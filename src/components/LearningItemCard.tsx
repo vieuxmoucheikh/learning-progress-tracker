@@ -23,12 +23,18 @@ export function LearningItemCard({ item, onDelete, onUpdate, onStartTracking, on
     if (item.progress.sessions.length > 0) {
       const lastSession = item.progress.sessions[item.progress.sessions.length - 1];
       if (lastSession.startTime && !lastSession.endTime) {
+        // Initialize elapsed time immediately
+        const startTime = new Date(lastSession.startTime).getTime();
+        const currentTime = new Date().getTime();
+        setElapsedTime(Math.floor((currentTime - startTime) / 60000));
+
+        // Then update every second
         interval = setInterval(() => {
-          const startTime = new Date(lastSession.startTime).getTime();
           const currentTime = new Date().getTime();
-          const elapsed = Math.floor((currentTime - startTime) / 60000); // Convert to minutes
-          setElapsedTime(elapsed);
+          setElapsedTime(Math.floor((currentTime - startTime) / 60000));
         }, 1000);
+      } else {
+        setElapsedTime(0);
       }
     }
 
@@ -51,6 +57,11 @@ export function LearningItemCard({ item, onDelete, onUpdate, onStartTracking, on
   const getTimeInMinutes = (time: { hours: number; minutes: number }) => {
     return time.hours * 60 + time.minutes;
   };
+
+  const progress = Math.min(
+    Math.round((getTimeInMinutes(item.progress.current) / getTimeInMinutes(item.progress.total)) * 100),
+    100
+  );
 
   const isTracking = item.progress.sessions.length > 0 && 
     !item.progress.sessions[item.progress.sessions.length - 1].endTime;
@@ -80,22 +91,28 @@ export function LearningItemCard({ item, onDelete, onUpdate, onStartTracking, on
           }
         });
       }
-      setNote('');
     }
+    setNote('');
     setShowNotes(false);
-    setElapsedTime(0);
   };
 
-  const progress = Math.min(
-    Math.round((getTimeInMinutes(item.progress.current) / getTimeInMinutes(item.progress.total)) * 100),
-    100
-  );
-
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 relative">
+    <div className={`bg-white rounded-lg shadow-md p-4 relative ${item.status === 'archived' ? 'opacity-75' : ''}`}>
       <div className="flex justify-between items-start mb-2">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
+            {item.completed && (
+              <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                Completed
+              </span>
+            )}
+            {item.status === 'archived' && (
+              <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full">
+                Archived
+              </span>
+            )}
+          </div>
           <div className="flex items-center text-sm text-gray-600 gap-2 mb-2">
             <Clock className="w-4 h-4" />
             <span>
@@ -117,7 +134,7 @@ export function LearningItemCard({ item, onDelete, onUpdate, onStartTracking, on
             </a>
           )}
           
-          {!item.completed && (
+          {!item.completed && !item.status?.includes('archived') && (
             <button
               onClick={isTracking ? handleStopTracking : handleStartTracking}
               className={`p-1.5 rounded-full ${
@@ -127,6 +144,16 @@ export function LearningItemCard({ item, onDelete, onUpdate, onStartTracking, on
               }`}
             >
               {isTracking ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            </button>
+          )}
+
+          {!item.status?.includes('archived') && (
+            <button
+              onClick={() => onUpdate(item.id, { status: 'archived' })}
+              className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+              title="Archive"
+            >
+              <Archive className="w-4 h-4" />
             </button>
           )}
           
@@ -140,10 +167,10 @@ export function LearningItemCard({ item, onDelete, onUpdate, onStartTracking, on
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+      <div className="w-full bg-gray-100 rounded-full h-2 mb-4">
         <div
-          className={`h-2 rounded-full ${
-            item.completed ? 'bg-green-500' : 'bg-blue-500'
+          className={`h-2 rounded-full transition-all duration-300 ${
+            item.completed ? 'bg-green-500' : isTracking ? 'bg-blue-500' : 'bg-blue-400'
           }`}
           style={{ width: `${progress}%` }}
         />

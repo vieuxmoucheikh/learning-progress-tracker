@@ -145,6 +145,20 @@ export default function App() {
 
   const handleUpdateItem = async (id: string, updates: Partial<LearningItem>) => {
     try {
+      const item = state.items.find(item => item.id === id);
+      if (!item) return;
+
+      // If marking as completed
+      if (updates.completed && !item.completed) {
+        updates.completedAt = new Date().toISOString();
+        updates.status = 'completed';
+      }
+
+      // If archiving
+      if (updates.status === 'archived' && item.status !== 'archived') {
+        updates.archivedAt = new Date().toISOString();
+      }
+
       const updatedItem = await updateLearningItem(id, updates);
       dispatch({ type: 'UPDATE_ITEM', payload: { id, updates: updatedItem } });
       setError(null);
@@ -211,6 +225,8 @@ export default function App() {
 
       const startTime = new Date(lastSession.startTime);
       const elapsedMinutes = Math.round((currentTime.getTime() - startTime.getTime()) / 60000);
+      
+      // Convert all times to minutes for accurate calculations
       const currentMinutes = (item.progress.current.hours * 60) + item.progress.current.minutes;
       const totalMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
       const newCurrentValue = currentMinutes + elapsedMinutes;
@@ -226,7 +242,7 @@ export default function App() {
           lastAccessed: currentTime.toISOString(),
           sessions: [...item.progress.sessions.slice(0, -1),
             {
-              ...item.progress.sessions[item.progress.sessions.length - 1],
+              ...lastSession,
               endTime: currentTime.toISOString(),
               duration: {
                 hours: Math.floor(elapsedMinutes / 60),
