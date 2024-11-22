@@ -20,34 +20,20 @@ export function AddLearningItem({ onAdd, onClose, isOpen }: Props) {
     tags: [],
     current: { hours: 0, minutes: 0 },
     total: { hours: 0, minutes: 0 },
-    unit: 'hours',
-    date: new Date().toISOString(), // This will be overridden by the selected date in App.tsx
+    date: new Date().toISOString(),
     difficulty: 'medium',
-    status: 'not_started'
+    status: 'not_started',
+    unit: 'hours'
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Ensure URL has https:// prefix
-    let processedUrl = formData.url;
-    if (processedUrl && !processedUrl.startsWith('http://') && !processedUrl.startsWith('https://')) {
-      processedUrl = 'https://' + processedUrl;
+    try {
+      await onAdd(formData);
+      onClose();
+    } catch (error) {
+      console.error('Error in handleSubmit:', error);
     }
-
-    // Process tags from comma-separated string if needed
-    const tags = typeof formData.tags === 'string' 
-      ? (formData.tags as string).split(',').map(tag => tag.trim())
-      : formData.tags;
-
-    const newItem: LearningItemFormData = {
-      ...formData,
-      url: processedUrl,
-      tags,
-    };
-
-    onAdd(newItem);
-    resetForm();
   };
 
   const resetForm = () => {
@@ -62,10 +48,10 @@ export function AddLearningItem({ onAdd, onClose, isOpen }: Props) {
       tags: [],
       current: { hours: 0, minutes: 0 },
       total: { hours: 0, minutes: 0 },
-      unit: 'hours',
       date: new Date().toISOString(),
       difficulty: 'medium',
-      status: 'not_started'
+      status: 'not_started',
+      unit: 'hours'
     });
   };
 

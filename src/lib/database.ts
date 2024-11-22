@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { LearningItem, StreakData } from '../types'
+import type { LearningItem, StreakData, LearningItemFormData } from '../types'
 
 // Learning Items
 export const getLearningItems = async () => {
@@ -21,22 +21,30 @@ export const getLearningItems = async () => {
   }
 }
 
-export const addLearningItem = async (item: Omit<LearningItem, 'id'>) => {
+export async function addLearningItem(item: LearningItemFormData): Promise<LearningItem> {
   try {
+    const { current, total, ...rest } = item;
+    const newItem = {
+      ...rest,
+      progress: {
+        current,
+        total,
+        lastAccessed: new Date().toISOString(),
+        sessions: []
+      }
+    };
+
     const { data, error } = await supabase
       .from('learning_items')
-      .insert([item])
+      .insert([newItem])
       .select()
-    
-    if (error) {
-      console.error('Error adding learning item:', error)
-      throw error
-    }
-    
-    return data[0]
+      .single();
+
+    if (error) throw error;
+    return data;
   } catch (error) {
-    console.error('Error in addLearningItem:', error)
-    throw error
+    console.error('Error adding learning item:', error);
+    throw error;
   }
 }
 
