@@ -412,23 +412,43 @@ export function LearningItemCard({
           </div>
 
           {item.progress.sessions && item.progress.sessions.length > 0 && (
-            <div className="space-y-2 max-h-[200px] overflow-y-auto">
+            <div className="space-y-4 max-h-[400px] overflow-y-auto">
               {item.progress.sessions.map((session, index) => (
                 <div
                   key={index}
-                  className="bg-white border border-gray-100 p-3 rounded-lg shadow-sm"
+                  className="bg-white border border-gray-100 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
                 >
-                  {session.notes && session.notes.length > 0 && (
-                    <div className="space-y-2">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="text-sm text-gray-500">
+                      Session {item.progress.sessions.length - index}
+                    </div>
+                    <div className="flex flex-col items-end text-xs text-gray-400">
+                      <div className="mb-1">
+                        Started: {new Date(session.startTime).toLocaleString()}
+                      </div>
+                      <div className="mb-1">
+                        Ended: {new Date(session.endTime).toLocaleString()}
+                      </div>
+                      <div className="text-blue-500 font-medium">
+                        Duration: {session.duration ? `${session.duration.hours}h ${session.duration.minutes}m` : 'N/A'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {session.notes && session.notes.length > 0 ? (
+                    <div className="space-y-2 mt-2 border-t pt-2">
+                      <div className="text-sm font-medium text-gray-700 mb-2">Session Notes:</div>
                       {session.notes.map((note, noteIndex) => (
-                        <div key={noteIndex} className="flex items-start justify-between group">
-                          <span className="text-gray-700">{note}</span>
-                          <span className="text-xs text-gray-400 group-hover:text-purple-500 transition-colors ml-2">
+                        <div key={noteIndex} className="flex items-start text-sm bg-gray-50 p-2 rounded">
+                          <span className="text-gray-700 flex-grow">{note}</span>
+                          <span className="text-xs text-gray-400 ml-2 whitespace-nowrap">
                             {new Date(session.startTime).toLocaleTimeString()}
                           </span>
                         </div>
                       ))}
                     </div>
+                  ) : (
+                    <div className="text-sm text-gray-400 italic mt-2">No notes for this session</div>
                   )}
                 </div>
               ))}
