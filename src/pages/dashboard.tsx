@@ -4,14 +4,15 @@ import { useAuth } from '../lib/auth';
 import App from '../App';
 
 export default function Dashboard() {
-  const { user, loading } = useAuth();
+  const { user, session, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && !session) {
+      console.log('No session found, redirecting to login');
       navigate('/');
     }
-  }, [user, loading, navigate]);
+  }, [session, loading, navigate]);
 
   if (loading) {
     return (
@@ -21,7 +22,7 @@ export default function Dashboard() {
     );
   }
 
-  if (!user) {
+  if (!session || !user) {
     return null;
   }
 

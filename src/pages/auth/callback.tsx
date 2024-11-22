@@ -8,12 +8,26 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        const { error } = await supabase.auth.getSession()
+        // Get the session and check if we have a user
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
         if (error) {
           console.error('Error during auth callback:', error)
           navigate('/')
           return
         }
+
+        if (!session) {
+          console.error('No session found during callback')
+          navigate('/')
+          return
+        }
+
+        // Remove the hash fragment from the URL
+        if (window.location.hash) {
+          window.history.replaceState(null, '', window.location.pathname)
+        }
+
         navigate('/dashboard')
       } catch (error) {
         console.error('Error during auth callback:', error)
