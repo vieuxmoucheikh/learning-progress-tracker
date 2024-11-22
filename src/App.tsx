@@ -120,20 +120,6 @@ export default function App() {
   }>({ activeTasks: [], completedTasks: [] });
   const [searchQuery, setSearchQuery] = useState('');
 
-  // If not authenticated, show auth page
-  if (!user && !authLoading) {
-    return <Auth />;
-  }
-
-  // Show loading state while checking auth
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
   // Load items from database
   useEffect(() => {
     async function loadItems() {
@@ -148,6 +134,29 @@ export default function App() {
     }
     loadItems();
   }, [user]);
+
+  // Show loading state while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  // If not authenticated, show auth page
+  if (!user) {
+    return <Auth />;
+  }
+
+  // Show loading state while loading items
+  if (state.loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   // Handle adding new item
   const handleAddItem = async (formData: LearningItemFormData) => {
