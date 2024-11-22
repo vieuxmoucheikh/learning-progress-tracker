@@ -61,10 +61,10 @@ export function DashboardTab({ items, onAddItem, onUpdate }: DashboardTabProps) 
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium text-blue-600">
-                    {Math.round((item.progress?.current?.hours || 0) / (item.progress?.target?.hours || 1) * 100)}%
+                    {Math.round((item.progress?.current?.hours || 0) / (item.progress?.total?.hours || 1) * 100)}%
                   </p>
                   <p className="text-xs text-gray-500">
-                    {item.progress?.current?.hours || 0}h / {item.progress?.target?.hours || 0}h
+                    {item.progress?.current?.hours || 0}h / {item.progress?.total?.hours || 0}h
                   </p>
                 </div>
               </div>
@@ -72,7 +72,7 @@ export function DashboardTab({ items, onAddItem, onUpdate }: DashboardTabProps) 
                 <div
                   className="h-full bg-blue-500 transition-all duration-300"
                   style={{
-                    width: `${Math.round((item.progress?.current?.hours || 0) / (item.progress?.target?.hours || 1) * 100)}%`
+                    width: `${Math.round((item.progress?.current?.hours || 0) / (item.progress?.total?.hours || 1) * 100)}%`
                   }}
                 />
               </div>
