@@ -388,6 +388,18 @@ export default function App() {
     dispatch({ type: 'SET_ACTIVE_ITEM', payload: id });
   };
 
+  const handleDashboardUpdate = (item: LearningItem) => {
+    handleUpdateItem(item.id, item);
+  };
+
+  const handleDashboardAddItem = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const handleItemsAddItem = () => {
+    setIsAddModalOpen(true);
+  };
+
   if (state.loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -426,15 +438,15 @@ export default function App() {
           {activeTab === "dashboard" && (
             <DashboardTab
               items={state.items}
-              onAddItem={handleAddItem}
-              onUpdate={handleUpdateItem}
+              onAddItem={handleDashboardAddItem}
+              onUpdate={handleDashboardUpdate}
             />
           )}
 
           {activeTab === "items" && (
             <ItemsTab
               items={state.items}
-              onAddItem={handleAddItem}
+              onAddItem={handleItemsAddItem}
               onUpdate={handleUpdateItem}
               onDelete={handleDeleteItem}
               onStartTracking={handleStartTracking}
