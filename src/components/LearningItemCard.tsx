@@ -256,6 +256,45 @@ export function LearningItemCard({
     };
   }, [item.lastTimestamp, item.progress, item.completed, item.id, handleStopTracking, onUpdate]);
 
+  // Delete Confirmation Dialog Component
+  const DeleteConfirmDialog = ({ 
+    isOpen, 
+    onClose, 
+    onConfirm 
+  }: { 
+    isOpen: boolean; 
+    onClose: () => void; 
+    onConfirm: () => void; 
+  }) => {
+    if (!isOpen) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Learning Item</h3>
+          <p className="text-gray-600 mb-6">
+            Are you sure you want to delete this item? This action cannot be undone.
+          </p>
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="hover:bg-gray-100"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={onConfirm}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Session Summary Component
   const SessionSummary = ({ sessions }: { sessions: Session[] }) => {
     const totalTime = sessions.reduce((acc, session) => {
@@ -269,16 +308,16 @@ export function LearningItemCard({
     const completedSessions = sessions.filter(session => session.duration).length;
     
     return (
-      <div className="bg-blue-50 p-4 rounded-lg mb-4">
-        <h4 className="text-sm font-semibold text-blue-700 mb-2">Session Summary</h4>
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg mb-4 border border-blue-100">
+        <h4 className="text-sm font-semibold text-blue-800 mb-2">Session Summary</h4>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-xs text-blue-600">Total Time</p>
-            <p className="font-medium text-blue-800">{totalHours}h {totalMinutes}m</p>
+            <p className="text-xs font-medium text-blue-600">Total Time</p>
+            <p className="font-semibold text-blue-900">{totalHours}h {totalMinutes}m</p>
           </div>
           <div>
-            <p className="text-xs text-blue-600">Completed Sessions</p>
-            <p className="font-medium text-blue-800">{completedSessions} / {sessions.length}</p>
+            <p className="text-xs font-medium text-blue-600">Completed Sessions</p>
+            <p className="font-semibold text-blue-900">{completedSessions} / {sessions.length}</p>
           </div>
         </div>
       </div>
@@ -286,48 +325,83 @@ export function LearningItemCard({
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow duration-200">
+    <Card className={`overflow-hidden transition-all duration-200 ${
+      item.completed ? 'bg-green-50/50' : 
+      item.status === 'archived' ? 'bg-gray-50/50' : 
+      'hover:shadow-md bg-white'
+    }`}>
       <div className="p-6">
         {/* Header with title and type */}
         <div className="flex justify-between items-start mb-4">
           <div className="flex-1">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">{item.title}</h3>
-            <div className="flex flex-wrap gap-2">
-              <span className="px-2 py-1 bg-gray-100 rounded-full text-sm text-gray-700">
-                {item.type}
-              </span>
-              {item.category && (
-                <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
-                  {item.category}
-                </span>
-              )}
-              {item.completed && (
-                <span className="px-2 py-1 bg-green-50 text-green-700 rounded-full text-sm flex items-center gap-1">
-                  <CheckCircle className="w-3 h-3" />
-                  Completed
-                </span>
-              )}
-              {item.status === 'archived' && (
-                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-sm flex items-center gap-1">
-                  <Archive className="w-3 h-3" />
-                  Archived
-                </span>
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className={`text-lg font-semibold ${
+                item.completed ? 'text-green-800' : 
+                item.status === 'archived' ? 'text-gray-600' : 
+                'text-gray-900'
+              }`}>
+                {item.title}
+              </h3>
+              {item.url && (
+                <a 
+                  href={item.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-700"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </a>
               )}
             </div>
+            <div className="flex items-center gap-2 text-sm">
+              <span className={`px-2 py-1 rounded-full ${
+                item.type === 'video' ? 'bg-purple-100 text-purple-700' :
+                item.type === 'book' ? 'bg-amber-100 text-amber-700' :
+                item.type === 'course' ? 'bg-blue-100 text-blue-700' :
+                item.type === 'article' ? 'bg-emerald-100 text-emerald-700' :
+                'bg-gray-100 text-gray-700'
+              }`}>
+                {item.type}
+              </span>
+              <span className={`px-2 py-1 rounded-full ${
+                item.priority === 'high' ? 'bg-red-100 text-red-700' :
+                item.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                'bg-green-100 text-green-700'
+              }`}>
+                {item.priority}
+              </span>
+              <span className={`px-2 py-1 rounded-full ${
+                item.status === 'completed' ? 'bg-green-100 text-green-700' :
+                item.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
+                item.status === 'on_hold' ? 'bg-yellow-100 text-yellow-700' :
+                item.status === 'archived' ? 'bg-gray-100 text-gray-700' :
+                'bg-red-100 text-red-700'
+              }`}>
+                {item.status.replace('_', ' ')}
+              </span>
+            </div>
           </div>
-
-          {/* URL link if available */}
-          {item.url && (
-            <a
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-4 p-2 hover:bg-gray-50 rounded-full transition-colors"
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="text-gray-500 hover:text-red-600 hover:bg-red-50"
             >
-              <ExternalLink className="w-5 h-5 text-gray-400 hover:text-gray-600" />
-            </a>
-          )}
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        <DeleteConfirmDialog
+          isOpen={showDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+          onConfirm={() => {
+            onDelete(item.id);
+            setShowDeleteConfirm(false);
+          }}
+        />
 
         {/* Progress section */}
         <div className="mb-6">
@@ -338,7 +412,14 @@ export function LearningItemCard({
               {formatTime((item.progress?.total?.hours ?? 0) * 60 + (item.progress?.total?.minutes ?? 0))}
             </span>
           </div>
-          <Progress value={calculateProgress(item.progress)} className="h-2" />
+          <Progress 
+            value={calculateProgress(item.progress)} 
+            className={`h-2 ${
+              item.completed ? 'bg-green-200' : 
+              item.status === 'in_progress' ? 'bg-blue-200' :
+              'bg-gray-200'
+            }`}
+          />
         </div>
 
         {/* Active session timer */}
