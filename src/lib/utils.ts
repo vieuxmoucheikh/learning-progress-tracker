@@ -71,3 +71,47 @@ export function calculateTimeByCategory(items: LearningItem[]): Record<string, {
     return acc;
   }, {} as Record<string, { hours: number; minutes: number }>);
 }
+
+export function calculateStreak(items: LearningItem[]): { currentStreak: number; longestStreak: number; lastActiveDate: string | null } {
+  // Sort all sessions by date in descending order
+  const sessions = items
+    .flatMap(item => item.progress.sessions || [])
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  if (sessions.length === 0) {
+    return { currentStreak: 0, longestStreak: 0, lastActiveDate: null };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  let currentStreak = 0;
+  let longestStreak = 0;
+  let currentDate = today;
+  let streakBroken = false;
+  let lastActiveDate = sessions[0].date;
+
+  // Check if there's activity today
+  const todayStr = today.toISOString().split('T')[0];
+  const hasActivityToday = sessions.some(s => s.date.split('T')[0] === todayStr);
+  
+  if (!hasActivityToday) {
+    // If no activity today, start checking from yesterday
+    currentDate.setDate(currentDate.getDate() - 1);
+  }
+
+  while (!streakBroken) {
+    const dateStr = currentDate.toISOString().split('T')[0];
+    const hasSession = sessions.some(s => s.date.split('T')[0] === dateStr);
+    
+    if (!hasSession) {
+      streakBroken = true;
+    } else {
+      currentStreak++;
+      longestStreak = Math.max(longestStreak, currentStreak);
+      currentDate.setDate(currentDate.getDate() - 1);
+    }
+  }
+
+  return { currentStreak, longestStreak, lastActiveDate };
+}

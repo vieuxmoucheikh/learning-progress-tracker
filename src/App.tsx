@@ -4,6 +4,7 @@ import { LearningItemCard } from './components/LearningItemCard';
 import { Stats } from './components/Stats';
 import { Insights } from './components/Insights';
 import { LearningInsights } from './components/LearningInsights';
+import { StreakDisplay } from './components/StreakDisplay';
 import { LearningItem, LearningItemFormData } from './types';
 import { Plus } from 'lucide-react';
 import { Calendar } from './components/Calendar';
@@ -408,31 +409,13 @@ export default function App() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <div className="flex justify-between items-center">
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Search learning items..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div className="ml-4">
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              <Plus className="-ml-1 mr-2 h-5 w-5" />
-              Add Item
-            </button>
-          </div>
+      <div className="flex flex-col lg:flex-row gap-6 mb-6">
+        <div className="w-full lg:w-2/3">
+          <Stats items={state.items} />
         </div>
-      </div>
-
-      <div className="mb-8">
-        <Stats items={state.items} />
+        <div className="w-full lg:w-1/3">
+          <StreakDisplay items={state.items} />
+        </div>
       </div>
 
       <div className="mb-8">
