@@ -11,9 +11,24 @@ interface ItemsTabProps {
   onAddItem: () => void;
   onUpdate: (id: string, updates: Partial<LearningItem>) => void;
   onDelete: (id: string) => void;
+  onStartTracking: (id: string) => void;
+  onStopTracking: (id: string) => void;
+  onNotesUpdate: (id: string, notes: string) => void;
+  onSessionNoteAdd: (id: string, note: string) => void;
+  onSetActiveItem: (id: string | null) => void;
 }
 
-export function ItemsTab({ items, onAddItem, onUpdate, onDelete }: ItemsTabProps) {
+export function ItemsTab({ 
+  items, 
+  onAddItem, 
+  onUpdate, 
+  onDelete,
+  onStartTracking,
+  onStopTracking,
+  onNotesUpdate,
+  onSessionNoteAdd,
+  onSetActiveItem 
+}: ItemsTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -91,6 +106,11 @@ export function ItemsTab({ items, onAddItem, onUpdate, onDelete }: ItemsTabProps
               item={item}
               onUpdate={onUpdate}
               onDelete={onDelete}
+              onStartTracking={onStartTracking}
+              onStopTracking={onStopTracking}
+              onNotesUpdate={onNotesUpdate}
+              onSessionNoteAdd={onSessionNoteAdd}
+              onSetActiveItem={onSetActiveItem}
             />
           ))}
         </div>

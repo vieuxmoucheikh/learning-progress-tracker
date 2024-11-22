@@ -437,6 +437,11 @@ export default function App() {
               onAddItem={handleAddItem}
               onUpdate={handleUpdateItem}
               onDelete={handleDeleteItem}
+              onStartTracking={handleStartTracking}
+              onStopTracking={handleStopTracking}
+              onNotesUpdate={handleUpdateNotes}
+              onSessionNoteAdd={handleAddSessionNote}
+              onSetActiveItem={handleSetActiveItem}
             />
           )}
 
