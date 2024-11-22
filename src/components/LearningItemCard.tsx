@@ -179,7 +179,6 @@ export function LearningItemCard({
       // First update local state
       const updates: Partial<LearningItem> = {
         status: 'archived' as const,
-        archived_at: new Date().toISOString(),
         completed: true,
         completed_at: new Date().toISOString()
       };
