@@ -236,9 +236,9 @@ export default function App() {
       
       // Convert all times to minutes for accurate calculations
       const currentMinutes = (item.progress.current.hours * 60) + item.progress.current.minutes;
-      const totalMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
+      const totalMinutes = item.progress.total ? (item.progress.total.hours * 60) + item.progress.total.minutes : 0;
       const newCurrentValue = currentMinutes + elapsedMinutes;
-      const completed = newCurrentValue >= totalMinutes;
+      const completed = totalMinutes > 0 && newCurrentValue >= totalMinutes;
       
       const updates: Partial<LearningItem> = {
         progress: {
@@ -247,6 +247,7 @@ export default function App() {
             hours: Math.floor(newCurrentValue / 60),
             minutes: newCurrentValue % 60
           },
+          total: item.progress.total || { hours: 0, minutes: 0 },
           lastAccessed: currentTime.toISOString(),
           sessions: [
             ...item.progress.sessions.slice(0, -1),
