@@ -170,14 +170,25 @@ export function LearningItemCard({
     }
   };
 
-  const handleArchive = () => {
-    if (isTracking) {
-      handleStopTracking();
+  const handleArchive = async () => {
+    try {
+      if (isTracking) {
+        await handleStopTracking();
+      }
+      
+      // First update local state
+      const updates: Partial<LearningItem> = {
+        status: 'archived' as const,
+        archived_at: new Date().toISOString(),
+        completed: true,
+        completed_at: new Date().toISOString()
+      };
+      
+      await onUpdate(item.id, updates);
+    } catch (error) {
+      console.error('Error archiving item:', error);
+      throw error;
     }
-    onUpdate(item.id, {
-      status: 'archived',
-      archived_at: new Date().toISOString()
-    });
   };
 
   const handleDelete = () => {
@@ -199,7 +210,8 @@ export function LearningItemCard({
   const isTracking = Boolean(item.lastTimestamp);
   const currentMinutes = (item.progress.current.hours * 60) + item.progress.current.minutes;
   const totalMinutes = item.progress.total ? 
-    (item.progress.total.hours * 60) + item.progress.total.minutes : 
+    (item.progress.total.hours * 60) + 
+    item.progress.total.minutes : 
     null;
   
   const progressText = totalMinutes ? 
