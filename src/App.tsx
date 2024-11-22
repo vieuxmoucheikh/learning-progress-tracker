@@ -149,7 +149,7 @@ export default function App() {
   }>({ activeTasks: [], completedTasks: [] });
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'completed' | 'archived'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'completed'>('all');
 
   const filteredItems = useMemo(() => {
     return state.items
@@ -168,9 +168,8 @@ export default function App() {
         // Filter by status
         const matchesStatus = 
           filterStatus === 'all' ? true :
-          filterStatus === 'active' ? item.status !== 'archived' && item.status !== 'completed' :
-          filterStatus === 'completed' ? item.status === 'completed' :
-          filterStatus === 'archived' ? item.status === 'archived' : true;
+          filterStatus === 'active' ? item.status !== 'completed' && item.status !== 'archived' :
+          filterStatus === 'completed' ? item.status === 'completed' || item.status === 'archived' : true;
         
         return matchesSearch && matchesDate && matchesStatus;
       });
@@ -233,12 +232,6 @@ export default function App() {
       if (updates.completed && !item.completed) {
         updates.completed_at = new Date().toISOString();
         updates.status = 'completed' as const;
-      }
-
-      // If archiving
-      if (updates.status === 'archived' && item.status !== 'archived') {
-        updates.completed = true;
-        updates.completed_at = new Date().toISOString();
       }
 
       // Update local state first for immediate feedback
@@ -496,16 +489,6 @@ export default function App() {
                 }`}
               >
                 Completed
-              </button>
-              <button
-                onClick={() => setFilterStatus('archived')}
-                className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                  filterStatus === 'archived'
-                    ? 'bg-gray-700 text-white'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                }`}
-              >
-                Archived
               </button>
             </div>
           </div>
