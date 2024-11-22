@@ -6,7 +6,7 @@ interface Props {
   onAdd: (item: LearningItemFormData) => void;
   onClose: () => void;
   isOpen: boolean;
-  selectedDate?: Date;
+  selectedDate?: Date | null;
 }
 
 export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props) {

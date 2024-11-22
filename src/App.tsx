@@ -142,7 +142,7 @@ export default function App() {
   });
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [selectedDateTasks, setSelectedDateTasks] = useState<{
     activeTasks: LearningItem[];
     completedTasks: LearningItem[];
