@@ -7,13 +7,18 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const handleAuthCallback = async () => {
-      const { error } = await supabase.auth.getSession()
-      if (error) {
+      try {
+        const { error } = await supabase.auth.getSession()
+        if (error) {
+          console.error('Error during auth callback:', error)
+          navigate('/')
+          return
+        }
+        navigate('/dashboard')
+      } catch (error) {
         console.error('Error during auth callback:', error)
-        navigate('/auth/error')
-        return
+        navigate('/')
       }
-      navigate('/')
     }
 
     handleAuthCallback()

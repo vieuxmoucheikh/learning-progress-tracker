@@ -29,7 +29,7 @@ export function Auth() {
               },
             }}
             providers={['google']}
-            redirectTo="https://learning-progress-tracker.vercel.app"
+            redirectTo={`${window.location.origin}/dashboard`}
             onlyThirdPartyProviders
           />
         </div>
