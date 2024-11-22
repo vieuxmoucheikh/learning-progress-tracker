@@ -150,13 +150,13 @@ export default function App() {
 
       // If marking as completed
       if (updates.completed && !item.completed) {
-        updates.completedAt = new Date().toISOString();
+        updates.completed_at = new Date().toISOString();
         updates.status = 'completed';
       }
 
       // If archiving
       if (updates.status === 'archived' && item.status !== 'archived') {
-        updates.archivedAt = new Date().toISOString();
+        updates.archived_at = new Date().toISOString();
       }
 
       // Update local state first for immediate feedback
@@ -265,7 +265,7 @@ export default function App() {
       // Only update completion status if it's newly completed
       if (completed && !item.completed) {
         updates.completed = true;
-        updates.completedAt = currentTime.toISOString();
+        updates.completed_at = currentTime.toISOString();
         updates.status = 'completed';
       }
 

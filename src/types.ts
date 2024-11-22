@@ -20,11 +20,11 @@ export interface LearningItem {
   url?: string;
   notes?: string;
   completed: boolean;
-  completedAt?: string | null;
-  archivedAt?: string | null;
+  completed_at?: string | null;
+  archived_at?: string | null;
   category: string;
   priority: 'low' | 'medium' | 'high';
-  dueDate?: string;
+  due_date?: string;
   tags: string[];
   date: string;
   difficulty: 'easy' | 'medium' | 'hard';
