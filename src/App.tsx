@@ -10,6 +10,7 @@ import { Calendar } from './components/Calendar';
 import { getLearningItems, addLearningItem, updateLearningItem, deleteLearningItem, getStreakData, updateStreakData } from './lib/database';
 import { useAuth } from './lib/auth';
 import { Auth } from './components/Auth';
+import { useNavigate } from 'react-router-dom';
 
 type State = {
   items: LearningItem[];
@@ -106,6 +107,7 @@ function reducer(state: State, action: Action): State {
 }
 
 export default function App() {
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [state, dispatch] = useReducer(reducer, {
     items: [],
@@ -155,7 +157,6 @@ export default function App() {
     };
   }, [user]);
 
-  // Show loading state while checking auth
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -164,12 +165,15 @@ export default function App() {
     );
   }
 
-  // If not authenticated, show auth page
   if (!user) {
-    return <Auth />;
+    navigate('/');
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
 
-  // Show loading state while loading items
   if (state.loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -178,7 +182,6 @@ export default function App() {
     );
   }
 
-  // Show error state if there's an error
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">

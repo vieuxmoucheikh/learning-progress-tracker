@@ -7,8 +7,8 @@ import { AuthProvider } from './lib/auth'
 import AuthCallback from './pages/auth/callback'
 import Dashboard from './pages/dashboard'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+function Root() {
+  return (
     <AuthProvider>
       <Router>
         <Routes>
@@ -19,5 +19,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </Routes>
       </Router>
     </AuthProvider>
+  )
+}
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <Root />
   </React.StrictMode>,
 )

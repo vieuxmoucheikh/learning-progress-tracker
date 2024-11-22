@@ -4,8 +4,8 @@ import { useAuth } from '../lib/auth';
 import App from '../App';
 
 export default function Dashboard() {
-  const { user, session, loading } = useAuth();
   const navigate = useNavigate();
+  const { user, session, loading } = useAuth();
 
   useEffect(() => {
     if (!loading && !session) {
@@ -23,7 +23,11 @@ export default function Dashboard() {
   }
 
   if (!session || !user) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
 
   return <App />;

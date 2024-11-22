@@ -1,25 +1,27 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 
 export default function AuthCallback() {
   const navigate = useNavigate()
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get the session and check if we have a user
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
           console.error('Error during auth callback:', error)
-          navigate('/')
+          setError('Authentication failed. Please try again.')
+          setTimeout(() => navigate('/'), 3000)
           return
         }
 
         if (!session) {
           console.error('No session found during callback')
-          navigate('/')
+          setError('No session found. Please try again.')
+          setTimeout(() => navigate('/'), 3000)
           return
         }
 
@@ -31,12 +33,24 @@ export default function AuthCallback() {
         navigate('/dashboard')
       } catch (error) {
         console.error('Error during auth callback:', error)
-        navigate('/')
+        setError('An unexpected error occurred. Please try again.')
+        setTimeout(() => navigate('/'), 3000)
       }
     }
 
     handleAuthCallback()
   }, [navigate])
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <p className="text-gray-600">Redirecting to login...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center">
