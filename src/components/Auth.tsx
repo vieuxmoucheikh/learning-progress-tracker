@@ -29,9 +29,8 @@ export function Auth() {
               },
             }}
             providers={['google']}
-            socialLayout="vertical"
-            showLinks={false}
-            theme="light"
+            redirectTo="https://learning-progress-tracker.vercel.app"
+            onlyThirdPartyProviders
           />
         </div>
       </div>
