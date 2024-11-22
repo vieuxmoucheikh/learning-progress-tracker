@@ -4,37 +4,48 @@ import type { LearningItem, StreakData, LearningItemFormData } from '../types'
 // Learning Items
 export const getLearningItems = async () => {
   try {
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) {
+      throw new Error('No authenticated user');
+    }
+
     const { data, error } = await supabase
       .from('learning_items')
       .select('*')
-      .order('date', { ascending: false })
+      .eq('user_id', user.data.user.id)
+      .order('date', { ascending: false });
     
     if (error) {
-      console.error('Error fetching learning items:', error)
-      return []
+      console.error('Error fetching learning items:', error);
+      return [];
     }
     
-    return data || []
+    return data || [];
   } catch (error) {
-    console.error('Error in getLearningItems:', error)
-    return []
+    console.error('Error in getLearningItems:', error);
+    return [];
   }
 }
 
 export async function addLearningItem(item: LearningItemFormData): Promise<LearningItem> {
   try {
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) {
+      throw new Error('No authenticated user');
+    }
+
     const { current, total, ...rest } = item;
     
     const newItem = {
       ...rest,
       progress: {
         current: {
-          hours: current.hours,
-          minutes: current.minutes
+          hours: current?.hours || 0,
+          minutes: current?.minutes || 0
         },
-        total: total ? {
-          hours: total.hours,
-          minutes: total.minutes
+        target: total ? {
+          hours: total.hours || 0,
+          minutes: total.minutes || 0
         } : {
           hours: 0,
           minutes: 0
@@ -42,7 +53,9 @@ export async function addLearningItem(item: LearningItemFormData): Promise<Learn
         lastAccessed: new Date().toISOString(),
         sessions: []
       },
-      user_id: (await supabase.auth.getUser()).data.user?.id
+      user_id: user.data.user.id,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
 
     const { data, error } = await supabase
@@ -53,7 +66,11 @@ export async function addLearningItem(item: LearningItemFormData): Promise<Learn
 
     if (error) {
       console.error('Error adding learning item:', error);
-      throw error;
+      throw new Error(error.message);
+    }
+
+    if (!data) {
+      throw new Error('No data returned from insert');
     }
 
     return data;
@@ -65,6 +82,11 @@ export async function addLearningItem(item: LearningItemFormData): Promise<Learn
 
 export async function updateLearningItem(id: string, updates: Partial<LearningItem>) {
   try {
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) {
+      throw new Error('No authenticated user');
+    }
+
     // If we're updating progress, ensure it's properly structured
     if (updates.progress) {
       const { data: currentItem } = await supabase
@@ -87,12 +109,17 @@ export async function updateLearningItem(id: string, updates: Partial<LearningIt
       .from('learning_items')
       .update(updates)
       .eq('id', id)
+      .eq('user_id', user.data.user.id)
       .select()
       .single();
 
     if (error) {
       console.error('Error updating learning item:', error);
-      throw error;
+      throw new Error(error.message);
+    }
+
+    if (!data) {
+      throw new Error('No data returned from update');
     }
 
     return data;
@@ -104,14 +131,20 @@ export async function updateLearningItem(id: string, updates: Partial<LearningIt
 
 export const deleteLearningItem = async (id: string) => {
   try {
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) {
+      throw new Error('No authenticated user');
+    }
+
     const { error } = await supabase
       .from('learning_items')
       .delete()
       .eq('id', id)
+      .eq('user_id', user.data.user.id)
     
     if (error) {
       console.error('Error deleting learning item:', error)
-      throw error
+      throw new Error(error.message)
     }
   } catch (error) {
     console.error('Error in deleteLearningItem:', error)
@@ -122,6 +155,15 @@ export const deleteLearningItem = async (id: string) => {
 // Streak Data
 export const getStreakData = async (userId: string) => {
   try {
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) {
+      throw new Error('No authenticated user');
+    }
+
+    if (user.data.user.id !== userId) {
+      throw new Error('Unauthorized access to streak data');
+    }
+
     const { data, error } = await supabase
       .from('streak_data')
       .select('*')
@@ -174,6 +216,15 @@ const createInitialStreakData = async (userId: string) => {
 
 export const updateStreakData = async (userId: string, streakData: Omit<StreakData, 'user_id'>) => {
   try {
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) {
+      throw new Error('No authenticated user');
+    }
+
+    if (user.data.user.id !== userId) {
+      throw new Error('Unauthorized access to streak data');
+    }
+
     const { data, error } = await supabase
       .from('streak_data')
       .update(streakData)
@@ -182,7 +233,7 @@ export const updateStreakData = async (userId: string, streakData: Omit<StreakDa
     
     if (error) {
       console.error('Error updating streak data:', error)
-      throw error
+      throw new Error(error.message)
     }
     
     return data[0]

@@ -27,9 +27,19 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
     unit: 'hours'
   });
 
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+
     try {
+      if (!formData.title.trim()) {
+        throw new Error('Title is required');
+      }
+
       // Ensure URL has https:// prefix if provided
       let processedUrl = formData.url;
       if (processedUrl && !processedUrl.startsWith('http://') && !processedUrl.startsWith('https://')) {
@@ -48,6 +58,9 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
       resetForm();
     } catch (error) {
       console.error('Error in handleSubmit:', error);
+      setError(error instanceof Error ? error.message : 'Failed to add item. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -90,6 +103,12 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
               <X className="w-5 h-5 text-gray-500" />
             </button>
           </div>
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Title */}
@@ -265,15 +284,17 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
               <button
                 type="button"
                 onClick={onClose}
+                disabled={isSubmitting}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
               >
-                Add Item
+                {isSubmitting ? 'Adding...' : 'Add Item'}
               </button>
             </div>
           </form>

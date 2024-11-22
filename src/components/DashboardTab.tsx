@@ -4,6 +4,8 @@ import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
 import { LearningItem } from "@/types";
+import { Calendar } from "./Calendar";
+import { useState } from "react";
 
 interface DashboardTabProps {
   items: LearningItem[];
@@ -13,6 +15,7 @@ interface DashboardTabProps {
 
 export function DashboardTab({ items, onAddItem, onUpdate }: DashboardTabProps) {
   const inProgressItems = items.filter(item => !item.completed);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   
   return (
     <div className="space-y-8">
@@ -27,6 +30,16 @@ export function DashboardTab({ items, onAddItem, onUpdate }: DashboardTabProps) 
           <Stats items={items} />
         </Card>
       </div>
+
+      <Card className="p-6">
+        <h2 className="text-lg font-semibold mb-4">Activity Calendar</h2>
+        <Calendar 
+          items={items} 
+          onDateSelect={(date, activeTasks, completedTasks) => {
+            setSelectedDate(date);
+          }} 
+        />
+      </Card>
 
       <div>
         <div className="flex items-center justify-between mb-4">
