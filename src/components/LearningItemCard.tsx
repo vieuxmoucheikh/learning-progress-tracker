@@ -424,10 +424,10 @@ export function LearningItemCard({
                     </div>
                     <div className="flex flex-col items-end text-xs text-gray-400">
                       <div className="mb-1">
-                        Started: {new Date(session.startTime).toLocaleString()}
+                        Started: {session.startTime ? new Date(session.startTime).toLocaleString() : 'N/A'}
                       </div>
                       <div className="mb-1">
-                        Ended: {new Date(session.endTime).toLocaleString()}
+                        Ended: {session.endTime ? new Date(session.endTime).toLocaleString() : 'N/A'}
                       </div>
                       <div className="text-blue-500 font-medium">
                         Duration: {session.duration ? `${session.duration.hours}h ${session.duration.minutes}m` : 'N/A'}
