@@ -460,23 +460,84 @@ export default function App() {
             items={state.items}
             onDateSelect={handleDateSelect}
           />
-          {selectedDateTasks.activeTasks.length > 0 && (
-            <div className="mt-4">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Active Tasks for {selectedDate.toLocaleDateString()}
-              </h3>
-              <div className="space-y-2">
-                {selectedDateTasks.activeTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="p-2 bg-white rounded-md shadow-sm"
-                  >
-                    {task.title}
-                  </div>
-                ))}
+          <div className="mt-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Tasks for {selectedDate.toLocaleDateString()}
+            </h3>
+            {selectedDateTasks.activeTasks.length > 0 && (
+              <div className="mb-4">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Active Tasks</h4>
+                <div className="space-y-2">
+                  {selectedDateTasks.activeTasks.map((task) => (
+                    <div
+                      key={task.id}
+                      className="p-3 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-indigo-500 transition-colors cursor-pointer"
+                      onClick={() => {
+                        const element = document.getElementById(`item-${task.id}`);
+                        if (element) {
+                          element.scrollIntoView({ behavior: 'smooth' });
+                          element.classList.add('ring-2', 'ring-indigo-500');
+                          setTimeout(() => {
+                            element.classList.remove('ring-2', 'ring-indigo-500');
+                          }, 2000);
+                        }
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-900">{task.title}</span>
+                        <span className="text-sm text-gray-500">{task.category}</span>
+                      </div>
+                      {task.progress.total && (
+                        <div className="mt-1 text-sm text-gray-500">
+                          {task.progress.current.hours}h {task.progress.current.minutes}m
+                          {' / '}
+                          {task.progress.total.hours}h {task.progress.total.minutes}m
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+            {selectedDateTasks.completedTasks.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Completed Tasks</h4>
+                <div className="space-y-2">
+                  {selectedDateTasks.completedTasks.map((task) => (
+                    <div
+                      key={task.id}
+                      className="p-3 bg-gray-50 rounded-lg shadow-sm border border-gray-200 hover:border-green-500 transition-colors cursor-pointer"
+                      onClick={() => {
+                        const element = document.getElementById(`item-${task.id}`);
+                        if (element) {
+                          element.scrollIntoView({ behavior: 'smooth' });
+                          element.classList.add('ring-2', 'ring-green-500');
+                          setTimeout(() => {
+                            element.classList.remove('ring-2', 'ring-green-500');
+                          }, 2000);
+                        }
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-900">{task.title}</span>
+                        <span className="text-sm text-gray-500">{task.category}</span>
+                      </div>
+                      {task.progress.total && (
+                        <div className="mt-1 text-sm text-gray-500">
+                          Completed: {task.progress.current.hours}h {task.progress.current.minutes}m
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {selectedDateTasks.activeTasks.length === 0 && selectedDateTasks.completedTasks.length === 0 && (
+              <div className="text-gray-500 text-center py-4">
+                No tasks scheduled for this date
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

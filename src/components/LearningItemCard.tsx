@@ -220,7 +220,13 @@ export function LearningItemCard({
   const isDisabled = item.completed || item.status === 'archived';
 
   return (
-    <Card className={`p-4 space-y-4 relative ${isDisabled ? 'opacity-75' : ''}`}>
+    <div
+      id={`item-${item.id}`}
+      className={`bg-white rounded-lg shadow-sm border ${
+        item.status === 'archived' ? 'border-gray-200' :
+        item.status === 'completed' ? 'border-green-200' : 'border-indigo-200'
+      } p-4 transition-all duration-200`}
+    >
       {showDeleteConfirm && (
         <div className="absolute inset-0 bg-white bg-opacity-95 rounded-lg flex items-center justify-center z-10">
           <div className="text-center p-4">
@@ -400,6 +406,6 @@ export function LearningItemCard({
           <span>Completed</span>
         </div>
       )}
-    </Card>
+    </div>
   );
 }
