@@ -149,8 +149,7 @@ export default function App() {
   }>({ activeTasks: [], completedTasks: [] });
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [showCompleted, setShowCompleted] = useState(true);
-  const [showArchived, setShowArchived] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'completed' | 'archived'>('all');
 
   const filteredItems = useMemo(() => {
     return state.items
@@ -168,13 +167,14 @@ export default function App() {
 
         // Filter by status
         const matchesStatus = 
-          (item.status === 'archived' && showArchived) ||
-          (item.status === 'completed' && showCompleted) ||
-          (item.status !== 'archived' && item.status !== 'completed' && !showArchived && !showCompleted);
+          filterStatus === 'all' ? true :
+          filterStatus === 'active' ? item.status !== 'archived' && item.status !== 'completed' :
+          filterStatus === 'completed' ? item.status === 'completed' :
+          filterStatus === 'archived' ? item.status === 'archived' : true;
         
         return matchesSearch && matchesDate && matchesStatus;
       });
-  }, [state.items, searchQuery, showArchived, showCompleted, selectedDate]);
+  }, [state.items, searchQuery, filterStatus, selectedDate]);
 
   useEffect(() => {
     let mounted = true;
@@ -468,12 +468,19 @@ export default function App() {
             </div>
             <div className="flex gap-2">
               <button
-                onClick={() => {
-                  setShowArchived(false);
-                  setShowCompleted(false);
-                }}
+                onClick={() => setFilterStatus('all')}
                 className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                  !showArchived && !showCompleted
+                  filterStatus === 'all'
+                    ? 'bg-indigo-100 text-indigo-700'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setFilterStatus('active')}
+                className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                  filterStatus === 'active'
                     ? 'bg-indigo-100 text-indigo-700'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                 }`}
@@ -481,12 +488,9 @@ export default function App() {
                 Active
               </button>
               <button
-                onClick={() => {
-                  setShowCompleted(true);
-                  setShowArchived(false);
-                }}
+                onClick={() => setFilterStatus('completed')}
                 className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                  showCompleted && !showArchived
+                  filterStatus === 'completed'
                     ? 'bg-green-100 text-green-700'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                 }`}
@@ -494,12 +498,9 @@ export default function App() {
                 Completed
               </button>
               <button
-                onClick={() => {
-                  setShowArchived(true);
-                  setShowCompleted(false);
-                }}
+                onClick={() => setFilterStatus('archived')}
                 className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                  showArchived
+                  filterStatus === 'archived'
                     ? 'bg-gray-700 text-white'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                 }`}

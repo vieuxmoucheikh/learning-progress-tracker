@@ -46,6 +46,7 @@ export function LearningItemCard({
   const [editedNotes, setEditedNotes] = useState(item.notes || '');
   const [newSessionNote, setNewSessionNote] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showSessionDetails, setShowSessionDetails] = useState(false);
 
   const handleStopTracking = useCallback(() => {
     if (!item.lastTimestamp) return;
@@ -245,167 +246,195 @@ export function LearningItemCard({
         </div>
       )}
 
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold">{item.title}</h3>
-            {item.completed && (
-              <CheckCircle className="w-4 h-4 text-green-500" />
-            )}
+      <div className="space-y-4">
+        {/* Title and basic info */}
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="text-lg font-medium">{item.title}</h3>
+            <p className="text-sm text-gray-500">{item.category}</p>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Clock className="w-4 h-4" />
-            <span>{progressText}</span>
-            {isTracking && (
-              <span className="text-blue-500">
-                (+{formatTime(elapsedTime)})
+          <div className="flex items-center space-x-2">
+            {item.status === 'completed' && (
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Completed
+              </span>
+            )}
+            {item.status === 'archived' && (
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                <Archive className="w-3 h-3 mr-1" />
+                Archived
               </span>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {item.url && (
-            <a
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:text-blue-600"
-              title="Open URL"
-            >
-              <ExternalLink className="w-4 h-4" />
-            </a>
-          )}
+        {/* Progress section */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center text-sm text-gray-500">
+            <span>Progress</span>
+            <span>{progressText}</span>
+          </div>
+          <Progress value={progress} />
+        </div>
 
-          {!isDisabled && (
-            isTracking ? (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleStopTracking}
-                title="Stop tracking"
-              >
-                <StopCircle className="w-4 h-4 mr-1" />
-                Stop
-              </Button>
-            ) : (
-              <Button
-                variant="default"
-                size="sm"
-                onClick={handleStartTracking}
-                title="Start tracking"
-              >
-                <PlayCircle className="w-4 h-4 mr-1" />
-                Start
-              </Button>
-            )
-          )}
-
-          {!item.status?.includes('archived') && (
+        {/* Session tracking controls */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
             <Button
-              variant="outline"
+              variant={item.lastTimestamp ? "destructive" : "default"}
               size="sm"
-              onClick={handleArchive}
-              title="Archive item"
+              onClick={() => item.lastTimestamp ? handleStopTracking() : handleStartTracking()}
             >
-              <Archive className="w-4 h-4" />
+              {item.lastTimestamp ? (
+                <>
+                  <StopCircle className="w-4 h-4 mr-1" />
+                  Stop
+                </>
+              ) : (
+                <>
+                  <PlayCircle className="w-4 h-4 mr-1" />
+                  Start
+                </>
+              )}
             </Button>
-          )}
-
+            {item.lastTimestamp && (
+              <span className="text-sm text-gray-500">
+                {formatDuration(elapsedTime)}
+              </span>
+            )}
+          </div>
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setShowDeleteConfirm(true)}
-            title="Delete item"
+            onClick={() => setShowSessionDetails(!showSessionDetails)}
           >
-            <Trash2 className="w-4 h-4" />
+            {showSessionDetails ? 'Hide Details' : 'Show Details'}
           </Button>
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <Progress 
-          value={progress} 
-          className={`h-2 ${
-            item.completed ? 'bg-green-100' : 
-            isTracking ? 'bg-blue-100' : 'bg-gray-100'
-          }`}
-        />
-      </div>
+        {/* Session details and notes */}
+        {showSessionDetails && (
+          <div className="space-y-4 mt-4 bg-gray-50 p-4 rounded-lg">
+            <div>
+              <h4 className="font-medium mb-2">Session History</h4>
+              {item.progress.sessions.map((session, index) => (
+                <div key={index} className="mb-3 p-2 bg-white rounded border">
+                  <div className="flex justify-between text-sm">
+                    <span>{new Date(session.date).toLocaleDateString()}</span>
+                    <span>{new Date(session.startTime).toLocaleTimeString()}</span>
+                  </div>
+                  {(session.notes?.length ?? 0) > 0 && (
+                    <div className="mt-2">
+                      <p className="text-sm font-medium">Session Notes:</p>
+                      <ul className="list-disc list-inside text-sm text-gray-600">
+                        {session.notes?.map((note, noteIndex) => (
+                          <li key={noteIndex}>{note}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
 
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">Notes</span>
-          {!isEditing ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsEditing(true)}
-              title="Edit notes"
-            >
-              <Edit2 className="w-4 h-4" />
-            </Button>
-          ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSaveNotes}
-              title="Save notes"
-            >
-              <Save className="w-4 h-4" />
-            </Button>
-          )}
-        </div>
-        {isEditing ? (
-          <Textarea
-            value={editedNotes}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditedNotes(e.target.value)}
-            className="min-h-[100px] resize-none"
-            placeholder="Add your notes here..."
-          />
-        ) : (
-          <p className="text-sm text-gray-600 whitespace-pre-wrap min-h-[2.5rem]">
-            {item.notes || 'No notes yet'}
-          </p>
+            <div>
+              <h4 className="font-medium mb-2">Notes</h4>
+              {isEditing ? (
+                <div className="space-y-2">
+                  <Textarea
+                    value={editedNotes}
+                    onChange={(e) => setEditedNotes(e.target.value)}
+                    className="w-full"
+                    rows={4}
+                  />
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setIsEditing(false);
+                        setEditedNotes(item.notes || '');
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        onNotesUpdate(item.id, editedNotes);
+                        setIsEditing(false);
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative">
+                  <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                    {item.notes || 'No notes added yet.'}
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute top-0 right-0"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Add session note */}
+            <div>
+              <h4 className="font-medium mb-2">Add Session Note</h4>
+              <div className="flex space-x-2">
+                <Input
+                  value={newSessionNote}
+                  onChange={(e) => setNewSessionNote(e.target.value)}
+                  placeholder="Add a note for this session..."
+                  className="flex-1"
+                />
+                <Button
+                  onClick={() => {
+                    if (newSessionNote.trim()) {
+                      onSessionNoteAdd(item.id, newSessionNote);
+                      setNewSessionNote('');
+                    }
+                  }}
+                  disabled={!newSessionNote.trim()}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
         )}
-      </div>
 
-      {isTracking && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Input
-              placeholder="Add session note... (Press Enter to add)"
-              value={newSessionNote}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewSessionNote(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="flex-1"
-            />
+        {/* Action buttons */}
+        <div className="flex justify-end space-x-2 mt-4">
+          {item.url && (
             <Button
               variant="outline"
               size="sm"
-              onClick={handleAddSessionNote}
-              title="Add session note"
-              disabled={!newSessionNote.trim()}
+              onClick={() => window.open(item.url, '_blank')}
             >
-              <Plus className="w-4 h-4" />
+              <ExternalLink className="w-4 h-4 mr-1" />
+              Open Link
             </Button>
-          </div>
-          <div className="space-y-1 max-h-32 overflow-y-auto">
-            {item.progress.sessions[item.progress.sessions.length - 1]?.notes?.map((note, index) => (
-              <p key={index} className="text-sm text-gray-600 pl-4 relative before:content-['•'] before:absolute before:left-1">
-                {note}
-              </p>
-            ))}
-          </div>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
+            <Trash2 className="w-4 h-4 mr-1" />
+            Delete
+          </Button>
         </div>
-      )}
-
-      {item.completed && (
-        <div className="mt-2 py-1 px-2 bg-green-50 text-green-600 text-sm rounded flex items-center gap-1">
-          <CheckCircle className="w-4 h-4" />
-          <span>Completed</span>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
