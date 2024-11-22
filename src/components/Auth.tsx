@@ -3,10 +3,9 @@ import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { supabase } from '../lib/supabase'
 
 export function Auth() {
-  // Get the current URL for redirect
   const redirectTo = typeof window !== 'undefined' 
-    ? window.location.origin 
-    : 'http://localhost:5173'
+    ? `${window.location.origin}/auth/callback`
+    : 'http://localhost:5173/auth/callback'
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
