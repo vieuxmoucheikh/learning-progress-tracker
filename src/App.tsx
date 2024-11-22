@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useState } from 'react';
+import { useReducer, useEffect, useState, useMemo } from 'react';
 import { AddLearningItem } from './components/AddLearningItem';
 import { LearningItemCard } from './components/LearningItemCard';
 import { Stats } from './components/Stats';
@@ -149,6 +149,24 @@ export default function App() {
   }>({ activeTasks: [], completedTasks: [] });
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
+
+  const filteredItems = useMemo(() => {
+    return state.items
+      .filter(item => {
+        const searchLower = searchQuery.toLowerCase();
+        const matchesSearch = 
+          item.title.toLowerCase().includes(searchLower) ||
+          item.category.toLowerCase().includes(searchLower) ||
+          (item.notes?.toLowerCase() || '').includes(searchLower);
+        
+        const matchesArchiveFilter = showArchived ? 
+          item.status === 'archived' : 
+          item.status !== 'archived';
+        
+        return matchesSearch && matchesArchiveFilter;
+      });
+  }, [state.items, searchQuery, showArchived]);
 
   useEffect(() => {
     let mounted = true;
@@ -411,30 +429,29 @@ export default function App() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Learning Items</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-medium text-gray-900">Learning Items</h2>
+            <button
+              onClick={() => setShowArchived(!showArchived)}
+              className="px-3 py-1 text-sm rounded-md bg-gray-100 hover:bg-gray-200 transition-colors"
+            >
+              {showArchived ? 'Show Active' : 'Show Archived'}
+            </button>
+          </div>
           <div className="space-y-4">
-            {state.items
-              .filter((item) => {
-                const searchLower = searchQuery.toLowerCase();
-                return (
-                  item.title.toLowerCase().includes(searchLower) ||
-                  item.category.toLowerCase().includes(searchLower) ||
-                  (item.notes?.toLowerCase() || '').includes(searchLower)
-                );
-              })
-              .map((item) => (
-                <LearningItemCard
-                  key={item.id}
-                  item={item}
-                  onUpdate={handleUpdateItem}
-                  onDelete={handleDeleteItem}
-                  onStartTracking={handleStartTracking}
-                  onStopTracking={handleStopTracking}
-                  onNotesUpdate={handleUpdateNotes}
-                  onSessionNoteAdd={handleAddSessionNote}
-                  onSetActiveItem={handleSetActiveItem}
-                />
-              ))}
+            {filteredItems.map((item) => (
+              <LearningItemCard
+                key={item.id}
+                item={item}
+                onUpdate={handleUpdateItem}
+                onDelete={handleDeleteItem}
+                onStartTracking={handleStartTracking}
+                onStopTracking={handleStopTracking}
+                onNotesUpdate={handleUpdateNotes}
+                onSessionNoteAdd={handleAddSessionNote}
+                onSetActiveItem={handleSetActiveItem}
+              />
+            ))}
           </div>
         </div>
 
@@ -468,6 +485,7 @@ export default function App() {
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
           onAdd={handleAddItem}
+          selectedDate={selectedDate}
         />
       )}
     </div>

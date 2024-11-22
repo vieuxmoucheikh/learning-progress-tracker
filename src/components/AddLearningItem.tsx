@@ -6,9 +6,10 @@ interface Props {
   onAdd: (item: LearningItemFormData) => void;
   onClose: () => void;
   isOpen: boolean;
+  selectedDate?: Date;
 }
 
-export function AddLearningItem({ onAdd, onClose, isOpen }: Props) {
+export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props) {
   const [formData, setFormData] = useState<LearningItemFormData>({
     title: '',
     type: 'video',
@@ -20,7 +21,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen }: Props) {
     tags: [],
     current: { hours: 0, minutes: 0 },
     total: { hours: 0, minutes: 0 },
-    date: new Date().toISOString(),
+    date: selectedDate ? selectedDate.toISOString() : new Date().toISOString(),
     difficulty: 'medium',
     status: 'not_started',
     unit: 'hours'
@@ -39,7 +40,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen }: Props) {
       const itemToAdd = {
         ...formData,
         url: processedUrl || '',  
-        date: new Date().toISOString(),
+        date: selectedDate ? selectedDate.toISOString() : new Date().toISOString(),
       };
 
       await onAdd(itemToAdd);
@@ -62,7 +63,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen }: Props) {
       tags: [],
       current: { hours: 0, minutes: 0 },
       total: { hours: 0, minutes: 0 },
-      date: new Date().toISOString(),
+      date: selectedDate ? selectedDate.toISOString() : new Date().toISOString(),
       difficulty: 'medium',
       status: 'not_started',
       unit: 'hours'
