@@ -256,6 +256,35 @@ export function LearningItemCard({
     };
   }, [item.lastTimestamp, item.progress, item.completed, item.id, handleStopTracking, onUpdate]);
 
+  // Session Summary Component
+  const SessionSummary = ({ sessions }: { sessions: Session[] }) => {
+    const totalTime = sessions.reduce((acc, session) => {
+      if (!session.duration) return acc;
+      return acc + (session.duration.hours * 60 + session.duration.minutes);
+    }, 0);
+    
+    const totalHours = Math.floor(totalTime / 60);
+    const totalMinutes = totalTime % 60;
+    
+    const completedSessions = sessions.filter(session => session.duration).length;
+    
+    return (
+      <div className="bg-blue-50 p-4 rounded-lg mb-4">
+        <h4 className="text-sm font-semibold text-blue-700 mb-2">Session Summary</h4>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-xs text-blue-600">Total Time</p>
+            <p className="font-medium text-blue-800">{totalHours}h {totalMinutes}m</p>
+          </div>
+          <div>
+            <p className="text-xs text-blue-600">Completed Sessions</p>
+            <p className="font-medium text-blue-800">{completedSessions} / {sessions.length}</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow duration-200">
       <div className="p-6">
@@ -352,16 +381,29 @@ export function LearningItemCard({
 
         {/* Action buttons */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {!item.completed && !item.lastTimestamp && (
+          {/* Quick Action Toolbar */}
+          <div className="flex items-center gap-2 mb-4">
             <Button
-              onClick={handleStartTracking}
-              className="bg-green-50 hover:bg-green-100 text-green-700"
+              variant="outline"
               size="sm"
+              onClick={handleStartTracking}
+              disabled={item.completed || item.status === 'archived'}
+              className="flex-1"
             >
-              <PlayCircle className="w-4 h-4 mr-1" />
+              <Clock className="w-4 h-4 mr-2" />
               Start Session
             </Button>
-          )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleMarkAsComplete}
+              disabled={item.status === 'archived' || isTracking}
+              className="flex-1"
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              {item.completed ? 'Mark Incomplete' : 'Mark Complete'}
+            </Button>
+          </div>
           {item.lastTimestamp && (
             <Button
               onClick={handleStopTracking}
@@ -379,15 +421,6 @@ export function LearningItemCard({
           >
             <Clock className="w-4 h-4 mr-1" />
             {showSessionDetails ? 'Hide History' : 'Show History'}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleMarkAsComplete}
-            disabled={item.status === 'archived' || isTracking}
-          >
-            <CheckCircle className="w-4 h-4 mr-2" />
-            Mark Complete
           </Button>
         </div>
 
@@ -455,11 +488,8 @@ export function LearningItemCard({
         {/* Session details section */}
         {showSessionDetails && (
           <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
-            <div>
-              <h4 className="font-medium mb-2 text-gray-700 flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                Session History ({item.progress.sessions.length})
-              </h4>
+            <SessionSummary sessions={item.progress.sessions} />
+            <div className="space-y-4">
               {item.progress.sessions.map((session, index) => (
                 <div key={index} className="mb-4 bg-white rounded-lg shadow-sm p-4 border border-gray-100">
                   {/* Session header */}
@@ -518,7 +548,12 @@ export function LearningItemCard({
                             key={noteIndex}
                             className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100"
                           >
-                            {note}
+                            <div className="flex items-start justify-between">
+                              <span>{note}</span>
+                              <span className="text-xs text-gray-400 ml-2">
+                                {new Date(session.startTime).toLocaleTimeString()}
+                              </span>
+                            </div>
                           </li>
                         ))}
                       </ul>
