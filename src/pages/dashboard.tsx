@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
+import { supabase } from '../lib/supabase';
 import App from '../App';
 
 export default function Dashboard() {
@@ -20,6 +21,15 @@ export default function Dashboard() {
       navigate('/', { replace: true });
     }
   }, [session, loading, navigate]);
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate('/', { replace: true });
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   if (loading) {
     return (
@@ -50,11 +60,7 @@ export default function Dashboard() {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <button
-                  onClick={() => {
-                    supabase.auth.signOut().then(() => {
-                      navigate('/', { replace: true });
-                    });
-                  }}
+                  onClick={handleSignOut}
                   className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   Sign Out

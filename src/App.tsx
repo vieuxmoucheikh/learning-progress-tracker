@@ -4,10 +4,10 @@ import { LearningItemCard } from './components/LearningItemCard';
 import { Stats } from './components/Stats';
 import { Insights } from './components/Insights';
 import { LearningInsights } from './components/LearningInsights';
-import { LearningItem } from './types';
+import { LearningItem, LearningItemFormData } from './types';
 import { Plus } from 'lucide-react';
 import { Calendar } from './components/Calendar';
-import { getLearningItems, addLearningItem, updateLearningItem, deleteLearningItem, getStreakData, updateStreakData } from './lib/database';
+import { getLearningItems, addLearningItem, updateLearningItem, deleteLearningItem } from './lib/database';
 import { useAuth } from './lib/auth';
 
 type State = {
@@ -24,84 +24,59 @@ type Action =
   | { type: 'STOP_TRACKING'; payload: string };
 
 function reducer(state: State, action: Action): State {
-  let newState: State;
-
   switch (action.type) {
     case 'LOAD_STATE':
-      newState = {
+      return {
         ...state,
         items: action.payload,
         loading: false,
       };
-      break;
 
     case 'ADD_ITEM':
-      newState = {
+      return {
         ...state,
         items: [...state.items, action.payload],
       };
-      break;
 
     case 'UPDATE_ITEM':
-      newState = {
+      return {
         ...state,
-        items: state.items.map(item =>
+        items: state.items.map((item) =>
           item.id === action.payload.id
             ? { ...item, ...action.payload.updates }
             : item
         ),
       };
-      break;
 
     case 'DELETE_ITEM':
-      newState = {
+      return {
         ...state,
-        items: state.items.filter(item => item.id !== action.payload),
+        items: state.items.filter((item) => item.id !== action.payload),
       };
-      break;
 
     case 'START_TRACKING':
-      newState = {
+      return {
         ...state,
-        items: state.items.map(item =>
+        items: state.items.map((item) =>
           item.id === action.payload
             ? { ...item, lastTimestamp: Date.now() }
             : item
         ),
       };
-      break;
 
     case 'STOP_TRACKING':
-      newState = {
+      return {
         ...state,
-        items: state.items.map(item => {
-          if (item.id === action.payload && item.lastTimestamp) {
-            const elapsedMinutes = Math.floor((Date.now() - item.lastTimestamp) / 1000 / 60);
-            const currentMinutes = item.progress.current.hours * 60 + item.progress.current.minutes + elapsedMinutes;
-
-            return {
-              ...item,
-              lastTimestamp: undefined,
-              progress: {
-                ...item.progress,
-                current: {
-                  hours: Math.floor(currentMinutes / 60),
-                  minutes: currentMinutes % 60,
-                },
-                lastAccessed: new Date().toISOString(),
-              },
-            };
-          }
-          return item;
-        }),
+        items: state.items.map((item) =>
+          item.id === action.payload
+            ? { ...item, lastTimestamp: null }
+            : item
+        ),
       };
-      break;
 
     default:
       return state;
   }
-
-  return newState;
 }
 
 export default function App() {
@@ -153,6 +128,62 @@ export default function App() {
     };
   }, [user]);
 
+  const handleAddItem = async (formData: LearningItemFormData) => {
+    try {
+      const newItem = await addLearningItem({
+        ...formData,
+        user_id: user?.id,
+        progress: {
+          current: formData.current,
+          total: formData.total,
+          lastAccessed: new Date().toISOString(),
+          sessions: [],
+        },
+      });
+      dispatch({ type: 'ADD_ITEM', payload: newItem });
+      setIsAddModalOpen(false);
+      setError(null);
+    } catch (error) {
+      console.error('Error adding item:', error);
+      setError('Failed to add item. Please try again.');
+    }
+  };
+
+  const handleUpdateItem = async (id: string, updates: Partial<LearningItem>) => {
+    try {
+      const updatedItem = await updateLearningItem(id, updates);
+      dispatch({ type: 'UPDATE_ITEM', payload: { id, updates: updatedItem } });
+      setError(null);
+    } catch (error) {
+      console.error('Error updating item:', error);
+      setError('Failed to update item. Please try again.');
+    }
+  };
+
+  const handleDeleteItem = async (id: string) => {
+    try {
+      await deleteLearningItem(id);
+      dispatch({ type: 'DELETE_ITEM', payload: id });
+      setError(null);
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      setError('Failed to delete item. Please try again.');
+    }
+  };
+
+  const handleStartTracking = (id: string) => {
+    dispatch({ type: 'START_TRACKING', payload: id });
+  };
+
+  const handleStopTracking = (id: string) => {
+    dispatch({ type: 'STOP_TRACKING', payload: id });
+  };
+
+  const handleDateSelect = (date: Date, activeTasks: LearningItem[], completedTasks: LearningItem[]) => {
+    setSelectedDate(date);
+    setSelectedDateTasks({ activeTasks, completedTasks });
+  };
+
   if (state.loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -177,131 +208,98 @@ export default function App() {
     );
   }
 
-  const handleAddItem = async (formData: any) => {
-    try {
-      const newItem = await addLearningItem(formData);
-      dispatch({ type: 'ADD_ITEM', payload: newItem });
-      setIsAddModalOpen(false);
-    } catch (error) {
-      console.error('Error adding item:', error);
-    }
-  };
-
-  const handleUpdateItem = async (id: string, updates: Partial<LearningItem>) => {
-    try {
-      const updatedItem = await updateLearningItem(id, updates);
-      dispatch({ type: 'UPDATE_ITEM', payload: { id, updates: updatedItem } });
-    } catch (error) {
-      console.error('Error updating item:', error);
-    }
-  };
-
-  const handleDeleteItem = async (id: string) => {
-    try {
-      await deleteLearningItem(id);
-      dispatch({ type: 'DELETE_ITEM', payload: id });
-    } catch (error) {
-      console.error('Error deleting item:', error);
-    }
-  };
-
-  const handleStartTracking = (id: string) => {
-    dispatch({ type: 'START_TRACKING', payload: id });
-  };
-
-  const handleStopTracking = (id: string) => {
-    dispatch({ type: 'STOP_TRACKING', payload: id });
-  };
-
-  const handleDateSelect = (date: Date, activeTasks: LearningItem[], completedTasks: LearningItem[]) => {
-    setSelectedDate(date);
-    setSelectedDateTasks({ activeTasks, completedTasks });
-  };
-
-  const filteredItems = state.items.filter(item => {
-    const searchString = `${item.title} ${item.category} ${item.tags.join(' ')} ${item.notes}`.toLowerCase();
-    const matchesSearch = searchString.includes(searchQuery.toLowerCase());
-
-    if (item.status === 'archived') {
-      const itemDate = new Date(item.date);
-      const isSelectedDate = itemDate.toDateString() === selectedDate.toDateString();
-      return matchesSearch && isSelectedDate;
-    }
-
-    return matchesSearch;
-  });
-
-  const sortedItems = [...filteredItems].sort((a, b) => {
-    if (a.completed === b.completed) {
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
-    }
-    return a.completed ? 1 : -1;
-  });
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Learning Progress Tracker</h1>
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            Add Learning Item
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-800">Learning Items</h2>
-              <div className="text-sm text-gray-500">
-                {sortedItems.length} {sortedItems.length === 1 ? 'item' : 'items'} total
-              </div>
-            </div>
-            <div className="space-y-4 bg-gray-50 p-4 rounded-xl">
-              {sortedItems.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <div className="text-lg font-medium mb-2">No learning items yet</div>
-                  <div className="text-sm">Click the "Add New" button to create your first learning item</div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {sortedItems.map((item) => (
-                    <LearningItemCard
-                      key={item.id}
-                      item={item}
-                      onDelete={handleDeleteItem}
-                      onStartTracking={handleStartTracking}
-                      onStopTracking={handleStopTracking}
-                      onUpdate={(updates) =>
-                        handleUpdateItem(item.id, updates)
-                      }
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Calendar View</h2>
-            <Calendar
-              items={state.items}
-              onDateSelect={handleDateSelect}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <div className="flex justify-between items-center">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Search learning items..."
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
+          <div className="ml-4">
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              <Plus className="-ml-1 mr-2 h-5 w-5" />
+              Add Item
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <Stats items={state.items} />
+      </div>
+
+      <div className="mb-8">
+        <LearningInsights items={state.items} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Learning Items</h2>
+          <div className="space-y-4">
+            {state.items
+              .filter((item) => {
+                const searchLower = searchQuery.toLowerCase();
+                return (
+                  item.title.toLowerCase().includes(searchLower) ||
+                  item.category.toLowerCase().includes(searchLower) ||
+                  item.notes.toLowerCase().includes(searchLower)
+                );
+              })
+              .map((item) => (
+                <LearningItemCard
+                  key={item.id}
+                  item={item}
+                  onUpdate={handleUpdateItem}
+                  onDelete={handleDeleteItem}
+                  onStartTracking={handleStartTracking}
+                  onStopTracking={handleStopTracking}
+                />
+              ))}
+          </div>
         </div>
 
-        {isAddModalOpen && (
-          <AddLearningItem
-            isOpen={isAddModalOpen}
-            onClose={() => setIsAddModalOpen(false)}
-            onAdd={handleAddItem}
+        <div>
+          <Calendar
+            items={state.items}
+            onDateSelect={handleDateSelect}
+            selectedDate={selectedDate}
           />
-        )}
+          {selectedDateTasks.activeTasks.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Active Tasks for {selectedDate.toLocaleDateString()}
+              </h3>
+              <div className="space-y-2">
+                {selectedDateTasks.activeTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className="p-2 bg-white rounded-md shadow-sm"
+                  >
+                    {task.title}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+
+      {isAddModalOpen && (
+        <AddLearningItem
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onAdd={handleAddItem}
+        />
+      )}
     </div>
   );
 }
