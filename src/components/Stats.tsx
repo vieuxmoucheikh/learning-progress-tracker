@@ -1,41 +1,89 @@
 import { useMemo } from 'react';
 import { LearningItem } from '../types';
 import { BarChart3, Clock, Calendar as CalendarIcon, Trophy, TrendingUp, Target } from 'lucide-react';
+import { calculateTimeByCategory } from '../lib/utils';
 
 interface Props {
   items: LearningItem[];
 }
 
 export function Stats({ items }: Props) {
-  const calculateTotalTime = () => {
-    return items.reduce((total, item) => {
-      const itemMinutes = (item.progress.current.hours * 60) + item.progress.current.minutes;
-      return total + itemMinutes;
-    }, 0);
-  };
+  const stats = useMemo(() => {
+    // Calculate status distribution
+    const statusCounts = items.reduce((acc, item) => {
+      const status = item.status;
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
 
-  const formatTime = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours}h ${mins}m`;
-  };
+    // Calculate priority distribution
+    const priorityCounts = items.reduce((acc, item) => {
+      const priority = item.priority;
+      acc[priority] = (acc[priority] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
 
-  const calculateStats = () => {
+    // Calculate time by category
+    const categoryTimes = calculateTimeByCategory(items);
+
+    // Calculate overall stats
     const totalItems = items.length;
     const completedItems = items.filter(item => item.completed).length;
-    const totalTime = calculateTotalTime();
-    const averageTime = totalItems > 0 ? totalTime / totalItems : 0;
+    const completionRate = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
+
+    // Calculate total time from all sessions
+    const totalMinutes = items.reduce((total, item) => {
+      return total + item.progress.sessions.reduce((sessionTotal, session) => {
+        if (session.duration) {
+          return sessionTotal + (session.duration.hours * 60) + session.duration.minutes;
+        }
+        return sessionTotal;
+      }, 0);
+    }, 0);
+
+    const averageTimePerItem = totalItems > 0 ? totalMinutes / totalItems : 0;
 
     return {
       totalItems,
       completedItems,
-      completionRate: totalItems > 0 ? (completedItems / totalItems) * 100 : 0,
-      totalTime: formatTime(totalTime),
-      averageTime: formatTime(Math.round(averageTime))
+      completionRate,
+      totalTime: {
+        hours: Math.floor(totalMinutes / 60),
+        minutes: totalMinutes % 60
+      },
+      averageTime: {
+        hours: Math.floor(averageTimePerItem / 60),
+        minutes: Math.floor(averageTimePerItem % 60)
+      },
+      statusDistribution: statusCounts,
+      priorityDistribution: priorityCounts,
+      categoryTimes
     };
+  }, [items]);
+
+  const formatTime = (time: { hours: number; minutes: number }) => {
+    return `${time.hours}h ${time.minutes}m`;
   };
 
-  const stats = useMemo(() => calculateStats(), [items]);
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return 'bg-green-500';
+      case 'in_progress': return 'bg-blue-500';
+      case 'not_started': return 'bg-gray-500';
+      case 'on_hold': return 'bg-yellow-500';
+      case 'archived': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'bg-red-500';
+      case 'medium': return 'bg-yellow-500';
+      case 'low': return 'bg-green-500';
+      default: return 'bg-gray-500';
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -58,7 +106,7 @@ export function Stats({ items }: Props) {
           </div>
           <div className="flex justify-between items-center">
             <p className="text-gray-600">Completion Rate</p>
-            <span className="text-2xl font-bold text-purple-600">{stats.completionRate}%</span>
+            <span className="text-2xl font-bold text-purple-600">{Math.round(stats.completionRate)}%</span>
           </div>
           <div className="w-full bg-gray-100 rounded-full h-3 mt-4">
             <div
@@ -80,11 +128,11 @@ export function Stats({ items }: Props) {
         <div className="space-y-3">
           <div className="flex justify-between items-center">
             <p className="text-gray-600">Total Time</p>
-            <span className="text-2xl font-bold text-green-600">{stats.totalTime}</span>
+            <span className="text-2xl font-bold text-green-600">{formatTime(stats.totalTime)}</span>
           </div>
           <div className="flex justify-between items-center">
             <p className="text-gray-600">Average Time</p>
-            <span className="text-2xl font-bold text-green-600">{stats.averageTime}</span>
+            <span className="text-2xl font-bold text-green-600">{formatTime(stats.averageTime)}</span>
           </div>
         </div>
       </div>
@@ -98,7 +146,15 @@ export function Stats({ items }: Props) {
           Status Distribution
         </h3>
         <div className="space-y-3">
-          {/* Add status distribution logic here */}
+          {Object.entries(stats.statusDistribution).map(([status, count]) => (
+            <div key={status} className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className={`w-3 h-3 rounded-full ${getStatusColor(status)}`} />
+                <span className="capitalize">{status.replace('_', ' ')}</span>
+              </div>
+              <span className="font-semibold">{count}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -111,7 +167,15 @@ export function Stats({ items }: Props) {
           Priority Levels
         </h3>
         <div className="space-y-3">
-          {/* Add priority distribution logic here */}
+          {Object.entries(stats.priorityDistribution).map(([priority, count]) => (
+            <div key={priority} className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className={`w-3 h-3 rounded-full ${getPriorityColor(priority)}`} />
+                <span className="capitalize">{priority}</span>
+              </div>
+              <span className="font-semibold">{count}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -124,7 +188,12 @@ export function Stats({ items }: Props) {
           Time by Category
         </h3>
         <div className="space-y-3">
-          {/* Add time by category logic here */}
+          {Object.entries(stats.categoryTimes).map(([category, time]) => (
+            <div key={category} className="flex items-center justify-between">
+              <span className="capitalize">{category}</span>
+              <span className="font-semibold">{formatTime(time)}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
