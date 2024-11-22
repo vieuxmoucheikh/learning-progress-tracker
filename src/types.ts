@@ -21,6 +21,7 @@ export interface LearningItem {
   notes?: string;
   completed: boolean;
   completedAt?: string | null;
+  archivedAt?: string | null;
   category: string;
   priority: 'low' | 'medium' | 'high';
   dueDate?: string;

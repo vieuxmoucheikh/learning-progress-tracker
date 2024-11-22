@@ -77,7 +77,8 @@ export async function updateLearningItem(id: string, updates: Partial<LearningIt
         updates.progress = {
           ...currentItem.progress,
           ...updates.progress,
-          sessions: [...(currentItem.progress.sessions || []), ...(updates.progress.sessions || [])]
+          // Don't concatenate sessions, use the provided sessions array
+          sessions: updates.progress.sessions || currentItem.progress.sessions
         };
       }
     }
