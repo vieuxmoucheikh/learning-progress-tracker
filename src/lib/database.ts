@@ -65,6 +65,23 @@ export async function addLearningItem(item: LearningItemFormData): Promise<Learn
 
 export async function updateLearningItem(id: string, updates: Partial<LearningItem>) {
   try {
+    // If we're updating progress, ensure it's properly structured
+    if (updates.progress) {
+      const { data: currentItem } = await supabase
+        .from('learning_items')
+        .select('progress')
+        .eq('id', id)
+        .single();
+
+      if (currentItem) {
+        updates.progress = {
+          ...currentItem.progress,
+          ...updates.progress,
+          sessions: [...(currentItem.progress.sessions || []), ...(updates.progress.sessions || [])]
+        };
+      }
+    }
+
     const { data, error } = await supabase
       .from('learning_items')
       .update(updates)

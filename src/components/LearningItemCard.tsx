@@ -14,36 +14,44 @@ export function LearningItemCard({ item, onDelete, onUpdate, onStartTracking, on
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const [note, setNote] = useState('');
-  const [elapsedTime, setElapsedTime] = useState(0);
+  const [elapsedTime, setElapsedTime] = useState({ hours: 0, minutes: 0 });
 
   // Calculate elapsed time for active session
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let intervalId: number | null = null;
     
     if (item.progress.sessions.length > 0) {
       const lastSession = item.progress.sessions[item.progress.sessions.length - 1];
       if (lastSession.startTime && !lastSession.endTime) {
-        // Initialize elapsed time immediately
-        const startTime = new Date(lastSession.startTime).getTime();
-        const currentTime = new Date().getTime();
-        setElapsedTime(Math.floor((currentTime - startTime) / 60000));
+        const startTime = new Date(lastSession.startTime);
+        
+        intervalId = window.setInterval(() => {
+          const now = new Date();
+          const elapsedMinutes = Math.floor((now.getTime() - startTime.getTime()) / 60000);
+          setElapsedTime({
+            hours: Math.floor(elapsedMinutes / 60),
+            minutes: elapsedMinutes % 60
+          });
 
-        // Then update every second
-        interval = setInterval(() => {
-          const currentTime = new Date().getTime();
-          setElapsedTime(Math.floor((currentTime - startTime) / 60000));
+          // Check if we've reached the total time
+          const currentMinutes = (item.progress.current.hours * 60) + item.progress.current.minutes + elapsedMinutes;
+          const totalMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
+          
+          if (currentMinutes >= totalMinutes && !item.completed) {
+            handleStopTracking();
+          }
         }, 1000);
       } else {
-        setElapsedTime(0);
+        setElapsedTime({ hours: 0, minutes: 0 });
       }
     }
 
     return () => {
-      if (interval) {
-        clearInterval(interval);
+      if (intervalId !== null) {
+        clearInterval(intervalId);
       }
     };
-  }, [item.progress.sessions]);
+  }, [item.progress.sessions, item.progress.current, item.progress.total, item.completed]);
 
   const formatTime = (time: number | { hours: number; minutes: number }) => {
     const totalMinutes = typeof time === 'number' 
@@ -58,26 +66,39 @@ export function LearningItemCard({ item, onDelete, onUpdate, onStartTracking, on
     return time.hours * 60 + time.minutes;
   };
 
-  const progress = Math.min(
-    Math.round((getTimeInMinutes(item.progress.current) / getTimeInMinutes(item.progress.total)) * 100),
-    100
-  );
-
   const isTracking = item.progress.sessions.length > 0 && 
     !item.progress.sessions[item.progress.sessions.length - 1].endTime;
 
   const handleStartTracking = () => {
-    onStartTracking(item.id);
+    if (isTracking) return;
+    
+    const startTime = new Date();
+    onUpdate(item.id, {
+      progress: {
+        ...item.progress,
+        lastAccessed: startTime.toISOString(),
+        sessions: [
+          ...item.progress.sessions,
+          {
+            startTime: startTime.toISOString(),
+            date: startTime.toISOString().split('T')[0]
+          }
+        ]
+      }
+    });
+    setElapsedTime({ hours: 0, minutes: 0 });
     setShowNotes(true);
   };
 
   const handleStopTracking = () => {
+    if (!isTracking) return;
     onStopTracking(item.id);
     if (note.trim()) {
       const lastSession = item.progress.sessions[item.progress.sessions.length - 1];
       if (lastSession) {
         const updatedSession = {
           ...lastSession,
+          endTime: new Date().toISOString(),
           notes: note.trim()
         };
         
@@ -95,6 +116,17 @@ export function LearningItemCard({ item, onDelete, onUpdate, onStartTracking, on
     setNote('');
     setShowNotes(false);
   };
+
+  const calculateProgress = () => {
+    const currentMinutes = (item.progress.current.hours * 60) + item.progress.current.minutes;
+    const totalMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
+    const elapsedMinutes = isTracking ? (elapsedTime.hours * 60) + elapsedTime.minutes : 0;
+    
+    const progress = ((currentMinutes + elapsedMinutes) / totalMinutes) * 100;
+    return Math.min(Math.max(progress, 0), 100);
+  };
+
+  const progress = calculateProgress();
 
   return (
     <div className={`bg-white rounded-lg shadow-md p-4 relative ${item.status === 'archived' ? 'opacity-75' : ''}`}>

@@ -159,12 +159,19 @@ export default function App() {
         updates.archivedAt = new Date().toISOString();
       }
 
+      // Update local state first for immediate feedback
+      dispatch({ type: 'UPDATE_ITEM', payload: { id, updates } });
+
       const updatedItem = await updateLearningItem(id, updates);
-      dispatch({ type: 'UPDATE_ITEM', payload: { id, updates: updatedItem } });
       setError(null);
     } catch (error) {
       console.error('Error updating item:', error);
       setError('Failed to update item. Please try again.');
+      // Revert the local state change on error
+      const item = state.items.find(item => item.id === id);
+      if (item) {
+        dispatch({ type: 'UPDATE_ITEM', payload: { id, updates: item } });
+      }
     }
   };
 
@@ -240,7 +247,8 @@ export default function App() {
             minutes: newCurrentValue % 60
           },
           lastAccessed: currentTime.toISOString(),
-          sessions: [...item.progress.sessions.slice(0, -1),
+          sessions: [
+            ...item.progress.sessions.slice(0, -1),
             {
               ...lastSession,
               endTime: currentTime.toISOString(),
@@ -250,16 +258,22 @@ export default function App() {
               }
             }
           ]
-        },
-        completed,
-        completedAt: completed ? currentTime.toISOString() : null,
-        status: completed ? 'completed' : item.status
+        }
       };
+
+      // Only update completion status if it's newly completed
+      if (completed && !item.completed) {
+        updates.completed = true;
+        updates.completedAt = currentTime.toISOString();
+        updates.status = 'completed';
+      }
 
       await updateLearningItem(id, updates);
     } catch (error) {
       console.error('Error stopping tracking:', error);
       setError('Failed to stop tracking. Please try again.');
+      // Revert the local state change on error
+      dispatch({ type: 'START_TRACKING', payload: id });
     }
   };
 
