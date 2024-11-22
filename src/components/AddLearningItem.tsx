@@ -29,8 +29,26 @@ export function AddLearningItem({ onAdd, onClose, isOpen }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await onAdd(formData);
+      // Ensure URL has https:// prefix if provided
+      let processedUrl = formData.url;
+      if (processedUrl && !processedUrl.startsWith('http://') && !processedUrl.startsWith('https://')) {
+        processedUrl = 'https://' + processedUrl;
+      }
+
+      // Process tags if they're a string
+      const tags = Array.isArray(formData.tags) ? formData.tags : 
+        formData.tags.split(',').map(tag => tag.trim()).filter(Boolean);
+
+      const itemToAdd = {
+        ...formData,
+        url: processedUrl || null,
+        tags,
+        date: new Date().toISOString(),
+      };
+
+      await onAdd(itemToAdd);
       onClose();
+      resetForm();
     } catch (error) {
       console.error('Error in handleSubmit:', error);
     }

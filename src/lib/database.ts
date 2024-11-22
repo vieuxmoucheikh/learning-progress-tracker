@@ -23,15 +23,18 @@ export const getLearningItems = async () => {
 
 export async function addLearningItem(item: LearningItemFormData): Promise<LearningItem> {
   try {
-    const { current, total, ...rest } = item;
+    const { current, total, unit, ...rest } = item;
+    
+    // Convert time values to minutes for storage
+    const currentMinutes = (current.hours * 60) + current.minutes;
+    const totalMinutes = total ? (total.hours * 60) + total.minutes : null;
+
     const newItem = {
       ...rest,
-      progress: {
-        current,
-        total,
-        lastAccessed: new Date().toISOString(),
-        sessions: []
-      }
+      current_minutes: currentMinutes,
+      total_minutes: totalMinutes,
+      unit,
+      user_id: (await supabase.auth.getUser()).data.user?.id
     };
 
     const { data, error } = await supabase
@@ -40,8 +43,23 @@ export async function addLearningItem(item: LearningItemFormData): Promise<Learn
       .select()
       .single();
 
-    if (error) throw error;
-    return data;
+    if (error) {
+      console.error('Error adding learning item:', error);
+      throw error;
+    }
+
+    // Convert the flat data back to our app's structure
+    return {
+      ...data,
+      current: {
+        hours: Math.floor(data.current_minutes / 60),
+        minutes: data.current_minutes % 60
+      },
+      total: data.total_minutes ? {
+        hours: Math.floor(data.total_minutes / 60),
+        minutes: data.total_minutes % 60
+      } : undefined
+    } as LearningItem;
   } catch (error) {
     console.error('Error adding learning item:', error);
     throw error;
