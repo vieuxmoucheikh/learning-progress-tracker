@@ -3,63 +3,149 @@ import type { LearningItem, StreakData } from '../types'
 
 // Learning Items
 export const getLearningItems = async () => {
-  const { data, error } = await supabase
-    .from('learning_items')
-    .select('*')
-    .order('date', { ascending: false })
-  
-  if (error) throw error
-  return data
+  try {
+    const { data, error } = await supabase
+      .from('learning_items')
+      .select('*')
+      .order('date', { ascending: false })
+    
+    if (error) {
+      console.error('Error fetching learning items:', error)
+      return []
+    }
+    
+    return data || []
+  } catch (error) {
+    console.error('Error in getLearningItems:', error)
+    return []
+  }
 }
 
 export const addLearningItem = async (item: Omit<LearningItem, 'id'>) => {
-  const { data, error } = await supabase
-    .from('learning_items')
-    .insert([item])
-    .select()
-  
-  if (error) throw error
-  return data[0]
+  try {
+    const { data, error } = await supabase
+      .from('learning_items')
+      .insert([item])
+      .select()
+    
+    if (error) {
+      console.error('Error adding learning item:', error)
+      throw error
+    }
+    
+    return data[0]
+  } catch (error) {
+    console.error('Error in addLearningItem:', error)
+    throw error
+  }
 }
 
 export const updateLearningItem = async (id: string, updates: Partial<LearningItem>) => {
-  const { data, error } = await supabase
-    .from('learning_items')
-    .update(updates)
-    .eq('id', id)
-    .select()
-  
-  if (error) throw error
-  return data[0]
+  try {
+    const { data, error } = await supabase
+      .from('learning_items')
+      .update(updates)
+      .eq('id', id)
+      .select()
+    
+    if (error) {
+      console.error('Error updating learning item:', error)
+      throw error
+    }
+    
+    return data[0]
+  } catch (error) {
+    console.error('Error in updateLearningItem:', error)
+    throw error
+  }
 }
 
 export const deleteLearningItem = async (id: string) => {
-  const { error } = await supabase
-    .from('learning_items')
-    .delete()
-    .eq('id', id)
-  
-  if (error) throw error
+  try {
+    const { error } = await supabase
+      .from('learning_items')
+      .delete()
+      .eq('id', id)
+    
+    if (error) {
+      console.error('Error deleting learning item:', error)
+      throw error
+    }
+  } catch (error) {
+    console.error('Error in deleteLearningItem:', error)
+    throw error
+  }
 }
 
 // Streak Data
 export const getStreakData = async (userId: string) => {
-  const { data, error } = await supabase
-    .from('streaks')
-    .select('*')
-    .eq('user_id', userId)
-    .single()
-  
-  if (error && error.code !== 'PGRST116') throw error // PGRST116 is "not found"
-  return data
+  try {
+    const { data, error } = await supabase
+      .from('streak_data')
+      .select('*')
+      .eq('user_id', userId)
+      .single()
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No data found, create initial streak data
+        return createInitialStreakData(userId)
+      }
+      console.error('Error fetching streak data:', error)
+      return null
+    }
+    
+    return data
+  } catch (error) {
+    console.error('Error in getStreakData:', error)
+    return null
+  }
+}
+
+const createInitialStreakData = async (userId: string) => {
+  try {
+    const initialData = {
+      user_id: userId,
+      current_streak: 0,
+      longest_streak: 0,
+      last_activity_date: null,
+      history: []
+    }
+
+    const { data, error } = await supabase
+      .from('streak_data')
+      .insert([initialData])
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error creating initial streak data:', error)
+      return null
+    }
+
+    return data
+  } catch (error) {
+    console.error('Error in createInitialStreakData:', error)
+    return null
+  }
 }
 
 export const updateStreakData = async (userId: string, streakData: Omit<StreakData, 'user_id'>) => {
-  const { data, error } = await supabase
-    .from('streaks')
-    .upsert({ user_id: userId, ...streakData })
-    .select()
-  
-  if (error) throw error
-  return data[0]
+  try {
+    const { data, error } = await supabase
+      .from('streak_data')
+      .update(streakData)
+      .eq('user_id', userId)
+      .select()
+    
+    if (error) {
+      console.error('Error updating streak data:', error)
+      throw error
+    }
+    
+    return data[0]
+  } catch (error) {
+    console.error('Error in updateStreakData:', error)
+    throw error
+  }
 }

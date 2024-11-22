@@ -119,20 +119,40 @@ export default function App() {
     completedTasks: LearningItem[];
   }>({ activeTasks: [], completedTasks: [] });
   const [searchQuery, setSearchQuery] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   // Load items from database
   useEffect(() => {
+    let mounted = true;
+
     async function loadItems() {
-      if (!user) return;
+      if (!user) {
+        if (mounted) {
+          dispatch({ type: 'LOAD_STATE', payload: [] });
+        }
+        return;
+      }
+
       try {
         const items = await getLearningItems();
-        dispatch({ type: 'LOAD_STATE', payload: items });
+        if (mounted) {
+          dispatch({ type: 'LOAD_STATE', payload: items });
+          setError(null);
+        }
       } catch (error) {
         console.error('Error loading items:', error);
-        dispatch({ type: 'LOAD_STATE', payload: [] });
+        if (mounted) {
+          dispatch({ type: 'LOAD_STATE', payload: [] });
+          setError('Failed to load items. Please try again later.');
+        }
       }
     }
+
     loadItems();
+
+    return () => {
+      mounted = false;
+    };
   }, [user]);
 
   // Show loading state while checking auth
@@ -154,6 +174,23 @@ export default function App() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  // Show error state if there's an error
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
