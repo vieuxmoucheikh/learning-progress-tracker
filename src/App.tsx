@@ -461,6 +461,13 @@ export default function App() {
             <AnalyticsTab items={state.items} />
           )}
         </main>
+
+        <AddLearningItem
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onAdd={handleAddItem}
+          selectedDate={new Date()}
+        />
       </div>
     </div>
   );
