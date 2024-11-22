@@ -478,49 +478,138 @@ export function LearningItemCard({
         )}
 
         {/* Action buttons */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {/* Quick Action Toolbar */}
-          <div className="flex items-center gap-2 mb-4">
+        <div className="flex flex-col gap-3 mb-6">
+          {/* Primary Actions */}
+          <div className="flex items-center gap-2">
+            {!item.completed && (
+              <Button
+                onClick={item.lastTimestamp ? handleStopTracking : handleStartTracking}
+                className={`flex-1 transition-all duration-200 ${
+                  item.lastTimestamp
+                    ? 'bg-red-500 hover:bg-red-600 text-white shadow-red-100'
+                    : 'bg-green-500 hover:bg-green-600 text-white shadow-green-100'
+                } shadow-lg`}
+                disabled={item.status === 'archived'}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  {item.lastTimestamp ? (
+                    <>
+                      <StopCircle className="w-4 h-4" />
+                      Stop Session
+                    </>
+                  ) : (
+                    <>
+                      <PlayCircle className="w-4 h-4" />
+                      Start Session
+                    </>
+                  )}
+                </div>
+              </Button>
+            )}
+            
             <Button
-              variant="outline"
-              size="sm"
-              onClick={handleStartTracking}
-              disabled={item.completed || item.status === 'archived'}
-              className="flex-1"
-            >
-              <Clock className="w-4 h-4 mr-2" />
-              Start Session
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
               onClick={handleMarkAsComplete}
-              disabled={item.status === 'archived' || isTracking}
-              className="flex-1"
+              disabled={item.status === 'archived' || item.lastTimestamp}
+              className={`flex-1 transition-all duration-200 ${
+                item.completed
+                  ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-100'
+                  : 'bg-blue-500 hover:bg-blue-600 text-white shadow-blue-100'
+              } shadow-lg`}
             >
-              <CheckCircle className="w-4 h-4 mr-2" />
-              {item.completed ? 'Mark Incomplete' : 'Mark Complete'}
+              <div className="flex items-center justify-center gap-2">
+                {item.completed ? (
+                  <>
+                    <AlertCircle className="w-4 h-4" />
+                    Mark Incomplete
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    Mark Complete
+                  </>
+                )}
+              </div>
             </Button>
           </div>
-          {item.lastTimestamp && (
+
+          {/* Secondary Actions */}
+          <div className="flex items-center gap-2">
             <Button
-              onClick={handleStopTracking}
-              className="bg-red-50 hover:bg-red-100 text-red-700"
-              size="sm"
+              onClick={() => setShowSessionDetails(!showSessionDetails)}
+              variant="outline"
+              className={`flex-1 border-2 transition-all duration-200 ${
+                showSessionDetails
+                  ? 'border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100'
+                  : 'border-gray-200 hover:border-purple-200 hover:bg-purple-50 hover:text-purple-700'
+              }`}
             >
-              <StopCircle className="w-4 h-4 mr-1" />
-              End Session
+              <div className="flex items-center justify-center gap-2">
+                <Clock className="w-4 h-4" />
+                {showSessionDetails ? 'Hide History' : 'Show History'}
+              </div>
             </Button>
-          )}
-          <Button
-            onClick={() => setShowSessionDetails(!showSessionDetails)}
-            className="bg-gray-50 hover:bg-gray-100 text-gray-700"
-            size="sm"
-          >
-            <Clock className="w-4 h-4 mr-1" />
-            {showSessionDetails ? 'Hide History' : 'Show History'}
-          </Button>
+          </div>
         </div>
+
+        {/* Session details section with improved styling */}
+        {showSessionDetails && (
+          <div className="space-y-4 bg-gradient-to-br from-purple-50 to-indigo-50 p-4 rounded-lg border border-purple-100">
+            <SessionSummary sessions={item.progress.sessions} />
+            <div className="space-y-4">
+              {item.progress.sessions.map((session, index) => (
+                <div 
+                  key={index} 
+                  className="bg-white rounded-lg shadow-sm p-4 border border-purple-100 hover:shadow-md transition-shadow duration-200"
+                >
+                  {/* Session header */}
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-sm font-medium text-purple-700">
+                      Session #{item.progress.sessions.length - index}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {new Date(session.date).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  {/* Session time */}
+                  {session.duration && (
+                    <div className="flex items-center gap-2 text-sm mb-3">
+                      <Clock className="w-4 h-4 text-green-600" />
+                      <span className="font-medium text-green-700">
+                        Duration: {session.duration.hours}h {session.duration.minutes}m
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Session notes with improved styling */}
+                  {(session.notes?.length ?? 0) > 0 && (
+                    <div className="mt-3 pt-3 border-t border-purple-100">
+                      <p className="text-sm font-medium text-purple-700 mb-2 flex items-center gap-2">
+                        <Edit2 className="w-4 h-4" />
+                        Session Notes
+                      </p>
+                      <ul className="space-y-2">
+                        {session.notes?.map((note, noteIndex) => (
+                          <li 
+                            key={noteIndex}
+                            className="text-sm text-gray-600 bg-purple-50/50 p-3 rounded-lg border border-purple-100"
+                          >
+                            <div className="flex items-start justify-between">
+                              <span>{note}</span>
+                              <span className="text-xs text-purple-400 ml-2">
+                                {new Date(session.startTime).toLocaleTimeString()}
+                              </span>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Notes section */}
         <div className="mb-6">
@@ -582,86 +671,6 @@ export function LearningItemCard({
             </div>
           )}
         </div>
-
-        {/* Session details section */}
-        {showSessionDetails && (
-          <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
-            <SessionSummary sessions={item.progress.sessions} />
-            <div className="space-y-4">
-              {item.progress.sessions.map((session, index) => (
-                <div key={index} className="mb-4 bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-                  {/* Session header */}
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="text-sm font-medium text-gray-700">
-                      Session #{item.progress.sessions.length - index}
-                    </span>
-                    <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
-                      {new Date(session.date).toLocaleDateString(undefined, { 
-                        weekday: 'short',
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </span>
-                  </div>
-
-                  {/* Session times */}
-                  <div className="grid grid-cols-2 gap-3 mb-3">
-                    <div className="bg-gray-50 p-2 rounded">
-                      <div className="text-xs text-gray-500 mb-1">Started</div>
-                      <div className="text-sm font-medium">
-                        {new Date(session.startTime).toLocaleTimeString()}
-                      </div>
-                    </div>
-                    {session.endTime && (
-                      <div className="bg-gray-50 p-2 rounded">
-                        <div className="text-xs text-gray-500 mb-1">Ended</div>
-                        <div className="text-sm font-medium">
-                          {new Date(session.endTime).toLocaleTimeString()}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Duration if available */}
-                  {session.duration && (
-                    <div className="flex items-center gap-2 mb-3 text-sm text-gray-600 bg-green-50 p-2 rounded">
-                      <Clock className="w-4 h-4 text-green-600" />
-                      <span className="font-medium text-green-700">
-                        Duration: {session.duration.hours}h {session.duration.minutes}m
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Session notes */}
-                  {(session.notes?.length ?? 0) > 0 && (
-                    <div className="mt-3 pt-3 border-t border-gray-100">
-                      <p className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                        <Edit2 className="w-4 h-4" />
-                        Session Notes
-                      </p>
-                      <ul className="space-y-2">
-                        {session.notes?.map((note, noteIndex) => (
-                          <li 
-                            key={noteIndex}
-                            className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100"
-                          >
-                            <div className="flex items-start justify-between">
-                              <span>{note}</span>
-                              <span className="text-xs text-gray-400 ml-2">
-                                {new Date(session.startTime).toLocaleTimeString()}
-                              </span>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </Card>
   );
