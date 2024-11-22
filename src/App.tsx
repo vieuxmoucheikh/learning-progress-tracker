@@ -10,6 +10,10 @@ import { Plus } from 'lucide-react';
 import { Calendar } from './components/Calendar';
 import { getLearningItems, addLearningItem, updateLearningItem, deleteLearningItem } from './lib/database';
 import { useAuth } from './lib/auth';
+import { TabNavigation } from './components/TabNavigation';
+import { DashboardTab } from './components/DashboardTab';
+import { ItemsTab } from './components/ItemsTab';
+import { AnalyticsTab } from './components/AnalyticsTab';
 
 interface State {
   items: LearningItem[];
@@ -76,10 +80,10 @@ function reducer(state: State, action: Action): State {
                   ...item.progress,
                   sessions: [
                     ...item.progress.sessions,
-                    { 
+                    {
                       startTime: new Date().toISOString(),
                       date: new Date().toISOString(),
-                      notes: [] 
+                      notes: []
                     }
                   ]
                 }
@@ -151,27 +155,28 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'completed'>('all');
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   const filteredItems = useMemo(() => {
     return state.items
       .filter(item => {
         const searchLower = searchQuery.toLowerCase();
-        const matchesSearch = 
+        const matchesSearch =
           item.title.toLowerCase().includes(searchLower) ||
           item.category.toLowerCase().includes(searchLower) ||
           (item.notes?.toLowerCase() || '').includes(searchLower);
-        
+
         // If a date is selected, only show items from that date
         const selectedDateStr = selectedDate ? selectedDate.toISOString().split('T')[0] : null;
         const itemDate = new Date(item.date).toISOString().split('T')[0];
         const matchesDate = selectedDate ? itemDate === selectedDateStr : true;
 
         // Filter by status
-        const matchesStatus = 
+        const matchesStatus =
           filterStatus === 'all' ? true :
           filterStatus === 'active' ? item.status !== 'completed' && item.status !== 'archived' :
           filterStatus === 'completed' ? item.status === 'completed' || item.status === 'archived' : true;
-        
+
         return matchesSearch && matchesDate && matchesStatus;
       });
   }, [state.items, searchQuery, filterStatus, selectedDate]);
@@ -304,18 +309,18 @@ export default function App() {
 
       const currentTime = new Date();
       const lastSession = item.progress.sessions[item.progress.sessions.length - 1];
-      
+
       if (!lastSession || !lastSession.startTime) return;
 
       const startTime = new Date(lastSession.startTime);
       const elapsedMinutes = Math.round((currentTime.getTime() - startTime.getTime()) / 60000);
-      
+
       // Convert all times to minutes for accurate calculations
       const currentMinutes = (item.progress.current.hours * 60) + item.progress.current.minutes;
       const totalMinutes = item.progress.total ? (item.progress.total.hours * 60) + item.progress.total.minutes : 0;
       const newCurrentValue = currentMinutes + elapsedMinutes;
       const completed = totalMinutes > 0 && newCurrentValue >= totalMinutes;
-      
+
       const updates: Partial<LearningItem> = {
         progress: {
           ...item.progress,
@@ -357,7 +362,7 @@ export default function App() {
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
-    
+
     // Get all tasks for the selected date
     const selectedDateStr = date.toISOString().split('T')[0];
     const tasksForDate = state.items.filter(item => {
@@ -408,112 +413,38 @@ export default function App() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex flex-col lg:flex-row gap-6 mb-6">
-        <div className="w-full lg:w-2/3">
-          <Stats items={state.items} />
-        </div>
-        <div className="w-full lg:w-1/3">
-          <StreakDisplay items={state.items} />
-        </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <header className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Learning Progress Tracker</h1>
+          <p className="text-gray-600">Track your learning journey and stay motivated</p>
+        </header>
+
+        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+
+        <main>
+          {activeTab === "dashboard" && (
+            <DashboardTab
+              items={state.items}
+              onAddItem={handleAddItem}
+              onUpdate={handleUpdateItem}
+            />
+          )}
+
+          {activeTab === "items" && (
+            <ItemsTab
+              items={state.items}
+              onAddItem={handleAddItem}
+              onUpdate={handleUpdateItem}
+              onDelete={handleDeleteItem}
+            />
+          )}
+
+          {activeTab === "analytics" && (
+            <AnalyticsTab items={state.items} />
+          )}
+        </main>
       </div>
-
-      <div className="mb-8">
-        <LearningInsights items={state.items} />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-medium text-gray-900">
-                {selectedDate ? (
-                  <span>Tasks for {selectedDate.toLocaleDateString()}</span>
-                ) : (
-                  'Learning Items'
-                )}
-              </h2>
-              {selectedDate && (
-                <button
-                  onClick={() => setSelectedDate(null)}
-                  className="text-sm text-gray-500 hover:text-gray-700"
-                >
-                  (Show All)
-                </button>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setFilterStatus('all')}
-                className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                  filterStatus === 'all'
-                    ? 'bg-indigo-100 text-indigo-700'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setFilterStatus('active')}
-                className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                  filterStatus === 'active'
-                    ? 'bg-indigo-100 text-indigo-700'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                }`}
-              >
-                Active
-              </button>
-              <button
-                onClick={() => setFilterStatus('completed')}
-                className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                  filterStatus === 'completed'
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                }`}
-              >
-                Completed
-              </button>
-            </div>
-          </div>
-          <div className="space-y-4">
-            {filteredItems.length > 0 ? (
-              filteredItems.map((item) => (
-                <LearningItemCard
-                  key={item.id}
-                  item={item}
-                  onUpdate={handleUpdateItem}
-                  onDelete={handleDeleteItem}
-                  onStartTracking={handleStartTracking}
-                  onStopTracking={handleStopTracking}
-                  onNotesUpdate={handleUpdateNotes}
-                  onSessionNoteAdd={handleAddSessionNote}
-                  onSetActiveItem={handleSetActiveItem}
-                />
-              ))
-            ) : (
-              <div className="text-gray-500 text-center py-4">
-                {selectedDate ? 'No tasks for this date' : 'No items found'}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <Calendar
-            items={state.items}
-            onDateSelect={handleDateSelect}
-          />
-        </div>
-      </div>
-
-      {isAddModalOpen && (
-        <AddLearningItem
-          isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          onAdd={handleAddItem}
-          selectedDate={selectedDate}
-        />
-      )}
     </div>
   );
 }
