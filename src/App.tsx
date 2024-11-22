@@ -191,20 +191,19 @@ export default function App() {
       const item = state.items.find(item => item.id === id);
       if (!item) return;
 
-      // First update local state for immediate feedback
+      // Update local state first for immediate feedback
       dispatch({ type: 'START_TRACKING', payload: id });
 
-      // Then update the database
-      const currentTime = new Date().toISOString();
+      const currentTime = new Date();
       const updates: Partial<LearningItem> = {
         progress: {
           ...item.progress,
-          lastAccessed: currentTime,
+          lastAccessed: currentTime.toISOString(),
           sessions: [
             ...item.progress.sessions,
-            { 
-              startTime: currentTime,
-              date: currentTime
+            {
+              startTime: currentTime.toISOString(),
+              date: currentTime.toISOString().split('T')[0]
             }
           ]
         }
@@ -214,6 +213,8 @@ export default function App() {
     } catch (error) {
       console.error('Error starting tracking:', error);
       setError('Failed to start tracking. Please try again.');
+      // Revert the local state change on error
+      dispatch({ type: 'STOP_TRACKING', payload: id });
     }
   };
 

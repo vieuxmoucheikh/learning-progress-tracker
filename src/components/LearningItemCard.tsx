@@ -73,6 +73,7 @@ export function LearningItemCard({ item, onDelete, onUpdate, onStartTracking, on
     if (isTracking) return;
     
     const startTime = new Date();
+    // First update the sessions
     onUpdate(item.id, {
       progress: {
         ...item.progress,
@@ -86,33 +87,40 @@ export function LearningItemCard({ item, onDelete, onUpdate, onStartTracking, on
         ]
       }
     });
+    
+    // Then start tracking
+    onStartTracking(item.id);
     setElapsedTime({ hours: 0, minutes: 0 });
     setShowNotes(true);
   };
 
   const handleStopTracking = () => {
     if (!isTracking) return;
+    
+    // First stop tracking to update the UI immediately
     onStopTracking(item.id);
+    
+    // Then update notes if any
     if (note.trim()) {
       const lastSession = item.progress.sessions[item.progress.sessions.length - 1];
       if (lastSession) {
         const updatedSession = {
           ...lastSession,
-          endTime: new Date().toISOString(),
           notes: note.trim()
         };
-        
-        const updatedSessions = [...item.progress.sessions];
-        updatedSessions[updatedSessions.length - 1] = updatedSession;
         
         onUpdate(item.id, {
           progress: {
             ...item.progress,
-            sessions: updatedSessions
+            sessions: [
+              ...item.progress.sessions.slice(0, -1),
+              updatedSession
+            ]
           }
         });
       }
     }
+    
     setNote('');
     setShowNotes(false);
   };

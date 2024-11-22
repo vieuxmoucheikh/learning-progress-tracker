@@ -53,77 +53,61 @@ export function learningItemReducer(
     case 'START_TRACKING':
       return {
         ...state,
-        items: state.items.map(item =>
-          item.id === action.payload
-            ? {
-                ...item,
-                progress: {
-                  ...item.progress,
-                  sessions: [
-                    ...item.progress.sessions,
-                    {
-                      startTime: new Date().toISOString(),
-                      date: new Date().toISOString(),
-                      duration: { hours: 0, minutes: 0 }
-                    }
-                  ]
-                }
+        items: state.items.map(item => {
+          if (item.id === action.payload) {
+            const currentTime = new Date().toISOString();
+            return {
+              ...item,
+              progress: {
+                ...item.progress,
+                lastAccessed: currentTime,
+                sessions: [
+                  ...item.progress.sessions,
+                  {
+                    startTime: currentTime,
+                    date: currentTime.split('T')[0]
+                  }
+                ]
               }
-            : item
-        )
+            };
+          }
+          return item;
+        })
       };
 
     case 'STOP_TRACKING':
       return {
         ...state,
         items: state.items.map(item => {
-          if (item.id !== action.payload) return item;
-
-          const lastSession = item.progress.sessions[item.progress.sessions.length - 1];
-          if (!lastSession?.startTime) return item;
-
-          const endTime = new Date().toISOString();
-          const duration = Math.round(
-            (new Date(endTime).getTime() - new Date(lastSession.startTime).getTime()) / 60000
-          );
-
-          const minutes = duration % 60;
-          const hours = Math.floor(duration / 60);
-
-          const updatedSessions = item.progress.sessions.map((session, index) => {
-            if (index === item.progress.sessions.length - 1) {
+          if (item.id === action.payload) {
+            const currentTime = new Date().toISOString();
+            const lastSession = item.progress.sessions[item.progress.sessions.length - 1];
+            
+            if (lastSession && !lastSession.endTime) {
+              const startTime = new Date(lastSession.startTime);
+              const elapsedMinutes = Math.round((new Date().getTime() - startTime.getTime()) / 60000);
+              
               return {
-                ...session,
-                endTime,
-                duration: { hours, minutes }
+                ...item,
+                progress: {
+                  ...item.progress,
+                  lastAccessed: currentTime,
+                  sessions: [
+                    ...item.progress.sessions.slice(0, -1),
+                    {
+                      ...lastSession,
+                      endTime: currentTime,
+                      duration: {
+                        hours: Math.floor(elapsedMinutes / 60),
+                        minutes: elapsedMinutes % 60
+                      }
+                    }
+                  ]
+                }
               };
             }
-            return session;
-          });
-
-          // Convert current progress and new duration to minutes for comparison
-          const currentInMinutes = (item.progress.current.hours * 60) + item.progress.current.minutes;
-          const newCurrentValue = { 
-            hours: Math.floor((currentInMinutes + duration) / 60),
-            minutes: (currentInMinutes + duration) % 60
-          };
-          
-          // Convert total to minutes for comparison
-          const totalInMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
-          const completed = (currentInMinutes + duration) >= totalInMinutes;
-
-          return {
-            ...item,
-            progress: {
-              ...item.progress,
-              current: newCurrentValue,
-              sessions: updatedSessions,
-              lastAccessed: endTime
-            },
-            completed,
-            completedAt: completed ? endTime : item.completedAt,
-            status: completed ? 'completed' : item.status
-          };
+          }
+          return item;
         })
       };
 
