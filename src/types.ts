@@ -1,10 +1,22 @@
+export interface Session {
+  startTime: string;
+  endTime?: string;
+  duration?: { hours: number; minutes: number };
+  date: string;
+}
+
+export interface Progress {
+  current: { hours: number; minutes: number };
+  total: { hours: number; minutes: number };
+  lastAccessed: string;
+  sessions: Session[];
+}
+
 export interface LearningItem {
   id: string;
   title: string;
   type: 'video' | 'pdf' | 'url' | 'book' | 'course' | 'article';
-  current_minutes: number;
-  total_minutes?: number;
-  unit: 'hours' | 'pages' | 'percent';
+  progress: Progress;
   url?: string;
   notes?: string;
   completed: boolean;
@@ -14,18 +26,17 @@ export interface LearningItem {
   dueDate?: string;
   tags: string[];
   date: string;
-  lastTimestamp?: number;
   difficulty: 'easy' | 'medium' | 'hard';
   status: 'not_started' | 'in_progress' | 'completed' | 'on_hold' | 'archived';
   rating?: 1 | 2 | 3 | 4 | 5;
   user_id?: string;
 }
 
-export type LearningItemFormData = Omit<LearningItem, 'id' | 'current_minutes' | 'total_minutes' | 'user_id'> & {
-  current: { hours: number; minutes: number };
+export type LearningItemFormData = Omit<LearningItem, 'id' | 'progress'> & {
+  current: { hours: number; minutes: number; pages?: number };
   total?: { hours: number; minutes: number };
   goal?: { hours: number; minutes: number };
-  lastTimestamp?: number;
+  unit: 'hours' | 'pages' | 'percent';
 };
 
 export interface StreakData {

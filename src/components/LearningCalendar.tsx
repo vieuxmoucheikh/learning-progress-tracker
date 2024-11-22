@@ -26,9 +26,9 @@ export function LearningCalendar({ items, setItems }: Props) {
     completed: false,
     priority: 'medium',
     tags: [],
-    goal: undefined,
+    goal: { hours: 0, minutes: 0 },
     date: selectedDate,
-    total: undefined,
+    total: { hours: 0, minutes: 0 },
     category: '',
     difficulty: 'medium',
     status: 'in_progress'
@@ -90,6 +90,7 @@ export function LearningCalendar({ items, setItems }: Props) {
           total: newActivity.total || { hours: 0, minutes: 0 },
           sessions: [{
             date: selectedDate,
+            startTime: new Date().toISOString(),
             duration: { hours: 0, minutes: 0 }
           }]
         },
@@ -107,9 +108,9 @@ export function LearningCalendar({ items, setItems }: Props) {
         completed: false,
         priority: 'medium',
         tags: [],
-        goal: undefined,
+        goal: { hours: 0, minutes: 0 },
         date: selectedDate,
-        total: undefined,
+        total: { hours: 0, minutes: 0 },
         category: '',
         difficulty: 'medium',
         status: 'in_progress'

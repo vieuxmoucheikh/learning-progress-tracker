@@ -35,14 +35,10 @@ export function AddLearningItem({ onAdd, onClose, isOpen }: Props) {
         processedUrl = 'https://' + processedUrl;
       }
 
-      // Process tags if they're a string
-      const tags = Array.isArray(formData.tags) ? formData.tags : 
-        formData.tags.split(',').map(tag => tag.trim()).filter(Boolean);
-
+      // Tags are already string[] from the form data
       const itemToAdd = {
         ...formData,
-        url: processedUrl || null,
-        tags,
+        url: processedUrl || '',  
         date: new Date().toISOString(),
       };
 
@@ -71,6 +67,11 @@ export function AddLearningItem({ onAdd, onClose, isOpen }: Props) {
       status: 'not_started',
       unit: 'hours'
     });
+  };
+
+  const handleTagsChange = (value: string) => {
+    const tags = value.split(',').map(tag => tag.trim()).filter(Boolean);
+    setFormData(prev => ({ ...prev, tags }));
   };
 
   if (!isOpen) return null;
@@ -233,14 +234,14 @@ export function AddLearningItem({ onAdd, onClose, isOpen }: Props) {
             {/* Tags */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tags (comma-separated)
+                Tags
               </label>
               <input
                 type="text"
                 value={formData.tags.join(', ')}
-                onChange={(e) => setFormData({ ...formData, tags: e.target.value.split(',').map(tag => tag.trim()) })}
+                onChange={(e) => handleTagsChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., javascript, react, web"
+                placeholder="Enter tags separated by commas"
               />
             </div>
 

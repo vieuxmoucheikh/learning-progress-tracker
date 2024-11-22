@@ -8,7 +8,10 @@ interface Props {
 
 export function Stats({ items }: Props) {
   const calculateTotalTime = () => {
-    return items.reduce((total, item) => total + (item.current_minutes || 0), 0);
+    return items.reduce((total, item) => {
+      const itemMinutes = (item.progress.current.hours * 60) + item.progress.current.minutes;
+      return total + itemMinutes;
+    }, 0);
   };
 
   const formatTime = (minutes: number) => {

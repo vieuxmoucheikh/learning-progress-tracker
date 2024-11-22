@@ -133,12 +133,6 @@ export default function App() {
       const newItem = await addLearningItem({
         ...formData,
         user_id: user?.id,
-        progress: {
-          current: formData.current,
-          total: formData.total,
-          lastAccessed: new Date().toISOString(),
-          sessions: [],
-        },
       });
       dispatch({ type: 'ADD_ITEM', payload: newItem });
       setIsAddModalOpen(false);
@@ -171,12 +165,86 @@ export default function App() {
     }
   };
 
-  const handleStartTracking = (id: string) => {
-    dispatch({ type: 'START_TRACKING', payload: id });
+  const handleStartTracking = async (id: string) => {
+    try {
+      const item = state.items.find(item => item.id === id);
+      if (!item) return;
+
+      // First update local state for immediate feedback
+      dispatch({ type: 'START_TRACKING', payload: id });
+
+      // Then update the database
+      const currentTime = new Date().toISOString();
+      const updates: Partial<LearningItem> = {
+        progress: {
+          ...item.progress,
+          lastAccessed: currentTime,
+          sessions: [
+            ...item.progress.sessions,
+            { 
+              startTime: currentTime,
+              date: currentTime
+            }
+          ]
+        }
+      };
+
+      await updateLearningItem(id, updates);
+    } catch (error) {
+      console.error('Error starting tracking:', error);
+      setError('Failed to start tracking. Please try again.');
+    }
   };
 
-  const handleStopTracking = (id: string) => {
-    dispatch({ type: 'STOP_TRACKING', payload: id });
+  const handleStopTracking = async (id: string) => {
+    try {
+      const item = state.items.find(item => item.id === id);
+      if (!item) return;
+
+      // First update local state for immediate feedback
+      dispatch({ type: 'STOP_TRACKING', payload: id });
+
+      const currentTime = new Date();
+      const lastSession = item.progress.sessions[item.progress.sessions.length - 1];
+      
+      if (!lastSession || !lastSession.startTime) return;
+
+      const startTime = new Date(lastSession.startTime);
+      const elapsedMinutes = Math.round((currentTime.getTime() - startTime.getTime()) / 60000);
+      const currentMinutes = (item.progress.current.hours * 60) + item.progress.current.minutes;
+      const totalMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
+      const newCurrentValue = currentMinutes + elapsedMinutes;
+      const completed = newCurrentValue >= totalMinutes;
+      
+      const updates: Partial<LearningItem> = {
+        progress: {
+          ...item.progress,
+          current: {
+            hours: Math.floor(newCurrentValue / 60),
+            minutes: newCurrentValue % 60
+          },
+          lastAccessed: currentTime.toISOString(),
+          sessions: [...item.progress.sessions.slice(0, -1),
+            {
+              ...item.progress.sessions[item.progress.sessions.length - 1],
+              endTime: currentTime.toISOString(),
+              duration: {
+                hours: Math.floor(elapsedMinutes / 60),
+                minutes: elapsedMinutes % 60
+              }
+            }
+          ]
+        },
+        completed,
+        completedAt: completed ? currentTime.toISOString() : null,
+        status: completed ? 'completed' : item.status
+      };
+
+      await updateLearningItem(id, updates);
+    } catch (error) {
+      console.error('Error stopping tracking:', error);
+      setError('Failed to stop tracking. Please try again.');
+    }
   };
 
   const handleDateSelect = (date: Date, activeTasks: LearningItem[], completedTasks: LearningItem[]) => {
@@ -251,7 +319,7 @@ export default function App() {
                 return (
                   item.title.toLowerCase().includes(searchLower) ||
                   item.category.toLowerCase().includes(searchLower) ||
-                  item.notes.toLowerCase().includes(searchLower)
+                  (item.notes?.toLowerCase() || '').includes(searchLower)
                 );
               })
               .map((item) => (
@@ -271,7 +339,6 @@ export default function App() {
           <Calendar
             items={state.items}
             onDateSelect={handleDateSelect}
-            selectedDate={selectedDate}
           />
           {selectedDateTasks.activeTasks.length > 0 && (
             <div className="mt-4">

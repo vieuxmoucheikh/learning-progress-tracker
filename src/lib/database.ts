@@ -23,17 +23,25 @@ export const getLearningItems = async () => {
 
 export async function addLearningItem(item: LearningItemFormData): Promise<LearningItem> {
   try {
-    const { current, total, unit, ...rest } = item;
+    const { current, total, ...rest } = item;
     
-    // Convert time values to minutes for storage
-    const currentMinutes = (current.hours * 60) + current.minutes;
-    const totalMinutes = total ? (total.hours * 60) + total.minutes : null;
-
     const newItem = {
       ...rest,
-      current_minutes: currentMinutes,
-      total_minutes: totalMinutes,
-      unit,
+      progress: {
+        current: {
+          hours: current.hours,
+          minutes: current.minutes
+        },
+        total: total ? {
+          hours: total.hours,
+          minutes: total.minutes
+        } : {
+          hours: 0,
+          minutes: 0
+        },
+        lastAccessed: new Date().toISOString(),
+        sessions: []
+      },
       user_id: (await supabase.auth.getUser()).data.user?.id
     };
 
@@ -48,41 +56,31 @@ export async function addLearningItem(item: LearningItemFormData): Promise<Learn
       throw error;
     }
 
-    // Convert the flat data back to our app's structure
-    return {
-      ...data,
-      current: {
-        hours: Math.floor(data.current_minutes / 60),
-        minutes: data.current_minutes % 60
-      },
-      total: data.total_minutes ? {
-        hours: Math.floor(data.total_minutes / 60),
-        minutes: data.total_minutes % 60
-      } : undefined
-    } as LearningItem;
+    return data;
   } catch (error) {
-    console.error('Error adding learning item:', error);
+    console.error('Error in addLearningItem:', error);
     throw error;
   }
 }
 
-export const updateLearningItem = async (id: string, updates: Partial<LearningItem>) => {
+export async function updateLearningItem(id: string, updates: Partial<LearningItem>) {
   try {
     const { data, error } = await supabase
       .from('learning_items')
       .update(updates)
       .eq('id', id)
       .select()
-    
+      .single();
+
     if (error) {
-      console.error('Error updating learning item:', error)
-      throw error
+      console.error('Error updating learning item:', error);
+      throw error;
     }
-    
-    return data[0]
+
+    return data;
   } catch (error) {
-    console.error('Error in updateLearningItem:', error)
-    throw error
+    console.error('Error in updateLearningItem:', error);
+    throw error;
   }
 }
 

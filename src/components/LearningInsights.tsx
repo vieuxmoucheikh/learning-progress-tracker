@@ -55,7 +55,7 @@ export function LearningInsights({ items }: Props) {
           const date = new Date(session.date);
           const hour = date.getHours();
           const day = date.toLocaleDateString('en-US', { weekday: 'long' });
-          const duration = (session.duration.hours * 60) + session.duration.minutes;
+          const duration = (session.duration?.hours ?? 0) * 60 + (session.duration?.minutes ?? 0);
 
           timeByHour[hour] = (timeByHour[hour] || 0) + duration;
           timeByDay[day] = (timeByDay[day] || 0) + duration;

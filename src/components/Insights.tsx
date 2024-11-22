@@ -36,7 +36,7 @@ export function Insights({ items }: Props) {
     // Calculate total study time
     const totalMinutes = items.reduce((acc, item) => {
       return acc + (item.progress.sessions?.reduce((mins, session) => {
-        return mins + (session.duration.hours * 60 + session.duration.minutes);
+        return mins + ((session.duration?.hours || 0) * 60 + (session.duration?.minutes || 0));
       }, 0) || 0);
     }, 0);
 
@@ -146,7 +146,7 @@ export function Insights({ items }: Props) {
 
     const dailyMinutes = sessions.reduce((acc, session) => {
       const date = session.date.split('T')[0];
-      acc[date] = (acc[date] || 0) + (session.duration.hours * 60 + session.duration.minutes);
+      acc[date] = (acc[date] || 0) + ((session.duration?.hours || 0) * 60 + (session.duration?.minutes || 0));
       return acc;
     }, {} as { [date: string]: number });
 

@@ -114,7 +114,9 @@ export function Calendar({ items, onDateSelect }: Props) {
           if (item.progress?.sessions) {
             item.progress.sessions.forEach(session => {
               if (getAdjustedDateStr(new Date(session.date)) === dateStr) {
-                dayActivities.minutes += session.duration.hours * 60 + session.duration.minutes;
+                const hours = session.duration?.hours ?? 0;
+                const minutes = session.duration?.minutes ?? 0;
+                dayActivities.minutes += hours * 60 + minutes;
                 dayActivities.sessions += 1;
               }
             });
