@@ -9,7 +9,7 @@ import { Plus, Search } from "lucide-react";
 interface ItemsTabProps {
   items: LearningItem[];
   onAddItem: () => void;
-  onUpdate: (item: LearningItem) => void;
+  onUpdate: (id: string, updates: Partial<LearningItem>) => void;
   onDelete: (id: string) => void;
 }
 
