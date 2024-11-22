@@ -1,8 +1,20 @@
 import { Auth as SupabaseAuth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { supabase } from '../lib/supabase'
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../lib/auth'
 
 export function Auth() {
+  const navigate = useNavigate()
+  const { user, session } = useAuth()
+
+  useEffect(() => {
+    if (user && session) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [user, session, navigate])
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -29,7 +41,7 @@ export function Auth() {
               },
             }}
             providers={['google']}
-            redirectTo={`${window.location.origin}/dashboard`}
+            redirectTo={`${window.location.origin}/auth/callback`}
             onlyThirdPartyProviders
           />
         </div>

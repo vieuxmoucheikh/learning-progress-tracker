@@ -1,18 +1,24 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import App from '../App';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, session, loading } = useAuth();
 
   useEffect(() => {
+    // Remove hash fragment if present
+    if (location.hash) {
+      window.history.replaceState(null, '', location.pathname);
+    }
+
     if (!loading && !session) {
       console.log('No session found, redirecting to login');
-      navigate('/');
+      navigate('/', { replace: true });
     }
-  }, [session, loading, navigate]);
+  }, [session, loading, navigate, location]);
 
   if (loading) {
     return (
