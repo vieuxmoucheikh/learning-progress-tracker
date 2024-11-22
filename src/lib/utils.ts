@@ -1,4 +1,4 @@
-import type { Progress } from '../types';
+import type { Progress, LearningItem } from '../types';
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -40,4 +40,34 @@ export function minutesToTime(minutes: number): { hours: number; minutes: number
     hours: Math.floor(minutes / 60),
     minutes: minutes % 60
   };
+}
+
+export function calculateTimeByCategory(items: LearningItem[]): Record<string, { hours: number; minutes: number }> {
+  const categoryTimes: Record<string, number> = {};
+
+  items.forEach(item => {
+    const category = item.category;
+    if (!categoryTimes[category]) {
+      categoryTimes[category] = 0;
+    }
+
+    // Add time from completed sessions
+    const sessionMinutes = item.progress.sessions.reduce((total, session) => {
+      if (session.duration) {
+        return total + (session.duration.hours * 60) + session.duration.minutes;
+      }
+      return total;
+    }, 0);
+
+    categoryTimes[category] += sessionMinutes;
+  });
+
+  // Convert minutes to hours and minutes format
+  return Object.entries(categoryTimes).reduce((acc, [category, totalMinutes]) => {
+    acc[category] = {
+      hours: Math.floor(totalMinutes / 60),
+      minutes: totalMinutes % 60
+    };
+    return acc;
+  }, {} as Record<string, { hours: number; minutes: number }>);
 }

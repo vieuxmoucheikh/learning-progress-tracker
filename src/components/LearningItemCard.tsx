@@ -17,7 +17,7 @@ import {
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
-import type { LearningItem } from '../types';
+import type { LearningItem, Session } from '../types';
 import { formatTime, calculateProgress, formatDuration } from '../lib/utils';
 
 interface Props {
@@ -48,19 +48,43 @@ export function LearningItemCard({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSessionDetails, setShowSessionDetails] = useState(false);
 
+  const calculateTotalTimeFromSessions = useCallback((sessions: Session[]) => {
+    return sessions.reduce((total, session) => {
+      if (session.duration) {
+        const sessionMinutes = (session.duration.hours * 60) + session.duration.minutes;
+        return total + sessionMinutes;
+      }
+      return total;
+    }, 0);
+  }, []);
+
   const handleStopTracking = useCallback(() => {
     if (!item.lastTimestamp) return;
 
-    // Calculate final progress including the current session
+    // Calculate current session duration
     const sessionDuration = Math.floor((Date.now() - item.lastTimestamp) / 1000);
-    const additionalMinutes = Math.floor(sessionDuration / 60);
-    const totalMinutes = additionalMinutes + 
-      (item.progress.current.hours * 60) + 
-      item.progress.current.minutes;
+    const sessionMinutes = Math.floor(sessionDuration / 60);
+    
+    // Create new session entry
+    const newSession: Session = {
+      startTime: new Date(item.lastTimestamp).toISOString(),
+      endTime: new Date().toISOString(),
+      duration: {
+        hours: Math.floor(sessionMinutes / 60),
+        minutes: sessionMinutes % 60
+      },
+      date: new Date().toISOString().split('T')[0],
+      notes: []
+    };
+
+    // Calculate total time including all sessions
+    const allSessions = [...item.progress.sessions, newSession];
+    const totalMinutes = calculateTotalTimeFromSessions(allSessions);
 
     onUpdate(item.id, {
       progress: {
         ...item.progress,
+        sessions: allSessions,
         current: {
           hours: Math.floor(totalMinutes / 60),
           minutes: totalMinutes % 60
@@ -69,58 +93,7 @@ export function LearningItemCard({
     });
     onStopTracking(item.id);
     onSetActiveItem(null);
-  }, [item.id, item.lastTimestamp, item.progress, onStopTracking, onSetActiveItem, onUpdate]);
-
-  // Timer effect
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-
-    if (item.lastTimestamp) {
-      const updateElapsedTime = () => {
-        const elapsed = Math.floor((Date.now() - item.lastTimestamp!) / 1000);
-        setElapsedTime(elapsed);
-
-        // Calculate current progress including the current session time
-        const currentSessionMinutes = Math.floor(elapsed / 60);
-        const totalCurrentMinutes = currentSessionMinutes + 
-          (item.progress.current.hours * 60) + 
-          item.progress.current.minutes;
-
-        // Check if we've reached the total time
-        if (item.progress.total) {
-          const totalMinutes = (item.progress.total.hours * 60) + 
-            item.progress.total.minutes;
-
-          if (totalCurrentMinutes >= totalMinutes && !item.completed) {
-            handleStopTracking();
-            onUpdate(item.id, {
-              completed: true,
-              completed_at: new Date().toISOString(),
-              status: 'completed',
-              progress: {
-                ...item.progress,
-                current: {
-                  hours: Math.floor(totalMinutes / 60),
-                  minutes: totalMinutes % 60
-                }
-              }
-            });
-          }
-        }
-      };
-
-      updateElapsedTime();
-      intervalId = setInterval(updateElapsedTime, 1000);
-    } else {
-      setElapsedTime(0);
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [item.lastTimestamp, item.progress, item.completed, item.id, handleStopTracking, onUpdate]);
+  }, [item.id, item.lastTimestamp, item.progress, onStopTracking, onSetActiveItem, onUpdate, calculateTotalTimeFromSessions]);
 
   const handleStartTracking = () => {
     if (item.completed || item.status === 'archived') return;
@@ -206,6 +179,18 @@ export function LearningItemCard({
     }
   };
 
+  const handleMarkAsComplete = () => {
+    if (isTracking) {
+      handleStopTracking();
+    }
+    
+    onUpdate(item.id, {
+      completed: true,
+      completed_at: new Date().toISOString(),
+      status: 'completed'
+    });
+  };
+
   const progress = calculateProgress(item.progress);
   const isTracking = Boolean(item.lastTimestamp);
   const currentMinutes = (item.progress.current.hours * 60) + item.progress.current.minutes;
@@ -219,6 +204,57 @@ export function LearningItemCard({
     formatDuration(currentMinutes);
 
   const isDisabled = item.completed || item.status === 'archived';
+
+  // Timer effect
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (item.lastTimestamp) {
+      const updateElapsedTime = () => {
+        const elapsed = Math.floor((Date.now() - item.lastTimestamp!) / 1000);
+        setElapsedTime(elapsed);
+
+        // Calculate current progress including the current session time
+        const currentSessionMinutes = Math.floor(elapsed / 60);
+        const totalCurrentMinutes = currentSessionMinutes + 
+          (item.progress.current.hours * 60) + 
+          item.progress.current.minutes;
+
+        // Check if we've reached the total time
+        if (item.progress.total) {
+          const totalMinutes = (item.progress.total.hours * 60) + 
+            item.progress.total.minutes;
+
+          if (totalCurrentMinutes >= totalMinutes && !item.completed) {
+            handleStopTracking();
+            onUpdate(item.id, {
+              completed: true,
+              completed_at: new Date().toISOString(),
+              status: 'completed',
+              progress: {
+                ...item.progress,
+                current: {
+                  hours: Math.floor(totalMinutes / 60),
+                  minutes: totalMinutes % 60
+                }
+              }
+            });
+          }
+        }
+      };
+
+      updateElapsedTime();
+      intervalId = setInterval(updateElapsedTime, 1000);
+    } else {
+      setElapsedTime(0);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [item.lastTimestamp, item.progress, item.completed, item.id, handleStopTracking, onUpdate]);
 
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow duration-200">
@@ -343,6 +379,15 @@ export function LearningItemCard({
           >
             <Clock className="w-4 h-4 mr-1" />
             {showSessionDetails ? 'Hide History' : 'Show History'}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleMarkAsComplete}
+            disabled={item.status === 'archived' || isTracking}
+          >
+            <CheckCircle className="w-4 h-4 mr-2" />
+            Mark Complete
           </Button>
         </div>
 
