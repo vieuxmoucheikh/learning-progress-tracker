@@ -1,14 +1,20 @@
+export interface Time {
+  hours: number;
+  minutes: number;
+}
+
 export interface Session {
   startTime: string;
   endTime?: string;
-  duration?: { hours: number; minutes: number };
+  duration?: Time;
   date: string;
+  notes?: string[];
 }
 
 export interface Progress {
-  current: { hours: number; minutes: number };
-  total: { hours: number; minutes: number };
-  lastAccessed: string;
+  current: Time;
+  total?: Time;
+  lastAccessed?: string;
   sessions: Session[];
 }
 
@@ -31,19 +37,21 @@ export interface LearningItem {
   status: 'not_started' | 'in_progress' | 'completed' | 'on_hold' | 'archived';
   rating?: 1 | 2 | 3 | 4 | 5;
   user_id?: string;
+  lastTimestamp?: number | null;
 }
 
 export type LearningItemFormData = Omit<LearningItem, 'id' | 'progress'> & {
-  current: { hours: number; minutes: number; pages?: number };
-  total?: { hours: number; minutes: number };
+  current: Time;
+  total?: Time;
   goal?: { hours: number; minutes: number };
   unit: 'hours' | 'pages' | 'percent';
 };
 
 export interface StreakData {
-  currentStreak: number;
-  lastActivityDate: string | null;
-  longestStreak: number;
+  user_id: string;
+  current_streak: number;
+  longest_streak: number;
+  last_activity_date?: string;
   history: {
     date: string;
     minutesSpent: number;
