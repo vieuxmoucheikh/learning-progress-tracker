@@ -34,24 +34,28 @@ export async function addLearningItem(item: LearningItemFormData): Promise<Learn
       throw new Error('Authentication required');
     }
 
+    if (!item || typeof item !== 'object') {
+      throw new Error('Invalid item data');
+    }
+
     // Create a clean database object
     const newItem = {
-      title: item.title.trim(),
-      type: item.type,
-      url: item.url?.trim() || '',
-      notes: item.notes?.trim() || '',
-      completed: false,
-      category: item.category?.trim() || '',
+      title: (item.title || '').trim(),
+      type: item.type || 'video',
+      url: (item.url || '').trim(),
+      notes: (item.notes || '').trim(),
+      completed: Boolean(item.completed),
+      category: (item.category || '').trim(),
       priority: item.priority || 'medium',
-      tags: (item.tags || []).map(tag => tag.trim()).filter(Boolean),
+      tags: Array.isArray(item.tags) ? item.tags.map(tag => (tag || '').trim()).filter(Boolean) : [],
       progress: {
         current: {
-          hours: Math.max(0, parseInt(String(item.current?.hours)) || 0),
-          minutes: Math.max(0, parseInt(String(item.current?.minutes)) || 0)
+          hours: Math.max(0, parseInt(String(item.current?.hours || 0)) || 0),
+          minutes: Math.max(0, parseInt(String(item.current?.minutes || 0)) || 0)
         },
         target: {
-          hours: Math.max(0, parseInt(String(item.total?.hours)) || 0),
-          minutes: Math.max(0, parseInt(String(item.total?.minutes)) || 0)
+          hours: Math.max(0, parseInt(String(item.total?.hours || 0)) || 0),
+          minutes: Math.max(0, parseInt(String(item.total?.minutes || 0)) || 0)
         },
         lastAccessed: new Date().toISOString(),
         sessions: []

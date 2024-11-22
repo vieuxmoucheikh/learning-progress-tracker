@@ -38,27 +38,31 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
     setIsSubmitting(true);
 
     try {
-      if (!formData.title.trim()) {
+      if (!formData || typeof formData !== 'object') {
+        throw new Error('Invalid form data');
+      }
+
+      if (!(formData.title || '').trim()) {
         throw new Error('Title is required');
       }
 
       // Create a clean object with only the necessary data
       const cleanData = {
-        title: formData.title.trim(),
-        type: formData.type,
-        url: formData.url?.trim() || '',
-        notes: formData.notes?.trim() || '',
-        completed: false,
-        category: formData.category?.trim() || '',
+        title: (formData.title || '').trim(),
+        type: formData.type || 'video',
+        url: (formData.url || '').trim(),
+        notes: (formData.notes || '').trim(),
+        completed: Boolean(formData.completed),
+        category: (formData.category || '').trim(),
         priority: formData.priority || 'medium',
-        tags: (formData.tags || []).map(tag => tag.trim()).filter(Boolean),
+        tags: Array.isArray(formData.tags) ? formData.tags.map(tag => (tag || '').trim()).filter(Boolean) : [],
         current: {
-          hours: Math.max(0, parseInt(String(formData.current?.hours)) || 0),
-          minutes: Math.max(0, parseInt(String(formData.current?.minutes)) || 0)
+          hours: Math.max(0, parseInt(String(formData.current?.hours || 0)) || 0),
+          minutes: Math.max(0, parseInt(String(formData.current?.minutes || 0)) || 0)
         },
         total: {
-          hours: Math.max(0, parseInt(String(formData.total?.hours)) || 0),
-          minutes: Math.max(0, parseInt(String(formData.total?.minutes)) || 0)
+          hours: Math.max(0, parseInt(String(formData.total?.hours || 0)) || 0),
+          minutes: Math.max(0, parseInt(String(formData.total?.minutes || 0)) || 0)
         },
         date: selectedDate ? selectedDate.toISOString() : new Date().toISOString(),
         difficulty: formData.difficulty || 'medium',
