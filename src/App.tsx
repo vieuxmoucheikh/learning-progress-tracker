@@ -149,6 +149,7 @@ export default function App() {
   }>({ activeTasks: [], completedTasks: [] });
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [showCompleted, setShowCompleted] = useState(true);
   const [showArchived, setShowArchived] = useState(false);
 
   const filteredItems = useMemo(() => {
@@ -160,13 +161,20 @@ export default function App() {
           item.category.toLowerCase().includes(searchLower) ||
           (item.notes?.toLowerCase() || '').includes(searchLower);
         
-        const matchesArchiveFilter = showArchived ? 
-          item.status === 'archived' : 
-          item.status !== 'archived';
+        // If a date is selected, only show items from that date
+        const selectedDateStr = selectedDate ? selectedDate.toISOString().split('T')[0] : null;
+        const itemDate = new Date(item.date).toISOString().split('T')[0];
+        const matchesDate = selectedDate ? itemDate === selectedDateStr : true;
+
+        // Filter by status
+        const matchesStatus = 
+          (item.status === 'archived' && showArchived) ||
+          (item.status === 'completed' && showCompleted) ||
+          (item.status !== 'archived' && item.status !== 'completed' && !showArchived && !showCompleted);
         
-        return matchesSearch && matchesArchiveFilter;
+        return matchesSearch && matchesDate && matchesStatus;
       });
-  }, [state.items, searchQuery, showArchived]);
+  }, [state.items, searchQuery, showArchived, showCompleted, selectedDate]);
 
   useEffect(() => {
     let mounted = true;
@@ -441,28 +449,85 @@ export default function App() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-medium text-gray-900">Learning Items</h2>
-            <button
-              onClick={() => setShowArchived(!showArchived)}
-              className="px-3 py-1 text-sm rounded-md bg-gray-100 hover:bg-gray-200 transition-colors"
-            >
-              {showArchived ? 'Show Active' : 'Show Archived'}
-            </button>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-medium text-gray-900">
+                {selectedDate ? (
+                  <span>Tasks for {selectedDate.toLocaleDateString()}</span>
+                ) : (
+                  'Learning Items'
+                )}
+              </h2>
+              {selectedDate && (
+                <button
+                  onClick={() => setSelectedDate(null)}
+                  className="text-sm text-gray-500 hover:text-gray-700"
+                >
+                  (Show All)
+                </button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setShowArchived(false);
+                  setShowCompleted(false);
+                }}
+                className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                  !showArchived && !showCompleted
+                    ? 'bg-indigo-100 text-indigo-700'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                }`}
+              >
+                Active
+              </button>
+              <button
+                onClick={() => {
+                  setShowCompleted(true);
+                  setShowArchived(false);
+                }}
+                className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                  showCompleted && !showArchived
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                }`}
+              >
+                Completed
+              </button>
+              <button
+                onClick={() => {
+                  setShowArchived(true);
+                  setShowCompleted(false);
+                }}
+                className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                  showArchived
+                    ? 'bg-gray-700 text-white'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                }`}
+              >
+                Archived
+              </button>
+            </div>
           </div>
           <div className="space-y-4">
-            {filteredItems.map((item) => (
-              <LearningItemCard
-                key={item.id}
-                item={item}
-                onUpdate={handleUpdateItem}
-                onDelete={handleDeleteItem}
-                onStartTracking={handleStartTracking}
-                onStopTracking={handleStopTracking}
-                onNotesUpdate={handleUpdateNotes}
-                onSessionNoteAdd={handleAddSessionNote}
-                onSetActiveItem={handleSetActiveItem}
-              />
-            ))}
+            {filteredItems.length > 0 ? (
+              filteredItems.map((item) => (
+                <LearningItemCard
+                  key={item.id}
+                  item={item}
+                  onUpdate={handleUpdateItem}
+                  onDelete={handleDeleteItem}
+                  onStartTracking={handleStartTracking}
+                  onStopTracking={handleStopTracking}
+                  onNotesUpdate={handleUpdateNotes}
+                  onSessionNoteAdd={handleAddSessionNote}
+                  onSetActiveItem={handleSetActiveItem}
+                />
+              ))
+            ) : (
+              <div className="text-gray-500 text-center py-4">
+                {selectedDate ? 'No tasks for this date' : 'No items found'}
+              </div>
+            )}
           </div>
         </div>
 
@@ -471,77 +536,6 @@ export default function App() {
             items={state.items}
             onDateSelect={handleDateSelect}
           />
-          <div className="mt-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Tasks for {selectedDate.toLocaleDateString()}
-            </h3>
-            <div className="space-y-4">
-              {state.items
-                .filter(item => {
-                  const itemDate = new Date(item.date).toISOString().split('T')[0];
-                  const selectedDateStr = selectedDate.toISOString().split('T')[0];
-                  return itemDate === selectedDateStr;
-                })
-                .map((task) => (
-                  <div
-                    key={task.id}
-                    className={`p-3 rounded-lg shadow-sm border transition-colors cursor-pointer ${
-                      task.status === 'archived' ? 'bg-gray-50 border-gray-200 hover:border-gray-400' :
-                      task.status === 'completed' ? 'bg-green-50 border-green-200 hover:border-green-400' :
-                      'bg-white border-indigo-200 hover:border-indigo-400'
-                    }`}
-                    onClick={() => {
-                      const element = document.getElementById(`item-${task.id}`);
-                      if (element) {
-                        element.scrollIntoView({ behavior: 'smooth' });
-                        element.classList.add('ring-2', 'ring-indigo-500');
-                        setTimeout(() => {
-                          element.classList.remove('ring-2', 'ring-indigo-500');
-                        }, 2000);
-                      }
-                    }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="text-gray-900">{task.title}</span>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-sm text-gray-500">{task.category}</span>
-                          <span className={`text-sm px-2 py-0.5 rounded ${
-                            task.status === 'archived' ? 'bg-gray-100 text-gray-600' :
-                            task.status === 'completed' ? 'bg-green-100 text-green-600' :
-                            'bg-indigo-100 text-indigo-600'
-                          }`}>
-                            {task.status === 'archived' ? 'Archived' :
-                             task.status === 'completed' ? 'Completed' :
-                             'Active'}
-                          </span>
-                        </div>
-                      </div>
-                      {task.progress.total && (
-                        <div className="text-sm text-gray-500 text-right">
-                          {task.progress.current.hours}h {task.progress.current.minutes}m
-                          {task.progress.total && (
-                            <span>
-                              {' / '}
-                              {task.progress.total.hours}h {task.progress.total.minutes}m
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              {state.items.filter(item => {
-                const itemDate = new Date(item.date).toISOString().split('T')[0];
-                const selectedDateStr = selectedDate.toISOString().split('T')[0];
-                return itemDate === selectedDateStr;
-              }).length === 0 && (
-                <div className="text-gray-500 text-center py-4">
-                  No tasks for this date
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </div>
 
