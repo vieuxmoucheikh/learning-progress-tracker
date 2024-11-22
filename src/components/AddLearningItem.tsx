@@ -14,19 +14,19 @@ interface Props {
 export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props) {
   const [formData, setFormData] = useState<LearningItemFormData>({
     title: '',
-    type: 'video',
+    type: 'video' as const,
     url: '',
     notes: '',
     completed: false,
     category: '',
-    priority: 'medium',
+    priority: 'medium' as const,
     tags: [],
     current: { hours: 0, minutes: 0 },
     total: { hours: 0, minutes: 0 },
     date: selectedDate ? selectedDate.toISOString() : new Date().toISOString(),
-    difficulty: 'medium',
-    status: 'not_started',
-    unit: 'hours'
+    difficulty: 'medium' as const,
+    status: 'not_started' as const,
+    unit: 'hours' as const
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -46,15 +46,21 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
         throw new Error('Title is required');
       }
 
+      // Validate type field
+      const validTypes = ['video', 'pdf', 'url', 'book', 'course', 'article'] as const;
+      if (!validTypes.includes(formData.type as typeof validTypes[number])) {
+        throw new Error('Invalid item type');
+      }
+
       // Create a clean object with only the necessary data
       const cleanData = {
         title: (formData.title || '').trim(),
-        type: formData.type || 'video',
+        type: formData.type as typeof validTypes[number],
         url: (formData.url || '').trim(),
         notes: (formData.notes || '').trim(),
         completed: Boolean(formData.completed),
         category: (formData.category || '').trim(),
-        priority: formData.priority || 'medium',
+        priority: (formData.priority || 'medium') as 'low' | 'medium' | 'high',
         tags: Array.isArray(formData.tags) ? formData.tags.map(tag => (tag || '').trim()).filter(Boolean) : [],
         current: {
           hours: Math.max(0, parseInt(String(formData.current?.hours || 0)) || 0),
@@ -65,9 +71,9 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
           minutes: Math.max(0, parseInt(String(formData.total?.minutes || 0)) || 0)
         },
         date: selectedDate ? selectedDate.toISOString() : new Date().toISOString(),
-        difficulty: formData.difficulty || 'medium',
-        status: formData.status || 'not_started',
-        unit: formData.unit || 'hours'
+        difficulty: (formData.difficulty || 'medium') as 'easy' | 'medium' | 'hard',
+        status: (formData.status || 'not_started') as 'not_started' | 'in_progress' | 'completed' | 'on_hold' | 'archived',
+        unit: (formData.unit || 'hours') as 'hours' | 'pages' | 'percent'
       };
 
       // Add https:// to URL if needed
@@ -89,19 +95,19 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
   const resetForm = () => {
     setFormData({
       title: '',
-      type: 'video',
+      type: 'video' as const,
       url: '',
       notes: '',
       completed: false,
       category: '',
-      priority: 'medium',
+      priority: 'medium' as const,
       tags: [],
       current: { hours: 0, minutes: 0 },
       total: { hours: 0, minutes: 0 },
       date: selectedDate ? selectedDate.toISOString() : new Date().toISOString(),
-      difficulty: 'medium',
-      status: 'not_started',
-      unit: 'hours'
+      difficulty: 'medium' as const,
+      status: 'not_started' as const,
+      unit: 'hours' as const
     });
   };
 

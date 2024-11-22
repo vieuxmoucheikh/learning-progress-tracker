@@ -38,15 +38,21 @@ export async function addLearningItem(item: LearningItemFormData): Promise<Learn
       throw new Error('Invalid item data');
     }
 
+    // Validate type field
+    const validTypes = ['video', 'pdf', 'url', 'book', 'course', 'article'] as const;
+    if (!validTypes.includes(item.type as typeof validTypes[number])) {
+      throw new Error('Invalid item type');
+    }
+
     // Create a clean database object
     const newItem = {
       title: (item.title || '').trim(),
-      type: item.type || 'video',
+      type: item.type as typeof validTypes[number],
       url: (item.url || '').trim(),
       notes: (item.notes || '').trim(),
       completed: Boolean(item.completed),
       category: (item.category || '').trim(),
-      priority: item.priority || 'medium',
+      priority: (item.priority || 'medium') as 'low' | 'medium' | 'high',
       tags: Array.isArray(item.tags) ? item.tags.map(tag => (tag || '').trim()).filter(Boolean) : [],
       progress: {
         current: {
@@ -61,9 +67,9 @@ export async function addLearningItem(item: LearningItemFormData): Promise<Learn
         sessions: []
       },
       date: item.date || new Date().toISOString(),
-      difficulty: item.difficulty || 'medium',
-      status: item.status || 'not_started',
-      unit: item.unit || 'hours',
+      difficulty: (item.difficulty || 'medium') as 'easy' | 'medium' | 'hard',
+      status: (item.status || 'not_started') as 'not_started' | 'in_progress' | 'completed' | 'on_hold' | 'archived',
+      unit: (item.unit || 'hours') as 'hours' | 'pages' | 'percent',
       user_id: user.id,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
