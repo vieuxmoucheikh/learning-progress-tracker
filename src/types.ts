@@ -2,16 +2,9 @@ export interface LearningItem {
   id: string;
   title: string;
   type: 'video' | 'pdf' | 'url' | 'book' | 'course' | 'article';
-  progress: {
-    current: { hours: number; minutes: number };
-    total?: { hours: number; minutes: number };
-    lastAccessed: string;
-    sessions: {
-      date: string;
-      duration: { hours: number; minutes: number };
-      notes?: string;
-    }[];
-  };
+  current_minutes: number;
+  total_minutes?: number;
+  unit: 'hours' | 'pages' | 'percent';
   url?: string;
   notes?: string;
   completed: boolean;
@@ -20,25 +13,18 @@ export interface LearningItem {
   priority: 'low' | 'medium' | 'high';
   dueDate?: string;
   tags: string[];
-  goal?: { hours: number; minutes: number };
   date: string;
   lastTimestamp?: number;
   difficulty: 'easy' | 'medium' | 'hard';
   status: 'not_started' | 'in_progress' | 'completed' | 'on_hold' | 'archived';
   rating?: 1 | 2 | 3 | 4 | 5;
-  reminders?: {
-    enabled: boolean;
-    frequency: 'daily' | 'weekly' | 'custom';
-    customDays?: number;
-    lastReminder?: string;
-  };
+  user_id?: string;
 }
 
-export type LearningItemFormData = Omit<LearningItem, 'id' | 'progress'> & {
+export type LearningItemFormData = Omit<LearningItem, 'id' | 'current_minutes' | 'total_minutes' | 'user_id'> & {
   current: { hours: number; minutes: number };
   total?: { hours: number; minutes: number };
   goal?: { hours: number; minutes: number };
-  unit: 'hours' | 'pages' | 'percent';
   lastTimestamp?: number;
 };
 

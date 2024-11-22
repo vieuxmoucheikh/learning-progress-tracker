@@ -91,11 +91,22 @@ export function LearningItemCard({ item, onDelete, onUpdate, onStartTracking, on
     });
   };
 
-  const calculateProgress = () => {
-    if (!item.progress.total) return 0;
-    const currentMinutes = item.progress.current.hours * 60 + item.progress.current.minutes;
-    const totalMinutes = item.progress.total.hours * 60 + item.progress.total.minutes;
-    return Math.min((currentMinutes / totalMinutes) * 100, 100);
+  const formatTime = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours}h ${mins}m`;
+  };
+
+  const renderProgress = () => {
+    if (!item.current_minutes) return 'Not started';
+    
+    const currentTime = formatTime(item.current_minutes);
+    if (!item.total_minutes) return currentTime;
+    
+    const totalTime = formatTime(item.total_minutes);
+    const percentage = Math.round((item.current_minutes / item.total_minutes) * 100);
+    
+    return `${currentTime} / ${totalTime} (${percentage}%)`;
   };
 
   const getDifficultyColor = () => {
@@ -117,16 +128,11 @@ export function LearningItemCard({ item, onDelete, onUpdate, onStartTracking, on
   };
 
   const getProgressColor = () => {
-    const progress = calculateProgress();
+    const progress = Math.round((item.current_minutes / item.total_minutes) * 100);
     if (progress >= 100) return 'bg-gradient-to-r from-green-500 to-green-600';
     if (progress >= 75) return 'bg-gradient-to-r from-blue-500 to-blue-600';
     if (progress >= 50) return 'bg-gradient-to-r from-yellow-500 to-yellow-600';
     return 'bg-gradient-to-r from-gray-500 to-gray-600';
-  };
-
-  const formatTime = (hours: number, minutes: number) => {
-    if (hours === 0) return `${minutes}m`;
-    return `${hours}h ${minutes}m`;
   };
 
   const formatDate = (dateString: string) => {
@@ -190,29 +196,20 @@ export function LearningItemCard({ item, onDelete, onUpdate, onStartTracking, on
           )}
 
           {/* Progress bar */}
-          {item.progress.total && (
+          {item.total_minutes && (
             <div className="mt-4">
               <div className="flex justify-between text-sm font-medium mb-2">
                 <span className="flex items-center gap-2 text-gray-700">
                   <Clock className="w-4 h-4 text-blue-500" />
                   <span className="font-semibold">
-                    {formatTime(item.progress.current.hours, item.progress.current.minutes)}
-                    {item.lastTimestamp && (
-                      <span className="text-green-600 animate-pulse ml-2">(Active)</span>
-                    )}
-                  </span>
-                </span>
-                <span className="flex items-center gap-2 text-gray-700">
-                  <Target className="w-4 h-4 text-purple-500" />
-                  <span className="font-semibold">
-                    {formatTime(item.progress.total.hours, item.progress.total.minutes)}
+                    {renderProgress()}
                   </span>
                 </span>
               </div>
               <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${getProgressColor()}`}
-                  style={{ width: `${calculateProgress()}%` }}
+                  style={{ width: `${Math.round((item.current_minutes / item.total_minutes) * 100)}%` }}
                 />
               </div>
             </div>
