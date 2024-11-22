@@ -8,7 +8,6 @@ import {
   Clock, 
   PlayCircle, 
   StopCircle, 
-  Archive, 
   Edit2, 
   Save, 
   Plus, 
@@ -96,7 +95,7 @@ export function LearningItemCard({
   }, [item.id, item.lastTimestamp, item.progress, onStopTracking, onSetActiveItem, onUpdate, calculateTotalTimeFromSessions]);
 
   const handleStartTracking = () => {
-    if (item.completed || item.status === 'archived') return;
+    if (item.completed) return;
     
     // Calculate current progress before starting new session
     const currentProgress = {
@@ -144,24 +143,16 @@ export function LearningItemCard({
     }
   };
 
-  const handleArchive = async () => {
-    try {
-      if (isTracking) {
-        await handleStopTracking();
-      }
-      
-      // First update local state
-      const updates: Partial<LearningItem> = {
-        status: 'archived' as const,
-        completed: true,
-        completed_at: new Date().toISOString()
-      };
-      
-      await onUpdate(item.id, updates);
-    } catch (error) {
-      console.error('Error archiving item:', error);
-      throw error;
+  const handleMarkAsComplete = () => {
+    if (isTracking) {
+      handleStopTracking();
     }
+    
+    onUpdate(item.id, {
+      completed: !item.completed,
+      completed_at: !item.completed ? new Date().toISOString() : null,
+      status: !item.completed ? 'completed' : 'not_started'
+    });
   };
 
   const handleDelete = () => {
@@ -179,18 +170,6 @@ export function LearningItemCard({
     }
   };
 
-  const handleMarkAsComplete = () => {
-    if (isTracking) {
-      handleStopTracking();
-    }
-    
-    onUpdate(item.id, {
-      completed: true,
-      completed_at: new Date().toISOString(),
-      status: 'completed'
-    });
-  };
-
   const progress = calculateProgress(item.progress);
   const isTracking = Boolean(item.lastTimestamp);
   const currentMinutes = (item.progress.current.hours * 60) + item.progress.current.minutes;
@@ -203,7 +182,7 @@ export function LearningItemCard({
     `${formatDuration(currentMinutes)} / ${formatDuration(totalMinutes)}` :
     formatDuration(currentMinutes);
 
-  const isDisabled = item.completed || item.status === 'archived';
+  const isDisabled = item.completed;
 
   // Timer effect
   useEffect(() => {
@@ -327,7 +306,6 @@ export function LearningItemCard({
   return (
     <Card className={`overflow-hidden transition-all duration-200 ${
       item.completed ? 'bg-green-50/50' : 
-      item.status === 'archived' ? 'bg-gray-50/50' : 
       'hover:shadow-md bg-white'
     }`}>
       <div className="p-6">
@@ -337,7 +315,6 @@ export function LearningItemCard({
             <div className="flex items-center gap-2 mb-2">
               <h3 className={`text-lg font-semibold ${
                 item.completed ? 'text-green-800' : 
-                item.status === 'archived' ? 'text-gray-600' : 
                 'text-gray-900'
               }`}>
                 {item.title}
@@ -391,7 +368,6 @@ export function LearningItemCard({
                 item.status === 'completed' ? 'bg-green-100 text-green-700' :
                 item.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
                 item.status === 'on_hold' ? 'bg-yellow-100 text-yellow-700' :
-                item.status === 'archived' ? 'bg-gray-100 text-gray-700' :
                 'bg-red-100 text-red-700'
               }`}>
                 {item.status.replace('_', ' ')}
@@ -433,7 +409,6 @@ export function LearningItemCard({
             value={calculateProgress(item.progress)} 
             className={`h-2 ${
               item.completed ? 'bg-green-200' : 
-              item.status === 'in_progress' ? 'bg-blue-200' :
               'bg-gray-200'
             }`}
           />
@@ -489,7 +464,6 @@ export function LearningItemCard({
                     ? 'bg-red-500 hover:bg-red-600 text-white shadow-red-100'
                     : 'bg-green-500 hover:bg-green-600 text-white shadow-green-100'
                 } shadow-lg`}
-                disabled={item.status === 'archived'}
               >
                 <div className="flex items-center justify-center gap-2">
                   {item.lastTimestamp ? (
@@ -509,7 +483,7 @@ export function LearningItemCard({
             
             <Button
               onClick={handleMarkAsComplete}
-              disabled={item.status === 'archived' || item.lastTimestamp}
+              disabled={Boolean(item.lastTimestamp)}
               className={`flex-1 transition-all duration-200 ${
                 item.completed
                   ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-100'
