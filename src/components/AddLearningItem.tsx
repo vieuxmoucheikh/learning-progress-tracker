@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { Plus, Link as LinkIcon, Clock, X } from 'lucide-react';
 import { LearningItemFormData } from '../types';
+import { Button } from './ui/button';
 
 interface Props {
   onAdd: (item: LearningItemFormData) => void;
@@ -281,21 +283,21 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
 
             {/* Submit Button */}
             <div className="flex justify-end gap-3">
-              <button
+              <Button
                 type="button"
                 onClick={onClose}
                 disabled={isSubmitting}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 disabled={isSubmitting}
                 className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
               >
                 {isSubmitting ? 'Adding...' : 'Add Item'}
-              </button>
+              </Button>
             </div>
           </form>
         </div>

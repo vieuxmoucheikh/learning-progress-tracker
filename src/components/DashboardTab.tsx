@@ -1,3 +1,5 @@
+import * as React from 'react';
+import { useState } from "react";
 import { StreakDisplay } from "./StreakDisplay";
 import { Stats } from "./Stats";
 import { Card } from "./ui/card";
@@ -5,7 +7,6 @@ import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
 import { LearningItem } from "@/types";
 import { Calendar } from "./Calendar";
-import { useState } from "react";
 
 interface DashboardTabProps {
   items: LearningItem[];

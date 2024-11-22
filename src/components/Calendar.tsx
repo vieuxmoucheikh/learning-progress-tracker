@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { LearningItem } from '../types';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CheckCircle2, Clock, Info, ChevronDown } from 'lucide-react';
