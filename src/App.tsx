@@ -206,12 +206,13 @@ export default function App() {
       // If marking as completed
       if (updates.completed && !item.completed) {
         updates.completed_at = new Date().toISOString();
-        updates.status = 'completed';
+        updates.status = 'completed' as const;
       }
 
       // If archiving
       if (updates.status === 'archived' && item.status !== 'archived') {
-        updates.archived_at = new Date().toISOString();
+        updates.completed = true;
+        updates.completed_at = new Date().toISOString();
       }
 
       // Update local state first for immediate feedback
@@ -322,7 +323,7 @@ export default function App() {
       if (completed && !item.completed) {
         updates.completed = true;
         updates.completed_at = currentTime.toISOString();
-        updates.status = 'completed';
+        updates.status = 'completed' as const;
       }
 
       await updateLearningItem(id, updates);
