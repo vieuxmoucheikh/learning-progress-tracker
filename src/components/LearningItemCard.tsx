@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Card } from './ui/card';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Textarea } from './ui/textarea';
-import { Progress } from './ui/progress';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Card } from '../ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
+import { Progress } from '../ui/progress';
 import { 
   Clock, 
   PlayCircle, 
@@ -48,9 +48,27 @@ export function LearningItemCard({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleStopTracking = useCallback(() => {
+    if (!item.lastTimestamp) return;
+
+    // Calculate final progress including the current session
+    const sessionDuration = Math.floor((Date.now() - item.lastTimestamp) / 1000);
+    const additionalMinutes = Math.floor(sessionDuration / 60);
+    const totalMinutes = additionalMinutes + 
+      (item.progress.current.hours * 60) + 
+      item.progress.current.minutes;
+
+    onUpdate(item.id, {
+      progress: {
+        ...item.progress,
+        current: {
+          hours: Math.floor(totalMinutes / 60),
+          minutes: totalMinutes % 60
+        }
+      }
+    });
     onStopTracking(item.id);
     onSetActiveItem(null);
-  }, [item.id, onStopTracking, onSetActiveItem]);
+  }, [item.id, item.lastTimestamp, item.progress, onStopTracking, onSetActiveItem, onUpdate]);
 
   // Timer effect
   useEffect(() => {
@@ -61,20 +79,30 @@ export function LearningItemCard({
         const elapsed = Math.floor((Date.now() - item.lastTimestamp!) / 1000);
         setElapsedTime(elapsed);
 
+        // Calculate current progress including the current session time
+        const currentSessionMinutes = Math.floor(elapsed / 60);
+        const totalCurrentMinutes = currentSessionMinutes + 
+          (item.progress.current.hours * 60) + 
+          item.progress.current.minutes;
+
         // Check if we've reached the total time
         if (item.progress.total) {
-          const currentMinutes = Math.floor(elapsed / 60) + 
-            (item.progress.current.hours * 60) + 
-            item.progress.current.minutes;
           const totalMinutes = (item.progress.total.hours * 60) + 
             item.progress.total.minutes;
 
-          if (currentMinutes >= totalMinutes && !item.completed) {
+          if (totalCurrentMinutes >= totalMinutes && !item.completed) {
             handleStopTracking();
             onUpdate(item.id, {
               completed: true,
               completed_at: new Date().toISOString(),
-              status: 'completed'
+              status: 'completed',
+              progress: {
+                ...item.progress,
+                current: {
+                  hours: Math.floor(totalMinutes / 60),
+                  minutes: totalMinutes % 60
+                }
+              }
             });
           }
         }
@@ -95,6 +123,19 @@ export function LearningItemCard({
 
   const handleStartTracking = () => {
     if (item.completed || item.status === 'archived') return;
+    
+    // Calculate current progress before starting new session
+    const currentProgress = {
+      ...item.progress.current,
+      // Keep existing progress
+    };
+    
+    onUpdate(item.id, {
+      progress: {
+        ...item.progress,
+        current: currentProgress,
+      }
+    });
     onStartTracking(item.id);
     onSetActiveItem(item.id);
   };
@@ -109,8 +150,23 @@ export function LearningItemCard({
   const handleAddSessionNote = () => {
     const trimmedNote = newSessionNote.trim();
     if (trimmedNote) {
-      onSessionNoteAdd(item.id, trimmedNote);
-      setNewSessionNote('');
+      const currentSession = item.progress.sessions[item.progress.sessions.length - 1];
+      if (currentSession) {
+        onUpdate(item.id, {
+          progress: {
+            ...item.progress,
+            sessions: [
+              ...item.progress.sessions.slice(0, -1),
+              {
+                ...currentSession,
+                notes: [...(currentSession.notes || []), trimmedNote]
+              }
+            ]
+          }
+        });
+        onSessionNoteAdd(item.id, trimmedNote);
+        setNewSessionNote('');
+      }
     }
   };
 
@@ -286,7 +342,7 @@ export function LearningItemCard({
         {isEditing ? (
           <Textarea
             value={editedNotes}
-            onChange={(e) => setEditedNotes(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditedNotes(e.target.value)}
             className="min-h-[100px] resize-none"
             placeholder="Add your notes here..."
           />
@@ -303,7 +359,7 @@ export function LearningItemCard({
             <Input
               placeholder="Add session note... (Press Enter to add)"
               value={newSessionNote}
-              onChange={(e) => setNewSessionNote(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewSessionNote(e.target.value)}
               onKeyDown={handleKeyDown}
               className="flex-1"
             />
