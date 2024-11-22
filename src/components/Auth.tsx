@@ -3,9 +3,7 @@ import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { supabase } from '../lib/supabase'
 
 export function Auth() {
-  const redirectTo = typeof window !== 'undefined' 
-    ? `${window.location.origin}/auth/callback`
-    : 'http://localhost:5173/auth/callback'
+  const redirectTo = import.meta.env.VITE_SITE_URL || 'http://localhost:5173'
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -33,7 +31,7 @@ export function Auth() {
               },
             }}
             providers={['google']}
-            redirectTo={redirectTo}
+            redirectTo={`${redirectTo}/auth/callback`}
             socialLayout="vertical"
             showLinks={false}
             theme="light"
