@@ -34,25 +34,32 @@ export async function addLearningItem(item: LearningItemFormData): Promise<Learn
       throw new Error('Authentication required');
     }
 
-    const { current, total, ...rest } = item;
-    
+    // Create a clean database object
     const newItem = {
-      ...rest,
+      title: item.title.trim(),
+      type: item.type,
+      url: item.url?.trim() || '',
+      notes: item.notes?.trim() || '',
+      completed: false,
+      category: item.category?.trim() || '',
+      priority: item.priority || 'medium',
+      tags: (item.tags || []).map(tag => tag.trim()).filter(Boolean),
       progress: {
         current: {
-          hours: parseInt(String(current?.hours)) || 0,
-          minutes: parseInt(String(current?.minutes)) || 0
+          hours: Math.max(0, parseInt(String(item.current?.hours)) || 0),
+          minutes: Math.max(0, parseInt(String(item.current?.minutes)) || 0)
         },
-        target: total ? {
-          hours: parseInt(String(total.hours)) || 0,
-          minutes: parseInt(String(total.minutes)) || 0
-        } : {
-          hours: 0,
-          minutes: 0
+        target: {
+          hours: Math.max(0, parseInt(String(item.total?.hours)) || 0),
+          minutes: Math.max(0, parseInt(String(item.total?.minutes)) || 0)
         },
         lastAccessed: new Date().toISOString(),
         sessions: []
       },
+      date: item.date || new Date().toISOString(),
+      difficulty: item.difficulty || 'medium',
+      status: item.status || 'not_started',
+      unit: item.unit || 'hours',
       user_id: user.id,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
