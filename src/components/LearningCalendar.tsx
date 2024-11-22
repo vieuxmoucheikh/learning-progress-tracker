@@ -123,8 +123,7 @@ export function LearningCalendar({ items, setItems }: Props) {
     }
   };
 
-  const renderCalendar = (): JSX.Element => {
-    const today = new Date();
+  const getCalendarDays = () => {
     const startDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
     const endDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
     const daysInMonth = endDate.getDate();
@@ -134,97 +133,162 @@ export function LearningCalendar({ items, setItems }: Props) {
 
     // Add empty boxes for days before the first day of the month
     for (let i = 0; i < firstDayOfMonth; i++) {
-      calendarDays.push(<div key={`empty-${i}`} className="border p-2 m-1"></div>);
+      calendarDays.push(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1 - i));
     }
 
     // Create calendar days
     for (let i = 1; i <= daysInMonth; i++) {
-      const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i);
-      const formattedDate = date.toISOString().split('T')[0];
-      const activities = getActivitiesForDate(formattedDate);
-      const isToday = formattedDate === today.toISOString().split('T')[0];
-      const isSelected = formattedDate === selectedDate;
-
-      calendarDays.push(
-        <div
-          key={i}
-          className={`border p-2 m-1 cursor-pointer ${isToday ? 'bg-yellow-200' : isSelected ? 'bg-blue-200' : activities.length > 0 ? 'bg-blue-100' : 'bg-gray-200'}`}
-          onClick={() => handleDateClick(formattedDate)}
-          title={activities.length > 0 ? `${activities.length} activity(ies)` : 'No activities'}
-        >
-          {i}
-          {activities.length > 0 && <span className="text-xs"> ({activities.length})</span>}
-        </div>
-      );
+      calendarDays.push(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i));
     }
 
-    return <div className="grid grid-cols-7">{calendarDays}</div>;
-  };
+    // Add empty boxes for days after the last day of the month
+    for (let i = 1; i <= 6 - endDate.getDay(); i++) {
+      calendarDays.push(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, i));
+    }
 
-  const renderActivityDetails = (): JSX.Element | null => {
-    if (!selectedDate) return null;
-
-    const activities = getActivitiesForDate(selectedDate);
-    return (
-      <div className="mt-4">
-        <h3 className="text-lg font-semibold">Activities on {selectedDate}</h3>
-        {activities.length > 0 ? (
-          <ul>
-            {activities.map(item => (
-              <li key={item.id} className="border-b py-2">
-                <div>{item.title}</div>
-                <div>{item.progress.current.hours}h {item.progress.current.minutes}m</div>
-                <div>Category: {item.category}</div>
-                <div>Notes: {item.notes}</div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No activities found for this date.</p>
-        )}
-      </div>
-    );
+    return calendarDays;
   };
 
   return (
-    <div>
-      <h2 className="text-xl font-bold">Learning Calendar</h2>
-      <form onSubmit={handleAddActivity}>
-        <input
-          type="text"
-          value={newActivity.title}
-          onChange={(e) => setNewActivity({ ...newActivity, title: e.target.value })}
-          placeholder="Activity Title"
-          required
-          className="border p-2 rounded"
-        />
-        <input
-          type="text"
-          value={newActivity.category}
-          onChange={(e) => setNewActivity({ ...newActivity, category: e.target.value })}
-          placeholder="Category"
-          required
-          className="border p-2 rounded"
-        />
-        <button type="submit" className="p-2 bg-blue-500 text-white rounded" disabled={loading}>
-          {loading ? 'Adding...' : 'Add Activity'}
-        </button>
-      </form>
-      {notification && <div className="mt-2 text-green-500">{notification}</div>}
-      <div className="flex justify-between mb-4">
-        <button onClick={() => handleMonthChange('prev')} className="p-2 bg-gray-300 rounded">Previous</button>
-        <span>{currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
-        <button onClick={() => handleMonthChange('next')} className="p-2 bg-gray-300 rounded">Next</button>
-        <button onClick={() => setCurrentMonth(new Date())} className="p-2 bg-gray-300 rounded">Today</button>
+    <div className="w-full max-w-[1200px] mx-auto p-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h2 className="text-2xl font-bold mb-2">Learning Calendar</h2>
+          <div className="flex gap-2">
+            <button
+              className={`p-2 rounded ${view === 'daily' ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
+              onClick={() => setView('daily')}
+            >
+              Daily
+            </button>
+            <button
+              className={`p-2 rounded ${view === 'monthly' ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
+              onClick={() => setView('monthly')}
+            >
+              Monthly
+            </button>
+          </div>
+        </div>
+
+        <div className="w-full sm:w-auto">
+          {view === 'monthly' && (
+            <div className="flex items-center gap-2">
+              <button
+                className="p-2 bg-gray-300 rounded"
+                onClick={() => {
+                  const newDate = new Date(currentMonth);
+                  newDate.setMonth(newDate.getMonth() - 1);
+                  setCurrentMonth(newDate);
+                }}
+              >
+                Previous
+              </button>
+              <span className="text-sm font-medium">
+                {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+              </span>
+              <button
+                className="p-2 bg-gray-300 rounded"
+                onClick={() => {
+                  const newDate = new Date(currentMonth);
+                  newDate.setMonth(newDate.getMonth() + 1);
+                  setCurrentMonth(newDate);
+                }}
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-      <div className="flex mb-4">
-        <button onClick={() => setView('daily')} className="p-2 bg-gray-300 rounded">Daily View</button>
-        <button onClick={() => setView('monthly')} className="p-2 bg-gray-300 rounded">Monthly View</button>
-      </div>
-      {view === 'monthly' ? (
-        renderCalendar()
+
+      {view === 'daily' ? (
+        <div className="space-y-6">
+          <form onSubmit={handleAddActivity}>
+            <input
+              type="text"
+              value={newActivity.title}
+              onChange={(e) => setNewActivity({ ...newActivity, title: e.target.value })}
+              placeholder="Activity Title"
+              required
+              className="border p-2 rounded"
+            />
+            <input
+              type="text"
+              value={newActivity.category}
+              onChange={(e) => setNewActivity({ ...newActivity, category: e.target.value })}
+              placeholder="Category"
+              required
+              className="border p-2 rounded"
+            />
+            <button type="submit" className="p-2 bg-blue-500 text-white rounded" disabled={loading}>
+              {loading ? 'Adding...' : 'Add Activity'}
+            </button>
+          </form>
+          {notification && <div className="mt-2 text-green-500">{notification}</div>}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {getActivitiesForDate(selectedDate).map((item) => (
+              <div key={item.id} className="w-full">
+                <div className="border p-2 rounded">
+                  <h3 className="text-lg font-bold">{item.title}</h3>
+                  <p>Category: {item.category}</p>
+                  <p>Notes: {item.notes}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {getActivitiesForDate(selectedDate).length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No learning activities for this date</p>
+            </div>
+          )}
+        </div>
       ) : (
-        renderActivityDetails()
+        <div className="bg-card rounded-lg shadow-sm overflow-hidden">
+          <div className="grid grid-cols-7 text-center text-sm font-medium border-b">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+              <div key={day} className="py-2 border-r last:border-r-0">
+                {day}
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7">
+            {getCalendarDays().map((date, index) => {
+              const isCurrentMonth = date.getMonth() === currentMonth.getMonth();
+              const isToday = date.toDateString() === new Date().toDateString();
+              const dateString = date.toISOString().split('T')[0];
+              const hasActivities = getActivitiesForDate(dateString).length > 0;
+
+              return (
+                <button
+                  key={index}
+                  onClick={() => handleDateClick(dateString)}
+                  className={`
+                    min-h-[80px] p-2 border-r border-b last:border-r-0
+                    hover:bg-muted/50 transition-colors
+                    ${!isCurrentMonth ? 'text-muted-foreground' : ''}
+                    ${isToday ? 'bg-primary/5' : ''}
+                    ${selectedDate === dateString ? 'bg-primary/10' : ''}
+                  `}
+                >
+                  <div className="flex flex-col h-full">
+                    <span className={`
+                      text-sm font-medium mb-1
+                      ${hasActivities ? 'text-primary' : ''}
+                    `}>
+                      {date.getDate()}
+                    </span>
+                    {hasActivities && (
+                      <div className="flex-1 flex items-end">
+                        <div className="w-2 h-2 rounded-full bg-primary"></div>
+                      </div>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       )}
     </div>
   );
