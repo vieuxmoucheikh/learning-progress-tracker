@@ -10,10 +10,13 @@ import { Calendar } from './components/Calendar';
 import { getLearningItems, addLearningItem, updateLearningItem, deleteLearningItem } from './lib/database';
 import { useAuth } from './lib/auth';
 
-type State = {
+interface State {
   items: LearningItem[];
   loading: boolean;
-};
+  activeItem: string | null;
+  notes: { [key: string]: string };
+  sessionNotes: { [key: string]: string[] };
+}
 
 type Action =
   | { type: 'LOAD_STATE'; payload: LearningItem[] }
@@ -21,7 +24,10 @@ type Action =
   | { type: 'UPDATE_ITEM'; payload: { id: string; updates: Partial<LearningItem> } }
   | { type: 'DELETE_ITEM'; payload: string }
   | { type: 'START_TRACKING'; payload: string }
-  | { type: 'STOP_TRACKING'; payload: string };
+  | { type: 'STOP_TRACKING'; payload: string }
+  | { type: 'UPDATE_NOTES'; payload: { id: string; notes: string } }
+  | { type: 'ADD_SESSION_NOTE'; payload: { id: string; note: string } }
+  | { type: 'SET_ACTIVE_ITEM'; payload: string | null };
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -52,6 +58,9 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         items: state.items.filter((item) => item.id !== action.payload),
+        notes: { ...state.notes },
+        sessionNotes: { ...state.sessionNotes },
+        activeItem: state.activeItem === action.payload ? null : state.activeItem,
       };
 
     case 'START_TRACKING':
@@ -59,9 +68,24 @@ function reducer(state: State, action: Action): State {
         ...state,
         items: state.items.map((item) =>
           item.id === action.payload
-            ? { ...item, lastTimestamp: Date.now() }
+            ? {
+                ...item,
+                lastTimestamp: Date.now(),
+                progress: {
+                  ...item.progress,
+                  sessions: [
+                    ...item.progress.sessions,
+                    { 
+                      startTime: new Date().toISOString(),
+                      date: new Date().toISOString(),
+                      notes: [] 
+                    }
+                  ]
+                }
+              }
             : item
         ),
+        activeItem: action.payload,
       };
 
     case 'STOP_TRACKING':
@@ -72,6 +96,34 @@ function reducer(state: State, action: Action): State {
             ? { ...item, lastTimestamp: null }
             : item
         ),
+        activeItem: null,
+      };
+
+    case 'UPDATE_NOTES':
+      return {
+        ...state,
+        notes: {
+          ...state.notes,
+          [action.payload.id]: action.payload.notes,
+        },
+      };
+
+    case 'ADD_SESSION_NOTE':
+      return {
+        ...state,
+        sessionNotes: {
+          ...state.sessionNotes,
+          [action.payload.id]: [
+            ...(state.sessionNotes[action.payload.id] || []),
+            action.payload.note,
+          ],
+        },
+      };
+
+    case 'SET_ACTIVE_ITEM':
+      return {
+        ...state,
+        activeItem: action.payload,
       };
 
     default:
@@ -84,6 +136,9 @@ export default function App() {
   const [state, dispatch] = useReducer(reducer, {
     items: [],
     loading: true,
+    activeItem: null,
+    notes: {},
+    sessionNotes: {},
   });
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -284,6 +339,18 @@ export default function App() {
     setSelectedDateTasks({ activeTasks, completedTasks });
   };
 
+  const handleUpdateNotes = (id: string, notes: string) => {
+    dispatch({ type: 'UPDATE_NOTES', payload: { id, notes } });
+  };
+
+  const handleAddSessionNote = (id: string, note: string) => {
+    dispatch({ type: 'ADD_SESSION_NOTE', payload: { id, note } });
+  };
+
+  const handleSetActiveItem = (id: string | null) => {
+    dispatch({ type: 'SET_ACTIVE_ITEM', payload: id });
+  };
+
   if (state.loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -362,6 +429,9 @@ export default function App() {
                   onDelete={handleDeleteItem}
                   onStartTracking={handleStartTracking}
                   onStopTracking={handleStopTracking}
+                  onNotesUpdate={handleUpdateNotes}
+                  onSessionNoteAdd={handleAddSessionNote}
+                  onSetActiveItem={handleSetActiveItem}
                 />
               ))}
           </div>
