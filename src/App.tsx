@@ -353,9 +353,20 @@ export default function App() {
     }
   };
 
-  const handleDateSelect = (date: Date, activeTasks: LearningItem[], completedTasks: LearningItem[]) => {
+  const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
-    setSelectedDateTasks({ activeTasks, completedTasks });
+    
+    // Get all tasks for the selected date
+    const selectedDateStr = date.toISOString().split('T')[0];
+    const tasksForDate = state.items.filter(item => {
+      const itemDate = new Date(item.date).toISOString().split('T')[0];
+      return itemDate === selectedDateStr;
+    });
+
+    setSelectedDateTasks({
+      activeTasks: tasksForDate.filter(task => task.status !== 'completed' && task.status !== 'archived'),
+      completedTasks: tasksForDate.filter(task => task.status === 'completed' || task.status === 'archived')
+    });
   };
 
   const handleUpdateNotes = (id: string, notes: string) => {
@@ -464,79 +475,72 @@ export default function App() {
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               Tasks for {selectedDate.toLocaleDateString()}
             </h3>
-            {selectedDateTasks.activeTasks.length > 0 && (
-              <div className="mb-4">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Active Tasks</h4>
-                <div className="space-y-2">
-                  {selectedDateTasks.activeTasks.map((task) => (
-                    <div
-                      key={task.id}
-                      className="p-3 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-indigo-500 transition-colors cursor-pointer"
-                      onClick={() => {
-                        const element = document.getElementById(`item-${task.id}`);
-                        if (element) {
-                          element.scrollIntoView({ behavior: 'smooth' });
-                          element.classList.add('ring-2', 'ring-indigo-500');
-                          setTimeout(() => {
-                            element.classList.remove('ring-2', 'ring-indigo-500');
-                          }, 2000);
-                        }
-                      }}
-                    >
-                      <div className="flex items-center justify-between">
+            <div className="space-y-4">
+              {state.items
+                .filter(item => {
+                  const itemDate = new Date(item.date).toISOString().split('T')[0];
+                  const selectedDateStr = selectedDate.toISOString().split('T')[0];
+                  return itemDate === selectedDateStr;
+                })
+                .map((task) => (
+                  <div
+                    key={task.id}
+                    className={`p-3 rounded-lg shadow-sm border transition-colors cursor-pointer ${
+                      task.status === 'archived' ? 'bg-gray-50 border-gray-200 hover:border-gray-400' :
+                      task.status === 'completed' ? 'bg-green-50 border-green-200 hover:border-green-400' :
+                      'bg-white border-indigo-200 hover:border-indigo-400'
+                    }`}
+                    onClick={() => {
+                      const element = document.getElementById(`item-${task.id}`);
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                        element.classList.add('ring-2', 'ring-indigo-500');
+                        setTimeout(() => {
+                          element.classList.remove('ring-2', 'ring-indigo-500');
+                        }, 2000);
+                      }
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
                         <span className="text-gray-900">{task.title}</span>
-                        <span className="text-sm text-gray-500">{task.category}</span>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-sm text-gray-500">{task.category}</span>
+                          <span className={`text-sm px-2 py-0.5 rounded ${
+                            task.status === 'archived' ? 'bg-gray-100 text-gray-600' :
+                            task.status === 'completed' ? 'bg-green-100 text-green-600' :
+                            'bg-indigo-100 text-indigo-600'
+                          }`}>
+                            {task.status === 'archived' ? 'Archived' :
+                             task.status === 'completed' ? 'Completed' :
+                             'Active'}
+                          </span>
+                        </div>
                       </div>
                       {task.progress.total && (
-                        <div className="mt-1 text-sm text-gray-500">
+                        <div className="text-sm text-gray-500 text-right">
                           {task.progress.current.hours}h {task.progress.current.minutes}m
-                          {' / '}
-                          {task.progress.total.hours}h {task.progress.total.minutes}m
+                          {task.progress.total && (
+                            <span>
+                              {' / '}
+                              {task.progress.total.hours}h {task.progress.total.minutes}m
+                            </span>
+                          )}
                         </div>
                       )}
                     </div>
-                  ))}
+                  </div>
+                ))}
+              {state.items.filter(item => {
+                const itemDate = new Date(item.date).toISOString().split('T')[0];
+                const selectedDateStr = selectedDate.toISOString().split('T')[0];
+                return itemDate === selectedDateStr;
+              }).length === 0 && (
+                <div className="text-gray-500 text-center py-4">
+                  No tasks for this date
                 </div>
-              </div>
-            )}
-            {selectedDateTasks.completedTasks.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Completed Tasks</h4>
-                <div className="space-y-2">
-                  {selectedDateTasks.completedTasks.map((task) => (
-                    <div
-                      key={task.id}
-                      className="p-3 bg-gray-50 rounded-lg shadow-sm border border-gray-200 hover:border-green-500 transition-colors cursor-pointer"
-                      onClick={() => {
-                        const element = document.getElementById(`item-${task.id}`);
-                        if (element) {
-                          element.scrollIntoView({ behavior: 'smooth' });
-                          element.classList.add('ring-2', 'ring-green-500');
-                          setTimeout(() => {
-                            element.classList.remove('ring-2', 'ring-green-500');
-                          }, 2000);
-                        }
-                      }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-900">{task.title}</span>
-                        <span className="text-sm text-gray-500">{task.category}</span>
-                      </div>
-                      {task.progress.total && (
-                        <div className="mt-1 text-sm text-gray-500">
-                          Completed: {task.progress.current.hours}h {task.progress.current.minutes}m
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            {selectedDateTasks.activeTasks.length === 0 && selectedDateTasks.completedTasks.length === 0 && (
-              <div className="text-gray-500 text-center py-4">
-                No tasks scheduled for this date
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
