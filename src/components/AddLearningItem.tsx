@@ -42,16 +42,32 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
         throw new Error('Title is required');
       }
 
+      // Validate time inputs
+      const current = {
+        hours: parseInt(String(formData.current?.hours)) || 0,
+        minutes: parseInt(String(formData.current?.minutes)) || 0
+      };
+      const total = {
+        hours: parseInt(String(formData.total?.hours)) || 0,
+        minutes: parseInt(String(formData.total?.minutes)) || 0
+      };
+
       // Ensure URL has https:// prefix if provided
-      let processedUrl = formData.url;
+      let processedUrl = formData.url?.trim();
       if (processedUrl && !processedUrl.startsWith('http://') && !processedUrl.startsWith('https://')) {
         processedUrl = 'https://' + processedUrl;
       }
 
-      // Tags are already string[] from the form data
+      // Process tags
+      const tags = formData.tags.map(tag => tag.trim()).filter(Boolean);
+
       const itemToAdd = {
         ...formData,
-        url: processedUrl || '',  
+        title: formData.title.trim(),
+        url: processedUrl || '',
+        tags,
+        current,
+        total,
         date: selectedDate ? selectedDate.toISOString() : new Date().toISOString(),
       };
 
