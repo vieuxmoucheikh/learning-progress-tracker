@@ -12,11 +12,17 @@ interface DashboardTabProps {
   items: LearningItem[];
   onAddItem: () => void;
   onUpdate: (item: LearningItem) => void;
+  onDateSelect: (date: Date) => void;
 }
 
-export function DashboardTab({ items, onAddItem, onUpdate }: DashboardTabProps) {
+export function DashboardTab({ items, onAddItem, onUpdate, onDateSelect }: DashboardTabProps) {
   const inProgressItems = items.filter(item => !item.completed);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  
+  const handleDateSelect = (date: Date, activeTasks: any[], completedTasks: any[]) => {
+    setSelectedDate(date);
+    onDateSelect(date);
+  };
   
   return (
     <div className="space-y-8">
@@ -32,62 +38,40 @@ export function DashboardTab({ items, onAddItem, onUpdate }: DashboardTabProps) 
         </Card>
       </div>
 
-      <Card className="p-6">
-        <h2 className="text-lg font-semibold mb-4">Activity Calendar</h2>
-        <Calendar 
-          items={items} 
-          onDateSelect={(date, activeTasks, completedTasks) => {
-            setSelectedDate(date);
-          }} 
-        />
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold mb-4">Activity Calendar</h2>
+          <Calendar 
+            items={items} 
+            onDateSelect={handleDateSelect} 
+          />
+        </Card>
 
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">In Progress Items</h2>
-          <Button onClick={onAddItem} className="bg-blue-500 hover:bg-blue-600">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Item
-          </Button>
-        </div>
-        
-        <div className="grid grid-cols-1 gap-4">
-          {inProgressItems.slice(0, 3).map(item => (
-            <Card key={item.id} className="p-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-medium">{item.title}</h3>
-                  <p className="text-sm text-gray-500">{item.category}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-blue-600">
-                    {Math.round((item.progress?.current?.hours || 0) / (item.progress?.total?.hours || 1) * 100)}%
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {item.progress?.current?.hours || 0}h / {item.progress?.total?.hours || 0}h
-                  </p>
-                </div>
-              </div>
-              <div className="mt-2 h-2 bg-blue-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-500 transition-all duration-300"
-                  style={{
-                    width: `${Math.round((item.progress?.current?.hours || 0) / (item.progress?.total?.hours || 1) * 100)}%`
-                  }}
-                />
-              </div>
-            </Card>
-          ))}
-          {inProgressItems.length > 3 && (
-            <Button
-              variant="outline"
-              onClick={() => window.location.hash = "#items"}
-              className="w-full"
-            >
-              View All ({inProgressItems.length}) Items
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">In Progress Items</h2>
+            <Button onClick={() => onAddItem()} className="bg-blue-500 hover:bg-blue-600">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Item
+              {selectedDate && <span className="ml-2 text-xs">({selectedDate.toLocaleDateString()})</span>}
             </Button>
-          )}
-        </div>
+          </div>
+          
+          <div className="space-y-4">
+            {inProgressItems.length === 0 ? (
+              <p className="text-gray-500 text-center py-4">No items in progress</p>
+            ) : (
+              inProgressItems.map(item => (
+                <div key={item.id} className="p-4 border rounded-lg">
+                  <h3 className="font-medium">{item.title}</h3>
+                  <div className="text-sm text-gray-500 mt-1">
+                    Progress: {item.progress?.current?.hours}h {item.progress?.current?.minutes}m / {item.progress?.total?.hours}h {item.progress?.total?.minutes}m
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </Card>
       </div>
     </div>
   );
