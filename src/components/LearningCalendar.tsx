@@ -101,10 +101,12 @@ export function LearningCalendar({ items, setItems }: Props) {
           sessions: [{
             date: selectedDate,
             startTime: new Date().toISOString(),
-            duration: { hours: 0, minutes: 0 }
+            duration: { hours: 0, minutes: 0 },
+            notes: []
           }]
         },
         completed: false,
+        notes: ''
       };
       
       setItems([...newItems, activity]);
