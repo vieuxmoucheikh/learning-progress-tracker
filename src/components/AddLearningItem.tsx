@@ -23,7 +23,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
     tags: [],
     current: { hours: 0, minutes: 0 },
     total: { hours: 0, minutes: 0 },
-    date: selectedDate ? selectedDate.toISOString() : new Date().toISOString(),
+    date: selectedDate ? new Date(selectedDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
     difficulty: 'medium' as const,
     status: 'not_started' as const,
     unit: 'hours' as const
@@ -70,7 +70,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
           hours: Math.max(0, parseInt(String(formData.total?.hours || 0)) || 0),
           minutes: Math.max(0, parseInt(String(formData.total?.minutes || 0)) || 0)
         },
-        date: selectedDate ? selectedDate.toISOString() : new Date().toISOString(),
+        date: selectedDate ? new Date(selectedDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
         difficulty: (formData.difficulty || 'medium') as 'easy' | 'medium' | 'hard',
         status: (formData.status || 'not_started') as 'not_started' | 'in_progress' | 'completed' | 'on_hold' | 'archived',
         unit: (formData.unit || 'hours') as 'hours' | 'pages' | 'percent'
@@ -104,7 +104,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
       tags: [],
       current: { hours: 0, minutes: 0 },
       total: { hours: 0, minutes: 0 },
-      date: selectedDate ? selectedDate.toISOString() : new Date().toISOString(),
+      date: selectedDate ? new Date(selectedDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       difficulty: 'medium' as const,
       status: 'not_started' as const,
       unit: 'hours' as const
