@@ -25,10 +25,17 @@ export function calculateProgress(progress: Progress): number {
   return Math.min(Math.max(progressPercentage, 0), 100);
 }
 
-export function formatDuration(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${hours}h ${mins}m`;
+export function formatDuration(time: { hours: number; minutes: number } | number): string {
+  if (typeof time === 'object') {
+    const totalMinutes = (time.hours * 60) + time.minutes;
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    return `${hours}h ${mins}m`;
+  } else {
+    const hours = Math.floor(time / 60);
+    const mins = time % 60;
+    return `${hours}h ${mins}m`;
+  }
 }
 
 export function getTotalMinutes(time: { hours: number; minutes: number }): number {

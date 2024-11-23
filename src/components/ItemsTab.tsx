@@ -44,12 +44,7 @@ export function ItemsTab({
     
     const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
     
-    const matchesStatus = statusFilter === "all" ||
-      (statusFilter === "not_started" && !item.started) ||
-      (statusFilter === "in_progress" && item.started && !item.completed) ||
-      (statusFilter === "completed" && item.completed) ||
-      (statusFilter === "on_hold" && item.on_hold) ||
-      (statusFilter === "archived" && item.archived);
+    const matchesStatus = statusFilter === "all" || item.status === statusFilter;
 
     return matchesSearch && matchesCategory && matchesStatus;
   }).sort((a, b) => {
