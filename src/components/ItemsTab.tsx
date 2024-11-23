@@ -31,7 +31,7 @@ export function ItemsTab({
 }: ItemsTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("in-progress");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date");
 
   const categories = Array.from(new Set(items.map(item => item.category)));
@@ -45,8 +45,11 @@ export function ItemsTab({
     const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
     
     const matchesStatus = statusFilter === "all" ||
+      (statusFilter === "not_started" && !item.started) ||
+      (statusFilter === "in_progress" && item.started && !item.completed) ||
       (statusFilter === "completed" && item.completed) ||
-      (statusFilter === "in-progress" && !item.completed);
+      (statusFilter === "on_hold" && item.on_hold) ||
+      (statusFilter === "archived" && item.archived);
 
     return matchesSearch && matchesCategory && matchesStatus;
   }).sort((a, b) => {
@@ -62,6 +65,10 @@ export function ItemsTab({
         const aProgress = (a.progress?.current?.hours || 0) / (a.progress?.total?.hours || 1);
         const bProgress = (b.progress?.current?.hours || 0) / (b.progress?.total?.hours || 1);
         return bProgress - aProgress;
+      case "time_spent":
+        const aTimeSpent = a.progress?.current?.hours || 0;
+        const bTimeSpent = b.progress?.current?.hours || 0;
+        return bTimeSpent - aTimeSpent;
       default:
         return 0;
     }
@@ -98,8 +105,11 @@ export function ItemsTab({
           onValueChange={setStatusFilter}
           items={[
             { value: "all", label: "All Status" },
-            { value: "in-progress", label: "In Progress" },
-            { value: "completed", label: "Completed" }
+            { value: "not_started", label: "Not Started" },
+            { value: "in_progress", label: "In Progress" },
+            { value: "completed", label: "Completed" },
+            { value: "on_hold", label: "On Hold" },
+            { value: "archived", label: "Archived" }
           ]}
           className="w-full sm:w-48"
         />
@@ -111,15 +121,11 @@ export function ItemsTab({
             { value: "date", label: "Sort by Date" },
             { value: "priority", label: "Sort by Priority" },
             { value: "title", label: "Sort by Title" },
-            { value: "progress", label: "Sort by Progress" }
+            { value: "progress", label: "Sort by Progress" },
+            { value: "time_spent", label: "Sort by Time Spent" }
           ]}
           className="w-full sm:w-48"
         />
-
-        <Button onClick={onAddItem} className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Item
-        </Button>
       </div>
 
       {filteredItems.length === 0 ? (
@@ -128,7 +134,7 @@ export function ItemsTab({
           <p className="text-sm text-gray-400">Try adjusting your search or filters</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-4 mt-6">
           {filteredItems.map((item) => (
             <LearningItemCard
               key={item.id}
