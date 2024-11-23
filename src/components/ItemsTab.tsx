@@ -8,6 +8,7 @@ import { Plus, Search } from "lucide-react";
 
 interface ItemsTabProps {
   items: LearningItem[];
+  onAddItem: () => void;
   onUpdate: (id: string, updates: Partial<LearningItem>) => void;
   onDelete: (id: string) => void;
   onStartTracking: (id: string) => void;
@@ -19,6 +20,7 @@ interface ItemsTabProps {
 
 export function ItemsTab({ 
   items, 
+  onAddItem,
   onUpdate, 
   onDelete,
   onStartTracking,
@@ -113,6 +115,11 @@ export function ItemsTab({
           ]}
           className="w-full sm:w-48"
         />
+
+        <Button onClick={onAddItem} className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600">
+          <Plus className="w-4 h-4 mr-2" />
+          Add Item
+        </Button>
       </div>
 
       {filteredItems.length === 0 ? (
