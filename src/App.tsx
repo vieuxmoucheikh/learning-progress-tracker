@@ -371,11 +371,12 @@ export default function App() {
     dispatch({ type: 'SET_ACTIVE_ITEM', payload: id });
   };
 
-  const handleDashboardUpdate = (item: LearningItem) => {
-    handleUpdateItem(item.id, item);
+  const handleDashboardUpdate = (id: string, updates: Partial<LearningItem>) => {
+    handleUpdateItem(id, updates);
   };
 
   const handleDashboardAddItem = () => {
+    setSelectedDate(new Date());
     setShowAddDialog(true);
   };
 
