@@ -29,8 +29,9 @@ const Select = React.forwardRef<
       </SelectPrimitive.Trigger>
       <SelectPrimitive.Portal>
         <SelectPrimitive.Content
-          className="relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+          className="relative z-50 min-w-[8rem] w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border bg-white text-gray-900 shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
           position="popper"
+          sideOffset={4}
         >
           <SelectPrimitive.Viewport className="p-1">
             {items.map((item) => (
@@ -38,12 +39,12 @@ const Select = React.forwardRef<
                 key={item.value}
                 value={item.value}
                 className={cn(
-                  "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-                  value === item.value && "bg-accent text-accent-foreground"
+                  "relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-gray-100 focus:bg-gray-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+                  value === item.value && "bg-blue-50 text-blue-600"
                 )}
               >
                 <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-                  {value === item.value && <Check className="h-4 w-4" />}
+                  {value === item.value && <Check className="h-4 w-4 text-blue-500" />}
                 </span>
                 <SelectPrimitive.ItemText>{item.label}</SelectPrimitive.ItemText>
               </SelectPrimitive.Item>

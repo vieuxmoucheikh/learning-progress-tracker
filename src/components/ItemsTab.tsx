@@ -31,7 +31,7 @@ export function ItemsTab({
 }: ItemsTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("in-progress");
 
   const categories = Array.from(new Set(items.map(item => item.category)));
 
