@@ -42,16 +42,22 @@ export function LearningCalendar({ items, setItems }: Props) {
   }, [selectedDate]);
 
   const handleDateClick = (date: string): void => {
-    const selectedDate = new Date(date).toISOString().split('T')[0];
-    setSelectedDate(selectedDate);
+    // Ensure we're using the local date string in YYYY-MM-DD format
+    const localDate = new Date(date);
+    localDate.setMinutes(localDate.getMinutes() - localDate.getTimezoneOffset());
+    const formattedDate = localDate.toISOString().split('T')[0];
+    
+    setSelectedDate(formattedDate);
     setNewActivity(prev => ({
       ...prev,
-      date: selectedDate
+      date: formattedDate
     }));
   };
 
   const getActivitiesForDate = (date: string): LearningItem[] => {
-    const formattedDate = new Date(date).toISOString().split('T')[0];
+    const localDate = new Date(date);
+    localDate.setMinutes(localDate.getMinutes() - localDate.getTimezoneOffset());
+    const formattedDate = localDate.toISOString().split('T')[0];
     return items.filter(item => item.date === formattedDate);
   };
 
