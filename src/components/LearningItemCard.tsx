@@ -18,8 +18,8 @@ import {
   X
 } from 'lucide-react';
 import type { LearningItem, Session } from '../types';
-import { formatTime, calculateProgress, formatDuration } from '../lib/utils';
-import cn from 'classnames';
+import { formatTime, calculateProgress, formatDuration, getTotalMinutes } from '../lib/utils';
+import clsx from 'clsx';
 
 interface Props {
   item: LearningItem;
@@ -239,7 +239,7 @@ export function LearningItemCard({
   }, [item.lastTimestamp, item.progress, item.completed, item.id, handleStopTracking, onUpdate]);
 
   return (
-    <Card className={cn(
+    <Card className={clsx(
       "p-4 transition-all duration-200",
       item.status === 'completed' && "bg-green-50 border-green-200",
       item.status === 'in_progress' && "bg-blue-50 border-blue-200",
@@ -262,7 +262,7 @@ export function LearningItemCard({
               <h3 className="text-lg font-semibold">{item.title}</h3>
             )}
             <div className="flex items-center mt-1 space-x-2 text-sm text-gray-600">
-              <span className={cn(
+              <span className={clsx(
                 "px-2 py-0.5 rounded-full text-xs font-medium",
                 item.status === 'completed' && "bg-green-100 text-green-800",
                 item.status === 'in_progress' && "bg-blue-100 text-blue-800",
@@ -273,7 +273,7 @@ export function LearningItemCard({
                 {item.status.replace('_', ' ')}
               </span>
               <span>•</span>
-              <span className={cn(
+              <span className={clsx(
                 "px-2 py-0.5 rounded-full text-xs font-medium",
                 item.priority === 'high' && "bg-red-100 text-red-800",
                 item.priority === 'medium' && "bg-yellow-100 text-yellow-800",
@@ -343,8 +343,8 @@ export function LearningItemCard({
             <div className="flex items-center space-x-2">
               <Clock className="w-4 h-4 text-gray-500" />
               <span className="text-sm text-gray-600">
-                {formatTime(item.progress?.current || { hours: 0, minutes: 0 })} / 
-                {item.progress?.total ? formatTime(item.progress.total) : 'No goal set'}
+                {formatTime(getTotalMinutes(item.progress?.current || { hours: 0, minutes: 0 }) * 60)} / 
+                {item.progress?.total ? formatTime(getTotalMinutes(item.progress.total) * 60) : 'No goal set'}
               </span>
             </div>
             <div className="flex items-center space-x-2">
@@ -377,7 +377,7 @@ export function LearningItemCard({
             <div className="space-y-1">
               <Progress 
                 value={calculateProgress(item.progress)} 
-                className={cn(
+                className={clsx(
                   "h-2",
                   item.status === 'completed' && "bg-green-100",
                   item.status === 'in_progress' && "bg-blue-100",
@@ -424,9 +424,9 @@ export function LearningItemCard({
                     <span>{new Date(session.date).toLocaleDateString()}</span>
                     <span>{formatDuration(session.duration || { hours: 0, minutes: 0 })}</span>
                   </div>
-                  {session.notes?.length > 0 && (
+                  {(session.notes ?? []).length > 0 && (
                     <div className="mt-1 text-xs text-gray-500">
-                      {session.notes.map((note, i) => (
+                      {(session.notes ?? []).map((note, i) => (
                         <p key={i}>{note}</p>
                       ))}
                     </div>
