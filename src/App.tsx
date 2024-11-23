@@ -145,17 +145,12 @@ export default function App() {
     notes: {},
     sessionNotes: {},
   });
-
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [selectedDateTasks, setSelectedDateTasks] = useState<{
-    activeTasks: LearningItem[];
-    completedTasks: LearningItem[];
-  }>({ activeTasks: [], completedTasks: [] });
+  const [selectedTab, setSelectedTab] = useState('dashboard');
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'completed'>('all');
-  const [activeTab, setActiveTab] = useState("dashboard");
 
   const filteredItems = useMemo(() => {
     return state.items
@@ -221,7 +216,7 @@ export default function App() {
         user_id: user?.id,
       });
       dispatch({ type: 'ADD_ITEM', payload: newItem });
-      setIsAddModalOpen(false);
+      setShowAddDialog(false);
       setError(null);
     } catch (error) {
       console.error('Error adding item:', error);
@@ -362,18 +357,6 @@ export default function App() {
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
-
-    // Get all tasks for the selected date
-    const selectedDateStr = date.toISOString().split('T')[0];
-    const tasksForDate = state.items.filter(item => {
-      const itemDate = new Date(item.date).toISOString().split('T')[0];
-      return itemDate === selectedDateStr;
-    });
-
-    setSelectedDateTasks({
-      activeTasks: tasksForDate.filter(task => task.status !== 'completed' && task.status !== 'archived'),
-      completedTasks: tasksForDate.filter(task => task.status === 'completed' || task.status === 'archived')
-    });
   };
 
   const handleUpdateNotes = (id: string, notes: string) => {
@@ -393,11 +376,11 @@ export default function App() {
   };
 
   const handleDashboardAddItem = () => {
-    setIsAddModalOpen(true);
+    setShowAddDialog(true);
   };
 
   const handleItemsAddItem = () => {
-    setIsAddModalOpen(true);
+    setShowAddDialog(true);
   };
 
   if (state.loading) {
@@ -432,18 +415,28 @@ export default function App() {
           <p className="text-gray-600">Track your learning journey and stay motivated</p>
         </header>
 
-        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <TabNavigation activeTab={selectedTab} onTabChange={setSelectedTab} />
+
+        {showAddDialog && (
+          <AddLearningItem
+            onAdd={handleAddItem}
+            onClose={() => setShowAddDialog(false)}
+            isOpen={showAddDialog}
+            selectedDate={selectedDate}
+          />
+        )}
 
         <main>
-          {activeTab === "dashboard" && (
+          {selectedTab === "dashboard" && (
             <DashboardTab
               items={state.items}
               onAddItem={handleDashboardAddItem}
               onUpdate={handleDashboardUpdate}
+              onDateSelect={handleDateSelect}
             />
           )}
 
-          {activeTab === "items" && (
+          {selectedTab === "items" && (
             <ItemsTab
               items={state.items}
               onAddItem={handleItemsAddItem}
@@ -457,17 +450,10 @@ export default function App() {
             />
           )}
 
-          {activeTab === "analytics" && (
+          {selectedTab === "analytics" && (
             <AnalyticsTab items={state.items} />
           )}
         </main>
-
-        <AddLearningItem
-          isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          onAdd={handleAddItem}
-          selectedDate={new Date()}
-        />
       </div>
     </div>
   );
