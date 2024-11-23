@@ -11,7 +11,7 @@ import { Calendar } from "./Calendar";
 interface DashboardTabProps {
   items: LearningItem[];
   onAddItem: () => void;
-  onUpdate: (item: LearningItem) => void;
+  onUpdate: (id: string, updates: Partial<LearningItem>) => void;
   onDateSelect: (date: Date) => void;
 }
 
@@ -52,6 +52,10 @@ export function DashboardTab({ items, onAddItem, onUpdate, onDateSelect }: Dashb
       return { hours, minutes };
     }
     return { hours: 0, minutes: 0 };
+  };
+
+  const handleUpdateItem = (item: LearningItem, updates: Partial<LearningItem>) => {
+    onUpdate(item.id, updates);
   };
 
   const selectedDateItems = getItemsForSelectedDate();
@@ -102,27 +106,52 @@ export function DashboardTab({ items, onAddItem, onUpdate, onDateSelect }: Dashb
                 <div key={item.id} className="p-4 border rounded-lg hover:border-blue-500 transition-colors">
                   <div className="flex items-center justify-between">
                     <h3 className="font-medium text-lg">{item.title}</h3>
-                    <span className={`px-2 py-1 rounded text-sm ${
-                      item.completed 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-blue-100 text-blue-800'
-                    }`}>
-                      {item.completed ? 'Completed' : 'In Progress'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleUpdateItem(item, {
+                          completed: !item.completed,
+                          completed_at: !item.completed ? new Date().toISOString() : null,
+                          status: !item.completed ? 'completed' : 'not_started'
+                        })}
+                        className={`px-2 py-1 rounded text-sm ${
+                          item.completed 
+                            ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                            : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                        }`}
+                      >
+                        {item.completed ? 'Completed' : 'Mark Complete'}
+                      </button>
+                    </div>
                   </div>
                   
                   <div className="mt-2 space-y-2 text-sm text-gray-600">
-                    <div>Category: {item.category}</div>
-                    <div>Priority: {item.priority}</div>
-                    <div className="flex items-center">
-                      <div className="flex-1">
-                        Progress: {item.progress?.current?.hours}h {item.progress?.current?.minutes}m 
-                        / {item.progress?.total?.hours}h {item.progress?.total?.minutes}m
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="p-2 bg-gray-50 rounded">
+                        <span className="font-medium">Category:</span> {item.category}
                       </div>
-                      <div className="ml-2">
-                        ({Math.round((item.progress?.current?.hours || 0) / (item.progress?.total?.hours || 1) * 100)}%)
+                      <div className="p-2 bg-gray-50 rounded">
+                        <span className="font-medium">Priority:</span> {item.priority}
                       </div>
                     </div>
+                    
+                    <div className="p-2 bg-gray-50 rounded">
+                      <div className="flex items-center">
+                        <div className="flex-1">
+                          <span className="font-medium">Progress:</span> {item.progress?.current?.hours}h {item.progress?.current?.minutes}m 
+                          / {item.progress?.total?.hours}h {item.progress?.total?.minutes}m
+                        </div>
+                        <div className="ml-2 font-medium">
+                          ({Math.round((item.progress?.current?.hours || 0) / (item.progress?.total?.hours || 1) * 100)}%)
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {item.notes && (
+                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                        <div className="font-medium text-blue-800 mb-1">Notes:</div>
+                        <div className="italic text-blue-700">{item.notes}</div>
+                      </div>
+                    )}
                     
                     {item.progress?.sessions?.filter(session => {
                       const sessionDate = new Date(session.date).toISOString().split('T')[0];
@@ -131,33 +160,29 @@ export function DashboardTab({ items, onAddItem, onUpdate, onDateSelect }: Dashb
                     }).map((session, index) => {
                       const duration = calculateSessionDuration(session);
                       return (
-                        <div key={index} className="bg-gray-50 p-2 rounded mt-2">
-                          <div className="flex justify-between items-center">
-                            <div>
+                        <div key={index} className="p-3 bg-green-50 rounded-lg border border-green-100">
+                          <div className="flex justify-between items-center text-green-800">
+                            <div className="font-medium">
                               Duration: {duration.hours}h {duration.minutes}m
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm">
                               {new Date(session.startTime).toLocaleTimeString()} 
                               {session.endTime && ` - ${new Date(session.endTime).toLocaleTimeString()}`}
                             </div>
                           </div>
                           {session.notes && session.notes.length > 0 && (
-                            <div className="mt-1 text-gray-600 italic space-y-1">
+                            <div className="mt-2 space-y-1">
+                              <div className="font-medium text-green-800">Session Notes:</div>
                               {session.notes.map((note, i) => (
-                                <div key={i}>"{note}"</div>
+                                <div key={i} className="italic text-green-700 pl-2 border-l-2 border-green-200">
+                                  "{note}"
+                                </div>
                               ))}
                             </div>
                           )}
                         </div>
                       );
                     })}
-                    
-                    {item.notes && (
-                      <div className="mt-2 text-gray-600">
-                        <div className="font-medium">Notes:</div>
-                        <div className="italic">{item.notes}</div>
-                      </div>
-                    )}
                   </div>
                 </div>
               ))
