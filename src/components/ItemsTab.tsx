@@ -8,7 +8,6 @@ import { Plus, Search } from "lucide-react";
 
 interface ItemsTabProps {
   items: LearningItem[];
-  onAddItem: () => void;
   onUpdate: (id: string, updates: Partial<LearningItem>) => void;
   onDelete: (id: string) => void;
   onStartTracking: (id: string) => void;
@@ -20,7 +19,6 @@ interface ItemsTabProps {
 
 export function ItemsTab({ 
   items, 
-  onAddItem, 
   onUpdate, 
   onDelete,
   onStartTracking,
@@ -32,12 +30,15 @@ export function ItemsTab({
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("in-progress");
+  const [sortBy, setSortBy] = useState("date");
 
   const categories = Array.from(new Set(items.map(item => item.category)));
 
   const filteredItems = items.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.category?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = 
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.notes?.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
     
@@ -46,6 +47,22 @@ export function ItemsTab({
       (statusFilter === "in-progress" && !item.completed);
 
     return matchesSearch && matchesCategory && matchesStatus;
+  }).sort((a, b) => {
+    switch (sortBy) {
+      case "date":
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      case "priority":
+        const priorityOrder = { high: 3, medium: 2, low: 1 };
+        return priorityOrder[b.priority] - priorityOrder[a.priority];
+      case "title":
+        return a.title.localeCompare(b.title);
+      case "progress":
+        const aProgress = (a.progress?.current?.hours || 0) / (a.progress?.total?.hours || 1);
+        const bProgress = (b.progress?.current?.hours || 0) / (b.progress?.total?.hours || 1);
+        return bProgress - aProgress;
+      default:
+        return 0;
+    }
   });
 
   return (
@@ -56,7 +73,7 @@ export function ItemsTab({
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               type="text"
-              placeholder="Search items..."
+              placeholder="Search by title, category, or notes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -84,23 +101,28 @@ export function ItemsTab({
           ]}
           className="w-full sm:w-48"
         />
-        
-        <Button onClick={onAddItem} className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Item
-        </Button>
+
+        <Select
+          value={sortBy}
+          onValueChange={setSortBy}
+          items={[
+            { value: "date", label: "Sort by Date" },
+            { value: "priority", label: "Sort by Priority" },
+            { value: "title", label: "Sort by Title" },
+            { value: "progress", label: "Sort by Progress" }
+          ]}
+          className="w-full sm:w-48"
+        />
       </div>
 
       {filteredItems.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500 mb-4">No items found</p>
-          <Button onClick={onAddItem} variant="outline">
-            Add Your First Item
-          </Button>
+          <p className="text-sm text-gray-400">Try adjusting your search or filters</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {filteredItems.map(item => (
+        <div className="grid grid-cols-1 gap-4">
+          {filteredItems.map((item) => (
             <LearningItemCard
               key={item.id}
               item={item}
