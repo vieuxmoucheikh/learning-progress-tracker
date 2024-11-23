@@ -352,7 +352,7 @@ export function LearningItemCard({
                 className="text-sm text-gray-600 border-l-2 border-gray-200 pl-2"
               >
                 <div className="font-medium">
-                  {formatDate(session.date)} • {formatDuration(getTotalMinutes(session.duration))}
+                  {formatDate(session.date)} • {session.duration ? formatDuration(getTotalMinutes(session.duration)) : '0h 0m'}
                 </div>
                 {session.notes && session.notes.length > 0 && (
                   <div className="mt-1 text-xs text-gray-500">
