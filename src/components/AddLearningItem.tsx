@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Link as LinkIcon, Clock, X } from 'lucide-react';
 import { LearningItemFormData } from '../types';
 import { Button } from './ui/button';
@@ -28,6 +28,17 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
     status: 'not_started' as const,
     unit: 'hours' as const
   });
+
+  // Update form data when selectedDate changes
+  useEffect(() => {
+    if (selectedDate) {
+      const formattedDate = new Date(selectedDate).toISOString().split('T')[0];
+      setFormData(prev => ({
+        ...prev,
+        date: formattedDate
+      }));
+    }
+  }, [selectedDate]);
 
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
