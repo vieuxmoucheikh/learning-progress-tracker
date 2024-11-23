@@ -5,7 +5,7 @@ import { Stats } from "./Stats";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
-import { LearningItem } from "@/types";
+import { LearningItem, Session } from "@/types";
 import { Calendar } from "./Calendar";
 
 interface DashboardTabProps {
@@ -31,12 +31,27 @@ export function DashboardTab({ items, onAddItem, onUpdate, onDateSelect }: Dashb
       // Check if the item was created on this date
       const itemDate = new Date(item.date).toISOString().split('T')[0];
       // Or if any session was logged on this date
-      const hasSessionOnDate = item.sessions?.some(session => {
+      const hasSessionOnDate = item.progress?.sessions?.some(session => {
         const sessionDate = new Date(session.date).toISOString().split('T')[0];
         return sessionDate === dateStr;
       });
       return itemDate === dateStr || hasSessionOnDate;
     });
+  };
+
+  const calculateSessionDuration = (session: Session) => {
+    if (session.duration) {
+      return session.duration;
+    }
+    if (session.startTime && session.endTime) {
+      const start = new Date(session.startTime).getTime();
+      const end = new Date(session.endTime).getTime();
+      const durationMs = end - start;
+      const hours = Math.floor(durationMs / (1000 * 60 * 60));
+      const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+      return { hours, minutes };
+    }
+    return { hours: 0, minutes: 0 };
   };
 
   const selectedDateItems = getItemsForSelectedDate();
@@ -109,18 +124,33 @@ export function DashboardTab({ items, onAddItem, onUpdate, onDateSelect }: Dashb
                       </div>
                     </div>
                     
-                    {item.sessions?.filter(session => {
+                    {item.progress?.sessions?.filter(session => {
                       const sessionDate = new Date(session.date).toISOString().split('T')[0];
                       const selectedDateStr = selectedDate.toISOString().split('T')[0];
                       return sessionDate === selectedDateStr;
-                    }).map((session, index) => (
-                      <div key={index} className="bg-gray-50 p-2 rounded mt-2">
-                        <div>Session Duration: {session.duration.hours}h {session.duration.minutes}m</div>
-                        {session.note && (
-                          <div className="mt-1 text-gray-600 italic">"{session.note}"</div>
-                        )}
-                      </div>
-                    ))}
+                    }).map((session, index) => {
+                      const duration = calculateSessionDuration(session);
+                      return (
+                        <div key={index} className="bg-gray-50 p-2 rounded mt-2">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              Duration: {duration.hours}h {duration.minutes}m
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {new Date(session.startTime).toLocaleTimeString()} 
+                              {session.endTime && ` - ${new Date(session.endTime).toLocaleTimeString()}`}
+                            </div>
+                          </div>
+                          {session.notes && session.notes.length > 0 && (
+                            <div className="mt-1 text-gray-600 italic space-y-1">
+                              {session.notes.map((note, i) => (
+                                <div key={i}>"{note}"</div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                     
                     {item.notes && (
                       <div className="mt-2 text-gray-600">
