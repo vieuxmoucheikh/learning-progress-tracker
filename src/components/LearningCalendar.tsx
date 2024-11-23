@@ -42,8 +42,12 @@ export function LearningCalendar({ items, setItems }: Props) {
   }, [selectedDate]);
 
   const handleDateClick = (date: string): void => {
-    const utcDate = new Date(date + 'T00:00:00Z');
-    setSelectedDate(utcDate.toISOString().split('T')[0]);
+    const selectedDate = new Date(date).toISOString().split('T')[0];
+    setSelectedDate(selectedDate);
+    setNewActivity(prev => ({
+      ...prev,
+      date: selectedDate
+    }));
   };
 
   const getActivitiesForDate = (date: string): LearningItem[] => {
@@ -72,7 +76,7 @@ export function LearningCalendar({ items, setItems }: Props) {
       // Check for duplicate titles on the same date
       const isDuplicate = newItems.some(item => 
         item.title.toLowerCase() === newActivity.title.toLowerCase() && 
-        item.date === newActivity.date
+        item.date === selectedDate
       );
       
       if (isDuplicate) {
