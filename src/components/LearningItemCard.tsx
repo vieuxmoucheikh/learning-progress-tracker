@@ -186,6 +186,11 @@ export function LearningItemCard({
             )
           }
         });
+        // Ensure the current session's notes are visible after adding a note
+        setShowSessionNotes(prev => ({
+          ...prev,
+          [currentSession.startTime]: true
+        }));
       }
       setNewSessionNote('');
     }
@@ -260,12 +265,19 @@ export function LearningItemCard({
         <h3 className="font-semibold text-lg">Session History</h3>
         {item.progress.sessions.map((session, index) => {
           const sessionNotes = Array.isArray(session.notes) ? session.notes : [];
+          const isCurrentSession = !session.endTime;
           
           return (
-            <div key={session.startTime} className="border rounded-lg p-4 space-y-2">
+            <div key={session.startTime} className={clsx(
+              "border rounded-lg p-4 space-y-2",
+              isCurrentSession && "border-blue-200 bg-blue-50"
+            )}>
               <div className="flex justify-between items-center">
                 <h4 className="font-medium text-base">
                   {session.title || `Session ${index + 1}`}
+                  {isCurrentSession && (
+                    <span className="ml-2 text-sm text-blue-600">(Current)</span>
+                  )}
                 </h4>
                 <button
                   onClick={() => toggleSessionNotes(session.startTime)}
@@ -319,7 +331,7 @@ export function LearningItemCard({
                       <p className="text-gray-500 italic text-sm">No notes for this session</p>
                     )}
                     
-                    {!session.endTime && (
+                    {isCurrentSession && (
                       <div className="mt-3 flex gap-2">
                         <Input
                           value={newSessionNote}
