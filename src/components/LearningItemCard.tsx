@@ -82,24 +82,39 @@ export function LearningItemCard({
     setEditTitle(item.title);
   }, [item.notes, item.title]);
 
+  // Timer implementation with visibility change handling
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-    if (item.lastTimestamp) {
-      const updateElapsedTime = () => {
-        const elapsed = Math.floor((Date.now() - item.lastTimestamp!) / 1000);
+    let startTime = performance.now();
+    let animationFrameId: number;
+    
+    const updateElapsedTime = () => {
+      if (item.lastTimestamp) {
+        const currentTime = performance.now();
+        const elapsed = Math.floor((currentTime - startTime + (item.lastTimestamp - Date.now())) / 1000);
         setElapsedTime(elapsed);
-      };
-      updateElapsedTime();
-      intervalId = setInterval(updateElapsedTime, 1000);
-    } else {
-      setElapsedTime(0);
-    }
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
+        animationFrameId = requestAnimationFrame(updateElapsedTime);
+      } else {
+        setElapsedTime(0);
       }
     };
-  }, [item.lastTimestamp]);
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(animationFrameId);
+      } else {
+        startTime = performance.now() - (elapsedTime * 1000);
+        updateElapsedTime();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    updateElapsedTime();
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [item.lastTimestamp, elapsedTime]);
 
   const handleStartTracking = () => {
     onStartTracking(item.id);
@@ -486,17 +501,40 @@ export function LearningItemCard({
                     {/* Current Session Notes */}
                     {(() => {
                       const lastSession = item.progress?.sessions?.[item.progress?.sessions?.length - 1];
-                      return lastSession?.notes && lastSession.notes.length > 0 && (
+                      return lastSession && (
                         <div className="mt-3 space-y-2">
                           <h5 className="text-sm font-medium text-blue-800 flex items-center">
                             <MessageSquare className="w-4 h-4 mr-1" />
-                            Current Notes ({lastSession.notes.length})
+                            Session Details
                           </h5>
-                          {lastSession.notes.map((note, noteIndex) => (
-                            <div key={noteIndex} className="text-sm bg-white p-2 rounded border border-blue-100">
-                              {note}
+                          <div className="text-sm bg-white p-3 rounded border border-blue-100">
+                            <div className="flex flex-col space-y-2">
+                              <div className="flex items-center text-gray-600">
+                                <Calendar className="w-4 h-4 mr-2" />
+                                <span>Start: {new Date(lastSession.startTime).toLocaleString()}</span>
+                              </div>
+                              {lastSession.endTime && (
+                                <div className="flex items-center text-gray-600">
+                                  <Calendar className="w-4 h-4 mr-2" />
+                                  <span>End: {new Date(lastSession.endTime).toLocaleString()}</span>
+                                </div>
+                              )}
+                              <div className="flex items-center text-gray-600">
+                                <Clock className="w-4 h-4 mr-2" />
+                                <span>Duration: {formatTime(Math.floor((lastSession.endTime ? new Date(lastSession.endTime).getTime() : Date.now()) - new Date(lastSession.startTime).getTime()) / 1000)}</span>
+                              </div>
                             </div>
-                          ))}
+                            {lastSession.notes && lastSession.notes.length > 0 && (
+                              <div className="mt-3">
+                                <h6 className="font-medium mb-2">Notes:</h6>
+                                {lastSession.notes.map((note, noteIndex) => (
+                                  <div key={noteIndex} className="pl-2 border-l-2 border-blue-200 mb-2">
+                                    {note}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       );
                     })()}
