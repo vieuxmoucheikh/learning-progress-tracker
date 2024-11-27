@@ -64,7 +64,7 @@ export function LearningItemCard({
   // Session management
   const handleStartSession = () => {
     if (currentSessionTitle.trim() === '') {
-      setCurrentSessionTitle(`Session ${item.progress.sessions.length + 1}`);
+      setCurrentSessionTitle(`Session ${item.progress?.sessions?.length + 1}`);
     }
     onStartTracking(item.id);
     setShowSessionForm(false);
@@ -178,7 +178,7 @@ export function LearningItemCard({
         <div className="mt-1 text-xs text-gray-500">
           {percentage}% Complete
         </div>
-      </div>
+    </div>
     );
   };
 
@@ -332,8 +332,8 @@ export function LearningItemCard({
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-gray-500" />
             <span className="text-sm text-gray-600">
-              {formatDuration(getTotalMinutes(item.progress.current))} / 
-              {item.progress.total ? formatDuration(getTotalMinutes(item.progress.total)) : '∞'}
+              {formatDuration(getTotalMinutes(item.progress?.current))} / 
+              {item.progress?.total ? formatDuration(getTotalMinutes(item.progress.total)) : '∞'}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -345,7 +345,7 @@ export function LearningItemCard({
           </div>
         </div>
         
-        {item.progress.total && (
+        {item.progress?.total && (
           <Progress
             value={calculateProgress(item.progress)}
             className="h-2"
@@ -438,7 +438,7 @@ export function LearningItemCard({
         )}
 
         {/* Session History */}
-        {item.progress.sessions.length > 0 && (
+        {item.progress?.sessions?.length > 0 && (
           <div className="mt-4">
             <Button
               variant="ghost"
@@ -447,7 +447,7 @@ export function LearningItemCard({
             >
               <span className="flex items-center">
                 <BookOpen className="w-4 h-4 mr-2" />
-                Session History ({item.progress.sessions.length})
+                Session History ({item.progress?.sessions?.length})
               </span>
               {showSessionDetails ? (
                 <ChevronUp className="w-4 h-4" />
@@ -458,7 +458,56 @@ export function LearningItemCard({
             
             {showSessionDetails && (
               <div className="mt-2 space-y-3">
-                {item.progress.sessions.map((session, index) => (
+                {/* Current Session */}
+                {item.lastTimestamp && (
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium text-blue-900">
+                          Current Session
+                          <span className="ml-2 text-sm text-blue-600">
+                            (In Progress)
+                          </span>
+                        </h4>
+                        <div className="text-sm text-blue-700 space-x-2 mt-1">
+                          <Calendar className="w-4 h-4 inline-block mr-1" />
+                          <span>{new Date().toLocaleDateString()}</span>
+                          <span>•</span>
+                          <Clock className="w-4 h-4 inline-block mx-1" />
+                          <span>
+                            {new Date(item.lastTimestamp).toLocaleTimeString()} - Now
+                          </span>
+                          <span>•</span>
+                          <span className="font-medium">{formatTime(elapsedTime)}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Current Session Notes */}
+                    {(() => {
+                      const lastSession = item.progress?.sessions?.[item.progress?.sessions?.length - 1];
+                      return lastSession?.notes && lastSession.notes.length > 0 && (
+                        <div className="mt-3 space-y-2">
+                          <h5 className="text-sm font-medium text-blue-800 flex items-center">
+                            <MessageSquare className="w-4 h-4 mr-1" />
+                            Current Notes ({lastSession.notes.length})
+                          </h5>
+                          {lastSession.notes.map((note, noteIndex) => (
+                            <div key={noteIndex} className="text-sm bg-white p-2 rounded border border-blue-100">
+                              {note}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {/* Past Sessions */}
+                {item.progress?.sessions
+                  .slice(0, -1)
+                  .reverse()
+                  .map((session, index) => (
                   <div
                     key={index}
                     className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
@@ -466,7 +515,7 @@ export function LearningItemCard({
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium text-gray-900">
-                          {session.title || `Session ${index + 1}`}
+                          {session.title || `Session ${item.progress.sessions?.length - index - 1}`}
                         </h4>
                         <div className="text-sm text-gray-500 space-x-2 mt-1">
                           <Calendar className="w-4 h-4 inline-block mr-1" />
