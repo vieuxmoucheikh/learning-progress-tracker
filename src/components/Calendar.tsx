@@ -196,13 +196,21 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
     return calendar;
   }, [currentDate, items]);
 
-  const getActivityColor = (day: CalendarDay): string => {
+  const isSelectedDate = (day: CalendarDay) => {
+    if (!selectedDay) return false;
+    const dayDate = new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate());
+    const selectedDate = new Date(selectedDay.getFullYear(), selectedDay.getMonth(), selectedDay.getDate());
+    return dayDate.getTime() === selectedDate.getTime();
+  };
+
+  const getActivityColor = (day: CalendarDay) => {
     const totalItems = 
       day.activities.activeItems.length + 
       day.activities.completedTasks.length + 
       day.activities.archivedItems.length;
     
     if (!day.isCurrentMonth) return 'bg-gray-50 text-gray-400';
+    if (isSelectedDate(day)) return 'bg-blue-500 text-white hover:bg-blue-600';
     if (day.isToday) return 'bg-blue-100 hover:bg-blue-200';
     if (totalItems === 0) return 'hover:bg-gray-100';
     
