@@ -346,6 +346,17 @@ export function LearningItemCard({
     );
   };
 
+  // Initialize session notes visibility when sessions change
+  useEffect(() => {
+    if (item.progress?.sessions) {
+      const initialState = item.progress.sessions.reduce((acc, session) => ({
+        ...acc,
+        [session.startTime]: false
+      }), {});
+      setShowSessionNotes(initialState);
+    }
+  }, [item.progress?.sessions]);
+
   return (
     <Card className={clsx(
       "w-full p-4 relative border-l-4 transition-all duration-200",
@@ -620,37 +631,7 @@ export function LearningItemCard({
               )}
             </Button>
             
-            {showSessionDetails && (
-              <div className="mt-2 space-y-3">
-                {/* Current Session */}
-                {item.lastTimestamp && (
-                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium text-blue-900">
-                          Current Session
-                          <span className="ml-2 text-sm text-blue-600">
-                            (In Progress)
-                          </span>
-                        </h4>
-                        <div className="text-sm text-blue-700 space-x-2 mt-1">
-                          <Calendar className="w-4 h-4 inline-block mr-1" />
-                          <span>{new Date().toLocaleDateString()}</span>
-                          <span>•</span>
-                          <Clock className="w-4 h-4 inline-block mx-1" />
-                          <span>
-                            {new Date(item.lastTimestamp).toLocaleTimeString()} - Now
-                          </span>
-                          <span>•</span>
-                          <span className="font-medium">{formatTime(elapsedTime)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {renderSessionHistory()}
-              </div>
-            )}
+            {showSessionDetails && renderSessionHistory()}
           </div>
         )}
       </div>
@@ -688,8 +669,6 @@ export function LearningItemCard({
           </Button>
         )
       )}
-      
-      {renderSessionHistory()}
     </Card>
   );
 }
