@@ -306,7 +306,7 @@ export function LearningItemCard({
         {!item.lastTimestamp ? (
           <Button
             variant="outline"
-            className="w-full"
+            className="w-full bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
             onClick={() => setShowSessionForm(true)}
           >
             <PlayCircle className="w-4 h-4 mr-2" />
@@ -315,7 +315,7 @@ export function LearningItemCard({
         ) : (
           <Button
             variant="outline"
-            className="w-full"
+            className="w-full bg-red-50 hover:bg-red-100 border-red-200 text-red-700"
             onClick={handleStopSession}
           >
             <StopCircle className="w-4 h-4 mr-2" />
@@ -325,32 +325,63 @@ export function LearningItemCard({
 
         {/* Session Form */}
         {showSessionForm && !item.lastTimestamp && (
-          <div className="p-4 bg-gray-50 rounded-lg space-y-4">
+          <div className="p-4 bg-green-50 rounded-lg space-y-4 border border-green-200">
             <Input
               placeholder="Session Title (optional)"
               value={currentSessionTitle}
               onChange={(e) => setCurrentSessionTitle(e.target.value)}
-              className="mb-2"
+              className="mb-2 border-green-200 focus:ring-green-500"
             />
             <Textarea
               placeholder="Session Description (optional)"
               value={currentSessionDescription}
               onChange={(e) => setCurrentSessionDescription(e.target.value)}
-              className="mb-2"
+              className="mb-2 border-green-200 focus:ring-green-500"
             />
             <div className="flex justify-end gap-2">
               <Button
                 variant="ghost"
                 onClick={() => setShowSessionForm(false)}
+                className="text-gray-600 hover:text-gray-800"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleStartSession}
+                className="bg-green-600 hover:bg-green-700 text-white"
               >
                 Start Session
               </Button>
             </div>
+          </div>
+        )}
+
+        {/* Active Session Notes */}
+        {item.lastTimestamp && (
+          <div className="p-4 bg-blue-50 rounded-lg space-y-4 border border-blue-200">
+            <div className="flex items-center justify-between">
+              <h4 className="font-medium text-blue-800">Current Session Notes</h4>
+              <span className="text-sm text-blue-600">{formatTime(elapsedTime)}</span>
+            </div>
+            <Textarea
+              placeholder="Add a note about your current session..."
+              value={newSessionNote}
+              onChange={(e) => setNewSessionNote(e.target.value)}
+              className="border-blue-200 focus:ring-blue-500"
+            />
+            <Button
+              onClick={() => {
+                if (newSessionNote.trim()) {
+                  onSessionNoteAdd(item.id, newSessionNote);
+                  setNewSessionNote('');
+                }
+              }}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={!newSessionNote.trim()}
+            >
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Add Note
+            </Button>
           </div>
         )}
 
@@ -359,12 +390,12 @@ export function LearningItemCard({
           <div className="mt-4">
             <Button
               variant="ghost"
-              className="w-full flex justify-between items-center"
+              className="w-full flex justify-between items-center hover:bg-gray-100"
               onClick={() => setShowSessionDetails(!showSessionDetails)}
             >
               <span className="flex items-center">
                 <BookOpen className="w-4 h-4 mr-2" />
-                Session History
+                Session History ({item.progress.sessions.length})
               </span>
               {showSessionDetails ? (
                 <ChevronUp className="w-4 h-4" />
@@ -374,20 +405,22 @@ export function LearningItemCard({
             </Button>
             
             {showSessionDetails && (
-              <div className="mt-2 space-y-2">
+              <div className="mt-2 space-y-3">
                 {item.progress.sessions.map((session, index) => (
                   <div
                     key={index}
-                    className="p-3 bg-gray-50 rounded-lg"
+                    className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="font-medium">
+                        <h4 className="font-medium text-gray-900">
                           {session.title || `Session ${index + 1}`}
                         </h4>
-                        <div className="text-sm text-gray-500 space-x-2">
+                        <div className="text-sm text-gray-500 space-x-2 mt-1">
+                          <Calendar className="w-4 h-4 inline-block mr-1" />
                           <span>{new Date(session.date).toLocaleDateString()}</span>
                           <span>•</span>
+                          <Clock className="w-4 h-4 inline-block mx-1" />
                           <span>
                             {new Date(session.startTime).toLocaleTimeString()} - 
                             {session.endTime ? new Date(session.endTime).toLocaleTimeString() : 'In Progress'}
@@ -395,56 +428,31 @@ export function LearningItemCard({
                           {session.duration && (
                             <>
                               <span>•</span>
-                              <span>{formatDuration(getTotalMinutes(session.duration))}</span>
+                              <span className="font-medium text-gray-700">{formatDuration(getTotalMinutes(session.duration))}</span>
                             </>
                           )}
                         </div>
-                        {session.description && (
-                          <p className="text-sm text-gray-600 mt-1">
-                            {session.description}
-                          </p>
-                        )}
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setShowSessionNotes({
-                            ...showSessionNotes,
-                            [index]: !showSessionNotes[index]
-                          });
-                        }}
-                      >
-                        <MessageSquare className="w-4 h-4" />
-                      </Button>
                     </div>
-
+                    
+                    {session.description && (
+                      <p className="mt-2 text-sm text-gray-600 bg-white p-2 rounded border border-gray-100">
+                        {session.description}
+                      </p>
+                    )}
+                    
                     {/* Session Notes */}
-                    {showSessionNotes[index] && (
-                      <div className="mt-2 space-y-2">
-                        {session.notes?.map((note, noteIndex) => (
-                          <div
-                            key={noteIndex}
-                            className="p-2 bg-white rounded border text-sm"
-                          >
+                    {session.notes && session.notes.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        <h5 className="text-sm font-medium text-gray-700 flex items-center">
+                          <MessageSquare className="w-4 h-4 mr-1" />
+                          Session Notes
+                        </h5>
+                        {session.notes.map((note, noteIndex) => (
+                          <div key={noteIndex} className="text-sm bg-white p-2 rounded border border-gray-100">
                             {note}
                           </div>
                         ))}
-                        <div className="flex gap-2">
-                          <Input
-                            value={newSessionNote}
-                            onChange={(e) => setNewSessionNote(e.target.value)}
-                            placeholder="Add a note..."
-                            className="flex-1"
-                          />
-                          <Button
-                            size="sm"
-                            onClick={handleAddSessionNote}
-                            disabled={!newSessionNote.trim()}
-                          >
-                            Add
-                          </Button>
-                        </div>
                       </div>
                     )}
                   </div>
