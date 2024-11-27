@@ -67,6 +67,22 @@ export function LearningItemCard({
       setCurrentSessionTitle(`Session ${item.progress?.sessions?.length + 1}`);
     }
     onStartTracking(item.id);
+    // Update the item with session title and description
+    onUpdate(item.id, {
+      progress: {
+        ...item.progress,
+        sessions: [
+          ...(item.progress?.sessions || []),
+          {
+            startTime: new Date().toISOString(),
+            date: new Date().toISOString().split('T')[0],
+            title: currentSessionTitle,
+            description: currentSessionDescription,
+            notes: []
+          }
+        ]
+      }
+    });
     setShowSessionForm(false);
   };
 
@@ -194,6 +210,91 @@ export function LearningItemCard({
           {percentage}% Complete
         </div>
     </div>
+    );
+  };
+
+  const renderSessionHistory = () => {
+    if (!item.progress?.sessions || item.progress.sessions.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="mt-4 space-y-4">
+        <h3 className="font-semibold text-lg">Session History</h3>
+        {item.progress.sessions.map((session, index) => (
+          <div key={session.startTime} className="border rounded-lg p-4 space-y-2">
+            <div className="flex justify-between items-center">
+              <h4 className="font-medium text-base">
+                {session.title || `Session ${index + 1}`}
+              </h4>
+              <button
+                onClick={() => toggleSessionNotes(session.startTime)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                {showSessionNotes[session.startTime] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+            </div>
+            
+            <div className="text-sm text-gray-600">
+              <div className="flex items-center">
+                <Calendar className="w-4 h-4 mr-2" />
+                <span>Start: {new Date(session.startTime).toLocaleString()}</span>
+              </div>
+              {session.endTime && (
+                <div className="flex items-center">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  <span>End: {new Date(session.endTime).toLocaleString()}</span>
+                </div>
+              )}
+              <div className="flex items-center">
+                <Clock className="w-4 h-4 mr-2" />
+                <span>Duration: {formatTime(Math.floor((session.endTime ? new Date(session.endTime).getTime() : Date.now()) - new Date(session.startTime).getTime()) / 1000)}</span>
+              </div>
+            </div>
+
+            {session.description && (
+              <div className="text-sm text-gray-600 mt-2">
+                <p className="font-medium">Description:</p>
+                <p>{session.description}</p>
+              </div>
+            )}
+
+            {showSessionNotes[session.startTime] && (
+              <div className="mt-3">
+                <div className="space-y-2">
+                  {session.notes && session.notes.length > 0 ? (
+                    session.notes.map((note, noteIndex) => (
+                      <div key={noteIndex} className="bg-gray-50 p-2 rounded">
+                        {note}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 italic">No notes for this session</p>
+                  )}
+                </div>
+                
+                {!session.endTime && (
+                  <div className="mt-3 flex gap-2">
+                    <Input
+                      value={newSessionNote}
+                      onChange={(e) => setNewSessionNote(e.target.value)}
+                      placeholder="Add a note to this session..."
+                      className="flex-1"
+                    />
+                    <Button 
+                      onClick={handleAddSessionNote}
+                      disabled={!newSessionNote.trim()}
+                      size="sm"
+                    >
+                      Add Note
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     );
   };
 
@@ -567,7 +668,7 @@ export function LearningItemCard({
                           {session.duration && (
                             <>
                               <span>•</span>
-                              <span className="font-medium text-gray-700">{formatDuration(getTotalMinutes(session.duration))}</span>
+                              <span className="font-medium">{formatDuration(getTotalMinutes(session.duration))}</span>
                             </>
                           )}
                         </div>
@@ -602,6 +703,41 @@ export function LearningItemCard({
         )}
       </div>
 
+      {showSessionForm ? (
+        <div className="mt-4 space-y-4">
+          <Input
+            value={currentSessionTitle}
+            onChange={(e) => setCurrentSessionTitle(e.target.value)}
+            placeholder="Session Title (optional)"
+          />
+          <Textarea
+            value={currentSessionDescription}
+            onChange={(e) => setCurrentSessionDescription(e.target.value)}
+            placeholder="Session Description (optional)"
+          />
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowSessionForm(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleStartSession}>
+              Start Session
+            </Button>
+          </div>
+        </div>
+      ) : (
+        !item.progress?.sessions?.find(s => !s.endTime) && (
+          <Button
+            onClick={() => setShowSessionForm(true)}
+            className="mt-4"
+            variant="outline"
+          >
+            <PlayCircle className="w-4 h-4 mr-2" />
+            Start New Session
+          </Button>
+        )
+      )}
+      
+      {renderSessionHistory()}
     </Card>
   );
 }
