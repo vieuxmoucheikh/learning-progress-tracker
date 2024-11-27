@@ -60,6 +60,24 @@ export function Calendar({ items, onDateSelect }: Props) {
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showLegend, setShowLegend] = useState(false);
 
+  // Handle date selection
+  const handleDateSelect = useCallback((day: CalendarDay) => {
+    setSelectedDay(day.date);
+    const dateStr = getAdjustedDateStr(day.date);
+    
+    const activeTasks = items.filter(item => {
+      const itemDate = getAdjustedDateStr(new Date(item.date));
+      return itemDate === dateStr && item.status !== 'completed' && item.status !== 'archived';
+    });
+
+    const completedTasks = items.filter(item => {
+      const itemDate = getAdjustedDateStr(new Date(item.date));
+      return itemDate === dateStr && (item.status === 'completed' || item.status === 'archived');
+    });
+
+    onDateSelect(day.date, activeTasks, completedTasks);
+  }, [items, onDateSelect]);
+
   // Handle keyboard navigation
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (!selectedDay) return;
@@ -397,14 +415,7 @@ export function Calendar({ items, onDateSelect }: Props) {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.2 }}
-                  onClick={() => {
-                    setSelectedDay(day.date);
-                    onDateSelect(
-                      day.date,
-                      day.activities.activeItems,
-                      day.activities.completedTasks
-                    );
-                  }}
+                  onClick={() => handleDateSelect(day)}
                   className={cn(
                     "aspect-square p-1 relative focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg transition-all",
                     selectedDay && getAdjustedDateStr(day.date) === getAdjustedDateStr(selectedDay)

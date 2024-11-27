@@ -50,6 +50,7 @@ export function LearningItemCard({
   const [showSessionDetails, setShowSessionDetails] = useState(false);
   const [editTitle, setEditTitle] = useState(item.title);
   const [showNotes, setShowNotes] = useState(false);
+  const [showSessionNotes, setShowSessionNotes] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
     setEditedNotes(item.notes || '');
@@ -113,6 +114,20 @@ export function LearningItemCard({
     onUpdate(item.id, { completed: !item.completed });
   };
 
+  const handleMarkComplete = () => {
+    onUpdate(item.id, {
+      status: item.status === 'completed' ? 'not_started' : 'completed',
+      completedAt: item.status === 'completed' ? null : new Date().toISOString()
+    });
+  };
+
+  const toggleSessionNotes = (sessionId: string) => {
+    setShowSessionNotes(prev => ({
+      ...prev,
+      [sessionId]: !prev[sessionId]
+    }));
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -144,89 +159,70 @@ export function LearningItemCard({
 
   return (
     <Card className={clsx(
-      'p-4 mb-4 relative',
-      item.completed ? 'bg-gray-50' : 'bg-white',
-      'hover:shadow-md transition-shadow duration-200'
+      'p-4 relative transition-all duration-200',
+      item.status === 'completed' && 'bg-green-50',
+      item.lastTimestamp && 'border-blue-500 border-2'
     )}>
-      <div className="flex justify-between items-start mb-2">
-        <div className="flex-1">
-          {isEditing ? (
-            <div className="flex items-center gap-2">
-              <Input
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                className="text-lg font-semibold"
-              />
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleTitleSave}
-              >
-                <Save className="h-4 w-4" />
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold">{item.title}</h3>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setIsEditing(true)}
-              >
-                <Edit2 className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-          <div className="text-sm text-gray-500 mt-1">
-            {item.type} • {formatDate(item.date)}
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {item.url && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => window.open(item.url, '_blank')}
-            >
-              <ExternalLink className="h-4 w-4" />
-            </Button>
-          )}
+      <div className="flex items-center justify-between mb-4">
+        {isEditing ? (
+          <Input
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            className="flex-1 mr-2"
+            onKeyDown={(e) => e.key === 'Enter' && handleTitleSave()}
+          />
+        ) : (
+          <h3 className={clsx(
+            'text-lg font-semibold flex-1',
+            item.status === 'completed' && 'line-through text-gray-500'
+          )}>
+            {item.title}
+          </h3>
+        )}
+        
+        <div className="flex items-center space-x-2">
           <Button
-            size="sm"
             variant="ghost"
-            onClick={handleToggleComplete}
+            size="sm"
+            onClick={handleMarkComplete}
+            className={clsx(
+              'flex items-center',
+              item.status === 'completed' ? 'text-green-600' : 'text-gray-600'
+            )}
           >
-            {item.completed ? (
-              <CheckCircle className="h-4 w-4 text-green-500" />
+            {item.status === 'completed' ? (
+              <>
+                <CheckCircle className="w-4 h-4 mr-1" />
+                Completed
+              </>
             ) : (
-              <AlertCircle className="h-4 w-4 text-yellow-500" />
+              <>
+                <CheckCircle className="w-4 h-4 mr-1" />
+                Mark Complete
+              </>
             )}
           </Button>
-          {!showDeleteConfirm ? (
+          
+          {!item.lastTimestamp ? (
             <Button
-              size="sm"
               variant="ghost"
-              onClick={() => setShowDeleteConfirm(true)}
+              size="sm"
+              onClick={handleStartTracking}
+              className="text-blue-600"
             >
-              <Trash2 className="h-4 w-4 text-red-500" />
+              <PlayCircle className="w-4 h-4 mr-1" />
+              Start Session
             </Button>
           ) : (
-            <div className="flex items-center gap-1">
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={handleDelete}
-              >
-                Confirm
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setShowDeleteConfirm(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleStopTracking}
+              className="text-red-600"
+            >
+              <StopCircle className="w-4 h-4 mr-1" />
+              Stop Session
+            </Button>
           )}
         </div>
       </div>
@@ -366,6 +362,77 @@ export function LearningItemCard({
           </div>
         )}
       </div>
+
+      {/* Session Notes Section */}
+      {item.progress?.sessions && item.progress.sessions.length > 0 && (
+        <div className="mt-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="font-medium text-gray-700">Session History</h4>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowSessionDetails(!showSessionDetails)}
+            >
+              {showSessionDetails ? 'Hide Details' : 'Show Details'}
+            </Button>
+          </div>
+
+          {showSessionDetails && (
+            <div className="space-y-3">
+              {item.progress.sessions.map((session, index) => (
+                <div
+                  key={index}
+                  className="p-3 bg-gray-50 rounded-lg"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">
+                      {new Date(session.date).toLocaleDateString()} - {formatDuration(getTotalMinutes(session))}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleSessionNotes(`${index}`)}
+                    >
+                      {showSessionNotes[`${index}`] ? 'Hide Notes' : 'Show Notes'}
+                    </Button>
+                  </div>
+
+                  {showSessionNotes[`${index}`] && (
+                    <div className="mt-2 space-y-2">
+                      {session.notes && session.notes.length > 0 ? (
+                        session.notes.map((note, noteIndex) => (
+                          <div key={noteIndex} className="text-sm bg-white p-2 rounded border border-gray-200">
+                            {note}
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-gray-500 italic">No notes for this session</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Add New Session Note */}
+              <div className="mt-3 space-y-2">
+                <Textarea
+                  value={newSessionNote}
+                  onChange={(e) => setNewSessionNote(e.target.value)}
+                  placeholder="Add a note for the current session..."
+                  className="w-full"
+                />
+                <Button
+                  onClick={handleAddSessionNote}
+                  disabled={!newSessionNote.trim()}
+                  className="w-full"
+                >
+                  Add Note
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </Card>
   );
 }
