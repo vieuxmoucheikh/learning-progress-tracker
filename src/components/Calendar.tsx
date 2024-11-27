@@ -35,12 +35,13 @@ interface CalendarData {
 interface Props {
   items: LearningItem[];
   onDateSelect: (date: Date, activeTasks: LearningItem[], completedTasks: LearningItem[]) => void;
+  selectedDate: Date | null;
 }
 
 // Helper function to get timezone-adjusted date string
 const getAdjustedDateStr = (date: Date): string => {
   const adjustedDate = new Date(date);
-  adjustedDate.setHours(0, 0, 0, 0);
+  adjustedDate.setMinutes(adjustedDate.getMinutes() - adjustedDate.getTimezoneOffset());
   return adjustedDate.toISOString().split('T')[0];
 };
 
@@ -51,19 +52,27 @@ const formatDuration = (minutes: number): string => {
   return `${hours}h ${mins}m`;
 };
 
-export function Calendar({ items, onDateSelect }: Props) {
+export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDate }: Props) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isYearPickerOpen, setIsYearPickerOpen] = useState(false);
   const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
-  const [selectedDay, setSelectedDay] = useState<Date | null>(new Date());
+  const [selectedDay, setSelectedDay] = useState<Date | null>(externalSelectedDate);
   const [hoveredDay, setHoveredDay] = useState<CalendarDay | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showLegend, setShowLegend] = useState(false);
 
+  useEffect(() => {
+    if (externalSelectedDate) {
+      setSelectedDay(externalSelectedDate);
+    }
+  }, [externalSelectedDate]);
+
   // Handle date selection
   const handleDateSelect = useCallback((day: CalendarDay) => {
-    setSelectedDay(day.date);
-    const dateStr = getAdjustedDateStr(day.date);
+    const selectedDate = new Date(day.date);
+    setSelectedDay(selectedDate);
+    
+    const dateStr = getAdjustedDateStr(selectedDate);
     
     const activeTasks = items.filter(item => {
       const itemDate = getAdjustedDateStr(new Date(item.date));
@@ -75,7 +84,7 @@ export function Calendar({ items, onDateSelect }: Props) {
       return itemDate === dateStr && (item.status === 'completed' || item.status === 'archived');
     });
 
-    onDateSelect(day.date, activeTasks, completedTasks);
+    onDateSelect(selectedDate, activeTasks, completedTasks);
   }, [items, onDateSelect]);
 
   // Handle keyboard navigation

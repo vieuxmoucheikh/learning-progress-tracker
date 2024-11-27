@@ -11,7 +11,7 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 
 interface DashboardTabProps {
   items: LearningItem[];
-  onAddItem: () => void;
+  onAddItem: (date?: Date) => void;
   onUpdate: (id: string, updates: Partial<LearningItem>) => void;
   onDateSelect: (date: Date) => void;
 }
@@ -20,10 +20,15 @@ export function DashboardTab({ items, onAddItem, onUpdate, onDateSelect }: Dashb
   const inProgressItems = items.filter(item => !item.completed);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showCalendar, setShowCalendar] = useState(false);
-  
+  const [showAddDialog, setShowAddDialog] = useState(false);
+
   const handleDateSelect = (date: Date, activeTasks: any[], completedTasks: any[]) => {
     setSelectedDate(date);
     onDateSelect(date);
+  };
+
+  const handleAddItem = () => {
+    onAddItem(selectedDate); // Pass the selected date to the add item handler
   };
 
   const getItemsForSelectedDate = () => {
@@ -78,10 +83,17 @@ export function DashboardTab({ items, onAddItem, onUpdate, onDateSelect }: Dashb
       {showCalendar && (
         <div className="mb-6">
           <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-4">Activity Calendar</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Activity Calendar</h2>
+              <Button onClick={handleAddItem} className="bg-blue-500 hover:bg-blue-600">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Item
+              </Button>
+            </div>
             <Calendar 
               items={items} 
-              onDateSelect={handleDateSelect} 
+              onDateSelect={handleDateSelect}
+              selectedDate={selectedDate}
             />
           </Card>
         </div>

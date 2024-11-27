@@ -209,12 +209,23 @@ export default function App() {
     };
   }, [user]);
 
-  const handleAddItem = async (formData: LearningItemFormData) => {
+  const handleAddItem = async (selectedDate?: Date) => {
+    setShowAddDialog(true);
+    if (selectedDate) {
+      setSelectedDate(selectedDate);
+    }
+  };
+
+  const handleSubmitItem = async (data: LearningItemFormData) => {
     try {
+      // Use the selected date from the calendar if available, otherwise use the current date
+      const itemDate = selectedDate ? new Date(selectedDate) : new Date();
       const newItem = await addLearningItem({
-        ...formData,
+        ...data,
+        date: itemDate.toISOString(),
         user_id: user?.id,
       });
+      
       dispatch({ type: 'ADD_ITEM', payload: newItem });
       setShowAddDialog(false);
       setError(null);
@@ -420,7 +431,7 @@ export default function App() {
 
         {showAddDialog && (
           <AddLearningItem
-            onAdd={handleAddItem}
+            onAdd={handleSubmitItem}
             onClose={() => setShowAddDialog(false)}
             isOpen={showAddDialog}
             selectedDate={selectedDate}
