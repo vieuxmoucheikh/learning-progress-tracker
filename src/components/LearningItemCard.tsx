@@ -183,7 +183,45 @@ export function LearningItemCard({
   };
 
   return (
-    <Card className="w-full p-4 relative">
+    <Card className={clsx(
+      "w-full p-4 relative border-l-4 transition-all duration-200",
+      {
+        'border-l-green-500 hover:border-l-green-600': item.status === 'completed',
+        'border-l-yellow-500 hover:border-l-yellow-600': item.status === 'in_progress',
+        'border-l-gray-400 hover:border-l-gray-500': item.status === 'not_started',
+        'border-l-red-400 hover:border-l-red-500': item.status === 'on_hold',
+        'border-l-blue-400 hover:border-l-blue-500': item.status === 'archived',
+      }
+    )}>
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="absolute inset-0 bg-white bg-opacity-95 z-10 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white p-6 rounded-lg shadow-lg border border-red-200 max-w-sm w-full">
+            <div className="text-center mb-4">
+              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-2" />
+              <h3 className="text-lg font-semibold text-gray-900">Delete Item</h3>
+              <p className="text-gray-600 mt-1">Are you sure you want to delete "{item.title}"? This action cannot be undone.</p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteConfirm(false)}
+                className="border-gray-300 hover:bg-gray-50"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                className="bg-red-500 hover:bg-red-600 text-white"
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
@@ -192,13 +230,13 @@ export function LearningItemCard({
               <Input
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                className="text-lg font-semibold"
+                className="text-lg font-semibold border-blue-200 focus:ring-blue-500"
               />
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleTitleSave}
-                className="text-green-600"
+                className="text-green-600 hover:text-green-700 hover:bg-green-50"
               >
                 <Save className="h-4 w-4" />
               </Button>
@@ -209,7 +247,7 @@ export function LearningItemCard({
                   setIsEditing(false);
                   setEditTitle(item.title);
                 }}
-                className="text-red-600"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -221,7 +259,7 @@ export function LearningItemCard({
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsEditing(true)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               >
                 <Edit2 className="h-4 w-4" />
               </Button>
@@ -229,7 +267,7 @@ export function LearningItemCard({
           )}
           <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
             <span className={clsx(
-              "px-2 py-1 rounded-full text-xs",
+              "px-2 py-1 rounded-full text-xs font-medium",
               {
                 'bg-green-100 text-green-800': item.status === 'completed',
                 'bg-yellow-100 text-yellow-800': item.status === 'in_progress',
@@ -256,8 +294,22 @@ export function LearningItemCard({
           <Button
             variant="ghost"
             size="icon"
+            onClick={() => handleMarkComplete()}
+            className={clsx(
+              "hover:bg-gray-50",
+              {
+                'text-green-500 hover:text-green-700': item.status !== 'completed',
+                'text-gray-400 hover:text-gray-600': item.status === 'completed'
+              }
+            )}
+          >
+            <CheckCircle className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setShowDeleteConfirm(true)}
-            className="text-red-500 hover:text-red-700"
+            className="text-red-400 hover:text-red-600 hover:bg-red-50"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -266,7 +318,7 @@ export function LearningItemCard({
               variant="ghost"
               size="icon"
               onClick={() => window.open(item.url, '_blank')}
-              className="text-blue-500 hover:text-blue-700"
+              className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
             >
               <ExternalLink className="h-4 w-4" />
             </Button>
@@ -390,7 +442,7 @@ export function LearningItemCard({
           <div className="mt-4">
             <Button
               variant="ghost"
-              className="w-full flex justify-between items-center hover:bg-gray-100"
+              className="w-full flex justify-between items-center hover:bg-gray-100 text-gray-700"
               onClick={() => setShowSessionDetails(!showSessionDetails)}
             >
               <span className="flex items-center">
@@ -446,7 +498,7 @@ export function LearningItemCard({
                       <div className="mt-3 space-y-2">
                         <h5 className="text-sm font-medium text-gray-700 flex items-center">
                           <MessageSquare className="w-4 h-4 mr-1" />
-                          Session Notes
+                          Session Notes ({session.notes.length})
                         </h5>
                         {session.notes.map((note, noteIndex) => (
                           <div key={noteIndex} className="text-sm bg-white p-2 rounded border border-gray-100">
@@ -463,31 +515,6 @@ export function LearningItemCard({
         )}
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      {showDeleteConfirm && (
-        <div className="absolute right-0 top-0 bg-white p-4 rounded-lg shadow-lg border z-10">
-          <p className="text-sm mb-2">Are you sure you want to delete this item?</p>
-          <div className="flex justify-end space-x-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowDeleteConfirm(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => {
-                onDelete(item.id);
-                setShowDeleteConfirm(false);
-              }}
-            >
-              Delete
-            </Button>
-          </div>
-        </div>
-      )}
     </Card>
   );
 }
