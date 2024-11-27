@@ -117,7 +117,7 @@ export function LearningItemCard({
   const handleMarkComplete = () => {
     onUpdate(item.id, {
       status: item.status === 'completed' ? 'not_started' : 'completed',
-      completedAt: item.status === 'completed' ? null : new Date().toISOString()
+      completed: item.status === 'completed' ? false : true
     });
   };
 
@@ -386,7 +386,7 @@ export function LearningItemCard({
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">
-                      {new Date(session.date).toLocaleDateString()} - {formatDuration(getTotalMinutes(session))}
+                      {new Date(session.date).toLocaleDateString()} {session.duration ? `- ${formatDuration(getTotalMinutes(session.duration))}` : ''}
                     </span>
                     <Button
                       variant="ghost"
