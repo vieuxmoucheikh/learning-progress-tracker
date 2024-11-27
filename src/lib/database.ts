@@ -261,3 +261,118 @@ export const updateStreakData = async (userId: string, streakData: Omit<StreakDa
     throw error instanceof Error ? error : new Error('Failed to update streak data')
   }
 }
+
+export async function startSession(itemId: string, sessionData: { title?: string; description?: string }) {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Authentication required');
+    }
+
+    const now = new Date();
+    const session = {
+      startTime: now.toISOString(),
+      date: now.toISOString(),
+      title: sessionData.title,
+      description: sessionData.description,
+      status: 'in_progress',
+      notes: []
+    };
+
+    const { data: item, error: getError } = await supabase
+      .from('learning_items')
+      .select('progress')
+      .eq('id', itemId)
+      .single();
+
+    if (getError) {
+      throw getError;
+    }
+
+    const progress = item.progress || { current: { hours: 0, minutes: 0 }, sessions: [] };
+    progress.sessions = [...progress.sessions, session];
+
+    const { error: updateError } = await supabase
+      .from('learning_items')
+      .update({
+        progress,
+        lastTimestamp: Date.now(),
+        status: 'in_progress'
+      })
+      .eq('id', itemId);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    return session;
+  } catch (error) {
+    console.error('Error starting session:', error);
+    throw error;
+  }
+}
+
+export async function stopSession(itemId: string) {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Authentication required');
+    }
+
+    const { data: item, error: getError } = await supabase
+      .from('learning_items')
+      .select('progress, lastTimestamp')
+      .eq('id', itemId)
+      .single();
+
+    if (getError) {
+      throw getError;
+    }
+
+    const now = new Date();
+    const progress = item.progress;
+    const lastSession = progress.sessions[progress.sessions.length - 1];
+    
+    if (lastSession && !lastSession.endTime) {
+      const startTime = new Date(lastSession.startTime);
+      const duration = calculateDuration(startTime, now);
+      
+      lastSession.endTime = now.toISOString();
+      lastSession.duration = duration;
+      lastSession.status = 'completed';
+
+      // Update current progress
+      progress.current.hours += duration.hours;
+      progress.current.minutes += duration.minutes;
+      if (progress.current.minutes >= 60) {
+        progress.current.hours += Math.floor(progress.current.minutes / 60);
+        progress.current.minutes = progress.current.minutes % 60;
+      }
+    }
+
+    const { error: updateError } = await supabase
+      .from('learning_items')
+      .update({
+        progress,
+        lastTimestamp: null
+      })
+      .eq('id', itemId);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    return progress;
+  } catch (error) {
+    console.error('Error stopping session:', error);
+    throw error;
+  }
+}
+
+function calculateDuration(startTime: Date, endTime: Date) {
+  const diffMinutes = Math.floor((endTime.getTime() - startTime.getTime()) / (1000 * 60));
+  return {
+    hours: Math.floor(diffMinutes / 60),
+    minutes: diffMinutes % 60
+  };
+}

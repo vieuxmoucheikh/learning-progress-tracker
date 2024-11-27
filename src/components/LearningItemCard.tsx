@@ -15,7 +15,13 @@ import {
   ExternalLink,
   AlertCircle,
   CheckCircle,
-  X
+  X,
+  ChevronDown,
+  ChevronUp,
+  MessageSquare,
+  Calendar,
+  MoreVertical,
+  BookOpen
 } from 'lucide-react';
 import type { LearningItem, Session } from '../types';
 import { formatTime, calculateProgress, formatDuration, getTotalMinutes } from '../lib/utils';
@@ -51,6 +57,25 @@ export function LearningItemCard({
   const [editTitle, setEditTitle] = useState(item.title);
   const [showNotes, setShowNotes] = useState(false);
   const [showSessionNotes, setShowSessionNotes] = useState<{ [key: string]: boolean }>({});
+  const [currentSessionTitle, setCurrentSessionTitle] = useState('');
+  const [currentSessionDescription, setCurrentSessionDescription] = useState('');
+  const [showSessionForm, setShowSessionForm] = useState(false);
+
+  // Session management
+  const handleStartSession = () => {
+    if (currentSessionTitle.trim() === '') {
+      setCurrentSessionTitle(`Session ${item.progress.sessions.length + 1}`);
+    }
+    onStartTracking(item.id);
+    setShowSessionForm(false);
+  };
+
+  const handleStopSession = () => {
+    onStopTracking(item.id);
+    setCurrentSessionTitle('');
+    setCurrentSessionDescription('');
+    setShowSessionForm(false);
+  };
 
   useEffect(() => {
     setEditedNotes(item.notes || '');
@@ -158,72 +183,76 @@ export function LearningItemCard({
   };
 
   return (
-    <Card className={clsx(
-      'p-4 relative transition-all duration-200',
-      item.status === 'completed' && 'bg-green-50',
-      item.lastTimestamp && 'border-blue-500 border-2'
-    )}>
-      <div className="flex items-center justify-between mb-4">
-        {isEditing ? (
-          <Input
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            className="flex-1 mr-2"
-            onKeyDown={(e) => e.key === 'Enter' && handleTitleSave()}
-          />
-        ) : (
-          <h3 className={clsx(
-            'text-lg font-semibold flex-1',
-            item.status === 'completed' && 'line-through text-gray-500'
-          )}>
-            {item.title}
-          </h3>
-        )}
-        
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleMarkComplete}
-            className={clsx(
-              'flex items-center',
-              item.status === 'completed' ? 'text-green-600' : 'text-gray-600'
-            )}
-          >
-            {item.status === 'completed' ? (
-              <>
-                <CheckCircle className="w-4 h-4 mr-1" />
-                Completed
-              </>
-            ) : (
-              <>
-                <CheckCircle className="w-4 h-4 mr-1" />
-                Mark Complete
-              </>
-            )}
-          </Button>
-          
-          {!item.lastTimestamp ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleStartTracking}
-              className="text-blue-600"
-            >
-              <PlayCircle className="w-4 h-4 mr-1" />
-              Start Session
-            </Button>
+    <Card className="w-full p-4 relative">
+      {/* Header Section */}
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex-1">
+          {isEditing ? (
+            <div className="flex items-center gap-2">
+              <Input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="text-lg font-semibold"
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleTitleSave}
+                className="text-green-600"
+              >
+                <Save className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditTitle(item.title);
+                }}
+                className="text-red-600"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleStopTracking}
-              className="text-red-600"
-            >
-              <StopCircle className="w-4 h-4 mr-1" />
-              Stop Session
-            </Button>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold">{item.title}</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsEditing(true)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <Edit2 className="h-4 w-4" />
+              </Button>
+            </div>
           )}
+          <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+            <span className={clsx(
+              "px-2 py-1 rounded-full text-xs",
+              {
+                'bg-green-100 text-green-800': item.status === 'completed',
+                'bg-yellow-100 text-yellow-800': item.status === 'in_progress',
+                'bg-gray-100 text-gray-800': item.status === 'not_started',
+                'bg-red-100 text-red-800': item.status === 'on_hold',
+                'bg-blue-100 text-blue-800': item.status === 'archived',
+              }
+            )}>
+              {item.status.replace('_', ' ')}
+            </span>
+            <span>•</span>
+            <span>{item.type}</span>
+            {item.category && (
+              <>
+                <span>•</span>
+                <span>{item.category}</span>
+              </>
+            )}
+          </div>
+        </div>
+        
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
@@ -232,237 +261,223 @@ export function LearningItemCard({
           >
             <Trash2 className="h-4 w-4" />
           </Button>
-          {showDeleteConfirm && (
-            <div className="absolute right-0 top-0 bg-white p-4 rounded-lg shadow-lg border z-10">
-              <p className="text-sm mb-2">Are you sure you want to delete this item?</p>
-              <div className="flex justify-end space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowDeleteConfirm(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => {
-                    onDelete(item.id);
-                    setShowDeleteConfirm(false);
-                  }}
-                >
-                  Delete
-                </Button>
-              </div>
-            </div>
+          {item.url && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => window.open(item.url, '_blank')}
+              className="text-blue-500 hover:text-blue-700"
+            >
+              <ExternalLink className="h-4 w-4" />
+            </Button>
           )}
         </div>
       </div>
 
-      {/* Progress tracking */}
-      <div className="mt-4">
+      {/* Progress Section */}
+      <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            <span className="text-sm">
-              {formatTime(elapsedTime)}
+            <Clock className="h-4 w-4 text-gray-500" />
+            <span className="text-sm text-gray-600">
+              {formatDuration(getTotalMinutes(item.progress.current))} / 
+              {item.progress.total ? formatDuration(getTotalMinutes(item.progress.total)) : '∞'}
             </span>
           </div>
-          <div>
+          <div className="flex items-center gap-2">
             {item.lastTimestamp ? (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleStopTracking}
-                className="gap-2"
-              >
-                <StopCircle className="h-4 w-4" />
-                Stop
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleStartTracking}
-                className="gap-2"
-              >
-                <PlayCircle className="h-4 w-4" />
-                Start
-              </Button>
-            )}
+              <span className="text-sm text-gray-600">
+                {formatTime(elapsedTime)}
+              </span>
+            ) : null}
           </div>
         </div>
-        {renderProgressBar()}
-      </div>
-
-      {/* Notes section */}
-      <div className="mt-4">
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => setShowNotes(!showNotes)}
-          className="mb-2"
-        >
-          {showNotes ? 'Hide Notes' : 'Show Notes'}
-        </Button>
         
-        {showNotes && (
-          <>
-            {isEditing ? (
-              <div className="space-y-2">
-                <Textarea
-                  value={editedNotes}
-                  onChange={(e) => setEditedNotes(e.target.value)}
-                  className="w-full"
-                  rows={3}
-                />
-                <Button
-                  size="sm"
-                  onClick={handleSaveNotes}
-                  className="gap-2"
-                >
-                  <Save className="h-4 w-4" />
-                  Save Notes
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <p className="text-sm text-gray-600">
-                  {item.notes || 'No notes yet.'}
-                </p>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setIsEditing(true)}
-                  className="gap-2"
-                >
-                  <Edit2 className="h-4 w-4" />
-                  Edit Notes
-                </Button>
-              </div>
-            )}
-          </>
+        {item.progress.total && (
+          <Progress
+            value={calculateProgress(item.progress)}
+            className="h-2"
+          />
         )}
       </div>
 
-      {/* Session notes */}
-      <div className="mt-4">
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => setShowSessionDetails(!showSessionDetails)}
-          className="mb-2"
-        >
-          {showSessionDetails ? 'Hide Sessions' : 'Show Sessions'}
-        </Button>
-        
-        {showSessionDetails && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Input
-                value={newSessionNote}
-                onChange={(e) => setNewSessionNote(e.target.value)}
-                placeholder="Add a session note..."
-                className="flex-1"
-              />
+      {/* Session Controls */}
+      <div className="mt-4 space-y-4">
+        {!item.lastTimestamp ? (
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => setShowSessionForm(true)}
+          >
+            <PlayCircle className="w-4 h-4 mr-2" />
+            Start Session
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleStopSession}
+          >
+            <StopCircle className="w-4 h-4 mr-2" />
+            Stop Session
+          </Button>
+        )}
+
+        {/* Session Form */}
+        {showSessionForm && !item.lastTimestamp && (
+          <div className="p-4 bg-gray-50 rounded-lg space-y-4">
+            <Input
+              placeholder="Session Title (optional)"
+              value={currentSessionTitle}
+              onChange={(e) => setCurrentSessionTitle(e.target.value)}
+              className="mb-2"
+            />
+            <Textarea
+              placeholder="Session Description (optional)"
+              value={currentSessionDescription}
+              onChange={(e) => setCurrentSessionDescription(e.target.value)}
+              className="mb-2"
+            />
+            <div className="flex justify-end gap-2">
               <Button
-                size="sm"
-                onClick={handleAddSessionNote}
-                disabled={!newSessionNote.trim()}
+                variant="ghost"
+                onClick={() => setShowSessionForm(false)}
               >
-                <Plus className="h-4 w-4" />
+                Cancel
+              </Button>
+              <Button
+                onClick={handleStartSession}
+              >
+                Start Session
               </Button>
             </div>
+          </div>
+        )}
+
+        {/* Session History */}
+        {item.progress.sessions.length > 0 && (
+          <div className="mt-4">
+            <Button
+              variant="ghost"
+              className="w-full flex justify-between items-center"
+              onClick={() => setShowSessionDetails(!showSessionDetails)}
+            >
+              <span className="flex items-center">
+                <BookOpen className="w-4 h-4 mr-2" />
+                Session History
+              </span>
+              {showSessionDetails ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
+            </Button>
             
-            {item.progress?.sessions.map((session, index) => (
-              <div
-                key={index}
-                className="text-sm text-gray-600 border-l-2 border-gray-200 pl-2"
-              >
-                <div className="font-medium">
-                  {formatDate(session.date)} • {session.duration ? formatDuration(getTotalMinutes(session.duration)) : '0h 0m'}
-                </div>
-                {session.notes && session.notes.length > 0 && (
-                  <div className="mt-1 text-xs text-gray-500">
-                    {session.notes.map((note, i) => (
-                      <p key={i}>{note}</p>
-                    ))}
+            {showSessionDetails && (
+              <div className="mt-2 space-y-2">
+                {item.progress.sessions.map((session, index) => (
+                  <div
+                    key={index}
+                    className="p-3 bg-gray-50 rounded-lg"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">
+                          {session.title || `Session ${index + 1}`}
+                        </h4>
+                        <div className="text-sm text-gray-500 space-x-2">
+                          <span>{new Date(session.date).toLocaleDateString()}</span>
+                          <span>•</span>
+                          <span>
+                            {new Date(session.startTime).toLocaleTimeString()} - 
+                            {session.endTime ? new Date(session.endTime).toLocaleTimeString() : 'In Progress'}
+                          </span>
+                          {session.duration && (
+                            <>
+                              <span>•</span>
+                              <span>{formatDuration(getTotalMinutes(session.duration))}</span>
+                            </>
+                          )}
+                        </div>
+                        {session.description && (
+                          <p className="text-sm text-gray-600 mt-1">
+                            {session.description}
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setShowSessionNotes({
+                            ...showSessionNotes,
+                            [index]: !showSessionNotes[index]
+                          });
+                        }}
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                      </Button>
+                    </div>
+
+                    {/* Session Notes */}
+                    {showSessionNotes[index] && (
+                      <div className="mt-2 space-y-2">
+                        {session.notes?.map((note, noteIndex) => (
+                          <div
+                            key={noteIndex}
+                            className="p-2 bg-white rounded border text-sm"
+                          >
+                            {note}
+                          </div>
+                        ))}
+                        <div className="flex gap-2">
+                          <Input
+                            value={newSessionNote}
+                            onChange={(e) => setNewSessionNote(e.target.value)}
+                            placeholder="Add a note..."
+                            className="flex-1"
+                          />
+                          <Button
+                            size="sm"
+                            onClick={handleAddSessionNote}
+                            disabled={!newSessionNote.trim()}
+                          >
+                            Add
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
+                ))}
               </div>
-            ))}
+            )}
           </div>
         )}
       </div>
 
-      {/* Session Notes Section */}
-      {item.progress?.sessions && item.progress.sessions.length > 0 && (
-        <div className="mt-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <h4 className="font-medium text-gray-700">Session History</h4>
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="absolute right-0 top-0 bg-white p-4 rounded-lg shadow-lg border z-10">
+          <p className="text-sm mb-2">Are you sure you want to delete this item?</p>
+          <div className="flex justify-end space-x-2">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowSessionDetails(!showSessionDetails)}
+              onClick={() => setShowDeleteConfirm(false)}
             >
-              {showSessionDetails ? 'Hide Details' : 'Show Details'}
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => {
+                onDelete(item.id);
+                setShowDeleteConfirm(false);
+              }}
+            >
+              Delete
             </Button>
           </div>
-
-          {showSessionDetails && (
-            <div className="space-y-3">
-              {item.progress.sessions.map((session, index) => (
-                <div
-                  key={index}
-                  className="p-3 bg-gray-50 rounded-lg"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">
-                      {new Date(session.date).toLocaleDateString()} {session.duration ? `- ${formatDuration(getTotalMinutes(session.duration))}` : ''}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => toggleSessionNotes(`${index}`)}
-                    >
-                      {showSessionNotes[`${index}`] ? 'Hide Notes' : 'Show Notes'}
-                    </Button>
-                  </div>
-
-                  {showSessionNotes[`${index}`] && (
-                    <div className="mt-2 space-y-2">
-                      {session.notes && session.notes.length > 0 ? (
-                        session.notes.map((note, noteIndex) => (
-                          <div key={noteIndex} className="text-sm bg-white p-2 rounded border border-gray-200">
-                            {note}
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-sm text-gray-500 italic">No notes for this session</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              {/* Add New Session Note */}
-              <div className="mt-3 space-y-2">
-                <Textarea
-                  value={newSessionNote}
-                  onChange={(e) => setNewSessionNote(e.target.value)}
-                  placeholder="Add a note for the current session..."
-                  className="w-full"
-                />
-                <Button
-                  onClick={handleAddSessionNote}
-                  disabled={!newSessionNote.trim()}
-                  className="w-full"
-                >
-                  Add Note
-                </Button>
-              </div>
-            </div>
-          )}
         </div>
       )}
     </Card>

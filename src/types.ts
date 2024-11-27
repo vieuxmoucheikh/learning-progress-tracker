@@ -9,6 +9,9 @@ export interface Session {
   duration?: Time;
   date: string;
   notes?: string[];
+  title?: string;
+  description?: string;
+  status?: 'in_progress' | 'completed' | 'paused';
 }
 
 export interface Progress {
