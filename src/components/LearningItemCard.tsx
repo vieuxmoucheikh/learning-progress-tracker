@@ -78,7 +78,8 @@ export function LearningItemCard({
             date: new Date().toISOString().split('T')[0],
             title: currentSessionTitle,
             description: currentSessionDescription,
-            notes: []
+            notes: [] as string[],
+            endTime: undefined
           }
         ]
       }
@@ -88,6 +89,25 @@ export function LearningItemCard({
 
   const handleStopSession = () => {
     onStopTracking(item.id);
+    
+    // Update the current session with an end time
+    const updatedSessions = (item.progress?.sessions || []).map(session => 
+      !session.endTime 
+        ? { 
+            ...session, 
+            endTime: new Date().toISOString(), 
+            status: 'completed' as const 
+          } 
+        : session
+    );
+
+    onUpdate(item.id, {
+      progress: {
+        ...item.progress,
+        sessions: updatedSessions
+      }
+    });
+
     setCurrentSessionTitle('');
     setCurrentSessionDescription('');
     setShowSessionForm(false);
@@ -149,7 +169,24 @@ export function LearningItemCard({
 
   const handleAddSessionNote = () => {
     if (newSessionNote.trim()) {
-      onSessionNoteAdd(item.id, newSessionNote);
+      // Find the current active session
+      const currentSession = item.progress?.sessions?.find(s => !s.endTime);
+      if (currentSession) {
+        // Update the session with the new note
+        onUpdate(item.id, {
+          progress: {
+            ...item.progress,
+            sessions: item.progress.sessions.map(session =>
+              session.startTime === currentSession.startTime
+                ? {
+                    ...session,
+                    notes: [...(session.notes || []), newSessionNote]
+                  }
+                : session
+            )
+          }
+        });
+      }
       setNewSessionNote('');
     }
   };
@@ -221,79 +258,90 @@ export function LearningItemCard({
     return (
       <div className="mt-4 space-y-4">
         <h3 className="font-semibold text-lg">Session History</h3>
-        {item.progress.sessions.map((session, index) => (
-          <div key={session.startTime} className="border rounded-lg p-4 space-y-2">
-            <div className="flex justify-between items-center">
-              <h4 className="font-medium text-base">
-                {session.title || `Session ${index + 1}`}
-              </h4>
-              <button
-                onClick={() => toggleSessionNotes(session.startTime)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                {showSessionNotes[session.startTime] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-            </div>
-            
-            <div className="text-sm text-gray-600">
-              <div className="flex items-center">
-                <Calendar className="w-4 h-4 mr-2" />
-                <span>Start: {new Date(session.startTime).toLocaleString()}</span>
+        {item.progress.sessions.map((session, index) => {
+          const sessionNotes = Array.isArray(session.notes) ? session.notes : [];
+          
+          return (
+            <div key={session.startTime} className="border rounded-lg p-4 space-y-2">
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium text-base">
+                  {session.title || `Session ${index + 1}`}
+                </h4>
+                <button
+                  onClick={() => toggleSessionNotes(session.startTime)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  {showSessionNotes[session.startTime] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
               </div>
-              {session.endTime && (
+              
+              <div className="text-sm text-gray-600">
                 <div className="flex items-center">
                   <Calendar className="w-4 h-4 mr-2" />
-                  <span>End: {new Date(session.endTime).toLocaleString()}</span>
+                  <span>Start: {new Date(session.startTime).toLocaleString()}</span>
+                </div>
+                {session.endTime && (
+                  <div className="flex items-center">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    <span>End: {new Date(session.endTime).toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="flex items-center">
+                  <Clock className="w-4 h-4 mr-2" />
+                  <span>Duration: {formatTime(Math.floor((session.endTime ? new Date(session.endTime).getTime() : Date.now()) - new Date(session.startTime).getTime()) / 1000)}</span>
+                </div>
+              </div>
+
+              {session.description && (
+                <div className="text-sm text-gray-600 mt-2">
+                  <p className="font-medium">Description:</p>
+                  <p>{session.description}</p>
                 </div>
               )}
-              <div className="flex items-center">
-                <Clock className="w-4 h-4 mr-2" />
-                <span>Duration: {formatTime(Math.floor((session.endTime ? new Date(session.endTime).getTime() : Date.now()) - new Date(session.startTime).getTime()) / 1000)}</span>
-              </div>
-            </div>
 
-            {session.description && (
-              <div className="text-sm text-gray-600 mt-2">
-                <p className="font-medium">Description:</p>
-                <p>{session.description}</p>
-              </div>
-            )}
-
-            {showSessionNotes[session.startTime] && (
               <div className="mt-3">
-                <div className="space-y-2">
-                  {session.notes && session.notes.length > 0 ? (
-                    session.notes.map((note, noteIndex) => (
-                      <div key={noteIndex} className="bg-gray-50 p-2 rounded">
-                        {note}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-500 italic">No notes for this session</p>
+                <div className="flex justify-between items-center mb-2">
+                  <h5 className="font-medium text-sm">Session Notes</h5>
+                  {!showSessionNotes[session.startTime] && sessionNotes.length > 0 && (
+                    <span className="text-xs text-gray-500">{sessionNotes.length} note{sessionNotes.length !== 1 ? 's' : ''}</span>
                   )}
                 </div>
                 
-                {!session.endTime && (
-                  <div className="mt-3 flex gap-2">
-                    <Input
-                      value={newSessionNote}
-                      onChange={(e) => setNewSessionNote(e.target.value)}
-                      placeholder="Add a note to this session..."
-                      className="flex-1"
-                    />
-                    <Button 
-                      onClick={handleAddSessionNote}
-                      disabled={!newSessionNote.trim()}
-                      size="sm"
-                    >
-                      Add Note
-                    </Button>
+                {showSessionNotes[session.startTime] && (
+                  <div className="space-y-2">
+                    {sessionNotes.length > 0 ? (
+                      sessionNotes.map((note, noteIndex) => (
+                        <div key={noteIndex} className="bg-gray-50 p-2 rounded text-sm">
+                          {note}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 italic text-sm">No notes for this session</p>
+                    )}
+                    
+                    {!session.endTime && (
+                      <div className="mt-3 flex gap-2">
+                        <Input
+                          value={newSessionNote}
+                          onChange={(e) => setNewSessionNote(e.target.value)}
+                          placeholder="Add a note to this session..."
+                          className="flex-1"
+                        />
+                        <Button 
+                          onClick={handleAddSessionNote}
+                          disabled={!newSessionNote.trim()}
+                          size="sm"
+                        >
+                          Add Note
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            )}
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
     );
   };
