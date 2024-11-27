@@ -387,7 +387,6 @@ export default function App() {
   };
 
   const handleDashboardAddItem = () => {
-    setSelectedDate(new Date());
     setShowAddDialog(true);
   };
 

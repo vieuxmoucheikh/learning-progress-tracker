@@ -224,6 +224,38 @@ export function LearningItemCard({
               Stop Session
             </Button>
           )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowDeleteConfirm(true)}
+            className="text-red-500 hover:text-red-700"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+          {showDeleteConfirm && (
+            <div className="absolute right-0 top-0 bg-white p-4 rounded-lg shadow-lg border z-10">
+              <p className="text-sm mb-2">Are you sure you want to delete this item?</p>
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDeleteConfirm(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => {
+                    onDelete(item.id);
+                    setShowDeleteConfirm(false);
+                  }}
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
