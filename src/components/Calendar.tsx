@@ -152,10 +152,11 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
 
       // Calculate activities for this day
       items.forEach(item => {
-        const itemDate = new Date(new Date(item.date).getFullYear(), new Date(item.date).getMonth(), new Date(item.date).getDate());
+        const itemDate = new Date(item.date);
         const currentDayDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const itemDayDate = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
         
-        if (itemDate.getTime() === currentDayDate.getTime()) {
+        if (itemDayDate.getTime() === currentDayDate.getTime()) {
           if (item.status === 'archived') {
             dayActivities.archivedItems.push(item);
           } else if (item.completed) {
@@ -166,8 +167,9 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
 
           if (item.progress?.sessions) {
             item.progress.sessions.forEach(session => {
-              const sessionDate = new Date(new Date(session.date).getFullYear(), new Date(session.date).getMonth(), new Date(session.date).getDate());
-              if (sessionDate.getTime() === currentDayDate.getTime()) {
+              const sessionDate = new Date(session.date);
+              const sessionDayDate = new Date(sessionDate.getFullYear(), sessionDate.getMonth(), sessionDate.getDate());
+              if (sessionDayDate.getTime() === currentDayDate.getTime()) {
                 const hours = session.duration?.hours ?? 0;
                 const minutes = session.duration?.minutes ?? 0;
                 dayActivities.minutes += hours * 60 + minutes;
