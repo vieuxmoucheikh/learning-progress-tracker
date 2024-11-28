@@ -19,6 +19,7 @@ export interface Progress {
   total?: Time;
   lastAccessed?: string;
   sessions: Session[];
+  isActive?: boolean;
 }
 
 export interface LearningItem {
