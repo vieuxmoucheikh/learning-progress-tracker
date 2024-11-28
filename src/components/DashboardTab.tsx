@@ -84,6 +84,7 @@ export function DashboardTab({ items, onAddItem, onUpdate, onDateSelect }: Dashb
               items={items} 
               onDateSelect={handleDateSelect}
               selectedDate={selectedDate}
+              onAddItem={() => onAddItem(selectedDate ?? undefined)}
             />
           </Card>
         </div>

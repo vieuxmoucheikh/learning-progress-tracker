@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { LearningItem } from "@/types";
-import { LearningItemCard } from "./LearningItemCard";
+import LearningItemCard from "./LearningItemCard";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select } from "./ui/select";

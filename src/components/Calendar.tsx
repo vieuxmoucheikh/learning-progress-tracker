@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { LearningItem } from '../types';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CheckCircle2, Clock, Info, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CheckCircle2, Clock, Info, ChevronDown, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -36,6 +36,7 @@ interface Props {
   items: LearningItem[];
   onDateSelect: (date: Date, activeTasks: LearningItem[], completedTasks: LearningItem[]) => void;
   selectedDate: Date | null;
+  onAddItem?: () => void;
 }
 
 // Helper function to get timezone-adjusted date string
@@ -50,7 +51,7 @@ const formatDuration = (minutes: number): string => {
   return `${hours}h ${mins}m`;
 };
 
-export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDate }: Props) {
+export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDate, onAddItem }: Props) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isYearPickerOpen, setIsYearPickerOpen] = useState(false);
   const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
@@ -416,6 +417,15 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
             </motion.div>
           )}
         </AnimatePresence>
+        {onAddItem && (
+          <button
+            onClick={onAddItem}
+            className="flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Add Item
+          </button>
+        )}
       </div>
 
       {/* Calendar Grid */}
