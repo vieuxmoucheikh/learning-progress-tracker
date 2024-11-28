@@ -134,18 +134,36 @@ export function LearningItemCard({
 
   const handleAddSessionNote = () => {
     if (newSessionNote.trim()) {
+      // Call the parent component's handler
       onSessionNoteAdd(item.id, newSessionNote);
-      setNewSessionNote('');
       
-      // Force show the notes for the current session
+      // Update local state
       const currentSession = item.progress?.sessions?.find(s => !s.endTime);
       if (currentSession) {
-        setShowSessionNotes(prev => ({
-          ...prev,
-          [currentSession.startTime]: true
-        }));
-        setShowSessionDetails(true); // Make sure session history is expanded
+        // Update the session with the new note locally
+        const updatedSessions = item.progress.sessions.map(session =>
+          session.startTime === currentSession.startTime
+            ? {
+                ...session,
+                notes: Array.isArray(session.notes) 
+                  ? [...session.notes, newSessionNote]
+                  : [newSessionNote]
+              }
+            : session
+        );
+
+        // Update the item with the new session data
+        onUpdate(item.id, {
+          progress: {
+            ...item.progress,
+            sessions: updatedSessions
+          }
+        });
       }
+      
+      // Clear the input
+      setNewSessionNote('');
+      setShowSessionDetails(true);
     }
   };
 
@@ -222,28 +240,25 @@ export function LearningItemCard({
       <div className="mt-4 space-y-4">
         <h3 className="font-semibold text-lg">Session History</h3>
         {sortedSessions.map((session, index) => {
-          const sessionNotes = session.notes || [];
           const isCurrentSession = !session.endTime;
-          const showNotes = showSessionNotes[session.startTime] || isCurrentSession;
+          const sessionNotes = Array.isArray(session.notes) ? session.notes : [];
           
           return (
             <div key={session.startTime} className={clsx(
               "border rounded-lg p-4 space-y-2",
-              isCurrentSession && "border-blue-200 bg-blue-50"
+              isCurrentSession ? "border-blue-200 bg-blue-50" : "border-gray-200"
             )}>
               <div className="flex justify-between items-center">
-                <h4 className="font-medium text-base">
-                  {session.title || `Session ${sortedSessions.length - index}`}
+                <div className="flex items-center gap-2">
+                  <h4 className="font-medium text-base">
+                    {session.title || `Session ${sortedSessions.length - index}`}
+                  </h4>
                   {isCurrentSession && (
-                    <span className="ml-2 text-sm text-blue-600">(Current)</span>
+                    <span className="text-sm text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">
+                      Current Session
+                    </span>
                   )}
-                </h4>
-                <button
-                  onClick={() => toggleSessionNotes(session.startTime)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  {showNotes ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </button>
+                </div>
               </div>
               
               <div className="text-sm text-gray-600">
@@ -272,30 +287,30 @@ export function LearningItemCard({
 
               <div className="mt-3">
                 <div className="flex justify-between items-center mb-2">
-                  <h5 className="font-medium text-sm">
+                  <h5 className="font-medium text-sm flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4" />
                     Session Notes 
                     {sessionNotes.length > 0 && (
-                      <span className="ml-2 text-sm text-blue-600">
-                        ({sessionNotes.length})
+                      <span className="text-sm text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                        {sessionNotes.length} note{sessionNotes.length !== 1 ? 's' : ''}
                       </span>
                     )}
                   </h5>
-                  {!showNotes && sessionNotes.length > 0 && (
-                    <span className="text-xs text-gray-500">{sessionNotes.length} note{sessionNotes.length !== 1 ? 's' : ''}</span>
-                  )}
                 </div>
                 
                 <div className="space-y-2">
-                  {showNotes && (
+                  {/* Notes section */}
+                  {sessionNotes.length > 0 && (
                     <div className="space-y-2">
                       {sessionNotes.map((note, noteIndex) => (
-                        <div key={noteIndex} className="bg-gray-50 p-2 rounded text-sm">
+                        <div key={noteIndex} className="bg-white border border-gray-100 p-3 rounded-lg text-sm shadow-sm">
                           {note}
                         </div>
                       ))}
                     </div>
                   )}
                   
+                  {/* Note input for current session */}
                   {isCurrentSession && (
                     <div className="mt-3 flex gap-2">
                       <Input
@@ -308,6 +323,7 @@ export function LearningItemCard({
                         onClick={handleAddSessionNote}
                         disabled={!newSessionNote.trim()}
                         size="sm"
+                        className="bg-blue-500 hover:bg-blue-600 text-white"
                       >
                         Add Note
                       </Button>
