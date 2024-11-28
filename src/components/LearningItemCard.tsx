@@ -63,28 +63,39 @@ export function LearningItemCard({
 
   // Session management
   const handleStartSession = () => {
+    const startTime = new Date().toISOString();
     if (currentSessionTitle.trim() === '') {
       setCurrentSessionTitle(`Session ${item.progress?.sessions?.length + 1}`);
     }
     onStartTracking(item.id);
     // Update the item with session title and description
+    const newSession = {
+      startTime,
+      date: startTime.split('T')[0],
+      title: currentSessionTitle || `Session ${item.progress?.sessions?.length + 1}`,
+      description: currentSessionDescription,
+      notes: [],
+      endTime: undefined
+    };
+    
     onUpdate(item.id, {
       progress: {
         ...item.progress,
         sessions: [
           ...(item.progress?.sessions || []),
-          {
-            startTime: new Date().toISOString(),
-            date: new Date().toISOString().split('T')[0],
-            title: currentSessionTitle,
-            description: currentSessionDescription,
-            notes: [] as string[],
-            endTime: undefined
-          }
+          newSession
         ]
       }
     });
+
+    // Show the notes section for the new session
+    setShowSessionNotes(prev => ({
+      ...prev,
+      [startTime]: true
+    }));
+    
     setShowSessionForm(false);
+    setShowSessionDetails(true); // Auto-expand session history
   };
 
   const handleStopSession = () => {
@@ -172,25 +183,33 @@ export function LearningItemCard({
       // Find the current active session
       const currentSession = item.progress?.sessions?.find(s => !s.endTime);
       if (currentSession) {
+        const updatedSessions = item.progress.sessions.map(session =>
+          session.startTime === currentSession.startTime
+            ? {
+                ...session,
+                notes: Array.isArray(session.notes) 
+                  ? [...session.notes, newSessionNote]
+                  : [newSessionNote]
+              }
+            : session
+        );
+
         // Update the session with the new note
         onUpdate(item.id, {
           progress: {
             ...item.progress,
-            sessions: item.progress.sessions.map(session =>
-              session.startTime === currentSession.startTime
-                ? {
-                    ...session,
-                    notes: [...(session.notes || []), newSessionNote]
-                  }
-                : session
-            )
+            sessions: updatedSessions
           }
         });
+
         // Ensure the current session's notes are visible after adding a note
         setShowSessionNotes(prev => ({
           ...prev,
           [currentSession.startTime]: true
         }));
+
+        // Auto-expand session history
+        setShowSessionDetails(true);
       }
       setNewSessionNote('');
     }
@@ -260,10 +279,15 @@ export function LearningItemCard({
       return null;
     }
 
+    // Sort sessions by start time, most recent first
+    const sortedSessions = [...item.progress.sessions].sort(
+      (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+    );
+
     return (
       <div className="mt-4 space-y-4">
         <h3 className="font-semibold text-lg">Session History</h3>
-        {item.progress.sessions.map((session, index) => {
+        {sortedSessions.map((session, index) => {
           const sessionNotes = Array.isArray(session.notes) ? session.notes : [];
           const isCurrentSession = !session.endTime;
           
@@ -274,7 +298,7 @@ export function LearningItemCard({
             )}>
               <div className="flex justify-between items-center">
                 <h4 className="font-medium text-base">
-                  {session.title || `Session ${index + 1}`}
+                  {session.title || `Session ${sortedSessions.length - index}`}
                   {isCurrentSession && (
                     <span className="ml-2 text-sm text-blue-600">(Current)</span>
                   )}
