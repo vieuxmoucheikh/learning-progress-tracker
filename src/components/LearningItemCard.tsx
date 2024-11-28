@@ -73,9 +73,13 @@ export function LearningItemCard({
 
   // Session management
   const handleStartSession = () => {
-    if (!currentSessionTitle.trim() && !currentSessionDescription.trim()) {
+    if (!currentSessionTitle.trim() && !showSessionForm) {
       setShowSessionForm(true);
       return;
+    }
+
+    if (showSessionForm && !currentSessionTitle.trim()) {
+      return; // Don't start session if title is empty in form
     }
 
     const sessionTitle = currentSessionTitle.trim() || `Session ${(item.progress?.sessions?.length || 0) + 1}`;
@@ -119,13 +123,15 @@ export function LearningItemCard({
       progress: {
         ...item.progress,
         sessions: updatedSessions,
-        lastAccessed: undefined
+        lastAccessed: undefined // Set to undefined instead of null to properly clear the session
       }
     });
 
     onStopTracking(item.id);
     onSetActiveItem(null);
     setShowSessionForm(false);
+    setCurrentSessionTitle('');
+    setCurrentSessionDescription('');
   };
 
   const handleAddNote = useCallback((sessionStartTime: string, note: string) => {
@@ -156,24 +162,30 @@ export function LearningItemCard({
         animationFrameId = requestAnimationFrame(updateElapsedTime);
       } else {
         setElapsedTime(0);
+        cancelAnimationFrame(animationFrameId);
       }
     };
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
         cancelAnimationFrame(animationFrameId);
-      } else {
+      } else if (item.progress?.lastAccessed) {
         startTime = Date.now();
         updateElapsedTime();
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    updateElapsedTime();
+
+    if (item.progress?.lastAccessed) {
+      updateElapsedTime();
+    }
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      cancelAnimationFrame(animationFrameId);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
     };
   }, [item.progress?.lastAccessed]);
 
