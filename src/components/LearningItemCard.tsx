@@ -63,62 +63,16 @@ export function LearningItemCard({
 
   // Session management
   const handleStartSession = () => {
-    const startTime = new Date().toISOString();
     if (currentSessionTitle.trim() === '') {
       setCurrentSessionTitle(`Session ${item.progress?.sessions?.length + 1}`);
     }
     onStartTracking(item.id);
-    // Update the item with session title and description
-    const newSession = {
-      startTime,
-      date: startTime.split('T')[0],
-      title: currentSessionTitle || `Session ${item.progress?.sessions?.length + 1}`,
-      description: currentSessionDescription,
-      notes: [],
-      endTime: undefined
-    };
-    
-    onUpdate(item.id, {
-      progress: {
-        ...item.progress,
-        sessions: [
-          ...(item.progress?.sessions || []),
-          newSession
-        ]
-      }
-    });
-
-    // Show the notes section for the new session
-    setShowSessionNotes(prev => ({
-      ...prev,
-      [startTime]: true
-    }));
-    
     setShowSessionForm(false);
     setShowSessionDetails(true); // Auto-expand session history
   };
 
   const handleStopSession = () => {
     onStopTracking(item.id);
-    
-    // Update the current session with an end time
-    const updatedSessions = (item.progress?.sessions || []).map(session => 
-      !session.endTime 
-        ? { 
-            ...session, 
-            endTime: new Date().toISOString(), 
-            status: 'completed' as const 
-          } 
-        : session
-    );
-
-    onUpdate(item.id, {
-      progress: {
-        ...item.progress,
-        sessions: updatedSessions
-      }
-    });
-
     setCurrentSessionTitle('');
     setCurrentSessionDescription('');
     setShowSessionForm(false);
@@ -180,42 +134,17 @@ export function LearningItemCard({
 
   const handleAddSessionNote = () => {
     if (newSessionNote.trim()) {
-      // Find the current active session
+      onSessionNoteAdd(item.id, newSessionNote);
+      setNewSessionNote('');
+      
+      // Ensure notes are visible for the current session
       const currentSession = item.progress?.sessions?.find(s => !s.endTime);
       if (currentSession) {
-        // Call onSessionNoteAdd to update the parent state
-        onSessionNoteAdd(item.id, newSessionNote);
-        
-        // Update the local state with the new note
-        const updatedSessions = item.progress.sessions.map(session =>
-          session.startTime === currentSession.startTime
-            ? {
-                ...session,
-                notes: Array.isArray(session.notes) 
-                  ? [...session.notes, newSessionNote]
-                  : [newSessionNote]
-              }
-            : session
-        );
-
-        // Update the session with the new note
-        onUpdate(item.id, {
-          progress: {
-            ...item.progress,
-            sessions: updatedSessions
-          }
-        });
-
-        // Ensure the current session's notes are visible
         setShowSessionNotes(prev => ({
           ...prev,
           [currentSession.startTime]: true
         }));
-
-        // Auto-expand session history
-        setShowSessionDetails(true);
       }
-      setNewSessionNote('');
     }
   };
 
