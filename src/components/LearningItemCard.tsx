@@ -74,39 +74,108 @@ export function LearningItemCard({
   const [currentSessionTitle, setCurrentSessionTitle] = useState('');
   const [currentSessionDescription, setCurrentSessionDescription] = useState('');
   const [showSessionForm, setShowSessionForm] = useState(false);
-  const [sessionStats, setSessionStats] = useState<{
-    totalTime: number;
-    averageSessionLength: number;
-    bestTimeOfDay: string;
-    mostProductiveDay: string;
-  }>({
+  const [sessionNote, setSessionNote] = useState('');
+  const [activeSessionIndex, setActiveSessionIndex] = useState<number | null>(null);
+  const [sessionStats, setSessionStats] = useState({
     totalTime: 0,
     averageSessionLength: 0,
     bestTimeOfDay: '',
     mostProductiveDay: '',
   });
   const [showStats, setShowStats] = useState(false);
-  const [sessionNote, setSessionNote] = useState('');
-  const [activeSessionIndex, setActiveSessionIndex] = useState<number | null>(null);
 
-  // Session management with improved state handling
+  // Calculate and update session statistics
+  useEffect(() => {
+    if (item.progress?.sessions) {
+      const sessions = item.progress.sessions;
+      const totalTime = sessions.reduce((total, session) => {
+        if (session.startTime && session.endTime) {
+          return total + (new Date(session.endTime).getTime() - new Date(session.startTime).getTime());
+        }
+        return total;
+      }, 0);
+
+      const avgLength = sessions.length ? totalTime / sessions.length : 0;
+
+      // Calculate best time of day
+      const hourCounts: { [hour: number]: number } = {};
+      sessions.forEach(session => {
+        const hour = new Date(session.startTime).getHours();
+        hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+      });
+
+      const bestHour = Object.entries(hourCounts)
+        .sort(([, a], [, b]) => b - a)[0]?.[0];
+
+      // Calculate most productive day
+      const dayCounts: { [day: string]: number } = {};
+      sessions.forEach(session => {
+        const day = new Date(session.startTime).toLocaleDateString('en-US', { weekday: 'long' });
+        dayCounts[day] = (dayCounts[day] || 0) + 1;
+      });
+
+      const bestDay = Object.entries(dayCounts)
+        .sort(([, a], [, b]) => b - a)[0]?.[0];
+
+      setSessionStats({
+        totalTime,
+        averageSessionLength: avgLength,
+        bestTimeOfDay: bestHour ? `${parseInt(bestHour)}:00` : 'N/A',
+        mostProductiveDay: bestDay || 'N/A',
+      });
+    }
+  }, [item.progress?.sessions]);
+
+  // Timer implementation with improved visibility handling
+  useEffect(() => {
+    let timerInterval: NodeJS.Timeout | null = null;
+    
+    const updateElapsedTime = () => {
+      if (item.progress?.lastAccessed && item.progress.isActive) {
+        const startTime = new Date(item.progress.lastAccessed).getTime();
+        const currentTime = Date.now();
+        const elapsed = Math.floor((currentTime - startTime) / 1000);
+        setElapsedTime(elapsed);
+      } else {
+        setElapsedTime(0);
+      }
+    };
+
+    if (item.progress?.isActive) {
+      updateElapsedTime();
+      timerInterval = setInterval(updateElapsedTime, 1000);
+    } else {
+      setElapsedTime(0);
+    }
+
+    return () => {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+    };
+  }, [item.progress?.lastAccessed, item.progress?.isActive]);
+
+  // Session management with improved validation
   const handleStartSession = useCallback(() => {
+    if (!showSessionForm) {
+      setShowSessionForm(true);
+      return;
+    }
+
     if (item.progress?.isActive) {
       console.warn('A session is already active');
       return;
     }
 
-    const currentTime = new Date().toISOString();
     const sessionTitle = currentSessionTitle.trim() || `Session ${(item.progress?.sessions?.length || 0) + 1}`;
     const sessionDescription = currentSessionDescription.trim();
 
     const newSession: LocalSession = {
-      startTime: currentTime,
+      startTime: new Date().toISOString(),
       title: sessionTitle,
       description: sessionDescription,
-      date: currentTime,
+      date: new Date().toISOString(),
       notes: [],
-      duration: { hours: 0, minutes: 0 },
       status: 'in_progress'
     };
 
@@ -115,7 +184,7 @@ export function LearningItemCard({
       progress: {
         ...item.progress,
         sessions: [...(item.progress?.sessions || []), newSession],
-        lastAccessed: currentTime,
+        lastAccessed: new Date().toISOString(),
         isActive: true
       }
     });
@@ -125,18 +194,41 @@ export function LearningItemCard({
     setShowSessionForm(false);
     setCurrentSessionTitle('');
     setCurrentSessionDescription('');
-  }, [item.id, item.progress, currentSessionTitle, currentSessionDescription, onUpdate, onStartTracking, onSetActiveItem]);
+  }, [item.id, item.progress, currentSessionTitle, currentSessionDescription, showSessionForm, onUpdate, onStartTracking, onSetActiveItem]);
 
   const handleStopSession = useCallback(() => {
-    if (!item.progress?.sessions || !item.progress.isActive) {
+    if (!item.progress?.isActive) {
       console.warn('No active session to stop');
       return;
     }
 
     const currentTime = new Date().toISOString();
-    const updatedSessions = item.progress.sessions.map(session => 
-      !session.endTime ? { ...session, endTime: currentTime } : session
-    );
+    const sessions = item.progress.sessions;
+    const lastSession = sessions[sessions.length - 1];
+
+    if (!lastSession || lastSession.endTime) {
+      console.warn('No active session found');
+      return;
+    }
+
+    const startTime = new Date(lastSession.startTime);
+    const endTime = new Date(currentTime);
+    const durationInMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
+
+    const updatedSession: LocalSession = {
+      ...lastSession,
+      endTime: currentTime,
+      duration: {
+        hours: Math.floor(durationInMinutes / 60),
+        minutes: durationInMinutes % 60
+      },
+      status: 'completed'
+    };
+
+    const updatedSessions = [
+      ...sessions.slice(0, -1),
+      updatedSession
+    ];
 
     onUpdate(item.id, {
       status: item.status === 'completed' ? 'completed' : 'not_started',
@@ -152,72 +244,48 @@ export function LearningItemCard({
     onSetActiveItem(null);
   }, [item.id, item.progress, item.status, onUpdate, onStopTracking, onSetActiveItem]);
 
-  // Improved note-taking functionality
-  const handleAddNote = useCallback((sessionStartTime: string, note: string) => {
-    if (!note.trim()) return;
+  // Render session form
+  const renderSessionForm = () => {
+    if (!showSessionForm) return null;
 
-    const updatedSessions = item.progress?.sessions.map((session, index) => {
-      if (session.startTime === sessionStartTime) {
-        return {
-          ...session,
-          notes: [...(session.notes || []), note.trim()]
-        };
-      }
-      return session;
-    });
-
-    onUpdate(item.id, {
-      progress: {
-        ...item.progress,
-        sessions: updatedSessions
-      }
-    });
-
-    setSessionNote('');
-  }, [item.id, item.progress, onUpdate]);
-
-  // Timer implementation with improved visibility handling
-  useEffect(() => {
-    let timerInterval: NodeJS.Timeout | null = null;
-    
-    const updateElapsedTime = () => {
-      if (item.progress?.lastAccessed && item.progress.isActive) {
-        const currentTime = Date.now();
-        const elapsed = Math.floor((currentTime - new Date(item.progress.lastAccessed).getTime()) / 1000);
-        setElapsedTime(elapsed);
-      } else {
-        setElapsedTime(0);
-      }
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        if (timerInterval) {
-          clearInterval(timerInterval);
-          timerInterval = null;
-        }
-      } else {
-        if (item.progress?.isActive) {
-          updateElapsedTime();
-          timerInterval = setInterval(updateElapsedTime, 1000);
-        }
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    if (item.progress?.isActive) {
-      updateElapsedTime();
-      timerInterval = setInterval(updateElapsedTime, 1000);
-    }
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      if (timerInterval) {
-        clearInterval(timerInterval);
-      }
-    };
-  }, [item.progress?.lastAccessed, item.progress?.isActive]);
+    return (
+      <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <h3 className="font-medium text-gray-900">New Learning Session</h3>
+        <Input
+          placeholder="Session Title (optional)"
+          value={currentSessionTitle}
+          onChange={(e) => setCurrentSessionTitle(e.target.value)}
+          className="w-full"
+        />
+        <Textarea
+          placeholder="Session Description (optional)"
+          value={currentSessionDescription}
+          onChange={(e) => setCurrentSessionDescription(e.target.value)}
+          className="w-full"
+        />
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setShowSessionForm(false);
+              setCurrentSessionTitle('');
+              setCurrentSessionDescription('');
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleStartSession}
+          >
+            Start Session
+          </Button>
+        </div>
+      </div>
+    );
+  };
 
   const handleStartTracking = () => {
     onStartTracking(item.id);
@@ -448,7 +516,7 @@ export function LearningItemCard({
                             className="flex-1"
                           />
                           <Button
-                            onClick={() => handleAddNote(session.startTime, sessionNote)}
+                            onClick={() => onSessionNoteAdd(item.id, sessionNote)}
                             disabled={!sessionNote.trim()}
                           >
                             Add
@@ -465,46 +533,6 @@ export function LearningItemCard({
       </div>
     );
   };
-
-  // Calculate session statistics
-  useEffect(() => {
-    if (item.progress?.sessions) {
-      const sessions = item.progress.sessions;
-      const timeByHour: { [key: number]: number } = {};
-      const timeByDay: { [key: string]: number } = {};
-      let totalSessionTime = 0;
-
-      sessions.forEach(session => {
-        const startTime = new Date(session.startTime);
-        const endTime = session.endTime ? new Date(session.endTime) : new Date();
-        const duration = endTime.getTime() - startTime.getTime();
-        
-        // Total time
-        totalSessionTime += duration;
-
-        // Time by hour
-        const hour = startTime.getHours();
-        timeByHour[hour] = (timeByHour[hour] || 0) + duration;
-
-        // Time by day
-        const day = startTime.toLocaleDateString('en-US', { weekday: 'long' });
-        timeByDay[day] = (timeByDay[day] || 0) + duration;
-      });
-
-      const bestHour = Object.entries(timeByHour)
-        .sort(([, a], [, b]) => b - a)[0]?.[0];
-      
-      const bestDay = Object.entries(timeByDay)
-        .sort(([, a], [, b]) => b - a)[0]?.[0];
-
-      setSessionStats({
-        totalTime: totalSessionTime,
-        averageSessionLength: totalSessionTime / sessions.length,
-        bestTimeOfDay: bestHour ? `${parseInt(bestHour)}:00` : '',
-        mostProductiveDay: bestDay || '',
-      });
-    }
-  }, [item.progress?.sessions]);
 
   return (
     <Card className={clsx(
@@ -700,38 +728,7 @@ export function LearningItemCard({
         )}
 
         {/* Session Form */}
-        {showSessionForm && !item.progress?.lastAccessed && (
-          <div className="p-4 bg-green-50 rounded-lg space-y-4 border border-green-200">
-            <Input
-              placeholder="Session Title (optional)"
-              value={currentSessionTitle}
-              onChange={(e) => setCurrentSessionTitle(e.target.value)}
-              className="border-green-200 focus:ring-green-500"
-            />
-            <Textarea
-              placeholder="Session Description (optional)"
-              value={currentSessionDescription}
-              onChange={(e) => setCurrentSessionDescription(e.target.value)}
-              className="border-green-200 focus:ring-green-500"
-              rows={3}
-            />
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="ghost"
-                onClick={() => setShowSessionForm(false)}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleStartSession}
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                Start Session
-              </Button>
-            </div>
-          </div>
-        )}
+        {renderSessionForm()}
 
         {/* Active Session */}
         {item.progress?.lastAccessed && (
