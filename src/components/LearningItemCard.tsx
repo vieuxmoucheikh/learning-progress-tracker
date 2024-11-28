@@ -92,9 +92,9 @@ export function LearningItemCard({
     onUpdate(item.id, {
       progress: {
         ...item.progress,
-        sessions: [...(item.progress?.sessions || []), newSession]
-      },
-      lastTimestamp: Date.now()
+        sessions: [...(item.progress?.sessions || []), newSession],
+        lastAccessed: currentTime
+      }
     });
 
     onStartTracking(item.id);
@@ -119,9 +119,9 @@ export function LearningItemCard({
     onUpdate(item.id, {
       progress: {
         ...item.progress,
-        sessions: updatedSessions
-      },
-      lastTimestamp: null
+        sessions: updatedSessions,
+        lastAccessed: undefined
+      }
     });
 
     onStopTracking(item.id);
@@ -172,9 +172,9 @@ export function LearningItemCard({
     let animationFrameId: number;
     
     const updateElapsedTime = () => {
-      if (item.lastTimestamp) {
+      if (item.progress?.lastAccessed) {
         const currentTime = Date.now();
-        const elapsed = Math.floor((currentTime - item.lastTimestamp) / 1000);
+        const elapsed = Math.floor((currentTime - new Date(item.progress.lastAccessed).getTime()) / 1000);
         setElapsedTime(elapsed);
         animationFrameId = requestAnimationFrame(updateElapsedTime);
       } else {
@@ -198,7 +198,7 @@ export function LearningItemCard({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [item.lastTimestamp]);
+  }, [item.progress?.lastAccessed]);
 
   const handleStartTracking = () => {
     onStartTracking(item.id);
@@ -670,7 +670,7 @@ export function LearningItemCard({
             </span>
           </div>
           <div className="flex items-center gap-2">
-            {item.lastTimestamp ? (
+            {item.progress?.lastAccessed ? (
               <span className="text-sm text-gray-600">
                 {formatTime(elapsedTime)}
               </span>
@@ -688,7 +688,7 @@ export function LearningItemCard({
 
       {/* Session Controls */}
       <div className="mt-4 space-y-4">
-        {!item.lastTimestamp ? (
+        {!item.progress?.lastAccessed ? (
           <Button
             variant="outline"
             className="w-full bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
@@ -709,7 +709,7 @@ export function LearningItemCard({
         )}
 
         {/* Session Form */}
-        {showSessionForm && !item.lastTimestamp && (
+        {showSessionForm && !item.progress?.lastAccessed && (
           <div className="p-4 bg-green-50 rounded-lg space-y-4 border border-green-200">
             <Input
               placeholder="Session Title (optional)"
@@ -743,7 +743,7 @@ export function LearningItemCard({
         )}
 
         {/* Active Session */}
-        {item.lastTimestamp && (
+        {item.progress?.lastAccessed && (
           <div className="p-4 bg-blue-50 rounded-lg space-y-4 border border-blue-200">
             <div className="flex items-center justify-between mb-2">
               <h4 className="font-medium text-blue-800">Current Session</h4>
@@ -754,10 +754,10 @@ export function LearningItemCard({
             <div className="space-y-2">
               <Textarea
                 placeholder="Add a note about your current session..."
-                value={newSessionNotes[String(item.lastTimestamp)] || ''}
+                value={newSessionNotes[String(item.progress.lastAccessed)] || ''}
                 onChange={(e) => setNewSessionNotes(prev => ({
                   ...prev,
-                  [String(item.lastTimestamp)]: e.target.value
+                  [String(item.progress.lastAccessed)]: e.target.value
                 }))}
                 className="border-blue-200 focus:ring-blue-500"
                 rows={3}
@@ -769,7 +769,7 @@ export function LearningItemCard({
                     handleAddSessionNote(currentSession.startTime);
                   }
                 }}
-                disabled={!newSessionNotes[String(item.lastTimestamp)]?.trim()}
+                disabled={!newSessionNotes[String(item.progress.lastAccessed)]?.trim()}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <MessageSquare className="w-4 h-4 mr-2" />
@@ -802,7 +802,7 @@ export function LearningItemCard({
           </div>
         </div>
       ) : (
-        !item.progress?.sessions?.find(s => !s.endTime) && (
+        !item.progress.sessions?.find(s => !s.endTime) && (
           <Button
             onClick={() => setShowSessionForm(true)}
             className="mt-4"
