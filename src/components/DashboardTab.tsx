@@ -27,10 +27,6 @@ export function DashboardTab({ items, onAddItem, onUpdate, onDateSelect }: Dashb
     onDateSelect(date);
   };
 
-  const handleAddItem = () => {
-    onAddItem(selectedDate); // Pass the selected date to the add item handler
-  };
-
   const getItemsForSelectedDate = () => {
     if (!selectedDate) return [];
     const dateStr = selectedDate.toISOString().split('T')[0];
@@ -83,13 +79,7 @@ export function DashboardTab({ items, onAddItem, onUpdate, onDateSelect }: Dashb
       {showCalendar && (
         <div className="mb-6">
           <Card className="p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Activity Calendar</h2>
-              <Button onClick={handleAddItem} className="bg-blue-500 hover:bg-blue-600">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Item
-              </Button>
-            </div>
+            <h2 className="text-lg font-semibold mb-4">Activity Calendar</h2>
             <Calendar 
               items={items} 
               onDateSelect={handleDateSelect}
@@ -205,7 +195,7 @@ export function DashboardTab({ items, onAddItem, onUpdate, onDateSelect }: Dashb
                                 <div className="font-medium text-green-800">Session Notes:</div>
                                 {session.notes.map((note, i) => (
                                   <div key={i} className="italic text-green-700 pl-2 border-l-2 border-green-200">
-                                    "{note}"
+                                    "{typeof note === 'string' ? note : note.content}"
                                   </div>
                                 ))}
                               </div>
