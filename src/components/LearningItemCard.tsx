@@ -60,6 +60,18 @@ export function LearningItemCard({
   const [currentSessionTitle, setCurrentSessionTitle] = useState('');
   const [currentSessionDescription, setCurrentSessionDescription] = useState('');
   const [showSessionForm, setShowSessionForm] = useState(false);
+  const [sessionStats, setSessionStats] = useState<{
+    totalTime: number;
+    averageSessionLength: number;
+    bestTimeOfDay: string;
+    mostProductiveDay: string;
+  }>({
+    totalTime: 0,
+    averageSessionLength: 0,
+    bestTimeOfDay: '',
+    mostProductiveDay: '',
+  });
+  const [showStats, setShowStats] = useState(false);
 
   // Session management
   const handleStartSession = () => {
@@ -229,7 +241,13 @@ export function LearningItemCard({
 
   const renderSessionHistory = () => {
     if (!item.progress?.sessions || item.progress.sessions.length === 0) {
-      return null;
+      return (
+        <div className="text-center text-gray-500 py-4">
+          <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-50" />
+          <p>No learning sessions recorded yet.</p>
+          <p className="text-sm">Start a session to begin tracking your progress!</p>
+        </div>
+      );
     }
 
     // Sort sessions by start time, most recent first
@@ -239,108 +257,216 @@ export function LearningItemCard({
 
     return (
       <div className="mt-4 space-y-4">
-        <h3 className="font-semibold text-lg">Session History</h3>
-        {sortedSessions.map((session, index) => {
-          const isCurrentSession = !session.endTime;
-          const sessionNotes = Array.isArray(session.notes) ? session.notes : [];
+        {/* Session Statistics */}
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-100">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-lg text-blue-800">Session Insights</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowStats(!showStats)}
+              className="text-blue-600 hover:text-blue-700"
+            >
+              {showStats ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </Button>
+          </div>
           
-          return (
-            <div key={session.startTime} className={clsx(
-              "border rounded-lg p-4 space-y-2",
-              isCurrentSession ? "border-blue-200 bg-blue-50" : "border-gray-200"
-            )}>
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <h4 className="font-medium text-base">
-                    {session.title || `Session ${sortedSessions.length - index}`}
-                  </h4>
-                  {isCurrentSession && (
-                    <span className="text-sm text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">
-                      Current Session
-                    </span>
-                  )}
-                </div>
+          {showStats && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <p className="text-sm text-gray-600">Total Time</p>
+                <p className="font-medium">{formatDuration(Math.floor(sessionStats.totalTime / 1000 / 60))}</p>
               </div>
-              
-              <div className="text-sm text-gray-600">
-                <div className="flex items-center">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  <span>Start: {new Date(session.startTime).toLocaleString()}</span>
-                </div>
-                {session.endTime && (
-                  <div className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    <span>End: {new Date(session.endTime).toLocaleString()}</span>
-                  </div>
-                )}
-                <div className="flex items-center">
-                  <Clock className="w-4 h-4 mr-2" />
-                  <span>Duration: {formatTime(Math.floor((session.endTime ? new Date(session.endTime).getTime() : Date.now()) - new Date(session.startTime).getTime()) / 1000)}</span>
-                </div>
+              <div className="space-y-1">
+                <p className="text-sm text-gray-600">Avg. Session</p>
+                <p className="font-medium">{formatDuration(Math.floor(sessionStats.averageSessionLength / 1000 / 60))}</p>
               </div>
-
-              {session.description && (
-                <div className="text-sm text-gray-600 mt-2">
-                  <p className="font-medium">Description:</p>
-                  <p>{session.description}</p>
-                </div>
-              )}
-
-              <div className="mt-3">
-                <div className="flex justify-between items-center mb-2">
-                  <h5 className="font-medium text-sm flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4" />
-                    Session Notes 
-                    {sessionNotes.length > 0 && (
-                      <span className="text-sm text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                        {sessionNotes.length} note{sessionNotes.length !== 1 ? 's' : ''}
-                      </span>
-                    )}
-                  </h5>
-                </div>
-                
-                <div className="space-y-2">
-                  {/* Notes section */}
-                  {sessionNotes.length > 0 && (
-                    <div className="space-y-2">
-                      {sessionNotes.map((note, noteIndex) => (
-                        <div key={noteIndex} className="bg-white border border-gray-100 p-3 rounded-lg text-sm shadow-sm">
-                          {note}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {/* Note input for current session */}
-                  {isCurrentSession && (
-                    <div className="mt-3 flex gap-2">
-                      <Input
-                        value={newSessionNotes[session.startTime] || ''}
-                        onChange={(e) => setNewSessionNotes(prev => ({
-                          ...prev,
-                          [session.startTime]: e.target.value
-                        }))}
-                        placeholder="Add a note to this session..."
-                        className="flex-1"
-                      />
-                      <Button 
-                        onClick={() => handleAddSessionNote(session.startTime)}
-                        disabled={!newSessionNotes[session.startTime]?.trim()}
-                        size="sm"
-                        className="bg-blue-500 hover:bg-blue-600 text-white"
-                      >
-                        Add Note
-                      </Button>
-                    </div>
-                  )}
-                </div>
+              <div className="space-y-1">
+                <p className="text-sm text-gray-600">Best Time</p>
+                <p className="font-medium">{sessionStats.bestTimeOfDay || 'N/A'}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-gray-600">Most Productive</p>
+                <p className="font-medium">{sessionStats.mostProductiveDay || 'N/A'}</p>
               </div>
             </div>
-          );
-        })}
+          )}
+        </div>
+
+        {/* Session List */}
+        <div className="space-y-4">
+          {sortedSessions.map((session, index) => {
+            const isCurrentSession = !session.endTime;
+            const sessionNotes = Array.isArray(session.notes) ? session.notes : [];
+            const startTime = new Date(session.startTime);
+            const endTime = session.endTime ? new Date(session.endTime) : new Date();
+            const duration = endTime.getTime() - startTime.getTime();
+            
+            return (
+              <div key={session.startTime} className={clsx(
+                "border rounded-lg p-4 space-y-2 transition-all duration-200",
+                isCurrentSession ? "border-blue-200 bg-blue-50" : "border-gray-200 hover:border-blue-200"
+              )}>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-medium text-base">
+                      {session.title || `Session ${sortedSessions.length - index}`}
+                    </h4>
+                    {isCurrentSession && (
+                      <span className="text-sm text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full animate-pulse">
+                        Active
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-sm font-medium text-gray-600">
+                    {formatDuration(Math.floor(duration / 1000 / 60))}
+                  </span>
+                </div>
+                
+                <div className="text-sm text-gray-600 grid grid-cols-2 gap-2">
+                  <div className="flex items-center">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    <span>{startTime.toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Clock className="w-4 h-4 mr-2" />
+                    <span>{startTime.toLocaleTimeString()}</span>
+                  </div>
+                  {session.endTime && (
+                    <>
+                      <div className="flex items-center">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        <span>{endTime.toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Clock className="w-4 h-4 mr-2" />
+                        <span>{endTime.toLocaleTimeString()}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {session.description && (
+                  <div className="text-sm text-gray-600 bg-white bg-opacity-50 p-3 rounded-lg">
+                    <p className="font-medium mb-1">Session Description:</p>
+                    <p>{session.description}</p>
+                  </div>
+                )}
+
+                <div className="mt-3">
+                  <div className="flex justify-between items-center mb-2">
+                    <h5 className="font-medium text-sm flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4" />
+                      Session Notes 
+                      {sessionNotes.length > 0 && (
+                        <span className="text-sm text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                          {sessionNotes.length}
+                        </span>
+                      )}
+                    </h5>
+                    {sessionNotes.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleSessionNotes(session.startTime)}
+                        className="text-gray-500 hover:text-gray-700"
+                      >
+                        {showSessionNotes[session.startTime] ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {/* Notes section */}
+                    {showSessionNotes[session.startTime] && sessionNotes.length > 0 && (
+                      <div className="space-y-2">
+                        {sessionNotes.map((note, noteIndex) => (
+                          <div 
+                            key={noteIndex} 
+                            className="bg-white border border-gray-100 p-3 rounded-lg text-sm shadow-sm hover:border-blue-200 transition-colors duration-200"
+                          >
+                            {note}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Note input for current session */}
+                    {isCurrentSession && (
+                      <div className="mt-3 space-y-2">
+                        <Textarea
+                          value={newSessionNotes[String(session.startTime)] || ''}
+                          onChange={(e) => setNewSessionNotes(prev => ({
+                            ...prev,
+                            [String(session.startTime)]: e.target.value
+                          }))}
+                          placeholder="Add a note about your current session..."
+                          className="border-blue-200 focus:ring-blue-500"
+                          rows={3}
+                        />
+                        <Button 
+                          onClick={() => handleAddSessionNote(String(session.startTime))}
+                          disabled={!newSessionNotes[String(session.startTime)]?.trim()}
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          <MessageSquare className="w-4 h-4 mr-2" />
+                          Add Note
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     );
   };
+
+  // Calculate session statistics
+  useEffect(() => {
+    if (item.progress?.sessions) {
+      const sessions = item.progress.sessions;
+      const timeByHour: { [key: number]: number } = {};
+      const timeByDay: { [key: string]: number } = {};
+      let totalSessionTime = 0;
+
+      sessions.forEach(session => {
+        const startTime = new Date(session.startTime);
+        const endTime = session.endTime ? new Date(session.endTime) : new Date();
+        const duration = endTime.getTime() - startTime.getTime();
+        
+        // Total time
+        totalSessionTime += duration;
+
+        // Time by hour
+        const hour = startTime.getHours();
+        timeByHour[hour] = (timeByHour[hour] || 0) + duration;
+
+        // Time by day
+        const day = startTime.toLocaleDateString('en-US', { weekday: 'long' });
+        timeByDay[day] = (timeByDay[day] || 0) + duration;
+      });
+
+      const bestHour = Object.entries(timeByHour)
+        .sort(([, a], [, b]) => b - a)[0]?.[0];
+      
+      const bestDay = Object.entries(timeByDay)
+        .sort(([, a], [, b]) => b - a)[0]?.[0];
+
+      setSessionStats({
+        totalTime: totalSessionTime,
+        averageSessionLength: totalSessionTime / sessions.length,
+        bestTimeOfDay: bestHour ? `${parseInt(bestHour)}:00` : '',
+        mostProductiveDay: bestDay || '',
+      });
+    }
+  }, [item.progress?.sessions]);
 
   // Initialize session notes visibility when sessions change
   useEffect(() => {
