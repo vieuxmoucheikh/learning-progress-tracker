@@ -91,7 +91,7 @@ export function LearningItemCard({
 
   // Calculate and update session statistics
   useEffect(() => {
-    if (item.progress?.sessions) {
+    if (item.progress && item.progress.sessions) {
       const sessions = item.progress.sessions;
       const totalTime = sessions.reduce((total, session) => {
         if (session.startTime && session.endTime) {
@@ -129,7 +129,7 @@ export function LearningItemCard({
         mostProductiveDay: bestDay || 'N/A',
       });
     }
-  }, [item.progress?.sessions]);
+  }, [item.progress && item.progress.sessions]);
 
   // Timer implementation with improved visibility handling
   useEffect(() => {
@@ -160,7 +160,7 @@ export function LearningItemCard({
     };
   }, [item.progress?.lastAccessed, item.progress?.isActive]);
 
-  // Session management with improved validation
+  // Session management with improved validation and error handling
   const handleAddSessionNote = useCallback((note: string) => {
     if (!item.progress?.isActive) {
       console.warn('Cannot add note: No active session');
@@ -168,19 +168,25 @@ export function LearningItemCard({
     }
 
     const sessions = item.progress.sessions;
-    const lastSession = sessions[sessions.length - 1];
+    if (!sessions?.length) {
+      console.warn('No sessions found');
+      return;
+    }
 
+    const lastSession = sessions[sessions.length - 1];
     if (!lastSession) {
       console.warn('No active session found');
       return;
     }
 
+    const newNote = {
+      content: note.trim(),
+      timestamp: new Date().toISOString()
+    };
+
     const updatedSession = {
       ...lastSession,
-      notes: [...(lastSession.notes || []), {
-        content: note,
-        timestamp: new Date().toISOString()
-      }]
+      notes: [...(lastSession.notes || []), newNote]
     };
 
     const updatedSessions = [
@@ -213,17 +219,17 @@ export function LearningItemCard({
     const sessionTitle = currentSessionTitle.trim() || `Session ${(item.progress?.sessions?.length || 0) + 1}`;
     const sessionDescription = currentSessionDescription.trim();
 
-    // Create new session with proper initialization
-    const newSession: LocalSession = {
+    // Create new session with proper initialization and validation
+    const newSession = {
       startTime: new Date().toISOString(),
       title: sessionTitle,
       description: sessionDescription,
-      date: new Date().toISOString().split('T')[0], // Ensure consistent date format
+      date: new Date().toISOString().split('T')[0],
       notes: [],
-      status: 'in_progress',
-      duration: { hours: 0, minutes: 0 }, // Initialize duration
-      hours: 0, // Add hours
-      minutes: 0 // Add minutes
+      status: 'in_progress' as const,
+      duration: { hours: 0, minutes: 0 },
+      hours: 0,
+      minutes: 0
     };
 
     onUpdate(item.id, {
@@ -258,21 +264,26 @@ export function LearningItemCard({
       return;
     }
 
-    const currentTime = new Date().toISOString();
     const sessions = item.progress.sessions;
-    const lastSession = sessions[sessions.length - 1];
+    if (!sessions?.length) {
+      console.warn('No sessions found');
+      return;
+    }
 
+    const lastSession = sessions[sessions.length - 1];
     if (!lastSession || lastSession.endTime) {
       console.warn('No active session found');
       return;
     }
 
-    // Calculate duration accounting for timezone
+    const currentTime = new Date().toISOString();
     const startTime = new Date(lastSession.startTime);
     const endTime = new Date(currentTime);
-    const durationInMinutes = Math.round(Math.max(0, endTime.getTime() - startTime.getTime()) / (1000 * 60));
+    
+    // Ensure duration calculation is non-negative
+    const durationInMinutes = Math.max(0, Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60)));
 
-    const updatedSession: LocalSession = {
+    const updatedSession = {
       ...lastSession,
       endTime: currentTime,
       duration: {
@@ -351,7 +362,7 @@ export function LearningItemCard({
   };
 
   const getProgressPercentage = () => {
-    if (!item.progress?.total || !item.progress.current) return 0;
+    if (!item.progress || !item.progress.total || !item.progress.current) return 0;
     const totalMinutes = getTotalMinutes(item.progress.total);
     if (totalMinutes === 0) return 0;
     const currentMinutes = getTotalMinutes(item.progress.current);
@@ -371,7 +382,8 @@ export function LearningItemCard({
   };
 
   const renderSessionHistory = () => {
-    if (!item.progress?.sessions || item.progress.sessions.length === 0) {
+    // Add explicit checks for progress and sessions
+    if (!item.progress || !item.progress.sessions || item.progress.sessions.length === 0) {
       return (
         <div className="text-center text-gray-500 py-4">
           <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -467,88 +479,54 @@ export function LearningItemCard({
                     <div className="text-sm text-gray-600 grid grid-cols-2 gap-2">
                       <div className="flex items-center">
                         <Calendar className="w-4 h-4 mr-2" />
-                        <span>{startTime.toLocaleDateString()}</span>
+                        <span>{new Date(session.startTime).toLocaleDateString()}</span>
                       </div>
-                      <div className="flex items-center">
+                      <div className="flex items-center justify-end">
                         <Clock className="w-4 h-4 mr-2" />
-                        <span>{startTime.toLocaleTimeString()}</span>
+                        <span>{new Date(session.startTime).toLocaleTimeString()}</span>
                       </div>
                       {session.endTime && (
                         <>
-                          <div className="flex items-center">
-                            <Calendar className="w-4 h-4 mr-2" />
-                            <span>{endTime.toLocaleDateString()}</span>
+                          <div className="flex items-center text-gray-500">
+                            <span className="ml-6">to</span>
                           </div>
-                          <div className="flex items-center">
+                          <div className="flex items-center justify-end">
                             <Clock className="w-4 h-4 mr-2" />
-                            <span>{endTime.toLocaleTimeString()}</span>
+                            <span>{new Date(session.endTime).toLocaleTimeString()}</span>
+                          </div>
+                          <div className="col-span-2 flex items-center justify-end mt-1 text-green-600 font-medium">
+                            <Clock className="w-4 h-4 mr-2" />
+                            <span>Duration: {session.duration ? `${session.duration.hours}h ${session.duration.minutes}m` : 'N/A'}</span>
                           </div>
                         </>
                       )}
                     </div>
 
                     {session.description && (
-                      <div className="text-sm text-gray-600 bg-white bg-opacity-50 p-3 rounded-lg">
-                        <p className="font-medium mb-1">Session Description:</p>
+                      <div className="mt-3 text-sm text-gray-600 bg-white bg-opacity-50 p-3 rounded-lg">
+                        <p className="font-medium mb-1">Description:</p>
                         <p>{session.description}</p>
                       </div>
                     )}
 
                     {/* Session Notes */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h5 className="font-medium text-sm text-gray-700">Session Notes</h5>
-                        {isCurrentSession && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setActiveSessionIndex(index)}
-                            className="text-blue-600 hover:text-blue-700"
-                          >
-                            <MessageSquare className="w-4 h-4 mr-1" />
-                            Add Note
-                          </Button>
-                        )}
-                      </div>
-                      
-                      {session.notes && session.notes.length > 0 ? (
+                    {session.notes && session.notes.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        <h5 className="text-sm font-medium text-gray-700">Session Notes</h5>
                         <div className="space-y-2">
                           {session.notes.map((note, noteIndex) => (
-                            <div key={noteIndex} className="bg-white p-2 rounded border border-gray-100">
-                              <p className="text-sm text-gray-600">
-                                {typeof note === 'string' 
-                                  ? note 
-                                  : note.content}
-                              </p>
+                            <div key={noteIndex} className="bg-white bg-opacity-50 p-2 rounded-lg border border-gray-100">
+                              <p className="text-gray-800">{typeof note === 'string' ? note : note.content}</p>
                               {typeof note !== 'string' && (
-                                <p className="text-xs text-gray-400 mt-1">
-                                  {note.timestamp}
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {new Date(note.timestamp).toLocaleTimeString()}
                                 </p>
                               )}
                             </div>
                           ))}
                         </div>
-                      ) : (
-                        <p className="text-sm text-gray-500 italic">No notes for this session</p>
-                      )}
-
-                      {isCurrentSession && isExpanded && (
-                        <div className="flex gap-2 mt-2">
-                          <Input
-                            value={sessionNote}
-                            onChange={(e) => setSessionNote(e.target.value)}
-                            placeholder="Add a note..."
-                            className="flex-1"
-                          />
-                          <Button
-                            onClick={() => handleAddSessionNote(sessionNote)}
-                            disabled={!sessionNote.trim()}
-                          >
-                            Add
-                          </Button>
-                        </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -607,30 +585,30 @@ export function LearningItemCard({
       {/* Delete Confirmation Dialog */}
       {showDeleteConfirm && (
         <div className="absolute inset-0 bg-white bg-opacity-95 z-10 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white p-6 rounded-lg shadow-lg border border-red-200 max-w-sm w-full">
-            <div className="text-center mb-4">
-              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-2" />
-              <h3 className="text-lg font-semibold text-gray-900">Delete Item</h3>
-              <p className="text-gray-600 mt-1">Are you sure you want to delete "{item.title}"? This action cannot be undone.</p>
-            </div>
-            <div className="flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowDeleteConfirm(false)}
-                className="border-gray-300 hover:bg-gray-50"
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleDelete}
-                className="bg-red-500 hover:bg-red-600 text-white"
-              >
-                Delete
-              </Button>
-            </div>
+        <div className="bg-white p-6 rounded-lg shadow-lg border border-red-200 max-w-sm w-full">
+          <div className="text-center mb-4">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-2" />
+            <h3 className="text-lg font-semibold text-gray-900">Delete Item</h3>
+            <p className="text-gray-600 mt-1">Are you sure you want to delete "{item.title}"? This action cannot be undone.</p>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteConfirm(false)}
+              className="border-gray-300 hover:bg-gray-50"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Delete
+            </Button>
           </div>
         </div>
+      </div>
       )}
 
       {/* Header Section */}
@@ -743,12 +721,12 @@ export function LearningItemCard({
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-gray-500" />
             <span className="text-sm text-gray-600">
-              {formatDuration(getTotalMinutes(item.progress?.current))} / 
-              {item.progress?.total ? formatDuration(getTotalMinutes(item.progress.total)) : '∞'}
+              {formatDuration(getTotalMinutes(item.progress && item.progress.current))} / 
+              {item.progress && item.progress.total ? formatDuration(getTotalMinutes(item.progress.total)) : '∞'}
             </span>
           </div>
           <div className="flex items-center gap-2">
-            {item.progress?.lastAccessed ? (
+            {item.progress && item.progress.lastAccessed ? (
               <span className="text-sm text-gray-600">
                 {formatTime(elapsedTime)}
               </span>
@@ -756,7 +734,7 @@ export function LearningItemCard({
           </div>
         </div>
         
-        {item.progress?.total && (
+        {item.progress && item.progress.total && (
           <Progress
             value={calculateProgress(item.progress)}
             className="h-2"
@@ -766,7 +744,7 @@ export function LearningItemCard({
 
       {/* Session Controls */}
       <div className="mt-4 space-y-4">
-        {!item.progress?.isActive ? (
+        {!item.progress || !item.progress.isActive ? (
           <Button
             variant="outline"
             className="w-full bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
@@ -787,12 +765,111 @@ export function LearningItemCard({
         )}
 
         {/* Active Session */}
-        {item.progress?.isActive && (
+        {item.progress && item.progress.isActive && (
           <div className="p-4 bg-blue-50 rounded-lg space-y-4 border border-blue-200">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-medium text-blue-800">Current Session</h4>
-              <span className="text-sm text-blue-600">{formatTime(elapsedTime)}</span>
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-blue-800">Current Session</h4>
+                <p className="text-sm text-blue-600">Started at: {new Date(item.progress.sessions[item.progress.sessions.length - 1].startTime).toLocaleTimeString()}</p>
+              </div>
+              <div className="text-right">
+                <span className="text-lg font-semibold text-blue-600">{formatTime(elapsedTime)}</span>
+                <p className="text-sm text-blue-600">Duration</p>
+              </div>
             </div>
+
+            {/* Session Notes Input */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h5 className="text-sm font-medium text-blue-800">Session Notes</h5>
+                <span className="text-xs text-blue-600">Press Enter to save</span>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  value={sessionNote}
+                  onChange={(e) => setSessionNote(e.target.value)}
+                  placeholder="Add a note..."
+                  className="flex-1"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && sessionNote.trim()) {
+                      e.preventDefault();
+                      const newNote = {
+                        content: sessionNote.trim(),
+                        timestamp: new Date().toISOString()
+                      };
+                      const currentSession = item.progress.sessions[item.progress.sessions.length - 1];
+                      const updatedSession = {
+                        ...currentSession,
+                        notes: [...(currentSession.notes || []), newNote]
+                      };
+                      const updatedSessions = [
+                        ...(item.progress.sessions.slice(0, -1) || []),
+                        updatedSession
+                      ];
+                      onUpdate(item.id, {
+                        progress: {
+                          ...item.progress,
+                          sessions: updatedSessions
+                        }
+                      });
+                      setSessionNote('');
+                    }
+                  }}
+                />
+                <Button
+                  variant="outline"
+                  className="bg-blue-100 hover:bg-blue-200 border-blue-200 text-blue-700"
+                  onClick={() => {
+                    if (sessionNote.trim()) {
+                      const newNote = {
+                        content: sessionNote.trim(),
+                        timestamp: new Date().toISOString()
+                      };
+                      const currentSession = item.progress.sessions[item.progress.sessions.length - 1];
+                      const updatedSession = {
+                        ...currentSession,
+                        notes: [...(currentSession.notes || []), newNote]
+                      };
+                      const updatedSessions = [
+                        ...(item.progress.sessions.slice(0, -1) || []),
+                        updatedSession
+                      ];
+                      onUpdate(item.id, {
+                        progress: {
+                          ...item.progress,
+                          sessions: updatedSessions
+                        }
+                      });
+                      setSessionNote('');
+                    }
+                  }}
+                >
+                  Add Note
+                </Button>
+              </div>
+            </div>
+
+            {/* Current Session Notes */}
+            {(() => {
+              const lastSession = item.progress && item.progress.sessions && item.progress.sessions[item.progress.sessions.length - 1];
+              return lastSession && lastSession.notes && lastSession.notes.length > 0 && (
+                <div className="space-y-2 mt-2">
+                  <h5 className="text-sm font-medium text-blue-800">Recent Notes</h5>
+                  <div className="space-y-2">
+                    {lastSession.notes.map((note, index) => (
+                      <div key={index} className="bg-white bg-opacity-50 p-2 rounded-lg">
+                        <p className="text-blue-800">{typeof note === 'string' ? note : note.content}</p>
+                        {typeof note !== 'string' && (
+                          <p className="text-xs text-blue-600 mt-1">
+                            {new Date(note.timestamp).toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>
@@ -800,7 +877,7 @@ export function LearningItemCard({
       {showSessionForm ? (
         renderSessionForm()
       ) : (
-        !item.progress.sessions?.find(s => !s.endTime) && (
+        !item.progress || !item.progress.sessions || !item.progress.sessions.find(s => !s.endTime) && (
           <Button
             onClick={() => setShowSessionForm(true)}
             className="mt-4"
