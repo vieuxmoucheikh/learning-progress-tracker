@@ -51,7 +51,7 @@ export function LearningItemCard({
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [isEditing, setIsEditing] = useState(false);
   const [editedNotes, setEditedNotes] = useState(item.notes || '');
-  const [newSessionNote, setNewSessionNote] = useState('');
+  const [newSessionNotes, setNewSessionNotes] = useState<{ [key: string]: string }>({});
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSessionDetails, setShowSessionDetails] = useState(false);
   const [editTitle, setEditTitle] = useState(item.title);
@@ -132,39 +132,40 @@ export function LearningItemCard({
     setIsEditing(false);
   };
 
-  const handleAddSessionNote = () => {
-    if (newSessionNote.trim()) {
-      // Call the parent component's handler
-      onSessionNoteAdd(item.id, newSessionNote);
-      
-      // Update local state
-      const currentSession = item.progress?.sessions?.find(s => !s.endTime);
-      if (currentSession) {
-        // Update the session with the new note locally
-        const updatedSessions = item.progress.sessions.map(session =>
-          session.startTime === currentSession.startTime
-            ? {
-                ...session,
-                notes: Array.isArray(session.notes) 
-                  ? [...session.notes, newSessionNote]
-                  : [newSessionNote]
-              }
-            : session
-        );
+  const handleAddSessionNote = (sessionStartTime: string) => {
+    const noteText = newSessionNotes[sessionStartTime]?.trim();
+    if (!noteText) return;
 
-        // Update the item with the new session data
-        onUpdate(item.id, {
-          progress: {
-            ...item.progress,
-            sessions: updatedSessions
+    // Find the session
+    const session = item.progress?.sessions?.find(s => s.startTime === sessionStartTime);
+    if (!session) return;
+
+    // Call the parent handler
+    onSessionNoteAdd(item.id, noteText);
+
+    // Update the session with the new note
+    const updatedSessions = item.progress.sessions.map(s => 
+      s.startTime === sessionStartTime
+        ? {
+            ...s,
+            notes: Array.isArray(s.notes) ? [...s.notes, noteText] : [noteText]
           }
-        });
+        : s
+    );
+
+    // Update the item
+    onUpdate(item.id, {
+      progress: {
+        ...item.progress,
+        sessions: updatedSessions
       }
-      
-      // Clear the input
-      setNewSessionNote('');
-      setShowSessionDetails(true);
-    }
+    });
+
+    // Clear the input for this session
+    setNewSessionNotes(prev => ({
+      ...prev,
+      [sessionStartTime]: ''
+    }));
   };
 
   const handleTitleSave = () => {
@@ -314,14 +315,17 @@ export function LearningItemCard({
                   {isCurrentSession && (
                     <div className="mt-3 flex gap-2">
                       <Input
-                        value={newSessionNote}
-                        onChange={(e) => setNewSessionNote(e.target.value)}
+                        value={newSessionNotes[session.startTime] || ''}
+                        onChange={(e) => setNewSessionNotes(prev => ({
+                          ...prev,
+                          [session.startTime]: e.target.value
+                        }))}
                         placeholder="Add a note to this session..."
                         className="flex-1"
                       />
                       <Button 
-                        onClick={handleAddSessionNote}
-                        disabled={!newSessionNote.trim()}
+                        onClick={() => handleAddSessionNote(session.startTime)}
+                        disabled={!newSessionNotes[session.startTime]?.trim()}
                         size="sm"
                         className="bg-blue-500 hover:bg-blue-600 text-white"
                       >
@@ -585,19 +589,17 @@ export function LearningItemCard({
             </div>
             <Textarea
               placeholder="Add a note about your current session..."
-              value={newSessionNote}
-              onChange={(e) => setNewSessionNote(e.target.value)}
+              value={newSessionNotes[String(item.lastTimestamp)]}
+              onChange={(e) => setNewSessionNotes(prev => ({
+                ...prev,
+                [String(item.lastTimestamp)]: e.target.value
+              }))}
               className="border-blue-200 focus:ring-blue-500"
             />
             <Button
-              onClick={() => {
-                if (newSessionNote.trim()) {
-                  onSessionNoteAdd(item.id, newSessionNote);
-                  setNewSessionNote('');
-                }
-              }}
+              onClick={() => handleAddSessionNote(String(item.lastTimestamp))}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              disabled={!newSessionNote.trim()}
+              disabled={!newSessionNotes[String(item.lastTimestamp)]?.trim()}
             >
               <MessageSquare className="w-4 h-4 mr-2" />
               Add Note
