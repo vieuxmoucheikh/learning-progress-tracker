@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Progress } from '../ui/progress';
+import { Badge } from '../components/ui/badge';
 import { 
   Clock, 
   PlayCircle, 
@@ -382,157 +383,68 @@ export function LearningItemCard({
   };
 
   const renderSessionHistory = () => {
-    // Add explicit checks for progress and sessions
-    if (!item.progress || !item.progress.sessions || item.progress.sessions.length === 0) {
+    if (!item.progress?.sessions?.length) {
       return (
-        <div className="text-center text-gray-500 py-4">
-          <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-50" />
-          <p>No learning sessions recorded yet.</p>
-          <p className="text-sm">Start a session to begin tracking your progress!</p>
+        <div className="text-sm text-muted-foreground italic">
+          No sessions recorded yet
         </div>
       );
     }
 
-    // Sort sessions by start time, most recent first
-    const sortedSessions = [...item.progress.sessions].sort(
-      (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
-    );
-
     return (
-      <div className="mt-4 space-y-4">
-        {/* Session Statistics */}
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-100">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-lg text-blue-800">Session Insights</h3>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowStats(!showStats)}
-              className="text-blue-600 hover:text-blue-700"
-            >
-              {showStats ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            </Button>
-          </div>
+      <div className="space-y-3">
+        {item.progress.sessions.map((session, index) => {
+          const startDate = new Date(session.startTime);
+          const endDate = session.endTime ? new Date(session.endTime) : null;
+          const duration = session.duration || { hours: 0, minutes: 0 };
+          const formattedDuration = `${duration.hours}h ${duration.minutes}m`;
           
-          {showStats && (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <p className="text-sm text-gray-600">Total Time</p>
-                <p className="font-medium">{formatDuration(Math.floor(sessionStats.totalTime / 1000 / 60))}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm text-gray-600">Avg. Session</p>
-                <p className="font-medium">{formatDuration(Math.floor(sessionStats.averageSessionLength / 1000 / 60))}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm text-gray-600">Best Time</p>
-                <p className="font-medium">{sessionStats.bestTimeOfDay || 'N/A'}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm text-gray-600">Most Productive</p>
-                <p className="font-medium">{sessionStats.mostProductiveDay || 'N/A'}</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Session List */}
-        <div className="space-y-4">
-          {sortedSessions.map((session, index) => {
-            const isCurrentSession = !session.endTime;
-            const startTime = new Date(session.startTime);
-            const endTime = session.endTime ? new Date(session.endTime) : new Date();
-            const duration = endTime.getTime() - startTime.getTime();
-            const isExpanded = activeSessionIndex === index;
-            
-            return (
-              <div 
-                key={session.startTime} 
-                className={clsx(
-                  "border rounded-lg p-4 space-y-2 transition-all duration-200",
-                  isCurrentSession ? "border-blue-200 bg-blue-50" : "border-gray-200 hover:border-blue-200"
-                )}
-              >
-                <div className="flex justify-between items-center">
-                  <Button
-                    variant="ghost"
-                    className="flex items-center gap-2 hover:bg-transparent p-0"
-                    onClick={() => setActiveSessionIndex(isExpanded ? null : index)}
-                  >
-                    {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    <h4 className="font-medium text-base">
-                      {session.title || `Session ${sortedSessions.length - index}`}
-                    </h4>
-                    {isCurrentSession && (
-                      <span className="text-sm text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full animate-pulse">
-                        Active
-                      </span>
-                    )}
-                  </Button>
-                  <span className="text-sm font-medium text-gray-600">
-                    {formatDuration(Math.floor(duration / 1000 / 60))}
-                  </span>
+          return (
+            <div 
+              key={index}
+              className="border rounded-lg p-3 space-y-2 bg-card"
+            >
+              <div className="flex items-center justify-between">
+                <div className="font-medium">
+                  Session {item.progress.sessions.length - index}
                 </div>
-                
-                {isExpanded && (
-                  <div className="mt-4 space-y-4">
-                    <div className="text-sm text-gray-600 grid grid-cols-2 gap-2">
-                      <div className="flex items-center">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        <span>{new Date(session.startTime).toLocaleDateString()}</span>
-                      </div>
-                      <div className="flex items-center justify-end">
-                        <Clock className="w-4 h-4 mr-2" />
-                        <span>{new Date(session.startTime).toLocaleTimeString()}</span>
-                      </div>
-                      {session.endTime && (
-                        <>
-                          <div className="flex items-center text-gray-500">
-                            <span className="ml-6">to</span>
-                          </div>
-                          <div className="flex items-center justify-end">
-                            <Clock className="w-4 h-4 mr-2" />
-                            <span>{new Date(session.endTime).toLocaleTimeString()}</span>
-                          </div>
-                          <div className="col-span-2 flex items-center justify-end mt-1 text-green-600 font-medium">
-                            <Clock className="w-4 h-4 mr-2" />
-                            <span>Duration: {session.duration ? `${session.duration.hours}h ${session.duration.minutes}m` : 'N/A'}</span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-
-                    {session.description && (
-                      <div className="mt-3 text-sm text-gray-600 bg-white bg-opacity-50 p-3 rounded-lg">
-                        <p className="font-medium mb-1">Description:</p>
-                        <p>{session.description}</p>
-                      </div>
-                    )}
-
-                    {/* Session Notes */}
-                    {session.notes && session.notes.length > 0 && (
-                      <div className="mt-3 space-y-2">
-                        <h5 className="text-sm font-medium text-gray-700">Session Notes</h5>
-                        <div className="space-y-2">
-                          {session.notes.map((note, noteIndex) => (
-                            <div key={noteIndex} className="bg-white bg-opacity-50 p-2 rounded-lg border border-gray-100">
-                              <p className="text-gray-800">{typeof note === 'string' ? note : note.content}</p>
-                              {typeof note !== 'string' && (
-                                <p className="text-xs text-gray-500 mt-1">
-                                  {new Date(note.timestamp).toLocaleTimeString()}
-                                </p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                <Badge variant={session.endTime ? "secondary" : "default"}>
+                  {session.endTime ? "Completed" : "Active"}
+                </Badge>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <div className="text-muted-foreground">Started</div>
+                  <div>{startDate.toLocaleString()}</div>
+                </div>
+                {endDate && (
+                  <div>
+                    <div className="text-muted-foreground">Ended</div>
+                    <div>{endDate.toLocaleString()}</div>
                   </div>
                 )}
               </div>
-            );
-          })}
-        </div>
+
+              <div className="flex items-center gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground mr-2">Duration:</span>
+                  {formattedDuration}
+                </div>
+                {session.notes && session.notes.length > 0 && (
+                  <div className="flex-1">
+                    <span className="text-muted-foreground mr-2">Notes:</span>
+                    <ul>
+                      {session.notes.map((note, index) => (
+                        <li key={index}>{typeof note === 'string' ? note : note.content}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     );
   };
