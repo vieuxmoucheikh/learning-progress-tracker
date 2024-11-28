@@ -43,15 +43,18 @@ interface Time {
   minutes: number;
 }
 
-interface LocalSession extends Session {
+interface LocalSession {
   startTime: string;
   endTime?: string;
-  duration?: Time;
+  duration?: {
+    hours: number;
+    minutes: number;
+  };
   date: string;
   notes?: string[];
   title?: string;
   description?: string;
-  status?: 'in_progress' | 'completed' | 'paused';
+  status: 'in_progress' | 'completed' | 'paused';
 }
 
 export function LearningItemCard({
@@ -194,7 +197,16 @@ export function LearningItemCard({
     setShowSessionForm(false);
     setCurrentSessionTitle('');
     setCurrentSessionDescription('');
-  }, [item.id, item.progress, currentSessionTitle, currentSessionDescription, showSessionForm, onUpdate, onStartTracking, onSetActiveItem]);
+  }, [
+    item.id,
+    item.progress,
+    currentSessionTitle,
+    currentSessionDescription,
+    showSessionForm,
+    onUpdate,
+    onStartTracking,
+    onSetActiveItem
+  ]);
 
   const handleStopSession = useCallback(() => {
     if (!item.progress?.isActive) {
@@ -222,13 +234,13 @@ export function LearningItemCard({
         hours: Math.floor(durationInMinutes / 60),
         minutes: durationInMinutes % 60
       },
-      status: 'completed'
+      status: 'completed' as const
     };
 
     const updatedSessions = [
       ...sessions.slice(0, -1),
       updatedSession
-    ];
+    ] as LocalSession[];
 
     onUpdate(item.id, {
       status: item.status === 'completed' ? 'completed' : 'not_started',
