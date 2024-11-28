@@ -73,33 +73,20 @@ export function LearningItemCard({
 
   // Session management
   const handleStartSession = () => {
-    if (!currentSessionTitle.trim() && !showSessionForm) {
-      setShowSessionForm(true);
-      return;
-    }
-
-    if (showSessionForm && !currentSessionTitle.trim()) {
-      return; // Don't start session if title is empty in form
-    }
-
-    const sessionTitle = currentSessionTitle.trim() || `Session ${(item.progress?.sessions?.length || 0) + 1}`;
-    const sessionDescription = currentSessionDescription.trim();
-    
-    // Create a new session with the current timestamp
     const currentTime = new Date().toISOString();
-    const newSession = {
+    const newSession: Session = {
       startTime: currentTime,
-      title: sessionTitle,
-      description: sessionDescription,
-      date: currentTime,
+      title: currentSessionTitle.trim(),
+      description: currentSessionDescription.trim(),
+      date: currentTime
     };
 
-    // Update the item with the new session
     onUpdate(item.id, {
       progress: {
         ...item.progress,
         sessions: [...(item.progress?.sessions || []), newSession],
-        lastAccessed: currentTime
+        lastAccessed: currentTime,
+        isActive: true
       }
     });
 
@@ -113,17 +100,17 @@ export function LearningItemCard({
   const handleStopSession = () => {
     if (!item.progress?.sessions) return;
 
-    // Find the current session and update it with end time
+    const currentTime = new Date().toISOString();
     const updatedSessions = item.progress.sessions.map(session => 
-      !session.endTime ? { ...session, endTime: new Date().toISOString() } : session
+      !session.endTime ? { ...session, endTime: currentTime } : session
     );
 
-    // Update the item
     onUpdate(item.id, {
+      status: 'not_started',
       progress: {
         ...item.progress,
         sessions: updatedSessions,
-        lastAccessed: undefined // Set to undefined instead of null to properly clear the session
+        lastAccessed: undefined
       }
     });
 
@@ -169,15 +156,19 @@ export function LearningItemCard({
     const handleVisibilityChange = () => {
       if (document.hidden) {
         cancelAnimationFrame(animationFrameId);
-      } else if (item.progress?.lastAccessed) {
-        startTime = Date.now();
-        updateElapsedTime();
+      } else {
+        const isActive = item.progress?.sessions?.some(session => !session.endTime);
+        if (item.progress?.lastAccessed && isActive) {
+          startTime = Date.now();
+          updateElapsedTime();
+        }
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    if (item.progress?.lastAccessed) {
+    const isActive = item.progress?.sessions?.some(session => !session.endTime);
+    if (item.progress?.lastAccessed && isActive) {
       updateElapsedTime();
     }
 
@@ -187,7 +178,7 @@ export function LearningItemCard({
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [item.progress?.lastAccessed]);
+  }, [item.progress?.lastAccessed, item.progress?.sessions]);
 
   const handleStartTracking = () => {
     onStartTracking(item.id);
