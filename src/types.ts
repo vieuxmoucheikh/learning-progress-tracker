@@ -8,7 +8,7 @@ export interface Session {
   endTime?: string;
   duration?: Time;
   date: string;
-  notes?: string[];
+  notes?: (string | { content: string; timestamp: string })[];
   title?: string;
   description?: string;
   status?: 'in_progress' | 'completed' | 'paused';

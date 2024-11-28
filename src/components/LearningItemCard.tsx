@@ -38,11 +38,6 @@ interface Props {
   onSessionNoteAdd: (id: string, note: string) => void;
 }
 
-interface Time {
-  hours: number;
-  minutes: number;
-}
-
 interface LocalSession {
   startTime: string;
   endTime?: string;
@@ -50,11 +45,18 @@ interface LocalSession {
     hours: number;
     minutes: number;
   };
+  hours: number;
+  minutes: number;
   date: string;
-  notes?: string[];
+  notes?: (string | { content: string; timestamp: string })[];
   title?: string;
   description?: string;
   status: 'in_progress' | 'completed' | 'paused';
+}
+
+interface Time {
+  hours: number;
+  minutes: number;
 }
 
 export function LearningItemCard({
@@ -159,6 +161,44 @@ export function LearningItemCard({
   }, [item.progress?.lastAccessed, item.progress?.isActive]);
 
   // Session management with improved validation
+  const handleAddSessionNote = useCallback((note: string) => {
+    if (!item.progress?.isActive) {
+      console.warn('Cannot add note: No active session');
+      return;
+    }
+
+    const sessions = item.progress.sessions;
+    const lastSession = sessions[sessions.length - 1];
+
+    if (!lastSession) {
+      console.warn('No active session found');
+      return;
+    }
+
+    const updatedSession = {
+      ...lastSession,
+      notes: [...(lastSession.notes || []), {
+        content: note,
+        timestamp: new Date().toISOString()
+      }]
+    };
+
+    const updatedSessions = [
+      ...sessions.slice(0, -1),
+      updatedSession
+    ];
+
+    onUpdate(item.id, {
+      progress: {
+        ...item.progress,
+        sessions: updatedSessions
+      }
+    });
+
+    onSessionNoteAdd(item.id, note);
+    setSessionNote('');
+  }, [item.id, item.progress, onUpdate, onSessionNoteAdd]);
+
   const handleStartSession = useCallback(() => {
     if (!showSessionForm) {
       setShowSessionForm(true);
@@ -173,13 +213,17 @@ export function LearningItemCard({
     const sessionTitle = currentSessionTitle.trim() || `Session ${(item.progress?.sessions?.length || 0) + 1}`;
     const sessionDescription = currentSessionDescription.trim();
 
+    // Create new session with proper initialization
     const newSession: LocalSession = {
       startTime: new Date().toISOString(),
       title: sessionTitle,
       description: sessionDescription,
-      date: new Date().toISOString(),
+      date: new Date().toISOString().split('T')[0], // Ensure consistent date format
       notes: [],
-      status: 'in_progress'
+      status: 'in_progress',
+      duration: { hours: 0, minutes: 0 }, // Initialize duration
+      hours: 0, // Add hours
+      minutes: 0 // Add minutes
     };
 
     onUpdate(item.id, {
@@ -223,9 +267,10 @@ export function LearningItemCard({
       return;
     }
 
+    // Calculate duration accounting for timezone
     const startTime = new Date(lastSession.startTime);
     const endTime = new Date(currentTime);
-    const durationInMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
+    const durationInMinutes = Math.round(Math.max(0, endTime.getTime() - startTime.getTime()) / (1000 * 60));
 
     const updatedSession: LocalSession = {
       ...lastSession,
@@ -234,13 +279,15 @@ export function LearningItemCard({
         hours: Math.floor(durationInMinutes / 60),
         minutes: durationInMinutes % 60
       },
+      hours: Math.floor(durationInMinutes / 60),
+      minutes: durationInMinutes % 60,
       status: 'completed' as const
     };
 
     const updatedSessions = [
       ...sessions.slice(0, -1),
       updatedSession
-    ] as LocalSession[];
+    ];
 
     onUpdate(item.id, {
       status: item.status === 'completed' ? 'completed' : 'not_started',
@@ -254,50 +301,7 @@ export function LearningItemCard({
 
     onStopTracking(item.id);
     onSetActiveItem(null);
-  }, [item.id, item.progress, item.status, onUpdate, onStopTracking, onSetActiveItem]);
-
-  // Render session form
-  const renderSessionForm = () => {
-    if (!showSessionForm) return null;
-
-    return (
-      <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <h3 className="font-medium text-gray-900">New Learning Session</h3>
-        <Input
-          placeholder="Session Title (optional)"
-          value={currentSessionTitle}
-          onChange={(e) => setCurrentSessionTitle(e.target.value)}
-          className="w-full"
-        />
-        <Textarea
-          placeholder="Session Description (optional)"
-          value={currentSessionDescription}
-          onChange={(e) => setCurrentSessionDescription(e.target.value)}
-          className="w-full"
-        />
-        <div className="flex justify-end gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setShowSessionForm(false);
-              setCurrentSessionTitle('');
-              setCurrentSessionDescription('');
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={handleStartSession}
-          >
-            Start Session
-          </Button>
-        </div>
-      </div>
-    );
-  };
+  }, [item, onUpdate, onStopTracking, onSetActiveItem]);
 
   const handleStartTracking = () => {
     onStartTracking(item.id);
@@ -511,7 +515,16 @@ export function LearningItemCard({
                         <div className="space-y-2">
                           {session.notes.map((note, noteIndex) => (
                             <div key={noteIndex} className="bg-white p-2 rounded border border-gray-100">
-                              <p className="text-sm text-gray-600">{note}</p>
+                              <p className="text-sm text-gray-600">
+                                {typeof note === 'string' 
+                                  ? note 
+                                  : note.content}
+                              </p>
+                              {typeof note !== 'string' && (
+                                <p className="text-xs text-gray-400 mt-1">
+                                  {note.timestamp}
+                                </p>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -528,7 +541,7 @@ export function LearningItemCard({
                             className="flex-1"
                           />
                           <Button
-                            onClick={() => onSessionNoteAdd(item.id, sessionNote)}
+                            onClick={() => handleAddSessionNote(sessionNote)}
                             disabled={!sessionNote.trim()}
                           >
                             Add
@@ -541,6 +554,40 @@ export function LearningItemCard({
               </div>
             );
           })}
+        </div>
+      </div>
+    );
+  };
+
+  const renderSessionForm = () => {
+    if (!showSessionForm) return null;
+
+    return (
+      <div className="mt-4 space-y-4">
+        <Input
+          placeholder="Session Title (optional)"
+          value={currentSessionTitle}
+          onChange={(e) => setCurrentSessionTitle(e.target.value)}
+        />
+        <Textarea
+          placeholder="Session Description (optional)"
+          value={currentSessionDescription}
+          onChange={(e) => setCurrentSessionDescription(e.target.value)}
+        />
+        <div className="flex space-x-2">
+          <Button 
+            onClick={handleStartSession} 
+            className="w-full"
+          >
+            Confirm Session Start
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => setShowSessionForm(false)} 
+            className="w-full"
+          >
+            Cancel
+          </Button>
         </div>
       </div>
     );
@@ -739,9 +786,6 @@ export function LearningItemCard({
           </Button>
         )}
 
-        {/* Session Form */}
-        {renderSessionForm()}
-
         {/* Active Session */}
         {item.progress?.lastAccessed && (
           <div className="p-4 bg-blue-50 rounded-lg space-y-4 border border-blue-200">
@@ -754,26 +798,7 @@ export function LearningItemCard({
       </div>
 
       {showSessionForm ? (
-        <div className="mt-4 space-y-4">
-          <Input
-            value={currentSessionTitle}
-            onChange={(e) => setCurrentSessionTitle(e.target.value)}
-            placeholder="Session Title (optional)"
-          />
-          <Textarea
-            value={currentSessionDescription}
-            onChange={(e) => setCurrentSessionDescription(e.target.value)}
-            placeholder="Session Description (optional)"
-          />
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setShowSessionForm(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleStartSession}>
-              Start Session
-            </Button>
-          </div>
-        </div>
+        renderSessionForm()
       ) : (
         !item.progress.sessions?.find(s => !s.endTime) && (
           <Button
