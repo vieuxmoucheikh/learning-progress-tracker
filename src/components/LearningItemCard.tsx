@@ -221,8 +221,9 @@ export function LearningItemCard({
       <div className="mt-4 space-y-4">
         <h3 className="font-semibold text-lg">Session History</h3>
         {sortedSessions.map((session, index) => {
-          const sessionNotes = Array.isArray(session.notes) ? session.notes : [];
+          const sessionNotes = session.notes || [];
           const isCurrentSession = !session.endTime;
+          const showNotes = showSessionNotes[session.startTime] || isCurrentSession;
           
           return (
             <div key={session.startTime} className={clsx(
@@ -240,7 +241,7 @@ export function LearningItemCard({
                   onClick={() => toggleSessionNotes(session.startTime)}
                   className="text-gray-500 hover:text-gray-700"
                 >
-                  {showSessionNotes[session.startTime] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  {showNotes ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
               </div>
               
@@ -272,19 +273,19 @@ export function LearningItemCard({
                 <div className="flex justify-between items-center mb-2">
                   <h5 className="font-medium text-sm">
                     Session Notes 
-                    {isCurrentSession && sessionNotes.length > 0 && (
+                    {sessionNotes.length > 0 && (
                       <span className="ml-2 text-sm text-blue-600">
                         ({sessionNotes.length})
                       </span>
                     )}
                   </h5>
-                  {!showSessionNotes[session.startTime] && sessionNotes.length > 0 && (
+                  {!showNotes && sessionNotes.length > 0 && (
                     <span className="text-xs text-gray-500">{sessionNotes.length} note{sessionNotes.length !== 1 ? 's' : ''}</span>
                   )}
                 </div>
                 
                 <div className="space-y-2">
-                  {showSessionNotes[session.startTime] && sessionNotes.length > 0 && (
+                  {showNotes && (
                     <div className="space-y-2">
                       {sessionNotes.map((note, noteIndex) => (
                         <div key={noteIndex} className="bg-gray-50 p-2 rounded text-sm">
