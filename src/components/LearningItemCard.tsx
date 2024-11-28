@@ -722,7 +722,7 @@ export function LearningItemCard({
             onClick={() => setShowDeleteConfirm(true)}
             className="text-red-400 hover:text-red-600 hover:bg-red-50"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-4 h-4" />
           </Button>
           {item.url && (
             <Button
@@ -766,7 +766,7 @@ export function LearningItemCard({
 
       {/* Session Controls */}
       <div className="mt-4 space-y-4">
-        {!item.progress?.lastAccessed ? (
+        {!item.progress?.isActive ? (
           <Button
             variant="outline"
             className="w-full bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
@@ -787,7 +787,7 @@ export function LearningItemCard({
         )}
 
         {/* Active Session */}
-        {item.progress?.lastAccessed && (
+        {item.progress?.isActive && (
           <div className="p-4 bg-blue-50 rounded-lg space-y-4 border border-blue-200">
             <div className="flex items-center justify-between mb-2">
               <h4 className="font-medium text-blue-800">Current Session</h4>
