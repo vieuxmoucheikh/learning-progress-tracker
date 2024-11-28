@@ -38,6 +38,22 @@ interface Props {
   onSessionNoteAdd: (id: string, note: string) => void;
 }
 
+interface Time {
+  hours: number;
+  minutes: number;
+}
+
+interface LocalSession extends Session {
+  startTime: string;
+  endTime?: string;
+  duration?: Time;
+  date: string;
+  notes?: string[];
+  title?: string;
+  description?: string;
+  status?: 'in_progress' | 'completed' | 'paused';
+}
+
 export function LearningItemCard({
   item,
   onUpdate,
@@ -70,18 +86,32 @@ export function LearningItemCard({
     mostProductiveDay: '',
   });
   const [showStats, setShowStats] = useState(false);
+  const [sessionNote, setSessionNote] = useState('');
+  const [activeSessionIndex, setActiveSessionIndex] = useState<number | null>(null);
 
-  // Session management
-  const handleStartSession = () => {
+  // Session management with improved state handling
+  const handleStartSession = useCallback(() => {
+    if (item.progress?.isActive) {
+      console.warn('A session is already active');
+      return;
+    }
+
     const currentTime = new Date().toISOString();
-    const newSession: Session = {
+    const sessionTitle = currentSessionTitle.trim() || `Session ${(item.progress?.sessions?.length || 0) + 1}`;
+    const sessionDescription = currentSessionDescription.trim();
+
+    const newSession: LocalSession = {
       startTime: currentTime,
-      title: currentSessionTitle.trim(),
-      description: currentSessionDescription.trim(),
-      date: currentTime
+      title: sessionTitle,
+      description: sessionDescription,
+      date: currentTime,
+      notes: [],
+      duration: { hours: 0, minutes: 0 },
+      status: 'in_progress'
     };
 
     onUpdate(item.id, {
+      status: 'in_progress',
       progress: {
         ...item.progress,
         sessions: [...(item.progress?.sessions || []), newSession],
@@ -95,10 +125,13 @@ export function LearningItemCard({
     setShowSessionForm(false);
     setCurrentSessionTitle('');
     setCurrentSessionDescription('');
-  };
+  }, [item.id, item.progress, currentSessionTitle, currentSessionDescription, onUpdate, onStartTracking, onSetActiveItem]);
 
-  const handleStopSession = () => {
-    if (!item.progress?.sessions) return;
+  const handleStopSession = useCallback(() => {
+    if (!item.progress?.sessions || !item.progress.isActive) {
+      console.warn('No active session to stop');
+      return;
+    }
 
     const currentTime = new Date().toISOString();
     const updatedSessions = item.progress.sessions.map(session => 
@@ -106,79 +139,85 @@ export function LearningItemCard({
     );
 
     onUpdate(item.id, {
-      status: 'not_started',
+      status: item.status === 'completed' ? 'completed' : 'not_started',
       progress: {
         ...item.progress,
         sessions: updatedSessions,
-        lastAccessed: undefined
+        lastAccessed: undefined,
+        isActive: false
       }
     });
 
     onStopTracking(item.id);
     onSetActiveItem(null);
-    setShowSessionForm(false);
-    setCurrentSessionTitle('');
-    setCurrentSessionDescription('');
-  };
+  }, [item.id, item.progress, item.status, onUpdate, onStopTracking, onSetActiveItem]);
 
+  // Improved note-taking functionality
   const handleAddNote = useCallback((sessionStartTime: string, note: string) => {
-    // Notes are no longer supported in sessions
-    console.warn('Session notes are no longer supported');
-  }, []);
+    if (!note.trim()) return;
 
-  const handleKeyPress = useCallback((e: React.KeyboardEvent, sessionStartTime: string) => {
-    // Notes are no longer supported in sessions
-    console.warn('Session notes are no longer supported');
-  }, []);
+    const updatedSessions = item.progress?.sessions.map((session, index) => {
+      if (session.startTime === sessionStartTime) {
+        return {
+          ...session,
+          notes: [...(session.notes || []), note.trim()]
+        };
+      }
+      return session;
+    });
 
+    onUpdate(item.id, {
+      progress: {
+        ...item.progress,
+        sessions: updatedSessions
+      }
+    });
+
+    setSessionNote('');
+  }, [item.id, item.progress, onUpdate]);
+
+  // Timer implementation with improved visibility handling
   useEffect(() => {
-    setEditedNotes(item.notes || '');
-    setEditTitle(item.title);
-  }, [item.notes, item.title]);
-
-  // Timer implementation with visibility change handling
-  useEffect(() => {
-    let startTime = Date.now();
-    let animationFrameId: number;
+    let timerInterval: NodeJS.Timeout | null = null;
     
     const updateElapsedTime = () => {
-      if (item.progress?.lastAccessed) {
+      if (item.progress?.lastAccessed && item.progress.isActive) {
         const currentTime = Date.now();
         const elapsed = Math.floor((currentTime - new Date(item.progress.lastAccessed).getTime()) / 1000);
         setElapsedTime(elapsed);
-        animationFrameId = requestAnimationFrame(updateElapsedTime);
       } else {
         setElapsedTime(0);
-        cancelAnimationFrame(animationFrameId);
       }
     };
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        cancelAnimationFrame(animationFrameId);
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
       } else {
-        const isActive = item.progress?.sessions?.some(session => !session.endTime);
-        if (item.progress?.lastAccessed && isActive) {
-          startTime = Date.now();
+        if (item.progress?.isActive) {
           updateElapsedTime();
+          timerInterval = setInterval(updateElapsedTime, 1000);
         }
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    const isActive = item.progress?.sessions?.some(session => !session.endTime);
-    if (item.progress?.lastAccessed && isActive) {
+    if (item.progress?.isActive) {
       updateElapsedTime();
+      timerInterval = setInterval(updateElapsedTime, 1000);
     }
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
+      if (timerInterval) {
+        clearInterval(timerInterval);
       }
     };
-  }, [item.progress?.lastAccessed, item.progress?.sessions]);
+  }, [item.progress?.lastAccessed, item.progress?.isActive]);
 
   const handleStartTracking = () => {
     onStartTracking(item.id);
@@ -308,14 +347,23 @@ export function LearningItemCard({
             const startTime = new Date(session.startTime);
             const endTime = session.endTime ? new Date(session.endTime) : new Date();
             const duration = endTime.getTime() - startTime.getTime();
+            const isExpanded = activeSessionIndex === index;
             
             return (
-              <div key={session.startTime} className={clsx(
-                "border rounded-lg p-4 space-y-2 transition-all duration-200",
-                isCurrentSession ? "border-blue-200 bg-blue-50" : "border-gray-200 hover:border-blue-200"
-              )}>
+              <div 
+                key={session.startTime} 
+                className={clsx(
+                  "border rounded-lg p-4 space-y-2 transition-all duration-200",
+                  isCurrentSession ? "border-blue-200 bg-blue-50" : "border-gray-200 hover:border-blue-200"
+                )}
+              >
                 <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-2 hover:bg-transparent p-0"
+                    onClick={() => setActiveSessionIndex(isExpanded ? null : index)}
+                  >
+                    {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     <h4 className="font-medium text-base">
                       {session.title || `Session ${sortedSessions.length - index}`}
                     </h4>
@@ -324,39 +372,90 @@ export function LearningItemCard({
                         Active
                       </span>
                     )}
-                  </div>
+                  </Button>
                   <span className="text-sm font-medium text-gray-600">
                     {formatDuration(Math.floor(duration / 1000 / 60))}
                   </span>
                 </div>
                 
-                <div className="text-sm text-gray-600 grid grid-cols-2 gap-2">
-                  <div className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    <span>{startTime.toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Clock className="w-4 h-4 mr-2" />
-                    <span>{startTime.toLocaleTimeString()}</span>
-                  </div>
-                  {session.endTime && (
-                    <>
+                {isExpanded && (
+                  <div className="mt-4 space-y-4">
+                    <div className="text-sm text-gray-600 grid grid-cols-2 gap-2">
                       <div className="flex items-center">
                         <Calendar className="w-4 h-4 mr-2" />
-                        <span>{endTime.toLocaleDateString()}</span>
+                        <span>{startTime.toLocaleDateString()}</span>
                       </div>
                       <div className="flex items-center">
                         <Clock className="w-4 h-4 mr-2" />
-                        <span>{endTime.toLocaleTimeString()}</span>
+                        <span>{startTime.toLocaleTimeString()}</span>
                       </div>
-                    </>
-                  )}
-                </div>
+                      {session.endTime && (
+                        <>
+                          <div className="flex items-center">
+                            <Calendar className="w-4 h-4 mr-2" />
+                            <span>{endTime.toLocaleDateString()}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Clock className="w-4 h-4 mr-2" />
+                            <span>{endTime.toLocaleTimeString()}</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
 
-                {session.description && (
-                  <div className="text-sm text-gray-600 bg-white bg-opacity-50 p-3 rounded-lg">
-                    <p className="font-medium mb-1">Session Description:</p>
-                    <p>{session.description}</p>
+                    {session.description && (
+                      <div className="text-sm text-gray-600 bg-white bg-opacity-50 p-3 rounded-lg">
+                        <p className="font-medium mb-1">Session Description:</p>
+                        <p>{session.description}</p>
+                      </div>
+                    )}
+
+                    {/* Session Notes */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h5 className="font-medium text-sm text-gray-700">Session Notes</h5>
+                        {isCurrentSession && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setActiveSessionIndex(index)}
+                            className="text-blue-600 hover:text-blue-700"
+                          >
+                            <MessageSquare className="w-4 h-4 mr-1" />
+                            Add Note
+                          </Button>
+                        )}
+                      </div>
+                      
+                      {session.notes && session.notes.length > 0 ? (
+                        <div className="space-y-2">
+                          {session.notes.map((note, noteIndex) => (
+                            <div key={noteIndex} className="bg-white p-2 rounded border border-gray-100">
+                              <p className="text-sm text-gray-600">{note}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500 italic">No notes for this session</p>
+                      )}
+
+                      {isCurrentSession && isExpanded && (
+                        <div className="flex gap-2 mt-2">
+                          <Input
+                            value={sessionNote}
+                            onChange={(e) => setSessionNote(e.target.value)}
+                            placeholder="Add a note..."
+                            className="flex-1"
+                          />
+                          <Button
+                            onClick={() => handleAddNote(session.startTime, sessionNote)}
+                            disabled={!sessionNote.trim()}
+                          >
+                            Add
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
