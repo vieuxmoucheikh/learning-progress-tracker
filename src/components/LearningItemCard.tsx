@@ -85,13 +85,13 @@ export function LearningItemCard({
 
   // Timer implementation with visibility change handling
   useEffect(() => {
-    let startTime = performance.now();
+    let startTime = Date.now();
     let animationFrameId: number;
     
     const updateElapsedTime = () => {
       if (item.lastTimestamp) {
-        const currentTime = performance.now();
-        const elapsed = Math.floor((currentTime - startTime + (item.lastTimestamp - Date.now())) / 1000);
+        const currentTime = Date.now();
+        const elapsed = Math.floor((currentTime - item.lastTimestamp) / 1000);
         setElapsedTime(elapsed);
         animationFrameId = requestAnimationFrame(updateElapsedTime);
       } else {
@@ -103,7 +103,7 @@ export function LearningItemCard({
       if (document.hidden) {
         cancelAnimationFrame(animationFrameId);
       } else {
-        startTime = performance.now() - (elapsedTime * 1000);
+        startTime = Date.now();
         updateElapsedTime();
       }
     };
@@ -115,7 +115,7 @@ export function LearningItemCard({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [item.lastTimestamp, elapsedTime]);
+  }, [item.lastTimestamp]);
 
   const handleStartTracking = () => {
     onStartTracking(item.id);
@@ -137,13 +137,14 @@ export function LearningItemCard({
       onSessionNoteAdd(item.id, newSessionNote);
       setNewSessionNote('');
       
-      // Ensure notes are visible for the current session
+      // Force show the notes for the current session
       const currentSession = item.progress?.sessions?.find(s => !s.endTime);
       if (currentSession) {
         setShowSessionNotes(prev => ({
           ...prev,
           [currentSession.startTime]: true
         }));
+        setShowSessionDetails(true); // Make sure session history is expanded
       }
     }
   };
@@ -326,9 +327,10 @@ export function LearningItemCard({
     if (item.progress?.sessions) {
       const initialState = item.progress.sessions.reduce((acc, session) => ({
         ...acc,
-        [session.startTime]: (session.notes?.length ?? 0) > 0 || !session.endTime // Show notes if there are any or if it's the current session
+        [session.startTime]: true // Always show notes by default
       }), {});
       setShowSessionNotes(initialState);
+      setShowSessionDetails(true); // Auto-expand session history
     }
   }, [item.progress?.sessions]);
 
