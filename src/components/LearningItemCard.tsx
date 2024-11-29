@@ -182,13 +182,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   }, [item.id, activeSession, item.progress, onStopTracking, onSetActiveItem, onUpdate]);
 
   const handleAddNote = useCallback(() => {
-    if (!sessionNote.trim()) return;
+    if (!sessionNote.trim() || !activeSession) return;
 
     const sessions = item.progress.sessions || [];
-    const activeSession = sessions.find(s => !s.endTime);
     
-    if (!activeSession) return;
-
     const updatedSessions = sessions.map(session => {
       if (session.startTime === activeSession.startTime) {
         return {
@@ -209,7 +206,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     onSessionNoteAdd(item.id, sessionNote);
     setSessionNote('');
     setShowNoteInput(false);
-  }, [item.id, item.progress, sessionNote, onSessionNoteAdd, onUpdate]);
+  }, [item.id, item.progress, sessionNote, onSessionNoteAdd, onUpdate, activeSession]);
 
   const handleSaveNotes = () => {
     onNotesUpdate(item.id, editedNotes);
