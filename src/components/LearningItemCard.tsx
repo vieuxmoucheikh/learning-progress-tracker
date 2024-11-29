@@ -109,8 +109,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
   const handleStartTracking = useCallback(() => {
     // First, ensure no active sessions exist
-    const hasActiveSession = item.progress.sessions.some(session => !session.endTime);
-    if (hasActiveSession) {
+    if (activeSession) {
       return;
     }
 
@@ -120,7 +119,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       notes: []
     };
 
-    const updatedSessions = [newSession, ...(item.progress.sessions || [])];
+    const updatedSessions = [newSession, ...(item.progress?.sessions || [])];
     
     onUpdate(item.id, {
       progress: {
@@ -129,9 +128,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       }
     });
 
-    onSetActiveItem(item.id);
     onStartTracking(item.id);
-  }, [item.id, item.progress.sessions, onStartTracking, onSetActiveItem, onUpdate]);
+    onSetActiveItem(item.id);
+  }, [item.id, activeSession, item.progress, onStartTracking, onSetActiveItem, onUpdate]);
 
   const handleStopTracking = useCallback(() => {
     const activeSession = item.progress.sessions.find(session => !session.endTime);
@@ -143,7 +142,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     const durationInMinutes = Math.round((endTimeDate.getTime() - startTime.getTime()) / (1000 * 60));
 
     const updatedSessions = item.progress.sessions.map(session => {
-      if (session.startTime === activeSession.startTime) {
+      if (!session.endTime) {
         return {
           ...session,
           endTime,
