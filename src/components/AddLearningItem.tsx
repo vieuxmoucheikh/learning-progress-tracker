@@ -9,6 +9,12 @@ const generateId = (): string => {
   return 'id-' + Math.random().toString(36).substr(2, 9);
 };
 
+const getAdjustedDateStr = (date: Date) => {
+  const userTimezoneOffset = date.getTimezoneOffset() * 60000;
+  const adjustedDate = new Date(date.getTime() + userTimezoneOffset);
+  return adjustedDate.toISOString().split('T')[0];
+};
+
 interface Props {
   onAdd: (item: LearningItemFormData) => void;
   onClose: () => void;
@@ -28,9 +34,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
     tags: [] as string[],
     current: { hours: 0, minutes: 0 },
     unit: 'hours' as const,
-    date: selectedDate ? 
-      new Date(selectedDate).toISOString().split('T')[0] : 
-      new Date().toISOString().split('T')[0],
+    date: selectedDate ? getAdjustedDateStr(selectedDate) : getAdjustedDateStr(new Date()),
     difficulty: 'medium' as const,
     status: 'not_started' as const
   };
@@ -42,7 +46,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
     if (selectedDate) {
       setFormData(prevData => ({
         ...prevData,
-        date: new Date(selectedDate).toISOString().split('T')[0]
+        date: getAdjustedDateStr(selectedDate)
       }));
     }
   }, [selectedDate]);
@@ -94,8 +98,8 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
         } : undefined,
         category: formData.category || '',
         date: selectedDate ? 
-          new Date(selectedDate).toISOString().split('T')[0] : 
-          new Date().toISOString().split('T')[0],
+          getAdjustedDateStr(selectedDate) : 
+          getAdjustedDateStr(new Date()),
         difficulty: formData.difficulty || 'medium',
         status: formData.status || 'not_started'
       };

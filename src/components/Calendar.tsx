@@ -41,9 +41,9 @@ interface Props {
 
 // Helper function to get timezone-adjusted date string
 const getAdjustedDateStr = (date: Date) => {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString().split('T')[0];
+  const userTimezoneOffset = date.getTimezoneOffset() * 60000;
+  const adjustedDate = new Date(date.getTime() + userTimezoneOffset);
+  return adjustedDate.toISOString().split('T')[0];
 };
 
 // Helper function to format minutes into hours and minutes
