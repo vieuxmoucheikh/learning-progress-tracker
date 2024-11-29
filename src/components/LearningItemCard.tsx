@@ -80,12 +80,18 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     const storedSession = localStorage.getItem(`session_${item.id}`);
     if (storedSession && !item.progress.sessions.some(session => !session.endTime)) {
       const session = JSON.parse(storedSession);
-      onUpdate(item.id, {
-        progress: {
-          ...item.progress,
-          sessions: [...item.progress.sessions, session]
-        }
-      });
+      // Check if this session already exists in the progress
+      const sessionExists = item.progress.sessions.some(
+        existingSession => existingSession.startTime === session.startTime
+      );
+      if (!sessionExists) {
+        onUpdate(item.id, {
+          progress: {
+            ...item.progress,
+            sessions: [...item.progress.sessions, session]
+          }
+        });
+      }
     }
   }, [item.id]);
 
