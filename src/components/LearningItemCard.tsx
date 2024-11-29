@@ -75,44 +75,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     startTime: activeSession?.startTime || null
   });
 
-  // Store active session in localStorage to persist across page refreshes
-  useEffect(() => {
-    const storedSession = localStorage.getItem(`session_${item.id}`);
-    if (storedSession) {
-      const session = JSON.parse(storedSession);
-      // Only restore if there's no active session and this session hasn't been stored yet
-      const hasNoActiveSession = !item.progress.sessions.some(s => !s.endTime);
-      const sessionNotStored = !item.progress.sessions.some(
-        s => s.startTime === session.startTime
-      );
-      
-      if (hasNoActiveSession && sessionNotStored) {
-        onUpdate(item.id, {
-          progress: {
-            ...item.progress,
-            sessions: [session, ...item.progress.sessions]
-          }
-        });
-      } else {
-        // Clear localStorage if session is already stored or there's an active session
-        localStorage.removeItem(`session_${item.id}`);
-      }
-    }
-  }, [item.id, item.progress.sessions]);
-
-  // Update localStorage when session changes
-  useEffect(() => {
-    const activeSession = item.progress.sessions.find(session => !session.endTime);
-    if (activeSession) {
-      localStorage.setItem(`session_${item.id}`, JSON.stringify(activeSession));
-    } else {
-      localStorage.removeItem(`session_${item.id}`);
-    }
-  }, [item.id, item.progress.sessions]);
-
   const handleStartTracking = useCallback(() => {
     // Clear any existing stored session first
     localStorage.removeItem(`session_${item.id}`);
+    
+    // Check if there's already an active session
+    if (item.progress.sessions.some(session => !session.endTime)) {
+      return; // Don't create a new session if one is active
+    }
     
     const newSession = {
       startTime: new Date().toISOString(),
@@ -127,35 +97,38 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       }
     });
     
-    // Store the new session in localStorage
-    localStorage.setItem(`session_${item.id}`, JSON.stringify(newSession));
-    
     onStartTracking(item.id);
     onSetActiveItem(item.id);
-  }, [item.id, onStartTracking, onSetActiveItem, onUpdate]);
+  }, [item.id, onStartTracking, onSetActiveItem, onUpdate, item.progress.sessions]);
 
   const handleStopTracking = useCallback(() => {
     if (!activeSession) return;
 
-    const sessionIndex = item.progress.sessions.findIndex(session => !session.endTime);
-    if (sessionIndex === -1) return;
+    // Find all active sessions
+    const activeSessions = item.progress.sessions.filter(session => !session.endTime);
+    if (activeSessions.length === 0) return;
 
     const endTime = new Date().toISOString();
-    const startTime = new Date(activeSession.startTime);
-    const endTimeDate = new Date(endTime);
-    const durationInMinutes = Math.round((endTimeDate.getTime() - startTime.getTime()) / (1000 * 60));
-
-    const completedSession = {
-      ...activeSession,
-      endTime,
-      duration: {
-        hours: Math.floor(durationInMinutes / 60),
-        minutes: durationInMinutes % 60
-      }
-    };
-
     const updatedSessions = [...item.progress.sessions];
-    updatedSessions[sessionIndex] = completedSession;
+
+    // Complete all active sessions
+    activeSessions.forEach(session => {
+      const sessionIndex = updatedSessions.findIndex(s => s.startTime === session.startTime);
+      if (sessionIndex === -1) return;
+
+      const startTime = new Date(session.startTime);
+      const endTimeDate = new Date(endTime);
+      const durationInMinutes = Math.round((endTimeDate.getTime() - startTime.getTime()) / (1000 * 60));
+
+      updatedSessions[sessionIndex] = {
+        ...session,
+        endTime,
+        duration: {
+          hours: Math.floor(durationInMinutes / 60),
+          minutes: durationInMinutes % 60
+        }
+      };
+    });
 
     onUpdate(item.id, {
       progress: {
@@ -164,9 +137,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       }
     });
 
-    // Clear localStorage when stopping the session
     localStorage.removeItem(`session_${item.id}`);
-
     onStopTracking(item.id);
     onSetActiveItem(null);
     setShowNoteInput(true);
