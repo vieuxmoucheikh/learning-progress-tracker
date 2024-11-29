@@ -41,9 +41,9 @@ interface Props {
 
 // Helper function to get timezone-adjusted date string
 const getAdjustedDateStr = (date: Date) => {
-  const userTimezoneOffset = date.getTimezoneOffset() * 60000;
-  const adjustedDate = new Date(date.getTime() + userTimezoneOffset);
-  return adjustedDate.toISOString().split('T')[0];
+  const d = new Date(date);
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().split('T')[0];
 };
 
 // Helper function to format minutes into hours and minutes
@@ -61,6 +61,15 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
   const [hoveredDay, setHoveredDay] = useState<CalendarDay | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showLegend, setShowLegend] = useState(false);
+
+  // Update current date when external selected date changes
+  useEffect(() => {
+    if (externalSelectedDate) {
+      const newDate = new Date(externalSelectedDate);
+      setSelectedDay(newDate);
+      setCurrentDate(new Date(newDate.getFullYear(), newDate.getMonth(), 1));
+    }
+  }, [externalSelectedDate]);
 
   const calendarData = useMemo<CalendarData>(() => {
     const calendar: CalendarData = {
@@ -320,15 +329,11 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
               {calendarData.month}
               <ChevronDown className="w-4 h-4" />
             </button>
-            <AnimatePresence>
-              {isMonthPickerOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute top-full left-0 mt-1 bg-white shadow-lg rounded-lg p-2 z-50 grid grid-cols-3 gap-1 w-48"
-                >
-                  {Array.from({ length: 12 }).map((_, i) => (
+            {isMonthPickerOpen && (
+              <div className="absolute top-full left-0 mt-1 bg-white shadow-lg rounded-lg p-2 z-50 grid grid-cols-3 gap-1 w-48">
+                {Array.from({ length: 12 }).map((_, i) => {
+                  const monthName = new Date(2000, i).toLocaleString('default', { month: 'short' });
+                  return (
                     <button
                       key={i}
                       onClick={() => {
@@ -344,12 +349,12 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
                           : "hover:bg-gray-100"
                       )}
                     >
-                      {new Date(2000, i).toLocaleString('default', { month: 'short' })}
+                      {monthName}
                     </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  );
+                })}
+              </div>
+            )}
           </div>
           <div className="relative">
             <button
@@ -359,39 +364,32 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
               {calendarData.year}
               <ChevronDown className="w-4 h-4" />
             </button>
-            <AnimatePresence>
-              {isYearPickerOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute top-full left-0 mt-1 bg-white shadow-lg rounded-lg p-2 z-50 grid grid-cols-3 gap-1 w-48"
-                >
-                  {Array.from({ length: 10 }).map((_, i) => {
-                    const year = currentDate.getFullYear() - 5 + i;
-                    return (
-                      <button
-                        key={year}
-                        onClick={() => {
-                          const newDate = new Date(currentDate);
-                          newDate.setFullYear(year);
-                          setCurrentDate(newDate);
-                          setIsYearPickerOpen(false);
-                        }}
-                        className={cn(
-                          "px-2 py-1 rounded text-sm",
-                          currentDate.getFullYear() === year
-                            ? "bg-blue-100 text-blue-700"
-                            : "hover:bg-gray-100"
-                        )}
-                      >
-                        {year}
-                      </button>
-                    );
-                  })}
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {isYearPickerOpen && (
+              <div className="absolute top-full left-0 mt-1 bg-white shadow-lg rounded-lg p-2 z-50 grid grid-cols-3 gap-1 w-48">
+                {Array.from({ length: 10 }, (_, i) => {
+                  const year = currentDate.getFullYear() - 5 + i;
+                  return (
+                    <button
+                      key={year}
+                      onClick={() => {
+                        const newDate = new Date(currentDate);
+                        newDate.setFullYear(year);
+                        setCurrentDate(newDate);
+                        setIsYearPickerOpen(false);
+                      }}
+                      className={cn(
+                        "px-2 py-1 rounded text-sm",
+                        currentDate.getFullYear() === year
+                          ? "bg-blue-100 text-blue-700"
+                          : "hover:bg-gray-100"
+                      )}
+                    >
+                      {year}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
         <button

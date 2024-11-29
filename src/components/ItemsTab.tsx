@@ -44,9 +44,12 @@ export function ItemsTab({
       
       if (selectedDate) {
         const itemDate = new Date(item.date);
-        const selectedDateStr = new Date(selectedDate).toISOString().split('T')[0];
-        const itemDateStr = new Date(itemDate).toISOString().split('T')[0];
-        return matchesSearch && matchesStatus && selectedDateStr === itemDateStr;
+        const selectedDateStr = new Date(selectedDate);
+        selectedDateStr.setMinutes(selectedDateStr.getMinutes() - selectedDateStr.getTimezoneOffset());
+        const itemDateStr = new Date(itemDate);
+        itemDateStr.setMinutes(itemDateStr.getMinutes() - itemDateStr.getTimezoneOffset());
+        return matchesSearch && matchesStatus && 
+          selectedDateStr.toISOString().split('T')[0] === itemDateStr.toISOString().split('T')[0];
       }
       
       return matchesSearch && matchesStatus;
