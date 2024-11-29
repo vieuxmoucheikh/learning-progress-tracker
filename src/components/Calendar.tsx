@@ -171,9 +171,10 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
 
   // Handle date selection
   const handleDateSelect = useCallback((day: CalendarDay) => {
-    const selectedDate = new Date(day.date);
-    setSelectedDay(selectedDate);
-    onDateSelect(selectedDate, day.activities.activeItems, day.activities.completedTasks);
+    setSelectedDay(day.date);
+    const newDate = new Date(day.date);
+    setCurrentDate(newDate);
+    onDateSelect(newDate, day.activities.activeItems, day.activities.completedTasks);
   }, [onDateSelect]);
 
   // Handle keyboard navigation
