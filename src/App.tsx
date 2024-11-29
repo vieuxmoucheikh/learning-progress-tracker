@@ -216,19 +216,29 @@ export default function App() {
     }
   };
 
-  const handleSubmitItem = async (data: LearningItemFormData) => {
+  const handleSubmitItem = async (formData: LearningItemFormData) => {
     try {
-      // Use the selected date from the calendar if available, otherwise use the current date
-      const itemDate = selectedDate ? new Date(selectedDate) : new Date();
-      const newItem = await addLearningItem({
-        ...data,
-        date: itemDate.toISOString(),
-        user_id: user?.id,
-      });
-      
-      dispatch({ type: 'ADD_ITEM', payload: newItem });
+      // Ensure we have the correct date format
+      const itemDate = selectedDate ? 
+        new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] :
+        new Date().toISOString().split('T')[0];
+
+      const newItem: LearningItem = {
+        id: generateId(),
+        ...formData,
+        date: itemDate, // Use the formatted date
+        status: 'not_started',
+        progress: {
+          current: formData.current || { hours: 0, minutes: 0 },
+          total: formData.total || { hours: 0, minutes: 0 },
+          sessions: [],
+          lastAccessed: new Date().toISOString()
+        }
+      };
+
+      const addedItem = await addLearningItem(newItem);
+      dispatch({ type: 'ADD_ITEM', payload: addedItem });
       setShowAddDialog(false);
-      setError(null);
     } catch (error) {
       console.error('Error adding item:', error);
       setError('Failed to add item. Please try again.');
@@ -386,7 +396,10 @@ export default function App() {
     handleUpdateItem(id, updates);
   };
 
-  const handleDashboardAddItem = () => {
+  const handleDashboardAddItem = (date?: Date) => {
+    if (date) {
+      setSelectedDate(date);
+    }
     setShowAddDialog(true);
   };
 
