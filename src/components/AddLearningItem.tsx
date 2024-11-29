@@ -29,7 +29,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
     current: { hours: 0, minutes: 0 },
     unit: 'hours' as const,
     date: selectedDate ? 
-      new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] : 
+      new Date(selectedDate).toISOString().split('T')[0] : 
       new Date().toISOString().split('T')[0],
     difficulty: 'medium' as const,
     status: 'not_started' as const
@@ -42,7 +42,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
     if (selectedDate) {
       setFormData(prevData => ({
         ...prevData,
-        date: new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0]
+        date: new Date(selectedDate).toISOString().split('T')[0]
       }));
     }
   }, [selectedDate]);
@@ -94,7 +94,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
         } : undefined,
         category: formData.category || '',
         date: selectedDate ? 
-          new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] : 
+          new Date(selectedDate).toISOString().split('T')[0] : 
           new Date().toISOString().split('T')[0],
         difficulty: formData.difficulty || 'medium',
         status: formData.status || 'not_started'

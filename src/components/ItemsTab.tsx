@@ -44,8 +44,8 @@ export function ItemsTab({
       
       if (selectedDate) {
         const itemDate = new Date(item.date);
-        const selectedDateStr = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0];
-        const itemDateStr = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate()).toISOString().split('T')[0];
+        const selectedDateStr = new Date(selectedDate).toISOString().split('T')[0];
+        const itemDateStr = new Date(itemDate).toISOString().split('T')[0];
         return matchesSearch && matchesStatus && selectedDateStr === itemDateStr;
       }
       
