@@ -88,7 +88,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         onUpdate(item.id, {
           progress: {
             ...item.progress,
-            sessions: [...item.progress.sessions, session]
+            sessions: [session, ...item.progress.sessions]  // Add new session at the beginning
           }
         });
       }
@@ -115,7 +115,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     onUpdate(item.id, {
       progress: {
         ...item.progress,
-        sessions: [...(item.progress.sessions || []), newSession]
+        sessions: [newSession, ...(item.progress.sessions || [])]  // Add new session at the beginning
       }
     });
     onStartTracking(item.id);
@@ -125,7 +125,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const handleStopTracking = useCallback(() => {
     if (!activeSession) return;
 
-    const sessionIndex = item.progress.sessions.findIndex(session => session.startTime === activeSession.startTime);
+    const sessionIndex = item.progress.sessions.findIndex(session => !session.endTime);
     if (sessionIndex === -1) return;
 
     const endTime = new Date().toISOString();
@@ -155,6 +155,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     onStopTracking(item.id);
     onSetActiveItem(null);
     setShowNoteInput(true);
+    localStorage.removeItem(`session_${item.id}`);
   }, [item.id, item.progress, onStopTracking, onSetActiveItem, onUpdate, activeSession]);
 
   const handleAddNote = useCallback(() => {
@@ -477,7 +478,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
       {/* Session Controls */}
       <div className="mt-4 space-y-4">
-        {!item.progress || !activeSession ? (
+        {!activeSession ? (
           <Button
             variant="outline"
             className="w-full bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
@@ -487,32 +488,30 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
             Start Session
           </Button>
         ) : (
-          <Button
-            variant="outline"
-            className="w-full bg-red-50 hover:bg-red-100 border-red-200 text-red-700"
-            onClick={handleStopTracking}
-          >
-            <StopCircle className="w-4 h-4 mr-2" />
-            Stop Session
-          </Button>
-        )}
+          <>
+            <Button
+              variant="outline"
+              className="w-full bg-red-50 hover:bg-red-100 border-red-200 text-red-700"
+              onClick={handleStopTracking}
+            >
+              <StopCircle className="w-4 h-4 mr-2" />
+              Stop Session
+            </Button>
 
-        {/* Active Session */}
-        {activeSession && (
-          <div className="p-4 bg-blue-50 rounded-lg space-y-4 border border-blue-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium text-blue-800">Active Session</h4>
-                <p className="text-sm text-blue-600">Started at: {new Date(activeSession.startTime).toLocaleTimeString()}</p>
+            {/* Active Session */}
+            <div className="p-4 bg-blue-50 rounded-lg space-y-4 border border-blue-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium text-blue-800">Active Session</h4>
+                  <p className="text-sm text-blue-600">Started at: {new Date(activeSession.startTime).toLocaleTimeString()}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-lg font-semibold text-blue-600">{formatElapsedTime()}</span>
+                  <p className="text-sm text-blue-600">Duration</p>
+                </div>
               </div>
-              <div className="text-right">
-                <span className="text-lg font-semibold text-blue-600">{formatElapsedTime()}</span>
-                <p className="text-sm text-blue-600">Duration</p>
-              </div>
-            </div>
 
-            {/* Session Notes Input */}
-            {showNoteInput && (
+              {/* Session Notes Input */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <h5 className="text-sm font-medium text-blue-800">Session Notes</h5>
@@ -540,10 +539,40 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                   </Button>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          </>
         )}
       </div>
+
+      {/* Show note input after stopping session */}
+      {!activeSession && showNoteInput && (
+        <div className="mt-4 p-4 bg-gray-50 rounded-lg space-y-2 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <h5 className="text-sm font-medium">Add Session Note</h5>
+            <span className="text-xs text-gray-600">Press Enter to save</span>
+          </div>
+          <div className="flex gap-2">
+            <Input
+              value={sessionNote}
+              onChange={(e) => setSessionNote(e.target.value)}
+              placeholder="Add a note for the completed session..."
+              className="flex-1"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && sessionNote.trim()) {
+                  e.preventDefault();
+                  handleAddNote();
+                }
+              }}
+            />
+            <Button
+              variant="outline"
+              onClick={handleAddNote}
+            >
+              Add Note
+            </Button>
+          </div>
+        </div>
+      )}
 
       {renderSessionHistory()}
     </Card>
