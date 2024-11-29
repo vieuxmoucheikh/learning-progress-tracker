@@ -70,24 +70,32 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [showNoteInput, setShowNoteInput] = useState(false);
 
   const activeSession = item.progress?.sessions?.find(session => !session.endTime);
-  const { elapsedTime, formatElapsedTime } = useSessionTimer({
+  const { elapsedTime, formatElapsedTime, lastUpdateTime, isValidSession } = useSessionTimer({
     isActive: !!activeSession,
-    startTime: activeSession?.startTime || null
+    startTime: activeSession?.startTime || null,
+    itemId: item.id
   });
 
-  // Persist active session on mount and cleanup on unmount
+  // Handle session persistence and cleanup
   useEffect(() => {
     const storedSessionStr = localStorage.getItem(`activeSession_${item.id}`);
+    const lastUpdateStr = localStorage.getItem(`sessionLastUpdate_${item.id}`);
     
     if (storedSessionStr) {
       try {
         const storedSession = JSON.parse(storedSessionStr);
+        const lastUpdate = lastUpdateStr ? parseInt(lastUpdateStr, 10) : null;
+        const now = Date.now();
+        
+        // Check if session is stale (no updates in last 5 minutes)
+        const isStaleSession = lastUpdate && (now - lastUpdate) > 5 * 60 * 1000;
+        
         const isAlreadyInSessions = item.progress?.sessions?.some(
           s => s.startTime === storedSession.startTime
         );
         
-        // Only restore if it's not already in sessions and doesn't have an end time
-        if (!isAlreadyInSessions && !storedSession.endTime) {
+        if (!isAlreadyInSessions && !storedSession.endTime && !isStaleSession) {
+          // Valid active session - restore it
           onUpdate(item.id, {
             progress: {
               ...item.progress,
@@ -97,80 +105,81 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           onStartTracking(item.id);
           onSetActiveItem(item.id);
         } else {
-          // Clean up localStorage if session is already in list or has ended
+          // Clean up stale or duplicate session
+          if (isStaleSession && !storedSession.endTime) {
+            // Auto-end stale session
+            const endedSession = {
+              ...storedSession,
+              endTime: new Date(lastUpdate || now).toISOString(),
+              status: 'completed' as const
+            };
+            onUpdate(item.id, {
+              progress: {
+                ...item.progress,
+                sessions: [endedSession, ...(item.progress?.sessions || [])]
+              }
+            });
+          }
           localStorage.removeItem(`activeSession_${item.id}`);
+          localStorage.removeItem(`sessionLastUpdate_${item.id}`);
         }
-      } catch (e) {
-        console.error('Error parsing stored session:', e);
+      } catch (error) {
+        console.error('Error restoring session:', error);
         localStorage.removeItem(`activeSession_${item.id}`);
+        localStorage.removeItem(`sessionLastUpdate_${item.id}`);
       }
     }
-  }, [item.id, item.progress?.sessions]);
+  }, [item.id]);
 
-  const handleStartTracking = useCallback(() => {
-    // First check if there's already an active session
-    const existingActiveSession = item.progress?.sessions?.find(s => !s.endTime);
-    if (existingActiveSession) {
-      return;
-    }
-
-    const newSession = {
+  // Handle session start
+  const handleStartSession = useCallback(() => {
+    if (activeSession) return; // Prevent multiple active sessions
+    
+    const newSession: Session = {
       startTime: new Date().toISOString(),
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString(),
+      status: 'in_progress',
       notes: []
     };
-
-    // Store in localStorage
+    
     localStorage.setItem(`activeSession_${item.id}`, JSON.stringify(newSession));
-
-    // Update state
+    onStartTracking(item.id);
+    onSetActiveItem(item.id);
+    
     onUpdate(item.id, {
       progress: {
         ...item.progress,
         sessions: [newSession, ...(item.progress?.sessions || [])]
       }
     });
+  }, [item.id, activeSession, item.progress, onStartTracking, onSetActiveItem, onUpdate]);
 
-    onStartTracking(item.id);
-    onSetActiveItem(item.id);
-  }, [item.id, item.progress?.sessions, onStartTracking, onSetActiveItem, onUpdate]);
-
-  const handleStopTracking = useCallback(() => {
-    // First remove from localStorage to prevent restoration on refresh
-    localStorage.removeItem(`activeSession_${item.id}`);
-
-    const now = new Date().toISOString();
+  // Handle session stop
+  const handleStopSession = useCallback(() => {
+    if (!activeSession) return;
     
-    // Update all active sessions (should only be one, but handle multiple just in case)
-    const updatedSessions = (item.progress?.sessions || []).map(session => {
-      if (!session.endTime) {
-        const startTime = new Date(session.startTime);
-        const endTimeDate = new Date(now);
-        const durationInMinutes = Math.round((endTimeDate.getTime() - startTime.getTime()) / (1000 * 60));
-
-        return {
-          ...session,
-          endTime: now,
-          duration: {
-            hours: Math.floor(durationInMinutes / 60),
-            minutes: durationInMinutes % 60
-          }
-        };
-      }
-      return session;
-    });
-
+    const endedSession: Session = {
+      ...activeSession,
+      endTime: new Date().toISOString(),
+      status: 'completed'
+    };
+    
+    localStorage.removeItem(`activeSession_${item.id}`);
+    localStorage.removeItem(`sessionLastUpdate_${item.id}`);
+    onStopTracking(item.id);
+    onSetActiveItem(null);
+    
+    const updatedSessions = item.progress?.sessions?.map(s => 
+      s.startTime === activeSession.startTime ? endedSession : s
+    ) || [endedSession];
+    
     onUpdate(item.id, {
       progress: {
         ...item.progress,
         sessions: updatedSessions
       }
     });
-
-    onStopTracking(item.id);
-    onSetActiveItem(null);
-    setShowNoteInput(true);
-  }, [item.id, item.progress?.sessions, onStopTracking, onSetActiveItem, onUpdate]);
+  }, [item.id, activeSession, item.progress, onStopTracking, onSetActiveItem, onUpdate]);
 
   const handleAddNote = useCallback(() => {
     if (!sessionNote.trim()) return;
@@ -496,7 +505,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           <Button
             variant="outline"
             className="w-full bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
-            onClick={handleStartTracking}
+            onClick={handleStartSession}
           >
             <PlayCircle className="w-4 h-4 mr-2" />
             Start Session
@@ -506,7 +515,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
             <Button
               variant="outline"
               className="w-full bg-red-50 hover:bg-red-100 border-red-200 text-red-700"
-              onClick={handleStopTracking}
+              onClick={handleStopSession}
             >
               <StopCircle className="w-4 h-4 mr-2" />
               Stop Session
