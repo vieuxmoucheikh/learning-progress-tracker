@@ -35,15 +35,14 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
     status: 'not_started' as const
   };
 
-  const [formData, setFormData] = useState(initialFormData);
+  const [formData, setFormData] = useState<LearningItemFormData>(initialFormData);
 
-  // Update form data when selectedDate changes
+  // Update form data when selected date changes
   useEffect(() => {
     if (selectedDate) {
-      const formattedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0];
-      setFormData(prev => ({
-        ...prev,
-        date: formattedDate
+      setFormData(prevData => ({
+        ...prevData,
+        date: new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0]
       }));
     }
   }, [selectedDate]);
@@ -94,7 +93,9 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
           minutes: Math.max(0, parseInt(String(formData.total.minutes || 0)) || 0)
         } : undefined,
         category: formData.category || '',
-        date: formData.date || new Date().toISOString().split('T')[0],
+        date: selectedDate ? 
+          new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] : 
+          new Date().toISOString().split('T')[0],
         difficulty: formData.difficulty || 'medium',
         status: formData.status || 'not_started'
       };
