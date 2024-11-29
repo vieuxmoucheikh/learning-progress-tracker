@@ -20,6 +20,7 @@ interface Props {
   onSetActiveItem: (id: string | null) => void;
   onSessionNoteAdd: (id: string, note: string) => void;
   onAddItem: (date?: Date) => void;
+  onDateSelect: (date: Date) => void;
 }
 
 export function DashboardTab({ 
@@ -31,7 +32,8 @@ export function DashboardTab({
   onNotesUpdate, 
   onSetActiveItem,
   onSessionNoteAdd,
-  onAddItem
+  onAddItem,
+  onDateSelect
 }: Props) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [activeTasks, setActiveTasks] = useState<LearningItem[]>([]);
@@ -41,7 +43,8 @@ export function DashboardTab({
     setSelectedDate(date);
     setActiveTasks(active);
     setCompletedTasks(completed);
-  }, []);
+    onDateSelect(date);
+  }, [onDateSelect]);
 
   return (
     <div className="space-y-6">

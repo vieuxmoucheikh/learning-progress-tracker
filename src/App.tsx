@@ -1,6 +1,5 @@
 import { useReducer, useEffect, useState, useMemo } from 'react';
 import { AddLearningItem } from './components/AddLearningItem';
-import { LearningItemCard } from './components/LearningItemCard';
 import { Stats } from './components/Stats';
 import { Insights } from './components/Insights';
 import { LearningInsights } from './components/LearningInsights';
@@ -136,6 +135,8 @@ function reducer(state: State, action: Action): State {
   }
 }
 
+const generateId = () => crypto.randomUUID();
+
 export default function App() {
   const { user } = useAuth();
   const [state, dispatch] = useReducer(reducer, {
@@ -223,20 +224,26 @@ export default function App() {
         new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] :
         new Date().toISOString().split('T')[0];
 
-      const newItem: LearningItem = {
-        id: generateId(),
-        ...formData,
-        date: itemDate, // Use the formatted date
-        status: 'not_started',
-        progress: {
-          current: formData.current || { hours: 0, minutes: 0 },
-          total: formData.total || { hours: 0, minutes: 0 },
-          sessions: [],
-          lastAccessed: new Date().toISOString()
-        }
+      // Create a clean form data object that matches LearningItemFormData
+      const cleanFormData: LearningItemFormData = {
+        title: formData.title,
+        type: formData.type,
+        current: formData.current || { hours: 0, minutes: 0 },
+        unit: formData.unit || 'hours',
+        url: formData.url || '',
+        notes: formData.notes || '',
+        completed: formData.completed || false,
+        priority: formData.priority || 'medium',
+        tags: formData.tags || [],
+        goal: formData.goal,
+        total: formData.total,
+        category: formData.category || '',
+        date: itemDate,
+        difficulty: formData.difficulty || 'medium',
+        status: formData.status || 'not_started'
       };
 
-      const addedItem = await addLearningItem(newItem);
+      const addedItem = await addLearningItem(cleanFormData);
       dispatch({ type: 'ADD_ITEM', payload: addedItem });
       setShowAddDialog(false);
     } catch (error) {
@@ -457,6 +464,12 @@ export default function App() {
               onAddItem={handleDashboardAddItem}
               onUpdate={handleDashboardUpdate}
               onDateSelect={handleDateSelect}
+              onDelete={handleDeleteItem}
+              onStartTracking={handleStartTracking}
+              onStopTracking={handleStopTracking}
+              onNotesUpdate={handleUpdateNotes}
+              onSessionNoteAdd={handleAddSessionNote}
+              onSetActiveItem={handleSetActiveItem}
             />
           )}
 
