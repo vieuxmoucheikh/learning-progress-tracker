@@ -274,7 +274,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
     return (
       <div className="space-y-3">
-        {item.progress.sessions.map((session, index) => {
+        {[...item.progress.sessions].reverse().map((session, index) => {
           const startDate = new Date(session.startTime);
           const endDate = session.endTime ? new Date(session.endTime) : null;
           const duration = session.duration || { hours: 0, minutes: 0 };
@@ -282,13 +282,13 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           
           return (
             <div 
-              key={index}
+              key={session.startTime}
               className="border rounded-lg p-3 space-y-2 bg-card hover:border-blue-200 transition-colors cursor-pointer"
               onClick={() => setShowHistory(true)}
             >
               <div className="flex items-center justify-between">
                 <div className="font-medium">
-                  Session {item.progress.sessions.length - index}
+                  Session {index + 1}
                 </div>
                 <Badge variant={session.endTime ? "secondary" : "default"}>
                   {session.endTime ? "Completed" : "Active"}
