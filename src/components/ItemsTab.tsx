@@ -10,7 +10,7 @@ import { Calendar } from "./Calendar";
 
 interface ItemsTabProps {
   items: LearningItem[];
-  onAddItem: () => void;
+  onAddItem: (selectedDate?: Date) => void;
   onUpdate: (id: string, updates: Partial<LearningItem>) => void;
   onDelete: (id: string) => void;
   onStartTracking: (id: string) => void;
@@ -47,7 +47,10 @@ export function ItemsTab({
 
   const handleDateSelect = (date: Date, activeTasks: LearningItem[], completedTasks: LearningItem[]) => {
     setSelectedDate(date);
-    // You can add additional logic here if needed, such as filtering items by date
+  };
+
+  const handleAddItem = () => {
+    onAddItem(selectedDate ?? undefined);
   };
 
   return (
@@ -84,7 +87,7 @@ export function ItemsTab({
             <CalendarIcon className="h-4 w-4" />
             {showCalendar ? 'Hide Calendar' : 'Show Calendar'}
           </Button>
-          <Button onClick={() => onAddItem()} className="gap-2 bg-blue-600 hover:bg-blue-700">
+          <Button onClick={handleAddItem} className="gap-2 bg-blue-600 hover:bg-blue-700">
             <Plus className="h-4 w-4" />
             Add Item
           </Button>
@@ -98,7 +101,7 @@ export function ItemsTab({
             items={items}
             onDateSelect={handleDateSelect}
             selectedDate={selectedDate}
-            onAddItem={onAddItem}
+            onAddItem={handleAddItem}
           />
         </Card>
       )}
