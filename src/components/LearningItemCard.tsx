@@ -22,7 +22,9 @@ import {
   MessageSquare,
   Calendar,
   MoreVertical,
-  BookOpen
+  BookOpen,
+  StickyNote,
+  CheckCircle2
 } from 'lucide-react';
 import type { LearningItem, Session } from '../types';
 import { formatTime, calculateProgress, formatDuration, getTotalMinutes } from '../lib/utils';
@@ -292,63 +294,84 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           return (
             <div 
               key={session.startTime}
-              className="border rounded-lg p-3 space-y-2 bg-card hover:border-blue-200 transition-colors cursor-pointer"
+              className="border rounded-lg p-4 space-y-3 bg-card hover:bg-gray-50/50 transition-all cursor-pointer shadow-sm hover:shadow-md"
               onClick={() => setShowHistory(true)}
             >
               <div className="flex items-center justify-between">
-                <div className="font-medium">
-                  Session {index + 1}
+                <div className="flex items-center gap-2">
+                  <div className="font-medium text-lg">
+                    Session {index + 1}
+                  </div>
+                  <Badge variant={session.endTime ? "secondary" : "default"} className="capitalize">
+                    {session.endTime ? "Completed" : "Active"}
+                  </Badge>
                 </div>
-                <Badge variant={session.endTime ? "secondary" : "default"}>
-                  {session.endTime ? "Completed" : "Active"}
-                </Badge>
+                <div className="text-sm text-muted-foreground">
+                  {formattedDuration}
+                </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <div className="text-muted-foreground">Started</div>
-                  <div>{startDate.toLocaleString()}</div>
+              <div className="grid grid-cols-2 gap-4 text-sm border-t border-b py-3">
+                <div className="space-y-1">
+                  <div className="text-muted-foreground flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Started
+                  </div>
+                  <div className="font-medium">{startDate.toLocaleString()}</div>
                 </div>
                 {endDate && (
-                  <div>
-                    <div className="text-muted-foreground">Ended</div>
-                    <div>{endDate.toLocaleString()}</div>
+                  <div className="space-y-1">
+                    <div className="text-muted-foreground flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4" />
+                      Ended
+                    </div>
+                    <div className="font-medium">{endDate.toLocaleString()}</div>
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground mr-2">Duration:</span>
-                  {formattedDuration}
-                </div>
-                {session.notes && session.notes.length > 0 && (
-                  <div className="flex-1">
-                    <span className="text-muted-foreground mr-2">Notes:</span>
-                    <ul className="list-disc list-inside">
-                      {session.notes.map((note, noteIndex) => (
-                        <li key={noteIndex} className="text-sm text-gray-600">
-                          {typeof note === 'string' ? note : note.content}
-                        </li>
-                      ))}
-                    </ul>
+              {session.notes && session.notes.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <StickyNote className="h-4 w-4" />
+                    Notes
                   </div>
-                )}
-              </div>
+                  <ul className="space-y-2">
+                    {session.notes.map((note, noteIndex) => (
+                      <li 
+                        key={noteIndex} 
+                        className="text-sm bg-muted/30 p-2 rounded-md"
+                      >
+                        {typeof note === 'string' ? note : note.content}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           );
         })}
         
         {item.progress.sessions.length > (activeSession ? 2 : 1) && (
           <Button
-            variant="ghost"
-            className="w-full text-sm text-muted-foreground hover:text-foreground"
+            variant="outline"
+            className="w-full text-sm gap-2 mt-2"
             onClick={(e) => {
               e.stopPropagation();
               setShowAllSessions(!showAllSessions);
             }}
           >
-            {showAllSessions ? 'Show Less' : `Show ${item.progress.sessions.length - (activeSession ? 2 : 1)} More Sessions`}
+            {showAllSessions ? (
+              <>
+                <ChevronUp className="h-4 w-4" />
+                Show Less
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4" />
+                Show {item.progress.sessions.length - (activeSession ? 2 : 1)} More Sessions
+              </>
+            )}
           </Button>
         )}
       </div>
