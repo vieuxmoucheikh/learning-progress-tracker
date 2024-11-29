@@ -68,6 +68,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [showHistory, setShowHistory] = useState(false);
   const [sessionNote, setSessionNote] = useState('');
   const [showNoteInput, setShowNoteInput] = useState(false);
+  const [showAllSessions, setShowAllSessions] = useState(false);
 
   const activeSession = item.progress?.sessions?.find(session => !session.endTime);
   const { elapsedTime, formatElapsedTime, lastUpdateTime, isValidSession } = useSessionTimer({
@@ -274,9 +275,15 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       );
     }
 
+    const reversedSessions = [...item.progress.sessions].reverse();
+    const activeSession = reversedSessions.find(s => !s.endTime);
+    const displaySessions = showAllSessions 
+      ? reversedSessions
+      : reversedSessions.slice(0, activeSession ? 2 : 1);
+    
     return (
       <div className="space-y-3">
-        {[...item.progress.sessions].reverse().map((session, index) => {
+        {displaySessions.map((session, index) => {
           const startDate = new Date(session.startTime);
           const endDate = session.endTime ? new Date(session.endTime) : null;
           const duration = session.duration || { hours: 0, minutes: 0 };
@@ -331,6 +338,19 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
             </div>
           );
         })}
+        
+        {item.progress.sessions.length > (activeSession ? 2 : 1) && (
+          <Button
+            variant="ghost"
+            className="w-full text-sm text-muted-foreground hover:text-foreground"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowAllSessions(!showAllSessions);
+            }}
+          >
+            {showAllSessions ? 'Show Less' : `Show ${item.progress.sessions.length - (activeSession ? 2 : 1)} More Sessions`}
+          </Button>
+        )}
       </div>
     );
   };
