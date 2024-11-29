@@ -34,6 +34,7 @@ export function ItemsTab({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [showCalendar, setShowCalendar] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   // Filter items based on search and status
   const filteredItems = useMemo(() => {
@@ -43,6 +44,11 @@ export function ItemsTab({
       return matchesSearch && item.status === selectedStatus;
     });
   }, [items, searchQuery, selectedStatus]);
+
+  const handleDateSelect = (date: Date, activeTasks: LearningItem[], completedTasks: LearningItem[]) => {
+    setSelectedDate(date);
+    // You can add additional logic here if needed, such as filtering items by date
+  };
 
   return (
     <div className="space-y-6">
@@ -90,9 +96,9 @@ export function ItemsTab({
         <Card className="p-4">
           <Calendar 
             items={items}
-            onDateSelect={() => {}}
-            selectedDate={null}
-            onAddItem={() => onAddItem()}
+            onDateSelect={handleDateSelect}
+            selectedDate={selectedDate}
+            onAddItem={onAddItem}
           />
         </Card>
       )}
