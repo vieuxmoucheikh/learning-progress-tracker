@@ -78,22 +78,27 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   // Store active session in localStorage to persist across page refreshes
   useEffect(() => {
     const storedSession = localStorage.getItem(`session_${item.id}`);
-    if (storedSession && !item.progress.sessions.some(session => !session.endTime)) {
+    if (storedSession) {
       const session = JSON.parse(storedSession);
-      // Check if this session already exists in the progress
-      const sessionExists = item.progress.sessions.some(
-        existingSession => existingSession.startTime === session.startTime
+      // Only restore if there's no active session and this session hasn't been stored yet
+      const hasNoActiveSession = !item.progress.sessions.some(s => !s.endTime);
+      const sessionNotStored = !item.progress.sessions.some(
+        s => s.startTime === session.startTime
       );
-      if (!sessionExists) {
+      
+      if (hasNoActiveSession && sessionNotStored) {
         onUpdate(item.id, {
           progress: {
             ...item.progress,
-            sessions: [session, ...item.progress.sessions]  // Add new session at the beginning
+            sessions: [session, ...item.progress.sessions]
           }
         });
+      } else {
+        // Clear localStorage if session is already stored or there's an active session
+        localStorage.removeItem(`session_${item.id}`);
       }
     }
-  }, [item.id]);
+  }, [item.id, item.progress.sessions]);
 
   // Update localStorage when session changes
   useEffect(() => {
@@ -106,6 +111,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   }, [item.id, item.progress.sessions]);
 
   const handleStartTracking = useCallback(() => {
+    // Clear any existing stored session first
+    localStorage.removeItem(`session_${item.id}`);
+    
     const newSession = {
       startTime: new Date().toISOString(),
       date: new Date().toISOString().split('T')[0],
@@ -115,9 +123,13 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     onUpdate(item.id, {
       progress: {
         ...item.progress,
-        sessions: [newSession, ...(item.progress.sessions || [])]  // Add new session at the beginning
+        sessions: [newSession, ...(item.progress.sessions || [])]
       }
     });
+    
+    // Store the new session in localStorage
+    localStorage.setItem(`session_${item.id}`, JSON.stringify(newSession));
+    
     onStartTracking(item.id);
     onSetActiveItem(item.id);
   }, [item.id, onStartTracking, onSetActiveItem, onUpdate]);
@@ -152,10 +164,12 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       }
     });
 
+    // Clear localStorage when stopping the session
+    localStorage.removeItem(`session_${item.id}`);
+
     onStopTracking(item.id);
     onSetActiveItem(null);
     setShowNoteInput(true);
-    localStorage.removeItem(`session_${item.id}`);
   }, [item.id, item.progress, onStopTracking, onSetActiveItem, onUpdate, activeSession]);
 
   const handleAddNote = useCallback(() => {
