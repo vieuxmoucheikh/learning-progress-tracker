@@ -60,31 +60,121 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showLegend, setShowLegend] = useState(false);
 
+  const calendarData = useMemo<CalendarData>(() => {
+    const calendar: CalendarData = {
+      month: currentDate.toLocaleString('default', { month: 'long' }),
+      year: currentDate.getFullYear(),
+      weeks: [],
+    };
+
+    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    const startDate = new Date(firstDayOfMonth);
+    startDate.setDate(startDate.getDate() - startDate.getDay());
+
+    const endDate = new Date(lastDayOfMonth);
+    if (endDate.getDay() !== 6) {
+      endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const weeks: CalendarWeek[] = [];
+    let currentWeek: CalendarDay[] = [];
+
+    for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
+      const dateStr = getAdjustedDateStr(date);
+      const dayActivities: DayActivity = {
+        minutes: 0,
+        sessions: 0,
+        completedTasks: [],
+        activeItems: [],
+        archivedItems: [],
+      };
+
+      // Process items for this date
+      items.forEach(item => {
+        const itemDate = new Date(item.date);
+        const itemDateStr = new Date(
+          itemDate.getFullYear(),
+          itemDate.getMonth(),
+          itemDate.getDate()
+        ).toISOString().split('T')[0];
+
+        if (itemDateStr === dateStr) {
+          if (item.status === 'completed') {
+            dayActivities.completedTasks.push(item);
+          } else if (item.status === 'archived') {
+            dayActivities.archivedItems.push(item);
+          } else {
+            dayActivities.activeItems.push(item);
+          }
+
+          // Calculate total minutes for the day
+          if (item.progress.sessions) {
+            item.progress.sessions.forEach(session => {
+              if (session.startTime && session.endTime) {
+                const duration = (new Date(session.endTime).getTime() - new Date(session.startTime).getTime()) / (1000 * 60);
+                dayActivities.minutes += duration;
+                dayActivities.sessions++;
+              }
+            });
+          }
+        }
+      });
+
+      const calendarDay: CalendarDay = {
+        date: new Date(date),
+        minutes: dayActivities.minutes,
+        sessions: dayActivities.sessions,
+        isCurrentMonth: date.getMonth() === currentDate.getMonth(),
+        isToday: dateStr === getAdjustedDateStr(today),
+        activities: dayActivities,
+      };
+
+      currentWeek.push(calendarDay);
+
+      if (currentWeek.length === 7) {
+        weeks.push({ days: currentWeek });
+        currentWeek = [];
+      }
+    }
+
+    if (currentWeek.length > 0) {
+      weeks.push({ days: currentWeek });
+    }
+
+    calendar.weeks = weeks;
+    return calendar;
+  }, [currentDate, items]);
+
   useEffect(() => {
     if (externalSelectedDate) {
-      setSelectedDay(externalSelectedDate);
+      const newSelectedDay = new Date(
+        externalSelectedDate.getFullYear(),
+        externalSelectedDate.getMonth(),
+        externalSelectedDate.getDate()
+      );
+      setSelectedDay(newSelectedDay);
+      
+      // Find the day in calendar data
+      const selectedDayData = calendarData.weeks
+        .flatMap(week => week.days)
+        .find(day => getAdjustedDateStr(day.date) === getAdjustedDateStr(newSelectedDay));
+
+      if (selectedDayData) {
+        onDateSelect(newSelectedDay, selectedDayData.activities.activeItems, selectedDayData.activities.completedTasks);
+      }
     }
-  }, [externalSelectedDate]);
+  }, [externalSelectedDate, calendarData, onDateSelect]);
 
   // Handle date selection
   const handleDateSelect = useCallback((day: CalendarDay) => {
     const selectedDate = new Date(day.date);
     setSelectedDay(selectedDate);
-    
-    const dateStr = getAdjustedDateStr(selectedDate);
-    
-    const activeTasks = items.filter(item => {
-      const itemDate = getAdjustedDateStr(new Date(item.date));
-      return itemDate === dateStr && item.status !== 'completed' && item.status !== 'archived';
-    });
-
-    const completedTasks = items.filter(item => {
-      const itemDate = getAdjustedDateStr(new Date(item.date));
-      return itemDate === dateStr && (item.status === 'completed' || item.status === 'archived');
-    });
-
-    onDateSelect(selectedDate, activeTasks, completedTasks);
-  }, [items, onDateSelect]);
+    onDateSelect(selectedDate, day.activities.activeItems, day.activities.completedTasks);
+  }, [onDateSelect]);
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -117,96 +207,11 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  const calendarData = useMemo<CalendarData>(() => {
-    const calendar: CalendarData = {
-      month: currentDate.toLocaleString('default', { month: 'long' }),
-      year: currentDate.getFullYear(),
-      weeks: [],
-    };
-
-    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-    const startDate = new Date(firstDayOfMonth);
-    startDate.setDate(startDate.getDate() - startDate.getDay());
-
-    const endDate = new Date(lastDayOfMonth);
-    if (endDate.getDay() !== 6) {
-      endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
-    }
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const weeks: CalendarWeek[] = [];
-    let currentWeek: CalendarDay[] = [];
-    const currentDateStr = getAdjustedDateStr(currentDate);
-
-    for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
-      const dateStr = getAdjustedDateStr(date);
-      const dayActivities: DayActivity = {
-        minutes: 0,
-        sessions: 0,
-        completedTasks: [],
-        activeItems: [],
-        archivedItems: [],
-      };
-
-      // Calculate activities for this day
-      items.forEach(item => {
-        const itemDate = new Date(item.date);
-        const currentDayDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-        const itemDayDate = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
-        
-        if (itemDayDate.getTime() === currentDayDate.getTime()) {
-          if (item.status === 'archived') {
-            dayActivities.archivedItems.push(item);
-          } else if (item.completed) {
-            dayActivities.completedTasks.push(item);
-          } else {
-            dayActivities.activeItems.push(item);
-          }
-
-          if (item.progress?.sessions) {
-            item.progress.sessions.forEach(session => {
-              const sessionDate = new Date(session.date);
-              const sessionDayDate = new Date(sessionDate.getFullYear(), sessionDate.getMonth(), sessionDate.getDate());
-              if (sessionDayDate.getTime() === currentDayDate.getTime()) {
-                const hours = session.duration?.hours ?? 0;
-                const minutes = session.duration?.minutes ?? 0;
-                dayActivities.minutes += hours * 60 + minutes;
-                dayActivities.sessions += 1;
-              }
-            });
-          }
-        }
-      });
-
-      const calendarDay: CalendarDay = {
-        date: new Date(date),
-        minutes: dayActivities.minutes,
-        sessions: dayActivities.sessions,
-        isCurrentMonth: date.getMonth() === currentDate.getMonth(),
-        isToday: getAdjustedDateStr(date) === getAdjustedDateStr(today),
-        activities: dayActivities,
-      };
-
-      currentWeek.push(calendarDay);
-
-      if (currentWeek.length === 7) {
-        weeks.push({ days: currentWeek });
-        currentWeek = [];
-      }
-    }
-
-    calendar.weeks = weeks;
-    return calendar;
-  }, [currentDate, items]);
-
   const isSelectedDate = (day: CalendarDay) => {
     if (!selectedDay) return false;
-    const dayDate = new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate());
-    const selectedDate = new Date(selectedDay.getFullYear(), selectedDay.getMonth(), selectedDay.getDate());
-    return dayDate.getTime() === selectedDate.getTime();
+    const dayStr = getAdjustedDateStr(day.date);
+    const selectedStr = getAdjustedDateStr(selectedDay);
+    return dayStr === selectedStr;
   };
 
   const getActivityColor = (day: CalendarDay) => {
