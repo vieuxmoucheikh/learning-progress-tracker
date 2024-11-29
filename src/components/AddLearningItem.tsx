@@ -24,7 +24,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
     current: { hours: 0, minutes: 0 },
     total: { hours: 0, minutes: 0 },
     date: selectedDate ? 
-      new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString() : 
+      new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] : 
       new Date().toISOString().split('T')[0],
     difficulty: 'medium' as const,
     status: 'not_started' as const,
@@ -34,7 +34,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
   // Update form data when selectedDate changes
   useEffect(() => {
     if (selectedDate) {
-      const formattedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString();
+      const formattedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0];
       setFormData(prev => ({
         ...prev,
         date: formattedDate
@@ -84,7 +84,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
           minutes: Math.max(0, parseInt(String(formData.total?.minutes || 0)) || 0)
         },
         date: selectedDate ? 
-          new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString() : 
+          new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] : 
           new Date().toISOString().split('T')[0],
         difficulty: (formData.difficulty || 'medium') as 'easy' | 'medium' | 'hard',
         status: (formData.status || 'not_started') as 'not_started' | 'in_progress' | 'completed' | 'on_hold' | 'archived',
@@ -120,7 +120,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
       current: { hours: 0, minutes: 0 },
       total: { hours: 0, minutes: 0 },
       date: selectedDate ? 
-        new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString() : 
+        new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] : 
         new Date().toISOString().split('T')[0],
       difficulty: 'medium' as const,
       status: 'not_started' as const,
