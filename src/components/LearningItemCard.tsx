@@ -185,19 +185,24 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     if (!sessionNote.trim()) return;
 
     const sessions = item.progress.sessions || [];
-    const lastSession = sessions[sessions.length - 1];
+    const activeSession = sessions.find(s => !s.endTime);
     
-    if (!lastSession) return;
+    if (!activeSession) return;
 
-    const updatedSession = {
-      ...lastSession,
-      notes: [...(lastSession.notes || []), sessionNote.trim()]
-    };
+    const updatedSessions = sessions.map(session => {
+      if (session.startTime === activeSession.startTime) {
+        return {
+          ...session,
+          notes: [...(session.notes || []), sessionNote.trim()]
+        };
+      }
+      return session;
+    });
 
     onUpdate(item.id, {
       progress: {
         ...item.progress,
-        sessions: [...sessions.slice(0, -1), updatedSession]
+        sessions: updatedSessions
       }
     });
 
