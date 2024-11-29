@@ -77,36 +77,40 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
   // Persist active session on mount and cleanup on unmount
   useEffect(() => {
-    const storedSession = localStorage.getItem(`activeSession_${item.id}`);
-    if (storedSession) {
-      const session = JSON.parse(storedSession);
-      // Check if this session isn't already in our sessions list
-      const sessionExists = item.progress?.sessions?.some(s => s.startTime === session.startTime);
-      if (!sessionExists) {
-        onUpdate(item.id, {
-          progress: {
-            ...item.progress,
-            sessions: [session, ...(item.progress?.sessions || [])]
-          }
-        });
-        onStartTracking(item.id);
-        onSetActiveItem(item.id);
+    const storedSessionStr = localStorage.getItem(`activeSession_${item.id}`);
+    
+    if (storedSessionStr) {
+      try {
+        const storedSession = JSON.parse(storedSessionStr);
+        const isAlreadyInSessions = item.progress?.sessions?.some(
+          s => s.startTime === storedSession.startTime
+        );
+        
+        // Only restore if it's not already in sessions and doesn't have an end time
+        if (!isAlreadyInSessions && !storedSession.endTime) {
+          onUpdate(item.id, {
+            progress: {
+              ...item.progress,
+              sessions: [storedSession, ...(item.progress?.sessions || [])]
+            }
+          });
+          onStartTracking(item.id);
+          onSetActiveItem(item.id);
+        } else {
+          // Clean up localStorage if session is already in list or has ended
+          localStorage.removeItem(`activeSession_${item.id}`);
+        }
+      } catch (e) {
+        console.error('Error parsing stored session:', e);
+        localStorage.removeItem(`activeSession_${item.id}`);
       }
     }
-
-    return () => {
-      // If there's an active session when component unmounts, persist it
-      const currentSession = item.progress?.sessions?.find(s => !s.endTime);
-      if (currentSession) {
-        localStorage.setItem(`activeSession_${item.id}`, JSON.stringify(currentSession));
-      }
-    };
-  }, []);
+  }, [item.id, item.progress?.sessions]);
 
   const handleStartTracking = useCallback(() => {
-    // Check for any active sessions
-    const hasActiveSession = item.progress?.sessions?.some(s => !s.endTime);
-    if (hasActiveSession) {
+    // First check if there's already an active session
+    const existingActiveSession = item.progress?.sessions?.find(s => !s.endTime);
+    if (existingActiveSession) {
       return;
     }
 
@@ -116,9 +120,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       notes: []
     };
 
-    // Store the new session in localStorage
+    // Store in localStorage
     localStorage.setItem(`activeSession_${item.id}`, JSON.stringify(newSession));
 
+    // Update state
     onUpdate(item.id, {
       progress: {
         ...item.progress,
@@ -128,23 +133,24 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
     onStartTracking(item.id);
     onSetActiveItem(item.id);
-  }, [item.id, item.progress, onStartTracking, onSetActiveItem, onUpdate]);
+  }, [item.id, item.progress?.sessions, onStartTracking, onSetActiveItem, onUpdate]);
 
   const handleStopTracking = useCallback(() => {
-    // Remove from localStorage first
+    // First remove from localStorage to prevent restoration on refresh
     localStorage.removeItem(`activeSession_${item.id}`);
 
-    // Find and complete all active sessions
-    const updatedSessions = item.progress?.sessions?.map(session => {
+    const now = new Date().toISOString();
+    
+    // Update all active sessions (should only be one, but handle multiple just in case)
+    const updatedSessions = (item.progress?.sessions || []).map(session => {
       if (!session.endTime) {
-        const endTime = new Date().toISOString();
         const startTime = new Date(session.startTime);
-        const endTimeDate = new Date(endTime);
+        const endTimeDate = new Date(now);
         const durationInMinutes = Math.round((endTimeDate.getTime() - startTime.getTime()) / (1000 * 60));
 
         return {
           ...session,
-          endTime,
+          endTime: now,
           duration: {
             hours: Math.floor(durationInMinutes / 60),
             minutes: durationInMinutes % 60
@@ -157,14 +163,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     onUpdate(item.id, {
       progress: {
         ...item.progress,
-        sessions: updatedSessions || []
+        sessions: updatedSessions
       }
     });
 
     onStopTracking(item.id);
     onSetActiveItem(null);
     setShowNoteInput(true);
-  }, [item.id, item.progress, onStopTracking, onSetActiveItem, onUpdate]);
+  }, [item.id, item.progress?.sessions, onStopTracking, onSetActiveItem, onUpdate]);
 
   const handleAddNote = useCallback(() => {
     if (!sessionNote.trim()) return;
