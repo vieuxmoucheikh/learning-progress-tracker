@@ -40,8 +40,10 @@ interface Props {
 }
 
 // Helper function to get timezone-adjusted date string
-const getAdjustedDateStr = (date: Date): string => {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString();
+const getAdjustedDateStr = (date: Date) => {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString().split('T')[0];
 };
 
 // Helper function to format minutes into hours and minutes
@@ -96,11 +98,8 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
       // Process items for this date
       items.forEach(item => {
         const itemDate = new Date(item.date);
-        const itemDateStr = new Date(
-          itemDate.getFullYear(),
-          itemDate.getMonth(),
-          itemDate.getDate()
-        ).toISOString().split('T')[0];
+        itemDate.setHours(0, 0, 0, 0);
+        const itemDateStr = getAdjustedDateStr(itemDate);
 
         if (itemDateStr === dateStr) {
           if (item.status === 'completed') {
@@ -171,8 +170,9 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
 
   // Handle date selection
   const handleDateSelect = useCallback((day: CalendarDay) => {
-    setSelectedDay(day.date);
     const newDate = new Date(day.date);
+    newDate.setHours(0, 0, 0, 0);
+    setSelectedDay(newDate);
     setCurrentDate(newDate);
     onDateSelect(newDate, day.activities.activeItems, day.activities.completedTasks);
   }, [onDateSelect]);
