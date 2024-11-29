@@ -150,12 +150,16 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
 
   useEffect(() => {
     if (externalSelectedDate) {
-      const newSelectedDay = new Date(
-        externalSelectedDate.getFullYear(),
-        externalSelectedDate.getMonth(),
-        externalSelectedDate.getDate()
-      );
+      const newSelectedDay = new Date(externalSelectedDate);
+      newSelectedDay.setHours(0, 0, 0, 0);
       setSelectedDay(newSelectedDay);
+      
+      // Update currentDate to show the month of the selected date
+      setCurrentDate(new Date(
+        newSelectedDay.getFullYear(),
+        newSelectedDay.getMonth(),
+        1
+      ));
       
       // Find the day in calendar data
       const selectedDayData = calendarData.weeks
@@ -173,7 +177,7 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
     const newDate = new Date(day.date);
     newDate.setHours(0, 0, 0, 0);
     setSelectedDay(newDate);
-    setCurrentDate(newDate);
+    // Don't update currentDate when selecting a day
     onDateSelect(newDate, day.activities.activeItems, day.activities.completedTasks);
   }, [onDateSelect]);
 
