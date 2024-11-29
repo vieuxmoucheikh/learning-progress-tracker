@@ -97,29 +97,31 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
 
       // Process items for this date
       items.forEach(item => {
-        const itemDate = new Date(item.date);
-        itemDate.setHours(0, 0, 0, 0);
-        const itemDateStr = getAdjustedDateStr(itemDate);
+        // First, check if there are any sessions on this date
+        if (item.progress.sessions) {
+          item.progress.sessions.forEach(session => {
+            const sessionDate = new Date(session.date);
+            sessionDate.setHours(0, 0, 0, 0);
+            const sessionDateStr = getAdjustedDateStr(sessionDate);
 
-        if (itemDateStr === dateStr) {
-          if (item.status === 'completed') {
-            dayActivities.completedTasks.push(item);
-          } else if (item.status === 'archived') {
-            dayActivities.archivedItems.push(item);
-          } else {
-            dayActivities.activeItems.push(item);
-          }
+            if (sessionDateStr === dateStr) {
+              // Add item to the appropriate list if not already added
+              if (item.status === 'completed' && !dayActivities.completedTasks.some(task => task.id === item.id)) {
+                dayActivities.completedTasks.push(item);
+              } else if (item.status === 'archived' && !dayActivities.archivedItems.some(task => task.id === item.id)) {
+                dayActivities.archivedItems.push(item);
+              } else if (!dayActivities.activeItems.some(task => task.id === item.id)) {
+                dayActivities.activeItems.push(item);
+              }
 
-          // Calculate total minutes for the day
-          if (item.progress.sessions) {
-            item.progress.sessions.forEach(session => {
+              // Calculate duration if session has start and end time
               if (session.startTime && session.endTime) {
                 const duration = (new Date(session.endTime).getTime() - new Date(session.startTime).getTime()) / (1000 * 60);
                 dayActivities.minutes += duration;
                 dayActivities.sessions++;
               }
-            });
-          }
+            }
+          });
         }
       });
 
