@@ -81,6 +81,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     
     // Check if there's already an active session
     if (item.progress.sessions.some(session => !session.endTime)) {
+      console.log('Session already active, preventing duplicate');
       return; // Don't create a new session if one is active
     }
     
@@ -90,16 +91,56 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       notes: []
     };
     
+    // Update the sessions array
+    const updatedSessions = [newSession, ...(item.progress.sessions || [])];
+    
+    // Update item with new sessions array
     onUpdate(item.id, {
       progress: {
         ...item.progress,
-        sessions: [newSession, ...(item.progress.sessions || [])]
+        sessions: updatedSessions
       }
     });
     
-    onStartTracking(item.id);
+    // Set active item first, then start tracking
     onSetActiveItem(item.id);
+    onStartTracking(item.id);
   }, [item.id, onStartTracking, onSetActiveItem, onUpdate, item.progress.sessions]);
+
+  // Effect to clean up any duplicate active sessions
+  useEffect(() => {
+    const activeSessions = item.progress.sessions.filter(session => !session.endTime);
+    if (activeSessions.length > 1) {
+      // Keep only the most recent active session
+      const mostRecentSession = activeSessions[0];
+      const updatedSessions = item.progress.sessions.map(session => {
+        if (!session.endTime && session.startTime !== mostRecentSession.startTime) {
+          // End any other active sessions
+          const endTime = new Date().toISOString();
+          const startTime = new Date(session.startTime);
+          const endTimeDate = new Date(endTime);
+          const durationInMinutes = Math.round((endTimeDate.getTime() - startTime.getTime()) / (1000 * 60));
+          
+          return {
+            ...session,
+            endTime,
+            duration: {
+              hours: Math.floor(durationInMinutes / 60),
+              minutes: durationInMinutes % 60
+            }
+          };
+        }
+        return session;
+      });
+
+      onUpdate(item.id, {
+        progress: {
+          ...item.progress,
+          sessions: updatedSessions
+        }
+      });
+    }
+  }, [item.id, item.progress.sessions, onUpdate]);
 
   const handleStopTracking = useCallback(() => {
     if (!activeSession) return;
