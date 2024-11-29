@@ -97,7 +97,22 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
 
       // Process items for this date
       items.forEach(item => {
-        // First, check if there are any sessions on this date
+        const itemDate = new Date(item.date);
+        itemDate.setHours(0, 0, 0, 0);
+        const itemDateStr = getAdjustedDateStr(itemDate);
+
+        // Add item based on its creation date
+        if (itemDateStr === dateStr) {
+          if (item.status === 'completed' && !dayActivities.completedTasks.some(task => task.id === item.id)) {
+            dayActivities.completedTasks.push(item);
+          } else if (item.status === 'archived' && !dayActivities.archivedItems.some(task => task.id === item.id)) {
+            dayActivities.archivedItems.push(item);
+          } else if (!dayActivities.activeItems.some(task => task.id === item.id)) {
+            dayActivities.activeItems.push(item);
+          }
+        }
+
+        // Also check sessions for this item
         if (item.progress.sessions) {
           item.progress.sessions.forEach(session => {
             const sessionDate = new Date(session.date);
@@ -105,7 +120,7 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
             const sessionDateStr = getAdjustedDateStr(sessionDate);
 
             if (sessionDateStr === dateStr) {
-              // Add item to the appropriate list if not already added
+              // Add item if not already added
               if (item.status === 'completed' && !dayActivities.completedTasks.some(task => task.id === item.id)) {
                 dayActivities.completedTasks.push(item);
               } else if (item.status === 'archived' && !dayActivities.archivedItems.some(task => task.id === item.id)) {
