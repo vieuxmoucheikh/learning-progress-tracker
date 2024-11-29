@@ -294,53 +294,56 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           return (
             <div 
               key={session.startTime}
-              className="border rounded-lg p-4 space-y-3 bg-card hover:bg-gray-50/50 transition-all cursor-pointer shadow-sm hover:shadow-md"
+              className={`border rounded-lg p-4 space-y-3 bg-gradient-to-br from-white to-gray-50/30 hover:from-gray-50 hover:to-white transition-all cursor-pointer shadow-sm hover:shadow-md ${!session.endTime ? 'border-l-4 border-l-blue-400' : ''}`}
               onClick={() => setShowHistory(true)}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="font-medium text-lg">
+                  <div className={`font-medium text-lg ${!session.endTime ? 'text-blue-600' : 'text-gray-800'}`}>
                     Session {index + 1}
                   </div>
-                  <Badge variant={session.endTime ? "secondary" : "default"} className="capitalize">
+                  <Badge 
+                    variant={session.endTime ? "secondary" : "default"} 
+                    className={`capitalize ${!session.endTime ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : ''}`}
+                  >
                     {session.endTime ? "Completed" : "Active"}
                   </Badge>
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm font-medium text-gray-600 bg-gray-100/80 px-2 py-1 rounded-full">
                   {formattedDuration}
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-4 text-sm border-t border-b py-3">
+              <div className="grid grid-cols-2 gap-4 text-sm border-t border-b py-3 border-gray-200">
                 <div className="space-y-1">
-                  <div className="text-muted-foreground flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
+                  <div className="text-gray-500 flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-blue-500" />
                     Started
                   </div>
-                  <div className="font-medium">{startDate.toLocaleString()}</div>
+                  <div className="font-medium text-gray-700">{startDate.toLocaleString()}</div>
                 </div>
                 {endDate && (
                   <div className="space-y-1">
-                    <div className="text-muted-foreground flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4" />
+                    <div className="text-gray-500 flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
                       Ended
                     </div>
-                    <div className="font-medium">{endDate.toLocaleString()}</div>
+                    <div className="font-medium text-gray-700">{endDate.toLocaleString()}</div>
                   </div>
                 )}
               </div>
 
               {session.notes && session.notes.length > 0 && (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <StickyNote className="h-4 w-4" />
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <StickyNote className="h-4 w-4 text-amber-500" />
                     Notes
                   </div>
                   <ul className="space-y-2">
                     {session.notes.map((note, noteIndex) => (
                       <li 
                         key={noteIndex} 
-                        className="text-sm bg-muted/30 p-2 rounded-md"
+                        className="text-sm bg-gradient-to-r from-amber-50 to-amber-50/30 p-2.5 rounded-md text-gray-700 border border-amber-100/50"
                       >
                         {typeof note === 'string' ? note : note.content}
                       </li>
@@ -355,7 +358,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         {item.progress.sessions.length > (activeSession ? 2 : 1) && (
           <Button
             variant="outline"
-            className="w-full text-sm gap-2 mt-2"
+            className="w-full text-sm gap-2 mt-2 border-gray-200 hover:bg-gray-50 hover:text-gray-900 text-gray-600"
             onClick={(e) => {
               e.stopPropagation();
               setShowAllSessions(!showAllSessions);
