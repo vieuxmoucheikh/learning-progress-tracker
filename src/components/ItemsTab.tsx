@@ -40,10 +40,18 @@ export function ItemsTab({
   const filteredItems = useMemo(() => {
     return items.filter(item => {
       const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
-      if (selectedStatus === 'all') return matchesSearch;
-      return matchesSearch && item.status === selectedStatus;
+      const matchesStatus = selectedStatus === 'all' || item.status === selectedStatus;
+      
+      if (selectedDate) {
+        const itemDate = new Date(item.date);
+        const selectedDateStr = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0];
+        const itemDateStr = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate()).toISOString().split('T')[0];
+        return matchesSearch && matchesStatus && selectedDateStr === itemDateStr;
+      }
+      
+      return matchesSearch && matchesStatus;
     });
-  }, [items, searchQuery, selectedStatus]);
+  }, [items, searchQuery, selectedStatus, selectedDate]);
 
   const handleDateSelect = (date: Date, activeTasks: LearningItem[], completedTasks: LearningItem[]) => {
     setSelectedDate(date);
