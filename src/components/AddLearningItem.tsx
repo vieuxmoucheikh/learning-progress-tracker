@@ -4,6 +4,11 @@ import { Plus, Link as LinkIcon, Clock, X } from 'lucide-react';
 import { LearningItemFormData } from '../types';
 import { Button } from './ui/button';
 
+// Add generateId function
+const generateId = (): string => {
+  return 'id-' + Math.random().toString(36).substr(2, 9);
+};
+
 interface Props {
   onAdd: (item: LearningItemFormData) => void;
   onClose: () => void;
@@ -12,7 +17,7 @@ interface Props {
 }
 
 export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props) {
-  const [formData, setFormData] = useState<LearningItemFormData>({
+  const initialFormData: LearningItemFormData = {
     title: '',
     type: 'video' as const,
     url: '',
@@ -20,24 +25,17 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
     completed: false,
     category: '',
     priority: 'medium' as const,
-    tags: [],
+    tags: [] as string[],
     current: { hours: 0, minutes: 0 },
-    total: { hours: 0, minutes: 0 },
+    unit: 'hours' as const,
     date: selectedDate ? 
       new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] : 
       new Date().toISOString().split('T')[0],
     difficulty: 'medium' as const,
-    status: 'not_started' as const,
-    unit: 'hours' as const,
-    sessions: [{
-      date: selectedDate ? 
-        new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] : 
-        new Date().toISOString().split('T')[0],
-      startTime: '',
-      endTime: '',
-      status: 'not_started' as 'in_progress' | 'completed' | 'paused'
-    }]
-  });
+    status: 'not_started' as const
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
 
   // Update form data when selectedDate changes
   useEffect(() => {
@@ -74,45 +72,39 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
       }
 
       // Create a clean object with only the necessary data
-      const cleanData = {
-        title: (formData.title || '').trim(),
-        type: formData.type as typeof validTypes[number],
-        url: (formData.url || '').trim(),
-        notes: (formData.notes || '').trim(),
-        completed: Boolean(formData.completed),
-        category: (formData.category || '').trim(),
-        priority: (formData.priority || 'medium') as 'low' | 'medium' | 'high',
-        tags: Array.isArray(formData.tags) ? formData.tags.map(tag => (tag || '').trim()).filter(Boolean) : [],
+      const formDataToSubmit: LearningItemFormData = {
+        title: formData.title,
+        type: formData.type as 'video' | 'pdf' | 'url' | 'book',
         current: {
           hours: Math.max(0, parseInt(String(formData.current?.hours || 0)) || 0),
           minutes: Math.max(0, parseInt(String(formData.current?.minutes || 0)) || 0)
         },
-        total: {
-          hours: Math.max(0, parseInt(String(formData.total?.hours || 0)) || 0),
-          minutes: Math.max(0, parseInt(String(formData.total?.minutes || 0)) || 0)
-        },
-        date: selectedDate ? 
-          new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] : 
-          new Date().toISOString().split('T')[0],
-        difficulty: (formData.difficulty || 'medium') as 'easy' | 'medium' | 'hard',
-        status: (formData.status || 'not_started') as 'not_started' | 'in_progress' | 'completed' | 'on_hold' | 'archived',
-        unit: (formData.unit || 'hours') as 'hours' | 'pages' | 'percent',
-        sessions: [{
-          date: selectedDate ? 
-            new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] : 
-            new Date().toISOString().split('T')[0],
-          startTime: '',
-          endTime: '',
-          status: 'not_started' as 'in_progress' | 'completed' | 'paused'
-        }]
+        unit: formData.unit || 'hours',
+        url: formData.url,
+        notes: formData.notes,
+        completed: formData.completed,
+        priority: formData.priority || 'medium',
+        tags: formData.tags || [],
+        goal: formData.total ? {
+          hours: Math.max(0, parseInt(String(formData.total.hours || 0)) || 0),
+          minutes: Math.max(0, parseInt(String(formData.total.minutes || 0)) || 0)
+        } : undefined,
+        total: formData.total ? {
+          hours: Math.max(0, parseInt(String(formData.total.hours || 0)) || 0),
+          minutes: Math.max(0, parseInt(String(formData.total.minutes || 0)) || 0)
+        } : undefined,
+        category: formData.category || '',
+        date: formData.date || new Date().toISOString().split('T')[0],
+        difficulty: formData.difficulty || 'medium',
+        status: formData.status || 'not_started'
       };
 
       // Add https:// to URL if needed
-      if (cleanData.url && !cleanData.url.startsWith('http://') && !cleanData.url.startsWith('https://')) {
-        cleanData.url = 'https://' + cleanData.url;
+      if (formDataToSubmit.url && !formDataToSubmit.url.startsWith('http://') && !formDataToSubmit.url.startsWith('https://')) {
+        formDataToSubmit.url = 'https://' + formDataToSubmit.url;
       }
 
-      await onAdd(cleanData);
+      await onAdd(formDataToSubmit);
       onClose();
       resetForm();
     } catch (error) {
@@ -124,37 +116,15 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
   };
 
   const resetForm = () => {
-    setFormData({
-      title: '',
-      type: 'video' as const,
-      url: '',
-      notes: '',
-      completed: false,
-      category: '',
-      priority: 'medium' as const,
-      tags: [],
-      current: { hours: 0, minutes: 0 },
-      total: { hours: 0, minutes: 0 },
-      date: selectedDate ? 
-        new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] : 
-        new Date().toISOString().split('T')[0],
-      difficulty: 'medium' as const,
-      status: 'not_started' as const,
-      unit: 'hours' as const,
-      sessions: [{
-        date: selectedDate ? 
-          new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] : 
-          new Date().toISOString().split('T')[0],
-        startTime: '',
-        endTime: '',
-        status: 'not_started' as 'in_progress' | 'completed' | 'paused'
-      }]
-    });
+    setFormData(initialFormData);
   };
 
   const handleTagsChange = (value: string) => {
     const tags = value.split(',').map(tag => tag.trim()).filter(Boolean);
-    setFormData(prev => ({ ...prev, tags }));
+    setFormData(prev => ({
+      ...prev, 
+      tags
+    }));
   };
 
   if (!isOpen) return null;
