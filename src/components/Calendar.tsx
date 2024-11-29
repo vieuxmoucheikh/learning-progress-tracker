@@ -245,9 +245,12 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
     if (!day.isCurrentMonth) return 'bg-gray-50 text-gray-400';
     if (isSelectedDate(day)) return 'bg-blue-500 text-white hover:bg-blue-600';
     if (day.isToday) return 'bg-blue-100 hover:bg-blue-200';
+    
+    // Color based on activity
+    if (totalItems === 0 && day.sessions > 0) return 'bg-yellow-100 hover:bg-yellow-200';
     if (totalItems === 0) return 'hover:bg-gray-100';
     
-    // Enhanced color scale
+    // Enhanced color scale based on total items
     if (totalItems >= 5) return 'bg-green-600 hover:bg-green-700 text-white';
     if (totalItems >= 3) return 'bg-green-500 hover:bg-green-600 text-white';
     if (totalItems >= 2) return 'bg-green-400 hover:bg-green-500';
@@ -255,10 +258,10 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
   };
 
   const getDayContent = (day: CalendarDay) => {
-    const totalItems = 
-      day.activities.activeItems.length + 
-      day.activities.completedTasks.length + 
-      day.activities.archivedItems.length;
+    const hasActiveTasks = day.activities.activeItems.length > 0;
+    const hasCompletedTasks = day.activities.completedTasks.length > 0;
+    const hasArchivedTasks = day.activities.archivedItems.length > 0;
+    const hasSessions = day.sessions > 0;
 
     return (
       <div 
@@ -267,19 +270,20 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
         onMouseLeave={() => setHoveredDay(null)}
       >
         <div className="text-sm">{day.date.getDate()}</div>
-        {totalItems > 0 && (
-          <div className="absolute bottom-1 right-1 flex items-center space-x-1">
-            {day.activities.activeItems.length > 0 && (
-              <div className="w-2 h-2 bg-blue-500 rounded-full" />
-            )}
-            {day.activities.completedTasks.length > 0 && (
-              <div className="w-2 h-2 bg-green-500 rounded-full" />
-            )}
-            {day.activities.archivedItems.length > 0 && (
-              <div className="w-2 h-2 bg-gray-500 rounded-full" />
-            )}
-          </div>
-        )}
+        <div className="absolute bottom-1 right-1 flex items-center space-x-1">
+          {hasActiveTasks && (
+            <div className="w-2 h-2 bg-blue-500 rounded-full" title="Active Tasks" />
+          )}
+          {hasCompletedTasks && (
+            <div className="w-2 h-2 bg-green-500 rounded-full" title="Completed Tasks" />
+          )}
+          {hasArchivedTasks && (
+            <div className="w-2 h-2 bg-gray-500 rounded-full" title="Archived Tasks" />
+          )}
+          {hasSessions && !hasActiveTasks && !hasCompletedTasks && !hasArchivedTasks && (
+            <div className="w-2 h-2 bg-yellow-500 rounded-full" title="Has Sessions" />
+          )}
+        </div>
       </div>
     );
   };

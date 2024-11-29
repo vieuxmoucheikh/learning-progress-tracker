@@ -28,7 +28,15 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
       new Date().toISOString().split('T')[0],
     difficulty: 'medium' as const,
     status: 'not_started' as const,
-    unit: 'hours' as const
+    unit: 'hours' as const,
+    sessions: [{
+      date: selectedDate ? 
+        new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] : 
+        new Date().toISOString().split('T')[0],
+      startTime: '',
+      endTime: '',
+      status: 'not_started' as 'in_progress' | 'completed' | 'paused'
+    }]
   });
 
   // Update form data when selectedDate changes
@@ -88,7 +96,15 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
           new Date().toISOString().split('T')[0],
         difficulty: (formData.difficulty || 'medium') as 'easy' | 'medium' | 'hard',
         status: (formData.status || 'not_started') as 'not_started' | 'in_progress' | 'completed' | 'on_hold' | 'archived',
-        unit: (formData.unit || 'hours') as 'hours' | 'pages' | 'percent'
+        unit: (formData.unit || 'hours') as 'hours' | 'pages' | 'percent',
+        sessions: [{
+          date: selectedDate ? 
+            new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] : 
+            new Date().toISOString().split('T')[0],
+          startTime: '',
+          endTime: '',
+          status: 'not_started' as 'in_progress' | 'completed' | 'paused'
+        }]
       };
 
       // Add https:// to URL if needed
@@ -124,7 +140,15 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
         new Date().toISOString().split('T')[0],
       difficulty: 'medium' as const,
       status: 'not_started' as const,
-      unit: 'hours' as const
+      unit: 'hours' as const,
+      sessions: [{
+        date: selectedDate ? 
+          new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] : 
+          new Date().toISOString().split('T')[0],
+        startTime: '',
+        endTime: '',
+        status: 'not_started' as 'in_progress' | 'completed' | 'paused'
+      }]
     });
   };
 
