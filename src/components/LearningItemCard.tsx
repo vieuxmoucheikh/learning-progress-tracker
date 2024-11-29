@@ -75,48 +75,13 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     startTime: activeSession?.startTime || null
   });
 
-  const handleStartTracking = useCallback(() => {
-    // Clear any existing stored session first
-    localStorage.removeItem(`session_${item.id}`);
-    
-    // Check if there's already an active session
-    if (item.progress.sessions.some(session => !session.endTime)) {
-      console.log('Session already active, preventing duplicate');
-      return; // Don't create a new session if one is active
-    }
-    
-    const newSession = {
-      startTime: new Date().toISOString(),
-      date: new Date().toISOString().split('T')[0],
-      notes: []
-    };
-    
-    // Update the sessions array
-    const updatedSessions = [newSession, ...(item.progress.sessions || [])];
-    
-    // Update item with new sessions array
-    onUpdate(item.id, {
-      progress: {
-        ...item.progress,
-        sessions: updatedSessions
-      }
-    });
-    
-    // Set active item first, then start tracking
-    onSetActiveItem(item.id);
-    onStartTracking(item.id);
-  }, [item.id, onStartTracking, onSetActiveItem, onUpdate, item.progress.sessions]);
-
-  // Effect to clean up any duplicate active sessions
+  // Cleanup effect for any lingering active sessions on mount
   useEffect(() => {
     const activeSessions = item.progress.sessions.filter(session => !session.endTime);
-    if (activeSessions.length > 1) {
-      // Keep only the most recent active session
-      const mostRecentSession = activeSessions[0];
+    if (activeSessions.length > 0) {
+      const endTime = new Date().toISOString();
       const updatedSessions = item.progress.sessions.map(session => {
-        if (!session.endTime && session.startTime !== mostRecentSession.startTime) {
-          // End any other active sessions
-          const endTime = new Date().toISOString();
+        if (!session.endTime) {
           const startTime = new Date(session.startTime);
           const endTimeDate = new Date(endTime);
           const durationInMinutes = Math.round((endTimeDate.getTime() - startTime.getTime()) / (1000 * 60));
@@ -140,35 +105,55 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         }
       });
     }
-  }, [item.id, item.progress.sessions, onUpdate]);
+  }, []); // Only run on mount
+
+  const handleStartTracking = useCallback(() => {
+    // First, ensure no active sessions exist
+    const hasActiveSession = item.progress.sessions.some(session => !session.endTime);
+    if (hasActiveSession) {
+      return;
+    }
+
+    const newSession = {
+      startTime: new Date().toISOString(),
+      date: new Date().toISOString().split('T')[0],
+      notes: []
+    };
+
+    const updatedSessions = [newSession, ...(item.progress.sessions || [])];
+    
+    onUpdate(item.id, {
+      progress: {
+        ...item.progress,
+        sessions: updatedSessions
+      }
+    });
+
+    onSetActiveItem(item.id);
+    onStartTracking(item.id);
+  }, [item.id, item.progress.sessions, onStartTracking, onSetActiveItem, onUpdate]);
 
   const handleStopTracking = useCallback(() => {
+    const activeSession = item.progress.sessions.find(session => !session.endTime);
     if (!activeSession) return;
 
-    // Find all active sessions
-    const activeSessions = item.progress.sessions.filter(session => !session.endTime);
-    if (activeSessions.length === 0) return;
-
     const endTime = new Date().toISOString();
-    const updatedSessions = [...item.progress.sessions];
+    const startTime = new Date(activeSession.startTime);
+    const endTimeDate = new Date(endTime);
+    const durationInMinutes = Math.round((endTimeDate.getTime() - startTime.getTime()) / (1000 * 60));
 
-    // Complete all active sessions
-    activeSessions.forEach(session => {
-      const sessionIndex = updatedSessions.findIndex(s => s.startTime === session.startTime);
-      if (sessionIndex === -1) return;
-
-      const startTime = new Date(session.startTime);
-      const endTimeDate = new Date(endTime);
-      const durationInMinutes = Math.round((endTimeDate.getTime() - startTime.getTime()) / (1000 * 60));
-
-      updatedSessions[sessionIndex] = {
-        ...session,
-        endTime,
-        duration: {
-          hours: Math.floor(durationInMinutes / 60),
-          minutes: durationInMinutes % 60
-        }
-      };
+    const updatedSessions = item.progress.sessions.map(session => {
+      if (session.startTime === activeSession.startTime) {
+        return {
+          ...session,
+          endTime,
+          duration: {
+            hours: Math.floor(durationInMinutes / 60),
+            minutes: durationInMinutes % 60
+          }
+        };
+      }
+      return session;
     });
 
     onUpdate(item.id, {
@@ -178,11 +163,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       }
     });
 
-    localStorage.removeItem(`session_${item.id}`);
     onStopTracking(item.id);
     onSetActiveItem(null);
     setShowNoteInput(true);
-  }, [item.id, item.progress, onStopTracking, onSetActiveItem, onUpdate, activeSession]);
+  }, [item.id, item.progress.sessions, onStopTracking, onSetActiveItem, onUpdate]);
 
   const handleAddNote = useCallback(() => {
     if (!sessionNote.trim()) return;
