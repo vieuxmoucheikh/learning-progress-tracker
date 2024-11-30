@@ -137,6 +137,14 @@ function reducer(state: State, action: Action): State {
 
 const generateId = () => crypto.randomUUID();
 
+// Helper function to get date string in YYYY-MM-DD format
+const getDateStr = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export default function App() {
   const { user } = useAuth();
   const [state, dispatch] = useReducer(reducer, {
@@ -163,8 +171,8 @@ export default function App() {
           (item.notes?.toLowerCase() || '').includes(searchLower);
 
         // If a date is selected, only show items from that date
-        const selectedDateStr = selectedDate ? selectedDate.toISOString().split('T')[0] : null;
-        const itemDate = new Date(item.date).toISOString().split('T')[0];
+        const selectedDateStr = selectedDate ? getDateStr(selectedDate) : null;
+        const itemDate = item.date ? getDateStr(new Date(item.date)) : null;
         const matchesDate = selectedDate ? itemDate === selectedDateStr : true;
 
         // Filter by status
@@ -221,7 +229,7 @@ export default function App() {
     try {
       // Create a date string at midnight in local timezone
       const date = selectedDate ? selectedDate : new Date();
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = getDateStr(date);
 
       // Create a clean form data object that matches LearningItemFormData
       const cleanFormData: LearningItemFormData = {

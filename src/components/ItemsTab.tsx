@@ -36,20 +36,25 @@ export function ItemsTab({
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
+  // Helper function to get date string in YYYY-MM-DD format
+  const getDateStr = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // Filter items based on search and status
   const filteredItems = useMemo(() => {
     return items.filter(item => {
       const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = selectedStatus === 'all' || item.status === selectedStatus;
       
-      if (selectedDate) {
+      if (selectedDate && item.date) {
         const itemDate = new Date(item.date);
-        const selectedDateStr = new Date(selectedDate);
-        selectedDateStr.setMinutes(selectedDateStr.getMinutes() - selectedDateStr.getTimezoneOffset());
-        const itemDateStr = new Date(itemDate);
-        itemDateStr.setMinutes(itemDateStr.getMinutes() - itemDateStr.getTimezoneOffset());
-        return matchesSearch && matchesStatus && 
-          selectedDateStr.toISOString().split('T')[0] === itemDateStr.toISOString().split('T')[0];
+        const selectedDateStr = getDateStr(selectedDate);
+        const itemDateStr = getDateStr(itemDate);
+        return matchesSearch && matchesStatus && selectedDateStr === itemDateStr;
       }
       
       return matchesSearch && matchesStatus;
