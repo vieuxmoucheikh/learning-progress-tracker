@@ -219,15 +219,9 @@ export default function App() {
 
   const handleSubmitItem = async (formData: LearningItemFormData) => {
     try {
-      // Create a date object and ensure it's set to the start of the selected day
-      const date = selectedDate ? new Date(selectedDate) : new Date();
-      // Create a UTC date that corresponds to midnight of the selected date in local timezone
-      const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      const utcDate = new Date(Date.UTC(
-        localDate.getFullYear(),
-        localDate.getMonth(),
-        localDate.getDate()
-      ));
+      // Create a date string at midnight in local timezone
+      const date = selectedDate ? selectedDate : new Date();
+      const dateStr = date.toISOString().split('T')[0];
 
       // Create a clean form data object that matches LearningItemFormData
       const cleanFormData: LearningItemFormData = {
@@ -243,7 +237,7 @@ export default function App() {
         goal: formData.goal,
         total: formData.total,
         category: formData.category || '',
-        date: utcDate.toISOString().split('T')[0],
+        date: dateStr,
         difficulty: formData.difficulty || 'medium',
         status: formData.status || 'not_started'
       };

@@ -111,15 +111,17 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
 
       // Process items for this date
       items.forEach(item => {
-        const itemDate = new Date(item.date);
-        itemDate.setHours(0, 0, 0, 0);
+        // Create dates in local timezone for comparison
+        const itemDate = new Date(item.date + 'T00:00:00');
+        const currentDateStr = currentDate.toISOString().split('T')[0];
+        const itemDateStr = itemDate.toISOString().split('T')[0];
 
-        if (itemDate.getTime() === currentDate.getTime()) {
+        if (itemDateStr === currentDateStr) {
           if (item.status === 'completed' && !dayActivities.completedTasks.some(task => task.id === item.id)) {
             dayActivities.completedTasks.push(item);
           } else if (item.status === 'archived' && !dayActivities.archivedItems.some(task => task.id === item.id)) {
             dayActivities.archivedItems.push(item);
-          } else if (!dayActivities.activeItems.some(task => task.id === item.id)) {
+          } else {
             dayActivities.activeItems.push(item);
           }
         }
@@ -127,23 +129,13 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
         // Process sessions
         if (item.progress?.sessions) {
           item.progress.sessions.forEach(session => {
-            console.log('Original session date:', session.date);
-            // Parse the date string and create a date at midnight UTC
-            const [datePart] = session.date.split('T');
-            const sessionDate = new Date(datePart + 'T00:00:00.000Z');
+            const sessionDate = new Date(session.date + 'T00:00:00');
+            const sessionDateStr = sessionDate.toISOString().split('T')[0];
 
-            const currentDateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
-            const comparableCurrentDate = new Date(currentDateStr + 'T00:00:00.000Z');
-
-            console.log('Session date after parsing:', sessionDate.toISOString());
-            console.log('Current date for comparison:', comparableCurrentDate.toISOString());
-
-            if (sessionDate.getTime() === comparableCurrentDate.getTime()) {
-              // Convert Time to total minutes
-              const sessionDurationMinutes = session.duration 
+            if (sessionDateStr === currentDateStr) {
+              dayActivities.minutes += session.duration 
                 ? (session.duration.hours || 0) * 60 + (session.duration.minutes || 0)
                 : 0;
-              dayActivities.minutes += sessionDurationMinutes;
               dayActivities.sessions++;
             }
           });
@@ -204,10 +196,10 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
 
   // Handle date selection
   const handleDateSelect = useCallback((day: CalendarDay) => {
-    // Create a date in the local timezone at midnight
-    const localDate = new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate());
-    setSelectedDay(localDate);
-    onDateSelect(localDate, day.activities.activeItems, day.activities.completedTasks);
+    // Create a date at midnight in local timezone
+    const selectedDate = new Date(day.date.toISOString().split('T')[0] + 'T00:00:00');
+    setSelectedDay(selectedDate);
+    onDateSelect(selectedDate, day.activities.activeItems, day.activities.completedTasks);
   }, [onDateSelect]);
 
   // Handle keyboard navigation
