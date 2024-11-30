@@ -335,25 +335,68 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
   const currentMonth = monthNames[currentDate.getMonth()];
   const currentYear = currentDate.getFullYear();
 
-  const handleMonthSelect = (monthIndex: number) => {
-    const newDate = new Date(currentDate);
-    newDate.setMonth(monthIndex);
-    setCurrentDate(newDate);
-    setIsMonthPickerOpen(false);
+  const handleMonthChange = (monthIndex: number) => {
+    try {
+      const newDate = new Date(currentDate);
+      newDate.setMonth(monthIndex);
+      
+      // If we have a selected day, try to keep the same day in the new month
+      if (selectedDay) {
+        const targetDay = selectedDay.getDate();
+        const lastDayOfNewMonth = new Date(newDate.getFullYear(), monthIndex + 1, 0).getDate();
+        const adjustedDay = Math.min(targetDay, lastDayOfNewMonth);
+        
+        const adjustedDate = new Date(newDate.getFullYear(), monthIndex, adjustedDay);
+        setSelectedDay(adjustedDate);
+        onDateSelect(adjustedDate, [], []);
+      }
+      
+      setCurrentDate(newDate);
+      setIsMonthPickerOpen(false);
+    } catch (e) {
+      console.error('Error changing month:', e);
+    }
   };
 
-  const handleYearSelect = (year: number) => {
-    const newDate = new Date(currentDate);
-    newDate.setFullYear(year);
-    setCurrentDate(newDate);
-    setIsYearPickerOpen(false);
+  const handleYearChange = (year: number) => {
+    try {
+      const newDate = new Date(currentDate);
+      newDate.setFullYear(year);
+      
+      // If we have a selected day, try to keep the same day in the new year
+      if (selectedDay) {
+        const targetMonth = selectedDay.getMonth();
+        const targetDay = selectedDay.getDate();
+        const lastDayOfNewMonth = new Date(year, targetMonth + 1, 0).getDate();
+        const adjustedDay = Math.min(targetDay, lastDayOfNewMonth);
+        
+        const adjustedDate = new Date(year, targetMonth, adjustedDay);
+        setSelectedDay(adjustedDate);
+        onDateSelect(adjustedDate, [], []);
+      }
+      
+      setCurrentDate(newDate);
+      setIsYearPickerOpen(false);
+    } catch (e) {
+      console.error('Error changing year:', e);
+    }
   };
-
-  const years = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
 
   const renderHeader = () => (
     <div className="flex justify-between items-center mb-4">
-      <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))} className="p-2">
+      <button 
+        onClick={() => {
+          const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+          setCurrentDate(newDate);
+          if (selectedDay) {
+            const adjustedDate = new Date(selectedDay);
+            adjustedDate.setMonth(adjustedDate.getMonth() - 1);
+            setSelectedDay(adjustedDate);
+            onDateSelect(adjustedDate, [], []);
+          }
+        }} 
+        className="p-2"
+      >
         <span className="text-xl">←</span>
       </button>
       <div className="flex gap-2">
@@ -372,7 +415,7 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
               {monthNames.map((month, index) => (
                 <button
                   key={month}
-                  onClick={() => handleMonthSelect(index)}
+                  onClick={() => handleMonthChange(index)}
                   className={`px-2 py-1 text-sm hover:bg-blue-100 rounded ${
                     index === currentDate.getMonth() ? 'bg-blue-500 text-white' : ''
                   }`}
@@ -395,12 +438,12 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
           </button>
           {isYearPickerOpen && (
             <div className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg z-50 grid grid-cols-3 gap-1 p-2 w-48 max-h-48 overflow-y-auto">
-              {years.map(year => (
+              {Array.from({ length: 21 }, (_, i) => currentYear - 10 + i).map(year => (
                 <button
                   key={year}
-                  onClick={() => handleYearSelect(year)}
+                  onClick={() => handleYearChange(year)}
                   className={`px-2 py-1 text-sm hover:bg-blue-100 rounded ${
-                    year === currentYear ? 'bg-blue-500 text-white' : ''
+                    year === currentDate.getFullYear() ? 'bg-blue-500 text-white' : ''
                   }`}
                 >
                   {year}
@@ -410,7 +453,19 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
           )}
         </div>
       </div>
-      <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))} className="p-2">
+      <button 
+        onClick={() => {
+          const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+          setCurrentDate(newDate);
+          if (selectedDay) {
+            const adjustedDate = new Date(selectedDay);
+            adjustedDate.setMonth(adjustedDate.getMonth() + 1);
+            setSelectedDay(adjustedDate);
+            onDateSelect(adjustedDate, [], []);
+          }
+        }} 
+        className="p-2"
+      >
         <span className="text-xl">→</span>
       </button>
     </div>
