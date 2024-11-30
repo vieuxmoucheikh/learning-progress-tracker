@@ -558,3 +558,5 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
     </div>
   );
 }
+
+export { Calendar };
