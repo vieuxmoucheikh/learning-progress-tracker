@@ -127,21 +127,15 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
         // Process sessions
         if (item.progress?.sessions) {
           item.progress.sessions.forEach(session => {
-            // Create UTC dates for comparison
-            const sessionDate = new Date(session.date);
-            const sessionDateUTC = new Date(Date.UTC(
-              sessionDate.getFullYear(),
-              sessionDate.getMonth(),
-              sessionDate.getDate()
-            ));
+            // Parse the date string and create a date at midnight in local timezone
+            const [year, month, day] = session.date.split('T')[0].split('-').map(Number);
+            const sessionDate = new Date(year, month - 1, day); // month is 0-based in Date constructor
+            sessionDate.setHours(0, 0, 0, 0);
 
-            const currentDateUTC = new Date(Date.UTC(
-              currentDate.getFullYear(),
-              currentDate.getMonth(),
-              currentDate.getDate()
-            ));
+            const comparableCurrentDate = new Date(currentDate);
+            comparableCurrentDate.setHours(0, 0, 0, 0);
 
-            if (sessionDateUTC.getTime() === currentDateUTC.getTime()) {
+            if (sessionDate.getTime() === comparableCurrentDate.getTime()) {
               // Convert Time to total minutes
               const sessionDurationMinutes = session.duration 
                 ? (session.duration.hours || 0) * 60 + (session.duration.minutes || 0)
