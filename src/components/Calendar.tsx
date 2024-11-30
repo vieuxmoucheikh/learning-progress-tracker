@@ -127,13 +127,16 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
         // Process sessions
         if (item.progress?.sessions) {
           item.progress.sessions.forEach(session => {
-            // Parse the date string and create a date at midnight in local timezone
-            const [year, month, day] = session.date.split('T')[0].split('-').map(Number);
-            const sessionDate = new Date(year, month - 1, day); // month is 0-based in Date constructor
-            sessionDate.setHours(0, 0, 0, 0);
+            console.log('Original session date:', session.date);
+            // Parse the date string and create a date at midnight UTC
+            const [datePart] = session.date.split('T');
+            const sessionDate = new Date(datePart + 'T00:00:00.000Z');
 
-            const comparableCurrentDate = new Date(currentDate);
-            comparableCurrentDate.setHours(0, 0, 0, 0);
+            const currentDateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+            const comparableCurrentDate = new Date(currentDateStr + 'T00:00:00.000Z');
+
+            console.log('Session date after parsing:', sessionDate.toISOString());
+            console.log('Current date for comparison:', comparableCurrentDate.toISOString());
 
             if (sessionDate.getTime() === comparableCurrentDate.getTime()) {
               // Convert Time to total minutes
