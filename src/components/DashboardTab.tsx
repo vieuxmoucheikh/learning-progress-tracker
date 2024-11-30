@@ -35,15 +35,29 @@ export function DashboardTab({
   onAddItem,
   onDateSelect
 }: Props) {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  });
   const [activeTasks, setActiveTasks] = useState<LearningItem[]>([]);
   const [completedTasks, setCompletedTasks] = useState<LearningItem[]>([]);
 
   const handleDateSelect = useCallback((date: Date, active: LearningItem[], completed: LearningItem[]) => {
-    setSelectedDate(date);
-    setActiveTasks(active);
-    setCompletedTasks(completed);
-    onDateSelect(date);
+    try {
+      const newDate = new Date(date);
+      newDate.setHours(0, 0, 0, 0);
+      if (isNaN(newDate.getTime())) {
+        console.error('Invalid date selected:', date);
+        return;
+      }
+      setSelectedDate(newDate);
+      setActiveTasks(active);
+      setCompletedTasks(completed);
+      onDateSelect(newDate);
+    } catch (e) {
+      console.error('Error handling date selection:', e);
+    }
   }, [onDateSelect]);
 
   return (

@@ -42,13 +42,14 @@ interface Props {
 // Helper function to get timezone-adjusted date string
 const getAdjustedDateStr = (date: Date | string) => {
   try {
-    const d = new Date(date);
+    const d = typeof date === 'string' ? new Date(date + 'T00:00:00') : new Date(date);
     if (isNaN(d.getTime())) {
       return null;
     }
     d.setHours(0, 0, 0, 0);  // Set to midnight in local timezone
     return d.toISOString().split('T')[0];
   } catch (e) {
+    console.error('Error adjusting date:', e);
     return null;
   }
 };
