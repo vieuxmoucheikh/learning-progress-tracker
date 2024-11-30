@@ -42,12 +42,15 @@ interface Props {
 // Helper function to get timezone-adjusted date string
 const getAdjustedDateStr = (date: Date | string) => {
   try {
-    const d = typeof date === 'string' ? new Date(date) : new Date(date);
+    const d = new Date(date);
     if (isNaN(d.getTime())) {
       return null;
     }
-    d.setHours(0, 0, 0, 0);  // Set to midnight in local timezone
-    return d.toLocaleDateString('en-CA'); // Returns YYYY-MM-DD format
+    // Use UTC methods to avoid timezone issues
+    const year = d.getUTCFullYear();
+    const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   } catch (e) {
     console.error('Error adjusting date:', e);
     return null;
@@ -333,12 +336,16 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
   const currentYear = currentDate.getFullYear();
 
   const handleMonthSelect = (monthIndex: number) => {
-    setCurrentDate(new Date(currentDate.getFullYear(), monthIndex, 1));
+    const newDate = new Date(currentDate);
+    newDate.setMonth(monthIndex);
+    setCurrentDate(newDate);
     setIsMonthPickerOpen(false);
   };
 
   const handleYearSelect = (year: number) => {
-    setCurrentDate(new Date(year, currentDate.getMonth(), 1));
+    const newDate = new Date(currentDate);
+    newDate.setFullYear(year);
+    setCurrentDate(newDate);
     setIsYearPickerOpen(false);
   };
 

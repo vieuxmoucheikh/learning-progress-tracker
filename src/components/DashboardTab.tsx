@@ -44,8 +44,18 @@ export function DashboardTab({
   const [completedTasks, setCompletedTasks] = useState<LearningItem[]>([]);
 
   // Helper function to get date string in YYYY-MM-DD format
-  const getDateStr = (date: Date) => {
-    return date.toLocaleDateString('en-CA');
+  const getDateStr = (date: Date | string) => {
+    try {
+      const d = new Date(date);
+      if (isNaN(d.getTime())) return null;
+      const year = d.getUTCFullYear();
+      const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    } catch (e) {
+      console.error('Error getting date string:', e);
+      return null;
+    }
   };
 
   // Update tasks when items or selectedDate changes
@@ -53,12 +63,14 @@ export function DashboardTab({
     if (!selectedDate) return;
 
     const dateStr = getDateStr(selectedDate);
+    if (!dateStr) return;
+
     const active: LearningItem[] = [];
     const completed: LearningItem[] = [];
 
     items.forEach(item => {
       if (!item.date) return;
-      const itemDateStr = new Date(item.date).toLocaleDateString('en-CA');
+      const itemDateStr = getDateStr(item.date);
       
       if (itemDateStr === dateStr) {
         if (item.status === 'completed') {
