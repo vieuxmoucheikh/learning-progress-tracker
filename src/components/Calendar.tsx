@@ -79,7 +79,11 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
     };
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const todayUtc = new Date(Date.UTC(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    ));
 
     const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -97,7 +101,11 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
 
     // Iterate through each day
     for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
-      const dateStr = getAdjustedDateStr(date);
+      const utcDate = new Date(Date.UTC(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+      ));
 
       // Initialize activities for this day
       const dayActivities: DayActivity = {
@@ -111,10 +119,14 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
       // Process items for this date
       items.forEach(item => {
         const itemDate = new Date(item.date);
-        itemDate.setHours(0, 0, 0, 0);
+        const itemUtcDate = new Date(Date.UTC(
+          itemDate.getFullYear(),
+          itemDate.getMonth(),
+          itemDate.getDate()
+        ));
 
         // Add item based on its creation date
-        if (getAdjustedDateStr(itemDate) === dateStr) {
+        if (itemUtcDate.toISOString().split('T')[0] === utcDate.toISOString().split('T')[0]) {
           if (item.status === 'completed' && !dayActivities.completedTasks.some(task => task.id === item.id)) {
             dayActivities.completedTasks.push(item);
           } else if (item.status === 'archived' && !dayActivities.archivedItems.some(task => task.id === item.id)) {
@@ -130,10 +142,13 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
         if (item.progress.sessions) {
           item.progress.sessions.forEach(session => {
             const sessionDate = new Date(session.date);
-            sessionDate.setHours(0, 0, 0, 0);
-            const sessionDateStr = getAdjustedDateStr(sessionDate);
+            const sessionUtcDate = new Date(Date.UTC(
+              sessionDate.getFullYear(),
+              sessionDate.getMonth(),
+              sessionDate.getDate()
+            ));
 
-            if (sessionDateStr === dateStr) {
+            if (sessionUtcDate.toISOString().split('T')[0] === utcDate.toISOString().split('T')[0]) {
               // Add item if not already added
               if (item.status === 'completed' && !dayActivities.completedTasks.some(task => task.id === item.id)) {
                 dayActivities.completedTasks.push(item);
@@ -155,11 +170,11 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
       });
 
       const calendarDay: CalendarDay = {
-        date: new Date(date),
+        date: utcDate,
         minutes: dayActivities.minutes,
         sessions: dayActivities.sessions,
-        isCurrentMonth: date.getMonth() === currentDate.getMonth(),
-        isToday: dateStr === getAdjustedDateStr(today),
+        isCurrentMonth: utcDate.getMonth() === currentDate.getMonth(),
+        isToday: utcDate.toISOString().split('T')[0] === todayUtc.toISOString().split('T')[0],
         activities: dayActivities,
       };
 
@@ -195,7 +210,7 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
       // Find the day in calendar data
       const selectedDayData = calendarData.weeks
         .flatMap(week => week.days)
-        .find(day => getAdjustedDateStr(day.date) === getAdjustedDateStr(newSelectedDay));
+        .find(day => day.date.toISOString().split('T')[0] === newSelectedDay.toISOString().split('T')[0]);
 
       if (selectedDayData) {
         onDateSelect(newSelectedDay, selectedDayData.activities.activeItems, selectedDayData.activities.completedTasks);
@@ -206,7 +221,6 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
   // Handle date selection
   const handleDateSelect = useCallback((day: CalendarDay) => {
     const selectedDate = new Date(day.date);
-    selectedDate.setUTCHours(0, 0, 0, 0);  // Set to midnight in UTC
     setSelectedDay(selectedDate);
     onDateSelect(selectedDate, day.activities.activeItems, day.activities.completedTasks);
   }, [onDateSelect]);
@@ -244,11 +258,7 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
 
   const isSelectedDate = useCallback((day: CalendarDay) => {
     if (!selectedDay) return false;
-    const dayDate = new Date(day.date);
-    dayDate.setHours(0, 0, 0, 0);
-    const selectedDate = new Date(selectedDay);
-    selectedDate.setHours(0, 0, 0, 0);
-    return dayDate.getTime() === selectedDate.getTime();
+    return day.date.toISOString().split('T')[0] === selectedDay.toISOString().split('T')[0];
   }, [selectedDay]);
 
   const getActivityColor = (day: CalendarDay) => {
