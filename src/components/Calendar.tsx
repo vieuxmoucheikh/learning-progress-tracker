@@ -127,10 +127,12 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
         // Process sessions
         if (item.progress?.sessions) {
           item.progress.sessions.forEach(session => {
+            // Create date object and adjust for timezone
             const sessionDate = new Date(session.date);
-            sessionDate.setHours(0, 0, 0, 0);
+            const adjustedDate = new Date(sessionDate.getTime() + sessionDate.getTimezoneOffset() * 60000);
+            adjustedDate.setHours(0, 0, 0, 0);
 
-            if (sessionDate.getTime() === currentDate.getTime()) {
+            if (adjustedDate.getTime() === currentDate.getTime()) {
               // Convert Time to total minutes
               const sessionDurationMinutes = session.duration 
                 ? (session.duration.hours || 0) * 60 + (session.duration.minutes || 0)
