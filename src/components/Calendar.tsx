@@ -78,48 +78,27 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
       weeks: []
     };
 
-    // Get today's date at midnight UTC
     const today = new Date();
-    const todayUtc = new Date(Date.UTC(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-      0, 0, 0, 0
-    ));
+    today.setHours(0, 0, 0, 0);
 
-    const firstDay = new Date(Date.UTC(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1,
-      0, 0, 0, 0
-    ));
-    const lastDay = new Date(Date.UTC(
-      currentDate.getFullYear(),
-      currentDate.getMonth() + 1,
-      0,
-      0, 0, 0, 0
-    ));
+    const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
 
     // Start from the first day of the week that contains the first day of the month
     const start = new Date(firstDay);
-    start.setUTCDate(firstDay.getUTCDate() - firstDay.getUTCDay());
+    start.setDate(firstDay.getDate() - firstDay.getDay());
 
     // End on the last day of the week that contains the last day of the month
     const end = new Date(lastDay);
-    end.setUTCDate(lastDay.getUTCDate() + (6 - lastDay.getUTCDay()));
+    end.setDate(lastDay.getDate() + (6 - lastDay.getDay()));
 
     let weeks: CalendarWeek[] = [];
     let currentWeek: CalendarDay[] = [];
 
     // Iterate through each day
-    const current = new Date(start);
-    while (current <= end) {
-      const utcDate = new Date(Date.UTC(
-        current.getUTCFullYear(),
-        current.getUTCMonth(),
-        current.getUTCDate(),
-        0, 0, 0, 0
-      ));
+    for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+      const currentDate = new Date(date);
+      currentDate.setHours(0, 0, 0, 0);
 
       // Initialize activities for this day
       const dayActivities: DayActivity = {
@@ -133,15 +112,9 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
       // Process items for this date
       items.forEach(item => {
         const itemDate = new Date(item.date);
-        const itemUtcDate = new Date(Date.UTC(
-          itemDate.getFullYear(),
-          itemDate.getMonth(),
-          itemDate.getDate(),
-          0, 0, 0, 0
-        ));
+        itemDate.setHours(0, 0, 0, 0);
 
-        // Add item based on its creation date
-        if (itemUtcDate.toISOString().split('T')[0] === utcDate.toISOString().split('T')[0]) {
+        if (itemDate.getTime() === currentDate.getTime()) {
           if (item.status === 'completed' && !dayActivities.completedTasks.some(task => task.id === item.id)) {
             dayActivities.completedTasks.push(item);
           } else if (item.status === 'archived' && !dayActivities.archivedItems.some(task => task.id === item.id)) {
@@ -150,47 +123,27 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
             dayActivities.activeItems.push(item);
           }
         }
-      });
 
-      // Also check sessions for this item
-      items.forEach(item => {
-        if (item.progress.sessions) {
+        // Process sessions
+        if (item.progress?.sessions) {
           item.progress.sessions.forEach(session => {
             const sessionDate = new Date(session.date);
-            const sessionUtcDate = new Date(Date.UTC(
-              sessionDate.getFullYear(),
-              sessionDate.getMonth(),
-              sessionDate.getDate(),
-              0, 0, 0, 0
-            ));
+            sessionDate.setHours(0, 0, 0, 0);
 
-            if (sessionUtcDate.toISOString().split('T')[0] === utcDate.toISOString().split('T')[0]) {
-              // Add item if not already added
-              if (item.status === 'completed' && !dayActivities.completedTasks.some(task => task.id === item.id)) {
-                dayActivities.completedTasks.push(item);
-              } else if (item.status === 'archived' && !dayActivities.archivedItems.some(task => task.id === item.id)) {
-                dayActivities.archivedItems.push(item);
-              } else if (!dayActivities.activeItems.some(task => task.id === item.id)) {
-                dayActivities.activeItems.push(item);
-              }
-
-              // Calculate duration if session has start and end time
-              if (session.startTime && session.endTime) {
-                const duration = (new Date(session.endTime).getTime() - new Date(session.startTime).getTime()) / (1000 * 60);
-                dayActivities.minutes += duration;
-                dayActivities.sessions++;
-              }
+            if (sessionDate.getTime() === currentDate.getTime()) {
+              dayActivities.minutes += session.duration;
+              dayActivities.sessions++;
             }
           });
         }
       });
 
       const calendarDay: CalendarDay = {
-        date: utcDate,
+        date: currentDate,
         minutes: dayActivities.minutes,
         sessions: dayActivities.sessions,
-        isCurrentMonth: utcDate.getUTCMonth() === currentDate.getUTCMonth(),
-        isToday: utcDate.toISOString().split('T')[0] === todayUtc.toISOString().split('T')[0],
+        isCurrentMonth: currentDate.getMonth() === currentDate.getMonth(),
+        isToday: currentDate.getTime() === today.getTime(),
         activities: dayActivities,
       };
 
@@ -200,16 +153,17 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
         weeks.push({ days: currentWeek });
         currentWeek = [];
       }
-
-      current.setUTCDate(current.getUTCDate() + 1);
     }
 
     if (currentWeek.length > 0) {
       weeks.push({ days: currentWeek });
     }
 
-    calendar.weeks = weeks;
-    return calendar;
+    return {
+      month: calendar.month,
+      year: calendar.year,
+      weeks
+    };
   }, [currentDate, items]);
 
   useEffect(() => {
@@ -228,7 +182,7 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
       // Find the day in calendar data
       const selectedDayData = calendarData.weeks
         .flatMap(week => week.days)
-        .find(day => day.date.toISOString().split('T')[0] === newSelectedDay.toISOString().split('T')[0]);
+        .find(day => day.date.getTime() === newSelectedDay.getTime());
 
       if (selectedDayData) {
         onDateSelect(newSelectedDay, selectedDayData.activities.activeItems, selectedDayData.activities.completedTasks);
@@ -238,13 +192,8 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
 
   // Handle date selection
   const handleDateSelect = useCallback((day: CalendarDay) => {
-    // Create a new date at midnight UTC
-    const selectedDate = new Date(Date.UTC(
-      day.date.getFullYear(),
-      day.date.getMonth(),
-      day.date.getDate(),
-      0, 0, 0, 0
-    ));
+    const selectedDate = new Date(day.date);
+    selectedDate.setHours(0, 0, 0, 0);
     setSelectedDay(selectedDate);
     onDateSelect(selectedDate, day.activities.activeItems, day.activities.completedTasks);
   }, [onDateSelect]);
@@ -256,16 +205,16 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
     const newDate = new Date(selectedDay);
     switch (e.key) {
       case 'ArrowLeft':
-        newDate.setUTCDate(newDate.getUTCDate() - 1);
+        newDate.setDate(newDate.getDate() - 1);
         break;
       case 'ArrowRight':
-        newDate.setUTCDate(newDate.getUTCDate() + 1);
+        newDate.setDate(newDate.getDate() + 1);
         break;
       case 'ArrowUp':
-        newDate.setUTCDate(newDate.getUTCDate() - 7);
+        newDate.setDate(newDate.getDate() - 7);
         break;
       case 'ArrowDown':
-        newDate.setUTCDate(newDate.getUTCDate() + 7);
+        newDate.setDate(newDate.getDate() + 7);
         break;
       default:
         return;
@@ -282,19 +231,10 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
 
   const isSelectedDate = useCallback((day: CalendarDay) => {
     if (!selectedDay) return false;
-    // Compare dates using UTC midnight
-    const dayDate = new Date(Date.UTC(
-      day.date.getFullYear(),
-      day.date.getMonth(),
-      day.date.getDate(),
-      0, 0, 0, 0
-    ));
-    const compareDate = new Date(Date.UTC(
-      selectedDay.getFullYear(),
-      selectedDay.getMonth(),
-      selectedDay.getDate(),
-      0, 0, 0, 0
-    ));
+    const dayDate = new Date(day.date);
+    dayDate.setHours(0, 0, 0, 0);
+    const compareDate = new Date(selectedDay);
+    compareDate.setHours(0, 0, 0, 0);
     return dayDate.getTime() === compareDate.getTime();
   }, [selectedDay]);
 
@@ -331,7 +271,7 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
         onMouseEnter={(e) => setHoveredDay(day)}
         onMouseLeave={() => setHoveredDay(null)}
       >
-        <div className="text-sm">{day.date.getUTCDate()}</div>
+        <div className="text-sm">{day.date.getDate()}</div>
         <div className="absolute bottom-1 right-1 flex items-center space-x-1">
           {hasActiveTasks && (
             <div className="w-2 h-2 bg-blue-500 rounded-full" title="Active Tasks" />
