@@ -204,10 +204,10 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
 
   // Handle date selection
   const handleDateSelect = useCallback((day: CalendarDay) => {
-    const selectedDate = new Date(day.date);
-    selectedDate.setHours(0, 0, 0, 0);
-    setSelectedDay(selectedDate);
-    onDateSelect(selectedDate, day.activities.activeItems, day.activities.completedTasks);
+    // Create a date in the local timezone at midnight
+    const localDate = new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate());
+    setSelectedDay(localDate);
+    onDateSelect(localDate, day.activities.activeItems, day.activities.completedTasks);
   }, [onDateSelect]);
 
   // Handle keyboard navigation
