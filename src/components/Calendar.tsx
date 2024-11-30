@@ -131,7 +131,11 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
             sessionDate.setHours(0, 0, 0, 0);
 
             if (sessionDate.getTime() === currentDate.getTime()) {
-              dayActivities.minutes += session.duration;
+              // Convert Time to total minutes
+              const sessionDurationMinutes = session.duration 
+                ? (session.duration.hours || 0) * 60 + (session.duration.minutes || 0)
+                : 0;
+              dayActivities.minutes += sessionDurationMinutes;
               dayActivities.sessions++;
             }
           });
