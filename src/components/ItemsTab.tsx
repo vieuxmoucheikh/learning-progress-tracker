@@ -1,12 +1,9 @@
 import { useState, useMemo } from "react";
 import { LearningItem } from "@/types";
 import LearningItemCard from "./LearningItemCard";
-import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select } from "./ui/select";
-import { Plus, Search, Calendar as CalendarIcon } from "lucide-react";
-import { Card } from "./ui/card";
-import { Calendar } from "./Calendar";
+import { Search } from "lucide-react";
 
 interface ItemsTabProps {
   items: LearningItem[];
@@ -33,8 +30,7 @@ export function ItemsTab({
 }: ItemsTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   // Helper function to get date string in YYYY-MM-DD format
   const getDateStr = (date: Date) => {
@@ -44,30 +40,17 @@ export function ItemsTab({
     return `${year}-${month}-${day}`;
   };
 
-  // Filter items based on search and status
+  // Filter items based on search, status and category
   const filteredItems = useMemo(() => {
     return items.filter(item => {
       const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = selectedStatus === 'all' || item.status === selectedStatus;
+      const matchesCategory = selectedCategory === 'all' || 
+        (item.category?.toLowerCase() === selectedCategory.toLowerCase());
       
-      if (selectedDate && item.date) {
-        const itemDate = new Date(item.date);
-        const selectedDateStr = getDateStr(selectedDate);
-        const itemDateStr = getDateStr(itemDate);
-        return matchesSearch && matchesStatus && selectedDateStr === itemDateStr;
-      }
-      
-      return matchesSearch && matchesStatus;
+      return matchesSearch && matchesStatus && matchesCategory;
     });
-  }, [items, searchQuery, selectedStatus, selectedDate]);
-
-  const handleDateSelect = (date: Date, activeTasks: LearningItem[], completedTasks: LearningItem[]) => {
-    setSelectedDate(date);
-  };
-
-  const handleAddItem = () => {
-    onAddItem(selectedDate ?? undefined);
-  };
+  }, [items, searchQuery, selectedStatus, selectedCategory]);
 
   return (
     <div className="space-y-6">
@@ -95,32 +78,22 @@ export function ItemsTab({
               { value: 'archived', label: 'Archived' }
             ]}
           />
-          <Button
-            variant="outline"
-            className="gap-2"
-            onClick={() => setShowCalendar(!showCalendar)}
-          >
-            <CalendarIcon className="h-4 w-4" />
-            {showCalendar ? 'Hide Calendar' : 'Show Calendar'}
-          </Button>
-          <Button onClick={handleAddItem} className="gap-2 bg-blue-600 hover:bg-blue-700">
-            <Plus className="h-4 w-4" />
-            Add Item
-          </Button>
+          <Select
+            value={selectedCategory}
+            onValueChange={setSelectedCategory}
+            className="w-full sm:w-[180px]"
+            items={[
+              { value: 'all', label: 'All Categories' },
+              ...Array.from(new Set(items.map(item => item.category?.toLowerCase() || '').filter(Boolean)))
+                .sort()
+                .map(category => ({
+                  value: category,
+                  label: category.charAt(0).toUpperCase() + category.slice(1)
+                }))
+            ]}
+          />
         </div>
       </div>
-
-      {/* Calendar Section */}
-      {showCalendar && (
-        <Card className="p-4">
-          <Calendar 
-            items={items}
-            onDateSelect={handleDateSelect}
-            selectedDate={selectedDate}
-            onAddItem={handleAddItem}
-          />
-        </Card>
-      )}
 
       {/* Items List */}
       <div className="space-y-4">
