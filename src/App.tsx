@@ -218,7 +218,7 @@ export default function App() {
     };
   }, [user]);
 
-  const handleAddItem = async (selectedDate?: Date) => {
+  const handleAddItem = async (selectedDate?: Date | null) => {
     setShowAddDialog(true);
     if (selectedDate) {
       setSelectedDate(selectedDate);

@@ -19,7 +19,7 @@ interface Props {
   onNotesUpdate: (id: string, notes: string) => void;
   onSetActiveItem: (id: string | null) => void;
   onSessionNoteAdd: (id: string, note: string) => void;
-  onAddItem: (date?: Date) => void;
+  onAddItem: (date?: Date | null) => void;
   onDateSelect: (date: Date) => void;
 }
 
@@ -101,88 +101,110 @@ export function DashboardTab({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Calendar Section - Takes up 2/5 of the space */}
-        <div className="lg:col-span-2">
-          <Card className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Calendar</h3>
-              <Button 
-                onClick={() => onAddItem(selectedDate ?? undefined)}
-                className="gap-2 bg-blue-600 hover:bg-blue-700"
-              >
-                <Plus className="h-4 w-4" />
-                Add Item
-              </Button>
+      {/* Stats Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="p-4">
+          <h3 className="text-sm font-medium text-gray-500">Total Items</h3>
+          <p className="mt-2 text-3xl font-semibold">{items.length}</p>
+        </Card>
+        <Card className="p-4">
+          <h3 className="text-sm font-medium text-gray-500">Active Items</h3>
+          <p className="mt-2 text-3xl font-semibold text-blue-600">
+            {items.filter(item => item.status === 'in_progress').length}
+          </p>
+        </Card>
+        <Card className="p-4">
+          <h3 className="text-sm font-medium text-gray-500">Completed Today</h3>
+          <p className="mt-2 text-3xl font-semibold text-green-600">{completedTasks.length}</p>
+        </Card>
+        <Card className="p-4">
+          <h3 className="text-sm font-medium text-gray-500">Pending Today</h3>
+          <p className="mt-2 text-3xl font-semibold text-yellow-600">{activeTasks.length}</p>
+        </Card>
+      </div>
+
+      {/* Calendar Section */}
+      <Card className="p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Calendar</h2>
+          <Button onClick={() => onAddItem(selectedDate)} className="gap-2 bg-blue-600 hover:bg-blue-700">
+            <Plus className="h-4 w-4" />
+            Add Item
+          </Button>
+        </div>
+        <Calendar 
+          items={items}
+          onDateSelect={handleDateSelect}
+          selectedDate={selectedDate}
+          onAddItem={onAddItem}
+        />
+      </Card>
+
+      {/* Today's Tasks */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Active Tasks */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Active Tasks</h2>
+            <span className="px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+              {activeTasks.length} items
+            </span>
+          </div>
+          {activeTasks.length === 0 ? (
+            <Card className="p-6 text-center">
+              <CalendarIcon className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+              <h3 className="text-lg font-medium text-gray-900">No active tasks</h3>
+              <p className="text-gray-500 mt-1">Add some tasks to get started</p>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {activeTasks.map((item) => (
+                <LearningItemCard
+                  key={item.id}
+                  item={item}
+                  onUpdate={onUpdate}
+                  onDelete={onDelete}
+                  onStartTracking={onStartTracking}
+                  onStopTracking={onStopTracking}
+                  onNotesUpdate={onNotesUpdate}
+                  onSetActiveItem={onSetActiveItem}
+                  onSessionNoteAdd={onSessionNoteAdd}
+                />
+              ))}
             </div>
-            <Calendar 
-              items={items} 
-              onDateSelect={handleDateSelect}
-              selectedDate={selectedDate}
-              onAddItem={() => onAddItem(selectedDate ?? undefined)}
-            />
-          </Card>
+          )}
         </div>
 
-        {/* Tasks Section - Takes up 3/5 of the space */}
-        <div className="lg:col-span-3 space-y-6">
-          {/* Active Tasks */}
-          {activeTasks.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Active Tasks</h3>
-              <div className="space-y-4">
-                {activeTasks.map((item) => (
-                  <LearningItemCard
-                    key={item.id}
-                    item={item}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                    onStartTracking={onStartTracking}
-                    onStopTracking={onStopTracking}
-                    onNotesUpdate={onNotesUpdate}
-                    onSetActiveItem={onSetActiveItem}
-                    onSessionNoteAdd={onSessionNoteAdd}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Completed Tasks */}
-          {completedTasks.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Completed Tasks</h3>
-              <div className="space-y-4">
-                {completedTasks.map((item) => (
-                  <LearningItemCard
-                    key={item.id}
-                    item={item}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                    onStartTracking={onStartTracking}
-                    onStopTracking={onStopTracking}
-                    onNotesUpdate={onNotesUpdate}
-                    onSetActiveItem={onSetActiveItem}
-                    onSessionNoteAdd={onSessionNoteAdd}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* No Tasks Message */}
-          {activeTasks.length === 0 && completedTasks.length === 0 && (
+        {/* Completed Tasks */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Completed Tasks</h2>
+            <span className="px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+              {completedTasks.length} items
+            </span>
+          </div>
+          {completedTasks.length === 0 ? (
             <Card className="p-6 text-center">
-              <h3 className="text-lg font-semibold mb-2">No Tasks for Selected Date</h3>
-              <p className="text-muted-foreground mb-4">Add a new task or select a different date</p>
-              <Button 
-                onClick={() => onAddItem(selectedDate ?? undefined)}
-                className="gap-2 bg-blue-600 hover:bg-blue-700"
-              >
-                <Plus className="h-4 w-4" />
-                Add New Task
-              </Button>
+              <CalendarIcon className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+              <h3 className="text-lg font-medium text-gray-900">No completed tasks</h3>
+              <p className="text-gray-500 mt-1">Complete some tasks to see them here</p>
             </Card>
+          ) : (
+            <div className="space-y-3">
+              {completedTasks.map((item) => (
+                <LearningItemCard
+                  key={item.id}
+                  item={item}
+                  onUpdate={onUpdate}
+                  onDelete={onDelete}
+                  onStartTracking={onStartTracking}
+                  onStopTracking={onStopTracking}
+                  onNotesUpdate={onNotesUpdate}
+                  onSetActiveItem={onSetActiveItem}
+                  onSessionNoteAdd={onSessionNoteAdd}
+                />
+              ))}
+            </div>
           )}
         </div>
       </div>
