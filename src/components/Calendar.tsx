@@ -40,10 +40,17 @@ interface Props {
 }
 
 // Helper function to get timezone-adjusted date string
-const getAdjustedDateStr = (date: Date) => {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);  // Set to midnight in local timezone
-  return d.toISOString().split('T')[0];
+const getAdjustedDateStr = (date: Date | string) => {
+  try {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) {
+      return null;
+    }
+    d.setHours(0, 0, 0, 0);  // Set to midnight in local timezone
+    return d.toISOString().split('T')[0];
+  } catch (e) {
+    return null;
+  }
 };
 
 // Helper function to format minutes into hours and minutes
@@ -111,12 +118,13 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
 
       // Process items for this date
       items.forEach(item => {
+        if (!item.date) return;
+        
         // Create dates in local timezone for comparison
-        const itemDate = new Date(item.date + 'T00:00:00');
-        const currentDateStr = currentDate.toISOString().split('T')[0];
-        const itemDateStr = itemDate.toISOString().split('T')[0];
+        const itemDateStr = getAdjustedDateStr(item.date);
+        const currentDateStr = getAdjustedDateStr(currentDate);
 
-        if (itemDateStr === currentDateStr) {
+        if (itemDateStr && currentDateStr && itemDateStr === currentDateStr) {
           if (item.status === 'completed' && !dayActivities.completedTasks.some(task => task.id === item.id)) {
             dayActivities.completedTasks.push(item);
           } else if (item.status === 'archived' && !dayActivities.archivedItems.some(task => task.id === item.id)) {
@@ -129,10 +137,10 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
         // Process sessions
         if (item.progress?.sessions) {
           item.progress.sessions.forEach(session => {
-            const sessionDate = new Date(session.date + 'T00:00:00');
-            const sessionDateStr = sessionDate.toISOString().split('T')[0];
-
-            if (sessionDateStr === currentDateStr) {
+            if (!session.date) return;
+            
+            const sessionDateStr = getAdjustedDateStr(session.date);
+            if (sessionDateStr && currentDateStr && sessionDateStr === currentDateStr) {
               dayActivities.minutes += session.duration 
                 ? (session.duration.hours || 0) * 60 + (session.duration.minutes || 0)
                 : 0;
@@ -196,10 +204,19 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
 
   // Handle date selection
   const handleDateSelect = useCallback((day: CalendarDay) => {
-    // Create a date at midnight in local timezone
-    const selectedDate = new Date(day.date.toISOString().split('T')[0] + 'T00:00:00');
-    setSelectedDay(selectedDate);
-    onDateSelect(selectedDate, day.activities.activeItems, day.activities.completedTasks);
+    try {
+      const dateStr = getAdjustedDateStr(day.date);
+      if (!dateStr) return;
+      
+      // Create a date at midnight in local timezone
+      const selectedDate = new Date(dateStr + 'T00:00:00');
+      if (isNaN(selectedDate.getTime())) return;
+      
+      setSelectedDay(selectedDate);
+      onDateSelect(selectedDate, day.activities.activeItems, day.activities.completedTasks);
+    } catch (e) {
+      console.error('Error handling date selection:', e);
+    }
   }, [onDateSelect]);
 
   // Handle keyboard navigation
