@@ -53,11 +53,11 @@ const formatDuration = (minutes: number): string => {
   return `${hours}h ${mins}m`;
 };
 
-export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDate, onAddItem }: Props) {
+const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: externalSelectedDate, onAddItem }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [isYearPickerOpen, setIsYearPickerOpen] = useState(false);
-  const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState<Date | null>(externalSelectedDate);
+  const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
+  const [isYearPickerOpen, setIsYearPickerOpen] = useState(false);
   const [hoveredDay, setHoveredDay] = useState<CalendarDay | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showLegend, setShowLegend] = useState(false);
@@ -303,103 +303,104 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
     setHoveredDay(day);
   };
 
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const currentMonth = monthNames[currentDate.getMonth()];
+  const currentYear = currentDate.getFullYear();
+
+  const handleMonthSelect = (monthIndex: number) => {
+    setCurrentDate(new Date(currentDate.getFullYear(), monthIndex, 1));
+    setIsMonthPickerOpen(false);
+  };
+
+  const handleYearSelect = (year: number) => {
+    setCurrentDate(new Date(year, currentDate.getMonth(), 1));
+    setIsYearPickerOpen(false);
+  };
+
+  const years = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
+
+  const renderHeader = () => (
+    <div className="flex justify-between items-center mb-4">
+      <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))} className="p-2">
+        <span className="text-xl">←</span>
+      </button>
+      <div className="flex gap-2">
+        <div className="relative">
+          <button 
+            onClick={() => {
+              setIsMonthPickerOpen(!isMonthPickerOpen);
+              setIsYearPickerOpen(false);
+            }}
+            className="px-2 py-1 text-lg font-semibold hover:bg-gray-100 rounded"
+          >
+            {currentMonth}
+          </button>
+          {isMonthPickerOpen && (
+            <div className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg z-50 grid grid-cols-3 gap-1 p-2 w-48">
+              {monthNames.map((month, index) => (
+                <button
+                  key={month}
+                  onClick={() => handleMonthSelect(index)}
+                  className={`px-2 py-1 text-sm hover:bg-blue-100 rounded ${
+                    index === currentDate.getMonth() ? 'bg-blue-500 text-white' : ''
+                  }`}
+                >
+                  {month}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="relative">
+          <button 
+            onClick={() => {
+              setIsYearPickerOpen(!isYearPickerOpen);
+              setIsMonthPickerOpen(false);
+            }}
+            className="px-2 py-1 text-lg font-semibold hover:bg-gray-100 rounded"
+          >
+            {currentYear}
+          </button>
+          {isYearPickerOpen && (
+            <div className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg z-50 grid grid-cols-3 gap-1 p-2 w-48 max-h-48 overflow-y-auto">
+              {years.map(year => (
+                <button
+                  key={year}
+                  onClick={() => handleYearSelect(year)}
+                  className={`px-2 py-1 text-sm hover:bg-blue-100 rounded ${
+                    year === currentYear ? 'bg-blue-500 text-white' : ''
+                  }`}
+                >
+                  {year}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))} className="p-2">
+        <span className="text-xl">→</span>
+      </button>
+    </div>
+  );
+
+  const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.relative')) {
+      setIsMonthPickerOpen(false);
+      setIsYearPickerOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <div className="relative space-y-4">
       {/* Month and Year Navigation */}
-      <div className="flex justify-between items-center">
-        <button
-          onClick={() => {
-            const newDate = new Date(currentDate);
-            newDate.setMonth(newDate.getMonth() - 1);
-            setCurrentDate(newDate);
-          }}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <div className="flex items-center space-x-2">
-          <div className="relative">
-            <button
-              onClick={() => setIsMonthPickerOpen(!isMonthPickerOpen)}
-              className="text-lg font-semibold hover:bg-gray-100 px-3 py-1 rounded transition-colors flex items-center gap-2"
-            >
-              {calendarData.month}
-              <ChevronDown className="w-4 h-4" />
-            </button>
-            {isMonthPickerOpen && (
-              <div className="absolute top-full left-0 mt-1 bg-white shadow-lg rounded-lg p-2 z-50 grid grid-cols-3 gap-1 w-48">
-                {Array.from({ length: 12 }).map((_, i) => {
-                  const monthName = new Date(2000, i).toLocaleString('default', { month: 'short' });
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => {
-                        const newDate = new Date(currentDate);
-                        newDate.setMonth(i);
-                        setCurrentDate(newDate);
-                        setIsMonthPickerOpen(false);
-                      }}
-                      className={cn(
-                        "px-2 py-1 rounded text-sm",
-                        currentDate.getMonth() === i
-                          ? "bg-blue-100 text-blue-700"
-                          : "hover:bg-gray-100"
-                      )}
-                    >
-                      {monthName}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-          <div className="relative">
-            <button
-              onClick={() => setIsYearPickerOpen(!isYearPickerOpen)}
-              className="text-lg font-semibold hover:bg-gray-100 px-3 py-1 rounded transition-colors flex items-center gap-2"
-            >
-              {calendarData.year}
-              <ChevronDown className="w-4 h-4" />
-            </button>
-            {isYearPickerOpen && (
-              <div className="absolute top-full left-0 mt-1 bg-white shadow-lg rounded-lg p-2 z-50 grid grid-cols-3 gap-1 w-48">
-                {Array.from({ length: 10 }, (_, i) => {
-                  const year = currentDate.getFullYear() - 5 + i;
-                  return (
-                    <button
-                      key={year}
-                      onClick={() => {
-                        const newDate = new Date(currentDate);
-                        newDate.setFullYear(year);
-                        setCurrentDate(newDate);
-                        setIsYearPickerOpen(false);
-                      }}
-                      className={cn(
-                        "px-2 py-1 rounded text-sm",
-                        currentDate.getFullYear() === year
-                          ? "bg-blue-100 text-blue-700"
-                          : "hover:bg-gray-100"
-                      )}
-                    >
-                      {year}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-        <button
-          onClick={() => {
-            const newDate = new Date(currentDate);
-            newDate.setMonth(newDate.getMonth() + 1);
-            setCurrentDate(newDate);
-          }}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-      </div>
+      {renderHeader()}
 
       {/* Legend */}
       <div className="flex items-center justify-end space-x-2 text-sm">
