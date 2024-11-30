@@ -42,12 +42,12 @@ interface Props {
 // Helper function to get timezone-adjusted date string
 const getAdjustedDateStr = (date: Date | string) => {
   try {
-    const d = typeof date === 'string' ? new Date(date + 'T00:00:00') : new Date(date);
+    const d = typeof date === 'string' ? new Date(date) : new Date(date);
     if (isNaN(d.getTime())) {
       return null;
     }
     d.setHours(0, 0, 0, 0);  // Set to midnight in local timezone
-    return d.toISOString().split('T')[0];
+    return d.toLocaleDateString('en-CA'); // Returns YYYY-MM-DD format
   } catch (e) {
     console.error('Error adjusting date:', e);
     return null;
@@ -62,8 +62,19 @@ const formatDuration = (minutes: number): string => {
 };
 
 const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: externalSelectedDate, onAddItem }) => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDay, setSelectedDay] = useState<Date | null>(externalSelectedDate);
+  const [currentDate, setCurrentDate] = useState(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return now;
+  });
+  const [selectedDay, setSelectedDay] = useState<Date | null>(() => {
+    if (externalSelectedDate) {
+      const date = new Date(externalSelectedDate);
+      date.setHours(0, 0, 0, 0);
+      return date;
+    }
+    return null;
+  });
   const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
   const [isYearPickerOpen, setIsYearPickerOpen] = useState(false);
   const [hoveredDay, setHoveredDay] = useState<CalendarDay | null>(null);
@@ -126,11 +137,11 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
         const currentDateStr = getAdjustedDateStr(currentDate);
 
         if (itemDateStr && currentDateStr && itemDateStr === currentDateStr) {
-          if (item.status === 'completed' && !dayActivities.completedTasks.some(task => task.id === item.id)) {
+          if (item.status === 'completed') {
             dayActivities.completedTasks.push(item);
-          } else if (item.status === 'archived' && !dayActivities.archivedItems.some(task => task.id === item.id)) {
+          } else if (item.status === 'archived') {
             dayActivities.archivedItems.push(item);
-          } else {
+          } else if (!dayActivities.activeItems.some(task => task.id === item.id)) {
             dayActivities.activeItems.push(item);
           }
         }
@@ -210,7 +221,7 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
       if (!dateStr) return;
       
       // Create a date at midnight in local timezone
-      const selectedDate = new Date(dateStr + 'T00:00:00');
+      const selectedDate = new Date(dateStr);
       if (isNaN(selectedDate.getTime())) return;
       
       setSelectedDay(selectedDate);

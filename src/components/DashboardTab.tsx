@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { StreakDisplay } from "./StreakDisplay";
 import { Stats } from "./Stats";
 import { Card } from "./ui/card";
@@ -43,18 +43,44 @@ export function DashboardTab({
   const [activeTasks, setActiveTasks] = useState<LearningItem[]>([]);
   const [completedTasks, setCompletedTasks] = useState<LearningItem[]>([]);
 
+  // Helper function to get date string in YYYY-MM-DD format
+  const getDateStr = (date: Date) => {
+    return date.toLocaleDateString('en-CA');
+  };
+
+  // Update tasks when items or selectedDate changes
+  useEffect(() => {
+    if (!selectedDate) return;
+
+    const dateStr = getDateStr(selectedDate);
+    const active: LearningItem[] = [];
+    const completed: LearningItem[] = [];
+
+    items.forEach(item => {
+      if (!item.date) return;
+      const itemDateStr = new Date(item.date).toLocaleDateString('en-CA');
+      
+      if (itemDateStr === dateStr) {
+        if (item.status === 'completed') {
+          completed.push(item);
+        } else if (item.status !== 'archived') {
+          active.push(item);
+        }
+      }
+    });
+
+    setActiveTasks(active);
+    setCompletedTasks(completed);
+  }, [items, selectedDate]);
+
   const handleDateSelect = useCallback((date: Date, active: LearningItem[], completed: LearningItem[]) => {
     try {
       const newDate = new Date(date);
       newDate.setHours(0, 0, 0, 0);
       
-      // Filter out any invalid items
-      const validActive = active.filter(item => item && item.id);
-      const validCompleted = completed.filter(item => item && item.id);
-      
       setSelectedDate(newDate);
-      setActiveTasks(validActive);
-      setCompletedTasks(validCompleted);
+      setActiveTasks(active);
+      setCompletedTasks(completed);
       onDateSelect(newDate);
     } catch (e) {
       console.error('Error handling date selection:', e);
