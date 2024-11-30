@@ -34,12 +34,19 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
     tags: [] as string[],
     current: { hours: 0, minutes: 0 },
     unit: 'hours' as const,
-    date: selectedDate ? getAdjustedDateStr(selectedDate) : getAdjustedDateStr(new Date()),
+    date: '',
     difficulty: 'medium' as const,
     status: 'not_started' as const
   };
 
-  const [formData, setFormData] = useState<LearningItemFormData>(initialFormData);
+  const [formData, setFormData] = useState<LearningItemFormData>(() => {
+    const date = selectedDate ? new Date(selectedDate) : new Date();
+    date.setHours(0, 0, 0, 0);
+    return {
+      ...initialFormData,
+      date: getAdjustedDateStr(date)
+    };
+  });
 
   // Update form data when selected date changes
   useEffect(() => {

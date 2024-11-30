@@ -75,27 +75,31 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
     const calendar: CalendarData = {
       month: currentDate.toLocaleString('default', { month: 'long' }),
       year: currentDate.getFullYear(),
-      weeks: [],
+      weeks: []
     };
-
-    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-    const startDate = new Date(firstDayOfMonth);
-    startDate.setDate(startDate.getDate() - startDate.getDay());
-
-    const endDate = new Date(lastDayOfMonth);
-    if (endDate.getDay() !== 6) {
-      endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
-    }
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const weeks: CalendarWeek[] = [];
+    const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+    // Start from the first day of the week that contains the first day of the month
+    const start = new Date(firstDay);
+    start.setDate(firstDay.getDate() - firstDay.getDay());
+
+    // End on the last day of the week that contains the last day of the month
+    const end = new Date(lastDay);
+    end.setDate(lastDay.getDate() + (6 - lastDay.getDay()));
+
+    let weeks: CalendarWeek[] = [];
     let currentWeek: CalendarDay[] = [];
 
-    for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
+    // Iterate through each day
+    for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
       const dateStr = getAdjustedDateStr(date);
+
+      // Initialize activities for this day
       const dayActivities: DayActivity = {
         minutes: 0,
         sessions: 0,
@@ -108,10 +112,9 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
       items.forEach(item => {
         const itemDate = new Date(item.date);
         itemDate.setHours(0, 0, 0, 0);
-        const itemDateStr = getAdjustedDateStr(itemDate);
 
         // Add item based on its creation date
-        if (itemDateStr === dateStr) {
+        if (getAdjustedDateStr(itemDate) === dateStr) {
           if (item.status === 'completed' && !dayActivities.completedTasks.some(task => task.id === item.id)) {
             dayActivities.completedTasks.push(item);
           } else if (item.status === 'archived' && !dayActivities.archivedItems.some(task => task.id === item.id)) {
@@ -120,8 +123,10 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
             dayActivities.activeItems.push(item);
           }
         }
+      });
 
-        // Also check sessions for this item
+      // Also check sessions for this item
+      items.forEach(item => {
         if (item.progress.sessions) {
           item.progress.sessions.forEach(session => {
             const sessionDate = new Date(session.date);
@@ -200,11 +205,10 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
 
   // Handle date selection
   const handleDateSelect = useCallback((day: CalendarDay) => {
-    const newDate = new Date(day.date);
-    newDate.setHours(0, 0, 0, 0);
-    setSelectedDay(newDate);
-    // Don't update currentDate when selecting a day
-    onDateSelect(newDate, day.activities.activeItems, day.activities.completedTasks);
+    const selectedDate = new Date(day.date);
+    selectedDate.setHours(0, 0, 0, 0);
+    setSelectedDay(selectedDate);
+    onDateSelect(selectedDate, day.activities.activeItems, day.activities.completedTasks);
   }, [onDateSelect]);
 
   // Handle keyboard navigation
@@ -238,12 +242,14 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  const isSelectedDate = (day: CalendarDay) => {
+  const isSelectedDate = useCallback((day: CalendarDay) => {
     if (!selectedDay) return false;
-    const dayStr = getAdjustedDateStr(day.date);
-    const selectedStr = getAdjustedDateStr(selectedDay);
-    return dayStr === selectedStr;
-  };
+    const dayDate = new Date(day.date);
+    dayDate.setHours(0, 0, 0, 0);
+    const selectedDate = new Date(selectedDay);
+    selectedDate.setHours(0, 0, 0, 0);
+    return dayDate.getTime() === selectedDate.getTime();
+  }, [selectedDay]);
 
   const getActivityColor = (day: CalendarDay) => {
     const totalItems = 
@@ -477,7 +483,7 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
                   onClick={() => handleDateSelect(day)}
                   className={cn(
                     "aspect-square p-1 relative focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg transition-all",
-                    selectedDay && getAdjustedDateStr(day.date) === getAdjustedDateStr(selectedDay)
+                    selectedDay && isSelectedDate(day)
                       ? 'ring-2 ring-blue-500'
                       : ''
                   )}
