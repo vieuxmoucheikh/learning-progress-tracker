@@ -78,33 +78,47 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
       weeks: []
     };
 
+    // Get today's date at midnight UTC
     const today = new Date();
     const todayUtc = new Date(Date.UTC(
       today.getFullYear(),
       today.getMonth(),
-      today.getDate()
+      today.getDate(),
+      0, 0, 0, 0
     ));
 
-    const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    const firstDay = new Date(Date.UTC(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1,
+      0, 0, 0, 0
+    ));
+    const lastDay = new Date(Date.UTC(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0,
+      0, 0, 0, 0
+    ));
 
     // Start from the first day of the week that contains the first day of the month
     const start = new Date(firstDay);
-    start.setDate(firstDay.getDate() - firstDay.getDay());
+    start.setUTCDate(firstDay.getUTCDate() - firstDay.getUTCDay());
 
     // End on the last day of the week that contains the last day of the month
     const end = new Date(lastDay);
-    end.setDate(lastDay.getDate() + (6 - lastDay.getDay()));
+    end.setUTCDate(lastDay.getUTCDate() + (6 - lastDay.getUTCDay()));
 
     let weeks: CalendarWeek[] = [];
     let currentWeek: CalendarDay[] = [];
 
     // Iterate through each day
-    for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+    const current = new Date(start);
+    while (current <= end) {
       const utcDate = new Date(Date.UTC(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate()
+        current.getUTCFullYear(),
+        current.getUTCMonth(),
+        current.getUTCDate(),
+        0, 0, 0, 0
       ));
 
       // Initialize activities for this day
@@ -122,7 +136,8 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
         const itemUtcDate = new Date(Date.UTC(
           itemDate.getFullYear(),
           itemDate.getMonth(),
-          itemDate.getDate()
+          itemDate.getDate(),
+          0, 0, 0, 0
         ));
 
         // Add item based on its creation date
@@ -145,7 +160,8 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
             const sessionUtcDate = new Date(Date.UTC(
               sessionDate.getFullYear(),
               sessionDate.getMonth(),
-              sessionDate.getDate()
+              sessionDate.getDate(),
+              0, 0, 0, 0
             ));
 
             if (sessionUtcDate.toISOString().split('T')[0] === utcDate.toISOString().split('T')[0]) {
@@ -173,7 +189,7 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
         date: utcDate,
         minutes: dayActivities.minutes,
         sessions: dayActivities.sessions,
-        isCurrentMonth: utcDate.getMonth() === currentDate.getMonth(),
+        isCurrentMonth: utcDate.getUTCMonth() === currentDate.getUTCMonth(),
         isToday: utcDate.toISOString().split('T')[0] === todayUtc.toISOString().split('T')[0],
         activities: dayActivities,
       };
@@ -184,6 +200,8 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
         weeks.push({ days: currentWeek });
         currentWeek = [];
       }
+
+      current.setUTCDate(current.getUTCDate() + 1);
     }
 
     if (currentWeek.length > 0) {
@@ -220,7 +238,13 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
 
   // Handle date selection
   const handleDateSelect = useCallback((day: CalendarDay) => {
-    const selectedDate = new Date(day.date);
+    // Create a new date at midnight UTC
+    const selectedDate = new Date(Date.UTC(
+      day.date.getFullYear(),
+      day.date.getMonth(),
+      day.date.getDate(),
+      0, 0, 0, 0
+    ));
     setSelectedDay(selectedDate);
     onDateSelect(selectedDate, day.activities.activeItems, day.activities.completedTasks);
   }, [onDateSelect]);
@@ -232,16 +256,16 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
     const newDate = new Date(selectedDay);
     switch (e.key) {
       case 'ArrowLeft':
-        newDate.setDate(newDate.getDate() - 1);
+        newDate.setUTCDate(newDate.getUTCDate() - 1);
         break;
       case 'ArrowRight':
-        newDate.setDate(newDate.getDate() + 1);
+        newDate.setUTCDate(newDate.getUTCDate() + 1);
         break;
       case 'ArrowUp':
-        newDate.setDate(newDate.getDate() - 7);
+        newDate.setUTCDate(newDate.getUTCDate() - 7);
         break;
       case 'ArrowDown':
-        newDate.setDate(newDate.getDate() + 7);
+        newDate.setUTCDate(newDate.getUTCDate() + 7);
         break;
       default:
         return;
@@ -258,7 +282,20 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
 
   const isSelectedDate = useCallback((day: CalendarDay) => {
     if (!selectedDay) return false;
-    return day.date.toISOString().split('T')[0] === selectedDay.toISOString().split('T')[0];
+    // Compare dates using UTC midnight
+    const dayDate = new Date(Date.UTC(
+      day.date.getFullYear(),
+      day.date.getMonth(),
+      day.date.getDate(),
+      0, 0, 0, 0
+    ));
+    const compareDate = new Date(Date.UTC(
+      selectedDay.getFullYear(),
+      selectedDay.getMonth(),
+      selectedDay.getDate(),
+      0, 0, 0, 0
+    ));
+    return dayDate.getTime() === compareDate.getTime();
   }, [selectedDay]);
 
   const getActivityColor = (day: CalendarDay) => {
@@ -294,7 +331,7 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
         onMouseEnter={(e) => setHoveredDay(day)}
         onMouseLeave={() => setHoveredDay(null)}
       >
-        <div className="text-sm">{day.date.getDate()}</div>
+        <div className="text-sm">{day.date.getUTCDate()}</div>
         <div className="absolute bottom-1 right-1 flex items-center space-x-1">
           {hasActiveTasks && (
             <div className="w-2 h-2 bg-blue-500 rounded-full" title="Active Tasks" />

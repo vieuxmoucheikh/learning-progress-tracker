@@ -219,13 +219,18 @@ export default function App() {
 
   const handleSubmitItem = async (formData: LearningItemFormData) => {
     try {
-      // Create date in UTC
+      // Create a UTC date at midnight
       const date = selectedDate ? new Date(selectedDate) : new Date();
       const utcDate = new Date(Date.UTC(
         date.getFullYear(),
         date.getMonth(),
-        date.getDate()
+        date.getDate(),
+        0, 0, 0, 0
       ));
+
+      // Adjust for local timezone offset to ensure the date stays on the selected day
+      const offset = date.getTimezoneOffset();
+      utcDate.setUTCMinutes(utcDate.getUTCMinutes() - offset);
 
       // Create a clean form data object that matches LearningItemFormData
       const cleanFormData: LearningItemFormData = {
