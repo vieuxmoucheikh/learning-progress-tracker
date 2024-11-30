@@ -155,8 +155,8 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
         date: currentDate,
         minutes: dayActivities.minutes,
         sessions: dayActivities.sessions,
-        isCurrentMonth: currentDate.getMonth() === currentDate.getMonth(),
-        isToday: currentDate.getTime() === today.getTime(),
+        isCurrentMonth: currentDate.getMonth() === firstDay.getMonth(),
+        isToday: getAdjustedDateStr(currentDate) === getAdjustedDateStr(today),
         activities: dayActivities,
       };
 
@@ -195,7 +195,7 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
       // Find the day in calendar data
       const selectedDayData = calendarData.weeks
         .flatMap(week => week.days)
-        .find(day => day.date.getTime() === newSelectedDay.getTime());
+        .find(day => getAdjustedDateStr(day.date) === getAdjustedDateStr(newSelectedDay));
 
       if (selectedDayData) {
         onDateSelect(newSelectedDay, selectedDayData.activities.activeItems, selectedDayData.activities.completedTasks);
@@ -252,12 +252,8 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
   }, [handleKeyDown]);
 
   const isSelectedDate = useCallback((day: CalendarDay) => {
-    if (!selectedDay) return false;
-    const dayDate = new Date(day.date);
-    dayDate.setHours(0, 0, 0, 0);
-    const compareDate = new Date(selectedDay);
-    compareDate.setHours(0, 0, 0, 0);
-    return dayDate.getTime() === compareDate.getTime();
+    if (!selectedDay || !day.date) return false;
+    return getAdjustedDateStr(day.date) === getAdjustedDateStr(selectedDay);
   }, [selectedDay]);
 
   const getActivityColor = (day: CalendarDay) => {
@@ -267,7 +263,7 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
       day.activities.archivedItems.length;
     
     if (!day.isCurrentMonth) return 'bg-gray-50 text-gray-400';
-    if (isSelectedDate(day)) return 'bg-blue-500 text-white hover:bg-blue-600';
+    if (isSelectedDate(day)) return 'bg-blue-500 text-white hover:bg-blue-500';
     if (day.isToday) return 'bg-blue-100 hover:bg-blue-200';
     
     // Color based on activity

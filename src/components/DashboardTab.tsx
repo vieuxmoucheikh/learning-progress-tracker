@@ -47,13 +47,14 @@ export function DashboardTab({
     try {
       const newDate = new Date(date);
       newDate.setHours(0, 0, 0, 0);
-      if (isNaN(newDate.getTime())) {
-        console.error('Invalid date selected:', date);
-        return;
-      }
+      
+      // Filter out any invalid items
+      const validActive = active.filter(item => item && item.id);
+      const validCompleted = completed.filter(item => item && item.id);
+      
       setSelectedDate(newDate);
-      setActiveTasks(active);
-      setCompletedTasks(completed);
+      setActiveTasks(validActive);
+      setCompletedTasks(validCompleted);
       onDateSelect(newDate);
     } catch (e) {
       console.error('Error handling date selection:', e);
