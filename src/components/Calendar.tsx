@@ -42,7 +42,7 @@ interface Props {
 // Helper function to get timezone-adjusted date string
 const getAdjustedDateStr = (date: Date) => {
   const d = new Date(date);
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  d.setHours(0, 0, 0, 0);  // Set to midnight in local timezone
   return d.toISOString().split('T')[0];
 };
 
