@@ -206,7 +206,7 @@ export function Calendar({ items, onDateSelect, selectedDate: externalSelectedDa
   // Handle date selection
   const handleDateSelect = useCallback((day: CalendarDay) => {
     const selectedDate = new Date(day.date);
-    selectedDate.setHours(0, 0, 0, 0);
+    selectedDate.setUTCHours(0, 0, 0, 0);  // Set to midnight in UTC
     setSelectedDay(selectedDate);
     onDateSelect(selectedDate, day.activities.activeItems, day.activities.completedTasks);
   }, [onDateSelect]);

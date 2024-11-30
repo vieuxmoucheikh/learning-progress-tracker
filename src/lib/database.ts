@@ -72,7 +72,7 @@ export async function addLearningItem(item: LearningItemFormData): Promise<Learn
         lastAccessed: new Date().toISOString(),
         sessions: []
       },
-      date: item.date ? getAdjustedDateStr(new Date(item.date)) : getAdjustedDateStr(new Date()),
+      date: item.date,  // Already formatted as YYYY-MM-DD
       difficulty: (item.difficulty || 'medium') as 'easy' | 'medium' | 'hard',
       status: (item.status || 'not_started') as 'not_started' | 'in_progress' | 'completed' | 'on_hold' | 'archived',
       unit: (item.unit || 'hours') as 'hours' | 'pages' | 'percent',

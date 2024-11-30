@@ -219,10 +219,9 @@ export default function App() {
 
   const handleSubmitItem = async (formData: LearningItemFormData) => {
     try {
-      // Ensure we have the correct date format
-      const itemDate = selectedDate ? 
-        new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0] :
-        new Date().toISOString().split('T')[0];
+      // Create a date object in local timezone and set to midnight
+      const date = selectedDate ? new Date(selectedDate) : new Date();
+      date.setHours(0, 0, 0, 0);
 
       // Create a clean form data object that matches LearningItemFormData
       const cleanFormData: LearningItemFormData = {
@@ -238,7 +237,7 @@ export default function App() {
         goal: formData.goal,
         total: formData.total,
         category: formData.category || '',
-        date: itemDate,
+        date: date.toISOString().split('T')[0],
         difficulty: formData.difficulty || 'medium',
         status: formData.status || 'not_started'
       };
