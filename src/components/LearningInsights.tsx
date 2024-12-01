@@ -209,11 +209,6 @@ export function LearningInsights({ items }: Props) {
                 {patterns.neglectedCategories.join(', ')}
               </span>
             </p>
-            <p className="text-sm text-gray-600">
-              Completion rate: <span className="font-semibold text-gray-800">
-                {Math.round(patterns.completionRate)}%
-              </span>
-            </p>
           </div>
         </div>
       </div>
