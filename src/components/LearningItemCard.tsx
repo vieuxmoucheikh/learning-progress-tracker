@@ -644,7 +644,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   };
 
   const getBorderColorClass = () => {
-    if (!item.status || item.status === 'unknown') {
+    if (!item.status) {
       return 'border-gray-300';
     }
 
@@ -665,7 +665,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   };
 
   const getStatusBadgeClass = () => {
-    if (!item.status || item.status === 'unknown') {
+    if (!item.status) {
       return 'bg-gray-100 text-gray-600';
     }
 
@@ -686,7 +686,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   };
 
   const getStatusText = () => {
-    if (!item.status || item.status === 'unknown') {
+    if (!item.status) {
       return 'Not Started';
     }
 
