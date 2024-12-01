@@ -1,4 +1,4 @@
-import type { Progress, LearningItem } from '../types';
+import type { Progress, LearningItem, Session } from '../types';
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -15,27 +15,38 @@ export function formatTime(seconds: number): string {
   return `${pad(hours)}:${pad(minutes)}:${pad(remainingSeconds)}`;
 }
 
-export function calculateProgress(progress: Progress): number {
-  const currentMinutes = (progress.current.hours * 60) + progress.current.minutes;
-  const totalMinutes = progress.total ? (progress.total.hours * 60) + progress.total.minutes : 0;
-  
-  if (totalMinutes === 0) return 0;
-  
-  const progressPercentage = (currentMinutes / totalMinutes) * 100;
-  return Math.min(Math.max(progressPercentage, 0), 100);
+export function calculateTotalTimeSpent(sessions: Session[]): number {
+  return sessions.reduce((total, session) => {
+    if (session.duration) {
+      return total + (session.duration.hours * 60) + session.duration.minutes;
+    }
+    return total;
+  }, 0);
 }
 
-export function formatDuration(time: { hours: number; minutes: number } | number): string {
+export function formatDuration(time: { hours: number; minutes: number } | number | undefined): string {
+  if (!time) return '0h 0m';
+  
   if (typeof time === 'object') {
     const totalMinutes = (time.hours * 60) + time.minutes;
     const hours = Math.floor(totalMinutes / 60);
     const mins = totalMinutes % 60;
-    return `${hours}h ${mins}m`;
+    return hours === 0 ? `${mins}m` : mins === 0 ? `${hours}h` : `${hours}h ${mins}m`;
   } else {
     const hours = Math.floor(time / 60);
     const mins = time % 60;
-    return `${hours}h ${mins}m`;
+    return hours === 0 ? `${mins}m` : mins === 0 ? `${hours}h` : `${hours}h ${mins}m`;
   }
+}
+
+export function calculateProgress(progress: Progress): number {
+  if (!progress.sessions) return 0;
+  
+  const totalSpentMinutes = calculateTotalTimeSpent(progress.sessions);
+  const totalTargetMinutes = progress.total ? (progress.total.hours * 60) + progress.total.minutes : 0;
+  
+  if (totalTargetMinutes === 0) return 0;
+  return Math.min(Math.round((totalSpentMinutes / totalTargetMinutes) * 100), 100);
 }
 
 export function getTotalMinutes(time: { hours: number; minutes: number }): number {
