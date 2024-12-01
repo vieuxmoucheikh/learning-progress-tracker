@@ -100,23 +100,34 @@ export function DashboardTab({
 
   // Calculate stats
   const stats = useMemo(() => {
-    const inProgress = items.filter(item => item.status === 'in_progress');
-    const totalTimeSpent = items.reduce((total, item) => {
-      return total + (item.progress?.sessions || []).reduce((sessionTotal, session) => {
-        if (session.duration) {
-          return sessionTotal + (session.duration.hours * 60) + session.duration.minutes;
-        }
-        return sessionTotal;
-      }, 0);
+    if (!selectedDate) return {
+      totalItems: items.length,
+      dailyTimeSpentHours: 0,
+      dailyTimeSpentMinutes: 0
+    };
+
+    const dateStr = getDateStr(selectedDate);
+    const dailyTimeSpent = items.reduce((total, item) => {
+      if (!item.date) return total;
+      const itemDateStr = getDateStr(item.date);
+      
+      if (itemDateStr === dateStr) {
+        return total + (item.progress?.sessions || []).reduce((sessionTotal, session) => {
+          if (session.duration) {
+            return sessionTotal + (session.duration.hours * 60) + session.duration.minutes;
+          }
+          return sessionTotal;
+        }, 0);
+      }
+      return total;
     }, 0);
 
     return {
       totalItems: items.length,
-      inProgressItems: inProgress.length,
-      totalTimeSpentHours: Math.floor(totalTimeSpent / 60),
-      totalTimeSpentMinutes: totalTimeSpent % 60
+      dailyTimeSpentHours: Math.floor(dailyTimeSpent / 60),
+      dailyTimeSpentMinutes: dailyTimeSpent % 60
     };
-  }, [items]);
+  }, [items, selectedDate, getDateStr]);
 
   return (
     <div className="space-y-4">
@@ -136,9 +147,9 @@ export function DashboardTab({
         <Card className="p-4 hover:shadow-md transition-shadow">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-500">Time Invested</h3>
+              <h3 className="text-sm font-medium text-gray-500">Time Invested Today</h3>
               <p className="mt-2 text-3xl font-semibold text-purple-600">
-                {stats.totalTimeSpentHours}h {stats.totalTimeSpentMinutes}m
+                {stats.dailyTimeSpentHours}h {stats.dailyTimeSpentMinutes}m
               </p>
             </div>
             <div className="p-2 bg-purple-50 rounded-lg">
@@ -217,10 +228,6 @@ export function DashboardTab({
                 </div>
                 <h3 className="text-lg font-medium text-gray-900">No goals for today</h3>
                 <p className="text-gray-500 mt-1">Add some tasks to get started</p>
-                <Button onClick={() => onAddItem(selectedDate)} className="mt-4 gap-2">
-                  <Plus className="h-4 w-4" />
-                  Add New Goal
-                </Button>
               </div>
             ) : (
               <div className="space-y-2">
