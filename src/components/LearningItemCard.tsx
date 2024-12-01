@@ -161,7 +161,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       status: 'in_progress',
       progress: {
         ...item.progress,
-        sessions: [newSession, ...(item.progress.sessions || [])]
+        sessions: [...[newSession], ...(item.progress.sessions || [])]  // Add new session at the beginning
       }
     });
 
@@ -423,8 +423,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       );
     }
 
-    // Display sessions in reverse order (newest first)
-    const sessions = [...item.progress.sessions].reverse();
+    // Sort sessions chronologically (newest first)
+    const sessions = [...item.progress.sessions].sort((a, b) => 
+      new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+    );
+    
     const activeSession = sessions.find(s => !s.endTime);
     const displaySessions = showAllSessions 
       ? sessions
@@ -437,8 +440,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           const endDate = session.endTime ? new Date(session.endTime) : null;
           const duration = session.duration || { hours: 0, minutes: 0 };
           const formattedDuration = `${duration.hours}h ${duration.minutes}m`;
-          const totalSessions = item.progress!.sessions!.length;
-          const sessionNumber = totalSessions - sessions.indexOf(session);
+          const sessionNumber = index + 1;
           
           return (
             <div 
