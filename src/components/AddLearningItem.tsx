@@ -96,10 +96,6 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
         completed: formData.completed,
         priority: formData.priority || 'medium',
         tags: formData.tags || [],
-        total: formData.total && (formData.total.hours > 0 || formData.total.minutes > 0) ? {
-          hours: Math.max(0, parseInt(String(formData.total.hours || 0)) || 0),
-          minutes: Math.max(0, parseInt(String(formData.total.minutes || 0)) || 0)
-        } : undefined,
         category: formData.category || '',
         date: selectedDate ? 
           getAdjustedDateStr(selectedDate) : 
@@ -188,61 +184,62 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Title */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Title *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter title"
-                />
-              </div>
-
-              {/* Type and Category */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Title and Type - Primary Information */}
+              <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Type *
-                  </label>
-                  <select
-                    required
-                    value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="video">Video</option>
-                    <option value="article">Article</option>
-                    <option value="book">Book</option>
-                    <option value="course">Course</option>
-                    <option value="pdf">PDF</option>
-                    <option value="url">URL</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Category *
+                    Title <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     required
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="e.g., Programming, Design"
+                    placeholder="What are you learning?"
                   />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Type <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      required
+                      value={formData.type}
+                      onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="video">Video</option>
+                      <option value="article">Article</option>
+                      <option value="book">Book</option>
+                      <option value="course">Course</option>
+                      <option value="pdf">PDF</option>
+                      <option value="url">URL</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Category <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="e.g., Programming, Design, Math"
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* URL */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  URL
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                  <LinkIcon className="h-4 w-4" /> Resource URL
                 </label>
                 <input
                   type="text"
@@ -253,74 +250,26 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                 />
               </div>
 
-              {/* Time Tracking */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Total Duration (optional)
-                </label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <input
-                      type="number"
-                      min="0"
-                      value={formData.total?.hours || ''}
-                      onChange={(e) => {
-                        const hours = e.target.value === '' ? undefined : parseInt(e.target.value);
-                        setFormData({
-                          ...formData,
-                          total: hours !== undefined || formData.total?.minutes ? {
-                            hours: hours || 0,
-                            minutes: formData.total?.minutes || 0
-                          } : undefined
-                        });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Hours"
-                    />
-                  </div>
-                  <div>
-                    <input
-                      type="number"
-                      min="0"
-                      max="59"
-                      value={formData.total?.minutes || ''}
-                      onChange={(e) => {
-                        const minutes = e.target.value === '' ? undefined : parseInt(e.target.value);
-                        setFormData({
-                          ...formData,
-                          total: minutes !== undefined || formData.total?.hours ? {
-                            hours: formData.total?.hours || 0,
-                            minutes: minutes || 0
-                          } : undefined
-                        });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Minutes"
-                    />
-                  </div>
-                </div>
-              </div>
-
               {/* Priority and Difficulty */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Priority
+                    Priority Level
                   </label>
                   <select
                     value={formData.priority}
                     onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
+                    <option value="low">Low Priority</option>
+                    <option value="medium">Medium Priority</option>
+                    <option value="high">High Priority</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Difficulty
+                    Difficulty Level
                   </label>
                   <select
                     value={formData.difficulty}
@@ -337,14 +286,14 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
               {/* Tags */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tags
+                  Tags <span className="text-gray-500 text-xs">(comma-separated)</span>
                 </label>
                 <input
                   type="text"
                   value={formData.tags.join(', ')}
                   onChange={(e) => handleTagsChange(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter tags separated by commas"
+                  placeholder="javascript, web development, react"
                 />
               </div>
 
@@ -356,26 +305,24 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                 <textarea
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  rows={3}
-                  placeholder="Add any notes..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[100px]"
+                  placeholder="Add any additional notes or thoughts about this learning item..."
                 />
               </div>
 
               {/* Submit Button */}
-              <div className="flex justify-end gap-3">
+              <div className="flex justify-end gap-3 pt-4">
                 <Button
                   type="button"
                   onClick={onClose}
-                  disabled={isSubmitting}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   {isSubmitting ? 'Adding...' : 'Add Item'}
                 </Button>
