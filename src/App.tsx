@@ -36,12 +36,13 @@ type Action =
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'LOAD_STATE':
-      // Clean up any stale sessions
+      // Only clean up sessions that are not in_progress or on_hold
       const cleanedItems = action.payload.map(item => {
         if (!item.progress?.sessions) return item;
 
         const cleanedSessions = item.progress.sessions.map(session => {
-          if (!session.endTime && session.status !== 'on_hold') {
+          // Only clean up sessions that are not in_progress or on_hold
+          if (!session.endTime && session.status !== 'in_progress' && session.status !== 'on_hold') {
             return {
               ...session,
               endTime: new Date().toISOString(),
@@ -60,18 +61,29 @@ function reducer(state: State, action: Action): State {
         };
       });
 
-      // Clean up any stale localStorage data
+      // Clean up localStorage only for completed sessions
       cleanedItems.forEach(item => {
-        localStorage.removeItem(`activeSession_${item.id}`);
-        localStorage.removeItem(`sessionLastUpdate_${item.id}`);
-        localStorage.removeItem(`sessionPauseTime_${item.id}`);
+        const hasActiveOrPausedSession = item.progress?.sessions?.some(
+          s => !s.endTime && (s.status === 'in_progress' || s.status === 'on_hold')
+        );
+        
+        if (!hasActiveOrPausedSession) {
+          localStorage.removeItem(`activeSession_${item.id}`);
+          localStorage.removeItem(`sessionLastUpdate_${item.id}`);
+          localStorage.removeItem(`sessionPauseTime_${item.id}`);
+        }
       });
+
+      // Find any active sessions and set them as the active item
+      const activeSession = cleanedItems.find(item => 
+        item.progress?.sessions?.some(s => !s.endTime && s.status === 'in_progress')
+      );
 
       return {
         ...state,
         items: cleanedItems,
         loading: false,
-        activeItem: null
+        activeItem: activeSession?.id || null
       };
 
     case 'ADD_ITEM':
@@ -301,6 +313,46 @@ export default function App() {
       mounted = false;
     };
   }, [user]);
+
+  useEffect(() => {
+    const activeItem = state.activeItem;
+    if (!activeItem) return;
+
+    const item = state.items.find(i => i.id === activeItem);
+    if (!item?.progress?.sessions) return;
+
+    const activeSession = item.progress.sessions.find(s => !s.endTime && s.status === 'in_progress');
+    if (!activeSession) return;
+
+    // Store active session info
+    localStorage.setItem(`activeSession_${activeItem}`, JSON.stringify({
+      startTime: activeSession.startTime,
+      status: activeSession.status
+    }));
+    localStorage.setItem(`sessionLastUpdate_${activeItem}`, Date.now().toString());
+  }, [state.activeItem, state.items]);
+
+  useEffect(() => {
+    const loadPersistedSessions = () => {
+      state.items.forEach(item => {
+        const persistedSession = localStorage.getItem(`activeSession_${item.id}`);
+        if (persistedSession) {
+          try {
+            const session = JSON.parse(persistedSession);
+            if (session.status === 'in_progress') {
+              dispatch({ type: 'SET_ACTIVE_ITEM', payload: item.id });
+            }
+          } catch (e) {
+            console.error('Error parsing persisted session:', e);
+          }
+        }
+      });
+    };
+
+    if (!state.loading) {
+      loadPersistedSessions();
+    }
+  }, [state.loading, state.items]);
 
   const handleAddItem = async (selectedDate?: Date | null) => {
     setShowAddDialog(true);
