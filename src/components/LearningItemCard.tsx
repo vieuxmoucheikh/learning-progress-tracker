@@ -167,28 +167,18 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const handlePauseSession = useCallback(() => {
     if (!activeSession || !item.progress?.sessions) return;
 
-    const now = new Date();
-    const startTime = new Date(activeSession.startTime);
-    const duration = calculateDuration(startTime, now);
-
-    // Update session status without ending it
-    const updatedSession = {
-      ...activeSession,
-      status: 'on_hold' as const,
-      duration
-    };
-
-    // Update item with paused session
-    const updatedSessions = item.progress.sessions.map(s => 
-      s.startTime === activeSession.startTime ? updatedSession : s
-    );
-
     // Store pause time in localStorage
     localStorage.setItem(`sessionPauseTime_${item.id}`, Date.now().toString());
-    localStorage.setItem(`sessionDuration_${item.id}`, JSON.stringify(duration));
+
+    // Update the current session to paused state
+    const updatedSessions = item.progress.sessions.map(s => 
+      s.startTime === activeSession.startTime ? {
+        ...s,
+        isPaused: true
+      } : s
+    );
 
     onUpdate(item.id, {
-      status: 'on_hold',
       progress: {
         ...item.progress,
         sessions: updatedSessions
@@ -196,46 +186,43 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     });
 
     onStopTracking(item.id);
-  }, [item, activeSession, onUpdate, onStopTracking, calculateDuration]);
+  }, [item, activeSession, onUpdate, onStopTracking]);
 
   // Handle session resume
   const handleResumeSession = useCallback(() => {
     if (!item.progress?.sessions) return;
 
-    const now = new Date();
+    const pausedSession = item.progress.sessions.find(s => s.isPaused && !s.endTime);
+    if (!pausedSession) return;
+
+    // Get the pause duration
     const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${item.id}`);
-    const storedDurationStr = localStorage.getItem(`sessionDuration_${item.id}`);
-    
-    if (!pauseTimeStr || !storedDurationStr) return;
+    if (!pauseTimeStr) return;
 
     const pauseTime = parseInt(pauseTimeStr, 10);
-    const storedDuration = JSON.parse(storedDurationStr);
-    const timeDiff = Date.now() - pauseTime;
+    const pauseDuration = Date.now() - pauseTime;
 
-    // Create new session with adjusted start time
-    const newSession = {
-      startTime: now.toISOString(),
-      date: now.toISOString().split('T')[0],
-      notes: [],
-      status: 'in_progress' as const,
-      previousDuration: storedDuration
-    };
+    // Adjust the start time to account for the pause duration
+    const adjustedStartTime = new Date(new Date(pausedSession.startTime).getTime() + pauseDuration).toISOString();
+
+    // Update the session with the adjusted start time
+    const updatedSessions = item.progress.sessions.map(s => 
+      s.startTime === pausedSession.startTime ? {
+        ...s,
+        startTime: adjustedStartTime,
+        isPaused: false
+      } : s
+    );
 
     onUpdate(item.id, {
-      status: 'in_progress',
       progress: {
         ...item.progress,
-        sessions: [newSession, ...(item.progress.sessions || [])]
+        sessions: updatedSessions
       }
     });
 
-    // Clean up localStorage
+    // Clean up pause time and restart tracking
     localStorage.removeItem(`sessionPauseTime_${item.id}`);
-    localStorage.removeItem(`sessionDuration_${item.id}`);
-    
-    // Start tracking the new session
-    localStorage.setItem(`activeSession_${item.id}`, JSON.stringify(newSession));
-    localStorage.setItem(`sessionLastUpdate_${item.id}`, Date.now().toString());
     onStartTracking(item.id);
   }, [item, onUpdate, onStartTracking]);
 
@@ -729,15 +716,27 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         <div className="flex items-center gap-4">
           {activeSession ? (
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 bg-yellow-50 hover:bg-yellow-100 border-yellow-200 text-yellow-700"
-                onClick={handlePauseSession}
-              >
-                <Pause className="h-4 w-4" />
-                Pause
-              </Button>
+              {!activeSession.isPaused ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 bg-yellow-50 hover:bg-yellow-100 border-yellow-200 text-yellow-700"
+                  onClick={handlePauseSession}
+                >
+                  <Pause className="h-4 w-4" />
+                  Pause
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700"
+                  onClick={handleResumeSession}
+                >
+                  <Play className="h-4 w-4" />
+                  Resume
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -754,23 +753,23 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 <Button
                   variant="default"
                   size="sm"
-                  onClick={item.status === 'on_hold' ? handleResumeSession : handleStartSession}
+                  onClick={handleStartSession}
                   className="gap-2 bg-blue-500 hover:bg-blue-600 text-white"
                 >
                   <Play className="h-4 w-4" />
-                  {item.status === 'on_hold' ? 'Resume Session' : 'Start Session'}
+                  Start Session
                 </Button>
               )}
             </div>
           )}
         </div>
 
-        {(activeSession || item.status === 'on_hold') && (
+        {activeSession && (
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-blue-600">
-              {activeSession ? `Current Session: ${formatElapsedTime()}` : 'Session Paused'}
+              {activeSession.isPaused ? 'Session Paused' : `Current Session: ${formatElapsedTime()}`}
             </span>
-            {activeSession && (
+            {!activeSession.isPaused && (
               <Button
                 variant="ghost"
                 size="sm"
