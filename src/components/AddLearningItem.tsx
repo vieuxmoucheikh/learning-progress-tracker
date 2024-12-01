@@ -33,6 +33,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
     priority: 'medium' as const,
     tags: [] as string[],
     current: { hours: 0, minutes: 0 },
+    total: undefined,
     unit: 'hours' as const,
     date: '',
     difficulty: 'medium' as const,
@@ -262,14 +263,17 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                     <input
                       type="number"
                       min="0"
-                      value={formData.total?.hours || 0}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        total: {
-                          hours: parseInt(e.target.value) || 0,
-                          minutes: formData.total?.minutes || 0
-                        }
-                      })}
+                      value={formData.total?.hours || ''}
+                      onChange={(e) => {
+                        const hours = e.target.value === '' ? undefined : parseInt(e.target.value);
+                        setFormData({
+                          ...formData,
+                          total: hours !== undefined || formData.total?.minutes ? {
+                            hours: hours || 0,
+                            minutes: formData.total?.minutes || 0
+                          } : undefined
+                        });
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Hours"
                     />
@@ -279,14 +283,17 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                       type="number"
                       min="0"
                       max="59"
-                      value={formData.total?.minutes || 0}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        total: {
-                          hours: formData.total?.hours || 0,
-                          minutes: parseInt(e.target.value) || 0
-                        }
-                      })}
+                      value={formData.total?.minutes || ''}
+                      onChange={(e) => {
+                        const minutes = e.target.value === '' ? undefined : parseInt(e.target.value);
+                        setFormData({
+                          ...formData,
+                          total: minutes !== undefined || formData.total?.hours ? {
+                            hours: formData.total?.hours || 0,
+                            minutes: minutes || 0
+                          } : undefined
+                        });
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Minutes"
                     />

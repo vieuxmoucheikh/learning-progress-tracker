@@ -90,6 +90,8 @@ export function LearningCalendar({ items, setItems }: Props) {
         return;
       }
 
+      const totalHours = newActivity.total ? 
+        newActivity.total.hours + (newActivity.total.minutes / 60) : 0;
       const activity: LearningItem = {
         id: generateUniqueId(),
         ...newActivity,
@@ -97,9 +99,9 @@ export function LearningCalendar({ items, setItems }: Props) {
         progress: {
           current: { hours: 0, minutes: 0 },
           lastAccessed: new Date().toISOString(),
-          total: newActivity.total && (newActivity.total.hours > 0 || newActivity.total.minutes > 0) ? {
-            hours: Math.max(0, parseInt(String(newActivity.total.hours)) || 0),
-            minutes: Math.max(0, parseInt(String(newActivity.total.minutes)) || 0)
+          total: totalHours > 0 ? {
+            hours: Math.floor(totalHours),
+            minutes: Math.round((totalHours - Math.floor(totalHours)) * 60)
           } : undefined,
           sessions: [{
             date: selectedDate,
