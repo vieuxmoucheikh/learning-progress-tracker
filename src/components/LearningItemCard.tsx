@@ -305,18 +305,19 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   };
 
   const renderDuration = () => {
-    const timeSpentMinutes = calculateTotalTimeSpent();
-    const currentDuration = {
-      hours: Math.floor(timeSpentMinutes / 60),
-      minutes: timeSpentMinutes % 60
-    };
+    if (!item.progress?.sessions) return null;
+    
+    const totalMinutes = getTotalMinutes(item.progress.sessions);
+    const formattedDuration = formatDuration({ 
+      hours: Math.floor(totalMinutes / 60), 
+      minutes: totalMinutes % 60 
+    });
     
     return (
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-2">
         <Clock className="h-4 w-4 text-gray-500" />
-        <span className="text-sm text-gray-600">
-          {formatDuration(currentDuration)}
-          {item.progress?.total ? ` / ${formatDuration(item.progress.total)}` : ' / ∞'}
+        <span className="text-sm font-medium text-gray-700">
+          {formattedDuration}
         </span>
       </div>
     );
@@ -325,24 +326,12 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const renderProgressBar = () => {
     if (!item.progress?.total) return null;
     
-    const percentage = getProgressPercentage();
+    const progress = calculateProgress();
     return (
-      <div className="mt-2">
-        <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-          <div 
-            className={clsx(
-              "h-full transition-all duration-300",
-              {
-                'bg-green-500': percentage >= 100,
-                'bg-blue-500': percentage > 0 && percentage < 100,
-                'bg-gray-200': percentage === 0
-              }
-            )}
-            style={{ width: `${percentage}%` }}
-          />
-        </div>
-        <div className="mt-1 text-xs text-gray-500 text-right">
-          {percentage}% Complete
+      <div className="space-y-2">
+        <Progress value={progress} />
+        <div className="flex justify-end">
+          <span className="text-sm text-gray-600">{progress}%</span>
         </div>
       </div>
     );
@@ -645,7 +634,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           {activeSession && (
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-blue-600">
-                Current Session: {formatElapsedTime}
+                Current Session: {formatElapsedTime()}
               </span>
               <Button
                 variant="ghost"

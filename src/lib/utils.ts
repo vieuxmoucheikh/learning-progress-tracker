@@ -15,10 +15,17 @@ export function formatTime(seconds: number): string {
   return `${pad(hours)}:${pad(minutes)}:${pad(remainingSeconds)}`;
 }
 
-export function calculateTotalTimeSpent(sessions: Session[]): number {
+export function getTotalMinutes(sessions: Session[]): number {
   return sessions.reduce((total, session) => {
     if (session.duration) {
       return total + (session.duration.hours * 60) + session.duration.minutes;
+    }
+    if (session.startTime && !session.endTime) {
+      // For active session, calculate duration up to now
+      const start = new Date(session.startTime);
+      const now = new Date();
+      const minutes = Math.floor((now.getTime() - start.getTime()) / (1000 * 60));
+      return total + minutes;
     }
     return total;
   }, 0);
@@ -42,18 +49,14 @@ export function formatDuration(time: { hours: number; minutes: number } | number
   }
 }
 
-export function calculateProgress(progress: Progress): number {
-  if (!progress.sessions) return 0;
+export function calculateProgress(item: LearningItem): number {
+  if (!item.progress?.sessions || !item.progress?.total) return 0;
   
-  const totalSpentMinutes = calculateTotalTimeSpent(progress.sessions);
-  const totalTargetMinutes = progress.total ? (progress.total.hours * 60) + progress.total.minutes : 0;
+  const totalSpentMinutes = getTotalMinutes(item.progress.sessions);
+  const totalTargetMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
   
   if (totalTargetMinutes === 0) return 0;
   return Math.min(Math.round((totalSpentMinutes / totalTargetMinutes) * 100), 100);
-}
-
-export function getTotalMinutes(time: { hours: number; minutes: number }): number {
-  return (time.hours * 60) + time.minutes;
 }
 
 export function minutesToTime(minutes: number): { hours: number; minutes: number } {
