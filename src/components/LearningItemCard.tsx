@@ -437,7 +437,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           const endDate = session.endTime ? new Date(session.endTime) : null;
           const duration = session.duration || { hours: 0, minutes: 0 };
           const formattedDuration = `${duration.hours}h ${duration.minutes}m`;
-          const sessionNumber = index + 1;
+          const totalSessions = item.progress!.sessions!.length;
+          const sessionNumber = totalSessions - sessions.indexOf(session);
           
           return (
             <div 
