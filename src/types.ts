@@ -11,7 +11,7 @@ export interface Session {
   notes?: (string | { content: string; timestamp: string })[];
   title?: string;
   description?: string;
-  status?: 'in_progress' | 'completed' | 'paused';
+  status?: 'in_progress' | 'completed' | 'on_hold';
 }
 
 export interface Progress {

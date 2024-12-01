@@ -59,6 +59,14 @@ export function calculateProgress(item: LearningItem): number {
   return Math.min(Math.round((totalSpentMinutes / totalTargetMinutes) * 100), 100);
 }
 
+export function calculateDuration(startTime: Date, endTime: Date) {
+  const diffMinutes = Math.floor((endTime.getTime() - startTime.getTime()) / (1000 * 60));
+  return {
+    hours: Math.floor(diffMinutes / 60),
+    minutes: diffMinutes % 60
+  };
+}
+
 export function minutesToTime(minutes: number): { hours: number; minutes: number } {
   return {
     hours: Math.floor(minutes / 60),

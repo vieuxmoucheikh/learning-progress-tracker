@@ -99,6 +99,7 @@ export function LearningCalendar({ items, setItems }: Props) {
         id: generateUniqueId(),
         ...restNewActivity,
         date: selectedDate,
+        status: 'not_started',
         progress: {
           current: { hours: 0, minutes: 0 },
           lastAccessed: new Date().toISOString(),
@@ -106,12 +107,7 @@ export function LearningCalendar({ items, setItems }: Props) {
             hours: Math.floor(totalHours),
             minutes: Math.round((totalHours - Math.floor(totalHours)) * 60)
           } : undefined,
-          sessions: [{
-            date: selectedDate,
-            startTime: new Date().toISOString(),
-            duration: { hours: 0, minutes: 0 },
-            notes: []
-          }]
+          sessions: []
         },
         completed: false,
         notes: ''

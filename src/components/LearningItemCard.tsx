@@ -6,28 +6,28 @@ import { Textarea } from '../ui/textarea';
 import { Progress } from '../ui/progress';
 import { Badge } from '../components/ui/badge';
 import { 
+  Play, 
+  Square, 
   Clock, 
-  PlayCircle, 
-  StopCircle, 
-  Edit2, 
-  Save, 
-  Plus, 
+  ChevronDown, 
+  ChevronUp, 
   Trash2, 
-  ExternalLink,
+  Edit, 
+  CheckCircle2, 
+  X, 
+  StopCircle, 
+  MoreVertical, 
+  BookOpen, 
+  StickyNote, 
+  Pause,
   AlertCircle,
-  CheckCircle,
-  X,
-  ChevronDown,
-  ChevronUp,
+  Save,
+  ExternalLink,
   MessageSquare,
-  Calendar,
-  MoreVertical,
-  BookOpen,
-  StickyNote,
-  CheckCircle2
+  Calendar
 } from 'lucide-react';
 import type { LearningItem, Session } from '../types';
-import { formatTime, calculateProgress, formatDuration, getTotalMinutes } from '../lib/utils';
+import { formatTime, calculateProgress, formatDuration, getTotalMinutes, calculateDuration } from '../lib/utils';
 import clsx from 'clsx';
 import { useSessionTimer } from '../hooks/useSessionTimer';
 
@@ -142,17 +142,19 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     const newSession = {
       startTime: now.toISOString(),
       date: now.toISOString().split('T')[0],
-      notes: []
+      notes: [],
+      status: 'in_progress' as const
     };
 
     // First update local state
     onStartTracking(item.id);
     
-    // Then update item with new session
+    // Then update item with new session and status
     onUpdate(item.id, {
+      status: 'in_progress',
       progress: {
         ...item.progress,
-        sessions: [...(item.progress.sessions || []), newSession]
+        sessions: [newSession, ...(item.progress.sessions || [])]
       }
     });
 
@@ -160,6 +162,69 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     localStorage.setItem(`activeSession_${item.id}`, JSON.stringify(newSession));
     localStorage.setItem(`sessionLastUpdate_${item.id}`, Date.now().toString());
   }, [item, onUpdate, onStartTracking, activeSession]);
+
+  // Handle session resume
+  const handleResumeSession = useCallback(() => {
+    if (activeSession || !item.progress) return;
+
+    const now = new Date();
+    const newSession = {
+      startTime: now.toISOString(),
+      date: now.toISOString().split('T')[0],
+      notes: [],
+      status: 'in_progress' as const
+    };
+
+    // First update local state
+    onStartTracking(item.id);
+
+    // Then update item with new session and status
+    onUpdate(item.id, {
+      status: 'in_progress',
+      progress: {
+        ...item.progress,
+        sessions: [newSession, ...(item.progress.sessions || [])]
+      }
+    });
+
+    // Finally update localStorage
+    localStorage.setItem(`activeSession_${item.id}`, JSON.stringify(newSession));
+    localStorage.setItem(`sessionLastUpdate_${item.id}`, Date.now().toString());
+  }, [item, onUpdate, onStartTracking, activeSession]);
+
+  // Handle session pause
+  const handlePauseSession = useCallback(() => {
+    if (!activeSession || !item.progress?.sessions) return;
+
+    const now = new Date();
+    const startTime = new Date(activeSession.startTime);
+    const duration = calculateDuration(startTime, now);
+
+    const updatedSession = {
+      ...activeSession,
+      endTime: now.toISOString(),
+      duration,
+      status: 'on_hold' as const
+    };
+
+    // Update item with paused session
+    const updatedSessions = item.progress.sessions.map(s => 
+      s.startTime === activeSession.startTime ? updatedSession : s
+    );
+
+    onUpdate(item.id, {
+      status: 'on_hold',
+      progress: {
+        ...item.progress,
+        sessions: updatedSessions
+      }
+    });
+
+    // Clear active session from localStorage
+    localStorage.removeItem(`activeSession_${item.id}`);
+    localStorage.removeItem(`sessionLastUpdate_${item.id}`);
+    onStopTracking(item.id);
+  }, [item, activeSession, onUpdate, onStopTracking]);
 
   // Handle session stop
   const handleStopSession = useCallback(() => {
@@ -178,7 +243,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       ...activeSession,
       endTime: now.toISOString(),
       duration,
-      date: startTime.toISOString().split('T')[0]
+      status: 'completed' as const
     };
 
     // First update local state
@@ -190,6 +255,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     );
 
     onUpdate(item.id, {
+      status: item.completed ? 'completed' : 'in_progress',
       progress: {
         ...item.progress,
         sessions: updatedSessions
@@ -456,6 +522,43 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     );
   };
 
+  const getStatusBadgeProps = () => {
+    if (activeSession) {
+      return {
+        variant: 'default' as const,
+        className: 'bg-blue-100 text-blue-700 hover:bg-blue-200',
+        children: 'In Progress'
+      };
+    }
+    
+    switch (item.status) {
+      case 'completed':
+        return {
+          variant: 'default' as const,
+          className: 'bg-green-100 text-green-700 hover:bg-green-200',
+          children: 'Completed'
+        };
+      case 'on_hold':
+        return {
+          variant: 'default' as const,
+          className: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200',
+          children: 'On Hold'
+        };
+      case 'in_progress':
+        return {
+          variant: 'default' as const,
+          className: 'bg-blue-100 text-blue-700 hover:bg-blue-200',
+          children: 'In Progress'
+        };
+      default:
+        return {
+          variant: 'secondary' as const,
+          className: '',
+          children: 'Not Started'
+        };
+    }
+  };
+
   return (
     <Card className={clsx(
       "w-full p-6 relative border-l-4 transition-all duration-200 hover:shadow-lg",
@@ -535,7 +638,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                   onClick={() => setIsEditing(true)}
                   className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50"
                 >
-                  <Edit2 className="h-4 w-4" />
+                  <Edit className="h-4 w-4" />
                 </Button>
               </div>
             )}
@@ -551,20 +654,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               </div>
             )}
             <div className="flex items-center gap-2">
-              <span className={clsx(
-                "px-2 py-0.5 rounded-full text-xs font-medium",
-                {
-                  'bg-green-100 text-green-800': item.status === 'completed',
-                  'bg-yellow-100 text-yellow-800': item.status === 'in_progress',
-                  'bg-gray-100 text-gray-800': item.status === 'not_started',
-                  'bg-red-100 text-red-800': item.status === 'on_hold',
-                  'bg-blue-100 text-blue-800': item.status === 'archived',
-                }
-              )}>
-                {item.status.replace('_', ' ')}
-              </span>
-              <span className="text-gray-400">•</span>
-              <span className="text-sm text-gray-600 font-medium">{item.type}</span>
+              <Badge {...getStatusBadgeProps()} />
+              <span className="text-sm font-medium text-gray-600">{item.type}</span>
             </div>
           </div>
 
@@ -589,7 +680,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               }
             )}
           >
-            <CheckCircle className="h-5 w-5" />
+            <CheckCircle2 className="h-5 w-5" />
           </Button>
           <Button
             variant="ghost"
@@ -616,25 +707,52 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       <div className="mt-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           {activeSession ? (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleStopSession}
-              className="gap-2 bg-red-500 hover:bg-red-600"
-            >
-              <StopCircle className="h-4 w-4" />
-              Stop Timer
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 bg-yellow-50 hover:bg-yellow-100 border-yellow-200 text-yellow-700"
+                onClick={handlePauseSession}
+              >
+                <Pause className="h-4 w-4" />
+                Pause
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 bg-red-50 hover:bg-red-100 border-red-200 text-red-700"
+                onClick={handleStopSession}
+              >
+                <StopCircle className="h-4 w-4" />
+                Stop
+              </Button>
+            </div>
           ) : (
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleStartSession}
-              className="gap-2 bg-blue-500 hover:bg-blue-600"
-            >
-              <PlayCircle className="h-4 w-4" />
-              Start Timer
-            </Button>
+            <div>
+              {item.status === 'on_hold' && !activeSession && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={handleResumeSession}
+                  className="gap-2 bg-blue-500 hover:bg-blue-600 text-white"
+                >
+                  <Play className="h-4 w-4" />
+                  Resume
+                </Button>
+              )}
+
+              {item.status === 'in_progress' && !activeSession && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={handleStartSession}
+                  className="gap-2 bg-blue-500 hover:bg-blue-600 text-white"
+                >
+                  <Play className="h-4 w-4" />
+                  Start Session
+                </Button>
+              )}
+            </div>
           )}
           
           {activeSession && (
