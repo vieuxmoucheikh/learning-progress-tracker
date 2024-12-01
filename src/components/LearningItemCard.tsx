@@ -136,7 +136,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
   // Handle session start
   const handleStartSession = useCallback(() => {
-    if (activeSession) return; // Prevent multiple active sessions
+    if (activeSession || !item.progress) return; // Prevent multiple active sessions
     
     const now = new Date();
     const newSession = {
@@ -145,19 +145,21 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       notes: []
     };
 
-    const updatedSessions = [...(item.progress.sessions || []), newSession];
-
+    // First update local state
+    onStartTracking(item.id);
+    
+    // Then update item with new session
     onUpdate(item.id, {
       progress: {
         ...item.progress,
-        sessions: updatedSessions
+        sessions: [...(item.progress.sessions || []), newSession]
       }
     });
 
-    onStartTracking(item.id);
+    // Finally update localStorage
     localStorage.setItem(`activeSession_${item.id}`, JSON.stringify(newSession));
     localStorage.setItem(`sessionLastUpdate_${item.id}`, Date.now().toString());
-  }, [item, onUpdate, onStartTracking]);
+  }, [item, onUpdate, onStartTracking, activeSession]);
 
   // Handle session stop
   const handleStopSession = useCallback(() => {
@@ -179,6 +181,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       date: startTime.toISOString().split('T')[0]
     };
 
+    // First update local state
+    onStopTracking(item.id);
+    
+    // Then update item with ended session
     const updatedSessions = item.progress.sessions.map(s => 
       s.startTime === activeSession.startTime ? updatedSession : s
     );
@@ -190,7 +196,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       }
     });
 
-    onStopTracking(item.id);
+    // Finally clean up localStorage
     localStorage.removeItem(`activeSession_${item.id}`);
     localStorage.removeItem(`sessionLastUpdate_${item.id}`);
   }, [activeSession, item, onUpdate, onStopTracking]);
@@ -565,6 +571,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
             variant="outline"
             className="w-full bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
             onClick={handleStartSession}
+            disabled={!!activeSession} // Extra safety
           >
             <PlayCircle className="w-4 h-4 mr-2" />
             Start Session
@@ -575,6 +582,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               variant="outline"
               className="w-full bg-red-50 hover:bg-red-100 border-red-200 text-red-700"
               onClick={handleStopSession}
+              disabled={!activeSession} // Extra safety
             >
               <StopCircle className="w-4 h-4 mr-2" />
               Stop Session
