@@ -31,11 +31,15 @@ export function formatDuration(time: { hours: number; minutes: number } | number
     const totalMinutes = (time.hours * 60) + time.minutes;
     const hours = Math.floor(totalMinutes / 60);
     const mins = totalMinutes % 60;
-    return hours === 0 ? `${mins}m` : mins === 0 ? `${hours}h` : `${hours}h ${mins}m`;
+    if (hours === 0) return `${mins}m`;
+    if (mins === 0) return `${hours}h`;
+    return `${hours}h ${mins}m`;
   } else {
     const hours = Math.floor(time / 60);
     const mins = time % 60;
-    return hours === 0 ? `${mins}m` : mins === 0 ? `${hours}h` : `${hours}h ${mins}m`;
+    if (hours === 0) return `${mins}m`;
+    if (mins === 0) return `${hours}h`;
+    return `${hours}h ${mins}m`;
   }
 }
 

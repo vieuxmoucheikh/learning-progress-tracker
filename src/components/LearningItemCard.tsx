@@ -310,6 +310,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         <span>
           {formatDuration(currentDuration)}
           {item.progress?.total && ` / ${formatDuration(item.progress.total)}`}
+          {!item.progress?.total && ' / ∞'}
         </span>
       </div>
     );
