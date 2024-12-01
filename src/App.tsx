@@ -36,10 +36,42 @@ type Action =
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'LOAD_STATE':
+      // Clean up any stale sessions
+      const cleanedItems = action.payload.map(item => {
+        if (!item.progress?.sessions) return item;
+
+        const cleanedSessions = item.progress.sessions.map(session => {
+          if (!session.endTime && session.status !== 'on_hold') {
+            return {
+              ...session,
+              endTime: new Date().toISOString(),
+              status: 'completed' as const
+            };
+          }
+          return session;
+        });
+
+        return {
+          ...item,
+          progress: {
+            ...item.progress,
+            sessions: cleanedSessions
+          }
+        };
+      });
+
+      // Clean up any stale localStorage data
+      cleanedItems.forEach(item => {
+        localStorage.removeItem(`activeSession_${item.id}`);
+        localStorage.removeItem(`sessionLastUpdate_${item.id}`);
+        localStorage.removeItem(`sessionPauseTime_${item.id}`);
+      });
+
       return {
         ...state,
-        items: action.payload,
+        items: cleanedItems,
         loading: false,
+        activeItem: null
       };
 
     case 'ADD_ITEM':
@@ -68,6 +100,30 @@ function reducer(state: State, action: Action): State {
       };
 
     case 'START_TRACKING':
+      const targetItem = state.items.find(item => item.id === action.payload);
+      if (!targetItem?.progress) return state;
+
+      // Check for existing active or paused sessions
+      const hasActiveSession = targetItem.progress.sessions?.some(s => !s.endTime && s.status === 'in_progress');
+      const hasPausedSession = targetItem.progress.sessions?.some(s => !s.endTime && s.status === 'on_hold');
+
+      // Don't create a new session if there's already an active one or if we're resuming a paused one
+      if (hasActiveSession || hasPausedSession) {
+        return {
+          ...state,
+          activeItem: action.payload
+        };
+      }
+
+      // Create new session only if there's no active or paused session
+      const now = new Date();
+      const newSession = {
+        startTime: now.toISOString(),
+        date: now.toISOString(),
+        notes: [],
+        status: 'in_progress' as const
+      };
+
       return {
         ...state,
         items: state.items.map((item) =>
@@ -77,17 +133,7 @@ function reducer(state: State, action: Action): State {
                 lastTimestamp: Date.now(),
                 progress: {
                   ...item.progress,
-                  sessions: item.progress.sessions.some(s => s.status === 'on_hold' && !s.endTime)
-                    ? item.progress.sessions // Don't add new session if there's a paused one
-                    : [
-                        {
-                          startTime: new Date().toISOString(),
-                          date: new Date().toISOString(),
-                          notes: [],
-                          status: 'in_progress'
-                        },
-                        ...item.progress.sessions
-                      ]
+                  sessions: [newSession, ...(item.progress.sessions || [])]
                 }
               }
             : item
@@ -96,11 +142,46 @@ function reducer(state: State, action: Action): State {
       };
 
     case 'STOP_TRACKING':
+      const stoppingItem = state.items.find(item => item.id === action.payload);
+      if (!stoppingItem?.progress) return state;
+
+      // End all active sessions
+      const updatedSessions = stoppingItem.progress.sessions.map(session => {
+        if (!session.endTime) {
+          const startTime = new Date(session.startTime);
+          const now = new Date();
+          const diffInMinutes = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
+
+          return {
+            ...session,
+            endTime: now.toISOString(),
+            status: 'completed' as const,
+            duration: {
+              hours: Math.floor(diffInMinutes / 60),
+              minutes: diffInMinutes % 60
+            }
+          };
+        }
+        return session;
+      });
+
+      // Clean up localStorage
+      localStorage.removeItem(`activeSession_${action.payload}`);
+      localStorage.removeItem(`sessionLastUpdate_${action.payload}`);
+      localStorage.removeItem(`sessionPauseTime_${action.payload}`);
+
       return {
         ...state,
         items: state.items.map((item) =>
           item.id === action.payload
-            ? { ...item, lastTimestamp: null }
+            ? {
+                ...item,
+                lastTimestamp: null,
+                progress: {
+                  ...item.progress,
+                  sessions: updatedSessions
+                }
+              }
             : item
         ),
         activeItem: null,
