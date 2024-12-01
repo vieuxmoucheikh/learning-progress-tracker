@@ -167,16 +167,25 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const handlePauseSession = useCallback(() => {
     if (!activeSession || !item.progress?.sessions) return;
 
+    const now = new Date();
+    const startTime = new Date(activeSession.startTime);
+    const duration = calculateDuration(startTime, now);
+
     // Update session status without ending it
     const updatedSession = {
       ...activeSession,
-      status: 'on_hold' as const
+      status: 'on_hold' as const,
+      duration
     };
 
     // Update item with paused session
     const updatedSessions = item.progress.sessions.map(s => 
       s.startTime === activeSession.startTime ? updatedSession : s
     );
+
+    // Store pause time in localStorage
+    localStorage.setItem(`sessionPauseTime_${item.id}`, Date.now().toString());
+    localStorage.setItem(`sessionDuration_${item.id}`, JSON.stringify(duration));
 
     onUpdate(item.id, {
       status: 'on_hold',
@@ -186,50 +195,48 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       }
     });
 
-    // Store pause time in localStorage
-    localStorage.setItem(`sessionPauseTime_${item.id}`, Date.now().toString());
     onStopTracking(item.id);
-  }, [item, activeSession, onUpdate, onStopTracking]);
+  }, [item, activeSession, onUpdate, onStopTracking, calculateDuration]);
 
   // Handle session resume
   const handleResumeSession = useCallback(() => {
     if (!item.progress?.sessions) return;
 
-    const pausedSession = item.progress.sessions.find(s => s.status === 'on_hold' && !s.endTime);
-    if (!pausedSession) return;
-
-    // Calculate the time difference during pause
+    const now = new Date();
     const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${item.id}`);
-    const pauseTime = pauseTimeStr ? parseInt(pauseTimeStr, 10) : null;
+    const storedDurationStr = localStorage.getItem(`sessionDuration_${item.id}`);
     
-    if (pauseTime) {
-      const timeDiff = Date.now() - pauseTime;
-      const adjustedStartTime = new Date(new Date(pausedSession.startTime).getTime() + timeDiff).toISOString();
+    if (!pauseTimeStr || !storedDurationStr) return;
 
-      // Update session with adjusted start time
-      const updatedSession = {
-        ...pausedSession,
-        startTime: adjustedStartTime,
-        status: 'in_progress' as const
-      };
+    const pauseTime = parseInt(pauseTimeStr, 10);
+    const storedDuration = JSON.parse(storedDurationStr);
+    const timeDiff = Date.now() - pauseTime;
 
-      const updatedSessions = item.progress.sessions.map(s => 
-        s.startTime === pausedSession.startTime ? updatedSession : s
-      );
+    // Create new session with adjusted start time
+    const newSession = {
+      startTime: now.toISOString(),
+      date: now.toISOString().split('T')[0],
+      notes: [],
+      status: 'in_progress' as const,
+      previousDuration: storedDuration
+    };
 
-      // Update item state
-      onUpdate(item.id, {
-        status: 'in_progress',
-        progress: {
-          ...item.progress,
-          sessions: updatedSessions
-        }
-      });
+    onUpdate(item.id, {
+      status: 'in_progress',
+      progress: {
+        ...item.progress,
+        sessions: [newSession, ...(item.progress.sessions || [])]
+      }
+    });
 
-      // Clean up pause time and update tracking
-      localStorage.removeItem(`sessionPauseTime_${item.id}`);
-      onStartTracking(item.id);
-    }
+    // Clean up localStorage
+    localStorage.removeItem(`sessionPauseTime_${item.id}`);
+    localStorage.removeItem(`sessionDuration_${item.id}`);
+    
+    // Start tracking the new session
+    localStorage.setItem(`activeSession_${item.id}`, JSON.stringify(newSession));
+    localStorage.setItem(`sessionLastUpdate_${item.id}`, Date.now().toString());
+    onStartTracking(item.id);
   }, [item, onUpdate, onStartTracking]);
 
   // Handle session stop
@@ -758,20 +765,22 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           )}
         </div>
 
-        {activeSession && (
+        {(activeSession || item.status === 'on_hold') && (
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-blue-600">
-              Current Session: {formatElapsedTime()}
+              {activeSession ? `Current Session: ${formatElapsedTime()}` : 'Session Paused'}
             </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowNoteInput(!showNoteInput)}
-              className="gap-2 text-gray-600 hover:text-gray-800"
-            >
-              <MessageSquare className="h-4 w-4" />
-              Add Note
-            </Button>
+            {activeSession && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowNoteInput(!showNoteInput)}
+                className="gap-2 text-gray-600 hover:text-gray-800"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Add Note
+              </Button>
+            )}
           </div>
         )}
       </div>
