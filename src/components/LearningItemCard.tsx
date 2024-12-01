@@ -276,17 +276,17 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   }, [item.progress?.sessions]);
 
   const calculateProgress = useCallback(() => {
-    if (!item.progress?.sessions || !item.progress?.total) return 0;
+    if (!item.progress?.total) return 0;
     
     const totalSpentMinutes = calculateTotalTimeSpent();
     const totalTargetMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
     
     if (totalTargetMinutes === 0) return 0;
     return Math.min(Math.round((totalSpentMinutes / totalTargetMinutes) * 100), 100);
-  }, [item.progress?.sessions, item.progress?.total, calculateTotalTimeSpent]);
+  }, [item.progress?.total, calculateTotalTimeSpent]);
 
   const getProgressPercentage = () => {
-    if (!item.progress?.sessions || !item.progress?.total) return 0;
+    if (!item.progress?.total) return 0;
     
     const totalSpentMinutes = calculateTotalTimeSpent();
     const totalTargetMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
@@ -295,7 +295,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     return Math.min(Math.round((totalSpentMinutes / totalTargetMinutes) * 100), 100);
   };
 
-  const formatDuration = (duration: Time) => {
+  const formatDuration = (duration: Time | undefined) => {
     if (!duration) return '0h 0m';
     const hours = duration.hours || 0;
     const minutes = duration.minutes || 0;
@@ -328,8 +328,20 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     const percentage = getProgressPercentage();
     return (
       <div className="mt-2">
-        <Progress value={percentage} className="h-2" />
-        <div className="mt-1 text-xs text-gray-500">
+        <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+          <div 
+            className={clsx(
+              "h-full transition-all duration-300",
+              {
+                'bg-green-500': percentage >= 100,
+                'bg-blue-500': percentage > 0 && percentage < 100,
+                'bg-gray-200': percentage === 0
+              }
+            )}
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+        <div className="mt-1 text-xs text-gray-500 text-right">
           {percentage}% Complete
         </div>
       </div>
