@@ -575,7 +575,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               {formatDuration({ 
                 hours: Math.floor(calculateTotalTimeSpent() / 60),
                 minutes: calculateTotalTimeSpent() % 60 
-              })} / {item.progress?.total ? formatDuration(item.progress.total) : '∞'}
+              })} / {formatDuration(item.progress.total || { hours: 0, minutes: 0 })}
             </span>
           </div>
           <div className="flex items-center gap-2">
