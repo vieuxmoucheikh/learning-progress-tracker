@@ -737,7 +737,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
             </div>
           ) : (
             <div>
-              {(item.status === 'on_hold' || item.status === 'in_progress') && !activeSession && (
+              {!item.completed && (
                 <Button
                   variant="default"
                   size="sm"
@@ -745,7 +745,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                   className="gap-2 bg-blue-500 hover:bg-blue-600 text-white"
                 >
                   <Play className="h-4 w-4" />
-                  {item.status === 'on_hold' ? 'Resume' : 'Start Session'}
+                  {item.status === 'on_hold' ? 'Resume Session' : 'Start Session'}
                 </Button>
               )}
             </div>
