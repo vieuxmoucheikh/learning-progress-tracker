@@ -499,7 +499,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         {item.progress.sessions.length > (activeSession ? 2 : 1) && (
           <Button
             variant="outline"
-            className="w-full text-sm gap-2 mt-2 border-gray-200 hover:bg-gray-50 hover:text-gray-900 text-gray-600"
+            className="w-full text-sm gap-2 mt-2 border-gray-200 hover:bg-gray-50"
             onClick={(e) => {
               e.stopPropagation();
               setShowAllSessions(!showAllSessions);
@@ -570,35 +570,35 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     )}>
       {/* Delete Confirmation Dialog */}
       {showHistory && (
-        <div className="absolute inset-0 bg-white bg-opacity-95 z-10 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div className="bg-white p-6 rounded-lg shadow-lg border border-red-200 max-w-sm w-full">
-          <div className="text-center mb-4">
-            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-2" />
-            <h3 className="text-lg font-semibold text-gray-900">Delete Item</h3>
-            <p className="text-gray-600 mt-1">Are you sure you want to delete "{item.title}"? This action cannot be undone.</p>
-          </div>
-          <div className="flex justify-end gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setShowHistory(false)}
-              className="border-gray-300 hover:bg-gray-50"
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              className="bg-red-500 hover:bg-red-600 text-white"
-            >
-              Delete
-            </Button>
+        <div className="fixed inset-0 bg-black/20 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white p-6 rounded-lg shadow-xl border max-w-sm w-full">
+            <div className="text-center mb-4">
+              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-2" />
+              <h3 className="text-lg font-semibold text-gray-900">Delete Item</h3>
+              <p className="text-gray-600 mt-1">Are you sure you want to delete "{item.title}"? This action cannot be undone.</p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowHistory(false)}
+                className="border-gray-300 hover:bg-gray-50"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                className="bg-red-500 hover:bg-red-600 text-white"
+              >
+                Delete
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
       )}
 
       {/* Header Section */}
-      <div className="flex justify-between items-start gap-4">
+      <div className="flex justify-between items-start gap-4 mb-4">
         <div className="flex-1 space-y-3">
           {/* Title */}
           <div>
@@ -648,7 +648,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           <div className="flex items-center gap-3">
             {item.category && (
               <div className="flex items-center">
-                <span className="px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100 shadow-sm">
+                <span className="px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100">
                   {item.category}
                 </span>
               </div>
@@ -657,12 +657,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               <Badge {...getStatusBadgeProps()} />
               <span className="text-sm font-medium text-gray-600">{item.type}</span>
             </div>
-          </div>
-
-          {/* Progress Section */}
-          <div className="space-y-2">
-            {renderDuration()}
-            {renderProgressBar()}
           </div>
         </div>
 
@@ -703,8 +697,22 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         </div>
       </div>
 
-      {/* Timer Controls */}
-      <div className="mt-4 flex items-center justify-between">
+      {/* Progress Section */}
+      <div className="space-y-2 mb-4">
+        <div className="flex items-center justify-between">
+          {renderDuration()}
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-gray-500" />
+            <span className="text-sm text-gray-600">
+              {formatDate(item.date)}
+            </span>
+          </div>
+        </div>
+        {renderProgressBar()}
+      </div>
+
+      {/* Timer Controls and Session Info */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           {activeSession ? (
             <div className="flex gap-2">
@@ -729,85 +737,72 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
             </div>
           ) : (
             <div>
-              {item.status === 'on_hold' && !activeSession && (
+              {(item.status === 'on_hold' || item.status === 'in_progress') && !activeSession && (
                 <Button
                   variant="default"
                   size="sm"
-                  onClick={handleResumeSession}
+                  onClick={item.status === 'on_hold' ? handleResumeSession : handleStartSession}
                   className="gap-2 bg-blue-500 hover:bg-blue-600 text-white"
                 >
                   <Play className="h-4 w-4" />
-                  Resume
+                  {item.status === 'on_hold' ? 'Resume' : 'Start Session'}
                 </Button>
               )}
+            </div>
+          )}
+        </div>
 
-              {item.status === 'in_progress' && !activeSession && (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handleStartSession}
-                  className="gap-2 bg-blue-500 hover:bg-blue-600 text-white"
-                >
-                  <Play className="h-4 w-4" />
-                  Start Session
-                </Button>
-              )}
-            </div>
-          )}
-          
-          {activeSession && (
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-blue-600">
-                Current Session: {formatElapsedTime()}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowNoteInput(!showNoteInput)}
-                className="gap-2 text-gray-600 hover:text-gray-800"
-              >
-                <MessageSquare className="h-4 w-4" />
-                Add Note
-              </Button>
-            </div>
-          )}
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-gray-500" />
-          <span className="text-sm text-gray-600">
-            {formatDate(item.date)}
-          </span>
-        </div>
+        {activeSession && (
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-blue-600">
+              Current Session: {formatElapsedTime()}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowNoteInput(!showNoteInput)}
+              className="gap-2 text-gray-600 hover:text-gray-800"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Add Note
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Note Input */}
       {showNoteInput && (
-        <div className="mt-4 flex gap-2">
-          <Input
+        <div className="mt-4 space-y-2">
+          <Textarea
             value={sessionNote}
             onChange={(e) => setSessionNote(e.target.value)}
             placeholder="Add a note about your progress..."
-            className="flex-1"
+            className="min-h-[80px] resize-none"
           />
-          <Button
-            variant="default"
-            size="sm"
-            onClick={handleAddNote}
-            disabled={!sessionNote.trim()}
-            className="bg-blue-500 hover:bg-blue-600"
-          >
-            Add Note
-          </Button>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowNoteInput(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleAddNote}
+              disabled={!sessionNote.trim()}
+              className="bg-blue-500 hover:bg-blue-600"
+            >
+              Add Note
+            </Button>
+          </div>
         </div>
       )}
 
       {/* Session History */}
       {item.progress?.sessions?.length > 0 && (
-        <div className="mt-6">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="font-medium text-gray-900">Session History</h4>
-          </div>
+        <div className="mt-4 pt-4 border-t">
           {renderSessionHistory()}
         </div>
       )}
