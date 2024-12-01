@@ -244,27 +244,29 @@ export function LearningGoals({ items }: Props) {
       </div>
 
       <Dialog open={isAddingGoal} onOpenChange={setIsAddingGoal}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-semibold">Add Learning Goal</DialogTitle>
-            <DialogDescription className="text-base text-gray-500">
+        <DialogContent className="sm:max-w-[500px] bg-white dark:bg-gray-900 border-0">
+          <DialogHeader className="space-y-3 pb-4 border-b">
+            <DialogTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Add Learning Goal
+            </DialogTitle>
+            <DialogDescription className="text-base text-gray-600 dark:text-gray-300">
               Set a new learning goal to track your progress and stay motivated.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-6 py-4">
+          <div className="grid gap-6 py-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Goal Title</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Goal Title</label>
               <Input
                 value={newGoal.title}
                 onChange={e => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="e.g., Master React Fundamentals"
-                className="w-full"
+                className="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Category</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Category</label>
               <Select
                 value={newGoal.category}
                 onValueChange={(value: string) => setNewGoal(prev => ({ ...prev, category: value }))}
@@ -279,28 +281,30 @@ export function LearningGoals({ items }: Props) {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Target Hours</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Target Hours</label>
                 <Input
                   type="number"
                   min="0"
                   value={newGoal.targetHours}
                   onChange={e => setNewGoal(prev => ({ ...prev, targetHours: Number(e.target.value) }))}
+                  className="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Target Date</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Target Date</label>
                 <Input
                   type="date"
                   value={newGoal.targetDate}
                   onChange={e => setNewGoal(prev => ({ ...prev, targetDate: e.target.value }))}
                   min={new Date().toISOString().split('T')[0]}
+                  className="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Priority</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Priority</label>
               <Select
                 value={newGoal.priority}
                 onValueChange={(value: string) => setNewGoal(prev => ({ ...prev, priority: value as Priority }))}
@@ -315,17 +319,17 @@ export function LearningGoals({ items }: Props) {
             </div>
           </div>
 
-          <DialogFooter className="gap-3">
+          <DialogFooter className="gap-3 pt-4 border-t">
             <Button
               variant="outline"
               onClick={() => setIsAddingGoal(false)}
-              className="flex-1"
+              className="flex-1 border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
             >
               Cancel
             </Button>
             <Button
               onClick={addGoal}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700"
+              className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-200"
               disabled={!newGoal.title || !newGoal.targetDate || !newGoal.targetHours || !newGoal.category}
             >
               Create Goal
