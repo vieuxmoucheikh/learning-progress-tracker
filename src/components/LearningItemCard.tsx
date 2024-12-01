@@ -555,10 +555,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                           "bg-gradient-to-r from-amber-50 to-amber-50/30",
                           "border border-amber-100/50",
                           "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors",
-                          "break-words whitespace-pre-wrap max-w-full",
-                          "overflow-hidden text-ellipsis"
+                          "break-words whitespace-pre-wrap",
+                          "overflow-hidden text-ellipsis",
+                          "w-full md:max-w-md lg:max-w-lg xl:max-w-xl"
                         )}
-                        style={{ maxWidth: '600px' }}
                       >
                         {typeof note === 'string' ? note : note.content}
                         <button
