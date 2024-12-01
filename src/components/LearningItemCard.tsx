@@ -76,7 +76,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [editedNotes, setEditedNotes] = useState(item.notes || '');
   const [showHistory, setShowHistory] = useState(false);
   const [sessionNote, setSessionNote] = useState('');
-  const [showNoteInput, setShowNoteInput] = useState(false);
+  const [showNoteDialog, setShowNoteDialog] = useState(false);
   const [showAllSessions, setShowAllSessions] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -303,7 +303,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
     onSessionNoteAdd(item.id, sessionNote);
     setSessionNote('');
-    setShowNoteInput(false);
+    setShowNoteDialog(false);
   }, [item.id, item.progress, sessionNote, onSessionNoteAdd, onUpdate, activeSession]);
 
   const handleSaveNotes = () => {
@@ -335,7 +335,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     
     // Reset UI state
     setShowHistory(false);
-    setShowNoteInput(false);
+    setShowNoteDialog(false);
     setIsEditing(false);
     setShowDeleteDialog(false);
     
@@ -629,6 +629,21 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     }
   };
 
+  const handleOpenNoteDialog = () => {
+    setShowNoteDialog(true);
+    setSessionNote('');
+  };
+
+  const handleCloseNoteDialog = () => {
+    setShowNoteDialog(false);
+    setSessionNote('');
+  };
+
+  const handleAddNoteSubmit = () => {
+    handleAddNote();
+    handleCloseNoteDialog();
+  };
+
   return (
     <>
       <Card className={clsx(
@@ -820,8 +835,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setShowNoteInput(!showNoteInput)}
-                    className="gap-2 text-gray-600 hover:text-gray-800"
+                    onClick={handleOpenNoteDialog}
+                    className="gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200 rounded-lg shadow-sm transition-colors"
                   >
                     <MessageSquare className="h-4 w-4" />
                     Add Note
@@ -850,68 +865,82 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           </div>
         </div>
 
-        {/* Note Input */}
-        {showNoteInput && (
-          <div className="p-6 bg-gray-50 border-t border-gray-200">
-            <div className="space-y-2">
+        {/* Note Dialog */}
+        <Dialog open={showNoteDialog} onOpenChange={setShowNoteDialog}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold text-gray-900">
+                Add Session Note
+              </DialogTitle>
+              <DialogDescription className="mt-2 text-gray-600">
+                Record your thoughts, progress, or any important points about this learning session.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4 space-y-4">
               <Textarea
                 value={sessionNote}
                 onChange={(e) => setSessionNote(e.target.value)}
-                placeholder="Add a note about your progress..."
-                className="min-h-[80px] resize-none bg-white"
+                placeholder="What did you learn or accomplish in this session?"
+                className="min-h-[120px] resize-none bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-3">
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowNoteInput(false)}
-                  className="text-gray-600 hover:text-gray-700"
+                  variant="outline"
+                  onClick={handleCloseNoteDialog}
+                  className="px-4 hover:bg-gray-50"
                 >
                   Cancel
                 </Button>
                 <Button
                   variant="default"
-                  size="sm"
-                  onClick={handleAddNote}
-                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                  onClick={handleAddNoteSubmit}
+                  className="px-4 bg-blue-600 hover:bg-blue-700 text-white gap-2"
+                  disabled={!sessionNote.trim()}
                 >
+                  <MessageSquare className="h-4 w-4" />
                   Add Note
                 </Button>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Session History Dialog */}
-        <Dialog open={showHistory} onOpenChange={setShowHistory}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Session History</DialogTitle>
-              <DialogDescription>
-                View detailed history of all learning sessions for this item.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="mt-4 space-y-4">
-              {item.progress?.sessions && renderSessionHistory()}
             </div>
           </DialogContent>
         </Dialog>
 
         {/* Delete Confirmation Dialog */}
         <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <DialogContent>
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Delete Item</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to delete "{item.title}"? This action cannot be undone.
+              <DialogTitle className="text-xl font-semibold text-gray-900">
+                Delete Learning Item
+              </DialogTitle>
+              <DialogDescription className="mt-3 text-gray-600">
+                <div className="space-y-3">
+                  <p>
+                    Are you sure you want to delete <span className="font-medium text-gray-900">"{item.title}"</span>?
+                  </p>
+                  <div className="flex items-center gap-2 p-3 bg-amber-50 text-amber-800 rounded-lg border border-amber-200">
+                    <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0" />
+                    <p className="text-sm">
+                      This action cannot be undone. All sessions and progress will be permanently deleted.
+                    </p>
+                  </div>
+                </div>
               </DialogDescription>
             </DialogHeader>
-            <div className="flex justify-end space-x-4 mt-4">
-              <Button variant="outline" onClick={handleCancelDelete}>
+            <div className="flex justify-end gap-3 mt-6">
+              <Button
+                variant="outline"
+                onClick={handleCancelDelete}
+                className="px-4 hover:bg-gray-50"
+              >
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={handleConfirmDelete}>
-                Delete
+              <Button
+                variant="destructive"
+                onClick={handleConfirmDelete}
+                className="px-4 bg-red-600 hover:bg-red-700 focus:ring-red-500"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Item
               </Button>
             </div>
           </DialogContent>
