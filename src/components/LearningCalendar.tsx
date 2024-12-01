@@ -92,9 +92,12 @@ export function LearningCalendar({ items, setItems }: Props) {
 
       const totalHours = newActivity.total ? 
         newActivity.total.hours + (newActivity.total.minutes / 60) : 0;
+      
+      const { total, ...restNewActivity } = newActivity;
+      
       const activity: LearningItem = {
         id: generateUniqueId(),
-        ...newActivity,
+        ...restNewActivity,
         date: selectedDate,
         progress: {
           current: { hours: 0, minutes: 0 },

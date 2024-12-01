@@ -283,21 +283,38 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   }, [item.progress?.sessions]);
 
   const calculateProgress = useCallback(() => {
-    if (!item.progress?.total) return 0;
-    const totalMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
-    if (totalMinutes === 0) return 0;
-    
+    const totalMinutes = item.progress?.total ? 
+      (item.progress.total.hours * 60) + item.progress.total.minutes : 0;
     const spentMinutes = calculateTotalTimeSpent();
+    
+    if (!item.progress?.total || totalMinutes === 0) return 0;
     return Math.min(Math.round((spentMinutes / totalMinutes) * 100), 100);
   }, [item.progress?.total, calculateTotalTimeSpent]);
 
   const getProgressPercentage = () => {
-    if (!item.progress?.total) return 0;
-    const totalMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
-    if (totalMinutes === 0) return 0;
-    
+    const totalMinutes = item.progress?.total ? 
+      (item.progress.total.hours * 60) + item.progress.total.minutes : 0;
     const spentMinutes = calculateTotalTimeSpent();
+    
+    if (!item.progress?.total || totalMinutes === 0) return 0;
     return Math.min(Math.round((spentMinutes / totalMinutes) * 100), 100);
+  };
+
+  const formatDuration = (duration: Time) => {
+    return `${duration.hours}h ${duration.minutes}m`;
+  };
+
+  const renderDuration = () => {
+    const timeSpent = calculateTotalTimeSpent();
+    const hours = Math.floor(timeSpent / 60);
+    const minutes = timeSpent % 60;
+    const currentDuration = { hours, minutes };
+    
+    return (
+      <div className="text-sm text-gray-600">
+        {formatDuration(currentDuration)} {item.progress?.total ? `/ ${formatDuration(item.progress.total)}` : '/ ∞'}
+      </div>
+    );
   };
 
   const renderProgressBar = () => {
@@ -573,10 +590,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-gray-500" />
             <span className="text-sm text-gray-600">
-              {formatDuration({ 
-                hours: Math.floor(calculateTotalTimeSpent() / 60),
-                minutes: calculateTotalTimeSpent() % 60 
-              })} / {item.progress?.total ? formatDuration(item.progress.total) : '∞'}
+              {renderDuration()}
             </span>
           </div>
           <div className="flex items-center gap-2">
