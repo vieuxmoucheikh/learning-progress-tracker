@@ -220,6 +220,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     localStorage.setItem(`activeSession_${item.id}`, JSON.stringify(resumedSession));
     localStorage.setItem(`sessionLastUpdate_${item.id}`, Date.now().toString());
 
+    // Update the item first
     onUpdate(item.id, {
       status: 'in_progress',
       progress: {

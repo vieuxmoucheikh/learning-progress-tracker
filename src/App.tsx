@@ -77,14 +77,17 @@ function reducer(state: State, action: Action): State {
                 lastTimestamp: Date.now(),
                 progress: {
                   ...item.progress,
-                  sessions: [
-                    ...item.progress.sessions,
-                    {
-                      startTime: new Date().toISOString(),
-                      date: new Date().toISOString(),
-                      notes: []
-                    }
-                  ]
+                  sessions: item.progress.sessions.some(s => s.status === 'on_hold' && !s.endTime)
+                    ? item.progress.sessions // Don't add new session if there's a paused one
+                    : [
+                        {
+                          startTime: new Date().toISOString(),
+                          date: new Date().toISOString(),
+                          notes: [],
+                          status: 'in_progress'
+                        },
+                        ...item.progress.sessions
+                      ]
                 }
               }
             : item
