@@ -36,13 +36,53 @@ const DIFFICULTY_COLORS = {
 
 export function AnalyticsTab({ items }: AnalyticsTabProps) {
   const analytics = useMemo(() => {
-    // Time spent per category
+    // Time spent per category (using actual session data)
     const categoryData = items.reduce((acc, item) => {
       const category = item.category || "Uncategorized";
-      const hours = (item.progress?.current?.hours || 0) + (item.progress?.current?.minutes || 0) / 60;
-      acc[category] = (acc[category] || 0) + hours;
+      
+      // Calculate time from sessions
+      const sessionTime = (item.progress?.sessions || []).reduce((time, session) => {
+        if (session.duration) {
+          return time + (session.duration.hours * 60 + session.duration.minutes);
+        }
+        return time;
+      }, 0);
+
+      // Add current session time if active
+      const isActive = item.progress?.sessions?.some(s => !s.endTime && s.status === 'in_progress');
+      if (isActive) {
+        const lastSession = item.progress?.sessions?.find(s => !s.endTime && s.status === 'in_progress');
+        if (lastSession) {
+          const startTime = new Date(lastSession.startTime).getTime();
+          const currentTime = new Date().getTime();
+          const activeMinutes = Math.floor((currentTime - startTime) / (1000 * 60));
+          acc[category] = (acc[category] || 0) + sessionTime + activeMinutes;
+        } else {
+          acc[category] = (acc[category] || 0) + sessionTime;
+        }
+      } else {
+        acc[category] = (acc[category] || 0) + sessionTime;
+      }
+      
       return acc;
     }, {} as Record<string, number>);
+
+    // Convert minutes to hours and sort by time spent
+    const sortedCategoryData = Object.entries(categoryData)
+      .map(([name, minutes]) => ({
+        name,
+        value: Math.round((minutes / 60) * 100) / 100,
+        minutes: minutes,
+        itemCount: items.filter(item => (item.category || "Uncategorized") === name).length
+      }))
+      .sort((a, b) => b.value - a.value);
+
+    // Calculate percentage for each category
+    const totalTime = sortedCategoryData.reduce((sum, cat) => sum + cat.value, 0);
+    const categoryDataWithPercentage = sortedCategoryData.map(cat => ({
+      ...cat,
+      percentage: totalTime > 0 ? Math.round((cat.value / totalTime) * 100) : 0
+    }));
 
     // Progress by difficulty
     const difficultyData = items.reduce((acc, item) => {
@@ -107,10 +147,7 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
     };
 
     return {
-      categoryData: Object.entries(categoryData).map(([name, value]) => ({
-        name,
-        value: Math.round(value * 100) / 100
-      })),
+      categoryData: categoryDataWithPercentage,
       difficultyData: Object.entries(difficultyData).map(([difficulty, data]) => ({
         name: difficulty.charAt(0).toUpperCase() + difficulty.slice(1),
         progress: Math.round(data.avgProgress * 10) / 10,
@@ -177,26 +214,66 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
         {/* Time by Category */}
         <Card className="p-6">
           <h2 className="text-lg font-semibold mb-6">Time Spent by Category</h2>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={analytics.categoryData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  label={({ name, value }) => `${name}: ${value}h`}
-                >
-                  {analytics.categoryData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={analytics.categoryData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    label={({ name, percentage }) => `${name}: ${percentage}%`}
+                  >
+                    {analytics.categoryData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value: number, name: string, entry: any) => [
+                      `${value}h (${entry.payload.percentage}%)`,
+                      `${name} (${entry.payload.itemCount} items)`
+                    ]}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-gray-500">Category Breakdown</h3>
+              <div className="space-y-3">
+                {analytics.categoryData.map((category, index) => (
+                  <div key={category.name} className="flex items-center gap-3">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="font-medium truncate">{category.name}</span>
+                        <span className="text-gray-500">
+                          {category.value}h ({category.percentage}%)
+                        </span>
+                      </div>
+                      <div className="mt-1 w-full bg-gray-100 rounded-full h-1.5">
+                        <div
+                          className="h-1.5 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${category.percentage}%`,
+                            backgroundColor: COLORS[index % COLORS.length]
+                          }}
+                        />
+                      </div>
+                      <div className="mt-1 text-xs text-gray-500">
+                        {category.itemCount} items · {Math.round(category.minutes)} minutes
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </Card>
 
