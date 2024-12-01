@@ -390,8 +390,10 @@ export default function App() {
     }
   };
 
-  const handleDateSelect = (date: Date) => {
-    setSelectedDate(date);
+  const handleDateSelect = (date?: Date) => {
+    if (date) {
+      setSelectedDate(date);
+    }
   };
 
   const handleUpdateNotes = (id: string, notes: string) => {
@@ -410,7 +412,7 @@ export default function App() {
     handleUpdateItem(id, updates);
   };
 
-  const handleDashboardAddItem = (date?: Date) => {
+  const handleDashboardAddItem = (date?: Date | null) => {
     if (date) {
       setSelectedDate(date);
     }
