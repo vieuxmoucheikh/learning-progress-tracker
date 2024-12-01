@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from './ui/dialog';
 import { Select } from "@/components/ui/select"
-import { Calendar, Clock, Target, Trophy, TrendingUp } from 'lucide-react';
+import { Calendar, Clock, Target, Trophy, TrendingUp, Plus, Trash2 } from 'lucide-react';
 import { LearningItem } from '@/types';
 import { clsx } from 'clsx';
 
@@ -81,6 +81,11 @@ export function LearningGoals({ items }: Props) {
       category: '',
       priority: 'medium',
     });
+  };
+
+  const deleteGoal = (goalId: string) => {
+    const updatedGoals = goals.filter(goal => goal.id !== goalId);
+    saveGoals(updatedGoals);
   };
 
   const calculateProgress = (category: string) => {
@@ -154,9 +159,17 @@ export function LearningGoals({ items }: Props) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">Learning Goals</h2>
-        <Button onClick={() => setIsAddingGoal(true)}>
-          Add Goal
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Learning Goals</h2>
+          <p className="text-sm text-muted-foreground">
+            Set and track your learning objectives
+          </p>
+        </div>
+        <Button 
+          onClick={() => setIsAddingGoal(true)}
+          className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
+        >
+          <Plus className="mr-2 h-4 w-4" /> Add Goal
         </Button>
       </div>
 
@@ -167,10 +180,20 @@ export function LearningGoals({ items }: Props) {
           const currentStatus = getGoalStatus(goal);
 
           return (
-            <Card key={goal.id} className="p-4 space-y-4">
+            <Card key={goal.id} className="p-4 space-y-4 relative group">
+              <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                  onClick={() => deleteGoal(goal.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
-                  <h3 className="font-medium">{goal.title}</h3>
+                  <h3 className="font-medium text-lg">{goal.title}</h3>
                   <p className="text-sm text-gray-500">{goal.category}</p>
                 </div>
                 <div className={clsx(
@@ -221,21 +244,22 @@ export function LearningGoals({ items }: Props) {
       </div>
 
       <Dialog open={isAddingGoal} onOpenChange={setIsAddingGoal}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Add Learning Goal</DialogTitle>
-            <DialogDescription>
-              Set a new learning goal to track your progress
+            <DialogTitle className="text-2xl font-semibold">Add Learning Goal</DialogTitle>
+            <DialogDescription className="text-base text-gray-500">
+              Set a new learning goal to track your progress and stay motivated.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-6 py-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Goal Title</label>
               <Input
                 value={newGoal.title}
                 onChange={e => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Learn React Fundamentals"
+                placeholder="e.g., Master React Fundamentals"
+                className="w-full"
               />
             </div>
 
@@ -291,11 +315,21 @@ export function LearningGoals({ items }: Props) {
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddingGoal(false)}>
+          <DialogFooter className="gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setIsAddingGoal(false)}
+              className="flex-1"
+            >
               Cancel
             </Button>
-            <Button onClick={addGoal}>Add Goal</Button>
+            <Button
+              onClick={addGoal}
+              className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700"
+              disabled={!newGoal.title || !newGoal.targetDate || !newGoal.targetHours || !newGoal.category}
+            >
+              Create Goal
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
