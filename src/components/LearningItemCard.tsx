@@ -287,7 +287,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       (item.progress.total.hours * 60) + item.progress.total.minutes : 0;
     const spentMinutes = calculateTotalTimeSpent();
     
-    if (!item.progress?.total || totalMinutes === 0) return 0;
+    if (!totalMinutes) return 0;
     return Math.min(Math.round((spentMinutes / totalMinutes) * 100), 100);
   }, [item.progress?.total, calculateTotalTimeSpent]);
 
@@ -296,7 +296,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       (item.progress.total.hours * 60) + item.progress.total.minutes : 0;
     const spentMinutes = calculateTotalTimeSpent();
     
-    if (!item.progress?.total || totalMinutes === 0) return 0;
+    if (!totalMinutes) return 0;
     return Math.min(Math.round((spentMinutes / totalMinutes) * 100), 100);
   };
 
@@ -311,9 +311,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     const currentDuration = { hours, minutes };
     
     return (
-      <div className="text-sm text-gray-600">
+      <span className="text-sm text-gray-600">
         {formatDuration(currentDuration)} {item.progress?.total ? `/ ${formatDuration(item.progress.total)}` : '/ ∞'}
-      </div>
+      </span>
     );
   };
 
