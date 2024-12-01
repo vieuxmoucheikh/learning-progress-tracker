@@ -474,14 +474,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           return (
             <div 
               key={session.startTime}
-              className={clsx(
-                "border rounded-xl p-5 space-y-4",
-                "bg-gradient-to-br from-white to-gray-50/30",
-                "hover:from-gray-50 hover:to-white transition-all",
-                "shadow-sm hover:shadow-md",
-                "relative overflow-hidden max-w-full",
-                !session.endTime && "border-l-4 border-l-blue-400"
-              )}
+              className="border rounded-xl p-5 space-y-4 w-full overflow-hidden"
             >
               {/* Session Status Indicator */}
               <div className={clsx(
@@ -541,25 +534,18 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
               {/* Notes */}
               {(Array.isArray(session.notes) || item.notes) && (
-                <div className="space-y-3 overflow-hidden">
+                <div className="w-full overflow-hidden">
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <StickyNote className="h-4 w-4 text-amber-500" />
                     Notes
                   </div>
-                  <ul className="space-y-2">
+                  <ul className="space-y-2 w-full">
                     {Array.isArray(session.notes) && session.notes.map((note, noteIndex) => (
                       <li 
                         key={noteIndex} 
-                        className={clsx(
-                          "group relative text-sm p-3 rounded-lg text-gray-700",
-                          "bg-gradient-to-r from-amber-50 to-amber-50/30",
-                          "border border-amber-100/50",
-                          "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors",
-                          "break-all whitespace-normal",
-                          "overflow-hidden"
-                        )}
+                        className="relative text-sm p-3 rounded-lg text-gray-700 bg-amber-50/50 border border-amber-100/50 w-full overflow-hidden"
                       >
-                        <div className="pr-8 word-wrap break-word">
+                        <div className="pr-8 break-words whitespace-pre-wrap overflow-hidden">
                           {typeof note === 'string' ? note : note.content}
                         </div>
                         <button
@@ -573,15 +559,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                       </li>
                     ))}
                     {sessionIndex === 0 && item.notes && (
-                      <li className={clsx(
-                        "text-sm p-3 rounded-lg text-gray-700",
-                        "bg-gradient-to-r from-amber-50 to-amber-50/30",
-                        "border border-amber-100/50",
-                        "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors",
-                        "break-all whitespace-normal",
-                        "overflow-hidden"
-                      )}>
-                        <div className="word-wrap break-word">
+                      <li className="text-sm p-3 rounded-lg text-gray-700 bg-amber-50/50 border border-amber-100/50 w-full overflow-hidden">
+                        <div className="break-words whitespace-pre-wrap overflow-hidden">
                           {item.notes}
                         </div>
                       </li>
@@ -668,12 +647,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   };
 
   return (
-    <>
-      <Card className={clsx(
-        "relative overflow-hidden transition-all duration-200",
-        "hover:shadow-lg border-l-4",
-        getBorderColorClass()
-      )}>
+    <div className="w-full max-w-full overflow-hidden">
+      <Card className="w-full overflow-hidden">
         {/* Card Header with gradient background */}
         <div className="bg-gradient-to-r from-gray-50 via-white to-gray-50 border-b border-gray-200/80">
           <div className="p-6">
@@ -1012,7 +987,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           </DialogContent>
         </Dialog>
       </Card>
-    </>
+    </div>
   );
 };
 
