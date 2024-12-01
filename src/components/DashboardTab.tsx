@@ -108,18 +108,13 @@ export function DashboardTab({
 
     const dateStr = getDateStr(selectedDate);
     const dailyTimeSpent = items.reduce((total, item) => {
-      if (!item.date) return total;
-      const itemDateStr = getDateStr(item.date);
-      
-      if (itemDateStr === dateStr) {
-        return total + (item.progress?.sessions || []).reduce((sessionTotal, session) => {
-          if (session.duration) {
-            return sessionTotal + (session.duration.hours * 60) + session.duration.minutes;
-          }
-          return sessionTotal;
-        }, 0);
-      }
-      return total;
+      return total + (item.progress?.sessions || []).reduce((sessionTotal, session) => {
+        const sessionDate = getDateStr(new Date(session.date));
+        if (sessionDate === dateStr && session.duration) {
+          return sessionTotal + (session.duration.hours * 60) + session.duration.minutes;
+        }
+        return sessionTotal;
+      }, 0);
     }, 0);
 
     return {

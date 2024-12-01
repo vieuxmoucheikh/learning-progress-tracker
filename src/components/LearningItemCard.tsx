@@ -138,51 +138,62 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const handleStartSession = useCallback(() => {
     if (activeSession) return; // Prevent multiple active sessions
     
-    const newSession: Session = {
-      startTime: new Date().toISOString(),
-      date: new Date().toISOString(),
-      status: 'in_progress',
+    const now = new Date();
+    const newSession = {
+      startTime: now.toISOString(),
+      date: now.toISOString().split('T')[0],
       notes: []
     };
-    
-    localStorage.setItem(`activeSession_${item.id}`, JSON.stringify(newSession));
-    onStartTracking(item.id);
-    onSetActiveItem(item.id);
-    
-    onUpdate(item.id, {
-      progress: {
-        ...item.progress,
-        sessions: [newSession, ...(item.progress?.sessions || [])]
-      }
-    });
-  }, [item.id, activeSession, item.progress, onStartTracking, onSetActiveItem, onUpdate]);
 
-  // Handle session stop
-  const handleStopSession = useCallback(() => {
-    if (!activeSession) return;
-    
-    const endedSession: Session = {
-      ...activeSession,
-      endTime: new Date().toISOString(),
-      status: 'completed'
-    };
-    
-    localStorage.removeItem(`activeSession_${item.id}`);
-    localStorage.removeItem(`sessionLastUpdate_${item.id}`);
-    onStopTracking(item.id);
-    onSetActiveItem(null);
-    
-    const updatedSessions = item.progress?.sessions?.map(s => 
-      s.startTime === activeSession.startTime ? endedSession : s
-    ) || [endedSession];
-    
+    const updatedSessions = [...(item.progress.sessions || []), newSession];
+
     onUpdate(item.id, {
       progress: {
         ...item.progress,
         sessions: updatedSessions
       }
     });
-  }, [item.id, activeSession, item.progress, onStopTracking, onSetActiveItem, onUpdate]);
+
+    onStartTracking(item.id);
+    localStorage.setItem(`activeSession_${item.id}`, JSON.stringify(newSession));
+    localStorage.setItem(`sessionLastUpdate_${item.id}`, Date.now().toString());
+  }, [item, onUpdate, onStartTracking]);
+
+  // Handle session stop
+  const handleStopSession = useCallback(() => {
+    if (!activeSession || !item.progress?.sessions) return;
+
+    const now = new Date();
+    const startTime = new Date(activeSession.startTime);
+    const diffInMinutes = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
+    
+    const duration = {
+      hours: Math.floor(diffInMinutes / 60),
+      minutes: diffInMinutes % 60
+    };
+
+    const updatedSession = {
+      ...activeSession,
+      endTime: now.toISOString(),
+      duration,
+      date: startTime.toISOString().split('T')[0]
+    };
+
+    const updatedSessions = item.progress.sessions.map(s => 
+      s.startTime === activeSession.startTime ? updatedSession : s
+    );
+
+    onUpdate(item.id, {
+      progress: {
+        ...item.progress,
+        sessions: updatedSessions
+      }
+    });
+
+    onStopTracking(item.id);
+    localStorage.removeItem(`activeSession_${item.id}`);
+    localStorage.removeItem(`sessionLastUpdate_${item.id}`);
+  }, [activeSession, item, onUpdate, onStopTracking]);
 
   const handleAddNote = useCallback(() => {
     if (!sessionNote.trim() || !activeSession) return;
