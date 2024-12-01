@@ -644,32 +644,65 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   };
 
   const getBorderColorClass = () => {
+    if (!item.status || item.status === 'unknown') {
+      return 'border-gray-300';
+    }
+
     switch (item.status) {
-      case 'completed':
-        return 'border-green-500';
-      case 'in_progress':
-        return 'border-blue-500';
       case 'not_started':
         return 'border-gray-300';
+      case 'in_progress':
+        return 'border-blue-400';
+      case 'completed':
+        return 'border-green-400';
       case 'on_hold':
-        return 'border-yellow-500';
+        return 'border-yellow-400';
       case 'archived':
-        return 'border-red-500';
+        return 'border-gray-400';
       default:
         return 'border-gray-300';
     }
   };
 
-  const getStatusBadgeProps = (): { variant: 'default' | 'secondary' | 'destructive' | 'outline', children: string } => {
+  const getStatusBadgeClass = () => {
+    if (!item.status || item.status === 'unknown') {
+      return 'bg-gray-100 text-gray-600';
+    }
+
     switch (item.status) {
-      case 'completed':
-        return { variant: 'default', children: 'Completed' };
+      case 'not_started':
+        return 'bg-gray-100 text-gray-600';
       case 'in_progress':
-        return { variant: 'secondary', children: 'In Progress' };
+        return 'bg-blue-100 text-blue-700';
+      case 'completed':
+        return 'bg-green-100 text-green-700';
       case 'on_hold':
-        return { variant: 'outline', children: 'On Hold' };
+        return 'bg-yellow-100 text-yellow-700';
+      case 'archived':
+        return 'bg-gray-200 text-gray-700';
       default:
-        return { variant: 'destructive', children: 'Unknown' };
+        return 'bg-gray-100 text-gray-600';
+    }
+  };
+
+  const getStatusText = () => {
+    if (!item.status || item.status === 'unknown') {
+      return 'Not Started';
+    }
+
+    switch (item.status) {
+      case 'not_started':
+        return 'Not Started';
+      case 'in_progress':
+        return 'In Progress';
+      case 'completed':
+        return 'Completed';
+      case 'on_hold':
+        return 'On Hold';
+      case 'archived':
+        return 'Archived';
+      default:
+        return 'Not Started';
     }
   };
 
@@ -740,7 +773,16 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     </div>
                   )}
                   <div className="flex items-center gap-2">
-                    <Badge {...getStatusBadgeProps()} className="shadow-sm" />
+                    <Badge 
+                      variant={getStatusBadgeClass().includes('bg-gray-100') ? 'destructive' : getStatusBadgeClass().includes('bg-blue-100') ? 'secondary' : getStatusBadgeClass().includes('bg-green-100') ? 'default' : 'outline'} 
+                      className={clsx(
+                        getStatusBadgeClass(),
+                        "capitalize font-medium",
+                        "shadow-sm"
+                      )}
+                    >
+                      {getStatusText()}
+                    </Badge>
                     <span className="text-sm font-medium text-gray-600">{item.type}</span>
                   </div>
                 </div>
