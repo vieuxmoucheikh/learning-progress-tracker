@@ -22,6 +22,7 @@ import {
 import { LearningItem } from "@/types";
 import { useMemo } from "react";
 import { Brain, Target, TrendingUp } from "lucide-react";
+import { LearningGoals } from './LearningGoals';
 
 interface AnalyticsTabProps {
   items: LearningItem[];
@@ -164,6 +165,9 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
 
   return (
     <div className="space-y-8">
+      {/* Learning Goals */}
+      <LearningGoals items={items} />
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="p-6">
