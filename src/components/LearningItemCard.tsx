@@ -359,6 +359,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           const endDate = session.endTime ? new Date(session.endTime) : null;
           const duration = session.duration || { hours: 0, minutes: 0 };
           const formattedDuration = `${duration.hours}h ${duration.minutes}m`;
+          const sessionNumber = item.progress!.sessions!.length - index;
           
           return (
             <div 
@@ -369,7 +370,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className={`font-medium text-lg ${!session.endTime ? 'text-blue-600' : 'text-gray-800'}`}>
-                    Session {index + 1}
+                    Session {sessionNumber}
                   </div>
                   <Badge 
                     variant={session.endTime ? "secondary" : "default"} 
@@ -402,14 +403,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 )}
               </div>
 
-              {session.notes && session.notes.length > 0 && (
+              {(Array.isArray(session.notes) || item.notes) && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <StickyNote className="h-4 w-4 text-amber-500" />
                     Notes
                   </div>
                   <ul className="space-y-2">
-                    {session.notes.map((note, noteIndex) => (
+                    {Array.isArray(session.notes) && session.notes.map((note, noteIndex) => (
                       <li 
                         key={noteIndex} 
                         className="text-sm bg-gradient-to-r from-amber-50 to-amber-50/30 p-2.5 rounded-md text-gray-700 border border-amber-100/50"
@@ -417,6 +418,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                         {typeof note === 'string' ? note : note.content}
                       </li>
                     ))}
+                    {index === 0 && item.notes && (
+                      <li className="text-sm bg-gradient-to-r from-amber-50 to-amber-50/30 p-2.5 rounded-md text-gray-700 border border-amber-100/50">
+                        {item.notes}
+                      </li>
+                    )}
                   </ul>
                 </div>
               )}
