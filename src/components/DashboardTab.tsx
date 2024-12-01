@@ -1,13 +1,12 @@
 import * as React from 'react';
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { StreakDisplay } from "./StreakDisplay";
 import { Stats } from "./Stats";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
-import { Plus } from "lucide-react";
+import { Plus, BookOpen, CheckCircle, Clock, Target, Calendar as CalendarIcon } from "lucide-react";
 import { LearningItem, Session } from "@/types";
 import { Calendar } from "./Calendar";
-import { Calendar as CalendarIcon } from 'lucide-react';
 import LearningItemCard from './LearningItemCard';
 
 interface Props {
@@ -99,35 +98,88 @@ export function DashboardTab({
     }
   }, [onDateSelect]);
 
+  // Calculate stats
+  const stats = useMemo(() => {
+    const inProgress = items.filter(item => item.status === 'in_progress');
+    const totalTimeSpent = items.reduce((total, item) => {
+      return total + (item.progress?.sessions || []).reduce((sessionTotal, session) => {
+        if (session.duration) {
+          return sessionTotal + (session.duration.hours * 60) + session.duration.minutes;
+        }
+        return sessionTotal;
+      }, 0);
+    }, 0);
+
+    return {
+      totalItems: items.length,
+      inProgressItems: inProgress.length,
+      totalTimeSpentHours: Math.floor(totalTimeSpent / 60),
+      totalTimeSpentMinutes: totalTimeSpent % 60
+    };
+  }, [items]);
+
   return (
     <div className="space-y-4">
       {/* Stats Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <Card className="p-4">
-          <h3 className="text-sm font-medium text-gray-500">Total Items</h3>
-          <p className="mt-2 text-3xl font-semibold">{items.length}</p>
+        <Card className="p-4 hover:shadow-md transition-shadow">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Total Items</h3>
+              <p className="mt-2 text-3xl font-semibold">{stats.totalItems}</p>
+            </div>
+            <div className="p-2 bg-blue-50 rounded-lg">
+              <BookOpen className="w-5 h-5 text-blue-500" />
+            </div>
+          </div>
         </Card>
-        <Card className="p-4">
-          <h3 className="text-sm font-medium text-gray-500">Active Items</h3>
-          <p className="mt-2 text-3xl font-semibold text-blue-600">
-            {items.filter(item => item.status === 'in_progress').length}
-          </p>
+        <Card className="p-4 hover:shadow-md transition-shadow">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Time Invested</h3>
+              <p className="mt-2 text-3xl font-semibold text-purple-600">
+                {stats.totalTimeSpentHours}h {stats.totalTimeSpentMinutes}m
+              </p>
+            </div>
+            <div className="p-2 bg-purple-50 rounded-lg">
+              <Clock className="w-5 h-5 text-purple-500" />
+            </div>
+          </div>
         </Card>
-        <Card className="p-4">
-          <h3 className="text-sm font-medium text-gray-500">Completed Today</h3>
-          <p className="mt-2 text-3xl font-semibold text-green-600">{completedTasks.length}</p>
+        <Card className="p-4 hover:shadow-md transition-shadow">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Completed Today</h3>
+              <p className="mt-2 text-3xl font-semibold text-green-600">{completedTasks.length}</p>
+            </div>
+            <div className="p-2 bg-green-50 rounded-lg">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+            </div>
+          </div>
         </Card>
-        <Card className="p-4">
-          <h3 className="text-sm font-medium text-gray-500">Pending Today</h3>
-          <p className="mt-2 text-3xl font-semibold text-yellow-600">{activeTasks.length}</p>
+        <Card className="p-4 hover:shadow-md transition-shadow">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Today's Goals</h3>
+              <p className="mt-2 text-3xl font-semibold text-yellow-600">{activeTasks.length}</p>
+            </div>
+            <div className="p-2 bg-yellow-50 rounded-lg">
+              <Target className="w-5 h-5 text-yellow-500" />
+            </div>
+          </div>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Calendar Section */}
-        <Card className="p-4 lg:col-span-1">
+        <Card className="p-4 lg:col-span-1 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Calendar</h2>
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-gray-100 rounded-lg">
+                <CalendarIcon className="w-5 h-5 text-gray-600" />
+              </div>
+              <h2 className="text-lg font-semibold">Calendar</h2>
+            </div>
             <Button onClick={() => onAddItem(selectedDate)} className="gap-2 bg-blue-600 hover:bg-blue-700">
               <Plus className="h-4 w-4" />
               Add Item
@@ -144,21 +196,32 @@ export function DashboardTab({
         </Card>
 
         {/* Tasks Section */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 grid gap-4">
           {/* Active Tasks */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Active Tasks</h2>
+          <Card className="p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-blue-50 rounded-lg">
+                  <Target className="w-5 h-5 text-blue-500" />
+                </div>
+                <h2 className="text-lg font-semibold">Today's Goals</h2>
+              </div>
               <span className="px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                 {activeTasks.length} items
               </span>
             </div>
             {activeTasks.length === 0 ? (
-              <Card className="p-6 text-center">
-                <CalendarIcon className="h-12 w-12 mx-auto text-gray-400 mb-2" />
-                <h3 className="text-lg font-medium text-gray-900">No active tasks</h3>
+              <div className="text-center py-8">
+                <div className="p-3 bg-gray-50 rounded-full inline-block mb-3">
+                  <Target className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900">No goals for today</h3>
                 <p className="text-gray-500 mt-1">Add some tasks to get started</p>
-              </Card>
+                <Button onClick={() => onAddItem(selectedDate)} className="mt-4 gap-2">
+                  <Plus className="h-4 w-4" />
+                  Add New Goal
+                </Button>
+              </div>
             ) : (
               <div className="space-y-2">
                 {activeTasks.map((item) => (
@@ -176,22 +239,29 @@ export function DashboardTab({
                 ))}
               </div>
             )}
-          </div>
+          </Card>
 
           {/* Completed Tasks */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Completed Tasks</h2>
+          <Card className="p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-green-50 rounded-lg">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                </div>
+                <h2 className="text-lg font-semibold">Completed Today</h2>
+              </div>
               <span className="px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
                 {completedTasks.length} items
               </span>
             </div>
             {completedTasks.length === 0 ? (
-              <Card className="p-6 text-center">
-                <CalendarIcon className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+              <div className="text-center py-8">
+                <div className="p-3 bg-gray-50 rounded-full inline-block mb-3">
+                  <CheckCircle className="h-8 w-8 text-gray-400" />
+                </div>
                 <h3 className="text-lg font-medium text-gray-900">No completed tasks</h3>
                 <p className="text-gray-500 mt-1">Complete some tasks to see them here</p>
-              </Card>
+              </div>
             ) : (
               <div className="space-y-2">
                 {completedTasks.map((item) => (
@@ -209,7 +279,7 @@ export function DashboardTab({
                 ))}
               </div>
             )}
-          </div>
+          </Card>
         </div>
       </div>
     </div>
