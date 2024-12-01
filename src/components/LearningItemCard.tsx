@@ -55,7 +55,7 @@ interface LocalSession {
   notes?: (string | { content: string; timestamp: string })[];
   title?: string;
   description?: string;
-  status: 'in_progress' | 'completed' | 'paused';
+  status: 'in_progress' | 'completed' | 'on_hold';
 }
 
 interface Time {
@@ -163,47 +163,13 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     localStorage.setItem(`sessionLastUpdate_${item.id}`, Date.now().toString());
   }, [item, onUpdate, onStartTracking, activeSession]);
 
-  // Handle session resume
-  const handleResumeSession = useCallback(() => {
-    if (activeSession || !item.progress) return;
-
-    const now = new Date();
-    const newSession = {
-      startTime: now.toISOString(),
-      date: now.toISOString().split('T')[0],
-      notes: [],
-      status: 'in_progress' as const
-    };
-
-    // First update local state
-    onStartTracking(item.id);
-
-    // Then update item with new session and status
-    onUpdate(item.id, {
-      status: 'in_progress',
-      progress: {
-        ...item.progress,
-        sessions: [newSession, ...(item.progress.sessions || [])]
-      }
-    });
-
-    // Finally update localStorage
-    localStorage.setItem(`activeSession_${item.id}`, JSON.stringify(newSession));
-    localStorage.setItem(`sessionLastUpdate_${item.id}`, Date.now().toString());
-  }, [item, onUpdate, onStartTracking, activeSession]);
-
   // Handle session pause
   const handlePauseSession = useCallback(() => {
     if (!activeSession || !item.progress?.sessions) return;
 
-    const now = new Date();
-    const startTime = new Date(activeSession.startTime);
-    const duration = calculateDuration(startTime, now);
-
+    // Update session status without ending it
     const updatedSession = {
       ...activeSession,
-      endTime: now.toISOString(),
-      duration,
       status: 'on_hold' as const
     };
 
@@ -220,11 +186,51 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       }
     });
 
-    // Clear active session from localStorage
-    localStorage.removeItem(`activeSession_${item.id}`);
-    localStorage.removeItem(`sessionLastUpdate_${item.id}`);
+    // Store pause time in localStorage
+    localStorage.setItem(`sessionPauseTime_${item.id}`, Date.now().toString());
     onStopTracking(item.id);
   }, [item, activeSession, onUpdate, onStopTracking]);
+
+  // Handle session resume
+  const handleResumeSession = useCallback(() => {
+    if (!item.progress?.sessions) return;
+
+    const pausedSession = item.progress.sessions.find(s => s.status === 'on_hold' && !s.endTime);
+    if (!pausedSession) return;
+
+    // Calculate the time difference during pause
+    const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${item.id}`);
+    const pauseTime = pauseTimeStr ? parseInt(pauseTimeStr, 10) : null;
+    
+    if (pauseTime) {
+      const timeDiff = Date.now() - pauseTime;
+      const adjustedStartTime = new Date(new Date(pausedSession.startTime).getTime() + timeDiff).toISOString();
+
+      // Update session with adjusted start time
+      const updatedSession = {
+        ...pausedSession,
+        startTime: adjustedStartTime,
+        status: 'in_progress' as const
+      };
+
+      const updatedSessions = item.progress.sessions.map(s => 
+        s.startTime === pausedSession.startTime ? updatedSession : s
+      );
+
+      // Update item state
+      onUpdate(item.id, {
+        status: 'in_progress',
+        progress: {
+          ...item.progress,
+          sessions: updatedSessions
+        }
+      });
+
+      // Clean up pause time and update tracking
+      localStorage.removeItem(`sessionPauseTime_${item.id}`);
+      onStartTracking(item.id);
+    }
+  }, [item, onUpdate, onStartTracking]);
 
   // Handle session stop
   const handleStopSession = useCallback(() => {
@@ -571,30 +577,30 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       {/* Delete Confirmation Dialog */}
       {showHistory && (
         <div className="fixed inset-0 bg-black/20 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white p-6 rounded-lg shadow-xl border max-w-sm w-full">
-            <div className="text-center mb-4">
-              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-2" />
-              <h3 className="text-lg font-semibold text-gray-900">Delete Item</h3>
-              <p className="text-gray-600 mt-1">Are you sure you want to delete "{item.title}"? This action cannot be undone.</p>
-            </div>
-            <div className="flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowHistory(false)}
-                className="border-gray-300 hover:bg-gray-50"
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleDelete}
-                className="bg-red-500 hover:bg-red-600 text-white"
-              >
-                Delete
-              </Button>
-            </div>
+        <div className="bg-white p-6 rounded-lg shadow-xl border max-w-sm w-full">
+          <div className="text-center mb-4">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-2" />
+            <h3 className="text-lg font-semibold text-gray-900">Delete Item</h3>
+            <p className="text-gray-600 mt-1">Are you sure you want to delete "{item.title}"? This action cannot be undone.</p>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowHistory(false)}
+              className="border-gray-300 hover:bg-gray-50"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Delete
+            </Button>
           </div>
         </div>
+      </div>
       )}
 
       {/* Header Section */}
