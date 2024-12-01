@@ -28,18 +28,17 @@ export function formatDuration(time: { hours: number; minutes: number } | number
   if (!time) return '0h 0m';
   
   if (typeof time === 'object') {
-    const totalMinutes = (time.hours * 60) + time.minutes;
-    const hours = Math.floor(totalMinutes / 60);
-    const mins = totalMinutes % 60;
-    if (hours === 0) return `${mins}m`;
-    if (mins === 0) return `${hours}h`;
-    return `${hours}h ${mins}m`;
+    const hours = time.hours || 0;
+    const minutes = time.minutes || 0;
+    if (hours === 0) return `${minutes}m`;
+    if (minutes === 0) return `${hours}h`;
+    return `${hours}h ${minutes}m`;
   } else {
     const hours = Math.floor(time / 60);
-    const mins = time % 60;
-    if (hours === 0) return `${mins}m`;
-    if (mins === 0) return `${hours}h`;
-    return `${hours}h ${mins}m`;
+    const minutes = time % 60;
+    if (hours === 0) return `${minutes}m`;
+    if (minutes === 0) return `${hours}h`;
+    return `${hours}h ${minutes}m`;
   }
 }
 

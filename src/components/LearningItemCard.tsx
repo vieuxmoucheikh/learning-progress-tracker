@@ -276,25 +276,32 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   }, [item.progress?.sessions]);
 
   const calculateProgress = useCallback(() => {
+    if (!item.progress?.sessions || !item.progress?.total) return 0;
+    
     const totalSpentMinutes = calculateTotalTimeSpent();
-    const totalTargetMinutes = item.progress?.total ? 
-      (item.progress.total.hours * 60) + item.progress.total.minutes : 0;
+    const totalTargetMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
     
     if (totalTargetMinutes === 0) return 0;
     return Math.min(Math.round((totalSpentMinutes / totalTargetMinutes) * 100), 100);
-  }, [item.progress?.total, calculateTotalTimeSpent]);
+  }, [item.progress?.sessions, item.progress?.total, calculateTotalTimeSpent]);
 
   const getProgressPercentage = () => {
+    if (!item.progress?.sessions || !item.progress?.total) return 0;
+    
     const totalSpentMinutes = calculateTotalTimeSpent();
-    const totalTargetMinutes = item.progress?.total ? 
-      (item.progress.total.hours * 60) + item.progress.total.minutes : 0;
+    const totalTargetMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
     
     if (totalTargetMinutes === 0) return 0;
     return Math.min(Math.round((totalSpentMinutes / totalTargetMinutes) * 100), 100);
   };
 
   const formatDuration = (duration: Time) => {
-    return `${duration.hours}h ${duration.minutes}m`;
+    if (!duration) return '0h 0m';
+    const hours = duration.hours || 0;
+    const minutes = duration.minutes || 0;
+    if (hours === 0) return `${minutes}m`;
+    if (minutes === 0) return `${hours}h`;
+    return `${hours}h ${minutes}m`;
   };
 
   const renderDuration = () => {
@@ -309,14 +316,15 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         <Clock className="h-4 w-4" />
         <span>
           {formatDuration(currentDuration)}
-          {item.progress?.total && ` / ${formatDuration(item.progress.total)}`}
-          {!item.progress?.total && ' / ∞'}
+          {item.progress?.total ? ` / ${formatDuration(item.progress.total)}` : ' / ∞'}
         </span>
       </div>
     );
   };
 
   const renderProgressBar = () => {
+    if (!item.progress?.total) return null;
+    
     const percentage = getProgressPercentage();
     return (
       <div className="mt-2">
@@ -324,7 +332,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         <div className="mt-1 text-xs text-gray-500">
           {percentage}% Complete
         </div>
-    </div>
+      </div>
     );
   };
 
