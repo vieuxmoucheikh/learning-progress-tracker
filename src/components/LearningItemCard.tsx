@@ -317,10 +317,25 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     setIsEditing(false);
   };
 
-  const handleDelete = () => {
-    onDelete(item.id);
+  const handleDelete = useCallback(() => {
+    // Clean up any localStorage items first
+    localStorage.removeItem(`activeSession_${item.id}`);
+    localStorage.removeItem(`sessionLastUpdate_${item.id}`);
+    localStorage.removeItem(`sessionPauseTime_${item.id}`);
+    
+    // Stop tracking if item is being tracked
+    if (activeSession) {
+      onStopTracking(item.id);
+    }
+    
+    // Reset UI state
     setShowHistory(false);
-  };
+    setShowNoteInput(false);
+    setIsEditing(false);
+    
+    // Finally delete the item
+    onDelete(item.id);
+  }, [item.id, activeSession, onStopTracking, onDelete]);
 
   const handleToggleComplete = () => {
     onUpdate(item.id, { completed: !item.completed });
@@ -440,7 +455,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           const endDate = session.endTime ? new Date(session.endTime) : null;
           const duration = session.duration || { hours: 0, minutes: 0 };
           const formattedDuration = `${duration.hours}h ${duration.minutes}m`;
-          const sessionNumber = index + 1;
+          const totalSessions = item.progress!.sessions!.length;
+          const sessionNumber = totalSessions - index;
           
           return (
             <div 
