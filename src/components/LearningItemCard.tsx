@@ -282,7 +282,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const handleAddNote = useCallback(() => {
     if (!sessionNote.trim() || !activeSession) return;
 
-    const sessions = item.progress.sessions || [];
+    const sessions = item.progress?.sessions || [];
     
     const updatedSessions = sessions.map(session => {
       if (session.startTime === activeSession.startTime) {
@@ -551,8 +551,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                           "text-sm p-3 rounded-lg text-gray-700",
                           "bg-gradient-to-r from-amber-50 to-amber-50/30",
                           "border border-amber-100/50",
-                          "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors"
+                          "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors",
+                          "break-words whitespace-pre-wrap max-w-full",
+                          "overflow-hidden text-ellipsis"
                         )}
+                        style={{ maxWidth: '600px' }}
                       >
                         {typeof note === 'string' ? note : note.content}
                       </li>
@@ -893,7 +896,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 </Button>
                 <Button
                   variant="default"
-                  onClick={handleAddNoteSubmit}
+                  onClick={handleAddNote}
                   className="px-4 bg-blue-600 hover:bg-blue-700 text-white gap-2"
                   disabled={!sessionNote.trim()}
                 >
