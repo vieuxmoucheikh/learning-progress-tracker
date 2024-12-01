@@ -107,15 +107,31 @@ export function DashboardTab({
     };
 
     const dateStr = getDateStr(selectedDate);
-    const dailyTimeSpent = items.reduce((total, item) => {
-      return total + (item.progress?.sessions || []).reduce((sessionTotal, session) => {
-        const sessionDate = getDateStr(new Date(session.date));
-        if (sessionDate === dateStr && session.duration) {
-          return sessionTotal + (session.duration.hours * 60) + session.duration.minutes;
-        }
-        return sessionTotal;
-      }, 0);
-    }, 0);
+    let dailyTimeSpent = 0;
+
+    // Sum up all session durations for the selected date
+    items.forEach(item => {
+      if (item.progress?.sessions) {
+        item.progress.sessions.forEach(session => {
+          // Get the date from the session's date field
+          const sessionDate = getDateStr(new Date(session.date));
+          
+          // If session is on the selected date and has a duration, add it to total
+          if (sessionDate === dateStr && session.duration) {
+            dailyTimeSpent += (session.duration.hours * 60) + session.duration.minutes;
+          }
+          
+          // If session is active (no endTime) and started on the selected date,
+          // calculate its current duration
+          if (sessionDate === dateStr && !session.endTime && session.startTime) {
+            const startTime = new Date(session.startTime);
+            const now = new Date();
+            const activeMinutes = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
+            dailyTimeSpent += activeMinutes;
+          }
+        });
+      }
+    });
 
     return {
       totalItems: items.length,
