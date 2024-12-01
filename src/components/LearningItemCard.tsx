@@ -541,12 +541,12 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
               {/* Notes */}
               {(Array.isArray(session.notes) || item.notes) && (
-                <div className="space-y-3">
+                <div className="space-y-3 max-w-full">
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <StickyNote className="h-4 w-4 text-amber-500" />
                     Notes
                   </div>
-                  <ul className="space-y-2">
+                  <ul className="space-y-2 w-full">
                     {Array.isArray(session.notes) && session.notes.map((note, noteIndex) => (
                       <li 
                         key={noteIndex} 
@@ -557,10 +557,12 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                           "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors",
                           "break-words whitespace-pre-wrap",
                           "overflow-hidden text-ellipsis",
-                          "w-full md:max-w-md lg:max-w-lg xl:max-w-xl"
+                          "w-full"
                         )}
                       >
-                        {typeof note === 'string' ? note : note.content}
+                        <div className="pr-8 overflow-x-auto">
+                          {typeof note === 'string' ? note : note.content}
+                        </div>
                         <button
                           onClick={() => openEditNoteDialog(sessionIndex, noteIndex, typeof note === 'string' ? note : note.content)}
                           className="absolute top-2 right-2 p-1 rounded-md 
@@ -576,9 +578,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                         "text-sm p-3 rounded-lg text-gray-700",
                         "bg-gradient-to-r from-amber-50 to-amber-50/30",
                         "border border-amber-100/50",
-                        "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors"
+                        "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors",
+                        "break-words whitespace-pre-wrap",
+                        "overflow-hidden text-ellipsis",
+                        "w-full"
                       )}>
-                        {item.notes}
+                        <div className="overflow-x-auto">
+                          {item.notes}
+                        </div>
                       </li>
                     )}
                   </ul>
