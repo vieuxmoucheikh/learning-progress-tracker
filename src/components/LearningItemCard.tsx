@@ -24,7 +24,8 @@ import {
   Save,
   ExternalLink,
   MessageSquare,
-  Calendar
+  Calendar,
+  Pencil
 } from 'lucide-react';
 import type { LearningItem, Session } from '../types';
 import { formatTime, calculateProgress, formatDuration, getTotalMinutes, calculateDuration } from '../lib/utils';
@@ -79,6 +80,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [showNoteDialog, setShowNoteDialog] = useState(false);
   const [showAllSessions, setShowAllSessions] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [editingNote, setEditingNote] = useState<{ sessionIndex: number; noteIndex: number; content: string } | null>(null);
+  const [showEditNoteDialog, setShowEditNoteDialog] = useState(false);
 
   const activeSession = item.progress?.sessions?.find(session => !session.endTime);
   const { elapsedTime, formatElapsedTime, lastUpdateTime, isValidSession } = useSessionTimer({
@@ -460,13 +463,13 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     
     return (
       <div className="space-y-4">
-        {displaySessions.map((session, index) => {
+        {displaySessions.map((session, sessionIndex) => {
           const startDate = new Date(session.startTime);
           const endDate = session.endTime ? new Date(session.endTime) : null;
           const duration = session.duration || { hours: 0, minutes: 0 };
           const formattedDuration = `${duration.hours}h ${duration.minutes}m`;
           const totalSessions = item.progress!.sessions!.length;
-          const sessionNumber = totalSessions - index;
+          const sessionNumber = totalSessions - sessionIndex;
           
           return (
             <div 
@@ -548,7 +551,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                       <li 
                         key={noteIndex} 
                         className={clsx(
-                          "text-sm p-3 rounded-lg text-gray-700",
+                          "group relative text-sm p-3 rounded-lg text-gray-700",
                           "bg-gradient-to-r from-amber-50 to-amber-50/30",
                           "border border-amber-100/50",
                           "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors",
@@ -558,9 +561,17 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                         style={{ maxWidth: '600px' }}
                       >
                         {typeof note === 'string' ? note : note.content}
+                        <button
+                          onClick={() => openEditNoteDialog(sessionIndex, noteIndex, typeof note === 'string' ? note : note.content)}
+                          className="absolute top-2 right-2 p-1 rounded-md 
+                            opacity-0 group-hover:opacity-100 transition-opacity
+                            text-gray-500 hover:text-blue-600 hover:bg-white/50"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
                       </li>
                     ))}
-                    {index === 0 && item.notes && (
+                    {sessionIndex === 0 && item.notes && (
                       <li className={clsx(
                         "text-sm p-3 rounded-lg text-gray-700",
                         "bg-gradient-to-r from-amber-50 to-amber-50/30",
@@ -580,56 +591,30 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     );
   };
 
-  const getStatusBadgeProps = () => {
-    if (activeSession) {
-      return {
-        variant: 'default' as const,
-        className: 'bg-blue-100 text-blue-700 hover:bg-blue-200',
-        children: 'In Progress'
-      };
-    }
-    
-    switch (item.status) {
-      case 'completed':
-        return {
-          variant: 'default' as const,
-          className: 'bg-green-100 text-green-700 hover:bg-green-200',
-          children: 'Completed'
-        };
-      case 'on_hold':
-        return {
-          variant: 'default' as const,
-          className: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200',
-          children: 'On Hold'
-        };
-      case 'in_progress':
-        return {
-          variant: 'default' as const,
-          className: 'bg-blue-100 text-blue-700 hover:bg-blue-200',
-          children: 'In Progress'
-        };
-      default:
-        return {
-          variant: 'secondary' as const,
-          className: '',
-          children: 'Not Started'
-        };
-    }
-  };
+  const handleEditNote = useCallback(() => {
+    if (!editingNote || !item.progress?.sessions) return;
 
-  const getBorderColorClass = () => {
-    if (activeSession) return 'border-blue-400';
+    const { sessionIndex, noteIndex, content } = editingNote;
+    const updatedSessions = [...item.progress.sessions];
     
-    switch (item.status) {
-      case 'completed':
-        return 'border-green-400';
-      case 'on_hold':
-        return 'border-yellow-400';
-      case 'in_progress':
-        return 'border-blue-400';
-      default:
-        return 'border-gray-300';
+    if (updatedSessions[sessionIndex]?.notes) {
+      updatedSessions[sessionIndex].notes[noteIndex] = content.trim();
+      
+      onUpdate(item.id, {
+        progress: {
+          ...item.progress,
+          sessions: updatedSessions
+        }
+      });
     }
+
+    setShowEditNoteDialog(false);
+    setEditingNote(null);
+  }, [editingNote, item.id, item.progress, onUpdate]);
+
+  const openEditNoteDialog = (sessionIndex: number, noteIndex: number, content: string) => {
+    setEditingNote({ sessionIndex, noteIndex, content });
+    setShowEditNoteDialog(true);
   };
 
   const handleOpenNoteDialog = () => {
@@ -896,12 +881,55 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 </Button>
                 <Button
                   variant="default"
-                  onClick={handleAddNote}
+                  onClick={handleAddNoteSubmit}
                   className="px-4 bg-blue-600 hover:bg-blue-700 text-white gap-2"
                   disabled={!sessionNote.trim()}
                 >
                   <MessageSquare className="h-4 w-4" />
                   Add Note
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Note Dialog */}
+        <Dialog open={showEditNoteDialog} onOpenChange={setShowEditNoteDialog}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold text-gray-900">
+                Edit Note
+              </DialogTitle>
+              <DialogDescription className="mt-2 text-gray-600">
+                Modify your session note below.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4 space-y-4">
+              <Textarea
+                value={editingNote?.content || ''}
+                onChange={(e) => setEditingNote(prev => prev ? { ...prev, content: e.target.value } : null)}
+                placeholder="Edit your note..."
+                className="min-h-[120px] resize-none bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+              />
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowEditNoteDialog(false);
+                    setEditingNote(null);
+                  }}
+                  className="px-4 hover:bg-gray-50"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="default"
+                  onClick={handleEditNote}
+                  className="px-4 bg-blue-600 hover:bg-blue-700 text-white gap-2"
+                  disabled={!editingNote?.content.trim()}
+                >
+                  <Pencil className="h-4 w-4" />
+                  Save Changes
                 </Button>
               </div>
             </div>
