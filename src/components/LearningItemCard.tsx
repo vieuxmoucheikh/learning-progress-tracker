@@ -30,6 +30,13 @@ import type { LearningItem, Session } from '../types';
 import { formatTime, calculateProgress, formatDuration, getTotalMinutes, calculateDuration } from '../lib/utils';
 import clsx from 'clsx';
 import { useSessionTimer } from '../hooks/useSessionTimer';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface Props {
   item: LearningItem;
@@ -424,40 +431,66 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       : sessions.slice(0, activeSession ? 2 : 1);
     
     return (
-      <div className="space-y-3">
+      <div className="space-y-4">
         {displaySessions.map((session, index) => {
           const startDate = new Date(session.startTime);
           const endDate = session.endTime ? new Date(session.endTime) : null;
           const duration = session.duration || { hours: 0, minutes: 0 };
           const formattedDuration = `${duration.hours}h ${duration.minutes}m`;
           const totalSessions = item.progress!.sessions!.length;
-          const sessionNumber = totalSessions - index; // Last session will be totalSessions, first will be 1
+          const sessionNumber = totalSessions - index;
           
           return (
             <div 
               key={session.startTime}
-              className={`border rounded-lg p-4 space-y-3 bg-gradient-to-br from-white to-gray-50/30 hover:from-gray-50 hover:to-white transition-all cursor-pointer shadow-sm hover:shadow-md ${!session.endTime ? 'border-l-4 border-l-blue-400' : ''}`}
-              onClick={() => setShowHistory(true)}
+              className={clsx(
+                "border rounded-xl p-5 space-y-4",
+                "bg-gradient-to-br from-white to-gray-50/30",
+                "hover:from-gray-50 hover:to-white transition-all",
+                "shadow-sm hover:shadow-md",
+                "relative overflow-hidden",
+                !session.endTime && "border-l-4 border-l-blue-400"
+              )}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className={`font-medium text-lg ${!session.endTime ? 'text-blue-600' : 'text-gray-800'}`}>
+              {/* Session Status Indicator */}
+              <div className={clsx(
+                "absolute top-0 right-0 w-24 h-24 -mr-12 -mt-12 transform rotate-45",
+                !session.endTime && session.status === 'in_progress' && "bg-blue-500/10",
+                !session.endTime && session.status === 'on_hold' && "bg-yellow-500/10",
+                session.endTime && "bg-green-500/10"
+              )} />
+
+              {/* Header */}
+              <div className="flex items-center justify-between relative">
+                <div className="flex items-center gap-3">
+                  <div className={clsx(
+                    "font-semibold text-lg",
+                    !session.endTime && session.status === 'in_progress' && "text-blue-600",
+                    !session.endTime && session.status === 'on_hold' && "text-yellow-600",
+                    session.endTime && "text-gray-700"
+                  )}>
                     Session {sessionNumber}
                   </div>
                   <Badge 
                     variant={session.endTime ? "secondary" : session.status === 'on_hold' ? "outline" : "default"} 
-                    className={`capitalize ${!session.endTime && session.status !== 'on_hold' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : ''}`}
+                    className={clsx(
+                      "capitalize font-medium",
+                      !session.endTime && session.status === 'in_progress' && "bg-blue-100 text-blue-700 hover:bg-blue-200",
+                      !session.endTime && session.status === 'on_hold' && "bg-yellow-50 text-yellow-700 border-yellow-200",
+                      session.endTime && "bg-green-50 text-green-700"
+                    )}
                   >
-                    {session.endTime ? "Completed" : session.status === 'on_hold' ? "On Hold" : "Active"}
+                    {session.endTime ? "Completed" : session.status === 'on_hold' ? "On Hold" : "In Progress"}
                   </Badge>
                 </div>
-                <div className="text-sm font-medium text-gray-600 bg-gray-100/80 px-2 py-1 rounded-full">
+                <div className="text-sm font-medium text-gray-600 bg-gray-100/80 px-3 py-1.5 rounded-full shadow-sm">
                   {formattedDuration}
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-4 text-sm border-t border-b py-3 border-gray-200">
-                <div className="space-y-1">
+              {/* Timing Information */}
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="space-y-1.5 bg-white/50 rounded-lg p-3 border border-gray-100">
                   <div className="text-gray-500 flex items-center gap-2">
                     <Clock className="h-4 w-4 text-blue-500" />
                     Started
@@ -465,7 +498,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                   <div className="font-medium text-gray-700">{startDate.toLocaleString()}</div>
                 </div>
                 {endDate && (
-                  <div className="space-y-1">
+                  <div className="space-y-1.5 bg-white/50 rounded-lg p-3 border border-gray-100">
                     <div className="text-gray-500 flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-500" />
                       Ended
@@ -475,8 +508,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 )}
               </div>
 
+              {/* Notes */}
               {(Array.isArray(session.notes) || item.notes) && (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <StickyNote className="h-4 w-4 text-amber-500" />
                     Notes
@@ -485,13 +519,23 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     {Array.isArray(session.notes) && session.notes.map((note, noteIndex) => (
                       <li 
                         key={noteIndex} 
-                        className="text-sm bg-gradient-to-r from-amber-50 to-amber-50/30 p-2.5 rounded-md text-gray-700 border border-amber-100/50"
+                        className={clsx(
+                          "text-sm p-3 rounded-lg text-gray-700",
+                          "bg-gradient-to-r from-amber-50 to-amber-50/30",
+                          "border border-amber-100/50",
+                          "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors"
+                        )}
                       >
                         {typeof note === 'string' ? note : note.content}
                       </li>
                     ))}
                     {index === 0 && item.notes && (
-                      <li className="text-sm bg-gradient-to-r from-amber-50 to-amber-50/30 p-2.5 rounded-md text-gray-700 border border-amber-100/50">
+                      <li className={clsx(
+                        "text-sm p-3 rounded-lg text-gray-700",
+                        "bg-gradient-to-r from-amber-50 to-amber-50/30",
+                        "border border-amber-100/50",
+                        "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors"
+                      )}>
                         {item.notes}
                       </li>
                     )}
@@ -501,29 +545,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
             </div>
           );
         })}
-        
-        {item.progress.sessions.length > (activeSession ? 2 : 1) && (
-          <Button
-            variant="outline"
-            className="w-full text-sm gap-2 mt-2 border-gray-200 hover:bg-gray-50"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowAllSessions(!showAllSessions);
-            }}
-          >
-            {showAllSessions ? (
-              <>
-                <ChevronUp className="h-4 w-4" />
-                Show Less
-              </>
-            ) : (
-              <>
-                <ChevronDown className="h-4 w-4" />
-                Show {item.progress.sessions.length - (activeSession ? 2 : 1)} More Sessions
-              </>
-            )}
-          </Button>
-        )}
       </div>
     );
   };
@@ -566,268 +587,267 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   };
 
   return (
-    <Card className={clsx(
-      "w-full p-6 relative border-l-4 transition-all duration-200 hover:shadow-lg",
-      {
-        "border-l-green-500": item.completed,
-        "border-l-blue-500": !item.completed && activeSession,
-        "border-l-gray-300": !item.completed && !activeSession
-      }
-    )}>
-      {/* Delete Confirmation Dialog */}
-      {showHistory && (
-        <div className="fixed inset-0 bg-black/20 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div className="bg-white p-6 rounded-lg shadow-xl border max-w-sm w-full">
-          <div className="text-center mb-4">
-            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-2" />
-            <h3 className="text-lg font-semibold text-gray-900">Delete Item</h3>
-            <p className="text-gray-600 mt-1">Are you sure you want to delete "{item.title}"? This action cannot be undone.</p>
-          </div>
-          <div className="flex justify-end gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setShowHistory(false)}
-              className="border-gray-300 hover:bg-gray-50"
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              className="bg-red-500 hover:bg-red-600 text-white"
-            >
-              Delete
-            </Button>
-          </div>
-        </div>
-      </div>
-      )}
+    <Card className="overflow-hidden group hover:shadow-lg transition-all duration-300 border-gray-200/80">
+      {/* Card Header with gradient background */}
+      <div className="bg-gradient-to-r from-gray-50 via-white to-gray-50 border-b border-gray-200/80">
+        <div className="p-6">
+          {/* Title Section */}
+          <div className="flex justify-between items-start gap-4 mb-4">
+            <div className="flex-1 space-y-3">
+              {/* Title */}
+              <div>
+                {isEditing ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={editedTitle}
+                      onChange={(e) => setEditedTitle(e.target.value)}
+                      className="text-xl font-semibold border-blue-200 focus:ring-blue-500"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleTitleSave}
+                      className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                    >
+                      <Save className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setIsEditing(false);
+                        setEditedTitle(item.title);
+                      }}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 group">
+                    <h3 className="text-2xl font-bold text-gray-800">{item.title}</h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsEditing(true)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
 
-      {/* Header Section */}
-      <div className="flex justify-between items-start gap-4 mb-4">
-        <div className="flex-1 space-y-3">
-          {/* Title */}
-          <div>
-            {isEditing ? (
-              <div className="flex items-center gap-2">
-                <Input
-                  value={editedTitle}
-                  onChange={(e) => setEditedTitle(e.target.value)}
-                  className="text-xl font-semibold border-blue-200 focus:ring-blue-500"
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleTitleSave}
-                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                >
-                  <Save className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setIsEditing(false);
-                    setEditedTitle(item.title);
-                  }}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+              {/* Category and Type */}
+              <div className="flex items-center gap-3">
+                {item.category && (
+                  <div className="flex items-center">
+                    <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100 shadow-sm">
+                      {item.category}
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <Badge {...getStatusBadgeProps()} className="shadow-sm" />
+                  <span className="text-sm font-medium text-gray-600">{item.type}</span>
+                </div>
               </div>
-            ) : (
-              <div className="flex items-center gap-2 group">
-                <h3 className="text-xl font-semibold text-gray-900">{item.title}</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsEditing(true)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </div>
+            </div>
 
-          {/* Category and Type */}
-          <div className="flex items-center gap-3">
-            {item.category && (
-              <div className="flex items-center">
-                <span className="px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100">
-                  {item.category}
-                </span>
-              </div>
-            )}
-            <div className="flex items-center gap-2">
-              <Badge {...getStatusBadgeProps()} />
-              <span className="text-sm font-medium text-gray-600">{item.type}</span>
+            {/* Action Buttons */}
+            <div className="flex flex-col items-center gap-2 p-2 rounded-lg bg-gray-50/50">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleMarkComplete()}
+                className={clsx(
+                  "hover:bg-white transition-colors rounded-lg shadow-sm",
+                  {
+                    'text-green-500 hover:text-green-700': item.status !== 'completed',
+                    'text-gray-400 hover:text-gray-600': item.status === 'completed'
+                  }
+                )}
+              >
+                <CheckCircle2 className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowHistory(true)}
+                className="text-red-400 hover:text-red-600 hover:bg-white transition-colors rounded-lg shadow-sm"
+              >
+                <Trash2 className="h-5 w-5" />
+              </Button>
+              {item.url && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => window.open(item.url, '_blank')}
+                  className="text-blue-500 hover:text-blue-700 hover:bg-white transition-colors rounded-lg shadow-sm"
+                >
+                  <ExternalLink className="h-5 w-5" />
+                </Button>
+              )}
             </div>
           </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleMarkComplete()}
-            className={clsx(
-              "hover:bg-gray-50 transition-colors",
-              {
-                'text-green-500 hover:text-green-700': item.status !== 'completed',
-                'text-gray-400 hover:text-gray-600': item.status === 'completed'
-              }
-            )}
-          >
-            <CheckCircle2 className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowHistory(true)}
-            className="text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-          >
-            <Trash2 className="h-5 w-5" />
-          </Button>
-          {item.url && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => window.open(item.url, '_blank')}
-              className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 transition-colors"
-            >
-              <ExternalLink className="h-5 w-5" />
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Progress Section */}
-      <div className="space-y-2 mb-4">
-        <div className="flex items-center justify-between">
-          {renderDuration()}
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-gray-500" />
-            <span className="text-sm text-gray-600">
-              {formatDate(item.date)}
-            </span>
+          {/* Progress Section */}
+          <div className="space-y-3 mt-6">
+            <div className="flex items-center justify-between">
+              {renderDuration()}
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-gray-500" />
+                <span className="text-sm text-gray-600">
+                  {formatDate(item.date)}
+                </span>
+              </div>
+            </div>
+            {renderProgressBar()}
           </div>
         </div>
-        {renderProgressBar()}
       </div>
 
       {/* Timer Controls and Session Info */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          {activeSession || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime) ? (
-            <div className="flex gap-2">
-              {activeSession?.status !== 'on_hold' ? (
+      <div className="p-6 bg-white">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            {activeSession || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime) ? (
+              <div className="flex gap-2">
+                {activeSession?.status !== 'on_hold' ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 bg-yellow-50 hover:bg-yellow-100 border-yellow-200 text-yellow-700 shadow-sm"
+                    onClick={handlePauseSession}
+                  >
+                    <Pause className="h-4 w-4" />
+                    Pause
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 shadow-sm"
+                    onClick={handleResumeSession}
+                  >
+                    <Play className="h-4 w-4" />
+                    Resume
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-2 bg-yellow-50 hover:bg-yellow-100 border-yellow-200 text-yellow-700"
-                  onClick={handlePauseSession}
+                  className="gap-2 bg-red-50 hover:bg-red-100 border-red-200 text-red-700 shadow-sm"
+                  onClick={handleStopSession}
                 >
-                  <Pause className="h-4 w-4" />
-                  Pause
+                  <StopCircle className="h-4 w-4" />
+                  Stop
                 </Button>
-              ) : (
+              </div>
+            ) : (
+              <div>
+                {!item.completed && (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={handleStartSession}
+                    className="gap-2 bg-blue-500 hover:bg-blue-600 text-white shadow-sm"
+                  >
+                    <Play className="h-4 w-4" />
+                    Start Session
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {(activeSession || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime)) && (
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-blue-600">
+                {activeSession?.status === 'on_hold' || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime)
+                  ? 'Session Paused'
+                  : `Current Session: ${formatElapsedTime()}`}
+              </span>
+              {activeSession?.status !== 'on_hold' && (
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  className="gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700"
-                  onClick={handleResumeSession}
+                  onClick={() => setShowNoteInput(!showNoteInput)}
+                  className="gap-2 text-gray-600 hover:text-gray-800"
                 >
-                  <Play className="h-4 w-4" />
-                  Resume
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 bg-red-50 hover:bg-red-100 border-red-200 text-red-700"
-                onClick={handleStopSession}
-              >
-                <StopCircle className="h-4 w-4" />
-                Stop
-              </Button>
-            </div>
-          ) : (
-            <div>
-              {!item.completed && (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handleStartSession}
-                  className="gap-2 bg-blue-500 hover:bg-blue-600 text-white"
-                >
-                  <Play className="h-4 w-4" />
-                  Start Session
+                  <MessageSquare className="h-4 w-4" />
+                  Add Note
                 </Button>
               )}
             </div>
           )}
         </div>
 
-        {(activeSession || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime)) && (
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-blue-600">
-              {activeSession?.status === 'on_hold' || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime) 
-                ? 'Session Paused' 
-                : `Current Session: ${formatElapsedTime()}`}
-            </span>
-            {activeSession?.status !== 'on_hold' && (
+        {/* Session History */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h4 className="text-lg font-semibold text-gray-800">Session History</h4>
+            {item.progress?.sessions?.length > 1 && (
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowNoteInput(!showNoteInput)}
-                className="gap-2 text-gray-600 hover:text-gray-800"
+                onClick={() => setShowAllSessions(!showAllSessions)}
+                className="text-blue-600 hover:text-blue-700"
               >
-                <MessageSquare className="h-4 w-4" />
-                Add Note
+                {showAllSessions ? 'Show Less' : 'Show All'}
               </Button>
             )}
           </div>
-        )}
+          {renderSessionHistory()}
+        </div>
       </div>
 
       {/* Note Input */}
       {showNoteInput && (
-        <div className="mt-4 space-y-2">
-          <Textarea
-            value={sessionNote}
-            onChange={(e) => setSessionNote(e.target.value)}
-            placeholder="Add a note about your progress..."
-            className="min-h-[80px] resize-none"
-          />
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowNoteInput(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleAddNote}
-              disabled={!sessionNote.trim()}
-              className="bg-blue-500 hover:bg-blue-600"
-            >
-              Add Note
-            </Button>
+        <div className="p-6 bg-gray-50 border-t border-gray-200">
+          <div className="space-y-2">
+            <Textarea
+              value={sessionNote}
+              onChange={(e) => setSessionNote(e.target.value)}
+              placeholder="Add a note about your progress..."
+              className="min-h-[80px] resize-none bg-white"
+            />
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowNoteInput(false)}
+                className="text-gray-600 hover:text-gray-700"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleAddNote}
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                Add Note
+              </Button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Session History */}
-      {item.progress?.sessions?.length > 0 && (
-        <div className="mt-4 pt-4 border-t">
-          {renderSessionHistory()}
-        </div>
-      )}
+      {/* Session History Dialog */}
+      <Dialog open={showHistory} onOpenChange={setShowHistory}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Session History</DialogTitle>
+            <DialogDescription>
+              View detailed history of all learning sessions for this item.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 space-y-4">
+            {item.progress?.sessions && renderSessionHistory()}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
