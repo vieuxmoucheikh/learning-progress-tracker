@@ -534,34 +534,41 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
               {/* Notes */}
               {(Array.isArray(session.notes) || item.notes) && (
-                <div className="w-full overflow-hidden">
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                <div className="w-full">
+                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
                     <StickyNote className="h-4 w-4 text-amber-500" />
                     Notes
                   </div>
-                  <ul className="space-y-2 w-full">
+                  <ul className="space-y-2">
                     {Array.isArray(session.notes) && session.notes.map((note, noteIndex) => (
                       <li 
                         key={noteIndex} 
-                        className="relative text-sm p-3 rounded-lg text-gray-700 bg-amber-50/50 border border-amber-100/50 w-full overflow-hidden"
+                        className="group relative text-sm p-3 rounded-lg bg-amber-50/50 border border-amber-100/50"
                       >
-                        <div className="pr-8 break-words whitespace-pre-wrap overflow-hidden">
-                          {typeof note === 'string' ? note : note.content}
+                        <div className="max-w-[calc(100%-2rem)] break-words">
+                          <span className="text-gray-700 whitespace-pre-line">
+                            {typeof note === 'string' ? note : note.content}
+                          </span>
                         </div>
                         <button
                           onClick={() => openEditNoteDialog(sessionIndex, noteIndex, typeof note === 'string' ? note : note.content)}
-                          className="absolute top-2 right-2 p-1 rounded-md 
-                            opacity-0 group-hover:opacity-100 transition-opacity
-                            text-gray-500 hover:text-blue-600 hover:bg-white/50"
+                          className="absolute top-2 right-2 p-1.5 rounded-md 
+                            bg-white/80 hover:bg-white
+                            text-gray-500 hover:text-blue-600 
+                            shadow-sm hover:shadow
+                            transition-all
+                            md:opacity-0 md:group-hover:opacity-100"
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className="h-3.5 w-3.5" />
                         </button>
                       </li>
                     ))}
                     {sessionIndex === 0 && item.notes && (
-                      <li className="text-sm p-3 rounded-lg text-gray-700 bg-amber-50/50 border border-amber-100/50 w-full overflow-hidden">
-                        <div className="break-words whitespace-pre-wrap overflow-hidden">
-                          {item.notes}
+                      <li className="text-sm p-3 rounded-lg bg-amber-50/50 border border-amber-100/50">
+                        <div className="max-w-full break-words">
+                          <span className="text-gray-700 whitespace-pre-line">
+                            {item.notes}
+                          </span>
                         </div>
                       </li>
                     )}
@@ -647,8 +654,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   };
 
   return (
-    <div className="w-full max-w-full overflow-hidden">
-      <Card className="w-full overflow-hidden">
+    <div className="w-full">
+      <Card className="relative w-full">
         {/* Card Header with gradient background */}
         <div className="bg-gradient-to-r from-gray-50 via-white to-gray-50 border-b border-gray-200/80">
           <div className="p-6">
