@@ -283,18 +283,21 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   }, [item.progress?.sessions]);
 
   const calculateProgress = useCallback(() => {
-    const totalMinutes = item.progress?.total ? (item.progress.total.hours * 60) + item.progress.total.minutes : 0;
+    if (!item.progress?.total) return 0;
+    const totalMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
     const spentMinutes = calculateTotalTimeSpent();
     
-    if (!totalMinutes) return 0;
+    if (totalMinutes === 0) return 0;
     return Math.min(Math.round((spentMinutes / totalMinutes) * 100), 100);
   }, [item.progress?.total, calculateTotalTimeSpent]);
 
   const getProgressPercentage = () => {
-    const totalMinutes = item.progress?.total ? (item.progress.total.hours * 60) + item.progress.total.minutes : 0;
-    if (!totalMinutes) return 0;
+    if (!item.progress?.total) return 0;
+    const totalMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
     const spentMinutes = calculateTotalTimeSpent();
-    return Math.min(100, Math.round((spentMinutes / totalMinutes) * 100));
+    
+    if (totalMinutes === 0) return 0;
+    return Math.min(Math.round((spentMinutes / totalMinutes) * 100), 100);
   };
 
   const renderProgressBar = () => {

@@ -95,11 +95,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
         completed: formData.completed,
         priority: formData.priority || 'medium',
         tags: formData.tags || [],
-        goal: formData.total ? {
-          hours: Math.max(0, parseInt(String(formData.total.hours || 0)) || 0),
-          minutes: Math.max(0, parseInt(String(formData.total.minutes || 0)) || 0)
-        } : undefined,
-        total: formData.total ? {
+        total: formData.total && (formData.total.hours > 0 || formData.total.minutes > 0) ? {
           hours: Math.max(0, parseInt(String(formData.total.hours || 0)) || 0),
           minutes: Math.max(0, parseInt(String(formData.total.minutes || 0)) || 0)
         } : undefined,
