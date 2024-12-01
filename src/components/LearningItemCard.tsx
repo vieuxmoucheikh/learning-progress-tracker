@@ -462,7 +462,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       : sessions.slice(0, activeSession ? 2 : 1);
     
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 overflow-hidden">
         {displaySessions.map((session, sessionIndex) => {
           const startDate = new Date(session.startTime);
           const endDate = session.endTime ? new Date(session.endTime) : null;
@@ -479,7 +479,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 "bg-gradient-to-br from-white to-gray-50/30",
                 "hover:from-gray-50 hover:to-white transition-all",
                 "shadow-sm hover:shadow-md",
-                "relative",
+                "relative overflow-hidden",
                 !session.endTime && "border-l-4 border-l-blue-400"
               )}
             >
@@ -541,12 +541,12 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
               {/* Notes */}
               {(Array.isArray(session.notes) || item.notes) && (
-                <div className="space-y-3">
+                <div className="space-y-3 overflow-hidden">
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <StickyNote className="h-4 w-4 text-amber-500" />
                     Notes
                   </div>
-                  <ul className="space-y-2">
+                  <ul className="space-y-2 overflow-hidden">
                     {Array.isArray(session.notes) && session.notes.map((note, noteIndex) => (
                       <li 
                         key={noteIndex} 
@@ -554,11 +554,12 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                           "group relative text-sm p-3 rounded-lg",
                           "bg-gradient-to-r from-amber-50 to-amber-50/30",
                           "border border-amber-100/50",
-                          "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors"
+                          "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors",
+                          "overflow-hidden"
                         )}
                       >
-                        <div className="pr-8 overflow-hidden">
-                          <p className="text-gray-700 break-words whitespace-pre-line">
+                        <div className="pr-8 max-w-full">
+                          <p className="text-gray-700 break-words whitespace-pre-line overflow-hidden">
                             {typeof note === 'string' ? note : note.content}
                           </p>
                         </div>
@@ -581,10 +582,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                         "text-sm p-3 rounded-lg",
                         "bg-gradient-to-r from-amber-50 to-amber-50/30",
                         "border border-amber-100/50",
-                        "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors"
+                        "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors",
+                        "overflow-hidden"
                       )}>
-                        <div className="overflow-hidden">
-                          <p className="text-gray-700 break-words whitespace-pre-line">
+                        <div className="max-w-full">
+                          <p className="text-gray-700 break-words whitespace-pre-line overflow-hidden">
                             {item.notes}
                           </p>
                         </div>
@@ -673,7 +675,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
   return (
     <div className="w-full">
-      <Card className="relative w-full">
+      <Card className={clsx(
+        "relative overflow-hidden transition-all duration-200",
+        "hover:shadow-lg border-l-4",
+        getBorderColorClass()
+      )}>
         {/* Card Header with gradient background */}
         <div className="bg-gradient-to-r from-gray-50 via-white to-gray-50 border-b border-gray-200/80">
           <div className="p-6">
