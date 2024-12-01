@@ -463,7 +463,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
   return (
     <Card className={clsx(
-      "w-full p-4 relative border-l-4 transition-all duration-200",
+      "w-full p-6 relative border-l-4 transition-all duration-200 hover:shadow-lg",
       {
         "border-l-green-500": item.completed,
         "border-l-blue-500": !item.completed && activeSession,
@@ -500,240 +500,204 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       )}
 
       {/* Header Section */}
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1">
-          {isEditing ? (
-            <div className="flex items-center gap-2">
-              <Input
-                value={editedTitle}
-                onChange={(e) => setEditedTitle(e.target.value)}
-                className="text-lg font-semibold border-blue-200 focus:ring-blue-500"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleTitleSave}
-                className="text-green-600 hover:text-green-700 hover:bg-green-50"
-              >
-                <Save className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setIsEditing(false);
-                  setEditedTitle(item.title);
-                }}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold">{item.title}</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsEditing(true)}
-                className="text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-              >
-                <Edit2 className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-          <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
-            <span className={clsx(
-              "px-2 py-1 rounded-full text-xs font-medium",
-              {
-                'bg-green-100 text-green-800': item.status === 'completed',
-                'bg-yellow-100 text-yellow-800': item.status === 'in_progress',
-                'bg-gray-100 text-gray-800': item.status === 'not_started',
-                'bg-red-100 text-red-800': item.status === 'on_hold',
-                'bg-blue-100 text-blue-800': item.status === 'archived',
-              }
-            )}>
-              {item.status.replace('_', ' ')}
-            </span>
-            <span>•</span>
-            <span>{item.type}</span>
-            {item.category && (
-              <>
-                <span>•</span>
-                <span>{item.category}</span>
-              </>
+      <div className="flex justify-between items-start gap-4">
+        <div className="flex-1 space-y-3">
+          {/* Title */}
+          <div>
+            {isEditing ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  className="text-xl font-semibold border-blue-200 focus:ring-blue-500"
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleTitleSave}
+                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                >
+                  <Save className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditedTitle(item.title);
+                  }}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 group">
+                <h3 className="text-xl font-semibold text-gray-900">{item.title}</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsEditing(true)}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                >
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+              </div>
             )}
           </div>
+
+          {/* Category and Type */}
+          <div className="flex items-center gap-3">
+            {item.category && (
+              <div className="flex items-center">
+                <span className="px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100 shadow-sm">
+                  {item.category}
+                </span>
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <span className={clsx(
+                "px-2 py-0.5 rounded-full text-xs font-medium",
+                {
+                  'bg-green-100 text-green-800': item.status === 'completed',
+                  'bg-yellow-100 text-yellow-800': item.status === 'in_progress',
+                  'bg-gray-100 text-gray-800': item.status === 'not_started',
+                  'bg-red-100 text-red-800': item.status === 'on_hold',
+                  'bg-blue-100 text-blue-800': item.status === 'archived',
+                }
+              )}>
+                {item.status.replace('_', ' ')}
+              </span>
+              <span className="text-gray-400">•</span>
+              <span className="text-sm text-gray-600 font-medium">{item.type}</span>
+            </div>
+          </div>
+
+          {/* Progress Section */}
+          <div className="space-y-2">
+            {renderDuration()}
+            {renderProgressBar()}
+          </div>
         </div>
-        
+
         {/* Action Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => handleMarkComplete()}
             className={clsx(
-              "hover:bg-gray-50",
+              "hover:bg-gray-50 transition-colors",
               {
                 'text-green-500 hover:text-green-700': item.status !== 'completed',
                 'text-gray-400 hover:text-gray-600': item.status === 'completed'
               }
             )}
           >
-            <CheckCircle className="h-4 w-4" />
+            <CheckCircle className="h-5 w-5" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setShowHistory(true)}
-            className="text-red-400 hover:text-red-600 hover:bg-red-50"
+            className="text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
           >
-            <Trash2 className="h-4 h-4" />
+            <Trash2 className="h-5 w-5" />
           </Button>
           {item.url && (
             <Button
               variant="ghost"
               size="icon"
               onClick={() => window.open(item.url, '_blank')}
-              className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+              className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 transition-colors"
             >
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="h-5 w-5" />
             </Button>
           )}
         </div>
       </div>
 
-      {/* Progress Section */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          {renderDuration()}
-          <div className="flex items-center gap-2">
-            {item.progress?.total && (
-              <span className="text-sm font-medium text-gray-700">
-                {calculateProgress()}%
+      {/* Timer Controls */}
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          {activeSession ? (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleStopSession}
+              className="gap-2 bg-red-500 hover:bg-red-600"
+            >
+              <StopCircle className="h-4 w-4" />
+              Stop Timer
+            </Button>
+          ) : (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleStartSession}
+              className="gap-2 bg-blue-500 hover:bg-blue-600"
+            >
+              <PlayCircle className="h-4 w-4" />
+              Start Timer
+            </Button>
+          )}
+          
+          {activeSession && (
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-blue-600">
+                Current Session: {formatElapsedTime}
               </span>
-            )}
-          </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowNoteInput(!showNoteInput)}
+                className="gap-2 text-gray-600 hover:text-gray-800"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Add Note
+              </Button>
+            </div>
+          )}
         </div>
         
-        {item.progress?.total && (
-          <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-            <div 
-              className={clsx(
-                "h-full transition-all duration-300",
-                {
-                  'bg-green-500': calculateProgress() >= 100,
-                  'bg-blue-500': calculateProgress() > 0 && calculateProgress() < 100,
-                  'bg-gray-200': calculateProgress() === 0
-                }
-              )}
-              style={{ width: `${calculateProgress()}%` }}
-            />
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-gray-500" />
+          <span className="text-sm text-gray-600">
+            {formatDate(item.date)}
+          </span>
+        </div>
       </div>
 
-      {/* Session Controls */}
-      <div className="mt-4 space-y-4">
-        {!activeSession ? (
+      {/* Note Input */}
+      {showNoteInput && (
+        <div className="mt-4 flex gap-2">
+          <Input
+            value={sessionNote}
+            onChange={(e) => setSessionNote(e.target.value)}
+            placeholder="Add a note about your progress..."
+            className="flex-1"
+          />
           <Button
-            variant="outline"
-            className="w-full bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
-            onClick={handleStartSession}
-            disabled={!!activeSession} // Extra safety
+            variant="default"
+            size="sm"
+            onClick={handleAddNote}
+            disabled={!sessionNote.trim()}
+            className="bg-blue-500 hover:bg-blue-600"
           >
-            <PlayCircle className="w-4 h-4 mr-2" />
-            Start Session
+            Add Note
           </Button>
-        ) : (
-          <>
-            <Button
-              variant="outline"
-              className="w-full bg-red-50 hover:bg-red-100 border-red-200 text-red-700"
-              onClick={handleStopSession}
-              disabled={!activeSession} // Extra safety
-            >
-              <StopCircle className="w-4 h-4 mr-2" />
-              Stop Session
-            </Button>
-
-            {/* Active Session */}
-            <div className="p-4 bg-blue-50 rounded-lg space-y-4 border border-blue-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-medium text-blue-800">Active Session</h4>
-                  <p className="text-sm text-blue-600">Started at: {new Date(activeSession.startTime).toLocaleTimeString()}</p>
-                </div>
-                <div className="text-right">
-                  <span className="text-lg font-semibold text-blue-600">{formatElapsedTime()}</span>
-                  <p className="text-sm text-blue-600">Duration</p>
-                </div>
-              </div>
-
-              {/* Session Notes Input */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h5 className="text-sm font-medium text-blue-800">Session Notes</h5>
-                  <span className="text-xs text-blue-600">Press Enter to save</span>
-                </div>
-                <div className="flex gap-2">
-                  <Input
-                    value={sessionNote}
-                    onChange={(e) => setSessionNote(e.target.value)}
-                    placeholder="Add a note..."
-                    className="flex-1"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && sessionNote.trim()) {
-                        e.preventDefault();
-                        handleAddNote();
-                      }
-                    }}
-                  />
-                  <Button
-                    variant="outline"
-                    className="bg-blue-100 hover:bg-blue-200 border-blue-200 text-blue-700"
-                    onClick={handleAddNote}
-                  >
-                    Add Note
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Show note input after stopping session */}
-      {!activeSession && showNoteInput && (
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg space-y-2 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <h5 className="text-sm font-medium">Add Session Note</h5>
-            <span className="text-xs text-gray-600">Press Enter to save</span>
-          </div>
-          <div className="flex gap-2">
-            <Input
-              value={sessionNote}
-              onChange={(e) => setSessionNote(e.target.value)}
-              placeholder="Add a note for the completed session..."
-              className="flex-1"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && sessionNote.trim()) {
-                  e.preventDefault();
-                  handleAddNote();
-                }
-              }}
-            />
-            <Button
-              variant="outline"
-              onClick={handleAddNote}
-            >
-              Add Note
-            </Button>
-          </div>
         </div>
       )}
 
-      {renderSessionHistory()}
+      {/* Session History */}
+      {item.progress?.sessions?.length > 0 && (
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-medium text-gray-900">Session History</h4>
+          </div>
+          {renderSessionHistory()}
+        </div>
+      )}
     </Card>
   );
 };
