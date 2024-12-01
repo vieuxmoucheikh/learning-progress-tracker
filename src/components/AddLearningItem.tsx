@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Plus, Link as LinkIcon, Clock, X } from 'lucide-react';
 import { LearningItemFormData } from '../types';
 import { Button } from './ui/button';
@@ -59,8 +59,35 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
     }
   }, [selectedDate]);
 
+  // Get unique categories from existing items
+  const existingCategories = useMemo(() => {
+    const items = JSON.parse(localStorage.getItem('learningItems') || '[]');
+    const categories = new Set(items.map((item: any) => item.category));
+    return Array.from(categories).filter(Boolean);
+  }, []);
+
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [customCategory, setCustomCategory] = useState('');
+
+  // Handle category change
+  const handleCategoryChange = (value: string) => {
+    if (value === 'custom') {
+      setShowCustomCategory(true);
+      setFormData({ ...formData, category: customCategory });
+    } else {
+      setShowCustomCategory(false);
+      setFormData({ ...formData, category: value });
+    }
+  };
+
+  // Handle custom category input
+  const handleCustomCategoryChange = (value: string) => {
+    setCustomCategory(value);
+    setFormData({ ...formData, category: value });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -224,14 +251,44 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Category <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="e.g., Programming, Design, Math"
-                    />
+                    {showCustomCategory ? (
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          required
+                          value={customCategory}
+                          onChange={(e) => handleCustomCategoryChange(e.target.value)}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Enter new category"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowCustomCategory(false);
+                            setCustomCategory('');
+                            setFormData({ ...formData, category: '' });
+                          }}
+                          className="px-2 py-1 text-sm text-gray-600 hover:text-gray-800"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <select
+                        required
+                        value={formData.category}
+                        onChange={(e) => handleCategoryChange(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="">Select category</option>
+                        {existingCategories.map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                        <option value="custom">+ Add new category</option>
+                      </select>
+                    )}
                   </div>
                 </div>
               </div>
