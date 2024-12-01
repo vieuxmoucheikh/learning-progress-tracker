@@ -479,7 +479,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 "bg-gradient-to-br from-white to-gray-50/30",
                 "hover:from-gray-50 hover:to-white transition-all",
                 "shadow-sm hover:shadow-md",
-                "relative overflow-hidden",
+                "relative overflow-hidden max-w-full",
                 !session.endTime && "border-l-4 border-l-blue-400"
               )}
             >
@@ -541,12 +541,12 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
               {/* Notes */}
               {(Array.isArray(session.notes) || item.notes) && (
-                <div className="space-y-3 max-w-full">
+                <div className="space-y-3 overflow-hidden">
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <StickyNote className="h-4 w-4 text-amber-500" />
                     Notes
                   </div>
-                  <ul className="space-y-2 w-full">
+                  <ul className="space-y-2">
                     {Array.isArray(session.notes) && session.notes.map((note, noteIndex) => (
                       <li 
                         key={noteIndex} 
@@ -555,12 +555,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                           "bg-gradient-to-r from-amber-50 to-amber-50/30",
                           "border border-amber-100/50",
                           "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors",
-                          "break-words whitespace-pre-wrap",
-                          "overflow-hidden text-ellipsis",
-                          "w-full"
+                          "break-all whitespace-normal",
+                          "overflow-hidden"
                         )}
                       >
-                        <div className="pr-8 overflow-x-auto">
+                        <div className="pr-8 word-wrap break-word">
                           {typeof note === 'string' ? note : note.content}
                         </div>
                         <button
@@ -579,11 +578,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                         "bg-gradient-to-r from-amber-50 to-amber-50/30",
                         "border border-amber-100/50",
                         "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors",
-                        "break-words whitespace-pre-wrap",
-                        "overflow-hidden text-ellipsis",
-                        "w-full"
+                        "break-all whitespace-normal",
+                        "overflow-hidden"
                       )}>
-                        <div className="overflow-x-auto">
+                        <div className="word-wrap break-word">
                           {item.notes}
                         </div>
                       </li>
