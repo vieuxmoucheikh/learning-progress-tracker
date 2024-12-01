@@ -208,6 +208,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       } : s
     );
 
+    // Store the session as active in localStorage
+    localStorage.setItem(`activeSession_${item.id}`, JSON.stringify(pausedSession));
+    localStorage.setItem(`sessionLastUpdate_${item.id}`, Date.now().toString());
+
     onUpdate(item.id, {
       status: 'in_progress',
       progress: {
@@ -241,9 +245,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       status: 'completed' as const
     };
 
-    // First update local state
-    onStopTracking(item.id);
-    
+    // First clean up localStorage
+    localStorage.removeItem(`activeSession_${item.id}`);
+    localStorage.removeItem(`sessionLastUpdate_${item.id}`);
+    localStorage.removeItem(`sessionPauseTime_${item.id}`);
+
     // Then update item with ended session
     const updatedSessions = item.progress.sessions.map(s => 
       s.startTime === activeSession.startTime ? updatedSession : s
@@ -257,9 +263,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       }
     });
 
-    // Finally clean up localStorage
-    localStorage.removeItem(`activeSession_${item.id}`);
-    localStorage.removeItem(`sessionLastUpdate_${item.id}`);
+    // Finally stop tracking
+    onStopTracking(item.id);
   }, [activeSession, item, onUpdate, onStopTracking]);
 
   const handleAddNote = useCallback(() => {
