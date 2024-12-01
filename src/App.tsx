@@ -145,7 +145,7 @@ function reducer(state: State, action: Action): State {
                 lastTimestamp: Date.now(),
                 progress: {
                   ...item.progress,
-                  sessions: [newSession, ...(item.progress.sessions || [])]
+                  sessions: [...(item.progress.sessions || []), newSession]
                 }
               }
             : item
