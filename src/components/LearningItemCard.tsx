@@ -178,6 +178,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       } : s
     );
 
+    // First stop tracking
+    onStopTracking(item.id);
+
+    // Then update the session status
     onUpdate(item.id, {
       status: 'on_hold',
       progress: {
@@ -185,8 +189,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         sessions: updatedSessions
       }
     });
-
-    onStopTracking(item.id);
   }, [item, activeSession, onUpdate, onStopTracking]);
 
   // Handle session resume
@@ -201,10 +203,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     localStorage.removeItem(`sessionLastUpdate_${item.id}`);
     localStorage.removeItem(`sessionPauseTime_${item.id}`);
 
-    // Start tracking first (this won't create a new session due to our reducer changes)
-    onStartTracking(item.id);
-
-    // Then update the session status
+    // Update the session status
     const updatedSessions = item.progress.sessions.map(s => 
       s.startTime === pausedSession.startTime ? {
         ...s,
@@ -212,6 +211,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       } : s
     );
 
+    // First update the session status
     onUpdate(item.id, {
       status: 'in_progress',
       progress: {
@@ -219,6 +219,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         sessions: updatedSessions
       }
     });
+
+    // Then start tracking
+    onStartTracking(item.id);
   }, [item, onUpdate, onStartTracking]);
 
   // Handle session stop
@@ -715,9 +718,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       {/* Timer Controls and Session Info */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          {activeSession ? (
+          {activeSession || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime) ? (
             <div className="flex gap-2">
-              {activeSession.status !== 'on_hold' ? (
+              {activeSession?.status !== 'on_hold' ? (
                 <Button
                   variant="outline"
                   size="sm"
@@ -765,12 +768,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           )}
         </div>
 
-        {activeSession && (
+        {(activeSession || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime)) && (
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-blue-600">
-              {activeSession.status === 'on_hold' ? 'Session Paused' : `Current Session: ${formatElapsedTime()}`}
+              {activeSession?.status === 'on_hold' || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime) 
+                ? 'Session Paused' 
+                : `Current Session: ${formatElapsedTime()}`}
             </span>
-            {activeSession.status !== 'on_hold' && (
+            {activeSession?.status !== 'on_hold' && (
               <Button
                 variant="ghost"
                 size="sm"
