@@ -423,6 +423,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       );
     }
 
+    // Get original session order for numbering
+    const originalSessions = [...item.progress.sessions];
     // Display sessions in reverse order (newest first)
     const sessions = [...item.progress.sessions].reverse();
     const activeSession = sessions.find(s => !s.endTime);
@@ -437,8 +439,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           const endDate = session.endTime ? new Date(session.endTime) : null;
           const duration = session.duration || { hours: 0, minutes: 0 };
           const formattedDuration = `${duration.hours}h ${duration.minutes}m`;
-          const totalSessions = item.progress!.sessions!.length;
-          const sessionNumber = totalSessions - sessions.indexOf(session);
+          // Find the original index of this session plus 1 for the session number
+          const sessionNumber = originalSessions.findIndex(s => s.startTime === session.startTime) + 1;
           
           return (
             <div 
