@@ -416,11 +416,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       );
     }
 
-    const sessions = item.progress.sessions;
+    const sessions = [...item.progress.sessions].reverse(); // Reverse to show newest first
     const activeSession = sessions.find(s => !s.endTime);
     const displaySessions = showAllSessions 
       ? sessions
-      : sessions.slice(sessions.length - (activeSession ? 2 : 1));
+      : sessions.slice(0, activeSession ? 2 : 1);
     
     return (
       <div className="space-y-3">
@@ -429,7 +429,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           const endDate = session.endTime ? new Date(session.endTime) : null;
           const duration = session.duration || { hours: 0, minutes: 0 };
           const formattedDuration = `${duration.hours}h ${duration.minutes}m`;
-          const sessionNumber = index + 1;
+          const sessionNumber = item.progress!.sessions!.length - (sessions.length - index - 1);
           
           return (
             <div 
