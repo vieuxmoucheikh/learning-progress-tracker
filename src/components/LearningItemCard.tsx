@@ -437,8 +437,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           const endDate = session.endTime ? new Date(session.endTime) : null;
           const duration = session.duration || { hours: 0, minutes: 0 };
           const formattedDuration = `${duration.hours}h ${duration.minutes}m`;
-          const totalSessions = item.progress!.sessions!.length;
-          const sessionNumber = totalSessions - index;
+          const sessionNumber = index + 1;
           
           return (
             <div 
@@ -586,8 +585,26 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     }
   };
 
+  const getBorderColorClass = () => {
+    if (activeSession) return 'border-blue-400';
+    
+    switch (item.status) {
+      case 'completed':
+        return 'border-green-400';
+      case 'on_hold':
+        return 'border-yellow-400';
+      case 'in_progress':
+        return 'border-blue-400';
+      default:
+        return 'border-gray-300';
+    }
+  };
+
   return (
-    <Card className="overflow-hidden group hover:shadow-lg transition-all duration-300 border-gray-200/80">
+    <Card className={clsx(
+      "overflow-hidden group hover:shadow-lg transition-all duration-300",
+      getBorderColorClass()
+    )}>
       {/* Card Header with gradient background */}
       <div className="bg-gradient-to-r from-gray-50 via-white to-gray-50 border-b border-gray-200/80">
         <div className="p-6">
