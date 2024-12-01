@@ -200,17 +200,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${item.id}`);
     if (!pauseTimeStr) return;
 
-    const pauseTime = parseInt(pauseTimeStr, 10);
-    const pauseDuration = Date.now() - pauseTime;
-
-    // Adjust the start time to account for the pause duration
-    const adjustedStartTime = new Date(new Date(pausedSession.startTime).getTime() + pauseDuration).toISOString();
-
-    // Update the session with the adjusted start time
+    // Update the session status without changing the start time
     const updatedSessions = item.progress.sessions.map(s => 
       s.startTime === pausedSession.startTime ? {
         ...s,
-        startTime: adjustedStartTime,
         status: 'in_progress' as const
       } : s
     );
@@ -441,10 +434,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     Session {sessionNumber}
                   </div>
                   <Badge 
-                    variant={session.endTime ? "secondary" : "default"} 
-                    className={`capitalize ${!session.endTime ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : ''}`}
+                    variant={session.endTime ? "secondary" : session.status === 'on_hold' ? "outline" : "default"} 
+                    className={`capitalize ${!session.endTime && session.status !== 'on_hold' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : ''}`}
                   >
-                    {session.endTime ? "Completed" : "Active"}
+                    {session.endTime ? "Completed" : session.status === 'on_hold' ? "On Hold" : "Active"}
                   </Badge>
                 </div>
                 <div className="text-sm font-medium text-gray-600 bg-gray-100/80 px-2 py-1 rounded-full">
