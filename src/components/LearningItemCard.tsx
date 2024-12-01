@@ -312,9 +312,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     };
     
     return (
-      <div className="flex items-center gap-1 text-sm text-gray-600">
-        <Clock className="h-4 w-4" />
-        <span>
+      <div className="flex items-center gap-1.5">
+        <Clock className="h-4 w-4 text-gray-500" />
+        <span className="text-sm text-gray-600">
           {formatDuration(currentDuration)}
           {item.progress?.total ? ` / ${formatDuration(item.progress.total)}` : ' / ∞'}
         </span>
@@ -594,16 +594,13 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       {/* Progress Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
+          {renderDuration()}
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-gray-500" />
-            <span className="text-sm text-gray-600">
-              {renderDuration()}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">
-              {calculateProgress()}%
-            </span>
+            {item.progress?.total && (
+              <span className="text-sm font-medium text-gray-700">
+                {calculateProgress()}%
+              </span>
+            )}
           </div>
         </div>
         
