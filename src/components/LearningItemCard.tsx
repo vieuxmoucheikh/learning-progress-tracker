@@ -265,6 +265,32 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     });
   };
 
+  const calculateTotalTimeSpent = useCallback(() => {
+    if (!item.progress?.sessions) return 0;
+    
+    return item.progress.sessions.reduce((total, session) => {
+      if (session.duration) {
+        return total + (session.duration.hours * 60) + session.duration.minutes;
+      }
+      // If session is active, calculate current duration
+      if (!session.endTime && session.startTime) {
+        const start = new Date(session.startTime);
+        const now = new Date();
+        return total + Math.floor((now.getTime() - start.getTime()) / (1000 * 60));
+      }
+      return total;
+    }, 0);
+  }, [item.progress?.sessions]);
+
+  const calculateProgress = useCallback(() => {
+    if (!item.progress?.total) return 0;
+    const totalMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
+    const spentMinutes = calculateTotalTimeSpent();
+    
+    if (totalMinutes === 0) return 0;
+    return Math.min(Math.round((spentMinutes / totalMinutes) * 100), 100);
+  }, [item.progress?.total, calculateTotalTimeSpent]);
+
   const getProgressPercentage = () => {
     if (!item.progress || !item.progress.total || !item.progress.current) return 0;
     const totalMinutes = getTotalMinutes(item.progress.total);
@@ -546,21 +572,33 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-gray-500" />
             <span className="text-sm text-gray-600">
-              {formatDuration(getTotalMinutes(item.progress && item.progress.current))} / 
-              {item.progress && item.progress.total ? formatDuration(getTotalMinutes(item.progress.total)) : '∞'}
+              {formatDuration({ 
+                hours: Math.floor(calculateTotalTimeSpent() / 60),
+                minutes: calculateTotalTimeSpent() % 60 
+              })} / {item.progress?.total ? formatDuration(item.progress.total) : '∞'}
             </span>
           </div>
           <div className="flex items-center gap-2">
-            {item.progress && item.progress.lastAccessed ? (
-              <span className="text-sm text-gray-600">
-                {formatTime(0)}
-              </span>
-            ) : null}
+            <span className="text-sm font-medium text-gray-700">
+              {calculateProgress()}%
+            </span>
           </div>
         </div>
         
-        {item.progress && item.progress.total && (
-          renderProgressBar()
+        {item.progress?.total && (
+          <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+            <div 
+              className={clsx(
+                "h-full transition-all duration-300",
+                {
+                  'bg-green-500': calculateProgress() >= 100,
+                  'bg-blue-500': calculateProgress() > 0 && calculateProgress() < 100,
+                  'bg-gray-200': calculateProgress() === 0
+                }
+              )}
+              style={{ width: `${calculateProgress()}%` }}
+            />
+          </div>
         )}
       </div>
 
