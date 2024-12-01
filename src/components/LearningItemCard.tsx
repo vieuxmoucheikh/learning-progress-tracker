@@ -632,6 +632,36 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     handleCloseNoteDialog();
   };
 
+  const getBorderColorClass = () => {
+    switch (item.status) {
+      case 'completed':
+        return 'border-green-500';
+      case 'in_progress':
+        return 'border-blue-500';
+      case 'not_started':
+        return 'border-gray-300';
+      case 'on_hold':
+        return 'border-yellow-500';
+      case 'archived':
+        return 'border-red-500';
+      default:
+        return 'border-gray-300';
+    }
+  };
+
+  const getStatusBadgeProps = (): { variant: 'default' | 'secondary' | 'destructive' | 'outline', children: string } => {
+    switch (item.status) {
+      case 'completed':
+        return { variant: 'default', children: 'Completed' };
+      case 'in_progress':
+        return { variant: 'secondary', children: 'In Progress' };
+      case 'on_hold':
+        return { variant: 'outline', children: 'On Hold' };
+      default:
+        return { variant: 'destructive', children: 'Unknown' };
+    }
+  };
+
   return (
     <>
       <Card className={clsx(
