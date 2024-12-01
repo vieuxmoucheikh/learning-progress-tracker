@@ -474,7 +474,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           return (
             <div 
               key={session.startTime}
-              className="border rounded-xl p-5 space-y-4 w-full overflow-hidden"
+              className={clsx(
+                "border rounded-xl p-5 space-y-4",
+                "bg-gradient-to-br from-white to-gray-50/30",
+                "hover:from-gray-50 hover:to-white transition-all",
+                "shadow-sm hover:shadow-md",
+                "relative",
+                !session.endTime && "border-l-4 border-l-blue-400"
+              )}
             >
               {/* Session Status Indicator */}
               <div className={clsx(
@@ -534,8 +541,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
               {/* Notes */}
               {(Array.isArray(session.notes) || item.notes) && (
-                <div className="w-full">
-                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
                     <StickyNote className="h-4 w-4 text-amber-500" />
                     Notes
                   </div>
@@ -543,32 +550,43 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     {Array.isArray(session.notes) && session.notes.map((note, noteIndex) => (
                       <li 
                         key={noteIndex} 
-                        className="group relative text-sm p-3 rounded-lg bg-amber-50/50 border border-amber-100/50"
+                        className={clsx(
+                          "group relative text-sm p-3 rounded-lg",
+                          "bg-gradient-to-r from-amber-50 to-amber-50/30",
+                          "border border-amber-100/50",
+                          "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors"
+                        )}
                       >
-                        <div className="max-w-[calc(100%-2rem)] break-words">
-                          <span className="text-gray-700 whitespace-pre-line">
+                        <div className="pr-8 overflow-hidden">
+                          <p className="text-gray-700 break-words whitespace-pre-line">
                             {typeof note === 'string' ? note : note.content}
-                          </span>
+                          </p>
                         </div>
                         <button
                           onClick={() => openEditNoteDialog(sessionIndex, noteIndex, typeof note === 'string' ? note : note.content)}
-                          className="absolute top-2 right-2 p-1.5 rounded-md 
-                            bg-white/80 hover:bg-white
-                            text-gray-500 hover:text-blue-600 
-                            shadow-sm hover:shadow
-                            transition-all
-                            md:opacity-0 md:group-hover:opacity-100"
+                          className={clsx(
+                            "absolute top-2 right-2 p-1.5 rounded-md",
+                            "bg-white/80 hover:bg-white shadow-sm",
+                            "text-gray-500 hover:text-blue-600",
+                            "transition-all duration-200",
+                            "opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                          )}
                         >
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
                       </li>
                     ))}
                     {sessionIndex === 0 && item.notes && (
-                      <li className="text-sm p-3 rounded-lg bg-amber-50/50 border border-amber-100/50">
-                        <div className="max-w-full break-words">
-                          <span className="text-gray-700 whitespace-pre-line">
+                      <li className={clsx(
+                        "text-sm p-3 rounded-lg",
+                        "bg-gradient-to-r from-amber-50 to-amber-50/30",
+                        "border border-amber-100/50",
+                        "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors"
+                      )}>
+                        <div className="overflow-hidden">
+                          <p className="text-gray-700 break-words whitespace-pre-line">
                             {item.notes}
-                          </span>
+                          </p>
                         </div>
                       </li>
                     )}
