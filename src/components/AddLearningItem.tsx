@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Plus, Link as LinkIcon, Clock, X } from 'lucide-react';
 import { LearningItemFormData } from '../types';
 import { Button } from './ui/button';
+import { getLearningItems } from '../lib/database';
 
 // Add generateId function
 const generateId = (): string => {
@@ -59,18 +60,29 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
     }
   }, [selectedDate]);
 
-  // Get unique categories from existing items
-  const existingCategories = useMemo(() => {
-    const items = JSON.parse(localStorage.getItem('learningItems') || '[]');
-    const categories = new Set(items.map((item: any) => item.category));
-    return Array.from(categories).filter(Boolean);
-  }, []);
+  const [existingCategories, setExistingCategories] = useState<string[]>([]);
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [customCategory, setCustomCategory] = useState('');
+
+  // Fetch existing categories from the database
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const items = await getLearningItems();
+        const categories = new Set(items.map(item => item.category));
+        setExistingCategories(Array.from(categories).filter(Boolean).sort());
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    if (isOpen) {
+      fetchCategories();
+    }
+  }, [isOpen]);
 
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [showCustomCategory, setShowCustomCategory] = useState(false);
-  const [customCategory, setCustomCategory] = useState('');
 
   // Handle category change
   const handleCategoryChange = (value: string) => {
