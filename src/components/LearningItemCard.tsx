@@ -134,9 +134,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     }
   }, [item.id]);
 
-  const handleStartTracking = useCallback(() => {
-    if (!item.progress || activeSession) return; // Prevent starting if already active
-
+  // Handle session start
+  const handleStartSession = useCallback(() => {
+    if (activeSession) return; // Prevent multiple active sessions
+    
     const now = new Date();
     const newSession = {
       startTime: now.toISOString(),
@@ -156,13 +157,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     onStartTracking(item.id);
     localStorage.setItem(`activeSession_${item.id}`, JSON.stringify(newSession));
     localStorage.setItem(`sessionLastUpdate_${item.id}`, Date.now().toString());
-  }, [item, onUpdate, onStartTracking, activeSession]);
+  }, [item, onUpdate, onStartTracking]);
 
-  const handleStopTracking = useCallback(() => {
+  // Handle session stop
+  const handleStopSession = useCallback(() => {
     if (!activeSession || !item.progress?.sessions) return;
-
-    // Prevent duplicate stops
-    if (activeSession.endTime) return;
 
     const now = new Date();
     const startTime = new Date(activeSession.startTime);
@@ -180,9 +179,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       date: startTime.toISOString().split('T')[0]
     };
 
-    // Only update if we haven't already ended this session
     const updatedSessions = item.progress.sessions.map(s => 
-      s.startTime === activeSession.startTime && !s.endTime ? updatedSession : s
+      s.startTime === activeSession.startTime ? updatedSession : s
     );
 
     onUpdate(item.id, {
@@ -395,10 +393,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   };
 
   return (
-    <Card className={clsx("relative p-4 transition-all duration-200", {
-      "border-purple-200 shadow-md": activeSession,
-      "hover:border-gray-300": !activeSession
-    })}>
+    <Card className={clsx(
+      "w-full p-4 relative border-l-4 transition-all duration-200",
+      {
+        "border-l-green-500": item.completed,
+        "border-l-blue-500": !item.completed && activeSession,
+        "border-l-gray-300": !item.completed && !activeSession
+      }
+    )}>
       {/* Delete Confirmation Dialog */}
       {showHistory && (
         <div className="absolute inset-0 bg-white bg-opacity-95 z-10 flex items-center justify-center p-4 backdrop-blur-sm">
@@ -429,65 +431,232 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       )}
 
       {/* Header Section */}
-      <div className="flex justify-between items-start gap-4">
+      <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
           {isEditing ? (
-            <Input
-              value={editedTitle}
-              onChange={(e) => setEditedTitle(e.target.value)}
-              onBlur={handleTitleSave}
-              onKeyDown={(e) => e.key === 'Enter' && handleTitleSave()}
-              className="mb-2"
-            />
+            <div className="flex items-center gap-2">
+              <Input
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="text-lg font-semibold border-blue-200 focus:ring-blue-500"
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleTitleSave}
+                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+              >
+                <Save className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditedTitle(item.title);
+                }}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           ) : (
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2">
               <h3 className="text-lg font-semibold">{item.title}</h3>
-              <button 
-                onClick={() => setIsEditing(true)} 
-                className="text-gray-400 hover:text-gray-600"
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsEditing(true)}
+                className="text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               >
                 <Edit2 className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           )}
-          
-          {/* Timer Display */}
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-            <Clock className="h-4 w-4" />
-            {activeSession ? (
-              <span>{formatElapsedTime()}</span>
-            ) : (
-              <span>No active session</span>
+          <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+            <span className={clsx(
+              "px-2 py-1 rounded-full text-xs font-medium",
+              {
+                'bg-green-100 text-green-800': item.status === 'completed',
+                'bg-yellow-100 text-yellow-800': item.status === 'in_progress',
+                'bg-gray-100 text-gray-800': item.status === 'not_started',
+                'bg-red-100 text-red-800': item.status === 'on_hold',
+                'bg-blue-100 text-blue-800': item.status === 'archived',
+              }
+            )}>
+              {item.status.replace('_', ' ')}
+            </span>
+            <span>•</span>
+            <span>{item.type}</span>
+            {item.category && (
+              <>
+                <span>•</span>
+                <span>{item.category}</span>
+              </>
             )}
           </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-2">
+        </div>
+        
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleMarkComplete()}
+            className={clsx(
+              "hover:bg-gray-50",
+              {
+                'text-green-500 hover:text-green-700': item.status !== 'completed',
+                'text-gray-400 hover:text-gray-600': item.status === 'completed'
+              }
+            )}
+          >
+            <CheckCircle className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowHistory(true)}
+            className="text-red-400 hover:text-red-600 hover:bg-red-50"
+          >
+            <Trash2 className="h-4 h-4" />
+          </Button>
+          {item.url && (
             <Button
-              onClick={handleStartTracking}
-              disabled={!!activeSession}
-              className={clsx("gap-2", {
-                "bg-gray-100 text-gray-400": activeSession,
-                "bg-green-500 hover:bg-green-600": !activeSession
-              })}
+              variant="ghost"
+              size="icon"
+              onClick={() => window.open(item.url, '_blank')}
+              className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
             >
-              <PlayCircle className="h-4 w-4" />
-              Start
+              <ExternalLink className="h-4 w-4" />
             </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Progress Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-gray-500" />
+            <span className="text-sm text-gray-600">
+              {formatDuration(getTotalMinutes(item.progress && item.progress.current))} / 
+              {item.progress && item.progress.total ? formatDuration(getTotalMinutes(item.progress.total)) : '∞'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {item.progress && item.progress.lastAccessed ? (
+              <span className="text-sm text-gray-600">
+                {formatTime(0)}
+              </span>
+            ) : null}
+          </div>
+        </div>
+        
+        {item.progress && item.progress.total && (
+          renderProgressBar()
+        )}
+      </div>
+
+      {/* Session Controls */}
+      <div className="mt-4 space-y-4">
+        {!activeSession ? (
+          <Button
+            variant="outline"
+            className="w-full bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
+            onClick={handleStartSession}
+          >
+            <PlayCircle className="w-4 h-4 mr-2" />
+            Start Session
+          </Button>
+        ) : (
+          <>
             <Button
-              onClick={handleStopTracking}
-              disabled={!activeSession}
-              className={clsx("gap-2", {
-                "bg-red-500 hover:bg-red-600": activeSession,
-                "bg-gray-100 text-gray-400": !activeSession
-              })}
+              variant="outline"
+              className="w-full bg-red-50 hover:bg-red-100 border-red-200 text-red-700"
+              onClick={handleStopSession}
             >
-              <StopCircle className="h-4 w-4" />
-              Stop
+              <StopCircle className="w-4 h-4 mr-2" />
+              Stop Session
+            </Button>
+
+            {/* Active Session */}
+            <div className="p-4 bg-blue-50 rounded-lg space-y-4 border border-blue-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium text-blue-800">Active Session</h4>
+                  <p className="text-sm text-blue-600">Started at: {new Date(activeSession.startTime).toLocaleTimeString()}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-lg font-semibold text-blue-600">{formatElapsedTime()}</span>
+                  <p className="text-sm text-blue-600">Duration</p>
+                </div>
+              </div>
+
+              {/* Session Notes Input */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h5 className="text-sm font-medium text-blue-800">Session Notes</h5>
+                  <span className="text-xs text-blue-600">Press Enter to save</span>
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    value={sessionNote}
+                    onChange={(e) => setSessionNote(e.target.value)}
+                    placeholder="Add a note..."
+                    className="flex-1"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && sessionNote.trim()) {
+                        e.preventDefault();
+                        handleAddNote();
+                      }
+                    }}
+                  />
+                  <Button
+                    variant="outline"
+                    className="bg-blue-100 hover:bg-blue-200 border-blue-200 text-blue-700"
+                    onClick={handleAddNote}
+                  >
+                    Add Note
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Show note input after stopping session */}
+      {!activeSession && showNoteInput && (
+        <div className="mt-4 p-4 bg-gray-50 rounded-lg space-y-2 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <h5 className="text-sm font-medium">Add Session Note</h5>
+            <span className="text-xs text-gray-600">Press Enter to save</span>
+          </div>
+          <div className="flex gap-2">
+            <Input
+              value={sessionNote}
+              onChange={(e) => setSessionNote(e.target.value)}
+              placeholder="Add a note for the completed session..."
+              className="flex-1"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && sessionNote.trim()) {
+                  e.preventDefault();
+                  handleAddNote();
+                }
+              }}
+            />
+            <Button
+              variant="outline"
+              onClick={handleAddNote}
+            >
+              Add Note
             </Button>
           </div>
         </div>
-      </div>
+      )}
+
+      {renderSessionHistory()}
     </Card>
   );
 };
