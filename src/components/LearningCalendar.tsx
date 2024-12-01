@@ -97,7 +97,7 @@ export function LearningCalendar({ items, setItems }: Props) {
         progress: {
           current: { hours: 0, minutes: 0 },
           lastAccessed: new Date().toISOString(),
-          total: newActivity.total || { hours: 0, minutes: 0 },
+          total: newActivity.total || undefined,
           sessions: [{
             date: selectedDate,
             startTime: new Date().toISOString(),
