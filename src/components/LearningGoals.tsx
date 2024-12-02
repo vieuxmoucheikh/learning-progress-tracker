@@ -9,13 +9,25 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger
 } from './ui/dialog';
 import { Select } from "@/components/ui/select"
-import { Calendar, Clock, Target, Trophy, TrendingUp, Plus, Trash2 } from 'lucide-react';
+import { Calendar, Clock, Target, Trophy, TrendingUp, Plus, Trash2, ChartBar, ArrowRight } from 'lucide-react';
 import { LearningItem } from '@/types';
 import { clsx } from 'clsx';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 type Priority = 'high' | 'medium' | 'low';
+
+interface GoalAnalytics {
+  dailyProgress: { date: string; minutes: number }[];
+  totalTimeSpent: number;
+  recentSessions: number;
+  averageSessionLength: number;
+  daysActive: number;
+  daysLeft: number;
+  projectedCompletion: number;
+}
 
 interface LearningGoal {
   id: string;
@@ -170,6 +182,65 @@ export function LearningGoals({ items }: Props) {
     setIsAddingNewCategory(false);
   };
 
+  const calculateGoalAnalytics = (goal: LearningGoal): GoalAnalytics => {
+    const categoryItems = items.filter(item => item.category === goal.category);
+    const now = new Date();
+    const targetDate = new Date(goal.targetDate);
+    const createdAt = new Date(goal.createdAt);
+    
+    // Get all sessions from items in this category
+    const allSessions = categoryItems.flatMap(item => 
+      (item.progress?.sessions || []).map(session => ({
+        startTime: new Date(session.startTime),
+        duration: session.duration ? session.duration.hours * 60 + session.duration.minutes : 0,
+        status: session.status
+      }))
+    ).filter(session => session.startTime >= createdAt);
+
+    // Calculate daily progress
+    const dailyProgress = allSessions.reduce((acc, session) => {
+      const date = session.startTime.toISOString().split('T')[0];
+      const existing = acc.find(d => d.date === date);
+      if (existing) {
+        existing.minutes += session.duration;
+      } else {
+        acc.push({ date, minutes: session.duration });
+      }
+      return acc;
+    }, [] as { date: string; minutes: number }[]).sort((a, b) => a.date.localeCompare(b.date));
+
+    // Calculate other metrics
+    const totalTimeSpent = allSessions.reduce((sum, session) => sum + session.duration, 0);
+    const recentSessions = allSessions.filter(session => 
+      session.startTime >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+    ).length;
+    const averageSessionLength = allSessions.length > 0 
+      ? Math.round(totalTimeSpent / allSessions.length) 
+      : 0;
+    const daysActive = new Set(dailyProgress.map(d => d.date)).size;
+    const daysLeft = Math.max(0, Math.ceil((targetDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+    
+    // Calculate projected completion based on current progress rate
+    const daysSinceStart = Math.ceil((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
+    const dailyRate = daysSinceStart > 0 ? totalTimeSpent / daysSinceStart : 0;
+    const remainingMinutes = goal.targetHours * 60 - totalTimeSpent;
+    const projectedDays = dailyRate > 0 ? Math.ceil(remainingMinutes / dailyRate) : 0;
+    const projectedCompletion = projectedDays > 0 ? Math.round((remainingMinutes / dailyRate) * 10) / 10 : 0;
+
+    return {
+      dailyProgress,
+      totalTimeSpent,
+      recentSessions,
+      averageSessionLength,
+      daysActive,
+      daysLeft,
+      projectedCompletion
+    };
+  };
+
+  const [selectedGoal, setSelectedGoal] = useState<LearningGoal | null>(null);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -195,7 +266,18 @@ export function LearningGoals({ items }: Props) {
 
           return (
             <Card key={goal.id} className="p-4 space-y-4 relative group">
-              <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                  onClick={() => {
+                    setSelectedGoal(goal);
+                    setShowAnalytics(true);
+                  }}
+                >
+                  <ChartBar className="h-4 w-4" />
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -401,6 +483,122 @@ export function LearningGoals({ items }: Props) {
               Create Goal
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Goal Analytics Dialog */}
+      <Dialog open={showAnalytics} onOpenChange={setShowAnalytics}>
+        <DialogContent className="sm:max-w-[700px] bg-white dark:bg-gray-900 border-0">
+          <DialogHeader className="space-y-3 pb-4 border-b">
+            <DialogTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Goal Analytics
+            </DialogTitle>
+            <DialogDescription className="text-base text-gray-600 dark:text-gray-300">
+              {selectedGoal?.title} - {selectedGoal?.category}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedGoal && (
+            <div className="space-y-6 py-4">
+              {/* Progress Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {(() => {
+                  const analytics = calculateGoalAnalytics(selectedGoal);
+                  const progress = (analytics.totalTimeSpent / 60) / selectedGoal.targetHours * 100;
+                  
+                  return (
+                    <>
+                      <Card className="p-4 space-y-2">
+                        <h3 className="text-sm font-medium text-gray-500">Progress</h3>
+                        <div className="text-2xl font-bold">{Math.round(progress)}%</div>
+                        <div className="text-sm text-gray-500">
+                          {Math.round(analytics.totalTimeSpent / 60)}h of {selectedGoal.targetHours}h
+                        </div>
+                      </Card>
+
+                      <Card className="p-4 space-y-2">
+                        <h3 className="text-sm font-medium text-gray-500">Time Left</h3>
+                        <div className="text-2xl font-bold">{analytics.daysLeft} days</div>
+                        <div className="text-sm text-gray-500">
+                          {analytics.projectedCompletion > 0 
+                            ? `Projected completion in ${analytics.projectedCompletion} days`
+                            : 'Insufficient data for projection'}
+                        </div>
+                      </Card>
+
+                      <Card className="p-4 space-y-2">
+                        <h3 className="text-sm font-medium text-gray-500">Activity</h3>
+                        <div className="text-2xl font-bold">{analytics.recentSessions}</div>
+                        <div className="text-sm text-gray-500">
+                          Sessions in last 7 days
+                        </div>
+                      </Card>
+                    </>
+                  );
+                })()}
+              </div>
+
+              {/* Daily Progress Chart */}
+              <Card className="p-4 space-y-4">
+                <h3 className="text-lg font-medium">Daily Progress</h3>
+                <div className="h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={calculateGoalAnalytics(selectedGoal).dailyProgress}
+                      margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
+                    >
+                      <XAxis 
+                        dataKey="date" 
+                        angle={-45}
+                        textAnchor="end"
+                        height={60}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <YAxis 
+                        label={{ 
+                          value: 'Minutes', 
+                          angle: -90, 
+                          position: 'insideLeft',
+                          style: { textAnchor: 'middle' }
+                        }}
+                      />
+                      <Tooltip
+                        formatter={(value: number) => [`${value} minutes`, 'Time Spent']}
+                      />
+                      <Bar 
+                        dataKey="minutes" 
+                        fill="#3B82F6"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </Card>
+
+              {/* Additional Stats */}
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="p-4 space-y-2">
+                  <h3 className="text-sm font-medium text-gray-500">Average Session</h3>
+                  <div className="text-xl font-bold">
+                    {(() => {
+                      const analytics = calculateGoalAnalytics(selectedGoal);
+                      return `${Math.round(analytics.averageSessionLength)} minutes`;
+                    })()}
+                  </div>
+                </Card>
+
+                <Card className="p-4 space-y-2">
+                  <h3 className="text-sm font-medium text-gray-500">Days Active</h3>
+                  <div className="text-xl font-bold">
+                    {(() => {
+                      const analytics = calculateGoalAnalytics(selectedGoal);
+                      return analytics.daysActive;
+                    })()}
+                  </div>
+                </Card>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
