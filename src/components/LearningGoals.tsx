@@ -497,12 +497,16 @@ export default function LearningGoals({ items }: Props) {
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full justify-start text-left font-normal"
+                    className={clsx(
+                      "w-full justify-start text-left font-normal border-gray-300 hover:bg-gray-50",
+                      !newGoal.targetDate && "text-gray-500"
+                    )}
                   >
+                    <LucideCalendar className="mr-2 h-4 w-4" />
                     {newGoal.targetDate ? (
-                      format(new Date(newGoal.targetDate), "PPP")
+                      format(new Date(newGoal.targetDate), "MMMM d, yyyy")
                     ) : (
-                      <span>Pick a date</span>
+                      <span>Select target date</span>
                     )}
                   </Button>
                 </PopoverTrigger>
@@ -510,9 +514,22 @@ export default function LearningGoals({ items }: Props) {
                   <Calendar
                     mode="single"
                     selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
-                    onSelect={(date: Date | undefined) => date && setNewGoal(prev => ({ ...prev, targetDate: date.toISOString().split('T')[0] }))}
-                    disabled={(date: Date) => date < new Date()}
+                    onSelect={(date: Date | undefined) => {
+                      if (date) {
+                        const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                        setNewGoal(prev => ({ 
+                          ...prev, 
+                          targetDate: localDate.toISOString().split('T')[0] 
+                        }));
+                      }
+                    }}
+                    disabled={(date: Date) => {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      return date < today;
+                    }}
                     initialFocus
+                    className="rounded-md border border-gray-200 bg-white shadow-md"
                   />
                 </PopoverContent>
               </Popover>
