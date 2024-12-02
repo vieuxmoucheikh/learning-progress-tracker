@@ -498,11 +498,11 @@ export default function LearningGoals({ items }: Props) {
                   <Button
                     variant="outline"
                     className={clsx(
-                      "w-full justify-start text-left font-normal border-gray-300 hover:bg-gray-50",
-                      !newGoal.targetDate && "text-gray-500"
+                      "w-full pl-3 text-left font-normal",
+                      !newGoal.targetDate && "text-muted-foreground"
                     )}
                   >
-                    <LucideCalendar className="mr-2 h-4 w-4" />
+                    <LucideCalendar className="mr-3 h-4 w-4 opacity-50" />
                     {newGoal.targetDate ? (
                       format(new Date(newGoal.targetDate), "MMMM d, yyyy")
                     ) : (
@@ -511,26 +511,27 @@ export default function LearningGoals({ items }: Props) {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
-                    onSelect={(date: Date | undefined) => {
-                      if (date) {
-                        const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-                        setNewGoal(prev => ({ 
-                          ...prev, 
-                          targetDate: localDate.toISOString().split('T')[0] 
-                        }));
-                      }
-                    }}
-                    disabled={(date: Date) => {
-                      const today = new Date();
-                      today.setHours(0, 0, 0, 0);
-                      return date < today;
-                    }}
-                    initialFocus
-                    className="rounded-md border border-gray-200 bg-white shadow-md"
-                  />
+                  <div className="p-1">
+                    <Calendar
+                      mode="single"
+                      selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
+                      onSelect={(date: Date | undefined) => {
+                        if (date) {
+                          const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                          setNewGoal(prev => ({ 
+                            ...prev, 
+                            targetDate: localDate.toISOString().split('T')[0] 
+                          }));
+                        }
+                      }}
+                      disabled={(date: Date) => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return date < today;
+                      }}
+                      initialFocus
+                    />
+                  </div>
                 </PopoverContent>
               </Popover>
             </div>
