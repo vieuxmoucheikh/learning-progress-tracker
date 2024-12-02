@@ -229,6 +229,7 @@ export default function LearningGoals({ items }: Props) {
         type: 'course' as const, // Using 'course' as the type for goals
         status: 'not_started' as const,
         difficulty: 'medium' as const,
+        unit: 'hours' as const, // Required field for learning items
         progress: {
           target: {
             hours: newGoal.targetHours,
