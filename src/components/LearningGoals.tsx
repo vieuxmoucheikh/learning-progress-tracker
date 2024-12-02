@@ -11,11 +11,14 @@ import {
   DialogTitle,
   DialogTrigger
 } from './ui/dialog';
-import { Select } from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar, Clock, Target, Trophy, TrendingUp, Plus, Trash2, ChartBar, ArrowRight } from 'lucide-react';
 import { LearningItem } from '@/types';
 import { clsx } from 'clsx';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { supabase } from '@/lib/supabase';
+import { useEffect } from 'react';
+import { useToast } from "@/components/ui/use-toast";
 
 type Priority = 'high' | 'medium' | 'low';
 
@@ -38,17 +41,17 @@ interface LearningGoal {
   priority: Priority;
   status: 'active' | 'completed' | 'overdue';
   createdAt: string;
+  userId: string;
 }
 
 interface Props {
   items: LearningItem[];
 }
 
-export function LearningGoals({ items }: Props) {
-  const [goals, setGoals] = useState<LearningGoal[]>(() => {
-    const savedGoals = localStorage.getItem('learningGoals');
-    return savedGoals ? JSON.parse(savedGoals) : [];
-  });
+export default function LearningGoals({ items }: Props) {
+  const { toast } = useToast();
+  const [goals, setGoals] = useState<LearningGoal[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isAddingGoal, setIsAddingGoal] = useState(false);
   const [newGoal, setNewGoal] = useState<{
     title: string;
@@ -65,42 +68,122 @@ export function LearningGoals({ items }: Props) {
   });
   const [isAddingNewCategory, setIsAddingNewCategory] = useState(false);
   const [newCategory, setNewCategory] = useState('');
+  const [selectedGoal, setSelectedGoal] = useState<LearningGoal | null>(null);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+
+  // Fetch goals from Supabase
+  const fetchGoals = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('goals')
+        .select('*')
+        .eq('userId', user.id)
+        .order('createdAt', { ascending: false });
+
+      if (error) throw error;
+      setGoals(data || []);
+    } catch (error) {
+      console.error('Error fetching goals:', error);
+      toast({
+        title: 'Error fetching goals',
+        description: 'Please try again later',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Subscribe to real-time updates
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.id) return;
+
+      const channel = supabase
+        .channel('goals_channel')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'goals',
+            filter: `userId=eq.${user.id}`,
+          },
+          () => {
+            fetchGoals();
+          }
+        )
+        .subscribe();
+
+      fetchGoals();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    };
+
+    fetchUser();
+  }, []);
+
+  const addGoal = async (newGoal: Omit<LearningGoal, 'id' | 'status' | 'createdAt' | 'userId'>) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.id) return;
+
+    try {
+      const goalToAdd = {
+        ...newGoal,
+        status: 'active',
+        createdAt: new Date().toISOString(),
+        userId: user.id,
+      };
+
+      const { error } = await supabase.from('goals').insert([goalToAdd]);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Goal added successfully',
+        description: 'Your new learning goal has been created',
+      });
+    } catch (error) {
+      console.error('Error adding goal:', error);
+      toast({
+        title: 'Error adding goal',
+        description: 'Please try again later',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const deleteGoal = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('goals')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Goal deleted successfully',
+        description: 'Your learning goal has been removed',
+      });
+    } catch (error) {
+      console.error('Error deleting goal:', error);
+      toast({
+        title: 'Error deleting goal',
+        description: 'Please try again later',
+        variant: 'destructive',
+      });
+    }
+  };
 
   // Get unique categories from items
   const categories = Array.from(new Set(items.map(item => item.category || 'Uncategorized'))).filter(Boolean);
-
-  const saveGoals = (updatedGoals: LearningGoal[]) => {
-    localStorage.setItem('learningGoals', JSON.stringify(updatedGoals));
-    setGoals(updatedGoals);
-  };
-
-  const addGoal = () => {
-    if (!newGoal.title || !newGoal.targetDate || !newGoal.targetHours || !newGoal.category) {
-      return;
-    }
-
-    const goal: LearningGoal = {
-      id: crypto.randomUUID(),
-      ...newGoal,
-      status: 'active',
-      createdAt: new Date().toISOString(),
-    };
-
-    saveGoals([...goals, goal]);
-    setIsAddingGoal(false);
-    setNewGoal({
-      title: '',
-      targetDate: '',
-      targetHours: 0,
-      category: '',
-      priority: 'medium',
-    });
-  };
-
-  const deleteGoal = (goalId: string) => {
-    const updatedGoals = goals.filter(goal => goal.id !== goalId);
-    saveGoals(updatedGoals);
-  };
 
   const calculateProgress = (category: string) => {
     const categoryItems = items.filter(item => item.category === category);
@@ -238,8 +321,38 @@ export function LearningGoals({ items }: Props) {
     };
   };
 
-  const [selectedGoal, setSelectedGoal] = useState<LearningGoal | null>(null);
-  const [showAnalytics, setShowAnalytics] = useState(false);
+  const PrioritySelect = () => (
+    <Select value={newGoal.priority} onValueChange={(value: Priority) => setNewGoal({ ...newGoal, priority: value })}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder="Select priority" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="high">High</SelectItem>
+        <SelectItem value="medium">Medium</SelectItem>
+        <SelectItem value="low">Low</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+
+  const CategorySelect = () => (
+    <Select value={newGoal.category} onValueChange={(value: string) => setNewGoal({ ...newGoal, category: value })}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder="Select category" />
+      </SelectTrigger>
+      <SelectContent>
+        {Array.from(new Set(goals.map(goal => goal.category))).map(category => (
+          <SelectItem key={category} value={category}>
+            {category}
+          </SelectItem>
+        ))}
+        {isAddingNewCategory && (
+          <SelectItem value={newCategory}>
+            {newCategory}
+          </SelectItem>
+        )}
+      </SelectContent>
+    </Select>
+  );
 
   return (
     <div className="space-y-6">
@@ -339,31 +452,25 @@ export function LearningGoals({ items }: Props) {
         })}
       </div>
 
-      <Dialog 
-        open={isAddingGoal} 
-        onOpenChange={(open) => {
-          setIsAddingGoal(open);
-          if (!open) resetForm();
-        }}
-      >
-        <DialogContent className="sm:max-w-[500px] bg-white dark:bg-gray-900 border-0">
-          <DialogHeader className="space-y-3 pb-4 border-b">
+      <Dialog open={isAddingGoal} onOpenChange={setIsAddingGoal}>
+        <DialogContent className="sm:max-w-[500px] bg-white dark:bg-gray-900 border-0 p-0 sm:p-6 sm:pt-4">
+          <DialogHeader className="space-y-3 pb-4 border-b px-4 sm:px-0">
             <DialogTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Add Learning Goal
+              Add New Goal
             </DialogTitle>
             <DialogDescription className="text-base text-gray-600 dark:text-gray-300">
-              Set a new learning goal to track your progress and stay motivated.
+              Set a new learning goal to track your progress
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-6 py-6">
+          <div className="p-4 sm:p-0 space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Goal Title</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Title</label>
               <Input
                 value={newGoal.title}
                 onChange={e => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="e.g., Master React Fundamentals"
-                className="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                placeholder="Enter goal title"
+                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               />
             </div>
 
@@ -371,27 +478,7 @@ export function LearningGoals({ items }: Props) {
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Category</label>
               <div className="space-y-2">
                 {!isAddingNewCategory ? (
-                  <div className="flex gap-2">
-                    <Select
-                      value={newGoal.category}
-                      onValueChange={(value: string) => {
-                        if (value === 'new') {
-                          setIsAddingNewCategory(true);
-                        } else {
-                          setNewGoal(prev => ({ ...prev, category: value }));
-                        }
-                      }}
-                      items={[
-                        ...categories.map(category => ({
-                          value: category,
-                          label: category
-                        })),
-                        { value: 'new', label: '+ Add New Category' }
-                      ]}
-                      placeholder="Select or add category"
-                      className="w-full"
-                    />
-                  </div>
+                  <CategorySelect />
                 ) : (
                   <div className="flex gap-2">
                     <Input
@@ -427,60 +514,55 @@ export function LearningGoals({ items }: Props) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Target Hours</label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={newGoal.targetHours}
-                  onChange={e => setNewGoal(prev => ({ ...prev, targetHours: Number(e.target.value) }))}
-                  className="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                />
-              </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Target Hours</label>
+              <Input
+                type="number"
+                value={newGoal.targetHours}
+                onChange={e => setNewGoal(prev => ({ ...prev, targetHours: Number(e.target.value) }))}
+                min={1}
+                placeholder="Enter target hours"
+                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+              />
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Target Date</label>
-                <Input
-                  type="date"
-                  value={newGoal.targetDate}
-                  onChange={e => setNewGoal(prev => ({ ...prev, targetDate: e.target.value }))}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                />
-              </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Target Date</label>
+              <Input
+                type="date"
+                value={newGoal.targetDate}
+                onChange={e => setNewGoal(prev => ({ ...prev, targetDate: e.target.value }))}
+                min={new Date().toISOString().split('T')[0]}
+                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+              />
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Priority</label>
-              <Select
-                value={newGoal.priority}
-                onValueChange={(value: string) => setNewGoal(prev => ({ ...prev, priority: value as Priority }))}
-                items={[
-                  { value: 'high', label: 'High Priority' },
-                  { value: 'medium', label: 'Medium Priority' },
-                  { value: 'low', label: 'Low Priority' }
-                ]}
-                placeholder="Select priority level"
-                className="w-full"
-              />
+              <PrioritySelect />
             </div>
           </div>
 
-          <DialogFooter className="gap-3 pt-4 border-t">
+          <DialogFooter className="px-4 sm:px-0">
             <Button
-              variant="outline"
-              onClick={() => setIsAddingGoal(false)}
-              className="flex-1 border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+              type="submit"
+              onClick={async () => {
+                if (!newGoal.title || !newGoal.category || !newGoal.targetDate || !newGoal.targetHours) {
+                  toast({
+                    title: 'Missing fields',
+                    description: 'Please fill in all required fields',
+                    variant: 'destructive',
+                  });
+                  return;
+                }
+
+                await addGoal(newGoal);
+                resetForm();
+                setIsAddingGoal(false);
+              }}
+              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700"
             >
-              Cancel
-            </Button>
-            <Button
-              onClick={addGoal}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-200"
-              disabled={!newGoal.title || !newGoal.targetDate || !newGoal.targetHours || !newGoal.category}
-            >
-              Create Goal
+              Add Goal
             </Button>
           </DialogFooter>
         </DialogContent>

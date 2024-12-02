@@ -22,7 +22,7 @@ import {
 import { LearningItem } from "@/types";
 import { useMemo } from "react";
 import { Brain, Target, TrendingUp } from "lucide-react";
-import { LearningGoals } from './LearningGoals';
+import LearningGoals from './LearningGoals';
 
 interface AnalyticsTabProps {
   items: LearningItem[];
