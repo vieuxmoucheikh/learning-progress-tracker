@@ -65,10 +65,6 @@ export async function addLearningItem(item: LearningItemFormData): Promise<Learn
           hours: Math.max(0, parseInt(String(item.current?.hours || 0)) || 0),
           minutes: Math.max(0, parseInt(String(item.current?.minutes || 0)) || 0)
         },
-        target: {
-          hours: Math.max(0, parseInt(String(item.total?.hours || 0)) || 0),
-          minutes: Math.max(0, parseInt(String(item.total?.minutes || 0)) || 0)
-        },
         lastAccessed: new Date().toISOString(),
         sessions: []
       },
