@@ -124,22 +124,9 @@ export default function LearningGoals({ items }: Props) {
       // Convert learning items to goals format with proper typing
       const goalsFromItems: LearningGoal[] = items.map(item => {
         console.log('Processing item:', item);
-        // Parse target hours and date from description if available
-        let targetHours = 10; // default
-        let targetDate = new Date();
-        targetDate.setDate(targetDate.getDate() + 30); // default 30 days
-
-        if (item.description) {
-          const match = item.description.match(/Target: (\d+) hours by (.+)$/);
-          if (match) {
-            targetHours = parseInt(match[1]);
-            try {
-              targetDate = new Date(match[2]);
-            } catch (e) {
-              console.error('Error parsing date:', e);
-            }
-          }
-        }
+        // Get target hours and date from progress.target or use defaults
+        let targetHours = item.progress?.target?.hours || 10;
+        let targetDate = item.progress?.target?.date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
         // Calculate total minutes spent
         const totalMinutes = (item.progress?.sessions || []).reduce((acc: number, session: any) => {
@@ -152,12 +139,12 @@ export default function LearningGoals({ items }: Props) {
           id: item.id,
           userId: item.user_id,
           title: item.title,
-          targetDate: targetDate.toISOString(),
+          targetDate: targetDate,
           targetHours: targetHours,
           category: item.category || 'General',
           priority: 'medium' as Priority,
           status: totalMinutes >= targetHours * 60 ? 'completed' : 
-                 new Date() > targetDate ? 'overdue' : 'active',
+                 new Date(targetDate) < new Date() ? 'overdue' : 'active',
           createdAt: item.created_at
         };
 
@@ -238,11 +225,14 @@ export default function LearningGoals({ items }: Props) {
 
       const learningItem = {
         title: newGoal.title || '',
-        description: `Target: ${newGoal.targetHours} hours by ${new Date(newGoal.targetDate).toLocaleDateString()}`,
         category: newGoal.category || 'General',
         status: 'not_started' as const,
         difficulty: 'medium' as const,
         progress: {
+          target: {
+            hours: newGoal.targetHours,
+            date: new Date(newGoal.targetDate).toISOString()
+          },
           sessions: [] as { date: string; duration: { hours: number; minutes: number }; notes?: string }[]
         },
         user_id: user.id,
