@@ -101,8 +101,8 @@ export default function LearningGoals({ items }: Props) {
       const { data: items, error: itemsError } = await supabase
         .from('learning_items')
         .select('*')
-        .eq('userId', user.id)
-        .order('createdAt', { ascending: false });
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
       if (itemsError) {
         console.error('Error fetching learning items:', itemsError);
@@ -150,7 +150,7 @@ export default function LearningGoals({ items }: Props) {
 
         const goal: LearningGoal = {
           id: item.id,
-          userId: item.userId,
+          userId: item.user_id,
           title: item.title,
           targetDate: targetDate.toISOString(),
           targetHours: targetHours,
@@ -158,7 +158,7 @@ export default function LearningGoals({ items }: Props) {
           priority: 'medium' as Priority,
           status: totalMinutes >= targetHours * 60 ? 'completed' : 
                  new Date() > targetDate ? 'overdue' : 'active',
-          createdAt: item.createdAt
+          createdAt: item.created_at
         };
 
         console.log('Converted to goal:', goal);
@@ -193,7 +193,7 @@ export default function LearningGoals({ items }: Props) {
             event: '*',
             schema: 'public',
             table: 'learning_items',
-            filter: `userId=eq.${user.id}`,
+            filter: `user_id=eq.${user.id}`,
           },
           () => {
             fetchGoals();
@@ -224,9 +224,9 @@ export default function LearningGoals({ items }: Props) {
         progress: {
           sessions: []
         },
-        userId: user.id,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        user_id: user.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
 
       const { error } = await supabase.from('learning_items').insert([learningItem]);
