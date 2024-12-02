@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -17,8 +17,9 @@ import { LearningItem } from '@/types';
 import { clsx } from 'clsx';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { supabase } from '@/lib/supabase';
-import { useEffect } from 'react';
 import { useToast } from "@/components/ui/use-toast";
+import { addGoal, getGoals, updateGoal, deleteGoal } from '@/lib/database';
+import type { LearningGoal } from '@/types';
 
 type Priority = 'high' | 'medium' | 'low';
 
@@ -30,18 +31,6 @@ interface GoalAnalytics {
   daysActive: number;
   daysLeft: number;
   projectedCompletion: number;
-}
-
-interface LearningGoal {
-  id: string;
-  title: string;
-  targetDate: string;
-  targetHours: number;
-  category: string;
-  priority: Priority;
-  status: 'active' | 'completed' | 'overdue';
-  createdAt: string;
-  userId: string;
 }
 
 interface Props {
@@ -74,91 +63,14 @@ export default function LearningGoals({ items }: Props) {
   // Fetch goals from Supabase
   const fetchGoals = async () => {
     try {
-      console.log('Fetching user...');
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError) {
-        console.error('Error fetching user:', userError);
-        toast({
-          title: "Authentication Error",
-          description: "Please sign in to view your goals",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (!user) {
-        console.error('No user found');
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in to view your goals",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      console.log('Fetching learning items for user:', user.id);
-      const { data: items, error: itemsError } = await supabase
-        .from('learning_items')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (itemsError) {
-        console.error('Error fetching learning items:', itemsError);
-        toast({
-          title: "Error fetching learning items",
-          description: itemsError.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      console.log('Received items:', items);
-      if (!items) {
-        console.log('No items found, setting empty goals array');
-        setGoals([]);
-        return;
-      }
-
-      // Convert learning items to goals format with proper typing
-      const goalsFromItems: LearningGoal[] = items.map(item => {
-        console.log('Processing item:', item);
-        // Get target hours and date from progress.target or use defaults
-        let targetHours = item.progress?.target?.hours || 10;
-        let targetDate = item.progress?.target?.date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-
-        // Calculate total minutes spent
-        const totalMinutes = (item.progress?.sessions || []).reduce((acc: number, session: any) => {
-          const hours = session.duration?.hours || 0;
-          const minutes = session.duration?.minutes || 0;
-          return acc + (hours * 60 + minutes);
-        }, 0);
-
-        const goal: LearningGoal = {
-          id: item.id,
-          userId: item.user_id,
-          title: item.title,
-          targetDate: targetDate,
-          targetHours: targetHours,
-          category: item.category || 'General',
-          priority: 'medium' as Priority,
-          status: totalMinutes >= targetHours * 60 ? 'completed' : 
-                 new Date(targetDate) < new Date() ? 'overdue' : 'active',
-          createdAt: item.created_at
-        };
-
-        console.log('Converted to goal:', goal);
-        return goal;
-      });
-
-      console.log('Setting goals:', goalsFromItems);
-      setGoals(goalsFromItems);
+      setIsLoading(true);
+      const goals = await getGoals();
+      setGoals(goals);
     } catch (error) {
       console.error('Error in fetchGoals:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch learning items. Please try again later.",
+        description: "Failed to fetch goals. Please try again later.",
         variant: "destructive",
       });
     } finally {
@@ -179,7 +91,7 @@ export default function LearningGoals({ items }: Props) {
           {
             event: '*',
             schema: 'public',
-            table: 'learning_items',
+            table: 'goals',
             filter: `user_id=eq.${user.id}`,
           },
           () => {
@@ -198,110 +110,70 @@ export default function LearningGoals({ items }: Props) {
     fetchUser();
   }, []);
 
-  const addGoal = async (newGoal: Omit<LearningGoal, 'id' | 'status' | 'createdAt' | 'userId'>) => {
+  const handleAddGoal = async () => {
     try {
-      console.log('Adding new goal:', newGoal);
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError) {
-        console.error('Error getting user:', userError);
+      if (!newGoal.title || !newGoal.category || !newGoal.targetDate || !newGoal.targetHours) {
         toast({
-          title: 'Authentication Error',
-          description: 'Please sign in to add a goal',
-          variant: 'destructive',
+          title: "Missing Fields",
+          description: "Please fill in all required fields",
+          variant: "destructive",
         });
         return;
       }
 
-      if (!user?.id) {
-        console.error('No user found');
-        toast({
-          title: 'Authentication Required',
-          description: 'Please sign in to add a goal',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      const learningItem = {
-        title: newGoal.title || '',
-        type: 'course' as const,
-        url: '',
-        notes: '',
-        completed: false,
-        category: newGoal.category || 'General',
-        priority: newGoal.priority || 'medium',
-        tags: [] as string[],
-        progress: {
-          current: { hours: 0, minutes: 0 },
-          target: {
-            hours: newGoal.targetHours,
-            date: new Date(newGoal.targetDate).toISOString()
-          },
-          sessions: [] as { date: string; duration: { hours: number; minutes: number }; notes?: string }[],
-          lastAccessed: new Date().toISOString()
-        },
-        date: new Date().toISOString().split('T')[0],
-        difficulty: 'medium' as const,
-        status: 'not_started' as const,
-        unit: 'hours' as const,
-        user_id: user.id,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-
-      console.log('Inserting learning item:', learningItem);
-      const { error: insertError } = await supabase
-        .from('learning_items')
-        .insert([learningItem]);
-
-      if (insertError) {
-        console.error('Error inserting learning item:', insertError);
-        toast({
-          title: 'Error adding goal',
-          description: insertError.message,
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      toast({
-        title: 'Goal added successfully',
-        description: 'Your new learning goal has been created',
-      });
-
+      await addGoal(newGoal);
       setIsAddingGoal(false);
-      resetForm();
-      fetchGoals(); // Refresh the goals list
+      setNewGoal({
+        title: '',
+        targetDate: '',
+        targetHours: 0,
+        category: '',
+        priority: 'medium',
+      });
+      toast({
+        title: "Success",
+        description: "Goal added successfully",
+      });
     } catch (error) {
       console.error('Error adding goal:', error);
       toast({
-        title: 'Error adding goal',
-        description: error instanceof Error ? error.message : 'Please try again later',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to add goal. Please try again.",
+        variant: "destructive",
       });
     }
   };
 
-  const deleteGoal = async (id: string) => {
+  const handleUpdateGoal = async (goalId: string, updates: Partial<LearningGoal>) => {
     try {
-      const { error } = await supabase
-        .from('learning_items')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
+      await updateGoal(goalId, updates);
       toast({
-        title: 'Goal deleted successfully',
-        description: 'Your learning goal has been removed',
+        title: "Success",
+        description: "Goal updated successfully",
+      });
+    } catch (error) {
+      console.error('Error updating goal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update goal. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteGoal = async (goalId: string) => {
+    try {
+      await deleteGoal(goalId);
+      toast({
+        title: "Success",
+        description: "Goal deleted successfully",
       });
     } catch (error) {
       console.error('Error deleting goal:', error);
       toast({
-        title: 'Error deleting goal',
-        description: 'Please try again later',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to delete goal. Please try again.",
+        variant: "destructive",
       });
     }
   };
@@ -519,7 +391,7 @@ export default function LearningGoals({ items }: Props) {
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                  onClick={() => deleteGoal(goal.id)}
+                  onClick={() => handleDeleteGoal(goal.id)}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -670,20 +542,7 @@ export default function LearningGoals({ items }: Props) {
           <DialogFooter className="px-4 sm:px-0">
             <Button
               type="submit"
-              onClick={async () => {
-                if (!newGoal.title || !newGoal.category || !newGoal.targetDate || !newGoal.targetHours) {
-                  toast({
-                    title: 'Missing fields',
-                    description: 'Please fill in all required fields',
-                    variant: 'destructive',
-                  });
-                  return;
-                }
-
-                await addGoal(newGoal);
-                resetForm();
-                setIsAddingGoal(false);
-              }}
+              onClick={handleAddGoal}
               className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700"
             >
               Add Goal
