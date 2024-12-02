@@ -60,8 +60,6 @@ export default function LearningGoals({ items }: Props) {
     category: '',
     priority: 'medium',
   });
-  const [isAddingNewCategory, setIsAddingNewCategory] = useState(false);
-  const [newCategory, setNewCategory] = useState('');
   const [selectedGoal, setSelectedGoal] = useState<LearningGoal | null>(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
 
@@ -262,8 +260,6 @@ export default function LearningGoals({ items }: Props) {
       category: '',
       priority: 'medium',
     });
-    setNewCategory('');
-    setIsAddingNewCategory(false);
   };
 
   const calculateGoalAnalytics = (goal: LearningGoal): GoalAnalytics => {
@@ -322,12 +318,27 @@ export default function LearningGoals({ items }: Props) {
     };
   };
 
-  const handleCategoryChange = (value: string) => {
-    if (value === 'add-new') {
-      setIsAddingNewCategory(true);
-    } else {
-      setNewGoal(prev => ({ ...prev, category: value }));
-    }
+  const CategorySelect = () => {
+    // Only use categories from existing items
+    const existingCategories = Array.from(new Set(items.map(item => item.category))).filter(Boolean);
+
+    return (
+      <Select 
+        value={newGoal.category} 
+        onValueChange={(value: string) => setNewGoal(prev => ({ ...prev, category: value }))}
+      >
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select category" />
+        </SelectTrigger>
+        <SelectContent>
+          {existingCategories.map(category => (
+            <SelectItem key={category} value={category}>
+              {category}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    );
   };
 
   const PrioritySelect = () => (
@@ -342,33 +353,6 @@ export default function LearningGoals({ items }: Props) {
       </SelectContent>
     </Select>
   );
-
-  const CategorySelect = () => {
-    const defaultCategories = ['Programming', 'Design', 'Language', 'Math', 'Science', 'Other'];
-    const existingCategories = Array.from(new Set([...items.map(item => item.category), ...goals.map(goal => goal.category)]));
-    const allCategories = [...new Set([...defaultCategories, ...existingCategories])].filter(Boolean);
-
-    return (
-      <Select 
-        value={newGoal.category} 
-        onValueChange={handleCategoryChange}
-      >
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Select category" />
-        </SelectTrigger>
-        <SelectContent>
-          {allCategories.map(category => (
-            <SelectItem key={category} value={category}>
-              {category}
-            </SelectItem>
-          ))}
-          <SelectItem value="add-new">
-            + Add new category
-          </SelectItem>
-        </SelectContent>
-      </Select>
-    );
-  };
 
   return (
     <div className="space-y-6">
@@ -492,42 +476,7 @@ export default function LearningGoals({ items }: Props) {
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Category</label>
-              <div className="space-y-2">
-                {!isAddingNewCategory ? (
-                  <CategorySelect />
-                ) : (
-                  <div className="flex gap-2">
-                    <Input
-                      value={newCategory}
-                      onChange={e => setNewCategory(e.target.value)}
-                      placeholder="Enter new category name"
-                      className="flex-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                    />
-                    <Button
-                      onClick={() => {
-                        if (newCategory.trim()) {
-                          setNewGoal(prev => ({ ...prev, category: newCategory.trim() }));
-                          setIsAddingNewCategory(false);
-                          setNewCategory('');
-                        }
-                      }}
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                    >
-                      Add
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setIsAddingNewCategory(false);
-                        setNewCategory('');
-                      }}
-                      className="border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                )}
-              </div>
+              <CategorySelect />
             </div>
 
             <div className="space-y-2">
