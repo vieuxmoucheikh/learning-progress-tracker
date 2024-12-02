@@ -417,7 +417,7 @@ export async function addGoal(goal: Omit<LearningGoal, 'id' | 'userId' | 'create
       target_hours: goal.targetHours,
       target_date: goal.targetDate,
       priority: goal.priority || 'medium',
-      status: 'active',
+      status: 'active' as const,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
@@ -437,7 +437,20 @@ export async function addGoal(goal: Omit<LearningGoal, 'id' | 'userId' | 'create
       throw new Error('No data returned from insert');
     }
 
-    return data;
+    // Transform the data to match the LearningGoal interface
+    const transformedData: LearningGoal = {
+      id: data.id,
+      userId: data.user_id,
+      title: data.title,
+      category: data.category,
+      targetHours: data.target_hours,
+      targetDate: data.target_date,
+      priority: data.priority,
+      status: data.status,
+      createdAt: data.created_at
+    };
+
+    return transformedData;
   } catch (error) {
     console.error('Error in addGoal:', error);
     throw error instanceof Error ? error : new Error('Failed to add goal');
