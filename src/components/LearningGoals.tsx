@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import { Calendar } from './ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { format } from 'date-fns';
 import {
   Dialog,
   DialogContent,
@@ -11,8 +14,10 @@ import {
   DialogTitle,
   DialogTrigger
 } from './ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar, Clock, Target, Trophy, TrendingUp, Plus, Trash2, ChartBar, ArrowRight } from 'lucide-react';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from "@/components/ui/select"
+import { Calendar as LucideCalendar, Clock, Target, Trophy, TrendingUp, Plus, Trash2, ChartBar, ArrowRight } from 'lucide-react';
 import { LearningItem } from '@/types';
 import { clsx } from 'clsx';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
@@ -330,25 +335,31 @@ export default function LearningGoals({ items }: Props) {
     </Select>
   );
 
-  const CategorySelect = () => (
-    <Select value={newGoal.category} onValueChange={(value: string) => setNewGoal({ ...newGoal, category: value })}>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select category" />
-      </SelectTrigger>
-      <SelectContent>
-        {Array.from(new Set(goals.map(goal => goal.category))).map(category => (
-          <SelectItem key={category} value={category}>
-            {category}
-          </SelectItem>
-        ))}
-        {isAddingNewCategory && (
-          <SelectItem value={newCategory}>
-            {newCategory}
-          </SelectItem>
-        )}
-      </SelectContent>
-    </Select>
-  );
+  const CategorySelect = () => {
+    const defaultCategories = ['Programming', 'Design', 'Language', 'Math', 'Science', 'Other'];
+    const existingCategories = Array.from(new Set(goals.map(goal => goal.category)));
+    const categories = [...new Set([...defaultCategories, ...existingCategories])];
+
+    return (
+      <Select value={newGoal.category} onValueChange={(value: string) => setNewGoal({ ...newGoal, category: value })}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select category" />
+        </SelectTrigger>
+        <SelectContent>
+          {categories.map(category => (
+            <SelectItem key={category} value={category}>
+              {category}
+            </SelectItem>
+          ))}
+          {isAddingNewCategory && (
+            <SelectItem value={newCategory}>
+              {newCategory}
+            </SelectItem>
+          )}
+        </SelectContent>
+      </Select>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -421,7 +432,7 @@ export default function LearningGoals({ items }: Props) {
                 </div>
 
                 <div className="flex items-center gap-2 text-sm">
-                  <Calendar className="h-4 w-4 text-gray-500" />
+                  <LucideCalendar className="h-4 w-4 text-gray-500" />
                   <span>{getRemainingTime(goal.targetDate)}</span>
                 </div>
 
@@ -524,13 +535,29 @@ export default function LearningGoals({ items }: Props) {
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Target Date</label>
-              <Input
-                type="date"
-                value={newGoal.targetDate}
-                onChange={e => setNewGoal(prev => ({ ...prev, targetDate: e.target.value }))}
-                min={new Date().toISOString().split('T')[0]}
-                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                  >
+                    {newGoal.targetDate ? (
+                      format(new Date(newGoal.targetDate), "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
+                    onSelect={(date) => date && setNewGoal(prev => ({ ...prev, targetDate: date.toISOString().split('T')[0] }))}
+                    disabled={(date) => date < new Date()}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-2">
