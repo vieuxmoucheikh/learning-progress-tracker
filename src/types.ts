@@ -72,3 +72,18 @@ export interface TimeStats {
   mostProductiveDay: string;
   mostProductiveTime: string;
 }
+
+export type Priority = 'low' | 'medium' | 'high';
+export type GoalStatus = 'active' | 'completed' | 'overdue';
+
+export interface LearningGoal {
+  id: string;
+  userId: string;
+  title: string;
+  category: string;
+  targetHours: number;
+  targetDate: string;
+  priority: Priority;
+  status: GoalStatus;
+  createdAt: string;
+}

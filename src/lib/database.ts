@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { LearningItem, StreakData, LearningItemFormData } from '../types'
+import type { LearningItem, StreakData, LearningItemFormData, LearningGoal } from '../types'
 
 // Learning Items
 export const getLearningItems = async () => {
@@ -375,4 +375,128 @@ function calculateDuration(startTime: Date, endTime: Date) {
     hours: Math.floor(diffMinutes / 60),
     minutes: diffMinutes % 60
   };
+}
+
+// Goals
+export async function getGoals() {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Authentication required');
+    }
+
+    const { data, error } = await supabase
+      .from('goals')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching goals:', error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error in getGoals:', error);
+    return [];
+  }
+}
+
+export async function addGoal(goal: Omit<LearningGoal, 'id' | 'userId' | 'createdAt' | 'status'>) {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Authentication required');
+    }
+
+    const newGoal = {
+      user_id: user.id,
+      title: goal.title.trim(),
+      category: goal.category.trim(),
+      target_hours: goal.targetHours,
+      target_date: goal.targetDate,
+      priority: goal.priority || 'medium',
+      status: 'active',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    const { data, error } = await supabase
+      .from('goals')
+      .insert([newGoal])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding goal:', error);
+      throw new Error(error.message || 'Failed to add goal');
+    }
+
+    if (!data) {
+      throw new Error('No data returned from insert');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in addGoal:', error);
+    throw error instanceof Error ? error : new Error('Failed to add goal');
+  }
+}
+
+export async function updateGoal(id: string, updates: Partial<LearningGoal>) {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Authentication required');
+    }
+
+    const { data, error } = await supabase
+      .from('goals')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating goal:', error);
+      throw new Error(error.message || 'Failed to update goal');
+    }
+
+    if (!data) {
+      throw new Error('No data returned from update');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in updateGoal:', error);
+    throw error instanceof Error ? error : new Error('Failed to update goal');
+  }
+}
+
+export async function deleteGoal(id: string) {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Authentication required');
+    }
+
+    const { error } = await supabase
+      .from('goals')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id);
+    
+    if (error) {
+      console.error('Error deleting goal:', error);
+      throw new Error(error.message || 'Failed to delete goal');
+    }
+  } catch (error) {
+    console.error('Error in deleteGoal:', error);
+    throw error instanceof Error ? error : new Error('Failed to delete goal');
+  }
 }
