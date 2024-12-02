@@ -385,8 +385,18 @@ export async function getGoals() {
       throw new Error('Authentication required');
     }
 
+    // First, try to check if the table exists
+    const { error: tableCheckError } = await supabase
+      .from('learning_goals')
+      .select('count')
+      .limit(1);
+
+    // Use the correct table name based on the check above
+    const tableName = tableCheckError ? 'goals' : 'learning_goals';
+    console.log('Using table for getGoals:', tableName);
+
     const { data, error } = await supabase
-      .from('goals')
+      .from(tableName)
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
@@ -395,8 +405,21 @@ export async function getGoals() {
       console.error('Error fetching goals:', error);
       return [];
     }
+
+    // Transform the data to match the LearningGoal interface
+    const transformedData = data?.map(goal => ({
+      id: goal.id,
+      userId: goal.user_id,
+      title: goal.title,
+      category: goal.category,
+      targetHours: goal.target_hours,
+      targetDate: goal.target_date,
+      priority: goal.priority,
+      status: goal.status,
+      createdAt: goal.created_at
+    })) || [];
     
-    return data || [];
+    return transformedData;
   } catch (error) {
     console.error('Error in getGoals:', error);
     return [];
@@ -410,6 +433,9 @@ export async function addGoal(goal: Omit<LearningGoal, 'id' | 'userId' | 'create
       throw new Error('Authentication required');
     }
 
+    console.log('Adding goal with user:', user.id);
+    console.log('Goal data:', goal);
+
     const newGoal = {
       user_id: user.id,
       title: goal.title.trim(),
@@ -422,8 +448,34 @@ export async function addGoal(goal: Omit<LearningGoal, 'id' | 'userId' | 'create
       updated_at: new Date().toISOString()
     };
 
+    console.log('Formatted goal data:', newGoal);
+
+    // First, try to check if the table exists
+    const { error: tableCheckError } = await supabase
+      .from('learning_goals')
+      .select('count')
+      .limit(1);
+
+    if (tableCheckError) {
+      console.log('Error checking learning_goals table:', tableCheckError);
+      // Try with 'goals' table instead
+      const { error: goalsCheckError } = await supabase
+        .from('goals')
+        .select('count')
+        .limit(1);
+
+      if (goalsCheckError) {
+        console.log('Error checking goals table:', goalsCheckError);
+        throw new Error('Could not find goals table');
+      }
+    }
+
+    // Use the correct table name based on the check above
+    const tableName = tableCheckError ? 'goals' : 'learning_goals';
+    console.log('Using table:', tableName);
+
     const { data, error } = await supabase
-      .from('goals')
+      .from(tableName)
       .insert([newGoal])
       .select()
       .single();
@@ -436,6 +488,8 @@ export async function addGoal(goal: Omit<LearningGoal, 'id' | 'userId' | 'create
     if (!data) {
       throw new Error('No data returned from insert');
     }
+
+    console.log('Successfully added goal:', data);
 
     // Transform the data to match the LearningGoal interface
     const transformedData: LearningGoal = {
