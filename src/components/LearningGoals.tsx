@@ -226,6 +226,7 @@ export default function LearningGoals({ items }: Props) {
       const learningItem = {
         title: newGoal.title || '',
         category: newGoal.category || 'General',
+        type: 'goal', // Required field
         status: 'not_started' as const,
         difficulty: 'medium' as const,
         progress: {
