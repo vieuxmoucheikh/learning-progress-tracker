@@ -73,24 +73,69 @@ export default function LearningGoals({ items }: Props) {
 
   // Fetch goals from Supabase
   const fetchGoals = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user?.id) return;
-
     try {
-      const { data, error } = await supabase
-        .from('goals')
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('No user found');
+        return;
+      }
+
+      const { data: items, error } = await supabase
+        .from('learning_items')
         .select('*')
         .eq('userId', user.id)
         .order('createdAt', { ascending: false });
 
-      if (error) throw error;
-      setGoals(data || []);
+      if (error) {
+        console.error('Error fetching learning items:', error);
+        toast({
+          title: "Error fetching learning items",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Convert learning items to goals format with proper typing
+      const goalsFromItems: LearningGoal[] = (items || []).map(item => {
+        // Parse target hours and date from description if available
+        let targetHours = 10; // default
+        let targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + 30); // default 30 days
+
+        if (item.description) {
+          const match = item.description.match(/Target: (\d+) hours by (.+)$/);
+          if (match) {
+            targetHours = parseInt(match[1]);
+            targetDate = new Date(match[2]);
+          }
+        }
+
+        // Calculate total minutes spent
+        const totalMinutes = item.progress?.sessions?.reduce((acc: number, session: any) => 
+          acc + ((session.duration?.hours || 0) * 60 + (session.duration?.minutes || 0)), 0) || 0;
+
+        return {
+          id: item.id,
+          userId: item.userId,
+          title: item.title,
+          targetDate: targetDate.toISOString(),
+          targetHours: targetHours,
+          category: item.category || 'General',
+          priority: 'medium' as Priority,
+          status: totalMinutes >= targetHours * 60 ? 'completed' : 
+                 new Date() > targetDate ? 'overdue' : 'active',
+          createdAt: item.createdAt
+        };
+      });
+
+      setGoals(goalsFromItems);
     } catch (error) {
-      console.error('Error fetching goals:', error);
+      console.error('Error in fetchGoals:', error);
       toast({
-        title: 'Error fetching goals',
-        description: 'Please try again later',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to fetch learning items. Please try again later.",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -110,7 +155,7 @@ export default function LearningGoals({ items }: Props) {
           {
             event: '*',
             schema: 'public',
-            table: 'goals',
+            table: 'learning_items',
             filter: `userId=eq.${user.id}`,
           },
           () => {
@@ -134,14 +179,20 @@ export default function LearningGoals({ items }: Props) {
     if (!user?.id) return;
 
     try {
-      const goalToAdd = {
-        ...newGoal,
-        status: 'active',
-        createdAt: new Date().toISOString(),
+      const learningItem = {
+        title: newGoal.title,
+        description: `Target: ${newGoal.targetHours} hours by ${new Date(newGoal.targetDate).toLocaleDateString()}`,
+        category: newGoal.category,
+        status: 'not_started',
+        progress: {
+          sessions: []
+        },
         userId: user.id,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
-      const { error } = await supabase.from('goals').insert([goalToAdd]);
+      const { error } = await supabase.from('learning_items').insert([learningItem]);
 
       if (error) throw error;
 
@@ -149,6 +200,9 @@ export default function LearningGoals({ items }: Props) {
         title: 'Goal added successfully',
         description: 'Your new learning goal has been created',
       });
+
+      setIsAddingGoal(false);
+      resetForm();
     } catch (error) {
       console.error('Error adding goal:', error);
       toast({
@@ -162,7 +216,7 @@ export default function LearningGoals({ items }: Props) {
   const deleteGoal = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('goals')
+        .from('learning_items')
         .delete()
         .eq('id', id);
 
