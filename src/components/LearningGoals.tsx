@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Card } from './ui/card';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Calendar } from './ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import {
   Dialog,
@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from './ui/dialog';
+} from '@/components/ui/dialog';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select"
@@ -322,6 +322,14 @@ export default function LearningGoals({ items }: Props) {
     };
   };
 
+  const handleCategoryChange = (value: string) => {
+    if (value === 'add-new') {
+      setIsAddingNewCategory(true);
+    } else {
+      setNewGoal(prev => ({ ...prev, category: value }));
+    }
+  };
+
   const PrioritySelect = () => (
     <Select value={newGoal.priority} onValueChange={(value: Priority) => setNewGoal({ ...newGoal, priority: value })}>
       <SelectTrigger className="w-full">
@@ -337,25 +345,26 @@ export default function LearningGoals({ items }: Props) {
 
   const CategorySelect = () => {
     const defaultCategories = ['Programming', 'Design', 'Language', 'Math', 'Science', 'Other'];
-    const existingCategories = Array.from(new Set(goals.map(goal => goal.category)));
-    const categories = [...new Set([...defaultCategories, ...existingCategories])];
+    const existingCategories = Array.from(new Set([...items.map(item => item.category), ...goals.map(goal => goal.category)]));
+    const allCategories = [...new Set([...defaultCategories, ...existingCategories])].filter(Boolean);
 
     return (
-      <Select value={newGoal.category} onValueChange={(value: string) => setNewGoal({ ...newGoal, category: value })}>
+      <Select 
+        value={newGoal.category} 
+        onValueChange={handleCategoryChange}
+      >
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select category" />
         </SelectTrigger>
         <SelectContent>
-          {categories.map(category => (
+          {allCategories.map(category => (
             <SelectItem key={category} value={category}>
               {category}
             </SelectItem>
           ))}
-          {isAddingNewCategory && (
-            <SelectItem value={newCategory}>
-              {newCategory}
-            </SelectItem>
-          )}
+          <SelectItem value="add-new">
+            + Add new category
+          </SelectItem>
         </SelectContent>
       </Select>
     );
@@ -498,9 +507,9 @@ export default function LearningGoals({ items }: Props) {
                       onClick={() => {
                         if (newCategory.trim()) {
                           setNewGoal(prev => ({ ...prev, category: newCategory.trim() }));
+                          setIsAddingNewCategory(false);
                           setNewCategory('');
                         }
-                        setIsAddingNewCategory(false);
                       }}
                       className="bg-green-600 hover:bg-green-700 text-white"
                     >
@@ -552,8 +561,8 @@ export default function LearningGoals({ items }: Props) {
                   <Calendar
                     mode="single"
                     selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
-                    onSelect={(date) => date && setNewGoal(prev => ({ ...prev, targetDate: date.toISOString().split('T')[0] }))}
-                    disabled={(date) => date < new Date()}
+                    onSelect={(date: Date | undefined) => date && setNewGoal(prev => ({ ...prev, targetDate: date.toISOString().split('T')[0] }))}
+                    disabled={(date: Date) => date < new Date()}
                     initialFocus
                   />
                 </PopoverContent>
