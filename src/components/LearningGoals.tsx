@@ -212,26 +212,58 @@ export default function LearningGoals({ items }: Props) {
   }, []);
 
   const addGoal = async (newGoal: Omit<LearningGoal, 'id' | 'status' | 'createdAt' | 'userId'>) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user?.id) return;
-
     try {
+      console.log('Adding new goal:', newGoal);
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('Error getting user:', userError);
+        toast({
+          title: 'Authentication Error',
+          description: 'Please sign in to add a goal',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (!user?.id) {
+        console.error('No user found');
+        toast({
+          title: 'Authentication Required',
+          description: 'Please sign in to add a goal',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const learningItem = {
-        title: newGoal.title,
+        title: newGoal.title || '',
         description: `Target: ${newGoal.targetHours} hours by ${new Date(newGoal.targetDate).toLocaleDateString()}`,
-        category: newGoal.category,
-        status: 'not_started',
+        category: newGoal.category || 'General',
+        status: 'not_started' as const,
+        difficulty: 'medium' as const,
         progress: {
-          sessions: []
+          sessions: [] as { date: string; duration: { hours: number; minutes: number }; notes?: string }[]
         },
         user_id: user.id,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
-      const { error } = await supabase.from('learning_items').insert([learningItem]);
+      console.log('Inserting learning item:', learningItem);
+      const { error: insertError } = await supabase
+        .from('learning_items')
+        .insert([learningItem]);
 
-      if (error) throw error;
+      if (insertError) {
+        console.error('Error inserting learning item:', insertError);
+        toast({
+          title: 'Error adding goal',
+          description: insertError.message,
+          variant: 'destructive',
+        });
+        return;
+      }
 
       toast({
         title: 'Goal added successfully',
@@ -240,11 +272,12 @@ export default function LearningGoals({ items }: Props) {
 
       setIsAddingGoal(false);
       resetForm();
+      fetchGoals(); // Refresh the goals list
     } catch (error) {
       console.error('Error adding goal:', error);
       toast({
         title: 'Error adding goal',
-        description: 'Please try again later',
+        description: error instanceof Error ? error.message : 'Please try again later',
         variant: 'destructive',
       });
     }
