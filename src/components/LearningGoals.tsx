@@ -74,30 +74,56 @@ export default function LearningGoals({ items }: Props) {
   // Fetch goals from Supabase
   const fetchGoals = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.error('No user found');
-        return;
-      }
-
-      const { data: items, error } = await supabase
-        .from('learning_items')
-        .select('*')
-        .eq('userId', user.id)
-        .order('createdAt', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching learning items:', error);
+      console.log('Fetching user...');
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('Error fetching user:', userError);
         toast({
-          title: "Error fetching learning items",
-          description: error.message,
+          title: "Authentication Error",
+          description: "Please sign in to view your goals",
           variant: "destructive",
         });
         return;
       }
 
+      if (!user) {
+        console.error('No user found');
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to view your goals",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log('Fetching learning items for user:', user.id);
+      const { data: items, error: itemsError } = await supabase
+        .from('learning_items')
+        .select('*')
+        .eq('userId', user.id)
+        .order('createdAt', { ascending: false });
+
+      if (itemsError) {
+        console.error('Error fetching learning items:', itemsError);
+        toast({
+          title: "Error fetching learning items",
+          description: itemsError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log('Received items:', items);
+      if (!items) {
+        console.log('No items found, setting empty goals array');
+        setGoals([]);
+        return;
+      }
+
       // Convert learning items to goals format with proper typing
-      const goalsFromItems: LearningGoal[] = (items || []).map(item => {
+      const goalsFromItems: LearningGoal[] = items.map(item => {
+        console.log('Processing item:', item);
         // Parse target hours and date from description if available
         let targetHours = 10; // default
         let targetDate = new Date();
@@ -107,15 +133,22 @@ export default function LearningGoals({ items }: Props) {
           const match = item.description.match(/Target: (\d+) hours by (.+)$/);
           if (match) {
             targetHours = parseInt(match[1]);
-            targetDate = new Date(match[2]);
+            try {
+              targetDate = new Date(match[2]);
+            } catch (e) {
+              console.error('Error parsing date:', e);
+            }
           }
         }
 
         // Calculate total minutes spent
-        const totalMinutes = item.progress?.sessions?.reduce((acc: number, session: any) => 
-          acc + ((session.duration?.hours || 0) * 60 + (session.duration?.minutes || 0)), 0) || 0;
+        const totalMinutes = (item.progress?.sessions || []).reduce((acc: number, session: any) => {
+          const hours = session.duration?.hours || 0;
+          const minutes = session.duration?.minutes || 0;
+          return acc + (hours * 60 + minutes);
+        }, 0);
 
-        return {
+        const goal: LearningGoal = {
           id: item.id,
           userId: item.userId,
           title: item.title,
@@ -127,8 +160,12 @@ export default function LearningGoals({ items }: Props) {
                  new Date() > targetDate ? 'overdue' : 'active',
           createdAt: item.createdAt
         };
+
+        console.log('Converted to goal:', goal);
+        return goal;
       });
 
+      console.log('Setting goals:', goalsFromItems);
       setGoals(goalsFromItems);
     } catch (error) {
       console.error('Error in fetchGoals:', error);
