@@ -226,7 +226,7 @@ export default function LearningGoals({ items }: Props) {
       const learningItem = {
         title: newGoal.title || '',
         category: newGoal.category || 'General',
-        type: 'goal', // Required field
+        type: 'course' as const, // Using 'course' as the type for goals
         status: 'not_started' as const,
         difficulty: 'medium' as const,
         progress: {
@@ -234,11 +234,16 @@ export default function LearningGoals({ items }: Props) {
             hours: newGoal.targetHours,
             date: new Date(newGoal.targetDate).toISOString()
           },
-          sessions: [] as { date: string; duration: { hours: number; minutes: number }; notes?: string }[]
+          sessions: [] as { date: string; duration: { hours: number; minutes: number }; notes?: string }[],
+          current: { hours: 0, minutes: 0 } // Required by LearningItem type
         },
         user_id: user.id,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        completed: false,
+        tags: [],
+        date: new Date().toISOString(),
+        priority: newGoal.priority || 'medium'
       };
 
       console.log('Inserting learning item:', learningItem);
