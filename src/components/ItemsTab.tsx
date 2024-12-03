@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { LearningItem } from "@/types";
 import LearningItemCard from "./LearningItemCard";
 import { Input } from "./ui/input";
-import { Select } from "./ui/select";
+import { CustomSelect } from "./ui/select";
 import { Search } from "lucide-react";
 
 interface ItemsTabProps {
@@ -67,7 +67,7 @@ export function ItemsTab({
             />
           </div>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <Select
+            <CustomSelect
               value={selectedStatus}
               onValueChange={setSelectedStatus}
               className="w-full sm:w-[180px]"
@@ -80,7 +80,7 @@ export function ItemsTab({
                 { value: 'archived', label: 'Archived' }
               ]}
             />
-            <Select
+            <CustomSelect
               value={selectedCategory}
               onValueChange={setSelectedCategory}
               className="w-full sm:w-[180px]"
