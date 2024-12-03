@@ -3,28 +3,18 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog';
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
-} from "@/components/ui/select"
-import { Calendar as LucideCalendar, Clock, Target, Trophy, TrendingUp, Plus, Trash2, ChartBar, ArrowRight } from 'lucide-react';
+import { Brain, ChartBar, LucideCalendar, Plus, Trash2, Target, Clock } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { addGoal, deleteGoal, getGoals, updateGoal } from '@/lib/database';
 import { LearningItem } from '@/types';
 import { clsx } from 'clsx';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { supabase } from '@/lib/supabase';
-import { useToast } from "@/components/ui/use-toast";
-import { addGoal, getGoals, updateGoal, deleteGoal } from '@/lib/database';
-import type { LearningGoal } from '@/types';
+import { LearningGoal } from '@/types';
 
 type Priority = 'high' | 'medium' | 'low';
 
@@ -47,6 +37,8 @@ export default function LearningGoals({ items }: Props) {
   const [goals, setGoals] = useState<LearningGoal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddingGoal, setIsAddingGoal] = useState(false);
+  const [goalToDelete, setGoalToDelete] = useState<LearningGoal | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [newGoal, setNewGoal] = useState<{
     title: string;
     targetDate: string;
@@ -167,6 +159,8 @@ export default function LearningGoals({ items }: Props) {
   const handleDeleteGoal = async (goalId: string) => {
     try {
       await deleteGoal(goalId);
+      setShowDeleteConfirm(false);
+      setGoalToDelete(null);
       toast({
         title: "Success",
         description: "Goal deleted successfully",
@@ -395,7 +389,10 @@ export default function LearningGoals({ items }: Props) {
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                  onClick={() => handleDeleteGoal(goal.id)}
+                  onClick={() => {
+                    setGoalToDelete(goal);
+                    setShowDeleteConfirm(true);
+                  }}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -549,6 +546,35 @@ export default function LearningGoals({ items }: Props) {
               className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700"
             >
               Add Goal
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete Goal</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{goalToDelete?.title}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteConfirm(false);
+                setGoalToDelete(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => goalToDelete && handleDeleteGoal(goalToDelete.id)}
+            >
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>
