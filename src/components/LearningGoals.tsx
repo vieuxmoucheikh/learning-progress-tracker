@@ -116,7 +116,9 @@ export default function LearningGoals({ items }: Props) {
         return;
       }
 
-      await addGoal(newGoal);
+      const addedGoal = await addGoal(newGoal);
+      // Update local state immediately
+      setGoals(prevGoals => [...prevGoals, addedGoal]);
       setIsAddingGoal(false);
       setNewGoal({
         title: '',
@@ -159,6 +161,8 @@ export default function LearningGoals({ items }: Props) {
   const handleDeleteGoal = async (goalId: string) => {
     try {
       await deleteGoal(goalId);
+      // Update local state immediately
+      setGoals(prevGoals => prevGoals.filter(goal => goal.id !== goalId));
       setShowDeleteConfirm(false);
       setGoalToDelete(null);
       toast({
@@ -495,7 +499,7 @@ export default function LearningGoals({ items }: Props) {
                   <Button
                     variant="outline"
                     className={clsx(
-                      "w-full pl-3 text-left font-normal",
+                      "w-full pl-3 text-left font-normal border-gray-300 hover:bg-gray-50",
                       !newGoal.targetDate && "text-muted-foreground"
                     )}
                   >
@@ -508,7 +512,7 @@ export default function LearningGoals({ items }: Props) {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <div className="p-1">
+                  <div className="rounded-md border shadow-md bg-white">
                     <Calendar
                       mode="single"
                       selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
@@ -527,6 +531,8 @@ export default function LearningGoals({ items }: Props) {
                         return date < today;
                       }}
                       initialFocus
+                      fromDate={new Date()}
+                      className="rounded-md border-0"
                     />
                   </div>
                 </PopoverContent>
