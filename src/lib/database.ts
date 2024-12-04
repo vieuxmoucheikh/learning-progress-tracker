@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { LearningItem, StreakData, LearningItemFormData, LearningGoal } from '../types'
+import type { LearningItem, StreakData, LearningItemFormData, LearningGoal, Priority, GoalStatus } from '../types'
 
 // Learning Items
 export const getLearningItems = async () => {
@@ -424,13 +424,18 @@ export async function getGoals() {
         category: goal.category,
         targetHours: goal.target_hours,
         targetDate: goal.target_date,
-        priority: goal.priority,
-        status: goal.status,
+        priority: goal.priority as Priority,
+        status: goal.status as GoalStatus,
         createdAt: goal.created_at,
         progress: {
-          sessions: sessions.map(session => ({
+          sessions: sessions.map((session: { 
+            date: string; 
+            duration?: { hours: number; minutes: number }; 
+            startTime?: string;
+            endTime?: string;
+          }) => ({
             date: session.date,
-            duration: session.duration,
+            duration: session.duration || { hours: 0, minutes: 0 },
             startTime: session.startTime || session.date,
             endTime: session.endTime
           }))
