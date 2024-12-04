@@ -35,10 +35,10 @@ function Calendar({
           "h-8 w-8 p-0 hover:bg-accent text-foreground rounded-full transition-all"
         ),
         table: "w-full border-collapse",
-        head_row: "grid grid-cols-7",
+        head_row: "grid grid-cols-7 text-center",
         head_cell: cn(
-          "text-muted-foreground font-medium text-[0.8rem]",
-          "mb-1 text-center last-of-type:text-center first-of-type:text-center"
+          "text-muted-foreground font-medium text-[0.8rem] w-9 h-9",
+          "flex items-center justify-center"
         ),
         row: "grid grid-cols-7 mt-2",
         cell: cn(
