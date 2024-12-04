@@ -378,6 +378,40 @@ function calculateDuration(startTime: Date, endTime: Date) {
 }
 
 // Goals
+async function addProgressColumnIfNeeded() {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Authentication required');
+    }
+
+    // First check if the column exists
+    const { error: checkError } = await supabase.rpc('check_column_exists', {
+      table_name: 'learning_goals',
+      column_name: 'progress'
+    });
+
+    if (checkError) {
+      // Column doesn't exist, add it
+      const { error: alterError } = await supabase.rpc('execute_sql', {
+        sql_string: `
+          ALTER TABLE learning_goals
+          ADD COLUMN IF NOT EXISTS progress JSONB DEFAULT '{"sessions": []}';
+        `
+      });
+
+      if (alterError) {
+        console.error('Error adding progress column:', alterError);
+        return;
+      }
+
+      console.log('Successfully added progress column');
+    }
+  } catch (error) {
+    console.error('Error in addProgressColumnIfNeeded:', error);
+  }
+}
+
 async function ensureGoalsTableExists() {
   try {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -510,53 +544,48 @@ export async function addGoal(goal: Omit<LearningGoal, 'id' | 'userId' | 'create
     console.log('Adding goal with user:', user.id);
     console.log('Goal data:', goal);
 
-    await ensureGoalsTableExists();
-
+    // Convert property names for database
+    const { targetHours, targetDate, ...rest } = goal;
     const newGoal = {
+      ...rest,
       user_id: user.id,
-      title: goal.title.trim(),
-      category: goal.category.trim(),
-      target_hours: goal.targetHours,
-      target_date: goal.targetDate,
-      priority: goal.priority || 'medium',
+      target_hours: targetHours,
+      target_date: targetDate,
       status: 'active' as const,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      progress: {
-        sessions: []
-      }
+      updated_at: new Date().toISOString()
     };
 
     console.log('Formatted goal data:', newGoal);
 
-    const { data, error } = await supabase
+    const { data: insertedGoal, error: insertError } = await supabase
       .from('learning_goals')
       .insert([newGoal])
       .select()
       .single();
 
-    if (error) {
-      console.error('Error adding goal:', error);
-      throw new Error(error.message || 'Failed to add goal');
+    if (insertError) {
+      console.error('Error adding goal:', insertError);
+      throw new Error(insertError.message || 'Failed to add goal');
     }
 
-    if (!data) {
+    if (!insertedGoal) {
       throw new Error('No data returned from insert');
     }
 
-    console.log('Successfully added goal:', data);
+    console.log('Successfully added goal:', insertedGoal);
 
     // Transform the data to match the LearningGoal interface
     const transformedData: LearningGoal = {
-      id: data.id,
-      userId: data.user_id,
-      title: data.title,
-      category: data.category,
-      targetHours: data.target_hours,
-      targetDate: data.target_date,
-      priority: data.priority,
-      status: data.status,
-      createdAt: data.created_at,
+      id: insertedGoal.id,
+      userId: insertedGoal.user_id,
+      title: insertedGoal.title,
+      category: insertedGoal.category,
+      targetHours: insertedGoal.target_hours,
+      targetDate: insertedGoal.target_date,
+      priority: insertedGoal.priority,
+      status: insertedGoal.status,
+      createdAt: insertedGoal.created_at,
       progress: {
         sessions: []
       }
@@ -576,20 +605,16 @@ export async function updateGoal(id: string, updates: Partial<LearningGoal>) {
       throw new Error('Authentication required');
     }
 
-    await ensureGoalsTableExists();
-
-    // Ensure progress.sessions exists if we're updating progress
-    const updatedData: any = {
-      ...updates,
+    // Remove progress from updates and convert property names
+    const { progress, targetHours, targetDate, ...rest } = updates;
+    const updatedData = {
+      ...rest,
+      ...(targetHours !== undefined && { target_hours: targetHours }),
+      ...(targetDate !== undefined && { target_date: targetDate }),
       updated_at: new Date().toISOString()
     };
 
-    if (updates.progress && !updates.progress.sessions) {
-      updatedData.progress = {
-        ...updates.progress,
-        sessions: []
-      };
-    }
+    console.log('Updating goal with data:', updatedData);
 
     const { data, error } = await supabase
       .from('learning_goals')
@@ -608,11 +633,19 @@ export async function updateGoal(id: string, updates: Partial<LearningGoal>) {
       throw new Error('No data returned from update');
     }
 
-    // Ensure the returned data has the progress.sessions array
+    // Transform the data back to match the LearningGoal interface
     const transformedData: LearningGoal = {
-      ...data,
+      id: data.id,
+      userId: data.user_id,
+      title: data.title,
+      category: data.category,
+      targetHours: data.target_hours,
+      targetDate: data.target_date,
+      priority: data.priority,
+      status: data.status,
+      createdAt: data.created_at,
       progress: {
-        sessions: data.progress?.sessions || []
+        sessions: []
       }
     };
 
@@ -647,3 +680,5 @@ export async function deleteGoal(id: string) {
     throw error instanceof Error ? error : new Error('Failed to delete goal');
   }
 }
+
+addProgressColumnIfNeeded();
