@@ -468,69 +468,32 @@ export async function getGoals() {
       throw new Error('Authentication required');
     }
 
-    // Get goals with their progress data
-    const { data: goalsData, error: goalsError } = await supabase
+    const { data, error } = await supabase
       .from('learning_goals')
       .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+      .eq('user_id', user.id);
 
-    if (goalsError) {
-      console.error('Error fetching goals:', goalsError);
-      throw new Error(goalsError.message);
+    if (error) {
+      console.error('Error fetching goals:', error);
+      throw new Error(error.message || 'Failed to fetch goals');
     }
 
-    // Process the goals data to ensure proper structure
-    const processedGoals = goalsData?.map(goal => {
-      // Ensure progress and sessions exist
-      const progress = goal.progress || { sessions: [] };
-      const sessions = Array.isArray(progress.sessions) ? progress.sessions : [];
-
-      console.log('Processing goal:', goal.title);
-      console.log('Raw sessions:', sessions);
-
-      if (sessions.length === 0) {
-        console.log('No sessions found');
-      } else {
-        console.log('Found sessions:', sessions.length);
-      }
-
-      return {
-        id: goal.id,
-        userId: goal.user_id,
-        title: goal.title,
-        category: goal.category,
-        targetHours: goal.target_hours,
-        targetDate: goal.target_date,
-        priority: goal.priority as Priority,
-        status: goal.status as GoalStatus,
-        createdAt: goal.created_at,
-        progress: {
-          sessions: sessions.map((session: { 
-            date: string; 
-            duration?: { hours: number; minutes: number }; 
-            startTime?: string;
-            endTime?: string;
-          }) => ({
-            date: session.date,
-            duration: session.duration || { hours: 0, minutes: 0 },
-            startTime: session.startTime || session.date,
-            endTime: session.endTime
-          }))
-        }
-      };
-    }) || [];
-
-    console.log('Processed goals:', processedGoals.map(g => ({
-      title: g.title,
-      sessionsCount: g.progress.sessions.length
-    })));
-
-    return processedGoals;
-
+    // Transform the data to match the LearningGoal interface
+    return data.map((goal): LearningGoal => ({
+      id: goal.id,
+      userId: goal.user_id,
+      title: goal.title,
+      category: goal.category,
+      targetHours: goal.target_hours,
+      targetDate: goal.target_date,
+      priority: goal.priority,
+      status: goal.status,
+      createdAt: goal.created_at,
+      progress: goal.progress || { sessions: [] }
+    }));
   } catch (error) {
     console.error('Error in getGoals:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error('Failed to fetch goals');
   }
 }
 
@@ -544,13 +507,14 @@ export async function addGoal(goal: Omit<LearningGoal, 'id' | 'userId' | 'create
     console.log('Adding goal with user:', user.id);
     console.log('Goal data:', goal);
 
-    // Convert property names for database
-    const { targetHours, targetDate, ...rest } = goal;
+    // Convert property names for database and initialize progress
+    const { targetHours, targetDate, progress, ...rest } = goal;
     const newGoal = {
       ...rest,
       user_id: user.id,
       target_hours: targetHours,
       target_date: targetDate,
+      progress: progress || { sessions: [] },
       status: 'active' as const,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -586,9 +550,7 @@ export async function addGoal(goal: Omit<LearningGoal, 'id' | 'userId' | 'create
       priority: insertedGoal.priority,
       status: insertedGoal.status,
       createdAt: insertedGoal.created_at,
-      progress: {
-        sessions: []
-      }
+      progress: insertedGoal.progress || { sessions: [] }
     };
 
     return transformedData;
@@ -605,12 +567,34 @@ export async function updateGoal(id: string, updates: Partial<LearningGoal>) {
       throw new Error('Authentication required');
     }
 
+    // Get the current goal to merge progress
+    const { data: currentGoal, error: fetchError } = await supabase
+      .from('learning_goals')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching current goal:', fetchError);
+      throw new Error(fetchError.message || 'Failed to fetch current goal');
+    }
+
+    // Prepare progress data
+    let progressData = currentGoal?.progress || { sessions: [] };
+    if (updates.progress?.sessions) {
+      progressData = {
+        sessions: [...(progressData.sessions || []), ...updates.progress.sessions]
+      };
+    }
+
     // Remove progress from updates and convert property names
     const { progress, targetHours, targetDate, ...rest } = updates;
     const updatedData = {
       ...rest,
       ...(targetHours !== undefined && { target_hours: targetHours }),
       ...(targetDate !== undefined && { target_date: targetDate }),
+      progress: progressData,
       updated_at: new Date().toISOString()
     };
 
@@ -644,9 +628,7 @@ export async function updateGoal(id: string, updates: Partial<LearningGoal>) {
       priority: data.priority,
       status: data.status,
       createdAt: data.created_at,
-      progress: {
-        sessions: []
-      }
+      progress: data.progress || { sessions: [] }
     };
 
     return transformedData;

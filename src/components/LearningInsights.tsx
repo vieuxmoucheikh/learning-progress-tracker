@@ -40,37 +40,32 @@ const calculateLearningVelocity = (sessions: Session[]): number => {
 
   console.log('Calculating learning velocity from sessions:', sessions);
 
-  // Sort sessions by date
-  const sortedSessions = [...sessions].sort((a, b) => {
-    try {
+  try {
+    // Sort sessions by date
+    const sortedSessions = [...sessions].sort((a, b) => {
       return new Date(a.date).getTime() - new Date(b.date).getTime();
-    } catch (e) {
-      console.error('Error sorting sessions:', e);
+    });
+
+    // Calculate total time invested
+    const totalMinutes = sortedSessions.reduce((total, session) => {
+      if (!session.duration) {
+        console.log('Session missing duration:', session);
+        return total;
+      }
+      const minutes = (session.duration.hours * 60) + session.duration.minutes;
+      console.log(`Session duration: ${minutes} minutes`);
+      return total + minutes;
+    }, 0);
+
+    // Calculate time span in days
+    const firstSession = sortedSessions[0];
+    const lastSession = sortedSessions[sortedSessions.length - 1];
+    
+    if (!firstSession?.date || !lastSession?.date) {
+      console.log('Missing date information for velocity calculation');
       return 0;
     }
-  });
 
-  // Calculate total time invested
-  const totalMinutes = sortedSessions.reduce((total, session) => {
-    if (!session.duration) {
-      console.log('Session missing duration:', session);
-      return total;
-    }
-    const minutes = (session.duration.hours * 60) + session.duration.minutes;
-    console.log(`Session duration: ${minutes} minutes`);
-    return total + minutes;
-  }, 0);
-
-  // Calculate time span in days
-  const firstSession = sortedSessions[0];
-  const lastSession = sortedSessions[sortedSessions.length - 1];
-  
-  if (!firstSession?.date || !lastSession?.date) {
-    console.log('Missing date information for velocity calculation');
-    return 0;
-  }
-
-  try {
     const firstDate = new Date(firstSession.date);
     const lastDate = new Date(lastSession.date);
     const daysDiff = Math.max(1, Math.ceil((lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)));
@@ -78,6 +73,7 @@ const calculateLearningVelocity = (sessions: Session[]): number => {
     console.log(`Time span: ${daysDiff} days`);
     console.log(`Total minutes: ${totalMinutes}`);
     
+    // Calculate average minutes per day
     const velocity = Math.round(totalMinutes / daysDiff);
     console.log(`Calculated velocity: ${velocity} minutes per day`);
     
@@ -149,6 +145,36 @@ const calculateStreakConsistency = (sessions: Session[]): number => {
   }
 };
 
+const calculateCurrentStreak = (date: string, streakDays: string[]) => {
+  const today = new Date(date);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  let currentStreak = 0;
+  let tempStreak = 0;
+
+  if (streakDays.includes(today.toISOString().split('T')[0])) {
+    currentStreak = 1;
+  }
+
+  for (let i = 1; i < streakDays.length; i++) {
+    const curr = new Date(streakDays[i]);
+    const prev = new Date(streakDays[i - 1]);
+    const diffDays = Math.floor((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) {
+      tempStreak++;
+      if (curr.getTime() === today.getTime() || curr.getTime() === yesterday.getTime()) {
+        currentStreak = tempStreak;
+      }
+    } else {
+      tempStreak = 1; // Reset to 1 (not 0) as this day still counts
+    }
+  }
+
+  return currentStreak;
+};
+
 export function LearningInsights({ items, isLoading, error }: Props) {
   const patterns = useMemo((): LearningPattern => {
     console.log('Processing items for analytics:', items);
@@ -163,155 +189,96 @@ export function LearningInsights({ items, isLoading, error }: Props) {
     let completedItems = 0;
     let totalItems = items.length;
     let streakDays = new Set<string>();
+    let allSessions: Session[] = [];
 
-    // Helper function to process a session
-    const processSession = (session: Session, category?: string) => {
-      if (!session?.date) {
-        console.log('Session missing date:', session);
-        return;
+    // Collect all sessions from items
+    items.forEach(item => {
+      if (item.progress?.sessions) {
+        allSessions = [...allSessions, ...item.progress.sessions];
       }
+    });
 
-      if (!session?.duration?.hours && !session?.duration?.minutes) {
-        console.log('Session missing duration:', session);
+    // Sort sessions by date
+    allSessions.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    console.log('Total sessions collected:', allSessions.length);
+
+    // Process each session
+    allSessions.forEach(session => {
+      if (!session?.date || !session?.duration) {
+        console.log('Invalid session data:', session);
         return;
       }
 
       try {
-        totalSessions++;
         const sessionDate = new Date(session.date);
         const duration = ((session.duration?.hours || 0) * 60) + (session.duration?.minutes || 0);
-
-        console.log('Processing session:', {
-          date: session.date,
-          duration,
-          category
-        });
 
         // Update time distributions
         const hour = sessionDate.getHours();
         const day = sessionDate.toLocaleDateString('en-US', { weekday: 'long' });
         timeByHour[hour] = (timeByHour[hour] || 0) + duration;
         timeByDay[day] = (timeByDay[day] || 0) + duration;
+        
+        // Track unique days for streaks
+        streakDays.add(sessionDate.toISOString().split('T')[0]);
+        
         totalTime += duration;
+        totalSessions++;
 
-        // Update category time
-        if (category) {
-          categoryTime[category] = (categoryTime[category] || 0) + duration;
-        }
-
-        // Add to streak days (normalize the date to local midnight)
-        const dateObj = new Date(session.date);
-        dateObj.setHours(0, 0, 0, 0);
-        streakDays.add(dateObj.toISOString());
-      } catch (error) {
-        console.error('Error processing session:', error, session);
+      } catch (e) {
+        console.error('Error processing session:', e);
       }
-    };
-
-    // Process all items and their sessions
-    items.forEach(item => {
-      console.log('Processing item:', {
-        title: item.title,
-        category: item.category,
-        sessionsCount: item.progress?.sessions?.length || 0
-      });
-
-      if (item.category) {
-        categoryCount[item.category] = (categoryCount[item.category] || 0) + 1;
-      }
-
-      if (item.completed) {
-        completedItems++;
-      }
-
-      // Process sessions from item's progress
-      const sessions = item.progress?.sessions || [];
-      sessions.forEach(session => processSession(session, item.category));
     });
 
-    // Calculate streak
-    const streakDaysArray = Array.from(streakDays).sort();
-    console.log('Streak days:', streakDaysArray);
-    
-    let currentStreak = 0;
-    let bestStreak = 0;
-    let tempStreak = 0;
+    // Calculate learning velocity
+    const learningVelocity = calculateLearningVelocity(allSessions);
 
-    if (streakDaysArray.length > 0) {
-      // Initialize with 1 for the first day
-      tempStreak = 1;
-      bestStreak = 1;
-
-      // Check if the last day is today or yesterday
-      const lastDay = new Date(streakDaysArray[streakDaysArray.length - 1]);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-
-      if (lastDay.getTime() === today.getTime() || lastDay.getTime() === yesterday.getTime()) {
-        currentStreak = 1;
-      }
-
-      // Calculate streaks
-      for (let i = 1; i < streakDaysArray.length; i++) {
-        const curr = new Date(streakDaysArray[i]);
-        const prev = new Date(streakDaysArray[i - 1]);
-        const diffDays = Math.floor((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
-
-        if (diffDays === 1) {
-          tempStreak++;
-          bestStreak = Math.max(bestStreak, tempStreak);
-
-          // Update current streak if this includes today/yesterday
-          if (curr.getTime() === today.getTime() || curr.getTime() === yesterday.getTime()) {
-            currentStreak = tempStreak;
-          }
-        } else {
-          tempStreak = 1; // Reset to 1 (not 0) as this day still counts
-        }
-      }
-    }
+    // Calculate streak consistency
+    const streakConsistency = calculateStreakConsistency(allSessions);
 
     // Find best time of day
     const bestHour = Object.entries(timeByHour)
       .sort(([, a], [, b]) => b - a)[0]?.[0] || '9';
-
+    
     // Find most productive day
-    const bestDay = Object.entries(timeByDay)
+    const mostProductiveDay = Object.entries(timeByDay)
       .sort(([, a], [, b]) => b - a)[0]?.[0] || 'Monday';
 
-    // Calculate average session length (in minutes)
-    const avgSessionLength = totalSessions ? Math.round(totalTime / totalSessions) : 0;
+    // Calculate average session length
+    const averageSessionLength = totalSessions > 0 ? Math.round(totalTime / totalSessions) : 0;
 
-    // Calculate learning velocity (minutes per day)
-    const daysActive = streakDays.size || 1; // Avoid division by zero
-    const learningVelocity = Math.round(totalTime / daysActive);
+    // Get preferred categories
+    const preferredCategories = Object.entries(categoryCount)
+      .map(([category, count]) => ({ category, count }))
+      .sort((a, b) => b.count - a.count);
 
-    // Sort categories by time spent
-    const sortedCategories = Object.entries(categoryTime)
-      .sort(([, a], [, b]) => b - a)
-      .map(([category]) => category);
+    // Calculate completion rate
+    const completionRate = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
 
-    const result = {
-      bestTimeOfDay: `${parseInt(bestHour)}:00`,
-      mostProductiveDay: bestDay,
-      averageSessionLength: avgSessionLength,
-      preferredCategories: Object.entries(categoryCount)
-        .map(([category, count]) => ({ category, count }))
-        .sort((a, b) => b.count - a.count),
-      completionRate: totalItems > 0 ? (completedItems / totalItems) * 100 : 0,
+    return {
+      bestTimeOfDay: `${bestHour}:00`,
+      mostProductiveDay,
+      averageSessionLength,
+      preferredCategories,
+      completionRate,
       learningVelocity,
-      focusedCategories: sortedCategories.slice(0, 2),
-      neglectedCategories: sortedCategories.slice(-2),
-      streakConsistency: currentStreak,
-      bestStreak,
+      focusedCategories: Object.entries(categoryTime)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 3)
+        .map(([category]) => category),
+      neglectedCategories: Object.entries(categoryTime)
+        .sort(([, a], [, b]) => a - b)
+        .slice(0, 3)
+        .map(([category]) => category),
+      streakConsistency,
+      bestStreak: Math.max(...Array.from(streakDays).map(date => {
+        const streak = calculateCurrentStreak(date, Array.from(streakDays));
+        return streak;
+      }), 0),
       totalSessions,
-      daysActive
+      daysActive: streakDays.size
     };
-
-    console.log('Calculated analytics:', result);
-    return result;
   }, [items]);
 
   const recommendations = useMemo((): Recommendation[] => {
