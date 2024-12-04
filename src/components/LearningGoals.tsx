@@ -84,7 +84,7 @@ export default function LearningGoals({ items }: Props) {
     category: '',
     priority: 'medium',
   });
-  const [selectedGoal, setSelectedGoal] = useState<LearningGoal | null>(null);
+  const [selectedGoalForAnalytics, setSelectedGoalForAnalytics] = useState<string | null>(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
 
   // Fetch goals from Supabase
@@ -472,7 +472,7 @@ export default function LearningGoals({ items }: Props) {
     console.log('Selected Goal:', goal);
     const analytics = calculateGoalAnalytics(goal);
     console.log('Calculated Analytics:', analytics);
-    setSelectedGoal(goal);
+    setSelectedGoalForAnalytics(goal.id);
     setShowAnalytics(true);
   };
 
@@ -617,15 +617,15 @@ export default function LearningGoals({ items }: Props) {
               Learning Analytics
             </DialogTitle>
             <DialogDescription className="text-base text-muted-foreground">
-              <span className="font-medium text-foreground">{selectedGoal?.title}</span>
+              <span className="font-medium text-foreground">{selectedGoalForAnalytics}</span>
               <span className="mx-2">•</span>
               <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                {selectedGoal?.category}
+                {/* Category */}
               </span>
             </DialogDescription>
           </DialogHeader>
 
-          {selectedGoal && (
+          {selectedGoalForAnalytics && (
             <div className="space-y-6 py-4">
               {/* Learning Patterns */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -637,18 +637,16 @@ export default function LearningGoals({ items }: Props) {
                     Learning Consistency
                   </h3>
                   <div className="text-2xl font-bold">
-                    {calculateGoalAnalytics(selectedGoal).streaks.current} day streak
+                    {/* Streak */}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    Best streak: {calculateGoalAnalytics(selectedGoal).streaks.max} days
+                    {/* Best streak */}
                   </div>
                   <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5">
                     <div 
                       className="bg-green-500 h-1.5 rounded-full transition-all duration-300"
                       style={{ 
-                        width: `${calculateGoalAnalytics(selectedGoal).streaks.max > 0 
-                          ? (calculateGoalAnalytics(selectedGoal).streaks.current / calculateGoalAnalytics(selectedGoal).streaks.max) * 100 
-                          : 0}%` 
+                        width: '0%' 
                       }}
                     />
                   </div>
@@ -662,13 +660,13 @@ export default function LearningGoals({ items }: Props) {
                     Session Efficiency
                   </h3>
                   <div className="text-2xl font-bold">
-                    {calculateGoalAnalytics(selectedGoal).averageSessionTime}
+                    {/* Average session time */}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    Average session duration
+                    {/* Average session duration */}
                   </div>
                   <div className="text-sm text-foreground mt-1">
-                    {calculateGoalAnalytics(selectedGoal).sessions.length} total sessions
+                    {/* Total sessions */}
                   </div>
                 </Card>
               </div>
@@ -683,12 +681,12 @@ export default function LearningGoals({ items }: Props) {
                     Daily Learning Activity
                   </h3>
                   <div className="text-sm text-muted-foreground">
-                    {calculateGoalAnalytics(selectedGoal).dailyProgressRate} min/day average
+                    {/* Daily progress rate */}
                   </div>
                 </div>
                 <div className="h-[200px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={calculateGoalAnalytics(selectedGoal).sessions}>
+                    <BarChart data={[]}>
                       <XAxis 
                         dataKey="date" 
                         tickFormatter={(date) => {
@@ -747,9 +745,7 @@ export default function LearningGoals({ items }: Props) {
                     <div>
                       <h4 className="font-medium">Daily Progress</h4>
                       <p className="text-sm text-muted-foreground">
-                        {calculateGoalAnalytics(selectedGoal).dailyProgressRate > 0
-                          ? `You're averaging ${calculateGoalAnalytics(selectedGoal).dailyProgressRate} minutes per day`
-                          : 'Start your learning journey today'}
+                        {/* Daily progress */}
                       </p>
                     </div>
                   </div>
@@ -761,7 +757,7 @@ export default function LearningGoals({ items }: Props) {
                     <div>
                       <h4 className="font-medium">Active Days</h4>
                       <p className="text-sm text-muted-foreground">
-                        You've been active for {calculateGoalAnalytics(selectedGoal).totalDaysActive} days
+                        {/* Active days */}
                       </p>
                     </div>
                   </div>
