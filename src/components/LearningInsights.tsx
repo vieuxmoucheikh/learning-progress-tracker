@@ -151,6 +151,8 @@ const calculateStreakConsistency = (sessions: Session[]): number => {
 
 export function LearningInsights({ items, isLoading, error }: Props) {
   const patterns = useMemo((): LearningPattern => {
+    console.log('Processing items for analytics:', items);
+    
     const now = new Date();
     const timeByHour: { [key: number]: number } = {};
     const timeByDay: { [key: string]: number } = {};
@@ -164,15 +166,26 @@ export function LearningInsights({ items, isLoading, error }: Props) {
 
     // Helper function to process a session
     const processSession = (session: Session, category?: string) => {
-      if (!session?.date || !session?.duration) {
-        console.log('Skipping invalid session:', session);
+      if (!session?.date) {
+        console.log('Session missing date:', session);
+        return;
+      }
+
+      if (!session?.duration?.hours && !session?.duration?.minutes) {
+        console.log('Session missing duration:', session);
         return;
       }
 
       try {
         totalSessions++;
         const sessionDate = new Date(session.date);
-        const duration = (session.duration.hours * 60) + session.duration.minutes;
+        const duration = ((session.duration?.hours || 0) * 60) + (session.duration?.minutes || 0);
+
+        console.log('Processing session:', {
+          date: session.date,
+          duration,
+          category
+        });
 
         // Update time distributions
         const hour = sessionDate.getHours();
@@ -197,6 +210,12 @@ export function LearningInsights({ items, isLoading, error }: Props) {
 
     // Process all items and their sessions
     items.forEach(item => {
+      console.log('Processing item:', {
+        title: item.title,
+        category: item.category,
+        sessionsCount: item.progress?.sessions?.length || 0
+      });
+
       if (item.category) {
         categoryCount[item.category] = (categoryCount[item.category] || 0) + 1;
       }
@@ -212,6 +231,8 @@ export function LearningInsights({ items, isLoading, error }: Props) {
 
     // Calculate streak
     const streakDaysArray = Array.from(streakDays).sort();
+    console.log('Streak days:', streakDaysArray);
+    
     let currentStreak = 0;
     let bestStreak = 0;
     let tempStreak = 0;
@@ -264,26 +285,15 @@ export function LearningInsights({ items, isLoading, error }: Props) {
     const avgSessionLength = totalSessions ? Math.round(totalTime / totalSessions) : 0;
 
     // Calculate learning velocity (minutes per day)
-    const daysActive = streakDays.size;
-    const learningVelocity = daysActive ? Math.round(totalTime / daysActive) : 0;
+    const daysActive = streakDays.size || 1; // Avoid division by zero
+    const learningVelocity = Math.round(totalTime / daysActive);
 
     // Sort categories by time spent
     const sortedCategories = Object.entries(categoryTime)
       .sort(([, a], [, b]) => b - a)
       .map(([category]) => category);
 
-    console.log('Calculated metrics:', {
-      streakDays: streakDaysArray,
-      currentStreak,
-      bestStreak,
-      daysActive,
-      totalSessions,
-      totalTime,
-      avgSessionLength,
-      learningVelocity
-    });
-
-    return {
+    const result = {
       bestTimeOfDay: `${parseInt(bestHour)}:00`,
       mostProductiveDay: bestDay,
       averageSessionLength: avgSessionLength,
@@ -299,6 +309,9 @@ export function LearningInsights({ items, isLoading, error }: Props) {
       totalSessions,
       daysActive
     };
+
+    console.log('Calculated analytics:', result);
+    return result;
   }, [items]);
 
   const recommendations = useMemo((): Recommendation[] => {
