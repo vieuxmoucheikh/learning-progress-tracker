@@ -299,7 +299,10 @@ export default function LearningGoals({ items }: Props) {
   };
 
   const calculateGoalAnalytics = (goal: LearningGoal): GoalAnalytics => {
-    if (!goal.progress?.sessions) {
+    console.log('Goal data:', goal);
+    console.log('Sessions:', goal.progress?.sessions);
+
+    if (!goal.progress?.sessions || goal.progress.sessions.length === 0) {
       return {
         averageSessionTime: '0h 0m',
         totalDaysActive: 0,
@@ -403,7 +406,7 @@ export default function LearningGoals({ items }: Props) {
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    return {
+    const result = {
       averageSessionTime: `${averageHours}h ${remainingMinutes}m`,
       totalDaysActive: uniqueDaysCount,
       sessions: chartData,
@@ -418,6 +421,71 @@ export default function LearningGoals({ items }: Props) {
         max: maxStreak
       }
     };
+
+    console.log('Calculated analytics:', result);
+    return result;
+  };
+
+  // Add this function to handle session addition
+  const addSession = async (goalId: string, duration: { hours: number, minutes: number }) => {
+    try {
+      const date = new Date().toISOString();
+      const { data: goal } = await supabase
+        .from('goals')
+        .select('progress')
+        .eq('id', goalId)
+        .single();
+
+      const currentProgress = goal?.progress || { sessions: [] };
+      const updatedSessions = [...currentProgress.sessions, { date, duration }];
+
+      const { error } = await supabase
+        .from('goals')
+        .update({
+          progress: {
+            sessions: updatedSessions
+          }
+        })
+        .eq('id', goalId);
+
+      if (error) throw error;
+      
+      // Refresh goals after adding session
+      await fetchGoals();
+    } catch (error) {
+      console.error('Error adding session:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to add session',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  // Add this function to handle session recording
+  const handleRecordSession = async (goal: LearningGoal) => {
+    try {
+      const hours = Math.floor(Math.random() * 3); // Random hours (0-2)
+      let minutes = Math.floor(Math.random() * 60); // Random minutes (0-59)
+      
+      if (hours === 0 && minutes === 0) {
+        minutes = 30; // Ensure at least 30 minutes if both are 0
+      }
+      
+      await addSession(goal.id, { hours, minutes });
+      
+      toast({
+        title: 'Success',
+        description: `Recorded ${hours}h ${minutes}m for ${goal.title}`,
+      });
+    } catch (error) {
+      console.error('Error recording session:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to record session',
+        variant: 'destructive'
+      });
+    }
   };
 
   const CategorySelect = () => {
@@ -836,6 +904,30 @@ export default function LearningGoals({ items }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {goals.map(goal => (
+        <div key={goal.id} className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs"
+              onClick={() => handleRecordSession(goal)}
+            >
+              Record Session
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs"
+              onClick={() => setShowAnalytics(true)}
+            >
+              <ChartBar className="w-4 h-4 mr-1" />
+              Analytics
+            </Button>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
