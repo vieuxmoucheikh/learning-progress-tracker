@@ -86,4 +86,10 @@ export interface LearningGoal {
   priority: Priority;
   status: GoalStatus;
   createdAt: string;
+  progress?: {
+    sessions: Array<{
+      date: string;
+      duration: { hours: number; minutes: number };
+    }>;
+  };
 }

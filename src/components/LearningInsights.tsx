@@ -40,7 +40,7 @@ export function LearningInsights({ items, isLoading, error }: Props) {
     let totalTime = 0;
     let completedItems = 0;
     let totalItems = items.length;
-    let streakDays = 0;
+    let streakDays = new Set<string>();
 
     // Analyze all sessions
     items.forEach(item => {
@@ -52,20 +52,24 @@ export function LearningInsights({ items, isLoading, error }: Props) {
         completedItems++;
       }
 
-      item.progress.sessions?.forEach(session => {
+      // Get sessions from progress
+      const sessions = item.progress?.sessions || [];
+      sessions.forEach(session => {
         if (session.date) {
           const date = new Date(session.date);
           const hour = date.getHours();
           const day = date.toLocaleDateString('en-US', { weekday: 'long' });
-          const duration = (session.duration?.hours ?? 0) * 60 + (session.duration?.minutes ?? 0);
+          const duration = session.duration || { hours: 0, minutes: 0 };
+          const minutes = (duration.hours * 60) + duration.minutes;
 
-          timeByHour[hour] = (timeByHour[hour] || 0) + duration;
-          timeByDay[day] = (timeByDay[day] || 0) + duration;
-          totalTime += duration;
+          timeByHour[hour] = (timeByHour[hour] || 0) + minutes;
+          timeByDay[day] = (timeByDay[day] || 0) + minutes;
+          totalTime += minutes;
           totalSessions++;
+          streakDays.add(date.toISOString().split('T')[0]);
 
           if (item.category) {
-            categoryTime[item.category] = (categoryTime[item.category] || 0) + duration;
+            categoryTime[item.category] = (categoryTime[item.category] || 0) + minutes;
           }
         }
       });
@@ -79,7 +83,7 @@ export function LearningInsights({ items, isLoading, error }: Props) {
     const bestDay = Object.entries(timeByDay)
       .sort(([, a], [, b]) => b - a)[0]?.[0] || 'Monday';
 
-    // Calculate average session length
+    // Calculate average session length (in minutes)
     const avgSessionLength = totalSessions ? Math.round(totalTime / totalSessions) : 0;
 
     // Sort categories by time spent
@@ -92,6 +96,11 @@ export function LearningInsights({ items, isLoading, error }: Props) {
     const weeksDiff = Math.max(1, Math.ceil((now.getTime() - oldestItemDate) / (1000 * 60 * 60 * 24 * 7)));
     const learningVelocity = completedItems / weeksDiff;
 
+    // Calculate streak consistency
+    const streakConsistency = streakDays.size > 0
+      ? Math.min(100, (streakDays.size / Math.ceil((now.getTime() - oldestItemDate) / (1000 * 60 * 60 * 24))) * 100)
+      : 0;
+
     return {
       bestTimeOfDay: `${parseInt(bestHour)}:00`,
       mostProductiveDay: bestDay,
@@ -99,11 +108,11 @@ export function LearningInsights({ items, isLoading, error }: Props) {
       preferredCategories: Object.entries(categoryCount)
         .map(([category, count]) => ({ category, count }))
         .sort((a, b) => b.count - a.count),
-      completionRate: (completedItems / totalItems) * 100,
+      completionRate: totalItems > 0 ? (completedItems / totalItems) * 100 : 0,
       learningVelocity,
       focusedCategories: sortedCategories.slice(0, 2),
       neglectedCategories: sortedCategories.slice(-2),
-      streakConsistency: Math.min(100, (streakDays / 7) * 100)
+      streakConsistency
     };
   }, [items]);
 
