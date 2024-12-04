@@ -380,15 +380,50 @@ function calculateDuration(startTime: Date, endTime: Date) {
 // Goals
 async function ensureGoalsTableExists() {
   try {
-    const { error } = await supabase.rpc('create_goals_table', {});
-    if (error) {
-      console.error('Error creating goals table:', error);
-      return false;
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Authentication required');
     }
-    return true;
+
+    // Check if the table exists
+    const { error: tableError } = await supabase
+      .from('learning_goals')
+      .select('id')
+      .limit(1);
+
+    if (tableError) {
+      console.log('Goals table does not exist, creating...');
+      
+      // Create the table with the updated schema
+      const { error: createError } = await supabase.rpc('create_goals_table', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS learning_goals (
+            id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+            user_id UUID NOT NULL REFERENCES auth.users(id),
+            title TEXT NOT NULL,
+            category TEXT,
+            target_hours INTEGER NOT NULL,
+            target_date DATE NOT NULL,
+            priority TEXT CHECK (priority IN ('low', 'medium', 'high')),
+            status TEXT CHECK (status IN ('active', 'completed', 'overdue')),
+            progress JSONB DEFAULT '{"sessions": []}',
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now()),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now())
+          );
+          
+          CREATE INDEX IF NOT EXISTS learning_goals_user_id_idx ON learning_goals(user_id);
+          CREATE INDEX IF NOT EXISTS learning_goals_status_idx ON learning_goals(status);
+        `
+      });
+
+      if (createError) {
+        console.error('Error creating goals table:', createError);
+        throw new Error('Failed to create goals table');
+      }
+    }
   } catch (error) {
     console.error('Error in ensureGoalsTableExists:', error);
-    return false;
+    throw error;
   }
 }
 
@@ -417,6 +452,15 @@ export async function getGoals() {
       const progress = goal.progress || { sessions: [] };
       const sessions = Array.isArray(progress.sessions) ? progress.sessions : [];
 
+      console.log('Processing goal:', goal.title);
+      console.log('Raw sessions:', sessions);
+
+      if (sessions.length === 0) {
+        console.log('No sessions found');
+      } else {
+        console.log('Found sessions:', sessions.length);
+      }
+
       return {
         id: goal.id,
         userId: goal.user_id,
@@ -443,7 +487,11 @@ export async function getGoals() {
       };
     }) || [];
 
-    console.log('Processed goals with sessions:', processedGoals);
+    console.log('Processed goals:', processedGoals.map(g => ({
+      title: g.title,
+      sessionsCount: g.progress.sessions.length
+    })));
+
     return processedGoals;
 
   } catch (error) {
@@ -473,7 +521,10 @@ export async function addGoal(goal: Omit<LearningGoal, 'id' | 'userId' | 'create
       priority: goal.priority || 'medium',
       status: 'active' as const,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      progress: {
+        sessions: []
+      }
     };
 
     console.log('Formatted goal data:', newGoal);
@@ -505,7 +556,10 @@ export async function addGoal(goal: Omit<LearningGoal, 'id' | 'userId' | 'create
       targetDate: data.target_date,
       priority: data.priority,
       status: data.status,
-      createdAt: data.created_at
+      createdAt: data.created_at,
+      progress: {
+        sessions: []
+      }
     };
 
     return transformedData;
@@ -524,12 +578,22 @@ export async function updateGoal(id: string, updates: Partial<LearningGoal>) {
 
     await ensureGoalsTableExists();
 
+    // Ensure progress.sessions exists if we're updating progress
+    const updatedData: any = {
+      ...updates,
+      updated_at: new Date().toISOString()
+    };
+
+    if (updates.progress && !updates.progress.sessions) {
+      updatedData.progress = {
+        ...updates.progress,
+        sessions: []
+      };
+    }
+
     const { data, error } = await supabase
       .from('learning_goals')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString()
-      })
+      .update(updatedData)
       .eq('id', id)
       .eq('user_id', user.id)
       .select()
@@ -544,7 +608,15 @@ export async function updateGoal(id: string, updates: Partial<LearningGoal>) {
       throw new Error('No data returned from update');
     }
 
-    return data;
+    // Ensure the returned data has the progress.sessions array
+    const transformedData: LearningGoal = {
+      ...data,
+      progress: {
+        sessions: data.progress?.sessions || []
+      }
+    };
+
+    return transformedData;
   } catch (error) {
     console.error('Error in updateGoal:', error);
     throw error instanceof Error ? error : new Error('Failed to update goal');
