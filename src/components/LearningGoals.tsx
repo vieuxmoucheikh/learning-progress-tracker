@@ -299,7 +299,19 @@ export default function LearningGoals({ items }: Props) {
   };
 
   const calculateGoalAnalytics = (goal: LearningGoal): GoalAnalytics => {
-    const sessions = goal.progress?.sessions || [];
+    if (!goal.progress?.sessions) {
+      return {
+        averageSessionTime: '0h 0m',
+        totalDaysActive: 0,
+        sessions: [],
+        totalTimeInvested: { hours: 0, minutes: 0 },
+        completionPercentage: 0,
+        dailyProgressRate: 0,
+        streaks: { current: 0, max: 0 }
+      };
+    }
+
+    const sessions = goal.progress.sessions;
     
     // Calculate total time invested
     const totalMinutes = sessions.reduce((total, session) => {
@@ -322,49 +334,35 @@ export default function LearningGoals({ items }: Props) {
       ? Math.min(100, Math.round((totalMinutes / targetMinutes) * 100))
       : 0;
     
-    // Calculate daily progress rate
-    const sortedSessions = [...sessions].sort((a, b) => 
-      new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
-    
-    const firstSession = sortedSessions[0]?.date ? new Date(sortedSessions[0].date) : new Date();
-    const lastSession = sortedSessions[sortedSessions.length - 1]?.date 
-      ? new Date(sortedSessions[sortedSessions.length - 1].date) 
-      : new Date();
-    
-    const daysBetween = Math.max(1, Math.ceil((lastSession.getTime() - firstSession.getTime()) / (1000 * 60 * 60 * 24)) + 1);
-    const dailyProgressRate = totalMinutes / daysBetween;
-    
-    // Calculate streak
-    let currentStreak = 0;
-    let maxStreak = 0;
-    let tempStreak = 0;
-    
+    // Calculate streaks
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    const sortedDays = Array.from(uniqueDays)
-      .map(date => new Date(date))
-      .sort((a, b) => b.getTime() - a.getTime());
+    const datesWithSessions = Array.from(uniqueDays)
+      .map(dateStr => {
+        const date = new Date(dateStr);
+        date.setHours(0, 0, 0, 0);
+        return date.getTime();
+      })
+      .sort((a, b) => b - a); // Sort in descending order (most recent first)
+
+    let currentStreak = 0;
+    let maxStreak = 0;
     
-    if (sortedDays.length > 0) {
-      const mostRecent = sortedDays[0];
-      mostRecent.setHours(0, 0, 0, 0);
+    // Calculate current streak
+    if (datesWithSessions.length > 0) {
+      const mostRecentDate = new Date(datesWithSessions[0]);
+      const daysSinceLastSession = Math.floor((today.getTime() - mostRecentDate.getTime()) / (1000 * 60 * 60 * 24));
       
-      // If most recent day is today or yesterday, count current streak
-      const daysDiff = Math.floor((today.getTime() - mostRecent.getTime()) / (1000 * 60 * 60 * 24));
-      if (daysDiff <= 1) {
+      if (daysSinceLastSession <= 1) { // Count streak if last session was today or yesterday
         currentStreak = 1;
-        let prevDate = mostRecent;
-        
-        for (let i = 1; i < sortedDays.length; i++) {
-          const currentDate = sortedDays[i];
-          currentDate.setHours(0, 0, 0, 0);
-          const diff = Math.floor((prevDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
+        for (let i = 1; i < datesWithSessions.length; i++) {
+          const currentDate = datesWithSessions[i];
+          const previousDate = datesWithSessions[i - 1];
+          const daysBetween = Math.floor((previousDate - currentDate) / (1000 * 60 * 60 * 24));
           
-          if (diff === 1) {
+          if (daysBetween === 1) {
             currentStreak++;
-            prevDate = currentDate;
           } else {
             break;
           }
@@ -373,32 +371,38 @@ export default function LearningGoals({ items }: Props) {
     }
     
     // Calculate max streak
-    for (let i = 0; i < sortedDays.length; i++) {
-      if (i === 0) {
-        tempStreak = 1;
+    let tempStreak = 1;
+    for (let i = 1; i < datesWithSessions.length; i++) {
+      const currentDate = datesWithSessions[i];
+      const previousDate = datesWithSessions[i - 1];
+      const daysBetween = Math.floor((previousDate - currentDate) / (1000 * 60 * 60 * 24));
+      
+      if (daysBetween === 1) {
+        tempStreak++;
       } else {
-        const diff = Math.floor(
-          (sortedDays[i - 1].getTime() - sortedDays[i].getTime()) / (1000 * 60 * 60 * 24)
-        );
-        if (diff === 1) {
-          tempStreak++;
-        } else {
-          maxStreak = Math.max(maxStreak, tempStreak);
-          tempStreak = 1;
-        }
+        maxStreak = Math.max(maxStreak, tempStreak);
+        tempStreak = 1;
       }
     }
     maxStreak = Math.max(maxStreak, tempStreak, currentStreak);
     
-    // Prepare session data for chart while maintaining original structure
-    const chartData = sessions.map(session => ({
-      date: session.date,
-      duration: {
-        hours: session.duration?.hours || 0,
-        minutes: session.duration?.minutes || 0
-      }
-    })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    
+    // Calculate daily progress rate
+    const activeTimeSpan = datesWithSessions.length > 1
+      ? Math.floor((datesWithSessions[0] - datesWithSessions[datesWithSessions.length - 1]) / (1000 * 60 * 60 * 24)) + 1
+      : 1;
+    const dailyProgressRate = Math.round(totalMinutes / activeTimeSpan);
+
+    // Prepare session data for chart
+    const chartData = sessions
+      .map(session => ({
+        date: session.date,
+        duration: {
+          hours: session.duration?.hours || 0,
+          minutes: session.duration?.minutes || 0
+        }
+      }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
     return {
       averageSessionTime: `${averageHours}h ${remainingMinutes}m`,
       totalDaysActive: uniqueDaysCount,
@@ -560,7 +564,11 @@ export default function LearningGoals({ items }: Props) {
               Learning Analytics
             </DialogTitle>
             <DialogDescription className="text-base text-muted-foreground">
-              {selectedGoal?.title} - Detailed Progress Analysis
+              <span className="font-medium text-foreground">{selectedGoal?.title}</span>
+              <span className="mx-2">•</span>
+              <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                {selectedGoal?.category}
+              </span>
             </DialogDescription>
           </DialogHeader>
 
@@ -569,8 +577,13 @@ export default function LearningGoals({ items }: Props) {
               {/* Learning Patterns */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                  <h3 className="text-sm font-medium text-foreground">Learning Consistency</h3>
-                  <div className="text-xl font-bold">
+                  <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
+                    <div className="p-1.5 bg-green-50 rounded">
+                      <TrendingUp className="w-4 h-4 text-green-600" />
+                    </div>
+                    Learning Consistency
+                  </h3>
+                  <div className="text-2xl font-bold">
                     {calculateGoalAnalytics(selectedGoal).streaks.current} day streak
                   </div>
                   <div className="text-sm text-muted-foreground">
@@ -580,22 +593,29 @@ export default function LearningGoals({ items }: Props) {
                     <div 
                       className="bg-green-500 h-1.5 rounded-full transition-all duration-300"
                       style={{ 
-                        width: `${(calculateGoalAnalytics(selectedGoal).streaks.current / calculateGoalAnalytics(selectedGoal).streaks.max) * 100}%` 
+                        width: `${calculateGoalAnalytics(selectedGoal).streaks.max > 0 
+                          ? (calculateGoalAnalytics(selectedGoal).streaks.current / calculateGoalAnalytics(selectedGoal).streaks.max) * 100 
+                          : 0}%` 
                       }}
                     />
                   </div>
                 </Card>
 
                 <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                  <h3 className="text-sm font-medium text-foreground">Session Efficiency</h3>
-                  <div className="text-xl font-bold">
+                  <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
+                    <div className="p-1.5 bg-blue-50 rounded">
+                      <Clock className="w-4 h-4 text-blue-600" />
+                    </div>
+                    Session Efficiency
+                  </h3>
+                  <div className="text-2xl font-bold">
                     {calculateGoalAnalytics(selectedGoal).averageSessionTime}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     Average session duration
                   </div>
                   <div className="text-sm text-foreground mt-1">
-                    Total sessions: {calculateGoalAnalytics(selectedGoal).sessions.length}
+                    {calculateGoalAnalytics(selectedGoal).sessions.length} total sessions
                   </div>
                 </Card>
               </div>
@@ -603,9 +623,14 @@ export default function LearningGoals({ items }: Props) {
               {/* Daily Progress Chart */}
               <Card className="p-4 space-y-4 bg-background text-foreground border-border">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium">Daily Learning Activity</h3>
+                  <h3 className="text-lg font-medium flex items-center gap-2">
+                    <div className="p-1.5 bg-indigo-50 rounded">
+                      <ChartBar className="w-4 h-4 text-indigo-600" />
+                    </div>
+                    Daily Learning Activity
+                  </h3>
                   <div className="text-sm text-muted-foreground">
-                    {Math.round(calculateGoalAnalytics(selectedGoal).dailyProgressRate)} min/day
+                    {calculateGoalAnalytics(selectedGoal).dailyProgressRate} min/day average
                   </div>
                 </div>
                 <div className="h-[200px]">
@@ -634,7 +659,12 @@ export default function LearningGoals({ items }: Props) {
 
               {/* Learning Insights */}
               <Card className="p-4 space-y-4 bg-background text-foreground border-border">
-                <h3 className="text-lg font-medium">Learning Insights</h3>
+                <h3 className="text-lg font-medium flex items-center gap-2">
+                  <div className="p-1.5 bg-purple-50 rounded">
+                    <Brain className="w-4 h-4 text-purple-600" />
+                  </div>
+                  Learning Insights
+                </h3>
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-blue-50 rounded-lg">
@@ -644,7 +674,7 @@ export default function LearningGoals({ items }: Props) {
                       <h4 className="font-medium">Daily Progress</h4>
                       <p className="text-sm text-muted-foreground">
                         {calculateGoalAnalytics(selectedGoal).dailyProgressRate > 0
-                          ? `You're averaging ${Math.round(calculateGoalAnalytics(selectedGoal).dailyProgressRate)} minutes per day`
+                          ? `You're averaging ${calculateGoalAnalytics(selectedGoal).dailyProgressRate} minutes per day`
                           : 'Start your learning journey today'}
                       </p>
                     </div>
