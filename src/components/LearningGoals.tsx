@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
-import { Brain, ChartBar, LucideCalendar, Plus, Trash2, Target, Clock } from 'lucide-react';
+import { Brain, ChartBar, LucideCalendar, Plus, Trash2, Target, Clock, TrendingUp } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { addGoal, deleteGoal, getGoals, updateGoal } from '@/lib/database';
 import { LearningItem } from '@/types';
@@ -511,97 +511,112 @@ export default function LearningGoals({ items }: Props) {
         <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto bg-background text-foreground border-border">
           <DialogHeader className="space-y-3 pb-4 border-b border-border">
             <DialogTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Goal Analytics
+              Learning Analytics
             </DialogTitle>
             <DialogDescription className="text-base text-muted-foreground">
-              {selectedGoal?.title} - {selectedGoal?.category}
+              {selectedGoal?.title} - Detailed Progress Analysis
             </DialogDescription>
           </DialogHeader>
 
           {selectedGoal && (
             <div className="space-y-6 py-4">
-              {/* Key Metrics */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {(() => {
-                  const analytics = calculateGoalAnalytics(selectedGoal);
-                  
-                  return (
-                    <>
-                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                        <h3 className="text-sm font-medium text-foreground">Progress</h3>
-                        <div className="text-2xl font-bold">{analytics.completionPercentage}%</div>
-                        <div className="text-sm text-foreground">
-                          {analytics.totalTimeInvested.hours}h {analytics.totalTimeInvested.minutes}m of {selectedGoal.targetHours}h
-                        </div>
-                      </Card>
-
-                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                        <h3 className="text-sm font-medium text-foreground">Time Left</h3>
-                        <div className="text-2xl font-bold">{getRemainingTime(selectedGoal.targetDate)}</div>
-                        <div className="text-sm text-foreground">
-                          {analytics.dailyProgressRate > 0 
-                            ? `${Math.round(analytics.dailyProgressRate)} min/day average`
-                            : 'No progress yet'}
-                        </div>
-                      </Card>
-
-                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                        <h3 className="text-sm font-medium text-foreground">Activity</h3>
-                        <div className="text-2xl font-bold">{analytics.streaks.current}</div>
-                        <div className="text-sm text-foreground">
-                          Day streak (Best: {analytics.streaks.max})
-                        </div>
-                      </Card>
-                    </>
-                  );
-                })()}
-              </div>
-
-              {/* Daily Progress Chart */}
-              <Card className="p-4 space-y-4 bg-background text-foreground border-border">
-                <h3 className="text-lg font-medium">Progress Overview</h3>
-                <div className="space-y-4">
-                  <div className="w-full bg-gray-100 rounded-full h-2.5">
-                    <div 
-                      className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
-                      style={{ width: `${calculateGoalAnalytics(selectedGoal).completionPercentage}%` }}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                    <div>
-                      <p>Total Time: {calculateGoalAnalytics(selectedGoal).totalTimeInvested.hours}h {calculateGoalAnalytics(selectedGoal).totalTimeInvested.minutes}m</p>
-                      <p>Daily Average: {Math.round(calculateGoalAnalytics(selectedGoal).dailyProgressRate)} min/day</p>
-                    </div>
-                    <div>
-                      <p>Days Active: {calculateGoalAnalytics(selectedGoal).totalDaysActive}</p>
-                      <p>Sessions: {calculateGoalAnalytics(selectedGoal).sessions.length}</p>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Additional Stats */}
+              {/* Learning Patterns */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                  <h3 className="text-sm font-medium text-foreground">Average Session</h3>
-                  <div className="text-xl font-bold">
-                    {calculateGoalAnalytics(selectedGoal).averageSessionTime}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Time per learning session
-                  </div>
-                </Card>
-
-                <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                  <h3 className="text-sm font-medium text-foreground">Consistency</h3>
+                  <h3 className="text-sm font-medium text-foreground">Learning Consistency</h3>
                   <div className="text-xl font-bold">
                     {calculateGoalAnalytics(selectedGoal).streaks.current} day streak
                   </div>
                   <div className="text-sm text-muted-foreground">
                     Best streak: {calculateGoalAnalytics(selectedGoal).streaks.max} days
                   </div>
+                  <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5">
+                    <div 
+                      className="bg-green-500 h-1.5 rounded-full transition-all duration-300"
+                      style={{ 
+                        width: `${(calculateGoalAnalytics(selectedGoal).streaks.current / calculateGoalAnalytics(selectedGoal).streaks.max) * 100}%` 
+                      }}
+                    />
+                  </div>
+                </Card>
+
+                <Card className="p-4 space-y-2 bg-background text-foreground border-border">
+                  <h3 className="text-sm font-medium text-foreground">Session Efficiency</h3>
+                  <div className="text-xl font-bold">
+                    {calculateGoalAnalytics(selectedGoal).averageSessionTime}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Average session duration
+                  </div>
+                  <div className="text-sm text-foreground mt-1">
+                    Total sessions: {calculateGoalAnalytics(selectedGoal).sessions.length}
+                  </div>
                 </Card>
               </div>
+
+              {/* Daily Progress Chart */}
+              <Card className="p-4 space-y-4 bg-background text-foreground border-border">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-medium">Daily Learning Activity</h3>
+                  <div className="text-sm text-muted-foreground">
+                    {Math.round(calculateGoalAnalytics(selectedGoal).dailyProgressRate)} min/day
+                  </div>
+                </div>
+                <div className="h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={selectedGoal.progress?.sessions || []}>
+                      <XAxis 
+                        dataKey="date" 
+                        tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      />
+                      <YAxis 
+                        label={{ value: 'Minutes', angle: -90, position: 'insideLeft' }} 
+                      />
+                      <Tooltip 
+                        formatter={(value: any) => [`${value} min`, 'Duration']}
+                        labelFormatter={(date) => new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                      />
+                      <Bar
+                        dataKey={(session) => (session.duration?.hours || 0) * 60 + (session.duration?.minutes || 0)}
+                        fill="#4F46E5"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </Card>
+
+              {/* Learning Insights */}
+              <Card className="p-4 space-y-4 bg-background text-foreground border-border">
+                <h3 className="text-lg font-medium">Learning Insights</h3>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-blue-50 rounded-lg">
+                      <TrendingUp className="w-5 h-5 text-blue-500" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Daily Progress</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {calculateGoalAnalytics(selectedGoal).dailyProgressRate > 0
+                          ? `You're averaging ${Math.round(calculateGoalAnalytics(selectedGoal).dailyProgressRate)} minutes per day`
+                          : 'Start your learning journey today'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-green-50 rounded-lg">
+                      <Calendar className="w-5 h-5 text-green-500" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Active Days</h4>
+                      <p className="text-sm text-muted-foreground">
+                        You've been active for {calculateGoalAnalytics(selectedGoal).totalDaysActive} days
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Card>
             </div>
           )}
 
