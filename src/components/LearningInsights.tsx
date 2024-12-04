@@ -29,6 +29,123 @@ interface Recommendation {
   icon: JSX.Element;
 }
 
+const calculateLearningVelocity = (sessions: any[]): number => {
+  if (!sessions || sessions.length === 0) {
+    console.log('No sessions available for velocity calculation');
+    return 0;
+  }
+
+  console.log('Calculating learning velocity from sessions:', sessions);
+
+  // Sort sessions by date
+  const sortedSessions = [...sessions].sort((a, b) => {
+    try {
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    } catch (e) {
+      console.error('Error sorting sessions:', e);
+      return 0;
+    }
+  });
+
+  // Calculate total time invested
+  const totalMinutes = sortedSessions.reduce((total, session) => {
+    if (!session.duration) {
+      console.log('Session missing duration:', session);
+      return total;
+    }
+    const minutes = (session.duration.hours * 60) + session.duration.minutes;
+    console.log(`Session duration: ${minutes} minutes`);
+    return total + minutes;
+  }, 0);
+
+  // Calculate time span in days
+  const firstSession = sortedSessions[0];
+  const lastSession = sortedSessions[sortedSessions.length - 1];
+  
+  if (!firstSession?.date || !lastSession?.date) {
+    console.log('Missing date information for velocity calculation');
+    return 0;
+  }
+
+  try {
+    const firstDate = new Date(firstSession.date);
+    const lastDate = new Date(lastSession.date);
+    const daysDiff = Math.max(1, Math.ceil((lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)));
+    
+    console.log(`Time span: ${daysDiff} days`);
+    console.log(`Total minutes: ${totalMinutes}`);
+    
+    const velocity = Math.round(totalMinutes / daysDiff);
+    console.log(`Calculated velocity: ${velocity} minutes per day`);
+    
+    return velocity;
+  } catch (e) {
+    console.error('Error calculating learning velocity:', e);
+    return 0;
+  }
+};
+
+const calculateStreakConsistency = (sessions: any[]): number => {
+  if (!sessions || sessions.length === 0) {
+    console.log('No sessions available for streak consistency calculation');
+    return 0;
+  }
+
+  console.log('Calculating streak consistency from sessions:', sessions);
+
+  try {
+    // Get unique dates and sort them
+    const uniqueDates = Array.from(new Set(
+      sessions
+        .map(s => s.date?.split('T')[0])
+        .filter(Boolean)
+    )).map(dateStr => new Date(dateStr));
+
+    uniqueDates.sort((a, b) => a.getTime() - b.getTime());
+    
+    if (uniqueDates.length <= 1) {
+      console.log('Not enough sessions for streak consistency calculation');
+      return 0;
+    }
+
+    // Calculate gaps between consecutive sessions
+    let totalGaps = 0;
+    let maxGap = 0;
+    
+    for (let i = 1; i < uniqueDates.length; i++) {
+      const gap = Math.floor(
+        (uniqueDates[i].getTime() - uniqueDates[i-1].getTime()) / (1000 * 60 * 60 * 24)
+      ) - 1; // Subtract 1 to get the gap (e.g., consecutive days have a gap of 0)
+      
+      totalGaps += gap;
+      maxGap = Math.max(maxGap, gap);
+      
+      console.log(`Gap between ${uniqueDates[i-1].toISOString()} and ${uniqueDates[i].toISOString()}: ${gap} days`);
+    }
+
+    const timeSpan = Math.floor(
+      (uniqueDates[uniqueDates.length - 1].getTime() - uniqueDates[0].getTime()) / (1000 * 60 * 60 * 24)
+    );
+    
+    console.log(`Total time span: ${timeSpan} days`);
+    console.log(`Total gaps: ${totalGaps} days`);
+    console.log(`Maximum gap: ${maxGap} days`);
+    
+    // Calculate consistency score (0-100)
+    // Lower gaps and more frequent sessions result in higher consistency
+    const consistencyScore = Math.round(
+      (1 - (totalGaps / Math.max(timeSpan, 1))) * 100
+    );
+    
+    console.log(`Calculated consistency score: ${consistencyScore}%`);
+    
+    return Math.max(0, Math.min(100, consistencyScore));
+  } catch (e) {
+    console.error('Error calculating streak consistency:', e);
+    return 0;
+  }
+};
+
 export function LearningInsights({ items, isLoading, error }: Props) {
   const patterns = useMemo((): LearningPattern => {
     const now = new Date();
@@ -96,56 +213,10 @@ export function LearningInsights({ items, isLoading, error }: Props) {
       ? Math.min(...items.map(item => new Date(item.date).getTime()))
       : now.getTime();
     const weeksDiff = Math.max(1, Math.ceil((now.getTime() - oldestItemDate) / (1000 * 60 * 60 * 24 * 7)));
-    const learningVelocity = completedItems / weeksDiff;
+    const learningVelocity = calculateLearningVelocity(items.flatMap(item => item.progress?.sessions || []));
 
     // Calculate streak consistency
-    const streakDaysArray = Array.from(streakDays)
-      .map(dateStr => new Date(dateStr))
-      .sort((a, b) => b.getTime() - a.getTime());
-
-    let currentStreak = 0;
-    let maxStreak = 0;
-    let tempStreak = 0;
-
-    // Calculate current streak (must include today or yesterday)
-    const mostRecentDate = streakDaysArray[0];
-    if (mostRecentDate) {
-      const daysSinceLastSession = Math.floor((now.getTime() - mostRecentDate.getTime()) / (1000 * 60 * 60 * 24));
-      
-      if (daysSinceLastSession <= 1) { // Count streak if last session was today or yesterday
-        currentStreak = 1;
-        for (let i = 1; i < streakDaysArray.length; i++) {
-          const daysBetween = Math.floor(
-            (streakDaysArray[i-1].getTime() - streakDaysArray[i].getTime()) / (1000 * 60 * 60 * 24)
-          );
-          if (daysBetween === 1) {
-            currentStreak++;
-          } else {
-            break;
-          }
-        }
-      }
-    }
-
-    // Calculate max streak
-    tempStreak = 1; // Start with 1 for the first day
-    for (let i = 1; i < streakDaysArray.length; i++) {
-      const daysBetween = Math.floor(
-        (streakDaysArray[i-1].getTime() - streakDaysArray[i].getTime()) / (1000 * 60 * 60 * 24)
-      );
-      if (daysBetween === 1) {
-        tempStreak++;
-      } else {
-        maxStreak = Math.max(maxStreak, tempStreak);
-        tempStreak = 1;
-      }
-    }
-    maxStreak = Math.max(maxStreak, tempStreak, currentStreak);
-
-    // Calculate streak consistency as a percentage of days with learning activity
-    const streakConsistency = streakDays.size > 0
-      ? Math.min(100, (streakDays.size / Math.ceil((now.getTime() - oldestItemDate) / (1000 * 60 * 60 * 24))) * 100)
-      : 0;
+    const streakConsistency = calculateStreakConsistency(items.flatMap(item => item.progress?.sessions || []));
 
     return {
       bestTimeOfDay: `${parseInt(bestHour)}:00`,
@@ -252,7 +323,7 @@ export function LearningInsights({ items, isLoading, error }: Props) {
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
                   Learning velocity: <span className="font-semibold text-gray-800 dark:text-gray-100">
-                    {patterns.learningVelocity.toFixed(1)} items/week
+                    {patterns.learningVelocity.toFixed(1)} minutes/day
                   </span>
                 </p>
               </div>

@@ -303,10 +303,14 @@ export default function LearningGoals({ items }: Props) {
   };
 
   const calculateGoalAnalytics = (goal: LearningGoal): GoalAnalytics => {
+    console.log('Calculating analytics for goal:', goal);
+
     // Check both progress.sessions and direct sessions
     const sessions = goal.progress?.sessions || goal.sessions || [];
+    console.log('Raw sessions:', sessions);
     
     if (sessions.length === 0) {
+      console.log('No sessions found');
       return {
         averageSessionTime: '0h 0m',
         totalDaysActive: 0,
@@ -320,32 +324,52 @@ export default function LearningGoals({ items }: Props) {
 
     // Calculate total time invested
     const totalMinutes = sessions.reduce((total, session) => {
-      const duration = session.duration || { hours: 0, minutes: 0 };
-      return total + (duration.hours * 60) + duration.minutes;
+      if (!session.duration) {
+        console.log('Session missing duration:', session);
+        return total;
+      }
+      const minutes = (session.duration.hours * 60) + session.duration.minutes;
+      console.log(`Session duration: ${minutes} minutes`);
+      return total + minutes;
     }, 0);
+    console.log('Total minutes:', totalMinutes);
     
     // Calculate average session time
     const averageMinutes = Math.round(totalMinutes / sessions.length);
     const averageHours = Math.floor(averageMinutes / 60);
     const remainingMinutes = averageMinutes % 60;
+    console.log(`Average session time: ${averageHours}h ${remainingMinutes}m`);
     
     // Calculate unique days and consistency
-    const uniqueDays = new Set(sessions.map(s => s.date.split('T')[0]));
+    const uniqueDays = new Set(sessions.map(s => s.date?.split('T')[0]).filter(Boolean));
     const uniqueDaysCount = uniqueDays.size;
+    console.log('Unique days:', uniqueDaysCount);
     
     // Calculate completion percentage
     const targetMinutes = (goal.targetHours || 0) * 60;
     const completionPercentage = targetMinutes > 0 
       ? Math.min(100, Math.round((totalMinutes / targetMinutes) * 100))
       : 0;
+    console.log('Completion percentage:', completionPercentage);
     
     // Calculate streaks
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
     const datesWithSessions = Array.from(uniqueDays)
-      .map(dateStr => new Date(dateStr))
+      .filter(Boolean)
+      .map(dateStr => {
+        try {
+          return new Date(dateStr);
+        } catch (e) {
+          console.error('Error parsing date:', dateStr, e);
+          return null;
+        }
+      })
+      .filter((date): date is Date => date !== null)
       .sort((a, b) => b.getTime() - a.getTime()); // Sort in descending order (most recent first)
+
+    console.log('Dates with sessions:', datesWithSessions);
 
     let currentStreak = 0;
     let maxStreak = 0;
@@ -355,6 +379,7 @@ export default function LearningGoals({ items }: Props) {
     const mostRecentDate = datesWithSessions[0];
     if (mostRecentDate) {
       const daysSinceLastSession = Math.floor((today.getTime() - mostRecentDate.getTime()) / (1000 * 60 * 60 * 24));
+      console.log('Days since last session:', daysSinceLastSession);
       
       if (daysSinceLastSession <= 1) { // Count streak if last session was today or yesterday
         currentStreak = 1;
@@ -370,6 +395,7 @@ export default function LearningGoals({ items }: Props) {
         }
       }
     }
+    console.log('Current streak:', currentStreak);
     
     // Calculate max streak
     tempStreak = 1; // Start with 1 for the first day
@@ -385,19 +411,35 @@ export default function LearningGoals({ items }: Props) {
       }
     }
     maxStreak = Math.max(maxStreak, tempStreak, currentStreak);
-    
+    console.log('Max streak:', maxStreak);
+
     // Calculate daily progress rate (minutes per active day)
     const dailyProgressRate = uniqueDaysCount > 0 ? Math.round(totalMinutes / uniqueDaysCount) : 0;
+    console.log('Daily progress rate:', dailyProgressRate);
 
-    return {
+    // Format sessions for the chart with proper duration calculations
+    const formattedSessions = sessions
+      .filter(session => session.date && session.duration)
+      .map(session => {
+        try {
+          return {
+            date: session.date,
+            duration: session.duration || { hours: 0, minutes: 0 }
+          };
+        } catch (e) {
+          console.error('Error formatting session:', session, e);
+          return null;
+        }
+      })
+      .filter((session): session is NonNullable<typeof session> => session !== null)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    console.log('Formatted sessions for chart:', formattedSessions);
+
+    const analytics = {
       averageSessionTime: `${averageHours}h ${remainingMinutes}m`,
       totalDaysActive: uniqueDaysCount,
-      sessions: sessions
-        .map(session => ({
-          date: session.date,
-          duration: session.duration || { hours: 0, minutes: 0 }
-        }))
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
+      sessions: formattedSessions,
       totalTimeInvested: {
         hours: Math.floor(totalMinutes / 60),
         minutes: totalMinutes % 60
@@ -409,6 +451,18 @@ export default function LearningGoals({ items }: Props) {
         max: maxStreak
       }
     };
+
+    console.log('Final analytics:', analytics);
+    return analytics;
+  };
+
+  // Add debug logging for analytics
+  const handleAnalyticsClick = (goal: LearningGoal) => {
+    console.log('Selected Goal:', goal);
+    const analytics = calculateGoalAnalytics(goal);
+    console.log('Calculated Analytics:', analytics);
+    setSelectedGoal(goal);
+    setShowAnalytics(true);
   };
 
   const CategorySelect = () => {
@@ -477,10 +531,7 @@ export default function LearningGoals({ items }: Props) {
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
-                  onClick={() => {
-                    setSelectedGoal(goal);
-                    setShowAnalytics(true);
-                  }}
+                  onClick={() => handleAnalyticsClick(goal)}
                 >
                   <ChartBar className="h-4 w-4" />
                 </Button>
@@ -629,17 +680,38 @@ export default function LearningGoals({ items }: Props) {
                     <BarChart data={calculateGoalAnalytics(selectedGoal).sessions}>
                       <XAxis 
                         dataKey="date" 
-                        tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        tickFormatter={(date) => {
+                          try {
+                            return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                          } catch (e) {
+                            console.error('Error formatting date:', date, e);
+                            return '';
+                          }
+                        }}
                       />
                       <YAxis 
                         label={{ value: 'Minutes', angle: -90, position: 'insideLeft' }} 
                       />
                       <Tooltip 
                         formatter={(value: any) => [`${value} min`, 'Duration']}
-                        labelFormatter={(date) => new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                        labelFormatter={(date) => {
+                          try {
+                            return new Date(date).toLocaleDateString('en-US', { 
+                              weekday: 'long', 
+                              month: 'long', 
+                              day: 'numeric' 
+                            });
+                          } catch (e) {
+                            console.error('Error formatting tooltip date:', date, e);
+                            return '';
+                          }
+                        }}
                       />
                       <Bar
-                        dataKey={(session) => (session.duration.hours * 60) + session.duration.minutes}
+                        dataKey={(session) => {
+                          if (!session || !session.duration) return 0;
+                          return (session.duration.hours * 60) + session.duration.minutes;
+                        }}
                         fill="#4F46E5"
                         radius={[4, 4, 0, 0]}
                       />
