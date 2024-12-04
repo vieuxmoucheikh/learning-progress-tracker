@@ -3,22 +3,26 @@ export interface Time {
   minutes: number;
 }
 
-export interface Session {
-  startTime: string;
-  endTime?: string;
-  duration?: Time;
+export interface GoalSession {
   date: string;
-  notes?: (string | { content: string; timestamp: string })[];
-  title?: string;
-  description?: string;
-  status?: 'in_progress' | 'completed' | 'on_hold';
+  duration: Time;
+}
+
+export interface Session {
+  id?: string;
+  goal_id?: string;
+  user_id?: string;
+  date: string;
+  duration: Time;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Progress {
   current: Time;
   total?: Time;
   lastAccessed?: string;
-  sessions: Session[];
+  sessions: GoalSession[];
   isActive?: boolean;
 }
 

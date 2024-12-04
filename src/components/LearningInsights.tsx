@@ -1,11 +1,13 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { LearningItem, Session } from '../types';
 import { Brain, Lightbulb, Zap, TrendingUp, Clock, Calendar, Target, BarChart3 } from 'lucide-react';
+import { getSessions } from '@/lib/database';
 
 interface Props {
   items: LearningItem[];
   isLoading?: boolean;
   error?: string;
+  goalId?: string;
 }
 
 interface LearningPattern {
@@ -175,36 +177,46 @@ const calculateCurrentStreak = (date: string, streakDays: string[]) => {
   return currentStreak;
 };
 
-export function LearningInsights({ items, isLoading, error }: Props) {
+export function LearningInsights({ items, isLoading, error, goalId }: Props) {
+  const [sessions, setSessions] = useState<Session[]>([]);
+
+  useEffect(() => {
+    async function fetchSessions() {
+      if (goalId) {
+        try {
+          const goalSessions = await getSessions(goalId);
+          setSessions(goalSessions.map(session => ({
+            ...session,
+            duration: {
+              hours: session.duration.hours || 0,
+              minutes: session.duration.minutes || 0
+            }
+          })));
+        } catch (error) {
+          console.error('Error fetching sessions:', error);
+        }
+      }
+    }
+    fetchSessions();
+  }, [goalId]);
+
   const patterns = useMemo((): LearningPattern => {
     console.log('Processing items for analytics:', items);
+    console.log('Processing sessions:', sessions);
     
     const now = new Date();
     const timeByHour: { [key: number]: number } = {};
     const timeByDay: { [key: string]: number } = {};
     const categoryCount: { [key: string]: number } = {};
     const categoryTime: { [key: string]: number } = {};
-    let totalSessions = 0;
+    let totalSessions = sessions.length;
     let totalTime = 0;
     let completedItems = 0;
     let totalItems = items.length;
     let streakDays = new Set<string>();
-    let allSessions: Session[] = [];
-
-    // Collect all sessions from items
-    items.forEach(item => {
-      if (item.progress?.sessions) {
-        allSessions = [...allSessions, ...item.progress.sessions];
-      }
-    });
-
-    // Sort sessions by date
-    allSessions.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    console.log('Total sessions collected:', allSessions.length);
-
+    
     // Process each session
-    allSessions.forEach(session => {
+    sessions.forEach(session => {
       if (!session?.date || !session?.duration) {
         console.log('Invalid session data:', session);
         return;
@@ -212,7 +224,7 @@ export function LearningInsights({ items, isLoading, error }: Props) {
 
       try {
         const sessionDate = new Date(session.date);
-        const duration = ((session.duration?.hours || 0) * 60) + (session.duration?.minutes || 0);
+        const duration = (session.duration.hours * 60) + session.duration.minutes;
 
         // Update time distributions
         const hour = sessionDate.getHours();
@@ -224,7 +236,6 @@ export function LearningInsights({ items, isLoading, error }: Props) {
         streakDays.add(sessionDate.toISOString().split('T')[0]);
         
         totalTime += duration;
-        totalSessions++;
 
       } catch (e) {
         console.error('Error processing session:', e);
@@ -232,10 +243,10 @@ export function LearningInsights({ items, isLoading, error }: Props) {
     });
 
     // Calculate learning velocity
-    const learningVelocity = calculateLearningVelocity(allSessions);
+    const learningVelocity = calculateLearningVelocity(sessions);
 
     // Calculate streak consistency
-    const streakConsistency = calculateStreakConsistency(allSessions);
+    const streakConsistency = calculateStreakConsistency(sessions);
 
     // Find best time of day
     const bestHour = Object.entries(timeByHour)
@@ -279,7 +290,7 @@ export function LearningInsights({ items, isLoading, error }: Props) {
       totalSessions,
       daysActive: streakDays.size
     };
-  }, [items]);
+  }, [items, sessions]);
 
   const recommendations = useMemo((): Recommendation[] => {
     const recs: Recommendation[] = [];
