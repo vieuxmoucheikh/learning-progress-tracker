@@ -42,6 +42,16 @@ interface GoalAnalytics {
     date: string;
     duration: { hours: number; minutes: number };
   }>;
+  totalTimeInvested: {
+    hours: number;
+    minutes: number;
+  };
+  completionPercentage: number;
+  dailyProgressRate: number;
+  streaks: {
+    current: number;
+    max: number;
+  };
 }
 
 type Priority = 'high' | 'medium' | 'low';
@@ -290,20 +300,73 @@ export default function LearningGoals({ items }: Props) {
 
   const calculateGoalAnalytics = (goal: LearningGoal): GoalAnalytics => {
     const sessions = goal.progress?.sessions || [];
+    
+    // Calculate total time invested
     const totalMinutes = sessions.reduce((total, session) => {
+      if (!session.duration) return total;
       return total + (session.duration.hours * 60) + session.duration.minutes;
     }, 0);
     
+    // Calculate average session time
     const averageMinutes = sessions.length ? Math.round(totalMinutes / sessions.length) : 0;
     const averageHours = Math.floor(averageMinutes / 60);
     const remainingMinutes = averageMinutes % 60;
     
-    const uniqueDays = new Set(sessions.map(s => s.date.split('T')[0])).size;
+    // Calculate unique days and consistency
+    const uniqueDays = new Set(sessions.map(s => s.date.split('T')[0]));
+    const uniqueDaysCount = uniqueDays.size;
+    
+    // Calculate completion percentage
+    const targetMinutes = (goal.targetHours || 0) * 60;
+    const completionPercentage = targetMinutes > 0 
+      ? Math.min(100, Math.round((totalMinutes / targetMinutes) * 100))
+      : 0;
+    
+    // Calculate daily progress rate
+    const firstSession = sessions[0]?.date ? new Date(sessions[0].date) : new Date();
+    const lastSession = sessions[sessions.length - 1]?.date ? new Date(sessions[sessions.length - 1].date) : new Date();
+    const daysBetween = Math.max(1, Math.ceil((lastSession.getTime() - firstSession.getTime()) / (1000 * 60 * 60 * 24)));
+    const dailyProgressRate = Math.round((totalMinutes / daysBetween) * 100) / 100;
+    
+    // Calculate streak
+    let currentStreak = 0;
+    let maxStreak = 0;
+    let tempStreak = 0;
+    
+    const sortedDays = Array.from(uniqueDays).sort();
+    sortedDays.forEach((date, index) => {
+      if (index === 0) {
+        tempStreak = 1;
+      } else {
+        const curr = new Date(date);
+        const prev = new Date(sortedDays[index - 1]);
+        const diffDays = Math.round((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 1) {
+          tempStreak++;
+        } else {
+          maxStreak = Math.max(maxStreak, tempStreak);
+          tempStreak = 1;
+        }
+      }
+    });
+    maxStreak = Math.max(maxStreak, tempStreak);
+    currentStreak = tempStreak;
     
     return {
       averageSessionTime: `${averageHours}h ${remainingMinutes}m`,
-      totalDaysActive: uniqueDays,
-      sessions: sessions
+      totalDaysActive: uniqueDaysCount,
+      sessions,
+      totalTimeInvested: {
+        hours: Math.floor(totalMinutes / 60),
+        minutes: totalMinutes % 60
+      },
+      completionPercentage,
+      dailyProgressRate,
+      streaks: {
+        current: currentStreak,
+        max: maxStreak
+      }
     };
   };
 
@@ -444,108 +507,58 @@ export default function LearningGoals({ items }: Props) {
         })}
       </div>
 
-      <Dialog open={showAnalytics} onOpenChange={setShowAnalytics}>
-        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto bg-background text-foreground border-border">
-          <DialogHeader className="space-y-3 pb-4 border-b border-border">
-            <DialogTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Goal Analytics
-            </DialogTitle>
-            <DialogDescription className="text-base text-muted-foreground">
-              {selectedGoal?.title} - {selectedGoal?.category}
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedGoal && (
-            <div className="space-y-6 py-4">
-              {/* Key Metrics */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {(() => {
-                  const analytics = calculateGoalAnalytics(selectedGoal);
-                  const progress = (analytics.totalDaysActive / selectedGoal.targetHours) * 100;
-                  
-                  return (
-                    <>
-                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                        <h3 className="text-sm font-medium text-foreground">Progress</h3>
-                        <div className="text-2xl font-bold">{Math.round(progress)}%</div>
-                        <div className="text-sm text-foreground">
-                          {Math.round(analytics.totalDaysActive)} days of {selectedGoal.targetHours} days
-                        </div>
-                      </Card>
-
-                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                        <h3 className="text-sm font-medium text-foreground">Time Left</h3>
-                        <div className="text-2xl font-bold">{getRemainingTime(selectedGoal.targetDate)}</div>
-                        <div className="text-sm text-foreground">
-                          {analytics.totalDaysActive > 0 
-                            ? `Projected completion in ${analytics.totalDaysActive} days`
-                            : 'Insufficient data for projection'}
-                        </div>
-                      </Card>
-
-                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                        <h3 className="text-sm font-medium text-foreground">Activity</h3>
-                        <div className="text-2xl font-bold">{analytics.sessions.length}</div>
-                        <div className="text-sm text-foreground">
-                          Sessions in last 7 days
-                        </div>
-                      </Card>
-                    </>
-                  );
-                })()}
-              </div>
-
-              {/* Daily Progress Chart */}
-              <Card className="p-4 space-y-4 bg-background text-foreground border-border">
-                <h3 className="text-lg font-medium">Daily Progress</h3>
-                <div className="h-[200px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={selectedGoal.progress?.sessions || []}>
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar
-                        dataKey="duration.hours"
-                        fill="#4F46E5"
-                        radius={[4, 4, 0, 0]}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
+      {showAnalytics && selectedGoal && (
+        <Dialog open={showAnalytics} onOpenChange={setShowAnalytics}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold">Goal Analytics</DialogTitle>
+              <DialogDescription>
+                Detailed analytics for {selectedGoal.title}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="space-y-2">
+                <h4 className="font-medium text-gray-700">Time Investment</h4>
+                <div className="text-sm text-gray-600">
+                  <p>Average Session: {calculateGoalAnalytics(selectedGoal).averageSessionTime}</p>
+                  <p>Total Time: {calculateGoalAnalytics(selectedGoal).totalTimeInvested.hours}h {calculateGoalAnalytics(selectedGoal).totalTimeInvested.minutes}m</p>
+                  <p>Daily Progress: {calculateGoalAnalytics(selectedGoal).dailyProgressRate} min/day</p>
                 </div>
-              </Card>
-
-              {/* Additional Stats */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                  <h3 className="text-sm font-medium text-foreground">Average Session</h3>
-                  <div className="text-xl font-bold">
-                    {calculateGoalAnalytics(selectedGoal).averageSessionTime}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Minutes per learning session
-                  </div>
-                </Card>
-
-                <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                  <h3 className="text-sm font-medium text-foreground">Days Active</h3>
-                  <div className="text-xl font-bold">
-                    {calculateGoalAnalytics(selectedGoal).totalDaysActive}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Total days with activity
-                  </div>
-                </Card>
+              </div>
+              
+              <div className="space-y-2">
+                <h4 className="font-medium text-gray-700">Progress</h4>
+                <div className="text-sm text-gray-600">
+                  <p>Completion: {calculateGoalAnalytics(selectedGoal).completionPercentage}%</p>
+                  <p>Days Active: {calculateGoalAnalytics(selectedGoal).totalDaysActive}</p>
+                  <p>Current Streak: {calculateGoalAnalytics(selectedGoal).streaks.current} days</p>
+                  <p>Best Streak: {calculateGoalAnalytics(selectedGoal).streaks.max} days</p>
+                </div>
               </div>
             </div>
-          )}
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAnalytics(false)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <div className="mt-6">
+              <h4 className="font-medium text-gray-700 mb-2">Progress Chart</h4>
+              <div className="w-full bg-gray-100 rounded-full h-2.5">
+                <div 
+                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                  style={{ width: `${calculateGoalAnalytics(selectedGoal).completionPercentage}%` }}
+                />
+              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                {calculateGoalAnalytics(selectedGoal).completionPercentage}% Complete
+              </p>
+            </div>
+
+            <DialogFooter className="mt-6">
+              <Button variant="outline" onClick={() => setShowAnalytics(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
       <Dialog open={isAddingGoal} onOpenChange={setIsAddingGoal}>
         <DialogContent className="sm:max-w-[500px] bg-background text-foreground border-border p-0 sm:p-6 sm:pt-4">
