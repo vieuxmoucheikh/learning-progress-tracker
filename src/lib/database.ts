@@ -426,6 +426,60 @@ async function ensureGoalsTableExists() {
   }
 }
 
+async function ensureSessionsTableExists() {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Authentication required');
+    }
+
+    // Check if the table exists
+    const { error: tableError } = await supabase
+      .from('goal_sessions')
+      .select('id')
+      .limit(1);
+
+    if (tableError) {
+      console.log('Sessions table does not exist, creating...');
+      
+      // Create the table with the updated schema
+      const { error: createError } = await supabase.rpc('create_goals_table', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS goal_sessions (
+            id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+            goal_id UUID NOT NULL REFERENCES learning_goals(id) ON DELETE CASCADE,
+            user_id UUID NOT NULL REFERENCES auth.users(id),
+            date DATE NOT NULL,
+            duration_hours INTEGER NOT NULL,
+            duration_minutes INTEGER NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now()),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now())
+          );
+          
+          CREATE INDEX IF NOT EXISTS goal_sessions_goal_id_idx ON goal_sessions(goal_id);
+          CREATE INDEX IF NOT EXISTS goal_sessions_user_id_idx ON goal_sessions(user_id);
+          CREATE INDEX IF NOT EXISTS goal_sessions_date_idx ON goal_sessions(date);
+        `
+      });
+
+      if (createError) {
+        console.error('Error creating sessions table:', createError);
+        throw new Error('Failed to create sessions table');
+      }
+    }
+  } catch (error) {
+    console.error('Error in ensureSessionsTableExists:', error);
+    throw error;
+  }
+}
+
+async function initializeTables() {
+  await ensureGoalsTableExists();
+  await ensureSessionsTableExists();
+}
+
+initializeTables();
+
 export async function getGoals() {
   try {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -681,5 +735,3 @@ export async function getSessions(goalId: string) {
     throw error instanceof Error ? error : new Error('Failed to fetch sessions');
   }
 }
-
-ensureGoalsTableExists();
