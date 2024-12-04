@@ -468,29 +468,34 @@ export async function getGoals() {
       throw new Error('Authentication required');
     }
 
-    const { data, error } = await supabase
+    const { data: goals, error: goalsError } = await supabase
       .from('learning_goals')
       .select('*')
       .eq('user_id', user.id);
 
-    if (error) {
-      console.error('Error fetching goals:', error);
-      throw new Error(error.message || 'Failed to fetch goals');
+    if (goalsError) {
+      console.error('Error fetching goals:', goalsError);
+      throw new Error(goalsError.message || 'Failed to fetch goals');
     }
 
-    // Transform the data to match the LearningGoal interface
-    return data.map((goal): LearningGoal => ({
-      id: goal.id,
-      userId: goal.user_id,
-      title: goal.title,
-      category: goal.category,
-      targetHours: goal.target_hours,
-      targetDate: goal.target_date,
-      priority: goal.priority,
-      status: goal.status,
-      createdAt: goal.created_at,
-      progress: goal.progress || { sessions: [] }
+    // Fetch sessions for each goal
+    const goalsWithSessions = await Promise.all(goals.map(async (goal) => {
+      const sessions = await getSessions(goal.id);
+      return {
+        id: goal.id,
+        userId: goal.user_id,
+        title: goal.title,
+        category: goal.category,
+        targetHours: goal.target_hours,
+        targetDate: goal.target_date,
+        priority: goal.priority,
+        status: goal.status,
+        createdAt: goal.created_at,
+        progress: { sessions }
+      };
     }));
+
+    return goalsWithSessions;
   } catch (error) {
     console.error('Error in getGoals:', error);
     throw error instanceof Error ? error : new Error('Failed to fetch goals');
@@ -507,14 +512,13 @@ export async function addGoal(goal: Omit<LearningGoal, 'id' | 'userId' | 'create
     console.log('Adding goal with user:', user.id);
     console.log('Goal data:', goal);
 
-    // Convert property names for database and initialize progress
+    // Convert property names for database
     const { targetHours, targetDate, progress, ...rest } = goal;
     const newGoal = {
       ...rest,
       user_id: user.id,
       target_hours: targetHours,
       target_date: targetDate,
-      progress: progress || { sessions: [] },
       status: 'active' as const,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -550,7 +554,7 @@ export async function addGoal(goal: Omit<LearningGoal, 'id' | 'userId' | 'create
       priority: insertedGoal.priority,
       status: insertedGoal.status,
       createdAt: insertedGoal.created_at,
-      progress: insertedGoal.progress || { sessions: [] }
+      progress: { sessions: [] }
     };
 
     return transformedData;
@@ -567,34 +571,12 @@ export async function updateGoal(id: string, updates: Partial<LearningGoal>) {
       throw new Error('Authentication required');
     }
 
-    // Get the current goal to merge progress
-    const { data: currentGoal, error: fetchError } = await supabase
-      .from('learning_goals')
-      .select('*')
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .single();
-
-    if (fetchError) {
-      console.error('Error fetching current goal:', fetchError);
-      throw new Error(fetchError.message || 'Failed to fetch current goal');
-    }
-
-    // Prepare progress data
-    let progressData = currentGoal?.progress || { sessions: [] };
-    if (updates.progress?.sessions) {
-      progressData = {
-        sessions: [...(progressData.sessions || []), ...updates.progress.sessions]
-      };
-    }
-
     // Remove progress from updates and convert property names
     const { progress, targetHours, targetDate, ...rest } = updates;
     const updatedData = {
       ...rest,
       ...(targetHours !== undefined && { target_hours: targetHours }),
       ...(targetDate !== undefined && { target_date: targetDate }),
-      progress: progressData,
       updated_at: new Date().toISOString()
     };
 
@@ -628,7 +610,7 @@ export async function updateGoal(id: string, updates: Partial<LearningGoal>) {
       priority: data.priority,
       status: data.status,
       createdAt: data.created_at,
-      progress: data.progress || { sessions: [] }
+      progress: { sessions: [] }
     };
 
     return transformedData;
@@ -660,6 +642,78 @@ export async function deleteGoal(id: string) {
   } catch (error) {
     console.error('Error in deleteGoal:', error);
     throw error instanceof Error ? error : new Error('Failed to delete goal');
+  }
+}
+
+// Add session functions
+export async function addSession(goalId: string, session: { date: string; duration: { hours: number; minutes: number } }) {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Authentication required');
+    }
+
+    const newSession = {
+      goal_id: goalId,
+      user_id: user.id,
+      date: session.date,
+      duration_hours: session.duration.hours,
+      duration_minutes: session.duration.minutes,
+      created_at: new Date().toISOString()
+    };
+
+    const { data, error } = await supabase
+      .from('goal_sessions')
+      .insert([newSession])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding session:', error);
+      throw new Error(error.message || 'Failed to add session');
+    }
+
+    return {
+      date: data.date,
+      duration: {
+        hours: data.duration_hours,
+        minutes: data.duration_minutes
+      }
+    };
+  } catch (error) {
+    console.error('Error in addSession:', error);
+    throw error instanceof Error ? error : new Error('Failed to add session');
+  }
+}
+
+export async function getSessions(goalId: string) {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Authentication required');
+    }
+
+    const { data, error } = await supabase
+      .from('goal_sessions')
+      .select('*')
+      .eq('goal_id', goalId)
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error fetching sessions:', error);
+      throw new Error(error.message || 'Failed to fetch sessions');
+    }
+
+    return data.map(session => ({
+      date: session.date,
+      duration: {
+        hours: session.duration_hours,
+        minutes: session.duration_minutes
+      }
+    }));
+  } catch (error) {
+    console.error('Error in getSessions:', error);
+    throw error instanceof Error ? error : new Error('Failed to fetch sessions');
   }
 }
 

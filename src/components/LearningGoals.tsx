@@ -10,7 +10,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
 import { Brain, ChartBar, LucideCalendar, Plus, Trash2, Target, Clock, TrendingUp } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { addGoal, deleteGoal, getGoals, updateGoal } from '@/lib/database';
+import { addGoal, deleteGoal, getGoals, updateGoal, addSession } from '@/lib/database';
 import { LearningItem } from '@/types';
 import { clsx } from 'clsx';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
@@ -218,6 +218,17 @@ export default function LearningGoals({ items }: Props) {
         description: "Failed to delete goal. Please try again.",
         variant: "destructive",
       });
+    }
+  };
+
+  // Add session handling
+  const addSessionToGoal = async (goalId: string, date: string, duration: { hours: number; minutes: number }) => {
+    try {
+      const session = await addSession(goalId, { date, duration });
+      return session;
+    } catch (error) {
+      console.error('Error adding session:', error);
+      throw error;
     }
   };
 
