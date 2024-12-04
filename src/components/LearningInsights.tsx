@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { LearningItem } from '../types';
+import { LearningItem, Session } from '../types';
 import { Brain, Lightbulb, Zap, TrendingUp, Clock, Calendar, Target, BarChart3 } from 'lucide-react';
 
 interface Props {
@@ -29,7 +29,7 @@ interface Recommendation {
   icon: JSX.Element;
 }
 
-const calculateLearningVelocity = (sessions: any[]): number => {
+const calculateLearningVelocity = (sessions: Session[]): number => {
   if (!sessions || sessions.length === 0) {
     console.log('No sessions available for velocity calculation');
     return 0;
@@ -85,7 +85,7 @@ const calculateLearningVelocity = (sessions: any[]): number => {
   }
 };
 
-const calculateStreakConsistency = (sessions: any[]): number => {
+const calculateStreakConsistency = (sessions: Session[]): number => {
   if (!sessions || sessions.length === 0) {
     console.log('No sessions available for streak consistency calculation');
     return 0;
@@ -159,6 +159,16 @@ export function LearningInsights({ items, isLoading, error }: Props) {
     let totalItems = items.length;
     let streakDays = new Set<string>();
 
+    // Collect all sessions from all items
+    const allSessions: Session[] = items.flatMap(item => {
+      // Check both progress.sessions and direct sessions
+      const itemSessions = item.progress?.sessions || [];
+      console.log(`Sessions for item ${item.title}:`, itemSessions);
+      return itemSessions;
+    });
+
+    console.log('Total collected sessions:', allSessions.length);
+
     // Analyze all sessions
     items.forEach(item => {
       if (item.category) {
@@ -169,28 +179,41 @@ export function LearningInsights({ items, isLoading, error }: Props) {
         completedItems++;
       }
 
-      // Get sessions from progress
+      // Process sessions for the item
       const sessions = item.progress?.sessions || [];
       sessions.forEach(session => {
-        if (!session.date) return;
+        if (!session.date || !session.duration) return;
 
-        const date = new Date(session.date);
-        const hour = date.getHours();
-        const day = date.toLocaleDateString('en-US', { weekday: 'long' });
-        const duration = session.duration || { hours: 0, minutes: 0 };
-        const minutes = (duration.hours * 60) + duration.minutes;
-
-        timeByHour[hour] = (timeByHour[hour] || 0) + minutes;
-        timeByDay[day] = (timeByDay[day] || 0) + minutes;
-        totalTime += minutes;
         totalSessions++;
-        streakDays.add(date.toISOString().split('T')[0]);
+        const sessionDate = new Date(session.date);
+        const hour = sessionDate.getHours();
+        const day = sessionDate.toLocaleDateString('en-US', { weekday: 'long' });
+        const duration = (session.duration.hours * 60) + session.duration.minutes;
+
+        timeByHour[hour] = (timeByHour[hour] || 0) + duration;
+        timeByDay[day] = (timeByDay[day] || 0) + duration;
+        totalTime += duration;
 
         if (item.category) {
-          categoryTime[item.category] = (categoryTime[item.category] || 0) + minutes;
+          categoryTime[item.category] = (categoryTime[item.category] || 0) + duration;
         }
+
+        streakDays.add(session.date.split('T')[0]);
       });
     });
+
+    // Calculate metrics
+    const oldestItemDate = items.length > 0
+      ? Math.min(...items.map(item => new Date(item.date).getTime()))
+      : now.getTime();
+    const weeksDiff = Math.max(1, Math.ceil((now.getTime() - oldestItemDate) / (1000 * 60 * 60 * 24 * 7)));
+
+    // Calculate learning velocity and streak consistency using all sessions
+    const learningVelocity = calculateLearningVelocity(allSessions);
+    const streakConsistency = calculateStreakConsistency(allSessions);
+
+    console.log('Learning velocity:', learningVelocity);
+    console.log('Streak consistency:', streakConsistency);
 
     // Find best time of day
     const bestHour = Object.entries(timeByHour)
@@ -207,16 +230,6 @@ export function LearningInsights({ items, isLoading, error }: Props) {
     const sortedCategories = Object.entries(categoryTime)
       .sort(([, a], [, b]) => b - a)
       .map(([category]) => category);
-
-    // Calculate learning velocity (items completed per week)
-    const oldestItemDate = items.length > 0 
-      ? Math.min(...items.map(item => new Date(item.date).getTime()))
-      : now.getTime();
-    const weeksDiff = Math.max(1, Math.ceil((now.getTime() - oldestItemDate) / (1000 * 60 * 60 * 24 * 7)));
-    const learningVelocity = calculateLearningVelocity(items.flatMap(item => item.progress?.sessions || []));
-
-    // Calculate streak consistency
-    const streakConsistency = calculateStreakConsistency(items.flatMap(item => item.progress?.sessions || []));
 
     return {
       bestTimeOfDay: `${parseInt(bestHour)}:00`,
