@@ -14,19 +14,37 @@ import { addGoal, deleteGoal, getGoals, updateGoal } from '@/lib/database';
 import { LearningItem } from '@/types';
 import { clsx } from 'clsx';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { LearningGoal } from '@/types';
 
-type Priority = 'high' | 'medium' | 'low';
+type GoalStatus = 'active' | 'completed' | 'overdue';
+
+interface LearningGoal {
+  id: string;
+  userId: string;
+  title: string;
+  category: string;
+  targetHours: number;
+  targetDate: string;
+  priority: 'low' | 'medium' | 'high';
+  status: GoalStatus;
+  createdAt: string;
+  progress?: {
+    sessions: Array<{
+      date: string;
+      duration: { hours: number; minutes: number };
+    }>;
+  };
+}
 
 interface GoalAnalytics {
-  dailyProgress: { date: string; minutes: number }[];
-  totalTimeSpent: number;
-  recentSessions: number;
-  averageSessionLength: number;
-  daysActive: number;
-  daysLeft: number;
-  projectedCompletion: number;
+  averageSessionTime: string;
+  totalDaysActive: number;
+  sessions: Array<{
+    date: string;
+    duration: { hours: number; minutes: number };
+  }>;
 }
+
+type Priority = 'high' | 'medium' | 'low';
 
 interface Props {
   items: LearningItem[];
@@ -118,7 +136,10 @@ export default function LearningGoals({ items }: Props) {
 
       const addedGoal = await addGoal(newGoal);
       // Update local state immediately
-      setGoals(prevGoals => [...prevGoals, addedGoal]);
+      setGoals(prevGoals => {
+        // Explicitly cast to LearningGoal[]
+        return [...prevGoals, addedGoal] as LearningGoal[];
+      });
       setIsAddingGoal(false);
       setNewGoal({
         title: '',
@@ -141,8 +162,14 @@ export default function LearningGoals({ items }: Props) {
     }
   };
 
+  // Valid goal statuses are: 'active' | 'completed' | 'overdue'
+  // Note: Goals cannot be 'archived' - use 'completed' status instead
   const handleUpdateGoal = async (goalId: string, updates: Partial<LearningGoal>) => {
     try {
+      // If trying to archive, mark as completed instead
+      if (updates.status && !['active', 'completed', 'overdue'].includes(updates.status)) {
+        updates.status = 'completed';
+      }
       await updateGoal(goalId, updates);
       toast({
         title: "Success",
@@ -158,11 +185,12 @@ export default function LearningGoals({ items }: Props) {
     }
   };
 
-  const handleDeleteGoal = async (goalId: string) => {
+  const handleDeleteGoal = async (goalId: string): Promise<void> => {
     try {
       await deleteGoal(goalId);
-      // Update local state immediately
-      setGoals(prevGoals => prevGoals.filter(goal => goal.id !== goalId));
+      setGoals((prevGoals: LearningGoal[]): LearningGoal[] => 
+        prevGoals.filter((goal: LearningGoal): boolean => goal.id !== goalId)
+      );
       setShowDeleteConfirm(false);
       setGoalToDelete(null);
       toast({
@@ -261,58 +289,21 @@ export default function LearningGoals({ items }: Props) {
   };
 
   const calculateGoalAnalytics = (goal: LearningGoal): GoalAnalytics => {
-    const categoryItems = items.filter(item => item.category === goal.category);
-    const now = new Date();
-    const targetDate = new Date(goal.targetDate);
-    const createdAt = new Date(goal.createdAt);
+    const sessions = goal.progress?.sessions || [];
+    const totalMinutes = sessions.reduce((total, session) => {
+      return total + (session.duration.hours * 60) + session.duration.minutes;
+    }, 0);
     
-    // Get all sessions from items in this category
-    const allSessions = categoryItems.flatMap(item => 
-      (item.progress?.sessions || []).map(session => ({
-        startTime: new Date(session.startTime),
-        duration: session.duration ? session.duration.hours * 60 + session.duration.minutes : 0,
-        status: session.status
-      }))
-    ).filter(session => session.startTime >= createdAt);
-
-    // Calculate daily progress
-    const dailyProgress = allSessions.reduce((acc, session) => {
-      const date = session.startTime.toISOString().split('T')[0];
-      const existing = acc.find(d => d.date === date);
-      if (existing) {
-        existing.minutes += session.duration;
-      } else {
-        acc.push({ date, minutes: session.duration });
-      }
-      return acc;
-    }, [] as { date: string; minutes: number }[]).sort((a, b) => a.date.localeCompare(b.date));
-
-    // Calculate other metrics
-    const totalTimeSpent = allSessions.reduce((sum, session) => sum + session.duration, 0);
-    const recentSessions = allSessions.filter(session => 
-      session.startTime >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-    ).length;
-    const averageSessionLength = allSessions.length > 0 
-      ? Math.round(totalTimeSpent / allSessions.length) 
-      : 0;
-    const daysActive = new Set(dailyProgress.map(d => d.date)).size;
-    const daysLeft = Math.max(0, Math.ceil((targetDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+    const averageMinutes = sessions.length ? Math.round(totalMinutes / sessions.length) : 0;
+    const averageHours = Math.floor(averageMinutes / 60);
+    const remainingMinutes = averageMinutes % 60;
     
-    // Calculate projected completion based on current progress rate
-    const daysSinceStart = Math.ceil((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
-    const dailyRate = daysSinceStart > 0 ? totalTimeSpent / daysSinceStart : 0;
-    const remainingMinutes = goal.targetHours * 60 - totalTimeSpent;
-    const projectedDays = dailyRate > 0 ? Math.ceil(remainingMinutes / dailyRate) : 0;
-    const projectedCompletion = projectedDays > 0 ? Math.round((remainingMinutes / dailyRate) * 10) / 10 : 0;
-
+    const uniqueDays = new Set(sessions.map(s => s.date.split('T')[0])).size;
+    
     return {
-      dailyProgress,
-      totalTimeSpent,
-      recentSessions,
-      averageSessionLength,
-      daysActive,
-      daysLeft,
-      projectedCompletion
+      averageSessionTime: `${averageHours}h ${remainingMinutes}m`,
+      totalDaysActive: uniqueDays,
+      sessions: sessions
     };
   };
 
@@ -453,6 +444,109 @@ export default function LearningGoals({ items }: Props) {
         })}
       </div>
 
+      <Dialog open={showAnalytics} onOpenChange={setShowAnalytics}>
+        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto bg-background text-foreground border-border">
+          <DialogHeader className="space-y-3 pb-4 border-b border-border">
+            <DialogTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Goal Analytics
+            </DialogTitle>
+            <DialogDescription className="text-base text-muted-foreground">
+              {selectedGoal?.title} - {selectedGoal?.category}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedGoal && (
+            <div className="space-y-6 py-4">
+              {/* Key Metrics */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {(() => {
+                  const analytics = calculateGoalAnalytics(selectedGoal);
+                  const progress = (analytics.totalDaysActive / selectedGoal.targetHours) * 100;
+                  
+                  return (
+                    <>
+                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
+                        <h3 className="text-sm font-medium text-foreground">Progress</h3>
+                        <div className="text-2xl font-bold">{Math.round(progress)}%</div>
+                        <div className="text-sm text-foreground">
+                          {Math.round(analytics.totalDaysActive)} days of {selectedGoal.targetHours} days
+                        </div>
+                      </Card>
+
+                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
+                        <h3 className="text-sm font-medium text-foreground">Time Left</h3>
+                        <div className="text-2xl font-bold">{getRemainingTime(selectedGoal.targetDate)}</div>
+                        <div className="text-sm text-foreground">
+                          {analytics.totalDaysActive > 0 
+                            ? `Projected completion in ${analytics.totalDaysActive} days`
+                            : 'Insufficient data for projection'}
+                        </div>
+                      </Card>
+
+                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
+                        <h3 className="text-sm font-medium text-foreground">Activity</h3>
+                        <div className="text-2xl font-bold">{analytics.sessions.length}</div>
+                        <div className="text-sm text-foreground">
+                          Sessions in last 7 days
+                        </div>
+                      </Card>
+                    </>
+                  );
+                })()}
+              </div>
+
+              {/* Daily Progress Chart */}
+              <Card className="p-4 space-y-4 bg-background text-foreground border-border">
+                <h3 className="text-lg font-medium">Daily Progress</h3>
+                <div className="h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={selectedGoal.progress?.sessions || []}>
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar
+                        dataKey="duration.hours"
+                        fill="#4F46E5"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </Card>
+
+              {/* Additional Stats */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Card className="p-4 space-y-2 bg-background text-foreground border-border">
+                  <h3 className="text-sm font-medium text-foreground">Average Session</h3>
+                  <div className="text-xl font-bold">
+                    {calculateGoalAnalytics(selectedGoal).averageSessionTime}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Minutes per learning session
+                  </div>
+                </Card>
+
+                <Card className="p-4 space-y-2 bg-background text-foreground border-border">
+                  <h3 className="text-sm font-medium text-foreground">Days Active</h3>
+                  <div className="text-xl font-bold">
+                    {calculateGoalAnalytics(selectedGoal).totalDaysActive}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Total days with activity
+                  </div>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAnalytics(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={isAddingGoal} onOpenChange={setIsAddingGoal}>
         <DialogContent className="sm:max-w-[500px] bg-background text-foreground border-border p-0 sm:p-6 sm:pt-4">
           <DialogHeader className="space-y-3 pb-4 border-b border-border px-4 sm:px-0">
@@ -583,122 +677,6 @@ export default function LearningGoals({ items }: Props) {
               Delete
             </Button>
           </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Goal Analytics Dialog */}
-      <Dialog open={showAnalytics} onOpenChange={setShowAnalytics}>
-        <DialogContent className="sm:max-w-[700px] bg-background text-foreground border-border">
-          <DialogHeader className="space-y-3 pb-4 border-b border-border">
-            <DialogTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Goal Analytics
-            </DialogTitle>
-            <DialogDescription className="text-base text-muted-foreground">
-              {selectedGoal?.title} - {selectedGoal?.category}
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedGoal && (
-            <div className="space-y-6 py-4">
-              {/* Progress Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {(() => {
-                  const analytics = calculateGoalAnalytics(selectedGoal);
-                  const progress = (analytics.totalTimeSpent / 60) / selectedGoal.targetHours * 100;
-                  
-                  return (
-                    <>
-                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                        <h3 className="text-sm font-medium text-foreground">Progress</h3>
-                        <div className="text-2xl font-bold">{Math.round(progress)}%</div>
-                        <div className="text-sm text-foreground">
-                          {Math.round(analytics.totalTimeSpent / 60)}h of {selectedGoal.targetHours}h
-                        </div>
-                      </Card>
-
-                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                        <h3 className="text-sm font-medium text-foreground">Time Left</h3>
-                        <div className="text-2xl font-bold">{analytics.daysLeft} days</div>
-                        <div className="text-sm text-foreground">
-                          {analytics.projectedCompletion > 0 
-                            ? `Projected completion in ${analytics.projectedCompletion} days`
-                            : 'Insufficient data for projection'}
-                        </div>
-                      </Card>
-
-                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                        <h3 className="text-sm font-medium text-foreground">Activity</h3>
-                        <div className="text-2xl font-bold">{analytics.recentSessions}</div>
-                        <div className="text-sm text-foreground">
-                          Sessions in last 7 days
-                        </div>
-                      </Card>
-                    </>
-                  );
-                })()}
-              </div>
-
-              {/* Daily Progress Chart */}
-              <Card className="p-4 space-y-4 bg-background text-foreground border-border">
-                <h3 className="text-lg font-medium">Daily Progress</h3>
-                <div className="h-[200px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={calculateGoalAnalytics(selectedGoal).dailyProgress}
-                      margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
-                    >
-                      <XAxis 
-                        dataKey="date" 
-                        angle={-45}
-                        textAnchor="end"
-                        height={60}
-                        tick={{ fontSize: 12 }}
-                      />
-                      <YAxis 
-                        label={{ 
-                          value: 'Minutes', 
-                          angle: -90, 
-                          position: 'insideLeft',
-                          style: { textAnchor: 'middle' }
-                        }}
-                      />
-                      <Tooltip
-                        formatter={(value: number) => [`${value} minutes`, 'Time Spent']}
-                      />
-                      <Bar 
-                        dataKey="minutes" 
-                        fill="#3B82F6"
-                        radius={[4, 4, 0, 0]}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </Card>
-
-              {/* Additional Stats */}
-              <div className="grid grid-cols-2 gap-4">
-                <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                  <h3 className="text-sm font-medium text-foreground">Average Session</h3>
-                  <div className="text-xl font-bold">
-                    {(() => {
-                      const analytics = calculateGoalAnalytics(selectedGoal);
-                      return `${Math.round(analytics.averageSessionLength)} minutes`;
-                    })()}
-                  </div>
-                </Card>
-
-                <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                  <h3 className="text-sm font-medium text-foreground">Days Active</h3>
-                  <div className="text-xl font-bold">
-                    {(() => {
-                      const analytics = calculateGoalAnalytics(selectedGoal);
-                      return analytics.daysActive;
-                    })()}
-                  </div>
-                </Card>
-              </div>
-            </div>
-          )}
         </DialogContent>
       </Dialog>
     </div>
