@@ -4,6 +4,8 @@ import { Brain, Lightbulb, Zap, TrendingUp, Clock, Calendar, Target, BarChart3 }
 
 interface Props {
   items: LearningItem[];
+  isLoading?: boolean;
+  error?: string;
 }
 
 interface LearningPattern {
@@ -27,7 +29,7 @@ interface Recommendation {
   icon: JSX.Element;
 }
 
-export function LearningInsights({ items }: Props) {
+export function LearningInsights({ items, isLoading, error }: Props) {
   const patterns = useMemo((): LearningPattern => {
     const now = new Date();
     const timeByHour: { [key: number]: number } = {};
@@ -158,91 +160,102 @@ export function LearningInsights({ items }: Props) {
   }, [patterns]);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border-2 border-gray-100 p-6">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
-          <Brain className="w-6 h-6 text-white" />
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border-2 border-gray-100 dark:border-gray-700 p-4 sm:p-6">
+      {isLoading ? (
+        <div className="flex items-center justify-center h-48">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
         </div>
-        <h2 className="text-2xl font-bold text-gray-800">Learning Insights</h2>
-      </div>
-
-      {/* Patterns Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div className="space-y-3">
-          <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-blue-500" />
-            Learning Patterns
-          </h3>
-          <div className="space-y-2">
-            <p className="text-sm text-gray-600">
-              Best learning time: <span className="font-semibold text-gray-800">{patterns.bestTimeOfDay}</span>
-            </p>
-            <p className="text-sm text-gray-600">
-              Most productive day: <span className="font-semibold text-gray-800">{patterns.mostProductiveDay}</span>
-            </p>
-            <p className="text-sm text-gray-600">
-              Average session: <span className="font-semibold text-gray-800">
-                {Math.floor(patterns.averageSessionLength / 60)}h {patterns.averageSessionLength % 60}m
-              </span>
-            </p>
-            <p className="text-sm text-gray-600">
-              Learning velocity: <span className="font-semibold text-gray-800">
-                {patterns.learningVelocity.toFixed(1)} items/week
-              </span>
-            </p>
+      ) : error ? (
+        <div className="text-red-500 text-center p-4">{error}</div>
+      ) : (
+        <>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
+              <Brain className="w-6 h-6 text-white" aria-hidden="true" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Learning Insights</h2>
           </div>
-        </div>
 
-        <div className="space-y-3">
-          <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-            <Target className="w-5 h-5 text-purple-500" />
-            Focus Areas
-          </h3>
-          <div className="space-y-2">
-            <p className="text-sm text-gray-600">
-              Top categories: <span className="font-semibold text-gray-800">
-                {patterns.focusedCategories.join(', ')}
-              </span>
-            </p>
-            <p className="text-sm text-gray-600">
-              Needs attention: <span className="font-semibold text-gray-800">
-                {patterns.neglectedCategories.join(', ')}
-              </span>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Recommendations */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-          <Lightbulb className="w-5 h-5 text-yellow-500" />
-          Personalized Recommendations
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {recommendations.map((rec, index) => (
-            <div
-              key={index}
-              className="p-4 rounded-lg bg-gray-50 border border-gray-100 hover:border-blue-100 transition-all duration-200"
-            >
-              <div className="flex items-start gap-3">
-                <div className="mt-1">{rec.icon}</div>
-                <div>
-                  <h4 className="font-semibold text-gray-800 mb-1">{rec.title}</h4>
-                  <p className="text-sm text-gray-600 mb-2">{rec.description}</p>
-                  {rec.action && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-700">
-                        Suggestion: {rec.action}
-                      </span>
-                    </div>
-                  )}
-                </div>
+          {/* Patterns Overview */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-blue-500" aria-hidden="true" />
+                Learning Patterns
+              </h3>
+              <div className="space-y-3 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Best learning time: <span className="font-semibold text-gray-800 dark:text-gray-100">{patterns.bestTimeOfDay}</span>
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Most productive day: <span className="font-semibold text-gray-800 dark:text-gray-100">{patterns.mostProductiveDay}</span>
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Average session: <span className="font-semibold text-gray-800 dark:text-gray-100">
+                    {Math.floor(patterns.averageSessionLength / 60)}h {patterns.averageSessionLength % 60}m
+                  </span>
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Learning velocity: <span className="font-semibold text-gray-800 dark:text-gray-100">
+                    {patterns.learningVelocity.toFixed(1)} items/week
+                  </span>
+                </p>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                <Target className="w-5 h-5 text-purple-500" aria-hidden="true" />
+                Focus Areas
+              </h3>
+              <div className="space-y-3 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Top categories: <span className="font-semibold text-gray-800 dark:text-gray-100">
+                    {patterns.focusedCategories.join(', ')}
+                  </span>
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Needs attention: <span className="font-semibold text-gray-800 dark:text-gray-100">
+                    {patterns.neglectedCategories.join(', ')}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Recommendations */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+              <Lightbulb className="w-5 h-5 text-yellow-500" aria-hidden="true" />
+              Personalized Recommendations
+            </h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {recommendations.map((rec, index) => (
+                <div
+                  key={index}
+                  className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600 hover:border-blue-100 dark:hover:border-blue-500/30 transition-all duration-200"
+                  role="article"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1 flex-shrink-0">{rec.icon}</div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-gray-800 dark:text-gray-100 mb-2">{rec.title}</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">{rec.description}</p>
+                      {rec.action && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-100">
+                            Suggestion: {rec.action}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
