@@ -161,13 +161,17 @@ export function LearningInsights({ items, isLoading, error }: Props) {
 
     // Collect all sessions from all items
     const allSessions: Session[] = items.flatMap(item => {
-      // Check both progress.sessions and direct sessions
       const itemSessions = item.progress?.sessions || [];
       console.log(`Sessions for item ${item.title}:`, itemSessions);
       return itemSessions;
-    });
+    }).filter((session): session is Session => 
+      session !== null && 
+      typeof session === 'object' && 
+      typeof session.date === 'string' && 
+      session.duration !== undefined
+    );
 
-    console.log('Total collected sessions:', allSessions.length);
+    console.log('Total valid sessions:', allSessions.length);
 
     // Analyze all sessions
     items.forEach(item => {
@@ -182,23 +186,34 @@ export function LearningInsights({ items, isLoading, error }: Props) {
       // Process sessions for the item
       const sessions = item.progress?.sessions || [];
       sessions.forEach(session => {
-        if (!session.date || !session.duration) return;
-
-        totalSessions++;
-        const sessionDate = new Date(session.date);
-        const hour = sessionDate.getHours();
-        const day = sessionDate.toLocaleDateString('en-US', { weekday: 'long' });
-        const duration = (session.duration.hours * 60) + session.duration.minutes;
-
-        timeByHour[hour] = (timeByHour[hour] || 0) + duration;
-        timeByDay[day] = (timeByDay[day] || 0) + duration;
-        totalTime += duration;
-
-        if (item.category) {
-          categoryTime[item.category] = (categoryTime[item.category] || 0) + duration;
+        if (!session?.date || !session?.duration) {
+          console.log('Skipping invalid session:', session);
+          return;
         }
 
-        streakDays.add(session.date.split('T')[0]);
+        try {
+          totalSessions++;
+          const sessionDate = new Date(session.date);
+          const hour = sessionDate.getHours();
+          const day = sessionDate.toLocaleDateString('en-US', { weekday: 'long' });
+          const duration = (session.duration.hours * 60) + session.duration.minutes;
+
+          timeByHour[hour] = (timeByHour[hour] || 0) + duration;
+          timeByDay[day] = (timeByDay[day] || 0) + duration;
+          totalTime += duration;
+
+          if (item.category) {
+            categoryTime[item.category] = (categoryTime[item.category] || 0) + duration;
+          }
+
+          const dateStr = session.date.split('T')[0];
+          if (dateStr) {
+            streakDays.add(dateStr);
+            console.log('Added streak day:', dateStr);
+          }
+        } catch (error) {
+          console.error('Error processing session:', error, session);
+        }
       });
     });
 
