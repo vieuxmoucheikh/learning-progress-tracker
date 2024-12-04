@@ -197,7 +197,6 @@ export function LearningInsights({ items, isLoading, error }: Props) {
           // Add to streak days
           const dateStr = session.date.split('T')[0];
           if (dateStr) streakDays.add(dateStr);
-
         } catch (error) {
           console.error('Error processing session:', error, session);
         }
@@ -221,14 +220,29 @@ export function LearningInsights({ items, isLoading, error }: Props) {
         
         // Check if this includes today or yesterday for current streak
         const today = new Date();
-        const todayStr = today.toISOString().split('T')[0];
-        const yesterdayStr = new Date(today.getTime() - 86400000).toISOString().split('T')[0];
+        today.setHours(0, 0, 0, 0);
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
         
-        if (streakDaysArray[i] === todayStr || streakDaysArray[i] === yesterdayStr) {
-          currentStreak = tempStreak;
+        if (curr.getTime() === today.getTime() || curr.getTime() === yesterday.getTime()) {
+          currentStreak = tempStreak + 1;
         }
       } else {
         tempStreak = 0;
+      }
+    }
+
+    // If we only have one day and it's today or yesterday, count it as a streak of 1
+    if (streakDaysArray.length === 1) {
+      const lastDay = new Date(streakDaysArray[0]);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      if (lastDay.getTime() === today.getTime() || lastDay.getTime() === yesterday.getTime()) {
+        currentStreak = 1;
+        bestStreak = 1;
       }
     }
 
@@ -264,7 +278,7 @@ export function LearningInsights({ items, isLoading, error }: Props) {
       focusedCategories: sortedCategories.slice(0, 2),
       neglectedCategories: sortedCategories.slice(-2),
       streakConsistency: currentStreak,
-      bestStreak: bestStreak + 1,
+      bestStreak: Math.max(bestStreak, currentStreak),
       totalSessions,
       daysActive
     };

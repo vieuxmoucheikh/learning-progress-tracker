@@ -399,36 +399,39 @@ export async function getGoals() {
       throw new Error('Authentication required');
     }
 
-    await ensureGoalsTableExists();
-
-    const { data, error } = await supabase
+    // First get all goals
+    const { data: goalsData, error: goalsError } = await supabase
       .from('learning_goals')
-      .select('*')
+      .select(`
+        *,
+        sessions:goal_sessions(
+          date,
+          duration
+        )
+      `)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error('Error fetching goals:', error);
-      return [];
+
+    if (goalsError) {
+      console.error('Error fetching goals:', goalsError);
+      throw new Error(goalsError.message);
     }
 
-    // Transform the data to match the LearningGoal interface
-    const transformedData = data?.map(goal => ({
-      id: goal.id,
-      userId: goal.user_id,
-      title: goal.title,
-      category: goal.category,
-      targetHours: goal.target_hours,
-      targetDate: goal.target_date,
-      priority: goal.priority,
-      status: goal.status,
-      createdAt: goal.created_at
+    // Process the goals data to match our types
+    const processedGoals = goalsData?.map(goal => ({
+      ...goal,
+      sessions: goal.sessions || [],
+      progress: {
+        sessions: goal.sessions || []
+      }
     })) || [];
-    
-    return transformedData;
+
+    console.log('Fetched goals with sessions:', processedGoals);
+    return processedGoals;
+
   } catch (error) {
     console.error('Error in getGoals:', error);
-    return [];
+    throw error;
   }
 }
 
