@@ -378,40 +378,6 @@ function calculateDuration(startTime: Date, endTime: Date) {
 }
 
 // Goals
-async function addProgressColumnIfNeeded() {
-  try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      throw new Error('Authentication required');
-    }
-
-    // First check if the column exists
-    const { error: checkError } = await supabase.rpc('check_column_exists', {
-      table_name: 'learning_goals',
-      column_name: 'progress'
-    });
-
-    if (checkError) {
-      // Column doesn't exist, add it
-      const { error: alterError } = await supabase.rpc('execute_sql', {
-        sql_string: `
-          ALTER TABLE learning_goals
-          ADD COLUMN IF NOT EXISTS progress JSONB DEFAULT '{"sessions": []}';
-        `
-      });
-
-      if (alterError) {
-        console.error('Error adding progress column:', alterError);
-        return;
-      }
-
-      console.log('Successfully added progress column');
-    }
-  } catch (error) {
-    console.error('Error in addProgressColumnIfNeeded:', error);
-  }
-}
-
 async function ensureGoalsTableExists() {
   try {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -440,7 +406,6 @@ async function ensureGoalsTableExists() {
             target_date DATE NOT NULL,
             priority TEXT CHECK (priority IN ('low', 'medium', 'high')),
             status TEXT CHECK (status IN ('active', 'completed', 'overdue')),
-            progress JSONB DEFAULT '{"sessions": []}',
             created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now()),
             updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now())
           );
@@ -513,7 +478,7 @@ export async function addGoal(goal: Omit<LearningGoal, 'id' | 'userId' | 'create
     console.log('Goal data:', goal);
 
     // Convert property names for database
-    const { targetHours, targetDate, progress, ...rest } = goal;
+    const { targetHours, targetDate, ...rest } = goal;
     const newGoal = {
       ...rest,
       user_id: user.id,
@@ -554,7 +519,7 @@ export async function addGoal(goal: Omit<LearningGoal, 'id' | 'userId' | 'create
       priority: insertedGoal.priority,
       status: insertedGoal.status,
       createdAt: insertedGoal.created_at,
-      progress: { sessions: [] }
+      progress: { sessions: [] }  // Initialize with empty sessions
     };
 
     return transformedData;
@@ -717,4 +682,4 @@ export async function getSessions(goalId: string) {
   }
 }
 
-addProgressColumnIfNeeded();
+ensureGoalsTableExists();
