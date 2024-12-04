@@ -162,6 +162,39 @@ export function LearningInsights({ items, isLoading, error }: Props) {
     let totalItems = items.length;
     let streakDays = new Set<string>();
 
+    // Helper function to process a session
+    const processSession = (session: Session, category?: string) => {
+      if (!session?.date || !session?.duration) {
+        console.log('Skipping invalid session:', session);
+        return;
+      }
+
+      try {
+        totalSessions++;
+        const sessionDate = new Date(session.date);
+        const duration = (session.duration.hours * 60) + session.duration.minutes;
+
+        // Update time distributions
+        const hour = sessionDate.getHours();
+        const day = sessionDate.toLocaleDateString('en-US', { weekday: 'long' });
+        timeByHour[hour] = (timeByHour[hour] || 0) + duration;
+        timeByDay[day] = (timeByDay[day] || 0) + duration;
+        totalTime += duration;
+
+        // Update category time
+        if (category) {
+          categoryTime[category] = (categoryTime[category] || 0) + duration;
+        }
+
+        // Add to streak days (normalize the date to local midnight)
+        const dateObj = new Date(session.date);
+        dateObj.setHours(0, 0, 0, 0);
+        streakDays.add(dateObj.toISOString());
+      } catch (error) {
+        console.error('Error processing session:', error, session);
+      }
+    };
+
     // Process all items and their sessions
     items.forEach(item => {
       if (item.category) {
@@ -174,33 +207,7 @@ export function LearningInsights({ items, isLoading, error }: Props) {
 
       // Process sessions from item's progress
       const sessions = item.progress?.sessions || [];
-      sessions.forEach(session => {
-        if (!session?.date || !session?.duration) return;
-
-        try {
-          totalSessions++;
-          const sessionDate = new Date(session.date);
-          const duration = (session.duration.hours * 60) + session.duration.minutes;
-
-          // Update time distributions
-          const hour = sessionDate.getHours();
-          const day = sessionDate.toLocaleDateString('en-US', { weekday: 'long' });
-          timeByHour[hour] = (timeByHour[hour] || 0) + duration;
-          timeByDay[day] = (timeByDay[day] || 0) + duration;
-          totalTime += duration;
-
-          // Update category time
-          if (item.category) {
-            categoryTime[item.category] = (categoryTime[item.category] || 0) + duration;
-          }
-
-          // Add to streak days
-          const dateStr = session.date.split('T')[0];
-          if (dateStr) streakDays.add(dateStr);
-        } catch (error) {
-          console.error('Error processing session:', error, session);
-        }
-      });
+      sessions.forEach(session => processSession(session, item.category));
     });
 
     // Calculate streak
@@ -209,40 +216,39 @@ export function LearningInsights({ items, isLoading, error }: Props) {
     let bestStreak = 0;
     let tempStreak = 0;
 
-    for (let i = 1; i < streakDaysArray.length; i++) {
-      const curr = new Date(streakDaysArray[i]);
-      const prev = new Date(streakDaysArray[i - 1]);
-      const diffDays = Math.floor((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
-      
-      if (diffDays === 1) {
-        tempStreak++;
-        bestStreak = Math.max(bestStreak, tempStreak);
-        
-        // Check if this includes today or yesterday for current streak
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-        
-        if (curr.getTime() === today.getTime() || curr.getTime() === yesterday.getTime()) {
-          currentStreak = tempStreak + 1;
-        }
-      } else {
-        tempStreak = 0;
-      }
-    }
+    if (streakDaysArray.length > 0) {
+      // Initialize with 1 for the first day
+      tempStreak = 1;
+      bestStreak = 1;
 
-    // If we only have one day and it's today or yesterday, count it as a streak of 1
-    if (streakDaysArray.length === 1) {
-      const lastDay = new Date(streakDaysArray[0]);
+      // Check if the last day is today or yesterday
+      const lastDay = new Date(streakDaysArray[streakDaysArray.length - 1]);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
-      
+
       if (lastDay.getTime() === today.getTime() || lastDay.getTime() === yesterday.getTime()) {
         currentStreak = 1;
-        bestStreak = 1;
+      }
+
+      // Calculate streaks
+      for (let i = 1; i < streakDaysArray.length; i++) {
+        const curr = new Date(streakDaysArray[i]);
+        const prev = new Date(streakDaysArray[i - 1]);
+        const diffDays = Math.floor((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 1) {
+          tempStreak++;
+          bestStreak = Math.max(bestStreak, tempStreak);
+
+          // Update current streak if this includes today/yesterday
+          if (curr.getTime() === today.getTime() || curr.getTime() === yesterday.getTime()) {
+            currentStreak = tempStreak;
+          }
+        } else {
+          tempStreak = 1; // Reset to 1 (not 0) as this day still counts
+        }
       }
     }
 
@@ -258,13 +264,24 @@ export function LearningInsights({ items, isLoading, error }: Props) {
     const avgSessionLength = totalSessions ? Math.round(totalTime / totalSessions) : 0;
 
     // Calculate learning velocity (minutes per day)
-    const daysActive = streakDaysArray.length;
+    const daysActive = streakDays.size;
     const learningVelocity = daysActive ? Math.round(totalTime / daysActive) : 0;
 
     // Sort categories by time spent
     const sortedCategories = Object.entries(categoryTime)
       .sort(([, a], [, b]) => b - a)
       .map(([category]) => category);
+
+    console.log('Calculated metrics:', {
+      streakDays: streakDaysArray,
+      currentStreak,
+      bestStreak,
+      daysActive,
+      totalSessions,
+      totalTime,
+      avgSessionLength,
+      learningVelocity
+    });
 
     return {
       bestTimeOfDay: `${parseInt(bestHour)}:00`,
@@ -278,7 +295,7 @@ export function LearningInsights({ items, isLoading, error }: Props) {
       focusedCategories: sortedCategories.slice(0, 2),
       neglectedCategories: sortedCategories.slice(-2),
       streakConsistency: currentStreak,
-      bestStreak: Math.max(bestStreak, currentStreak),
+      bestStreak,
       totalSessions,
       daysActive
     };

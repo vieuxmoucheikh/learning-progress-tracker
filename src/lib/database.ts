@@ -399,16 +399,10 @@ export async function getGoals() {
       throw new Error('Authentication required');
     }
 
-    // First get all goals
+    // Get goals with their progress data
     const { data: goalsData, error: goalsError } = await supabase
       .from('learning_goals')
-      .select(`
-        *,
-        sessions:goal_sessions(
-          date,
-          duration
-        )
-      `)
+      .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -417,16 +411,34 @@ export async function getGoals() {
       throw new Error(goalsError.message);
     }
 
-    // Process the goals data to match our types
-    const processedGoals = goalsData?.map(goal => ({
-      ...goal,
-      sessions: goal.sessions || [],
-      progress: {
-        sessions: goal.sessions || []
-      }
-    })) || [];
+    // Process the goals data to ensure proper structure
+    const processedGoals = goalsData?.map(goal => {
+      // Ensure progress and sessions exist
+      const progress = goal.progress || { sessions: [] };
+      const sessions = Array.isArray(progress.sessions) ? progress.sessions : [];
 
-    console.log('Fetched goals with sessions:', processedGoals);
+      return {
+        id: goal.id,
+        userId: goal.user_id,
+        title: goal.title,
+        category: goal.category,
+        targetHours: goal.target_hours,
+        targetDate: goal.target_date,
+        priority: goal.priority,
+        status: goal.status,
+        createdAt: goal.created_at,
+        progress: {
+          sessions: sessions.map(session => ({
+            date: session.date,
+            duration: session.duration,
+            startTime: session.startTime || session.date,
+            endTime: session.endTime
+          }))
+        }
+      };
+    }) || [];
+
+    console.log('Processed goals with sessions:', processedGoals);
     return processedGoals;
 
   } catch (error) {
