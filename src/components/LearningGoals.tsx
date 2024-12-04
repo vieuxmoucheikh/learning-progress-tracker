@@ -323,40 +323,86 @@ export default function LearningGoals({ items }: Props) {
       : 0;
     
     // Calculate daily progress rate
-    const firstSession = sessions[0]?.date ? new Date(sessions[0].date) : new Date();
-    const lastSession = sessions[sessions.length - 1]?.date ? new Date(sessions[sessions.length - 1].date) : new Date();
-    const daysBetween = Math.max(1, Math.ceil((lastSession.getTime() - firstSession.getTime()) / (1000 * 60 * 60 * 24)));
-    const dailyProgressRate = Math.round((totalMinutes / daysBetween) * 100) / 100;
+    const sortedSessions = [...sessions].sort((a, b) => 
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+    
+    const firstSession = sortedSessions[0]?.date ? new Date(sortedSessions[0].date) : new Date();
+    const lastSession = sortedSessions[sortedSessions.length - 1]?.date 
+      ? new Date(sortedSessions[sortedSessions.length - 1].date) 
+      : new Date();
+    
+    const daysBetween = Math.max(1, Math.ceil((lastSession.getTime() - firstSession.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+    const dailyProgressRate = totalMinutes / daysBetween;
     
     // Calculate streak
     let currentStreak = 0;
     let maxStreak = 0;
     let tempStreak = 0;
     
-    const sortedDays = Array.from(uniqueDays).sort();
-    sortedDays.forEach((date, index) => {
-      if (index === 0) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const sortedDays = Array.from(uniqueDays)
+      .map(date => new Date(date))
+      .sort((a, b) => b.getTime() - a.getTime());
+    
+    if (sortedDays.length > 0) {
+      const mostRecent = sortedDays[0];
+      mostRecent.setHours(0, 0, 0, 0);
+      
+      // If most recent day is today or yesterday, count current streak
+      const daysDiff = Math.floor((today.getTime() - mostRecent.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysDiff <= 1) {
+        currentStreak = 1;
+        let prevDate = mostRecent;
+        
+        for (let i = 1; i < sortedDays.length; i++) {
+          const currentDate = sortedDays[i];
+          currentDate.setHours(0, 0, 0, 0);
+          const diff = Math.floor((prevDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
+          
+          if (diff === 1) {
+            currentStreak++;
+            prevDate = currentDate;
+          } else {
+            break;
+          }
+        }
+      }
+    }
+    
+    // Calculate max streak
+    for (let i = 0; i < sortedDays.length; i++) {
+      if (i === 0) {
         tempStreak = 1;
       } else {
-        const curr = new Date(date);
-        const prev = new Date(sortedDays[index - 1]);
-        const diffDays = Math.round((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
-        
-        if (diffDays === 1) {
+        const diff = Math.floor(
+          (sortedDays[i - 1].getTime() - sortedDays[i].getTime()) / (1000 * 60 * 60 * 24)
+        );
+        if (diff === 1) {
           tempStreak++;
         } else {
           maxStreak = Math.max(maxStreak, tempStreak);
           tempStreak = 1;
         }
       }
-    });
-    maxStreak = Math.max(maxStreak, tempStreak);
-    currentStreak = tempStreak;
+    }
+    maxStreak = Math.max(maxStreak, tempStreak, currentStreak);
+    
+    // Prepare session data for chart while maintaining original structure
+    const chartData = sessions.map(session => ({
+      date: session.date,
+      duration: {
+        hours: session.duration?.hours || 0,
+        minutes: session.duration?.minutes || 0
+      }
+    })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     
     return {
       averageSessionTime: `${averageHours}h ${remainingMinutes}m`,
       totalDaysActive: uniqueDaysCount,
-      sessions,
+      sessions: chartData,
       totalTimeInvested: {
         hours: Math.floor(totalMinutes / 60),
         minutes: totalMinutes % 60
@@ -564,7 +610,7 @@ export default function LearningGoals({ items }: Props) {
                 </div>
                 <div className="h-[200px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={selectedGoal.progress?.sessions || []}>
+                    <BarChart data={calculateGoalAnalytics(selectedGoal).sessions}>
                       <XAxis 
                         dataKey="date" 
                         tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -577,7 +623,7 @@ export default function LearningGoals({ items }: Props) {
                         labelFormatter={(date) => new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                       />
                       <Bar
-                        dataKey={(session) => (session.duration?.hours || 0) * 60 + (session.duration?.minutes || 0)}
+                        dataKey={(session) => (session.duration.hours * 60) + session.duration.minutes}
                         fill="#4F46E5"
                         radius={[4, 4, 0, 0]}
                       />
@@ -606,7 +652,7 @@ export default function LearningGoals({ items }: Props) {
 
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-green-50 rounded-lg">
-                      <Calendar className="w-5 h-5 text-green-500" />
+                      <LucideCalendar className="w-5 h-5 text-green-500" />
                     </div>
                     <div>
                       <h4 className="font-medium">Active Days</h4>
