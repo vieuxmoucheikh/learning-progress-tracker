@@ -344,22 +344,24 @@ export default function LearningGoals({ items }: Props) {
     today.setHours(0, 0, 0, 0);
     
     const datesWithSessions = Array.from(uniqueDays)
-      .map(dateStr => new Date(dateStr).getTime())
-      .sort((a, b) => b - a); // Sort in descending order (most recent first)
+      .map(dateStr => new Date(dateStr))
+      .sort((a, b) => b.getTime() - a.getTime()); // Sort in descending order (most recent first)
 
     let currentStreak = 0;
     let maxStreak = 0;
-    let tempStreak = 1;
-    
-    // Calculate current streak
-    if (datesWithSessions.length > 0) {
-      const mostRecentDate = new Date(datesWithSessions[0]);
+    let tempStreak = 0;
+
+    // Calculate current streak (must include today or yesterday)
+    const mostRecentDate = datesWithSessions[0];
+    if (mostRecentDate) {
       const daysSinceLastSession = Math.floor((today.getTime() - mostRecentDate.getTime()) / (1000 * 60 * 60 * 24));
       
       if (daysSinceLastSession <= 1) { // Count streak if last session was today or yesterday
         currentStreak = 1;
         for (let i = 1; i < datesWithSessions.length; i++) {
-          const daysBetween = Math.floor((datesWithSessions[i-1] - datesWithSessions[i]) / (1000 * 60 * 60 * 24));
+          const daysBetween = Math.floor(
+            (datesWithSessions[i-1].getTime() - datesWithSessions[i].getTime()) / (1000 * 60 * 60 * 24)
+          );
           if (daysBetween === 1) {
             currentStreak++;
           } else {
@@ -370,8 +372,11 @@ export default function LearningGoals({ items }: Props) {
     }
     
     // Calculate max streak
+    tempStreak = 1; // Start with 1 for the first day
     for (let i = 1; i < datesWithSessions.length; i++) {
-      const daysBetween = Math.floor((datesWithSessions[i-1] - datesWithSessions[i]) / (1000 * 60 * 60 * 24));
+      const daysBetween = Math.floor(
+        (datesWithSessions[i-1].getTime() - datesWithSessions[i].getTime()) / (1000 * 60 * 60 * 24)
+      );
       if (daysBetween === 1) {
         tempStreak++;
       } else {
@@ -381,25 +386,18 @@ export default function LearningGoals({ items }: Props) {
     }
     maxStreak = Math.max(maxStreak, tempStreak, currentStreak);
     
-    // Calculate daily progress rate (minutes per day)
-    const activeTimeSpan = datesWithSessions.length > 1
-      ? Math.floor((datesWithSessions[0] - datesWithSessions[datesWithSessions.length - 1]) / (1000 * 60 * 60 * 24)) + 1
-      : (datesWithSessions.length ? 1 : 0);
-    
-    const dailyProgressRate = activeTimeSpan > 0 ? Math.round(totalMinutes / activeTimeSpan) : 0;
-
-    // Prepare session data for chart
-    const chartData = sessions
-      .map(session => ({
-        date: session.date,
-        duration: session.duration || { hours: 0, minutes: 0 }
-      }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // Calculate daily progress rate (minutes per active day)
+    const dailyProgressRate = uniqueDaysCount > 0 ? Math.round(totalMinutes / uniqueDaysCount) : 0;
 
     return {
       averageSessionTime: `${averageHours}h ${remainingMinutes}m`,
       totalDaysActive: uniqueDaysCount,
-      sessions: chartData,
+      sessions: sessions
+        .map(session => ({
+          date: session.date,
+          duration: session.duration || { hours: 0, minutes: 0 }
+        }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
       totalTimeInvested: {
         hours: Math.floor(totalMinutes / 60),
         minutes: totalMinutes % 60
