@@ -221,70 +221,6 @@ export default function LearningGoals({ items }: Props) {
     }
   };
 
-  // Track learning time for a goal
-  const trackLearningTime = async (goalId: string, duration: { hours: number; minutes: number }) => {
-    try {
-      const goal = goals.find(g => g.id === goalId);
-      if (!goal) {
-        console.error('Goal not found:', goalId);
-        return;
-      }
-
-      const now = new Date();
-      const session = {
-        date: now.toISOString().split('T')[0],
-        duration: duration,
-        startTime: new Date(now.getTime() - ((duration.hours * 60 + duration.minutes) * 60000)).toISOString(),
-        endTime: now.toISOString()
-      };
-
-      console.log('Adding session to goal:', session);
-
-      // Update goal with new session
-      const updatedGoal = {
-        ...goal,
-        progress: {
-          ...goal.progress,
-          sessions: [...(goal.progress?.sessions || []), session]
-        }
-      };
-
-      await handleUpdateGoal(goalId, updatedGoal);
-      console.log('Goal updated with new session:', updatedGoal);
-
-      // Refresh goals to get latest data
-      await fetchGoals();
-    } catch (error) {
-      console.error('Error tracking learning time:', error);
-      toast({
-        title: "Error",
-        description: "Failed to track learning time. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Handle time tracking form submission
-  const handleTimeSubmit = async (e: React.FormEvent<HTMLFormElement>, goalId: string) => {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-    const hours = parseInt(formData.get('hours') as string) || 0;
-    const minutes = parseInt(formData.get('minutes') as string) || 0;
-
-    if (hours === 0 && minutes === 0) {
-      toast({
-        title: "Invalid Time",
-        description: "Please enter a valid duration",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    await trackLearningTime(goalId, { hours, minutes });
-    form.reset();
-  };
-
   // Get unique categories from items
   const categories = Array.from(new Set(items.map(item => item.category || 'Uncategorized'))).filter(Boolean);
 
@@ -569,7 +505,7 @@ export default function LearningGoals({ items }: Props) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Learning Goals</h2>
+          <h2 className="text-2xl font-bold">Learning Goals</h2>
           <p className="text-sm text-muted-foreground">
             Set and track your learning objectives
           </p>
@@ -657,41 +593,6 @@ export default function LearningGoals({ items }: Props) {
                     />
                   </div>
                 </div>
-
-                {/* Time Tracking Form */}
-                <form 
-                  onSubmit={(e) => handleTimeSubmit(e, goal.id)} 
-                  className="mt-4 space-y-4 bg-gray-50 p-4 rounded-lg"
-                >
-                  <h4 className="text-sm font-medium text-gray-700">Track Learning Time</h4>
-                  <div className="flex gap-4">
-                    <div>
-                      <label htmlFor="hours" className="text-sm text-gray-600">Hours</label>
-                      <Input
-                        type="number"
-                        name="hours"
-                        min="0"
-                        max="24"
-                        placeholder="0"
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="minutes" className="text-sm text-gray-600">Minutes</label>
-                      <Input
-                        type="number"
-                        name="minutes"
-                        min="0"
-                        max="59"
-                        placeholder="0"
-                        className="mt-1"
-                      />
-                    </div>
-                    <Button type="submit" className="self-end">
-                      Log Time
-                    </Button>
-                  </div>
-                </form>
               </div>
             </Card>
           );

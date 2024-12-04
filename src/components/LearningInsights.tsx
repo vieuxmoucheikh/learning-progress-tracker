@@ -18,6 +18,9 @@ interface LearningPattern {
   focusedCategories: string[];
   neglectedCategories: string[];
   streakConsistency: number;
+  bestStreak: number;
+  totalSessions: number;
+  daysActive: number;
 }
 
 interface Recommendation {
@@ -159,21 +162,7 @@ export function LearningInsights({ items, isLoading, error }: Props) {
     let totalItems = items.length;
     let streakDays = new Set<string>();
 
-    // Collect all sessions from all items
-    const allSessions: Session[] = items.flatMap(item => {
-      const itemSessions = item.progress?.sessions || [];
-      console.log(`Sessions for item ${item.title}:`, itemSessions);
-      return itemSessions;
-    }).filter((session): session is Session => 
-      session !== null && 
-      typeof session === 'object' && 
-      typeof session.date === 'string' && 
-      session.duration !== undefined
-    );
-
-    console.log('Total valid sessions:', allSessions.length);
-
-    // Analyze all sessions
+    // Process all items and their sessions
     items.forEach(item => {
       if (item.category) {
         categoryCount[item.category] = (categoryCount[item.category] || 0) + 1;
@@ -183,52 +172,65 @@ export function LearningInsights({ items, isLoading, error }: Props) {
         completedItems++;
       }
 
-      // Process sessions for the item
+      // Process sessions from item's progress
       const sessions = item.progress?.sessions || [];
       sessions.forEach(session => {
-        if (!session?.date || !session?.duration) {
-          console.log('Skipping invalid session:', session);
-          return;
-        }
+        if (!session?.date || !session?.duration) return;
 
         try {
           totalSessions++;
           const sessionDate = new Date(session.date);
-          const hour = sessionDate.getHours();
-          const day = sessionDate.toLocaleDateString('en-US', { weekday: 'long' });
           const duration = (session.duration.hours * 60) + session.duration.minutes;
 
+          // Update time distributions
+          const hour = sessionDate.getHours();
+          const day = sessionDate.toLocaleDateString('en-US', { weekday: 'long' });
           timeByHour[hour] = (timeByHour[hour] || 0) + duration;
           timeByDay[day] = (timeByDay[day] || 0) + duration;
           totalTime += duration;
 
+          // Update category time
           if (item.category) {
             categoryTime[item.category] = (categoryTime[item.category] || 0) + duration;
           }
 
+          // Add to streak days
           const dateStr = session.date.split('T')[0];
-          if (dateStr) {
-            streakDays.add(dateStr);
-            console.log('Added streak day:', dateStr);
-          }
+          if (dateStr) streakDays.add(dateStr);
+
         } catch (error) {
           console.error('Error processing session:', error, session);
         }
       });
     });
 
-    // Calculate metrics
-    const oldestItemDate = items.length > 0
-      ? Math.min(...items.map(item => new Date(item.date).getTime()))
-      : now.getTime();
-    const weeksDiff = Math.max(1, Math.ceil((now.getTime() - oldestItemDate) / (1000 * 60 * 60 * 24 * 7)));
+    // Calculate streak
+    const streakDaysArray = Array.from(streakDays).sort();
+    let currentStreak = 0;
+    let bestStreak = 0;
+    let tempStreak = 0;
 
-    // Calculate learning velocity and streak consistency using all sessions
-    const learningVelocity = calculateLearningVelocity(allSessions);
-    const streakConsistency = calculateStreakConsistency(allSessions);
-
-    console.log('Learning velocity:', learningVelocity);
-    console.log('Streak consistency:', streakConsistency);
+    for (let i = 1; i < streakDaysArray.length; i++) {
+      const curr = new Date(streakDaysArray[i]);
+      const prev = new Date(streakDaysArray[i - 1]);
+      const diffDays = Math.floor((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 1) {
+        tempStreak++;
+        bestStreak = Math.max(bestStreak, tempStreak);
+        
+        // Check if this includes today or yesterday for current streak
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+        const yesterdayStr = new Date(today.getTime() - 86400000).toISOString().split('T')[0];
+        
+        if (streakDaysArray[i] === todayStr || streakDaysArray[i] === yesterdayStr) {
+          currentStreak = tempStreak;
+        }
+      } else {
+        tempStreak = 0;
+      }
+    }
 
     // Find best time of day
     const bestHour = Object.entries(timeByHour)
@@ -240,6 +242,10 @@ export function LearningInsights({ items, isLoading, error }: Props) {
 
     // Calculate average session length (in minutes)
     const avgSessionLength = totalSessions ? Math.round(totalTime / totalSessions) : 0;
+
+    // Calculate learning velocity (minutes per day)
+    const daysActive = streakDaysArray.length;
+    const learningVelocity = daysActive ? Math.round(totalTime / daysActive) : 0;
 
     // Sort categories by time spent
     const sortedCategories = Object.entries(categoryTime)
@@ -257,7 +263,10 @@ export function LearningInsights({ items, isLoading, error }: Props) {
       learningVelocity,
       focusedCategories: sortedCategories.slice(0, 2),
       neglectedCategories: sortedCategories.slice(-2),
-      streakConsistency
+      streakConsistency: currentStreak,
+      bestStreak: bestStreak + 1,
+      totalSessions,
+      daysActive
     };
   }, [items]);
 
