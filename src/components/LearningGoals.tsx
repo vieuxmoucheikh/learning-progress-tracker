@@ -507,58 +507,111 @@ export default function LearningGoals({ items }: Props) {
         })}
       </div>
 
-      {showAnalytics && selectedGoal && (
-        <Dialog open={showAnalytics} onOpenChange={setShowAnalytics}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle className="text-xl font-semibold">Goal Analytics</DialogTitle>
-              <DialogDescription>
-                Detailed analytics for {selectedGoal.title}
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <div className="space-y-2">
-                <h4 className="font-medium text-gray-700">Time Investment</h4>
-                <div className="text-sm text-gray-600">
-                  <p>Average Session: {calculateGoalAnalytics(selectedGoal).averageSessionTime}</p>
-                  <p>Total Time: {calculateGoalAnalytics(selectedGoal).totalTimeInvested.hours}h {calculateGoalAnalytics(selectedGoal).totalTimeInvested.minutes}m</p>
-                  <p>Daily Progress: {calculateGoalAnalytics(selectedGoal).dailyProgressRate} min/day</p>
-                </div>
+      <Dialog open={showAnalytics} onOpenChange={setShowAnalytics}>
+        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto bg-background text-foreground border-border">
+          <DialogHeader className="space-y-3 pb-4 border-b border-border">
+            <DialogTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Goal Analytics
+            </DialogTitle>
+            <DialogDescription className="text-base text-muted-foreground">
+              {selectedGoal?.title} - {selectedGoal?.category}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedGoal && (
+            <div className="space-y-6 py-4">
+              {/* Key Metrics */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {(() => {
+                  const analytics = calculateGoalAnalytics(selectedGoal);
+                  
+                  return (
+                    <>
+                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
+                        <h3 className="text-sm font-medium text-foreground">Progress</h3>
+                        <div className="text-2xl font-bold">{analytics.completionPercentage}%</div>
+                        <div className="text-sm text-foreground">
+                          {analytics.totalTimeInvested.hours}h {analytics.totalTimeInvested.minutes}m of {selectedGoal.targetHours}h
+                        </div>
+                      </Card>
+
+                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
+                        <h3 className="text-sm font-medium text-foreground">Time Left</h3>
+                        <div className="text-2xl font-bold">{getRemainingTime(selectedGoal.targetDate)}</div>
+                        <div className="text-sm text-foreground">
+                          {analytics.dailyProgressRate > 0 
+                            ? `${Math.round(analytics.dailyProgressRate)} min/day average`
+                            : 'No progress yet'}
+                        </div>
+                      </Card>
+
+                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
+                        <h3 className="text-sm font-medium text-foreground">Activity</h3>
+                        <div className="text-2xl font-bold">{analytics.streaks.current}</div>
+                        <div className="text-sm text-foreground">
+                          Day streak (Best: {analytics.streaks.max})
+                        </div>
+                      </Card>
+                    </>
+                  );
+                })()}
               </div>
-              
-              <div className="space-y-2">
-                <h4 className="font-medium text-gray-700">Progress</h4>
-                <div className="text-sm text-gray-600">
-                  <p>Completion: {calculateGoalAnalytics(selectedGoal).completionPercentage}%</p>
-                  <p>Days Active: {calculateGoalAnalytics(selectedGoal).totalDaysActive}</p>
-                  <p>Current Streak: {calculateGoalAnalytics(selectedGoal).streaks.current} days</p>
-                  <p>Best Streak: {calculateGoalAnalytics(selectedGoal).streaks.max} days</p>
+
+              {/* Daily Progress Chart */}
+              <Card className="p-4 space-y-4 bg-background text-foreground border-border">
+                <h3 className="text-lg font-medium">Progress Overview</h3>
+                <div className="space-y-4">
+                  <div className="w-full bg-gray-100 rounded-full h-2.5">
+                    <div 
+                      className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                      style={{ width: `${calculateGoalAnalytics(selectedGoal).completionPercentage}%` }}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                      <p>Total Time: {calculateGoalAnalytics(selectedGoal).totalTimeInvested.hours}h {calculateGoalAnalytics(selectedGoal).totalTimeInvested.minutes}m</p>
+                      <p>Daily Average: {Math.round(calculateGoalAnalytics(selectedGoal).dailyProgressRate)} min/day</p>
+                    </div>
+                    <div>
+                      <p>Days Active: {calculateGoalAnalytics(selectedGoal).totalDaysActive}</p>
+                      <p>Sessions: {calculateGoalAnalytics(selectedGoal).sessions.length}</p>
+                    </div>
+                  </div>
                 </div>
+              </Card>
+
+              {/* Additional Stats */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Card className="p-4 space-y-2 bg-background text-foreground border-border">
+                  <h3 className="text-sm font-medium text-foreground">Average Session</h3>
+                  <div className="text-xl font-bold">
+                    {calculateGoalAnalytics(selectedGoal).averageSessionTime}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Time per learning session
+                  </div>
+                </Card>
+
+                <Card className="p-4 space-y-2 bg-background text-foreground border-border">
+                  <h3 className="text-sm font-medium text-foreground">Consistency</h3>
+                  <div className="text-xl font-bold">
+                    {calculateGoalAnalytics(selectedGoal).streaks.current} day streak
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Best streak: {calculateGoalAnalytics(selectedGoal).streaks.max} days
+                  </div>
+                </Card>
               </div>
             </div>
+          )}
 
-            <div className="mt-6">
-              <h4 className="font-medium text-gray-700 mb-2">Progress Chart</h4>
-              <div className="w-full bg-gray-100 rounded-full h-2.5">
-                <div 
-                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
-                  style={{ width: `${calculateGoalAnalytics(selectedGoal).completionPercentage}%` }}
-                />
-              </div>
-              <p className="text-sm text-gray-500 mt-1">
-                {calculateGoalAnalytics(selectedGoal).completionPercentage}% Complete
-              </p>
-            </div>
-
-            <DialogFooter className="mt-6">
-              <Button variant="outline" onClick={() => setShowAnalytics(false)}>
-                Close
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAnalytics(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isAddingGoal} onOpenChange={setIsAddingGoal}>
         <DialogContent className="sm:max-w-[500px] bg-background text-foreground border-border p-0 sm:p-6 sm:pt-4">
