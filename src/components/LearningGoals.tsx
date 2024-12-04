@@ -325,12 +325,12 @@ export default function LearningGoals({ items }: Props) {
         value={newGoal.category} 
         onValueChange={(value: string) => setNewGoal(prev => ({ ...prev, category: value }))}
       >
-        <SelectTrigger className="w-full">
+        <SelectTrigger className="w-full bg-background text-foreground border-input">
           <SelectValue placeholder="Select category" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="bg-background border-input">
           {existingCategories.map(category => (
-            <SelectItem key={category} value={category}>
+            <SelectItem key={category} value={category} className="text-foreground">
               {category}
             </SelectItem>
           ))}
@@ -341,13 +341,13 @@ export default function LearningGoals({ items }: Props) {
 
   const PrioritySelect = () => (
     <Select value={newGoal.priority} onValueChange={(value: Priority) => setNewGoal({ ...newGoal, priority: value })}>
-      <SelectTrigger className="w-full">
+      <SelectTrigger className="w-full bg-background text-foreground border-input">
         <SelectValue placeholder="Select priority" />
       </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="high">High</SelectItem>
-        <SelectItem value="medium">Medium</SelectItem>
-        <SelectItem value="low">Low</SelectItem>
+      <SelectContent className="bg-background border-input">
+        <SelectItem value="high" className="text-foreground">High</SelectItem>
+        <SelectItem value="medium" className="text-foreground">Medium</SelectItem>
+        <SelectItem value="low" className="text-foreground">Low</SelectItem>
       </SelectContent>
     </Select>
   );
@@ -454,52 +454,52 @@ export default function LearningGoals({ items }: Props) {
       </div>
 
       <Dialog open={isAddingGoal} onOpenChange={setIsAddingGoal}>
-        <DialogContent className="sm:max-w-[500px] bg-white dark:bg-gray-900 border-0 p-0 sm:p-6 sm:pt-4">
-          <DialogHeader className="space-y-3 pb-4 border-b px-4 sm:px-0">
+        <DialogContent className="sm:max-w-[500px] bg-background text-foreground border-border p-0 sm:p-6 sm:pt-4">
+          <DialogHeader className="space-y-3 pb-4 border-b border-border px-4 sm:px-0">
             <DialogTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Add New Goal
             </DialogTitle>
-            <DialogDescription className="text-base text-gray-600 dark:text-gray-300">
+            <DialogDescription className="text-base text-muted-foreground">
               Set a new learning goal to track your progress
             </DialogDescription>
           </DialogHeader>
 
           <div className="p-4 sm:p-0 space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Title</label>
+              <label className="text-sm font-semibold text-foreground">Title</label>
               <Input
                 value={newGoal.title}
                 onChange={e => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="Enter goal title"
-                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="border-input bg-background text-foreground"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Category</label>
+              <label className="text-sm font-semibold text-foreground">Category</label>
               <CategorySelect />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Target Hours</label>
+              <label className="text-sm font-semibold text-foreground">Target Hours</label>
               <Input
                 type="number"
                 value={newGoal.targetHours}
                 onChange={e => setNewGoal(prev => ({ ...prev, targetHours: Number(e.target.value) }))}
                 min={1}
                 placeholder="Enter target hours"
-                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="border-input bg-background text-foreground"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Target Date</label>
+              <label className="text-sm font-semibold text-foreground">Target Date</label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={clsx(
-                      "w-full pl-3 text-left font-normal border-gray-300 hover:bg-gray-50",
+                      "w-full pl-3 text-left font-normal border-input bg-background text-foreground",
                       !newGoal.targetDate && "text-muted-foreground"
                     )}
                   >
@@ -512,7 +512,7 @@ export default function LearningGoals({ items }: Props) {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <div className="rounded-md border shadow-md bg-white">
+                  <div className="rounded-md border shadow-md bg-background">
                     <Calendar
                       mode="single"
                       selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
@@ -540,7 +540,7 @@ export default function LearningGoals({ items }: Props) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Priority</label>
+              <label className="text-sm font-semibold text-foreground">Priority</label>
               <PrioritySelect />
             </div>
           </div>
@@ -559,7 +559,7 @@ export default function LearningGoals({ items }: Props) {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] bg-background text-foreground border-border">
           <DialogHeader>
             <DialogTitle>Delete Goal</DialogTitle>
             <DialogDescription>
@@ -588,12 +588,12 @@ export default function LearningGoals({ items }: Props) {
 
       {/* Goal Analytics Dialog */}
       <Dialog open={showAnalytics} onOpenChange={setShowAnalytics}>
-        <DialogContent className="sm:max-w-[700px] bg-white dark:bg-gray-900 border-0">
-          <DialogHeader className="space-y-3 pb-4 border-b">
+        <DialogContent className="sm:max-w-[700px] bg-background text-foreground border-border">
+          <DialogHeader className="space-y-3 pb-4 border-b border-border">
             <DialogTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Goal Analytics
             </DialogTitle>
-            <DialogDescription className="text-base text-gray-600 dark:text-gray-300">
+            <DialogDescription className="text-base text-muted-foreground">
               {selectedGoal?.title} - {selectedGoal?.category}
             </DialogDescription>
           </DialogHeader>
@@ -608,28 +608,28 @@ export default function LearningGoals({ items }: Props) {
                   
                   return (
                     <>
-                      <Card className="p-4 space-y-2">
-                        <h3 className="text-sm font-medium text-gray-500">Progress</h3>
+                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
+                        <h3 className="text-sm font-medium text-foreground">Progress</h3>
                         <div className="text-2xl font-bold">{Math.round(progress)}%</div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-foreground">
                           {Math.round(analytics.totalTimeSpent / 60)}h of {selectedGoal.targetHours}h
                         </div>
                       </Card>
 
-                      <Card className="p-4 space-y-2">
-                        <h3 className="text-sm font-medium text-gray-500">Time Left</h3>
+                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
+                        <h3 className="text-sm font-medium text-foreground">Time Left</h3>
                         <div className="text-2xl font-bold">{analytics.daysLeft} days</div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-foreground">
                           {analytics.projectedCompletion > 0 
                             ? `Projected completion in ${analytics.projectedCompletion} days`
                             : 'Insufficient data for projection'}
                         </div>
                       </Card>
 
-                      <Card className="p-4 space-y-2">
-                        <h3 className="text-sm font-medium text-gray-500">Activity</h3>
+                      <Card className="p-4 space-y-2 bg-background text-foreground border-border">
+                        <h3 className="text-sm font-medium text-foreground">Activity</h3>
                         <div className="text-2xl font-bold">{analytics.recentSessions}</div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-foreground">
                           Sessions in last 7 days
                         </div>
                       </Card>
@@ -639,7 +639,7 @@ export default function LearningGoals({ items }: Props) {
               </div>
 
               {/* Daily Progress Chart */}
-              <Card className="p-4 space-y-4">
+              <Card className="p-4 space-y-4 bg-background text-foreground border-border">
                 <h3 className="text-lg font-medium">Daily Progress</h3>
                 <div className="h-[200px]">
                   <ResponsiveContainer width="100%" height="100%">
@@ -677,8 +677,8 @@ export default function LearningGoals({ items }: Props) {
 
               {/* Additional Stats */}
               <div className="grid grid-cols-2 gap-4">
-                <Card className="p-4 space-y-2">
-                  <h3 className="text-sm font-medium text-gray-500">Average Session</h3>
+                <Card className="p-4 space-y-2 bg-background text-foreground border-border">
+                  <h3 className="text-sm font-medium text-foreground">Average Session</h3>
                   <div className="text-xl font-bold">
                     {(() => {
                       const analytics = calculateGoalAnalytics(selectedGoal);
@@ -687,8 +687,8 @@ export default function LearningGoals({ items }: Props) {
                   </div>
                 </Card>
 
-                <Card className="p-4 space-y-2">
-                  <h3 className="text-sm font-medium text-gray-500">Days Active</h3>
+                <Card className="p-4 space-y-2 bg-background text-foreground border-border">
+                  <h3 className="text-sm font-medium text-foreground">Days Active</h3>
                   <div className="text-xl font-bold">
                     {(() => {
                       const analytics = calculateGoalAnalytics(selectedGoal);
