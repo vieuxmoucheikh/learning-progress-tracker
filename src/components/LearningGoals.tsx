@@ -622,6 +622,11 @@ export default function LearningGoals({ items }: Props) {
           <div className="py-4">
             <LearningInsights goalId={selectedGoalForAnalytics || undefined} />
           </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAnalytics(false)}>
+              Close
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

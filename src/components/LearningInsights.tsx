@@ -28,7 +28,10 @@ export function LearningInsights({ goalId }: Props) {
 
   useEffect(() => {
     async function fetchSessions() {
-      if (!goalId) return;
+      if (!goalId) {
+        setSessions([]);
+        return;
+      }
       
       setIsLoading(true);
       setError(null);
@@ -38,6 +41,7 @@ export function LearningInsights({ goalId }: Props) {
       } catch (error) {
         console.error('Error fetching sessions:', error);
         setError('Failed to load learning sessions');
+        setSessions([]);
       } finally {
         setIsLoading(false);
       }

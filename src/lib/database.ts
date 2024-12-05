@@ -428,22 +428,33 @@ async function ensureGoalsTableExists() {
 
 async function ensureSessionsTableExists() {
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      throw new Error('Authentication required');
-    }
-
-    // Check if the table exists
-    const { error: tableError } = await supabase
+    const { data: exists } = await supabase
       .from('goal_sessions')
       .select('id')
       .limit(1);
 
-    if (tableError) {
+    if (exists === null) {
       console.log('Sessions table does not exist, creating...');
       
-      // Create the table with the updated schema
-      const { error: createError } = await supabase.rpc('create_sessions_table');
+      const { error: createError } = await supabase.rpc('create_sessions_table', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS goal_sessions (
+            id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+            goal_id UUID NOT NULL REFERENCES learning_goals(id) ON DELETE CASCADE,
+            user_id UUID NOT NULL REFERENCES auth.users(id),
+            date TIMESTAMP WITH TIME ZONE NOT NULL,
+            duration JSONB NOT NULL,
+            notes TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now()),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now())
+          );
+          
+          CREATE INDEX IF NOT EXISTS goal_sessions_goal_id_idx ON goal_sessions(goal_id);
+          CREATE INDEX IF NOT EXISTS goal_sessions_user_id_idx ON goal_sessions(user_id);
+          CREATE INDEX IF NOT EXISTS goal_sessions_date_idx ON goal_sessions(date);
+        `
+      });
+
       if (createError) {
         console.error('Error creating sessions table:', createError);
         throw new Error('Failed to create sessions table');
