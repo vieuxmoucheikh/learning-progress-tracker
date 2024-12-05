@@ -113,21 +113,31 @@ export function DashboardTab({
     items.forEach(item => {
       if (item.progress?.sessions) {
         item.progress.sessions.forEach(session => {
-          // Get the date from the session's date field
-          const sessionDate = getDateStr(new Date(session.date));
+          // Get the date part of the session start time
+          const sessionDate = session.startTime?.split('T')[0];
           
-          // If session is on the selected date and has a duration, add it to total
-          if (sessionDate === dateStr && session.duration) {
-            dailyTimeSpent += (session.duration.hours * 60) + session.duration.minutes;
+          // For completed sessions on the selected date
+          if (sessionDate === dateStr && session.endTime) {
+            const duration = session.duration;
+            if (duration) {
+              dailyTimeSpent += (duration.hours * 60 + duration.minutes);
+            }
           }
           
-          // If session is active (no endTime) and started on the selected date,
-          // calculate its current duration
-          if (sessionDate === dateStr && !session.endTime && session.startTime) {
-            const startTime = new Date(session.startTime);
-            const now = new Date();
-            const activeMinutes = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
-            dailyTimeSpent += activeMinutes;
+          // For active sessions (no endTime) that started on the selected date
+          if (sessionDate === dateStr && !session.endTime) {
+            try {
+              const startTime = new Date(session.startTime);
+              if (!isNaN(startTime.getTime())) {  // Check if startTime is valid
+                const now = new Date();
+                const activeMinutes = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
+                if (activeMinutes > 0) {  // Ensure we don't add negative time
+                  dailyTimeSpent += activeMinutes;
+                }
+              }
+            } catch (error) {
+              console.error('Error calculating active session time:', error);
+            }
           }
         });
       }

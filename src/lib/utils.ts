@@ -1,4 +1,4 @@
-import type { Progress, LearningItem, Session } from '../types';
+import type { Progress, LearningItem, Session, GoalSession } from '../types';
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -15,16 +15,15 @@ export function formatTime(seconds: number): string {
   return `${pad(hours)}:${pad(minutes)}:${pad(remainingSeconds)}`;
 }
 
-export function getTotalMinutes(sessions: Session[]): number {
+export function getTotalMinutes(sessions: (Session | GoalSession)[]): number {
   return sessions.reduce((total, session) => {
     if (session.duration) {
       return total + (session.duration.hours * 60) + session.duration.minutes;
     }
-    if (session.startTime && !session.endTime) {
-      // For active session, calculate duration up to now
+    if ('startTime' in session && session.startTime) {
       const start = new Date(session.startTime);
-      const now = new Date();
-      const minutes = Math.floor((now.getTime() - start.getTime()) / (1000 * 60));
+      const end = session.endTime ? new Date(session.endTime) : new Date();
+      const minutes = Math.floor((end.getTime() - start.getTime()) / (1000 * 60));
       return total + minutes;
     }
     return total;

@@ -5,7 +5,11 @@ export interface Time {
 
 export interface GoalSession {
   date: string;
-  duration: Time;
+  duration?: Time;
+  startTime: string;
+  endTime?: string;
+  status?: 'in_progress' | 'completed' | 'on_hold';
+  notes?: (string | { content: string; timestamp: string })[];
 }
 
 export interface Session {
