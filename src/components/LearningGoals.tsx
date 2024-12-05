@@ -3,18 +3,16 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
-import { Brain, ChartBar, LucideCalendar, Plus, Trash2, Target, Clock, TrendingUp } from 'lucide-react';
+import { Plus, Trash2, Target, Clock, LucideCalendar } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { addGoal, deleteGoal, getGoals, updateGoal, addSession } from '@/lib/database';
 import { LearningItem } from '@/types';
 import { clsx } from 'clsx';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { LearningInsights } from './LearningInsights';
 
 type GoalStatus = 'active' | 'completed' | 'overdue';
 
@@ -38,25 +36,6 @@ interface LearningGoal {
     date: string;
     duration: { hours: number; minutes: number };
   }>;
-}
-
-interface GoalAnalytics {
-  averageSessionTime: string;
-  totalDaysActive: number;
-  sessions: Array<{
-    date: string;
-    duration: { hours: number; minutes: number };
-  }>;
-  totalTimeInvested: {
-    hours: number;
-    minutes: number;
-  };
-  completionPercentage: number;
-  dailyProgressRate: number;
-  streaks: {
-    current: number;
-    max: number;
-  };
 }
 
 type Priority = 'high' | 'medium' | 'low';
@@ -85,8 +64,6 @@ export default function LearningGoals({ items }: Props) {
     category: '',
     priority: 'medium',
   });
-  const [selectedGoalForAnalytics, setSelectedGoalForAnalytics] = useState<string | null>(null);
-  const [showAnalytics, setShowAnalytics] = useState(false);
 
   // Fetch goals from Supabase
   const fetchGoals = async () => {
@@ -322,169 +299,6 @@ export default function LearningGoals({ items }: Props) {
     });
   };
 
-  const calculateGoalAnalytics = (goal: LearningGoal): GoalAnalytics => {
-    console.log('Calculating analytics for goal:', goal);
-
-    // Check both progress.sessions and direct sessions
-    const sessions = goal.progress?.sessions || goal.sessions || [];
-    console.log('Raw sessions:', sessions);
-    
-    if (sessions.length === 0) {
-      console.log('No sessions found');
-      return {
-        averageSessionTime: '0h 0m',
-        totalDaysActive: 0,
-        sessions: [],
-        totalTimeInvested: { hours: 0, minutes: 0 },
-        completionPercentage: 0,
-        dailyProgressRate: 0,
-        streaks: { current: 0, max: 0 }
-      };
-    }
-
-    // Calculate total time invested
-    const totalMinutes = sessions.reduce((total, session) => {
-      if (!session.duration) {
-        console.log('Session missing duration:', session);
-        return total;
-      }
-      const minutes = (session.duration.hours * 60) + session.duration.minutes;
-      console.log(`Session duration: ${minutes} minutes`);
-      return total + minutes;
-    }, 0);
-    console.log('Total minutes:', totalMinutes);
-    
-    // Calculate average session time
-    const averageMinutes = Math.round(totalMinutes / sessions.length);
-    const averageHours = Math.floor(averageMinutes / 60);
-    const remainingMinutes = averageMinutes % 60;
-    console.log(`Average session time: ${averageHours}h ${remainingMinutes}m`);
-    
-    // Calculate unique days and consistency
-    const uniqueDays = new Set(sessions.map(s => s.date?.split('T')[0]).filter(Boolean));
-    const uniqueDaysCount = uniqueDays.size;
-    console.log('Unique days:', uniqueDaysCount);
-    
-    // Calculate completion percentage
-    const targetMinutes = (goal.targetHours || 0) * 60;
-    const completionPercentage = targetMinutes > 0 
-      ? Math.min(100, Math.round((totalMinutes / targetMinutes) * 100))
-      : 0;
-    console.log('Completion percentage:', completionPercentage);
-    
-    // Calculate streaks
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const datesWithSessions = Array.from(uniqueDays)
-      .filter(Boolean)
-      .map(dateStr => {
-        try {
-          return new Date(dateStr);
-        } catch (e) {
-          console.error('Error parsing date:', dateStr, e);
-          return null;
-        }
-      })
-      .filter((date): date is Date => date !== null)
-      .sort((a, b) => b.getTime() - a.getTime()); // Sort in descending order (most recent first)
-
-    console.log('Dates with sessions:', datesWithSessions);
-
-    let currentStreak = 0;
-    let maxStreak = 0;
-    let tempStreak = 0;
-
-    // Calculate current streak (must include today or yesterday)
-    const mostRecentDate = datesWithSessions[0];
-    if (mostRecentDate) {
-      const daysSinceLastSession = Math.floor((today.getTime() - mostRecentDate.getTime()) / (1000 * 60 * 60 * 24));
-      console.log('Days since last session:', daysSinceLastSession);
-      
-      if (daysSinceLastSession <= 1) { // Count streak if last session was today or yesterday
-        currentStreak = 1;
-        for (let i = 1; i < datesWithSessions.length; i++) {
-          const daysBetween = Math.floor(
-            (datesWithSessions[i-1].getTime() - datesWithSessions[i].getTime()) / (1000 * 60 * 60 * 24)
-          );
-          if (daysBetween === 1) {
-            currentStreak++;
-          } else {
-            break;
-          }
-        }
-      }
-    }
-    console.log('Current streak:', currentStreak);
-    
-    // Calculate max streak
-    tempStreak = 1; // Start with 1 for the first day
-    for (let i = 1; i < datesWithSessions.length; i++) {
-      const daysBetween = Math.floor(
-        (datesWithSessions[i-1].getTime() - datesWithSessions[i].getTime()) / (1000 * 60 * 60 * 24)
-      );
-      if (daysBetween === 1) {
-        tempStreak++;
-      } else {
-        maxStreak = Math.max(maxStreak, tempStreak);
-        tempStreak = 1;
-      }
-    }
-    maxStreak = Math.max(maxStreak, tempStreak, currentStreak);
-    console.log('Max streak:', maxStreak);
-
-    // Calculate daily progress rate (minutes per active day)
-    const dailyProgressRate = uniqueDaysCount > 0 ? Math.round(totalMinutes / uniqueDaysCount) : 0;
-    console.log('Daily progress rate:', dailyProgressRate);
-
-    // Format sessions for the chart with proper duration calculations
-    const formattedSessions = sessions
-      .filter(session => session.date && session.duration)
-      .map(session => {
-        try {
-          return {
-            date: session.date,
-            duration: session.duration || { hours: 0, minutes: 0 }
-          };
-        } catch (e) {
-          console.error('Error formatting session:', session, e);
-          return null;
-        }
-      })
-      .filter((session): session is NonNullable<typeof session> => session !== null)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    console.log('Formatted sessions for chart:', formattedSessions);
-
-    const analytics = {
-      averageSessionTime: `${averageHours}h ${remainingMinutes}m`,
-      totalDaysActive: uniqueDaysCount,
-      sessions: formattedSessions,
-      totalTimeInvested: {
-        hours: Math.floor(totalMinutes / 60),
-        minutes: totalMinutes % 60
-      },
-      completionPercentage,
-      dailyProgressRate,
-      streaks: {
-        current: currentStreak,
-        max: maxStreak
-      }
-    };
-
-    console.log('Final analytics:', analytics);
-    return analytics;
-  };
-
-  // Add debug logging for analytics
-  const handleAnalyticsClick = (goal: LearningGoal) => {
-    console.log('Selected Goal:', goal);
-    const analytics = calculateGoalAnalytics(goal);
-    console.log('Calculated Analytics:', analytics);
-    setSelectedGoalForAnalytics(goal.id);
-    setShowAnalytics(true);
-  };
-
   const CategorySelect = () => {
     // Only use categories from existing items
     const existingCategories = Array.from(new Set(items.map(item => item.category))).filter(Boolean);
@@ -492,8 +306,7 @@ export default function LearningGoals({ items }: Props) {
     return (
       <Select 
         value={newGoal.category} 
-        onValueChange={(value: string) => setNewGoal(prev => ({ ...prev, category: value }))}
-      >
+        onValueChange={(value: string) => setNewGoal(prev => ({ ...prev, category: value }))}>
         <SelectTrigger className="w-full bg-background text-foreground border-input">
           <SelectValue placeholder="Select category" />
         </SelectTrigger>
@@ -547,14 +360,6 @@ export default function LearningGoals({ items }: Props) {
           return (
             <Card key={goal.id} className="p-4 space-y-4 relative group">
               <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
-                  onClick={() => handleAnalyticsClick(goal)}
-                >
-                  <ChartBar className="h-4 w-4" />
-                </Button>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -618,25 +423,6 @@ export default function LearningGoals({ items }: Props) {
           );
         })}
       </div>
-
-      <Dialog open={showAnalytics} onOpenChange={setShowAnalytics}>
-        <DialogContent className="sm:max-w-[800px]">
-          <DialogHeader>
-            <DialogTitle>Learning Analytics</DialogTitle>
-            <DialogDescription>
-              View detailed insights about your learning progress
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <LearningInsights goalId={selectedGoalForAnalytics ?? ''} />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAnalytics(false)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={isAddingGoal} onOpenChange={setIsAddingGoal}>
         <DialogContent className="sm:max-w-[500px] bg-background text-foreground border-border p-0 sm:p-6 sm:pt-4">
