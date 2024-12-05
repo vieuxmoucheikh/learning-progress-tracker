@@ -659,54 +659,109 @@ export async function deleteGoal(id: string) {
 
 // Add session functions
 export async function getSessions(goalId: string): Promise<Session[]> {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('User not authenticated');
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('Authentication error:', authError);
+      throw new Error('Authentication required');
+    }
 
-  const { data: sessions, error } = await supabase
-    .from('goal_sessions')
-    .select('*')
-    .eq('goal_id', goalId)
-    .eq('user_id', user.id)
-    .order('date', { ascending: false });
+    const { data: sessions, error } = await supabase
+      .from('goal_sessions')
+      .select('*')
+      .eq('goal_id', goalId)
+      .eq('user_id', user.id)
+      .order('date', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching sessions:', error);
+    if (error) {
+      console.error('Error fetching sessions:', error);
+      throw error;
+    }
+
+    if (!sessions) {
+      console.log('No sessions found for goal:', goalId);
+      return [];
+    }
+
+    return sessions.map(session => ({
+      id: session.id,
+      goal_id: session.goal_id,
+      user_id: session.user_id,
+      date: session.date,
+      duration: {
+        hours: session.duration?.hours || 0,
+        minutes: session.duration?.minutes || 0
+      },
+      notes: session.notes || '',
+      created_at: session.created_at,
+      updated_at: session.updated_at
+    }));
+  } catch (error) {
+    console.error('Error in getSessions:', error);
     throw error;
   }
-
-  return sessions.map(session => ({
-    ...session,
-    duration: {
-      hours: session.duration.hours || 0,
-      minutes: session.duration.minutes || 0
-    }
-  }));
 }
 
-export async function addSession(goalId: string, sessionData: Omit<Session, 'id' | 'goal_id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<Session> {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('User not authenticated');
+export async function addSession(goalId: string, sessionData: { date: string; duration: { hours: number; minutes: number }; notes?: string }): Promise<Session> {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('Authentication error:', authError);
+      throw new Error('Authentication required');
+    }
 
-  const { data: session, error } = await supabase
-    .from('goal_sessions')
-    .insert([
-      {
-        goal_id: goalId,
-        user_id: user.id,
-        date: sessionData.date,
-        duration: sessionData.duration,
-        notes: sessionData.notes
-      }
-    ])
-    .select()
-    .single();
+    // Validate input
+    if (!sessionData.date || !sessionData.duration) {
+      throw new Error('Invalid session data: date and duration are required');
+    }
 
-  if (error) {
-    console.error('Error adding session:', error);
+    if (typeof sessionData.duration.hours !== 'number' || typeof sessionData.duration.minutes !== 'number') {
+      throw new Error('Invalid duration format');
+    }
+
+    const { data: session, error } = await supabase
+      .from('goal_sessions')
+      .insert([
+        {
+          goal_id: goalId,
+          user_id: user.id,
+          date: sessionData.date,
+          duration: {
+            hours: Math.max(0, Math.floor(sessionData.duration.hours)),
+            minutes: Math.max(0, Math.min(59, Math.floor(sessionData.duration.minutes)))
+          },
+          notes: sessionData.notes || ''
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding session:', error);
+      throw error;
+    }
+
+    if (!session) {
+      throw new Error('Failed to create session');
+    }
+
+    return {
+      id: session.id,
+      goal_id: session.goal_id,
+      user_id: session.user_id,
+      date: session.date,
+      duration: {
+        hours: session.duration.hours,
+        minutes: session.duration.minutes
+      },
+      notes: session.notes || '',
+      created_at: session.created_at,
+      updated_at: session.updated_at
+    };
+  } catch (error) {
+    console.error('Error in addSession:', error);
     throw error;
   }
-
-  return session;
 }
 
 async function getCurrentUser() {

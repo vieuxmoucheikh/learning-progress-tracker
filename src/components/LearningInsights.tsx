@@ -1,11 +1,12 @@
-import { useMemo, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Session } from '../types';
-import { Brain, Clock, Calendar } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { getSessions } from '@/lib/database';
+import { getSessions } from '../lib/database';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card.tsx';
+import { Progress } from '../ui/progress.tsx';
+import { format, differenceInDays, parseISO, isAfter, isBefore, startOfDay, endOfDay } from 'date-fns';
 
-interface Props {
-  goalId?: string;
+interface LearningInsightsProps {
+  goalId: string;
 }
 
 interface Analytics {
@@ -14,122 +15,190 @@ interface Analytics {
     minutes: number;
   };
   sessionsCount: number;
-  averageSessionTime: {
+  averageSessionLength: {
     hours: number;
     minutes: number;
   };
   activeDays: number;
+  recentProgress: number;
+  lastSession: string | null;
 }
 
-export function LearningInsights({ goalId }: Props) {
+export function LearningInsights({ goalId }: LearningInsightsProps) {
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [analytics, setAnalytics] = useState<Analytics>({
+    totalTime: { hours: 0, minutes: 0 },
+    sessionsCount: 0,
+    averageSessionLength: { hours: 0, minutes: 0 },
+    activeDays: 0,
+    recentProgress: 0,
+    lastSession: null,
+  });
 
   useEffect(() => {
-    async function fetchSessions() {
-      if (!goalId) {
-        setSessions([]);
-        return;
-      }
-      
-      setIsLoading(true);
-      setError(null);
+    const fetchSessions = async () => {
       try {
-        const goalSessions = await getSessions(goalId);
-        setSessions(goalSessions);
-      } catch (error) {
-        console.error('Error fetching sessions:', error);
-        setError('Failed to load learning sessions');
-        setSessions([]);
+        setLoading(true);
+        setError(null);
+        const fetchedSessions = await getSessions(goalId);
+        setSessions(fetchedSessions);
+        calculateAnalytics(fetchedSessions);
+      } catch (err) {
+        console.error('Error fetching sessions:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch sessions');
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
+    };
+
+    if (goalId) {
+      fetchSessions();
     }
-    fetchSessions();
   }, [goalId]);
 
-  const analytics = useMemo((): Analytics => {
+  const calculateAnalytics = (sessions: Session[]) => {
     if (!sessions.length) {
-      return {
+      setAnalytics({
         totalTime: { hours: 0, minutes: 0 },
         sessionsCount: 0,
-        averageSessionTime: { hours: 0, minutes: 0 },
-        activeDays: 0
-      };
+        averageSessionLength: { hours: 0, minutes: 0 },
+        activeDays: 0,
+        recentProgress: 0,
+        lastSession: null,
+      });
+      return;
     }
 
     // Calculate total time
     const totalMinutes = sessions.reduce((total, session) => {
-      const sessionMinutes = (session.duration.hours * 60) + session.duration.minutes;
-      return total + sessionMinutes;
+      return total + (session.duration.hours * 60 + session.duration.minutes);
     }, 0);
 
-    const totalHours = Math.floor(totalMinutes / 60);
-    const remainingMinutes = totalMinutes % 60;
+    // Calculate unique active days
+    const uniqueDays = new Set(sessions.map(session => format(parseISO(session.date), 'yyyy-MM-dd')));
 
-    // Calculate average session time
-    const avgMinutes = Math.round(totalMinutes / sessions.length);
-    const avgHours = Math.floor(avgMinutes / 60);
-    const avgMinutesRemaining = avgMinutes % 60;
+    // Calculate recent progress
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
+    const recentSessions = sessions.filter(session => {
+      const sessionDate = parseISO(session.date);
+      return isAfter(sessionDate, thirtyDaysAgo) && isBefore(sessionDate, endOfDay(new Date()));
+    });
 
-    // Count unique active days
-    const uniqueDays = new Set(sessions.map(s => s.date.split('T')[0])).size;
+    const recentTotalMinutes = recentSessions.reduce((total, session) => {
+      return total + (session.duration.hours * 60 + session.duration.minutes);
+    }, 0);
 
-    return {
+    // Calculate average session length
+    const averageMinutes = Math.round(totalMinutes / sessions.length);
+
+    // Find last session date
+    const lastSession = sessions.length > 0 ? format(parseISO(sessions[0].date), 'PPP') : null;
+
+    setAnalytics({
       totalTime: {
-        hours: totalHours,
-        minutes: remainingMinutes
+        hours: Math.floor(totalMinutes / 60),
+        minutes: totalMinutes % 60,
       },
       sessionsCount: sessions.length,
-      averageSessionTime: {
-        hours: avgHours,
-        minutes: avgMinutesRemaining
+      averageSessionLength: {
+        hours: Math.floor(averageMinutes / 60),
+        minutes: averageMinutes % 60,
       },
-      activeDays: uniqueDays
-    };
-  }, [sessions]);
+      activeDays: uniqueDays.size,
+      recentProgress: Math.min(100, Math.round((recentTotalMinutes / (30 * 60)) * 100)), // Target: 1 hour per day
+      lastSession,
+    });
+  };
 
-  if (isLoading) {
-    return <div className="p-4">Loading analytics...</div>;
+  if (loading) {
+    return (
+      <div className="space-y-4 p-4">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="p-4 text-red-500">{error}</div>;
+    return (
+      <div className="p-4 text-red-500">
+        <p>Error loading insights: {error}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="mt-2 text-sm text-blue-500 hover:text-blue-700"
+        >
+          Try again
+        </button>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-4 space-y-2">
-          <div className="flex items-center space-x-2">
-            <Clock className="h-4 w-4 text-blue-500" />
-            <h3 className="text-sm font-medium">Total Time Invested</h3>
-          </div>
-          <p className="text-2xl font-bold">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <Card>
+        <CardHeader>
+          <CardTitle>Total Time Invested</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">
             {analytics.totalTime.hours}h {analytics.totalTime.minutes}m
-          </p>
-        </Card>
-
-        <Card className="p-4 space-y-2">
-          <div className="flex items-center space-x-2">
-            <Brain className="h-4 w-4 text-green-500" />
-            <h3 className="text-sm font-medium">Learning Sessions</h3>
           </div>
-          <p className="text-2xl font-bold">{analytics.sessionsCount}</p>
-          <p className="text-sm text-muted-foreground">
-            Avg: {analytics.averageSessionTime.hours}h {analytics.averageSessionTime.minutes}m
+          <p className="text-xs text-muted-foreground">
+            Across {analytics.sessionsCount} sessions
           </p>
-        </Card>
+        </CardContent>
+      </Card>
 
-        <Card className="p-4 space-y-2">
-          <div className="flex items-center space-x-2">
-            <Calendar className="h-4 w-4 text-purple-500" />
-            <h3 className="text-sm font-medium">Active Days</h3>
+      <Card>
+        <CardHeader>
+          <CardTitle>Average Session</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">
+            {analytics.averageSessionLength.hours}h {analytics.averageSessionLength.minutes}m
           </div>
-          <p className="text-2xl font-bold">{analytics.activeDays}</p>
-        </Card>
-      </div>
+          <p className="text-xs text-muted-foreground">
+            Per learning session
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Active Days</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">
+            {analytics.activeDays}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Days with recorded sessions
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card className="md:col-span-2 lg:col-span-3">
+        <CardHeader>
+          <CardTitle>30-Day Progress</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Progress value={analytics.recentProgress} className="h-2" />
+          <p className="mt-2 text-sm text-muted-foreground">
+            {analytics.recentProgress}% of target (1 hour/day)
+          </p>
+          {analytics.lastSession && (
+            <p className="mt-1 text-sm text-muted-foreground">
+              Last session: {analytics.lastSession}
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
