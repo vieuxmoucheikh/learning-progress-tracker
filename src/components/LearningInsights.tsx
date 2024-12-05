@@ -1,5 +1,5 @@
 import { useMemo, useEffect, useState } from 'react';
-import { LearningItem, Session } from '../types';
+import { Session } from '../types';
 import { Brain, Clock, Calendar } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { getSessions } from '@/lib/database';
@@ -57,7 +57,8 @@ export function LearningInsights({ goalId }: Props) {
 
     // Calculate total time
     const totalMinutes = sessions.reduce((total, session) => {
-      return total + (session.duration.hours * 60) + session.duration.minutes;
+      const sessionMinutes = (session.duration.hours * 60) + session.duration.minutes;
+      return total + sessionMinutes;
     }, 0);
 
     const totalHours = Math.floor(totalMinutes / 60);

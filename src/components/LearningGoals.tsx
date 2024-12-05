@@ -14,6 +14,7 @@ import { addGoal, deleteGoal, getGoals, updateGoal, addSession } from '@/lib/dat
 import { LearningItem } from '@/types';
 import { clsx } from 'clsx';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { LearningInsights } from './LearningInsights';
 
 type GoalStatus = 'active' | 'completed' | 'overdue';
 
@@ -611,166 +612,16 @@ export default function LearningGoals({ items }: Props) {
       </div>
 
       <Dialog open={showAnalytics} onOpenChange={setShowAnalytics}>
-        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto bg-background text-foreground border-border">
-          <DialogHeader className="space-y-3 pb-4 border-b border-border">
-            <DialogTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Learning Analytics
-            </DialogTitle>
-            <DialogDescription className="text-base text-muted-foreground">
-              <span className="font-medium text-foreground">{selectedGoalForAnalytics}</span>
-              <span className="mx-2">•</span>
-              <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                {/* Category */}
-              </span>
+        <DialogContent className="sm:max-w-[800px]">
+          <DialogHeader>
+            <DialogTitle>Learning Analytics</DialogTitle>
+            <DialogDescription>
+              View detailed insights about your learning progress
             </DialogDescription>
           </DialogHeader>
-
-          {selectedGoalForAnalytics && (
-            <div className="space-y-6 py-4">
-              {/* Learning Patterns */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                  <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
-                    <div className="p-1.5 bg-green-50 rounded">
-                      <TrendingUp className="w-4 h-4 text-green-600" />
-                    </div>
-                    Learning Consistency
-                  </h3>
-                  <div className="text-2xl font-bold">
-                    {/* Streak */}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {/* Best streak */}
-                  </div>
-                  <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5">
-                    <div 
-                      className="bg-green-500 h-1.5 rounded-full transition-all duration-300"
-                      style={{ 
-                        width: '0%' 
-                      }}
-                    />
-                  </div>
-                </Card>
-
-                <Card className="p-4 space-y-2 bg-background text-foreground border-border">
-                  <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
-                    <div className="p-1.5 bg-blue-50 rounded">
-                      <Clock className="w-4 h-4 text-blue-600" />
-                    </div>
-                    Session Efficiency
-                  </h3>
-                  <div className="text-2xl font-bold">
-                    {/* Average session time */}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {/* Average session duration */}
-                  </div>
-                  <div className="text-sm text-foreground mt-1">
-                    {/* Total sessions */}
-                  </div>
-                </Card>
-              </div>
-
-              {/* Daily Progress Chart */}
-              <Card className="p-4 space-y-4 bg-background text-foreground border-border">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium flex items-center gap-2">
-                    <div className="p-1.5 bg-indigo-50 rounded">
-                      <ChartBar className="w-4 h-4 text-indigo-600" />
-                    </div>
-                    Daily Learning Activity
-                  </h3>
-                  <div className="text-sm text-muted-foreground">
-                    {/* Daily progress rate */}
-                  </div>
-                </div>
-                <div className="h-[200px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={[]}>
-                      <XAxis 
-                        dataKey="date" 
-                        tickFormatter={(date) => {
-                          try {
-                            return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                          } catch (e) {
-                            console.error('Error formatting date:', date, e);
-                            return '';
-                          }
-                        }}
-                      />
-                      <YAxis 
-                        label={{ value: 'Minutes', angle: -90, position: 'insideLeft' }} 
-                      />
-                      <Tooltip 
-                        formatter={(value: any) => [`${value} min`, 'Duration']}
-                        labelFormatter={(date) => {
-                          try {
-                            return new Date(date).toLocaleDateString('en-US', { 
-                              weekday: 'long', 
-                              month: 'long', 
-                              day: 'numeric' 
-                            });
-                          } catch (e) {
-                            console.error('Error formatting tooltip date:', date, e);
-                            return '';
-                          }
-                        }}
-                      />
-                      <Bar
-                        dataKey={(session) => {
-                          if (!session || !session.duration) return 0;
-                          return (session.duration.hours * 60) + session.duration.minutes;
-                        }}
-                        fill="#4F46E5"
-                        radius={[4, 4, 0, 0]}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </Card>
-
-              {/* Learning Insights */}
-              <Card className="p-4 space-y-4 bg-background text-foreground border-border">
-                <h3 className="text-lg font-medium flex items-center gap-2">
-                  <div className="p-1.5 bg-purple-50 rounded">
-                    <Brain className="w-4 h-4 text-purple-600" />
-                  </div>
-                  Learning Insights
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 bg-blue-50 rounded-lg">
-                      <TrendingUp className="w-5 h-5 text-blue-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium">Daily Progress</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {/* Daily progress */}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 bg-green-50 rounded-lg">
-                      <LucideCalendar className="w-5 h-5 text-green-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium">Active Days</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {/* Active days */}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAnalytics(false)}>
-              Close
-            </Button>
-          </DialogFooter>
+          <div className="py-4">
+            <LearningInsights goalId={selectedGoalForAnalytics || undefined} />
+          </div>
         </DialogContent>
       </Dialog>
 
