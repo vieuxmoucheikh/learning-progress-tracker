@@ -9,13 +9,17 @@ export interface GoalSession {
 }
 
 export interface Session {
-  id?: string;
-  goal_id?: string;
-  user_id?: string;
+  id: string;
+  goal_id: string;
+  user_id: string;
   date: string;
-  duration: Time;
-  created_at?: string;
-  updated_at?: string;
+  duration: {
+    hours: number;
+    minutes: number;
+  };
+  notes?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Progress {

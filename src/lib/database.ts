@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { LearningItem, StreakData, LearningItemFormData, LearningGoal, Priority, GoalStatus } from '../types'
+import type { LearningItem, StreakData, LearningItemFormData, LearningGoal, Priority, GoalStatus, Session } from '../types'
 
 // Learning Items
 export const getLearningItems = async () => {
@@ -443,25 +443,7 @@ async function ensureSessionsTableExists() {
       console.log('Sessions table does not exist, creating...');
       
       // Create the table with the updated schema
-      const { error: createError } = await supabase.rpc('create_goals_table', {
-        sql: `
-          CREATE TABLE IF NOT EXISTS goal_sessions (
-            id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-            goal_id UUID NOT NULL REFERENCES learning_goals(id) ON DELETE CASCADE,
-            user_id UUID NOT NULL REFERENCES auth.users(id),
-            date DATE NOT NULL,
-            duration_hours INTEGER NOT NULL,
-            duration_minutes INTEGER NOT NULL,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now()),
-            updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now())
-          );
-          
-          CREATE INDEX IF NOT EXISTS goal_sessions_goal_id_idx ON goal_sessions(goal_id);
-          CREATE INDEX IF NOT EXISTS goal_sessions_user_id_idx ON goal_sessions(user_id);
-          CREATE INDEX IF NOT EXISTS goal_sessions_date_idx ON goal_sessions(date);
-        `
-      });
-
+      const { error: createError } = await supabase.rpc('create_sessions_table');
       if (createError) {
         console.error('Error creating sessions table:', createError);
         throw new Error('Failed to create sessions table');
@@ -665,73 +647,61 @@ export async function deleteGoal(id: string) {
 }
 
 // Add session functions
-export async function addSession(goalId: string, session: { date: string; duration: { hours: number; minutes: number } }) {
-  try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      throw new Error('Authentication required');
-    }
+export async function getSessions(goalId: string): Promise<Session[]> {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('User not authenticated');
 
-    const newSession = {
-      goal_id: goalId,
-      user_id: user.id,
-      date: session.date,
-      duration_hours: session.duration.hours,
-      duration_minutes: session.duration.minutes,
-      created_at: new Date().toISOString()
-    };
+  const { data: sessions, error } = await supabase
+    .from('goal_sessions')
+    .select('*')
+    .eq('goal_id', goalId)
+    .eq('user_id', user.id)
+    .order('date', { ascending: false });
 
-    const { data, error } = await supabase
-      .from('goal_sessions')
-      .insert([newSession])
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error adding session:', error);
-      throw new Error(error.message || 'Failed to add session');
-    }
-
-    return {
-      date: data.date,
-      duration: {
-        hours: data.duration_hours,
-        minutes: data.duration_minutes
-      }
-    };
-  } catch (error) {
-    console.error('Error in addSession:', error);
-    throw error instanceof Error ? error : new Error('Failed to add session');
+  if (error) {
+    console.error('Error fetching sessions:', error);
+    throw error;
   }
+
+  return sessions.map(session => ({
+    ...session,
+    duration: {
+      hours: session.duration.hours || 0,
+      minutes: session.duration.minutes || 0
+    }
+  }));
 }
 
-export async function getSessions(goalId: string) {
-  try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      throw new Error('Authentication required');
-    }
+export async function addSession(goalId: string, sessionData: Omit<Session, 'id' | 'goal_id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<Session> {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('User not authenticated');
 
-    const { data, error } = await supabase
-      .from('goal_sessions')
-      .select('*')
-      .eq('goal_id', goalId)
-      .eq('user_id', user.id);
-
-    if (error) {
-      console.error('Error fetching sessions:', error);
-      throw new Error(error.message || 'Failed to fetch sessions');
-    }
-
-    return data.map(session => ({
-      date: session.date,
-      duration: {
-        hours: session.duration_hours,
-        minutes: session.duration_minutes
+  const { data: session, error } = await supabase
+    .from('goal_sessions')
+    .insert([
+      {
+        goal_id: goalId,
+        user_id: user.id,
+        date: sessionData.date,
+        duration: sessionData.duration,
+        notes: sessionData.notes
       }
-    }));
-  } catch (error) {
-    console.error('Error in getSessions:', error);
-    throw error instanceof Error ? error : new Error('Failed to fetch sessions');
+    ])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error adding session:', error);
+    throw error;
   }
+
+  return session;
+}
+
+async function getCurrentUser() {
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    throw new Error('Authentication required');
+  }
+  return user;
 }
