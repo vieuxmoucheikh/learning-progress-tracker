@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Session } from '../types';
 import { getSessions } from '../lib/database';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card.tsx';
-import { Progress } from '../ui/progress.tsx';
-import { format, differenceInDays, parseISO, isAfter, isBefore, startOfDay, endOfDay } from 'date-fns';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Progress } from '../ui/progress';
+import { format, differenceInDays, parseISO, isAfter, isBefore, startOfDay, endOfDay, eachDayOfInterval, isSameDay, subDays } from 'date-fns';
 
 interface LearningInsightsProps {
   goalId: string;
@@ -22,6 +22,12 @@ interface Analytics {
   activeDays: number;
   recentProgress: number;
   lastSession: string | null;
+  currentStreak: number;
+  longestStreak: number;
+  weeklyAverage: {
+    hours: number;
+    minutes: number;
+  };
 }
 
 export function LearningInsights({ goalId }: LearningInsightsProps) {
@@ -35,6 +41,9 @@ export function LearningInsights({ goalId }: LearningInsightsProps) {
     activeDays: 0,
     recentProgress: 0,
     lastSession: null,
+    currentStreak: 0,
+    longestStreak: 0,
+    weeklyAverage: { hours: 0, minutes: 0 },
   });
 
   useEffect(() => {
@@ -43,7 +52,9 @@ export function LearningInsights({ goalId }: LearningInsightsProps) {
         setLoading(true);
         setError(null);
         const fetchedSessions = await getSessions(goalId);
-        setSessions(fetchedSessions);
+        setSessions(fetchedSessions.sort((a, b) => 
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+        ));
         calculateAnalytics(fetchedSessions);
       } catch (err) {
         console.error('Error fetching sessions:', err);
@@ -67,49 +78,118 @@ export function LearningInsights({ goalId }: LearningInsightsProps) {
         activeDays: 0,
         recentProgress: 0,
         lastSession: null,
+        currentStreak: 0,
+        longestStreak: 0,
+        weeklyAverage: { hours: 0, minutes: 0 },
       });
       return;
     }
 
+    // Sort sessions by date (newest first)
+    const sortedSessions = [...sessions].sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+
     // Calculate total time
-    const totalMinutes = sessions.reduce((total, session) => {
-      return total + (session.duration.hours * 60 + session.duration.minutes);
-    }, 0);
+    const totalMinutes = sortedSessions.reduce((total, session) => 
+      total + (session.duration.hours * 60 + session.duration.minutes), 0
+    );
 
-    // Calculate unique active days
-    const uniqueDays = new Set(sessions.map(session => format(parseISO(session.date), 'yyyy-MM-dd')));
+    // Group sessions by day
+    const sessionsByDay = sortedSessions.reduce((acc, session) => {
+      const date = format(parseISO(session.date), 'yyyy-MM-dd');
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(session);
+      return acc;
+    }, {} as Record<string, Session[]>);
 
-    // Calculate recent progress
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
-    const recentSessions = sessions.filter(session => {
+    // Calculate streaks
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempStreak = 0;
+    
+    const today = startOfDay(new Date());
+    const yesterday = startOfDay(subDays(today, 1));
+    const dates = Object.keys(sessionsByDay).map(date => parseISO(date)).sort((a, b) => b.getTime() - a.getTime());
+    
+    // Calculate current streak
+    if (dates.length > 0) {
+      const lastSessionDate = dates[0];
+      if (isSameDay(lastSessionDate, today) || isSameDay(lastSessionDate, yesterday)) {
+        currentStreak = 1;
+        let checkDate = yesterday;
+        let dateIndex = dates.findIndex(d => isSameDay(d, lastSessionDate)) + 1;
+        
+        while (dateIndex < dates.length) {
+          const prevDate = dates[dateIndex];
+          if (differenceInDays(checkDate, prevDate) === 1) {
+            currentStreak++;
+            checkDate = prevDate;
+          } else {
+            break;
+          }
+          dateIndex++;
+        }
+      }
+    }
+
+    // Calculate longest streak
+    dates.forEach((date, index) => {
+      if (index === 0) {
+        tempStreak = 1;
+      } else {
+        const prevDate = dates[index - 1];
+        if (differenceInDays(prevDate, date) === 1) {
+          tempStreak++;
+        } else {
+          longestStreak = Math.max(longestStreak, tempStreak);
+          tempStreak = 1;
+        }
+      }
+    });
+    longestStreak = Math.max(longestStreak, tempStreak, currentStreak);
+
+    // Calculate recent progress (last 30 days)
+    const thirtyDaysAgo = subDays(today, 30);
+    const recentSessions = sortedSessions.filter(session => {
       const sessionDate = parseISO(session.date);
-      return isAfter(sessionDate, thirtyDaysAgo) && isBefore(sessionDate, endOfDay(new Date()));
+      return isAfter(sessionDate, thirtyDaysAgo) && isBefore(sessionDate, endOfDay(today));
     });
 
-    const recentTotalMinutes = recentSessions.reduce((total, session) => {
-      return total + (session.duration.hours * 60 + session.duration.minutes);
-    }, 0);
+    const recentTotalMinutes = recentSessions.reduce((total, session) => 
+      total + (session.duration.hours * 60 + session.duration.minutes), 0
+    );
+
+    // Calculate weekly average
+    const weeklyTotalMinutes = recentTotalMinutes / 4.285714; // 30 days / 7 days per week
 
     // Calculate average session length
-    const averageMinutes = Math.round(totalMinutes / sessions.length);
+    const averageMinutes = Math.round(totalMinutes / sortedSessions.length);
 
     // Find last session date
-    const lastSession = sessions.length > 0 ? format(parseISO(sessions[0].date), 'PPP') : null;
+    const lastSession = sortedSessions.length > 0 ? format(parseISO(sortedSessions[0].date), 'PPP') : null;
 
     setAnalytics({
       totalTime: {
         hours: Math.floor(totalMinutes / 60),
         minutes: totalMinutes % 60,
       },
-      sessionsCount: sessions.length,
+      sessionsCount: sortedSessions.length,
       averageSessionLength: {
         hours: Math.floor(averageMinutes / 60),
         minutes: averageMinutes % 60,
       },
-      activeDays: uniqueDays.size,
-      recentProgress: Math.min(100, Math.round((recentTotalMinutes / (30 * 60)) * 100)), // Target: 1 hour per day
+      activeDays: Object.keys(sessionsByDay).length,
+      recentProgress: Math.min(100, Math.round((recentTotalMinutes / (30 * 45)) * 100)), // Target: 45 minutes per day
       lastSession,
+      currentStreak,
+      longestStreak,
+      weeklyAverage: {
+        hours: Math.floor(weeklyTotalMinutes / 60),
+        minutes: Math.round(weeklyTotalMinutes % 60),
+      },
     });
   };
 
@@ -157,6 +237,34 @@ export function LearningInsights({ goalId }: LearningInsightsProps) {
 
       <Card>
         <CardHeader>
+          <CardTitle>Weekly Average</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">
+            {analytics.weeklyAverage.hours}h {analytics.weeklyAverage.minutes}m
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Based on last 30 days
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Learning Streak</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">
+            {analytics.currentStreak} days
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Longest streak: {analytics.longestStreak} days
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Average Session</CardTitle>
         </CardHeader>
         <CardContent>
@@ -190,7 +298,7 @@ export function LearningInsights({ goalId }: LearningInsightsProps) {
         <CardContent>
           <Progress value={analytics.recentProgress} className="h-2" />
           <p className="mt-2 text-sm text-muted-foreground">
-            {analytics.recentProgress}% of target (1 hour/day)
+            {analytics.recentProgress}% of target (45 min/day)
           </p>
           {analytics.lastSession && (
             <p className="mt-1 text-sm text-muted-foreground">
