@@ -225,7 +225,15 @@ export default function LearningGoals({ items }: Props) {
   // Add session handling
   const addSessionToGoal = async (goalId: string, date: string, duration: { hours: number; minutes: number }) => {
     try {
+      console.log('Adding session:', { goalId, date, duration });
       const session = await addSession(goalId, { date, duration });
+      console.log('Session added:', session);
+      
+      // Update the local state
+      const updatedGoals = await getGoals();
+      console.log('Updated goals:', updatedGoals);
+      setGoals(updatedGoals);
+      
       return session;
     } catch (error) {
       console.error('Error adding session:', error);
