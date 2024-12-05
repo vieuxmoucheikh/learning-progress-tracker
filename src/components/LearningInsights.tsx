@@ -97,51 +97,49 @@ export function LearningInsights({ goalId }: LearningInsightsProps) {
 
     // Group sessions by day
     const sessionsByDay = sortedSessions.reduce((acc, session) => {
-      const date = format(parseISO(session.date), 'yyyy-MM-dd');
-      if (!acc[date]) {
-        acc[date] = [];
+      const dateKey = format(new Date(session.date), 'yyyy-MM-dd');
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
       }
-      acc[date].push(session);
+      acc[dateKey].push(session);
       return acc;
     }, {} as Record<string, Session[]>);
 
     // Calculate streaks
-    let currentStreak = 0;
-    let longestStreak = 0;
-    let tempStreak = 0;
-    
     const today = startOfDay(new Date());
     const yesterday = startOfDay(subDays(today, 1));
-    const dates = Object.keys(sessionsByDay).map(date => parseISO(date)).sort((a, b) => b.getTime() - a.getTime());
+    const dates = Object.keys(sessionsByDay)
+      .map(date => new Date(date))
+      .sort((a, b) => b.getTime() - a.getTime());
     
     // Calculate current streak
+    let currentStreak = 0;
     if (dates.length > 0) {
       const lastSessionDate = dates[0];
       if (isSameDay(lastSessionDate, today) || isSameDay(lastSessionDate, yesterday)) {
         currentStreak = 1;
-        let checkDate = yesterday;
-        let dateIndex = dates.findIndex(d => isSameDay(d, lastSessionDate)) + 1;
+        let checkDate = isSameDay(lastSessionDate, today) ? today : yesterday;
         
-        while (dateIndex < dates.length) {
-          const prevDate = dates[dateIndex];
+        for (let i = 1; i < dates.length; i++) {
+          const prevDate = dates[i];
           if (differenceInDays(checkDate, prevDate) === 1) {
             currentStreak++;
             checkDate = prevDate;
           } else {
             break;
           }
-          dateIndex++;
         }
       }
     }
 
     // Calculate longest streak
+    let longestStreak = 0;
+    let tempStreak = 0;
     dates.forEach((date, index) => {
       if (index === 0) {
         tempStreak = 1;
       } else {
-        const prevDate = dates[index - 1];
-        if (differenceInDays(prevDate, date) === 1) {
+        if (differenceInDays(dates[index - 1], date) === 1) {
           tempStreak++;
         } else {
           longestStreak = Math.max(longestStreak, tempStreak);
@@ -154,7 +152,7 @@ export function LearningInsights({ goalId }: LearningInsightsProps) {
     // Calculate recent progress (last 30 days)
     const thirtyDaysAgo = subDays(today, 30);
     const recentSessions = sortedSessions.filter(session => {
-      const sessionDate = parseISO(session.date);
+      const sessionDate = new Date(session.date);
       return isAfter(sessionDate, thirtyDaysAgo) && isBefore(sessionDate, endOfDay(today));
     });
 
@@ -169,7 +167,9 @@ export function LearningInsights({ goalId }: LearningInsightsProps) {
     const averageMinutes = Math.round(totalMinutes / sortedSessions.length);
 
     // Find last session date
-    const lastSession = sortedSessions.length > 0 ? format(parseISO(sortedSessions[0].date), 'PPP') : null;
+    const lastSession = sortedSessions.length > 0 
+      ? format(new Date(sortedSessions[0].date), 'PPP') 
+      : null;
 
     setAnalytics({
       totalTime: {

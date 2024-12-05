@@ -687,7 +687,7 @@ export async function getSessions(goalId: string): Promise<Session[]> {
       id: session.id,
       goal_id: session.goal_id,
       user_id: session.user_id,
-      date: session.date,
+      date: new Date(session.date).toISOString(),
       duration: {
         hours: session.duration?.hours || 0,
         minutes: session.duration?.minutes || 0
@@ -719,13 +719,19 @@ export async function addSession(goalId: string, sessionData: { date: string; du
       throw new Error('Invalid duration format');
     }
 
+    // Ensure the date is a valid ISO string
+    const sessionDate = new Date(sessionData.date);
+    if (isNaN(sessionDate.getTime())) {
+      throw new Error('Invalid date format');
+    }
+
     const { data: session, error } = await supabase
       .from('goal_sessions')
       .insert([
         {
           goal_id: goalId,
           user_id: user.id,
-          date: sessionData.date,
+          date: sessionDate.toISOString(), // Store as ISO string
           duration: {
             hours: Math.max(0, Math.floor(sessionData.duration.hours)),
             minutes: Math.max(0, Math.min(59, Math.floor(sessionData.duration.minutes)))
@@ -749,7 +755,7 @@ export async function addSession(goalId: string, sessionData: { date: string; du
       id: session.id,
       goal_id: session.goal_id,
       user_id: session.user_id,
-      date: session.date,
+      date: new Date(session.date).toISOString(),
       duration: {
         hours: session.duration.hours,
         minutes: session.duration.minutes
