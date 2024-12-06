@@ -27,11 +27,10 @@ const TIMER_STATES = {
 type TimerState = typeof TIMER_STATES[keyof typeof TIMER_STATES];
 
 interface Props {
-  sessionId: string;
   onComplete?: () => void;
 }
 
-export default function PomodoroTimer({ sessionId, onComplete }: Props) {
+export default function PomodoroTimer({ onComplete }: Props) {
   const { toast } = useToast();
   const [settings, setSettings] = useState<PomodoroSettings | null>(null);
   const [timerState, setTimerState] = useState<TimerState>(TIMER_STATES.IDLE);
@@ -46,7 +45,7 @@ export default function PomodoroTimer({ sessionId, onComplete }: Props) {
       try {
         const [settingsData, statsData] = await Promise.all([
           getPomodoroSettings(),
-          sessionId ? getPomodoroStats(sessionId) : Promise.resolve(null)
+          getPomodoroStats()
         ]);
         setSettings(settingsData);
         setStats(statsData);
@@ -61,7 +60,7 @@ export default function PomodoroTimer({ sessionId, onComplete }: Props) {
       }
     };
     loadData();
-  }, [sessionId]);
+  }, []);
 
   // Timer logic
   useEffect(() => {
@@ -110,7 +109,7 @@ export default function PomodoroTimer({ sessionId, onComplete }: Props) {
         });
 
         if (settings.auto_start_pomodoros) {
-          startPomodoro(sessionId); // Pass sessionId to startPomodoro
+          startTimer('work');
         } else {
           setTimerState(TIMER_STATES.IDLE);
           setTimeLeft(settings.work_duration * 60);
@@ -118,14 +117,8 @@ export default function PomodoroTimer({ sessionId, onComplete }: Props) {
       }
 
       // Refresh stats
-      if (sessionId) {
-        const newStats = await getPomodoroStats(sessionId);
-        setStats(newStats);
-      } else {
-        console.error('sessionId is undefined');
-        // Handle the case where sessionId is not available
-        return;
-      }
+      const newStats = await getPomodoroStats();
+      setStats(newStats);
     } catch (error) {
       console.error('Error completing Pomodoro:', error);
       toast({
@@ -144,7 +137,7 @@ export default function PomodoroTimer({ sessionId, onComplete }: Props) {
     if (!settings) return;
 
     try {
-      const pomodoro = await startPomodoro(sessionId, type);
+      const pomodoro = await startPomodoro(type);
       setCurrentPomodoro(pomodoro);
       setTimerState(TIMER_STATES.RUNNING);
       setTimeLeft(type === 'work' ? settings.work_duration * 60 : 
