@@ -3,7 +3,6 @@ import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
-import { Progress } from '../ui/progress';
 import { Badge } from '../components/ui/badge';
 import { 
   Play, 
@@ -489,20 +488,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     );
   };
 
-  const renderProgressBar = () => {
-    if (!item.progress?.total) return null;
-    
-    const progress = calculateProgress();
-    return (
-      <div className="space-y-2">
-        <Progress value={progress} />
-        <div className="flex justify-end">
-          <span className="text-sm text-gray-600">{progress}%</span>
-        </div>
-      </div>
-    );
-  };
-
   const renderSessionHistory = () => {
     if (!item.progress?.sessions?.length) {
       return (
@@ -886,7 +871,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               </div>
             </div>
 
-            {/* Progress Section */}
+            {/* Time Display */}
             <div className="space-y-3 mt-6">
               <div className="flex items-center justify-between">
                 {renderDuration()}
@@ -897,7 +882,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                   </span>
                 </div>
               </div>
-              {renderProgressBar()}
             </div>
           </div>
         </div>
