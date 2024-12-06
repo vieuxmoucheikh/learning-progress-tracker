@@ -420,12 +420,36 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
   const handleTimeSave = () => {
     const minutes = Math.max(0, editedMinutes);
-    
-    // Update the total time directly
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+
+    // Create or update a session with the edited time
+    const updatedSessions = item.progress?.sessions || [];
+    if (updatedSessions.length === 0) {
+      // If no sessions exist, create a new completed session
+      updatedSessions.push({
+        startTime: new Date().toISOString(),
+        endTime: new Date().toISOString(),
+        duration: {
+          hours,
+          minutes: remainingMinutes
+        },
+        date: new Date().toISOString().split('T')[0] // Add this line
+      });
+    } else {
+      // Update the last session's duration
+      const lastSession = updatedSessions[updatedSessions.length - 1];
+      lastSession.duration = {
+        hours,
+        minutes: remainingMinutes
+      };
+    }
+
+    // Update the sessions in the progress
     onUpdate(item.id, {
       progress: {
         ...item.progress,
-        total: { hours: 0, minutes }
+        sessions: updatedSessions
       }
     });
     
