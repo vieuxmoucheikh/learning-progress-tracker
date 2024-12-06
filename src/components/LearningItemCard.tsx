@@ -82,6 +82,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [editingNote, setEditingNote] = useState<{ sessionIndex: number; noteIndex: number; content: string } | null>(null);
   const [showEditNoteDialog, setShowEditNoteDialog] = useState(false);
+  const [isTimeEditing, setIsTimeEditing] = useState(false);
+  const [editedHours, setEditedHours] = useState(item.progress?.total?.hours || 0);
+  const [editedMinutes, setEditedMinutes] = useState(item.progress?.total?.minutes || 0);
 
   const activeSession = item.progress?.sessions?.find(session => !session.endTime);
   const { elapsedTime, formatElapsedTime, lastUpdateTime, isValidSession } = useSessionTimer({
@@ -409,21 +412,96 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     return `${hours}h ${minutes}m`;
   };
 
-  const renderDuration = () => {
-    if (!item.progress?.sessions) return null;
+  const handleTimeEdit = () => {
+    setIsTimeEditing(true);
+    setEditedHours(item.progress?.total?.hours || 0);
+    setEditedMinutes(item.progress?.total?.minutes || 0);
+  };
+
+  const handleTimeSave = () => {
+    const hours = Math.max(0, editedHours);
+    const minutes = Math.max(0, Math.min(59, editedMinutes));
     
-    const totalMinutes = getTotalMinutes(item.progress.sessions);
-    const formattedDuration = formatDuration({ 
-      hours: Math.floor(totalMinutes / 60), 
-      minutes: totalMinutes % 60 
+    onUpdate(item.id, {
+      progress: {
+        ...item.progress,
+        total: { hours, minutes }
+      }
     });
     
+    setIsTimeEditing(false);
+  };
+
+  const handleTimeCancel = () => {
+    setIsTimeEditing(false);
+    setEditedHours(item.progress?.total?.hours || 0);
+    setEditedMinutes(item.progress?.total?.minutes || 0);
+  };
+
+  const renderDuration = () => {
+    const current = item.progress?.current || { hours: 0, minutes: 0 };
+    const total = item.progress?.total || { hours: 0, minutes: 0 };
+    
+    if (isTimeEditing) {
+      return (
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              min="0"
+              value={editedHours}
+              onChange={(e) => setEditedHours(Math.max(0, parseInt(e.target.value) || 0))}
+              className="w-20 text-sm border-blue-200 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-600">hrs</span>
+            <Input
+              type="number"
+              min="0"
+              max="59"
+              value={editedMinutes}
+              onChange={(e) => setEditedMinutes(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
+              className="w-20 text-sm border-blue-200 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-600">min</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleTimeSave}
+              className="text-green-600 hover:text-green-700 hover:bg-green-50"
+            >
+              <Save className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleTimeCancel}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
     return (
-      <div className="flex items-center gap-2">
-        <Clock className="h-4 w-4 text-gray-500" />
-        <span className="text-sm font-medium text-gray-700">
-          {formattedDuration}
-        </span>
+      <div className="flex items-center gap-2 group">
+        <div className="flex items-center gap-1.5">
+          <Clock className="h-4 w-4 text-gray-500" />
+          <span className="text-sm font-medium">
+            {formatDuration(current)} / {formatDuration(total)}
+          </span>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleTimeEdit}
+          className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50 p-1"
+        >
+          <Edit className="h-3.5 w-3.5" />
+        </Button>
       </div>
     );
   };
