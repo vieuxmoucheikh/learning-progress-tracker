@@ -14,6 +14,7 @@ import { DashboardTab } from './components/DashboardTab';
 import { ItemsTab } from './components/ItemsTab';
 import { AnalyticsTab } from './components/AnalyticsTab';
 import { Toaster } from "@/components/ui/toaster";
+import { PomodoroTimer } from './components/pomodoro/PomodoroTimer';
 
 interface State {
   items: LearningItem[];
@@ -587,6 +588,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Toaster />
+      <PomodoroTimer sessionId={state.activeItem || undefined} />
       <div className="max-w-7xl mx-auto px-4 py-8">
         <header className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Learning Progress Tracker</h1>
@@ -595,7 +597,7 @@ export default function App() {
 
         <TabNavigation activeTab={selectedTab} onTabChange={setSelectedTab} />
 
-        {showAddDialog && (
+        {showAddDialog && ( 
           <AddLearningItem
             onAdd={handleSubmitItem}
             onClose={() => setShowAddDialog(false)}
