@@ -13,7 +13,7 @@ import { PomodoroSettingsDialog } from './PomodoroSettingsDialog';
 import { PomodoroStats as PomodoroStatsComponent } from './PomodoroStats';
 import { PlayIcon, PauseIcon, SkipForwardIcon, Settings2Icon } from 'lucide-react';
 
-export function PomodoroTimer({ sessionId }: { sessionId?: string }) {
+export function PomodoroTimer() {
   const [time, setTime] = useState(25 * 60); // Default 25 minutes in seconds
   const [isActive, setIsActive] = useState(false);
   const [isBreak, setIsBreak] = useState(false);
@@ -31,7 +31,7 @@ export function PomodoroTimer({ sessionId }: { sessionId?: string }) {
         setSettings(pomodoroSettings);
         setTime(pomodoroSettings.work_duration * 60);
         
-        const pomodoroStats = await getPomodoroStats(sessionId);
+        const pomodoroStats = await getPomodoroStats();
         setStats(pomodoroStats);
       } catch (error) {
         console.error('Error loading Pomodoro data:', error);
@@ -43,7 +43,7 @@ export function PomodoroTimer({ sessionId }: { sessionId?: string }) {
       }
     };
     loadData();
-  }, [sessionId]);
+  }, []);
 
   // Timer logic
   useEffect(() => {
@@ -65,9 +65,9 @@ export function PomodoroTimer({ sessionId }: { sessionId?: string }) {
   const handleTimerComplete = async () => {
     if (!settings) return;
 
-    // Ensure currentPomodoroId and sessionId are available
-    if (!currentPomodoroId || !sessionId) {
-      console.error('Missing currentPomodoroId or sessionId');
+    // Ensure currentPomodoroId is available
+    if (!currentPomodoroId) {
+      console.error('Missing currentPomodoroId');
       return;
     }
 
@@ -79,7 +79,7 @@ export function PomodoroTimer({ sessionId }: { sessionId?: string }) {
     try {
       await completePomodoro(currentPomodoroId);
       // Refresh stats
-      const newStats = await getPomodoroStats(sessionId);
+      const newStats = await getPomodoroStats();
       setStats(newStats);
     } catch (error) {
       console.error('Error completing Pomodoro:', error);
@@ -108,10 +108,8 @@ export function PomodoroTimer({ sessionId }: { sessionId?: string }) {
   };
 
   const startNewPomodoro = async (type: 'work' | 'break' = 'work') => {
-    if (!sessionId) return;
-    
     try {
-      const pomodoro = await startPomodoro(sessionId, type);
+      const pomodoro = await startPomodoro(type);
       setCurrentPomodoroId(pomodoro.id);
       setIsActive(true);
     } catch (error) {
