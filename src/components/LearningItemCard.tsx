@@ -484,7 +484,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         <div className="flex items-center gap-1.5">
           <Clock className="h-4 w-4 text-gray-500" />
           <span className="text-sm font-medium">
-            {activeSession ? `${currentSessionTime}m (Current) / ` : ''}{totalCurrentMinutes}m / {totalMinutes}m
+            {totalCurrentMinutes}m / <span className="cursor-pointer hover:text-blue-600">{totalMinutes}m</span>
           </span>
         </div>
         <Button
@@ -497,7 +497,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         </Button>
       </div>
     );
-};
+  };
+
   const renderSessionHistory = () => {
     if (!item.progress?.sessions?.length) {
       return (
