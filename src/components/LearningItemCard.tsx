@@ -409,7 +409,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
   const handleTimeEdit = () => {
     setIsTimeEditing(true);
-    setEditedMinutes(item.progress?.total?.minutes || 0);
+    setEditedMinutes(item.progress?.total?.minutes || 0); 
   };
 
   const handleTimeCancel = () => {
