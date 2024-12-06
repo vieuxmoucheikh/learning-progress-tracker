@@ -1,8 +1,10 @@
+-- Create extension if not exists
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- Create pomodoros table
 CREATE TABLE IF NOT EXISTS public.pomodoros (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  session_id UUID,
   start_time TIMESTAMP WITH TIME ZONE NOT NULL,
   end_time TIMESTAMP WITH TIME ZONE,
   type VARCHAR(10) CHECK (type IN ('work', 'break')),
@@ -59,4 +61,3 @@ CREATE POLICY "Users can update their own pomodoro settings"
 
 -- Add indexes
 CREATE INDEX IF NOT EXISTS pomodoros_user_id_idx ON public.pomodoros(user_id);
-CREATE INDEX IF NOT EXISTS pomodoros_session_id_idx ON public.pomodoros USING btree (session_id) WHERE session_id IS NOT NULL;
