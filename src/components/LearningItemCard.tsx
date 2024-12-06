@@ -412,26 +412,37 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     setEditedMinutes(item.progress?.total?.minutes || 0);
   };
 
-  const handleTimeSave = () => {
-    const minutes = Math.max(0, editedMinutes);
-    
-    onUpdate(item.id, {
-      progress: {
-        ...item.progress,
-        total: { hours: 0, minutes }
-      }
-    });
-    
-    setIsTimeEditing(false);
-  };
-
   const handleTimeCancel = () => {
     setIsTimeEditing(false);
     setEditedMinutes(item.progress?.total?.minutes || 0);
   };
 
+  const handleTimeSave = () => {
+    const minutes = Math.max(0, editedMinutes);
+    
+    // Calculate total time including current session
+    const currentSessionTime = activeSession ? Math.floor(elapsedTime / 60) : 0;
+    const totalSessionsTime = item.progress?.sessions?.reduce((acc, session) => {
+      if (session.duration) {
+        return acc + (session.duration.minutes || 0);
+      }
+      return acc;
+    }, 0) || 0;
+    
+    onUpdate(item.id, {
+      progress: {
+        ...item.progress,
+        total: { hours: 0, minutes: editedMinutes }
+      }
+    });
+    
+    setIsTimeEditing(false);
+};
+
   const renderDuration = () => {
     const totalMinutes = item.progress?.total?.minutes || 0;
+    const currentSessionTime = activeSession ? Math.floor(elapsedTime / 60) : 0;
+    const totalCurrentMinutes = calculateTotalTimeSpent();
     
     if (isTimeEditing) {
       return (
@@ -473,7 +484,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         <div className="flex items-center gap-1.5">
           <Clock className="h-4 w-4 text-gray-500" />
           <span className="text-sm font-medium">
-            {totalMinutes}m
+            {activeSession ? `${currentSessionTime}m (Current) / ` : ''}{totalCurrentMinutes}m / {totalMinutes}m
           </span>
         </div>
         <Button
@@ -486,8 +497,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         </Button>
       </div>
     );
-  };
-
+};
   const renderSessionHistory = () => {
     if (!item.progress?.sessions?.length) {
       return (
