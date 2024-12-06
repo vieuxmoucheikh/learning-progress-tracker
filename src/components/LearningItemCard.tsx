@@ -83,7 +83,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [editingNote, setEditingNote] = useState<{ sessionIndex: number; noteIndex: number; content: string } | null>(null);
   const [showEditNoteDialog, setShowEditNoteDialog] = useState(false);
   const [isTimeEditing, setIsTimeEditing] = useState(false);
-  const [editedHours, setEditedHours] = useState(item.progress?.total?.hours || 0);
   const [editedMinutes, setEditedMinutes] = useState(item.progress?.total?.minutes || 0);
 
   const activeSession = item.progress?.sessions?.find(session => !session.endTime);
@@ -387,7 +386,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     if (!item.progress?.total) return 0;
     
     const totalSpentMinutes = calculateTotalTimeSpent();
-    const totalTargetMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
+    const totalTargetMinutes = item.progress.total.minutes;
     
     if (totalTargetMinutes === 0) return 0;
     return Math.min(Math.round((totalSpentMinutes / totalTargetMinutes) * 100), 100);
@@ -397,35 +396,30 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     if (!item.progress?.total) return 0;
     
     const totalSpentMinutes = calculateTotalTimeSpent();
-    const totalTargetMinutes = (item.progress.total.hours * 60) + item.progress.total.minutes;
+    const totalTargetMinutes = item.progress.total.minutes;
     
     if (totalTargetMinutes === 0) return 0;
     return Math.min(Math.round((totalSpentMinutes / totalTargetMinutes) * 100), 100);
   };
 
   const formatDuration = (duration: Time | undefined) => {
-    if (!duration) return '0h 0m';
-    const hours = duration.hours || 0;
+    if (!duration) return '0m';
     const minutes = duration.minutes || 0;
-    if (hours === 0) return `${minutes}m`;
-    if (minutes === 0) return `${hours}h`;
-    return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
   };
 
   const handleTimeEdit = () => {
     setIsTimeEditing(true);
-    setEditedHours(item.progress?.total?.hours || 0);
     setEditedMinutes(item.progress?.total?.minutes || 0);
   };
 
   const handleTimeSave = () => {
-    const hours = Math.max(0, editedHours);
-    const minutes = Math.max(0, Math.min(59, editedMinutes));
+    const minutes = Math.max(0, editedMinutes);
     
     onUpdate(item.id, {
       progress: {
         ...item.progress,
-        total: { hours, minutes }
+        total: { hours: 0, minutes }
       }
     });
     
@@ -434,13 +428,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
   const handleTimeCancel = () => {
     setIsTimeEditing(false);
-    setEditedHours(item.progress?.total?.hours || 0);
     setEditedMinutes(item.progress?.total?.minutes || 0);
   };
 
   const renderDuration = () => {
-    const current = item.progress?.current || { hours: 0, minutes: 0 };
-    const total = item.progress?.total || { hours: 0, minutes: 0 };
+    const totalMinutes = item.progress?.total?.minutes || 0;
     
     if (isTimeEditing) {
       return (
@@ -449,17 +441,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
             <Input
               type="number"
               min="0"
-              value={editedHours}
-              onChange={(e) => setEditedHours(Math.max(0, parseInt(e.target.value) || 0))}
-              className="w-20 text-sm border-blue-200 focus:ring-blue-500"
-            />
-            <span className="text-sm text-gray-600">hrs</span>
-            <Input
-              type="number"
-              min="0"
-              max="59"
               value={editedMinutes}
-              onChange={(e) => setEditedMinutes(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
+              onChange={(e) => setEditedMinutes(Math.max(0, parseInt(e.target.value) || 0))}
               className="w-20 text-sm border-blue-200 focus:ring-blue-500"
             />
             <span className="text-sm text-gray-600">min</span>
@@ -491,7 +474,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         <div className="flex items-center gap-1.5">
           <Clock className="h-4 w-4 text-gray-500" />
           <span className="text-sm font-medium">
-            {formatDuration(current)} / {formatDuration(total)}
+            {totalMinutes}m
           </span>
         </div>
         <Button
