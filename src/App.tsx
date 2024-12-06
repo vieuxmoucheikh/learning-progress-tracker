@@ -35,6 +35,13 @@ type Action =
   | { type: 'ADD_SESSION_NOTE'; payload: { id: string; note: string } }
   | { type: 'SET_ACTIVE_ITEM'; payload: string | null };
 
+const TAB_OPTIONS = {
+  DASHBOARD: 'dashboard',
+  ITEMS: 'items',
+  ANALYTICS: 'analytics',
+  POMODORO: 'pomodoro'
+} as const;
+
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'LOAD_STATE':
@@ -252,7 +259,7 @@ export default function App() {
     notes: {},
     sessionNotes: {},
   });
-  const [selectedTab, setSelectedTab] = useState('dashboard');
+  const [selectedTab, setSelectedTab] = useState<string>(TAB_OPTIONS.DASHBOARD);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -588,7 +595,6 @@ export default function App() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Toaster />
-      <PomodoroTimer sessionId={state.activeItem || undefined} />
       <div className="max-w-7xl mx-auto px-4 py-8">
         <header className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Learning Progress Tracker</h1>
@@ -607,7 +613,7 @@ export default function App() {
         )}
 
         <main>
-          {selectedTab === "dashboard" && (
+          {selectedTab === TAB_OPTIONS.DASHBOARD && (
             <DashboardTab
               items={state.items}
               onAddItem={handleDashboardAddItem}
@@ -622,7 +628,7 @@ export default function App() {
             />
           )}
 
-          {selectedTab === "items" && (
+          {selectedTab === TAB_OPTIONS.ITEMS && (
             <ItemsTab
               items={state.items}
               onAddItem={handleItemsAddItem}
@@ -636,8 +642,12 @@ export default function App() {
             />
           )}
 
-          {selectedTab === "analytics" && (
+          {selectedTab === TAB_OPTIONS.ANALYTICS && (
             <AnalyticsTab items={state.items} />
+          )}
+
+          {selectedTab === TAB_OPTIONS.POMODORO && (
+            <PomodoroTimer />
           )}
         </main>
       </div>
