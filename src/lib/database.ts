@@ -475,7 +475,6 @@ async function createDatabaseFunctions() {
           CREATE TABLE IF NOT EXISTS pomodoros (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-            session_id UUID REFERENCES sessions(id) ON DELETE CASCADE,
             start_time TIMESTAMP WITH TIME ZONE NOT NULL,
             end_time TIMESTAMP WITH TIME ZONE,
             type VARCHAR(10) CHECK (type IN ('work', 'break')),
@@ -855,7 +854,7 @@ async function getCurrentUser() {
 }
 
 // Pomodoro Management Functions
-export async function startPomodoro(sessionId: string, type: 'work' | 'break' = 'work'): Promise<Pomodoro> {
+export async function startPomodoro(type: 'work' | 'break' = 'work'): Promise<Pomodoro> {
   try {
     const user = await getCurrentUser();
     if (!user) throw new Error('No authenticated user');
@@ -864,7 +863,6 @@ export async function startPomodoro(sessionId: string, type: 'work' | 'break' = 
       .from('pomodoros')
       .insert({
         user_id: user.id,
-        session_id: sessionId,
         start_time: new Date().toISOString(),
         type
       })
@@ -976,7 +974,7 @@ export async function updatePomodoroSettings(settings: Partial<PomodoroSettings>
 }
 
 // Pomodoro Statistics Functions
-export async function getPomodoroStats(sessionId?: string): Promise<PomodoroStats> {
+export async function getPomodoroStats(): Promise<PomodoroStats> {
   try {
     const user = await getCurrentUser();
     if (!user) throw new Error('No authenticated user');
@@ -985,18 +983,13 @@ export async function getPomodoroStats(sessionId?: string): Promise<PomodoroStat
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
-    let query = supabase
+    const { data: todayPomodoros, error: todayError } = await supabase
       .from('pomodoros')
       .select('*')
       .eq('user_id', user.id)
       .eq('completed', true)
       .gte('start_time', today.toISOString());
 
-    if (sessionId) {
-      query = query.eq('session_id', sessionId);
-    }
-
-    const { data: todayPomodoros, error: todayError } = await query;
     if (todayError) throw todayError;
 
     // Get all pomodoros for streak calculation
