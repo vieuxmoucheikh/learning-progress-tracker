@@ -58,5 +58,5 @@ CREATE POLICY "Users can update their own pomodoro settings"
   WITH CHECK (auth.uid() = user_id);
 
 -- Add indexes
-CREATE INDEX pomodoros_user_id_idx ON public.pomodoros(user_id);
-CREATE INDEX pomodoros_session_id_idx ON public.pomodoros(session_id);
+CREATE INDEX IF NOT EXISTS pomodoros_user_id_idx ON public.pomodoros(user_id);
+CREATE INDEX IF NOT EXISTS pomodoros_session_id_idx ON public.pomodoros USING btree (session_id) WHERE session_id IS NOT NULL;
