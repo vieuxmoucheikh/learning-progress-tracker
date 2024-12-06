@@ -105,3 +105,39 @@ export interface LearningGoal {
     }>;
   };
 }
+
+export interface Pomodoro {
+  id: string;
+  user_id: string;
+  session_id: string; 
+  start_time: string;
+  end_time?: string;
+  type: 'work' | 'break';
+  completed: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PomodoroSettings {
+  user_id: string;
+  work_duration: number;
+  break_duration: number;
+  long_break_duration: number;
+  pomodoros_until_long_break: number;
+  auto_start_breaks: boolean;
+  auto_start_pomodoros: boolean;
+  sound_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PomodoroStats {
+  totalPomodoros: number;
+  completedPomodoros: number;
+  totalWorkMinutes: number;
+  totalBreakMinutes: number;
+  dailyAverage: number;
+  mostProductiveTime: string;
+  currentStreak: number;
+  longestStreak: number;
+}

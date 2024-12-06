@@ -13,9 +13,11 @@ import { supabase } from '@/lib/supabase';
 import { addGoal, deleteGoal, getGoals, updateGoal, addSession } from '@/lib/database';
 import { LearningItem } from '@/types';
 import { clsx } from 'clsx';
+import { PomodoroTimer } from './pomodoro/PomodoroTimer';
+import type { Session } from '../types';
 
 type GoalStatus = 'active' | 'completed' | 'overdue';
-
+ 
 interface LearningGoal {
   id: string;
   userId: string;
@@ -47,8 +49,10 @@ interface Props {
 export default function LearningGoals({ items }: Props) {
   const { toast } = useToast();
   const [goals, setGoals] = useState<LearningGoal[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [selectedGoal, setSelectedGoal] = useState<LearningGoal | null>(null);
   const [isAddingGoal, setIsAddingGoal] = useState(false);
+  const [activeSession, setActiveSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [goalToDelete, setGoalToDelete] = useState<LearningGoal | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [newGoal, setNewGoal] = useState<{
@@ -337,19 +341,15 @@ export default function LearningGoals({ items }: Props) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Learning Goals</h2>
-          <p className="text-sm text-muted-foreground">
-            Set and track your learning objectives
-          </p>
-        </div>
-        <Button 
-          onClick={() => setIsAddingGoal(true)}
-          className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
-        >
-          <Plus className="mr-2 h-4 w-4" /> Add Goal
-        </Button>
+        <h2 className="text-3xl font-bold tracking-tight">Learning Goals</h2>
+        <Button onClick={() => setIsAddingGoal(true)}>Add Goal</Button>
       </div>
+
+      {activeSession && (
+        <div className="mb-6">
+          <PomodoroTimer sessionId={activeSession.id} />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {goals.map(goal => {

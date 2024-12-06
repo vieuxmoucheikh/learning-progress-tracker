@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { LearningItem, StreakData, LearningItemFormData, LearningGoal, Priority, GoalStatus, Session } from '../types'
+import type { LearningItem, StreakData, LearningItemFormData, LearningGoal, Priority, GoalStatus, Session, Pomodoro, PomodoroSettings, PomodoroStats } from '../types'
 
 // Learning Items
 export const getLearningItems = async () => {
@@ -18,7 +18,7 @@ export const getLearningItems = async () => {
     if (error) {
       console.error('Error fetching learning items:', error);
       return [];
-    }
+    } 
     
     return data || [];
   } catch (error) {
@@ -395,25 +395,7 @@ async function ensureGoalsTableExists() {
       console.log('Goals table does not exist, creating...');
       
       // Create the table with the updated schema
-      const { error: createError } = await supabase.rpc('create_goals_table', {
-        sql: `
-          CREATE TABLE IF NOT EXISTS learning_goals (
-            id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-            user_id UUID NOT NULL REFERENCES auth.users(id),
-            title TEXT NOT NULL,
-            category TEXT,
-            target_hours INTEGER NOT NULL,
-            target_date DATE NOT NULL,
-            priority TEXT CHECK (priority IN ('low', 'medium', 'high')),
-            status TEXT CHECK (status IN ('active', 'completed', 'overdue')),
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now()),
-            updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now())
-          );
-          
-          CREATE INDEX IF NOT EXISTS learning_goals_user_id_idx ON learning_goals(user_id);
-          CREATE INDEX IF NOT EXISTS learning_goals_status_idx ON learning_goals(status);
-        `
-      });
+      const { error: createError } = await supabase.rpc('create_goals_table');
 
       if (createError) {
         console.error('Error creating goals table:', createError);
@@ -436,24 +418,7 @@ async function ensureSessionsTableExists() {
     if (exists === null) {
       console.log('Sessions table does not exist, creating...');
       
-      const { error: createError } = await supabase.rpc('create_sessions_table', {
-        sql: `
-          CREATE TABLE IF NOT EXISTS goal_sessions (
-            id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-            goal_id UUID NOT NULL REFERENCES learning_goals(id) ON DELETE CASCADE,
-            user_id UUID NOT NULL REFERENCES auth.users(id),
-            date TIMESTAMP WITH TIME ZONE NOT NULL,
-            duration JSONB NOT NULL,
-            notes TEXT,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now()),
-            updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now())
-          );
-          
-          CREATE INDEX IF NOT EXISTS goal_sessions_goal_id_idx ON goal_sessions(goal_id);
-          CREATE INDEX IF NOT EXISTS goal_sessions_user_id_idx ON goal_sessions(user_id);
-          CREATE INDEX IF NOT EXISTS goal_sessions_date_idx ON goal_sessions(date);
-        `
-      });
+      const { error: createError } = await supabase.rpc('create_sessions_table');
 
       if (createError) {
         console.error('Error creating sessions table:', createError);
@@ -466,9 +431,101 @@ async function ensureSessionsTableExists() {
   }
 }
 
+async function ensurePomodoroTableExists() {
+  try {
+    const { error } = await supabase
+      .from('pomodoros')
+      .select('id')
+      .limit(1);
+
+    if (error && error.code === 'PGRST204') {
+      await supabase.rpc('create_pomodoro_table');
+    }
+  } catch (error) {
+    console.error('Error in ensurePomodoroTableExists:', error);
+  }
+}
+
+async function ensurePomodoroSettingsTableExists() {
+  try {
+    const { error } = await supabase
+      .from('pomodoro_settings')
+      .select('user_id')
+      .limit(1);
+
+    if (error && error.code === 'PGRST204') {
+      await supabase.rpc('create_pomodoro_settings_table');
+    }
+  } catch (error) {
+    console.error('Error in ensurePomodoroSettingsTableExists:', error);
+  }
+}
+
+async function createDatabaseFunctions() {
+  try {
+    // Create function for pomodoro table
+    await supabase.rpc('exec_sql', {
+      sql_string: `
+        CREATE OR REPLACE FUNCTION create_pomodoro_table()
+        RETURNS void
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        AS $$
+        BEGIN
+          CREATE TABLE IF NOT EXISTS pomodoros (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+            session_id UUID REFERENCES sessions(id) ON DELETE CASCADE,
+            start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+            end_time TIMESTAMP WITH TIME ZONE,
+            type VARCHAR(10) CHECK (type IN ('work', 'break')),
+            completed BOOLEAN DEFAULT false,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now()),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now())
+          );
+        END;
+        $$;
+      `
+    });
+
+    // Create function for pomodoro settings table
+    await supabase.rpc('exec_sql', {
+      sql_string: `
+        CREATE OR REPLACE FUNCTION create_pomodoro_settings_table()
+        RETURNS void
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        AS $$
+        BEGIN
+          CREATE TABLE IF NOT EXISTS pomodoro_settings (
+            user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+            work_duration INTEGER DEFAULT 25,
+            break_duration INTEGER DEFAULT 5,
+            long_break_duration INTEGER DEFAULT 15,
+            pomodoros_until_long_break INTEGER DEFAULT 4,
+            auto_start_breaks BOOLEAN DEFAULT true,
+            auto_start_pomodoros BOOLEAN DEFAULT false,
+            sound_enabled BOOLEAN DEFAULT true,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now()),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now())
+          );
+        END;
+        $$;
+      `
+    });
+  } catch (error) {
+    console.error('Error creating database functions:', error);
+  }
+}
+
 async function initializeTables() {
-  await ensureGoalsTableExists();
-  await ensureSessionsTableExists();
+  await createDatabaseFunctions();
+  await Promise.all([
+    ensureGoalsTableExists(),
+    ensureSessionsTableExists(),
+    ensurePomodoroTableExists(),
+    ensurePomodoroSettingsTableExists()
+  ]);
 }
 
 initializeTables();
@@ -795,4 +852,258 @@ async function getCurrentUser() {
     throw new Error('Authentication required');
   }
   return user;
+}
+
+// Pomodoro Management Functions
+export async function startPomodoro(sessionId: string, type: 'work' | 'break' = 'work'): Promise<Pomodoro> {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('No authenticated user');
+
+    const { data, error } = await supabase
+      .from('pomodoros')
+      .insert({
+        user_id: user.id,
+        session_id: sessionId,
+        start_time: new Date().toISOString(),
+        type
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error in startPomodoro:', error);
+    throw error;
+  }
+}
+
+export async function completePomodoro(pomodoroId: string): Promise<Pomodoro> {
+  try {
+    const { data, error } = await supabase
+      .from('pomodoros')
+      .update({
+        end_time: new Date().toISOString(),
+        completed: true,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', pomodoroId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error in completePomodoro:', error);
+    throw error;
+  }
+}
+
+export async function getPomodoroSettings(): Promise<PomodoroSettings> {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('No authenticated user');
+
+    const { data, error } = await supabase
+      .from('pomodoro_settings')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+
+    if (error && error.code === 'PGRST116') {
+      // Settings don't exist, create default settings
+      return createDefaultPomodoroSettings();
+    }
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error in getPomodoroSettings:', error);
+    throw error;
+  }
+}
+
+export async function createDefaultPomodoroSettings(): Promise<PomodoroSettings> {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('No authenticated user');
+
+    const { data, error } = await supabase
+      .from('pomodoro_settings')
+      .insert({
+        user_id: user.id,
+        work_duration: 25,
+        break_duration: 5,
+        long_break_duration: 15,
+        pomodoros_until_long_break: 4,
+        auto_start_breaks: true,
+        auto_start_pomodoros: false,
+        sound_enabled: true
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error in createDefaultPomodoroSettings:', error);
+    throw error;
+  }
+}
+
+export async function updatePomodoroSettings(settings: Partial<PomodoroSettings>): Promise<PomodoroSettings> {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('No authenticated user');
+
+    const { data, error } = await supabase
+      .from('pomodoro_settings')
+      .update({
+        ...settings,
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', user.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error in updatePomodoroSettings:', error);
+    throw error;
+  }
+}
+
+// Pomodoro Statistics Functions
+export async function getPomodoroStats(sessionId?: string): Promise<PomodoroStats> {
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('No authenticated user');
+
+    // Get today's date at midnight UTC
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    let query = supabase
+      .from('pomodoros')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('completed', true)
+      .gte('start_time', today.toISOString());
+
+    if (sessionId) {
+      query = query.eq('session_id', sessionId);
+    }
+
+    const { data: todayPomodoros, error: todayError } = await query;
+    if (todayError) throw todayError;
+
+    // Get all pomodoros for streak calculation
+    const { data: allPomodoros, error: allError } = await supabase
+      .from('pomodoros')
+      .select('start_time')
+      .eq('user_id', user.id)
+      .eq('completed', true)
+      .order('start_time', { ascending: false });
+
+    if (allError) throw allError;
+
+    // Calculate stats
+    const stats: PomodoroStats = {
+      totalPomodoros: todayPomodoros.length,
+      completedPomodoros: todayPomodoros.filter(p => p.completed).length,
+      totalWorkMinutes: todayPomodoros
+        .filter(p => p.type === 'work')
+        .reduce((acc, p) => {
+          if (p.end_time) {
+            const duration = (new Date(p.end_time).getTime() - new Date(p.start_time).getTime()) / 1000 / 60;
+            return acc + duration;
+          }
+          return acc;
+        }, 0),
+      totalBreakMinutes: todayPomodoros
+        .filter(p => p.type === 'break')
+        .reduce((acc, p) => {
+          if (p.end_time) {
+            const duration = (new Date(p.end_time).getTime() - new Date(p.start_time).getTime()) / 1000 / 60;
+            return acc + duration;
+          }
+          return acc;
+        }, 0),
+      dailyAverage: 0,
+      mostProductiveTime: calculateMostProductiveTime(todayPomodoros),
+      currentStreak: calculateCurrentStreak(allPomodoros),
+      longestStreak: calculateLongestStreak(allPomodoros)
+    };
+
+    return stats;
+  } catch (error) {
+    console.error('Error in getPomodoroStats:', error);
+    throw error;
+  }
+}
+
+function calculateMostProductiveTime(pomodoros: Pomodoro[]): string {
+  if (pomodoros.length === 0) return 'N/A';
+
+  const hourCounts = new Array(24).fill(0);
+  pomodoros.forEach(p => {
+    const hour = new Date(p.start_time).getHours();
+    hourCounts[hour]++;
+  });
+
+  const maxHour = hourCounts.indexOf(Math.max(...hourCounts));
+  return `${maxHour.toString().padStart(2, '0')}:00`;
+}
+
+function calculateCurrentStreak(pomodoros: Pick<Pomodoro, 'start_time'>[]): number {
+  if (pomodoros.length === 0) return 0;
+
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
+  let currentStreak = 0;
+  let currentDate = today;
+
+  for (const pomodoro of pomodoros) {
+    const pomodoroDate = new Date(pomodoro.start_time);
+    pomodoroDate.setUTCHours(0, 0, 0, 0);
+
+    if (currentDate.getTime() === pomodoroDate.getTime()) {
+      currentStreak++;
+      currentDate.setDate(currentDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+
+  return currentStreak;
+}
+
+function calculateLongestStreak(pomodoros: Pick<Pomodoro, 'start_time'>[]): number {
+  if (pomodoros.length === 0) return 0;
+
+  let currentStreak = 1;
+  let maxStreak = 1;
+  let lastDate = new Date(pomodoros[0].start_time);
+  lastDate.setUTCHours(0, 0, 0, 0);
+
+  for (let i = 1; i < pomodoros.length; i++) {
+    const currentDate = new Date(pomodoros[i].start_time);
+    currentDate.setUTCHours(0, 0, 0, 0);
+
+    const diffDays = Math.floor((lastDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) {
+      currentStreak++;
+      maxStreak = Math.max(maxStreak, currentStreak);
+    } else if (diffDays > 1) {
+      currentStreak = 1;
+    }
+
+    lastDate = currentDate;
+  }
+
+  return maxStreak;
 }
