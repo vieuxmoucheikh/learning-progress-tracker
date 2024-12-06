@@ -1,20 +1,25 @@
 -- Create extension if not exists
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Drop existing tables if they exist
+DROP TABLE IF EXISTS public.pomodoros;
+DROP TABLE IF EXISTS public.pomodoro_settings;
+
 -- Create pomodoros table
-CREATE TABLE IF NOT EXISTS public.pomodoros (
+CREATE TABLE public.pomodoros (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   start_time TIMESTAMP WITH TIME ZONE NOT NULL,
   end_time TIMESTAMP WITH TIME ZONE,
   type VARCHAR(10) CHECK (type IN ('work', 'break')),
   completed BOOLEAN DEFAULT false,
+  settings JSONB NOT NULL DEFAULT '{}'::jsonb,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 -- Create pomodoro_settings table
-CREATE TABLE IF NOT EXISTS public.pomodoro_settings (
+CREATE TABLE public.pomodoro_settings (
   user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   work_duration INTEGER DEFAULT 25,
   break_duration INTEGER DEFAULT 5,
@@ -23,6 +28,7 @@ CREATE TABLE IF NOT EXISTS public.pomodoro_settings (
   auto_start_breaks BOOLEAN DEFAULT true,
   auto_start_pomodoros BOOLEAN DEFAULT false,
   sound_enabled BOOLEAN DEFAULT true,
+  settings JSONB NOT NULL DEFAULT '{}'::jsonb,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
