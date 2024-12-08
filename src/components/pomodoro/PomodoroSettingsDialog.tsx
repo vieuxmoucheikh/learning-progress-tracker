@@ -44,9 +44,7 @@ export function PomodoroSettingsDialog({
   };
 
   const handleSave = () => {
-    // Temporarily remove daily_goal from settings until database is updated
-    const { daily_goal, ...settingsToUpdate } = settings;
-    onSettingsUpdate(settingsToUpdate);
+    onSettingsUpdate(settings);
     onOpenChange(false);
   };
 
