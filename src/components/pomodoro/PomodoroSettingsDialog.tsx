@@ -44,16 +44,21 @@ export function PomodoroSettingsDialog({
   };
 
   const handleSave = () => {
-    onSettingsUpdate(settings);
+    // Temporarily remove unsupported fields until database is updated
+    const { notification_enabled, vibration_enabled, theme, ...settingsToUpdate } = settings;
+    onSettingsUpdate(settingsToUpdate);
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
+      <DialogContent 
+        className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto"
+        aria-describedby="settings-description"
+      >
         <DialogHeader>
           <DialogTitle>Pomodoro Settings</DialogTitle>
-          <p className="text-sm text-muted-foreground">
+          <p id="settings-description" className="text-sm text-muted-foreground">
             Customize your Pomodoro timer settings and preferences.
           </p>
         </DialogHeader>
