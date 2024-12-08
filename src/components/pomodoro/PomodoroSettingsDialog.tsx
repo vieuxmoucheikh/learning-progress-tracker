@@ -44,7 +44,9 @@ export function PomodoroSettingsDialog({
   };
 
   const handleSave = () => {
-    onSettingsUpdate(settings);
+    // Temporarily remove daily_goal from settings until database is updated
+    const { daily_goal, ...settingsToUpdate } = settings;
+    onSettingsUpdate(settingsToUpdate);
     onOpenChange(false);
   };
 
@@ -53,6 +55,9 @@ export function PomodoroSettingsDialog({
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Pomodoro Settings</DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            Customize your Pomodoro timer settings and preferences.
+          </p>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
