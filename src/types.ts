@@ -109,26 +109,27 @@ export interface LearningGoal {
 export interface Pomodoro {
   id: string;
   user_id: string;
-  session_id: string; 
   start_time: string;
   end_time?: string;
   type: 'work' | 'break';
   completed: boolean;
+  label?: string;
   created_at: string;
   updated_at: string;
 }
 
 export interface PomodoroSettings {
-  user_id: string;
   work_duration: number;
   break_duration: number;
   long_break_duration: number;
   pomodoros_until_long_break: number;
+  sound_enabled: boolean;
   auto_start_breaks: boolean;
   auto_start_pomodoros: boolean;
-  sound_enabled: boolean;
-  created_at: string;
-  updated_at: string;
+  daily_goal?: number;
+  notification_enabled?: boolean;
+  vibration_enabled?: boolean;
+  theme?: 'light' | 'dark' | 'system';
 }
 
 export interface PomodoroStats {
@@ -140,4 +141,6 @@ export interface PomodoroStats {
   mostProductiveTime: string;
   currentStreak: number;
   longestStreak: number;
+  focusLabels?: string[];
+  weeklyCompletion?: number[];
 }
