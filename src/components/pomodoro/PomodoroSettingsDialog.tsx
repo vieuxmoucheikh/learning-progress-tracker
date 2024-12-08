@@ -44,9 +44,7 @@ export function PomodoroSettingsDialog({
   };
 
   const handleSave = () => {
-    // Temporarily remove unsupported fields until database is updated
-    const { notification_enabled, vibration_enabled, theme, ...settingsToUpdate } = settings;
-    onSettingsUpdate(settingsToUpdate);
+    onSettingsUpdate(settings);
     onOpenChange(false);
   };
 
