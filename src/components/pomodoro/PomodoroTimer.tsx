@@ -75,6 +75,87 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     };
   }, []);
 
+  // Synchronize timer state with Supabase
+  const syncWithSupabase = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const { data, error } = await supabase
+        .from('pomodoro_states')
+        .upsert({
+          user_id: user.id,
+          time,
+          is_active: isActive,
+          is_break: isBreak,
+          current_pomodoro_id: currentPomodoroId,
+          last_update: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update state if the remote state is newer
+      if (data && new Date(data.last_update) > new Date(localStorage.getItem('lastUpdate') || '')) {
+        setTime(data.time);
+        setIsActive(data.is_active);
+        setIsBreak(data.is_break);
+        setCurrentPomodoroId(data.current_pomodoro_id);
+        localStorage.setItem('lastUpdate', data.last_update);
+      }
+    } catch (error) {
+      console.error('Error syncing with Supabase:', error);
+    }
+  }, [user?.id, time, isActive, isBreak, currentPomodoroId, supabase]);
+
+  // Play notification sound
+  const playNotificationSound = useCallback(() => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioContext();
+    }
+    const oscillator = audioContextRef.current.createOscillator();
+    const gainNode = audioContextRef.current.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContextRef.current.destination);
+    oscillator.frequency.setValueAtTime(440, audioContextRef.current.currentTime);
+    gainNode.gain.setValueAtTime(0.1, audioContextRef.current.currentTime);
+    oscillator.start();
+    oscillator.stop(audioContextRef.current.currentTime + 0.5);
+
+    // Show notification if permission is granted
+    if (Notification.permission === 'granted') {
+      new Notification('Pomodoro Timer', {
+        body: isBreak ? 'Break time is over!' : 'Time to take a break!',
+        icon: '/favicon.ico'
+      });
+    }
+  }, [isBreak]);
+
+  // Timer logic with Web Worker
+  useEffect(() => {
+    const worker = new Worker(new URL('./timerWorker.js', import.meta.url));
+    worker.onmessage = (e) => {
+      if (e.data.type === 'tick') {
+        setTime(prevTime => {
+          const newTime = Math.max(0, prevTime - 1);
+          if (newTime === 0) {
+            handleTimerComplete();
+          }
+          return newTime;
+        });
+      }
+    };
+
+    if (isActive) {
+      worker.postMessage({ command: 'start' });
+    } else {
+      worker.postMessage({ command: 'stop' });
+    }
+
+    return () => {
+      worker.terminate();
+    };
+  }, [isActive]);
+
   // Handle visibility change
   useEffect(() => {
     let lastTimestamp = Date.now();
@@ -132,186 +213,11 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     }
   }, []);
 
-  // Sync timer state with Supabase
-  const syncWithSupabase = useCallback(async () => {
-    if (!user?.id) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .update({
-          pomodoro_state: {
-            time,
-            is_active: isActive,
-            is_break: isBreak,
-            current_pomodoro_id: currentPomodoroId,
-            last_update: new Date().toISOString()
-          }
-        })
-        .eq('id', user.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Only update if the remote state is newer
-      if (data?.pomodoro_state) {
-        const remoteState = data.pomodoro_state;
-        const localLastUpdate = localStorage.getItem('lastUpdate');
-        
-        if (localLastUpdate && new Date(remoteState.last_update) > new Date(localLastUpdate)) {
-          setTime(remoteState.time);
-          setIsActive(remoteState.is_active);
-          setIsBreak(remoteState.is_break);
-          setCurrentPomodoroId(remoteState.current_pomodoro_id);
-          localStorage.setItem('lastUpdate', remoteState.last_update);
-        }
-      }
-    } catch (error) {
-      console.error('Error syncing with Supabase:', error);
-    }
-  }, [user?.id, time, isActive, isBreak, currentPomodoroId]);
-
-  // Subscribe to real-time updates
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const channel = supabase
-      .channel('users_updates')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'users',
-          filter: `id=eq.${user.id}`
-        },
-        (payload) => {
-          const remoteState = payload.new.pomodoro_state;
-          if (remoteState) {
-            const localLastUpdate = localStorage.getItem('lastUpdate');
-            if (localLastUpdate && new Date(remoteState.last_update) > new Date(localLastUpdate)) {
-              setTime(remoteState.time);
-              setIsActive(remoteState.is_active);
-              setIsBreak(remoteState.is_break);
-              setCurrentPomodoroId(remoteState.current_pomodoro_id);
-              localStorage.setItem('lastUpdate', remoteState.last_update);
-            }
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id]);
-
   // Sync periodically
   useEffect(() => {
     const syncInterval = setInterval(syncWithSupabase, 5000);
     return () => clearInterval(syncInterval);
   }, [syncWithSupabase]);
-
-  const playNotificationSound = useCallback(async () => {
-    try {
-      if (!settings?.sound_enabled) return;
-
-      // Resume audio context if suspended
-      if (audioContextRef.current?.state === 'suspended') {
-        await audioContextRef.current.resume();
-      }
-
-      const context = audioContextRef.current || new AudioContext();
-      const oscillator = context.createOscillator();
-      const gainNode = context.createGain();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(context.destination);
-
-      // Use a more pleasant notification sound
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(440, context.currentTime); // A4 note
-      gainNode.gain.setValueAtTime(0.1, context.currentTime);
-
-      oscillator.start(context.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + 0.5);
-      oscillator.stop(context.currentTime + 0.5);
-
-      // Show notification if permission granted
-      if (Notification.permission === 'granted') {
-        new Notification(isBreak ? 'Break time!' : 'Focus time!', {
-          body: isBreak ? 'Time to take a break!' : 'Time to focus!',
-          icon: '/favicon.ico',
-          silent: true // We're handling the sound ourselves
-        });
-      }
-    } catch (error) {
-      console.error('Error playing notification:', error);
-      // Fallback to system notification with sound
-      if (Notification.permission === 'granted') {
-        new Notification(isBreak ? 'Break time!' : 'Focus time!', {
-          body: isBreak ? 'Time to take a break!' : 'Time to focus!',
-          icon: '/favicon.ico',
-          silent: false
-        });
-      }
-    }
-  }, [settings?.sound_enabled, isBreak]);
-
-  // Request notification permission on mount
-  useEffect(() => {
-    if (Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
-  }, []);
-
-  // Handle visibility change
-  useEffect(() => {
-    const handleVisibilityChange = async () => {
-      if (document.hidden) {
-        // Tab is hidden, sync state immediately
-        await syncWithSupabase();
-      } else {
-        // Tab is visible again, sync and resume audio context
-        await syncWithSupabase();
-        if (audioContextRef.current?.state === 'suspended') {
-          await audioContextRef.current.resume();
-        }
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [syncWithSupabase]);
-
-  // Timer logic with improved reliability
-  useEffect(() => {
-    let timer: NodeJS.Timeout | null = null;
-
-    if (isActive && time > 0) {
-      timer = setInterval(() => {
-        setTime((prevTime) => {
-          const newTime = Math.max(0, prevTime - 1);
-          if (newTime === 0) {
-            handleTimerComplete();
-          }
-          return newTime;
-        });
-      }, 1000);
-
-      // Sync immediately when timer starts
-      syncWithSupabase();
-    }
-
-    return () => {
-      if (timer) {
-        clearInterval(timer);
-      }
-    };
-  }, [isActive]);
 
   const handleTimerComplete = async () => {
     if (!settings) return;
