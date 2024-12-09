@@ -581,63 +581,78 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
   return (
     <Card className="p-6 max-w-md mx-auto">
-      <div className="pomodoro-timer space-y-6 p-6">
-        <GoalManager />
-        {stats && (
-          <div className="flex justify-between items-center">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex gap-2"
-            >
-              <Badge variant={isBreak ? "secondary" : "default"} className="text-sm">
-                {isBreak ? "Break Time" : "Focus Time"}
+      <div className="pomodoro-timer space-y-6">
+        {/* Timer Status */}
+        <div className="flex justify-between items-center">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex gap-2"
+          >
+            <Badge variant={isBreak ? "secondary" : "default"}>
+              {isBreak ? "Break Time" : "Focus Time"}
+            </Badge>
+            {activeTaskId && (
+              <Badge variant="outline">
+                {tasks.find(t => t.id === activeTaskId)?.text}
               </Badge>
-              <Badge variant="outline" className="text-sm">
-                {stats.daily_completed} / {settings?.daily_goal || 0} Today
-              </Badge>
-            </motion.div>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <div className="flex items-center gap-2">
-                    <motion.div
-                      className={cn(
-                        "w-3 h-3 rounded-full",
-                        isActive ? "bg-green-500" : "bg-gray-300"
-                      )}
-                      animate={{
-                        scale: isActive ? [1, 1.2, 1] : 1,
-                        opacity: isActive ? 1 : 0.5,
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: isActive ? Infinity : 0,
-                      }}
-                    />
-                    <span className="text-sm text-muted-foreground">
-                      {isActive ? "Recording" : "Paused"}
-                    </span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>Timer Status</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            )}
+          </motion.div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <div className="flex items-center gap-2">
+                  <motion.div
+                    className={cn(
+                      "w-3 h-3 rounded-full",
+                      isActive ? "bg-green-500" : "bg-gray-300"
+                    )}
+                    animate={{
+                      scale: isActive ? [1, 1.2, 1] : 1,
+                      opacity: isActive ? 1 : 0.5,
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: isActive ? Infinity : 0,
+                    }}
+                  />
+                  <span className="text-sm text-muted-foreground">
+                    {isActive ? "Recording" : "Paused"}
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>Timer Status</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+
+        {/* Task Management */}
+        <div className="w-full space-y-4">
+          <div className="flex items-center gap-2">
+            <Input 
+              value={currentTask} 
+              onChange={(e) => setCurrentTask(e.target.value)} 
+              placeholder="Add a new task"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && currentTask) {
+                  addTask(currentTask);
+                  setCurrentTask('');
+                }
+              }}
+            />
+            <Button onClick={() => { 
+              if (currentTask) { 
+                addTask(currentTask); 
+                setCurrentTask(''); 
+              } 
+            }}>
+              Add Task
+            </Button>
           </div>
-        )}
-        
-        {!isBreak && !isActive && (
-          <div className="w-full space-y-4">
-            <div className="flex items-center gap-2">
-              <Input value={currentTask} onChange={(e) => setCurrentTask(e.target.value)} placeholder="Add a new task" />
-              <Button onClick={() => { if (currentTask) { addTask(currentTask); setCurrentTask(''); } }}>Add Task</Button>
-              <Button onClick={() => setShowCompletedTasks(prev => !prev)}>{showCompletedTasks ? 'Hide Completed' : 'Show Completed'}</Button>
-            </div>
-            
-            {renderTaskList()}
-          </div>
-        )}
-        
+          {renderTaskList()}
+        </div>
+
+        {/* Timer Display */}
         <div className="relative" ref={timerRef}>
           <motion.div 
             className="text-7xl font-mono z-10 relative text-center font-bold"
@@ -651,31 +666,13 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           >
             {formatTime(time)}
           </motion.div>
-          <motion.div 
-            className="absolute inset-0 -m-4"
-            initial={false}
-            animate={{
-              rotate: isActive ? 360 : 0,
-            }}
-            transition={{
-              duration: 60,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-          >
-            <div className={cn(
-              "h-2 transition-colors",
-              isBreak ? "bg-secondary" : "bg-primary",
-              time <= 60 && isActive && "bg-red-500"
-            )}>
-              <Progress 
-                value={calculateProgress()} 
-              />
-            </div>
-          </motion.div>
+          <div className="mt-4">
+            <Progress value={calculateProgress()} />
+          </div>
         </div>
 
-        <div className="flex space-x-4">
+        {/* Timer Controls */}
+        <div className="flex justify-center space-x-4">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -683,13 +680,14 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                   onClick={() => handleButtonClick(isActive ? 'pause' : 'start')}
                   variant="default"
                   size="lg"
+                  disabled={!activeTaskId}
                   className="w-24"
                 >
                   {isActive ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                Space to {isActive ? 'Pause' : 'Start'}
+                {!activeTaskId ? 'Select a task first' : `Space to ${isActive ? 'Pause' : 'Start'}`}
               </TooltipContent>
             </Tooltip>
 
@@ -699,12 +697,13 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                   onClick={() => handleButtonClick('skip')}
                   variant="outline"
                   size="lg"
+                  disabled={!activeTaskId || !isActive}
                 >
                   <SkipForwardIcon className="h-6 w-6" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                Press 'S' to Skip
+                Skip current interval
               </TooltipContent>
             </Tooltip>
 
@@ -719,152 +718,77 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                Press 'L' for Settings
+                Timer Settings
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
 
+        {/* Active Task Stats */}
+        {activeTaskId && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4 p-4 rounded-lg bg-muted/30"
+          >
+            <div className="text-sm font-medium mb-2">Current Task Progress</div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold">
+                  {tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0}
+                </div>
+                <div className="text-xs text-muted-foreground">Pomodoros</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">
+                  {Math.floor((tasks.find(t => t.id === activeTaskId)?.metrics.totalMinutes || 0) / 60)}h
+                </div>
+                <div className="text-xs text-muted-foreground">Total Hours</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">
+                  {tasks.find(t => t.id === activeTaskId)?.metrics.currentStreak || 0}
+                </div>
+                <div className="text-xs text-muted-foreground">Streak</div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Break Suggestion */}
         {isBreak && (
           <div className="text-center text-sm text-muted-foreground">
             <p>{getBreakSuggestion()}</p>
           </div>
         )}
 
-        {stats && (
-          <div className="grid grid-cols-3 gap-4 mt-6">
-            <motion.div
-              className="flex flex-col items-center p-4 rounded-lg bg-muted/50"
-              whileHover={{ scale: 1.05 }}
-            >
-              <Brain className="h-6 w-6 mb-2 text-primary" />
-              <div className="text-2xl font-bold">
-                {Math.floor(stats.totalWorkMinutes / 60)}h {stats.totalWorkMinutes % 60}m
-              </div>
-              <div className="text-xs text-muted-foreground">Total Focus Time</div>
-            </motion.div>
-            
-            <motion.div
-              className="flex flex-col items-center p-4 rounded-lg bg-muted/50"
-              whileHover={{ scale: 1.05 }}
-            >
-              <Target className="h-6 w-6 mb-2 text-primary" />
-              <div className="text-2xl font-bold">
-                {stats.daily_completed} / {settings?.daily_goal || 0}
-              </div>
-              <div className="text-xs text-muted-foreground">Today's Progress</div>
-            </motion.div>
-            
-            <motion.div
-              className="flex flex-col items-center p-4 rounded-lg bg-muted/50"
-              whileHover={{ scale: 1.05 }}
-            >
-              <Trophy className="h-6 w-6 mb-2 text-primary" />
-              <div className="text-2xl font-bold">{stats.currentStreak}</div>
-              <div className="text-xs text-muted-foreground">Day Streak</div>
-            </motion.div>
-
-            <motion.div
-              className="flex flex-col items-center p-4 rounded-lg bg-muted/50 col-span-3"
-              whileHover={{ scale: 1.02 }}
-            >
-              <div className="w-full">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-muted-foreground">Daily Goal Progress</span>
-                  <span className="text-sm font-medium">
-                    {Math.round((stats.daily_completed / (settings?.daily_goal || 1)) * 100)}%
-                  </span>
-                </div>
-                <Progress 
-                  value={(stats.daily_completed / (settings?.daily_goal || 1)) * 100}
-                />
-              </div>
-            </motion.div>
-          </div>
-        )}
-
-        {isActive && currentTask && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-4 p-4 rounded-lg bg-muted/30"
-          >
-            <div className="text-sm text-muted-foreground">Currently focusing on:</div>
-            <div className="font-medium">{tasks.find(t => t.id === currentTask)?.text}</div>
-          </motion.div>
-        )}
-        
-        {stats && <PomodoroStatsComponent stats={stats} />}
+        {/* Settings Dialog */}
+        <PomodoroSettingsDialog
+          open={settingsOpen}
+          onOpenChange={setSettingsOpen}
+          onSettingsUpdate={async (newSettings) => {
+            try {
+              await updatePomodoroSettings(newSettings);
+              const updatedSettings = await getPomodoroSettings();
+              setSettings(updatedSettings);
+              if (updatedSettings.work_duration && !isActive) {
+                setTime(updatedSettings.work_duration * 60);
+              }
+              toast({
+                title: "Settings Updated",
+                description: "Your pomodoro settings have been saved.",
+              });
+            } catch (error) {
+              toast({
+                title: "Error",
+                description: "Failed to update settings",
+                variant: "destructive",
+              });
+            }
+          }}
+          initialSettings={settings}
+        />
       </div>
-
-      <PomodoroSettingsDialog
-        open={settingsOpen}
-        onOpenChange={setSettingsOpen}
-        onSettingsUpdate={async (newSettings) => {
-          try {
-            // Update local state immediately
-            setSettings(prev => {
-              if (!prev) return prev;
-              return {
-                ...prev,
-                work_duration: newSettings.work_duration ?? prev.work_duration,
-                break_duration: newSettings.break_duration ?? prev.break_duration,
-                long_break_duration: newSettings.long_break_duration ?? prev.long_break_duration,
-                pomodoros_until_long_break: newSettings.pomodoros_until_long_break ?? prev.pomodoros_until_long_break,
-                auto_start_pomodoros: newSettings.auto_start_pomodoros ?? prev.auto_start_pomodoros,
-                auto_start_breaks: newSettings.auto_start_breaks ?? prev.auto_start_breaks,
-                sound_enabled: newSettings.sound_enabled ?? prev.sound_enabled,
-                notification_enabled: newSettings.notification_enabled ?? prev.notification_enabled,
-                vibration_enabled: newSettings.vibration_enabled ?? prev.vibration_enabled,
-                theme: newSettings.theme ?? prev.theme
-              };
-            });
-            if (newSettings.daily_goal) {
-              setDailyGoal(newSettings.daily_goal);
-            }
-            if (newSettings.work_duration && !isActive) {
-              setTime(newSettings.work_duration * 60);
-            }
-            
-            // Save to database
-            await updatePomodoroSettings(newSettings);
-            
-            // Refresh from database to ensure consistency
-            const updatedSettings = await getPomodoroSettings();
-            setSettings(updatedSettings);
-            setDailyGoal(updatedSettings.daily_goal || 8);
-            
-            toast({
-              title: "Settings Updated",
-              description: "Your pomodoro settings have been saved.",
-            });
-          } catch (error) {
-            // Revert local changes on error
-            const currentSettings = await getPomodoroSettings();
-            setSettings(currentSettings);
-            setDailyGoal(currentSettings.daily_goal || 8);
-            
-            toast({
-              title: "Error",
-              description: "Failed to update settings",
-              variant: "destructive",
-            });
-          }
-        }}
-        initialSettings={settings}
-      >
-        <DialogContent 
-          className="sm:max-w-[425px]"
-          aria-describedby="timer-settings-description"
-        >
-          <DialogHeader>
-            <DialogTitle>Timer Settings</DialogTitle>
-            <p id="timer-settings-description" className="text-sm text-muted-foreground">
-              Customize your timer preferences and notifications.
-            </p>
-          </DialogHeader>
-        </DialogContent>
-      </PomodoroSettingsDialog>
     </Card>
   );
 }
