@@ -52,12 +52,84 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
 
   // Initialize audio context
   useEffect(() => {
-    audioContextRef.current = new AudioContext();
+    // Create audio context only when needed
+    const initAudioContext = () => {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext();
+      }
+    };
+
+    // Handle user interaction to initialize audio
+    const handleInteraction = () => {
+      initAudioContext();
+      document.removeEventListener('click', handleInteraction);
+    };
+
+    document.addEventListener('click', handleInteraction);
+    
     return () => {
+      document.removeEventListener('click', handleInteraction);
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
     };
+  }, []);
+
+  // Handle visibility change
+  useEffect(() => {
+    let lastTimestamp = Date.now();
+    
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Save the current timestamp when tab becomes hidden
+        lastTimestamp = Date.now();
+        localStorage.setItem('pomodoroLastTimestamp', lastTimestamp.toString());
+      } else {
+        // Calculate elapsed time when tab becomes visible
+        const storedTimestamp = parseInt(localStorage.getItem('pomodoroLastTimestamp') || lastTimestamp.toString());
+        const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
+        
+        if (isActive && elapsedSeconds > 0) {
+          setTime(prevTime => Math.max(0, prevTime - elapsedSeconds));
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isActive]);
+
+  // Persist timer state to localStorage
+  useEffect(() => {
+    const timerState = {
+      time,
+      isActive,
+      isBreak,
+      currentPomodoroId,
+      lastUpdate: new Date().toISOString()
+    };
+    localStorage.setItem('pomodoroState', JSON.stringify(timerState));
+  }, [time, isActive, isBreak, currentPomodoroId]);
+
+  // Load persisted state on mount
+  useEffect(() => {
+    const savedState = localStorage.getItem('pomodoroState');
+    if (savedState) {
+      const parsedState = JSON.parse(savedState);
+      const elapsedSeconds = Math.floor((Date.now() - new Date(parsedState.lastUpdate).getTime()) / 1000);
+      
+      if (parsedState.isActive) {
+        setTime(Math.max(0, parsedState.time - elapsedSeconds));
+      } else {
+        setTime(parsedState.time);
+      }
+      setIsActive(parsedState.isActive);
+      setIsBreak(parsedState.isBreak);
+      setCurrentPomodoroId(parsedState.currentPomodoroId);
+    }
   }, []);
 
   // Sync timer state with Supabase
@@ -230,49 +302,6 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
       }
     };
   }, [isActive]);
-
-  // Save state to localStorage whenever relevant state changes
-  useEffect(() => {
-    if (time >= 0) {
-      localStorage.setItem('pomodoroState', JSON.stringify({
-        time,
-        isActive,
-        isBreak,
-        currentPomodoroId,
-        startTime: Date.now()
-      }));
-    }
-  }, [time, isActive, isBreak, currentPomodoroId]);
-
-  // Load initial state
-  useEffect(() => {
-    const loadInitialState = async () => {
-      try {
-        const pomodoroSettings = await getPomodoroSettings();
-        setSettings(pomodoroSettings);
-
-        const savedState = localStorage.getItem('pomodoroState');
-        if (savedState) {
-          const { time: savedTime, isActive: savedIsActive, isBreak: savedIsBreak, currentPomodoroId: savedPomodoroId } = JSON.parse(savedState);
-          setTime(savedTime);
-          setIsBreak(savedIsBreak);
-          setIsActive(savedIsActive);
-          if (savedPomodoroId) {
-            setCurrentPomodoroId(savedPomodoroId);
-          }
-        } else {
-          setTime(pomodoroSettings.work_duration * 60);
-        }
-
-        const pomodoroStats = await getPomodoroStats();
-        setStats(pomodoroStats);
-      } catch (error) {
-        console.error('Error loading initial state:', error);
-      }
-    };
-
-    loadInitialState();
-  }, []);
 
   const handleTimerComplete = async () => {
     if (!settings) return;

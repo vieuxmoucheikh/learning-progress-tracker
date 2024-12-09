@@ -40,6 +40,16 @@ export default async function handler(
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Compare timestamps to resolve conflicts
+    const currentState = user.pomodoroState;
+    if (currentState && new Date(currentState.lastUpdate).getTime() > lastUpdate) {
+      // Server state is newer, return it to the client
+      return res.status(200).json({
+        sync: false,
+        state: currentState
+      });
+    }
+
     // Update the user's timer state
     const updatedState = await prisma.user.update({
       where: { id: user.id },
@@ -51,25 +61,28 @@ export default async function handler(
               isActive,
               isBreak,
               currentPomodoroId,
-              lastUpdate,
+              lastUpdate: new Date(lastUpdate)
             },
             update: {
               time,
               isActive,
               isBreak,
               currentPomodoroId,
-              lastUpdate,
-            },
-          },
-        },
+              lastUpdate: new Date(lastUpdate)
+            }
+          }
+        }
       },
       select: {
-        pomodoroState: true,
-      },
+        pomodoroState: true
+      }
     });
 
     // Return the current state
-    return res.status(200).json(updatedState.pomodoroState);
+    return res.status(200).json({
+      sync: true,
+      state: updatedState.pomodoroState
+    });
   } catch (error) {
     console.error('Error syncing pomodoro state:', error);
     return res.status(500).json({ message: 'Internal server error' });
