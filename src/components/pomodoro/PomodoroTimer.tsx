@@ -77,10 +77,29 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
   }, []);
 
   // Synchronize timer state with server
-  const syncWithSupabase = async () => {
-    if (!isActive) return;
-
+  const syncWithSupabase = useCallback(async () => {
     try {
+      // Try to sync any failed completions first
+      const failedCompletions = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
+      if (failedCompletions.length > 0) {
+        for (const session of failedCompletions) {
+          try {
+            await completePomodoro(session.pomodoroId);
+          } catch (error) {
+            console.error('Error syncing failed completion:', error);
+            // Stop trying to sync if we still have connection issues
+            return;
+          }
+        }
+        // Clear failed completions after successful sync
+        localStorage.removeItem('failedPomodoroCompletions');
+        // Refresh stats after syncing
+        const newStats = await getPomodoroStats();
+        setStats(newStats);
+      }
+      
+      if (!isActive) return;
+
       const response = await fetch('/api/pomodoro/sync', {
         method: 'POST',
         headers: {
@@ -111,7 +130,7 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     } catch (error) {
       console.error('Error syncing with server:', error);
     }
-  };
+  }, [time, isActive, isBreak, currentPomodoroId]);
 
   // Play notification sound
   const playNotificationSound = useCallback(() => {
@@ -290,26 +309,48 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
       } catch (error) {
         console.error(`Error completing timer (attempt ${retryCount + 1}):`, error);
         retryCount++;
-
-        if (retryCount === maxRetries) {
+        
+        // Save progress locally even if network operations fail
+        const sessionData = {
+          pomodoroId: currentPomodoroId,
+          timestamp: new Date().toISOString(),
+          duration: settings.work_duration * 60,
+          type: isBreak ? 'break' : 'work'
+        };
+        
+        try {
+          // Store failed completion data locally
+          const failedCompletions = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
+          failedCompletions.push(sessionData);
+          localStorage.setItem('failedPomodoroCompletions', JSON.stringify(failedCompletions));
+          
+          // Show more helpful error message
           toast({
-            title: 'Error completing timer session',
-            description: 'Please check your connection and try again. Your progress has been saved.',
-            variant: 'destructive',
+            title: 'Session saved locally',
+            description: 'Your progress has been saved and will sync when connection is restored.',
+            variant: 'default'
           });
           
-          // Even if we fail, ensure the timer is stopped and reset
+          // Continue with timer state updates even if network operations failed
           setIsActive(false);
-          const newIsBreak = !isBreak;
-          setIsBreak(newIsBreak);
-          const newTime = newIsBreak
-            ? (settings.break_duration * 60)
-            : (settings.work_duration * 60);
-          setTime(newTime);
-        } else {
-          // Wait before retrying
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          setIsBreak(!isBreak);
+          setTime((!isBreak ? settings.break_duration : settings.work_duration) * 60);
+          return;
+        } catch (localError) {
+          console.error('Error saving progress locally:', localError);
         }
+        
+        // Only show error toast on final retry
+        if (retryCount === maxRetries) {
+          toast({
+            title: 'Connection Error',
+            description: 'Unable to save your progress. Please check your connection.',
+            variant: 'destructive'
+          });
+        }
+        
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
       }
     }
   };
