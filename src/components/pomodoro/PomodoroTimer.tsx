@@ -470,13 +470,27 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     return "Stay hydrated during your break";
   }, [stats]);
 
-  const addTask = (text: string) => {
+  const addTask = async (text: string) => {
+    // Reset all metrics
+    setTime(settings?.work_duration ? settings.work_duration * 60 : 25 * 60);
+    setIsActive(false);
+    setIsBreak(false);
+    if (currentPomodoroId) {
+      await completePomodoro(currentPomodoroId);
+      setCurrentPomodoroId(null);
+    }
+    
+    // Add the new task
     setTasks(prev => [...prev, { 
       id: crypto.randomUUID(), 
       text, 
       completed: false,
       progress: 0
     }]);
+    
+    // Reset stats for the new task
+    const newStats = await getPomodoroStats();
+    setStats(newStats);
   };
 
   const toggleTask = (id: string) => {
@@ -709,8 +723,10 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               whileHover={{ scale: 1.05 }}
             >
               <Brain className="h-6 w-6 mb-2 text-primary" />
-              <div className="text-2xl font-bold">{stats.totalWorkMinutes}</div>
-              <div className="text-xs text-muted-foreground">Focus Hours</div>
+              <div className="text-2xl font-bold">
+                {Math.floor(stats.totalWorkMinutes / 60)}h {stats.totalWorkMinutes % 60}m
+              </div>
+              <div className="text-xs text-muted-foreground">Total Focus Time</div>
             </motion.div>
             
             <motion.div
@@ -718,8 +734,10 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               whileHover={{ scale: 1.05 }}
             >
               <Target className="h-6 w-6 mb-2 text-primary" />
-              <div className="text-2xl font-bold">{stats.daily_completed} / {settings?.daily_goal || 0}</div>
-              <div className="text-xs text-muted-foreground">Daily Goal</div>
+              <div className="text-2xl font-bold">
+                {stats.daily_completed} / {settings?.daily_goal || 0}
+              </div>
+              <div className="text-xs text-muted-foreground">Today's Progress</div>
             </motion.div>
             
             <motion.div
@@ -727,8 +745,25 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               whileHover={{ scale: 1.05 }}
             >
               <Trophy className="h-6 w-6 mb-2 text-primary" />
-              <div className="text-2xl font-bold">{streak}</div>
+              <div className="text-2xl font-bold">{stats.currentStreak}</div>
               <div className="text-xs text-muted-foreground">Day Streak</div>
+            </motion.div>
+
+            <motion.div
+              className="flex flex-col items-center p-4 rounded-lg bg-muted/50 col-span-3"
+              whileHover={{ scale: 1.02 }}
+            >
+              <div className="w-full">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-muted-foreground">Daily Goal Progress</span>
+                  <span className="text-sm font-medium">
+                    {Math.round((stats.daily_completed / (settings?.daily_goal || 1)) * 100)}%
+                  </span>
+                </div>
+                <Progress 
+                  value={(stats.daily_completed / (settings?.daily_goal || 1)) * 100}
+                />
+              </div>
             </motion.div>
           </div>
         )}
