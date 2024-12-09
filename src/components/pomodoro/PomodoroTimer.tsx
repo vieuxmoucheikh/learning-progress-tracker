@@ -175,8 +175,15 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
         const storedTimestamp = parseInt(localStorage.getItem('pomodoroLastTimestamp') || lastTimestamp.toString());
         const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
         
+        console.log('Visibility change detected. Current time:', time);
+        console.log('Elapsed seconds:', elapsedSeconds);
+
         if (isActive && elapsedSeconds > 0) {
-          setTime(prevTime => Math.max(0, prevTime - elapsedSeconds));
+          setTime(prevTime => {
+            const adjustedTime = Math.max(0, prevTime - elapsedSeconds);
+            console.log('Adjusted time after visibility change:', adjustedTime);
+            return adjustedTime;
+          });
         }
       }
     };
@@ -186,7 +193,7 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isActive]);
+  }, [isActive, time]);
 
   // Persist timer state to localStorage
   useEffect(() => {
@@ -225,6 +232,7 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
   }, [syncWithSupabase]);
 
   const handleTimerComplete = async () => {
+    console.log('Timer completed, updating stats and resetting timer.');
     if (!settings) return;
 
     try {
@@ -250,8 +258,9 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
         : (settings.work_duration * 60);
       setTime(newTime);
 
-      // Refresh stats
+      console.log('Refreshing stats...');
       const newStats = await getPomodoroStats();
+      console.log('Updated stats:', newStats);
       setStats(newStats);
 
       // Show notification
