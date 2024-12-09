@@ -24,7 +24,7 @@ interface PomodoroTimerProps {
 }
 
 export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
-  const [time, setTime] = useState(25 * 60); // Default 25 minutes in seconds
+  const [time, setTime] = useState(25 * 60);
   const [isActive, setIsActive] = useState(false);
   const [isBreak, setIsBreak] = useState(false);
   const [settings, setSettings] = useState<PomodoroSettings | null>(null);
@@ -32,11 +32,12 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
   const [currentPomodoroId, setCurrentPomodoroId] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [focusLabel, setFocusLabel] = useState<string>('');
-  const [dailyGoal, setDailyGoal] = useState<number>(8); // Default 8 pomodoros per day
+  const [dailyGoal, setDailyGoal] = useState<number>(8);
   const timerRef = useRef<HTMLDivElement>(null);
+  const lastTickRef = useRef<number>(Date.now());
   const { toast } = useToast();
 
-  // Load timer state from localStorage
+  // Load timer state from localStorage and start background sync
   useEffect(() => {
     const loadTimerState = async () => {
       try {
@@ -48,16 +49,18 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
           const { time, isActive, isBreak, currentPomodoroId, startTime } = JSON.parse(savedState);
           
           if (isActive && startTime) {
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const now = Date.now();
+            const elapsed = Math.floor((now - startTime) / 1000);
             const remainingTime = Math.max(0, time - elapsed);
+            
             setTime(remainingTime);
             setIsActive(true);
             setIsBreak(isBreak);
             if (currentPomodoroId) {
               setCurrentPomodoroId(currentPomodoroId);
             }
+            lastTickRef.current = now;
           } else {
-            // If timer is not active, set default time based on type
             const defaultTime = isBreak ? 
               (pomodoroSettings.break_duration * 60) : 
               (pomodoroSettings.work_duration * 60);
@@ -66,13 +69,11 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
             setIsActive(false);
           }
         } else {
-          // Initial state
           setTime(pomodoroSettings.work_duration * 60);
           setIsBreak(false);
           setIsActive(false);
         }
 
-        // Load stats
         const pomodoroStats = await getPomodoroStats();
         setStats(pomodoroStats);
       } catch (error) {
@@ -81,57 +82,73 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     };
 
     loadTimerState();
+
+    // Set up background sync
+    const syncInterval = setInterval(() => {
+      const savedState = localStorage.getItem('pomodoroState');
+      if (savedState) {
+        const { isActive, startTime } = JSON.parse(savedState);
+        if (isActive && startTime) {
+          const now = Date.now();
+          const elapsed = Math.floor((now - startTime) / 1000);
+          setTime(prev => Math.max(0, prev - elapsed));
+          lastTickRef.current = now;
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(syncInterval);
   }, []);
 
-  // Save timer state to localStorage
+  // Save timer state with accurate timestamps
   useEffect(() => {
-    if (time >= 0) { // Only save valid time values
-      localStorage.setItem('pomodoroState', JSON.stringify({
+    if (time >= 0) {
+      const state = {
         time,
         isActive,
         isBreak,
         currentPomodoroId,
-        startTime: isActive ? Date.now() : null
-      }));
+        startTime: isActive ? Date.now() - ((settings?.work_duration || 25) * 60 - time) * 1000 : null
+      };
+      localStorage.setItem('pomodoroState', JSON.stringify(state));
     }
-  }, [time, isActive, isBreak, currentPomodoroId]);
+  }, [time, isActive, isBreak, currentPomodoroId, settings]);
 
-  // Handle visibility change
+  // Timer logic with performance optimization
   useEffect(() => {
-    let visibilityTimeout: NodeJS.Timeout;
-    
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // Tab is hidden, save current state
-        localStorage.setItem('pomodoroState', JSON.stringify({
-          time,
-          isActive,
-          isBreak,
-          currentPomodoroId,
-          startTime: isActive ? Date.now() : null
-        }));
-      } else {
-        // Tab is visible again, sync state after a short delay
-        visibilityTimeout = setTimeout(() => {
-          const savedState = localStorage.getItem('pomodoroState');
-          if (savedState) {
-            const { time: savedTime, isActive: savedIsActive, startTime } = JSON.parse(savedState);
-            if (savedIsActive && startTime) {
-              const elapsed = Math.floor((Date.now() - startTime) / 1000);
-              const remainingTime = Math.max(0, savedTime - elapsed);
-              setTime(remainingTime);
+    let animationFrameId: number;
+    let lastUpdate = Date.now();
+
+    const updateTimer = () => {
+      if (isActive && time > 0) {
+        const now = Date.now();
+        const delta = now - lastUpdate;
+
+        if (delta >= 1000) {
+          setTime(prevTime => {
+            const newTime = Math.max(0, prevTime - Math.floor(delta / 1000));
+            if (newTime === 0) {
+              handleTimerComplete();
             }
-          }
-        }, 100); // Small delay to ensure proper state sync
+            return newTime;
+          });
+          lastUpdate = now - (delta % 1000);
+        }
+
+        animationFrameId = requestAnimationFrame(updateTimer);
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    if (isActive && time > 0) {
+      animationFrameId = requestAnimationFrame(updateTimer);
+    }
+
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      clearTimeout(visibilityTimeout);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
     };
-  }, [time, isActive, isBreak, currentPomodoroId]);
+  }, [isActive, time]);
 
   const handleTimerComplete = async () => {
     if (!settings) return;
@@ -199,38 +216,6 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
       });
     }
   };
-
-  // Timer logic with improved persistence
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-
-    if (isActive && time > 0) {
-      interval = setInterval(() => {
-        setTime((prevTime) => {
-          const newTime = Math.max(0, prevTime - 1);
-          
-          // Update localStorage
-          const currentState = {
-            time: newTime,
-            isActive,
-            isBreak,
-            currentPomodoroId,
-            startTime: Date.now() - ((settings?.work_duration || 25) * 60 - newTime) * 1000
-          };
-          localStorage.setItem('pomodoroState', JSON.stringify(currentState));
-          
-          if (newTime === 0) {
-            handleTimerComplete();
-          }
-          return newTime;
-        });
-      }, 1000);
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isActive, isBreak, settings]);
 
   const startNewPomodoro = async (type: 'work' | 'break' = 'work') => {
     try {
@@ -321,39 +306,28 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     }
   };
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement) return; // Ignore when typing in input fields
-      
-      switch(e.key.toLowerCase()) {
-        case ' ':
-          e.preventDefault();
-          toggleTimer();
-          break;
-        case 's':
-          e.preventDefault();
-          skipCurrentInterval();
-          break;
-        case 'l':
-          e.preventDefault();
-          setSettingsOpen(true);
-          break;
-      }
-    };
+  const handleButtonClick = useCallback(async (action: 'start' | 'pause' | 'skip') => {
+    switch (action) {
+      case 'start':
+        if (!isActive) {
+          await startNewPomodoro(isBreak ? 'break' : 'work');
+        }
+        break;
+      case 'pause':
+        setIsActive(false);
+        break;
+      case 'skip':
+        skipCurrentInterval();
+        break;
+    }
+  }, [isActive, isBreak]);
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isActive]);
-
-  // Calculate progress percentage for the ring
   const calculateProgress = useCallback(() => {
     if (!settings) return 0;
     const totalTime = isBreak ? settings.break_duration * 60 : settings.work_duration * 60;
     return ((totalTime - time) / totalTime) * 100;
   }, [time, isBreak, settings]);
 
-  // Smart break suggestions
   const getBreakSuggestion = useCallback(() => {
     if (!stats || !settings) return null;
     
@@ -419,7 +393,7 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  onClick={toggleTimer}
+                  onClick={() => handleButtonClick(isActive ? 'pause' : 'start')}
                   variant="default"
                   size="lg"
                   className="w-24"
@@ -435,7 +409,7 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  onClick={skipCurrentInterval}
+                  onClick={() => handleButtonClick('skip')}
                   variant="outline"
                   size="lg"
                 >
