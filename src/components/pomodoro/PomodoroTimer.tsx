@@ -52,65 +52,12 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
 
   // Initialize audio context
   useEffect(() => {
-    // Create audio context only when needed
-    const initAudioContext = () => {
-      if (!audioContextRef.current) {
-        audioContextRef.current = new AudioContext();
-      }
-    };
-
-    // Handle user interaction to initialize audio
-    const handleInteraction = () => {
-      initAudioContext();
-      document.removeEventListener('click', handleInteraction);
-    };
-
-    document.addEventListener('click', handleInteraction);
-    
+    audioContextRef.current = new AudioContext();
     return () => {
-      document.removeEventListener('click', handleInteraction);
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
     };
-  }, []);
-
-  // Persist timer state to localStorage with more accurate timing
-  useEffect(() => {
-    const timerState = {
-      time,
-      isActive,
-      isBreak,
-      currentPomodoroId,
-      lastUpdate: Date.now() // Use timestamp for more precise timing
-    };
-    localStorage.setItem('pomodoroState', JSON.stringify(timerState));
-    localStorage.setItem('lastUpdate', Date.now().toString());
-  }, [time, isActive, isBreak, currentPomodoroId]);
-
-  // Load persisted state on mount with improved time calculation
-  useEffect(() => {
-    const savedState = localStorage.getItem('pomodoroState');
-    if (savedState) {
-      const parsedState = JSON.parse(savedState);
-      const elapsedSeconds = Math.floor((Date.now() - parsedState.lastUpdate) / 1000);
-      
-      if (parsedState.isActive && elapsedSeconds > 0) {
-        const newTime = Math.max(0, parsedState.time - elapsedSeconds);
-        setTime(newTime);
-        if (newTime === 0) {
-          setIsActive(false);
-          playNotificationSound();
-        } else {
-          setIsActive(parsedState.isActive);
-        }
-      } else {
-        setTime(parsedState.time);
-        setIsActive(parsedState.isActive);
-      }
-      setIsBreak(parsedState.isBreak);
-      setCurrentPomodoroId(parsedState.currentPomodoroId);
-    }
   }, []);
 
   // Sync timer state with Supabase
@@ -119,65 +66,55 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
 
     try {
       const { data, error } = await supabase
-        .from('users')
-        .update({
-          pomodoro_state: {
-            time,
-            is_active: isActive,
-            is_break: isBreak,
-            current_pomodoro_id: currentPomodoroId,
-            last_update: new Date().toISOString()
-          }
+        .from('pomodoro_states')
+        .upsert({
+          user_id: user.id,
+          time,
+          is_active: isActive,
+          is_break: isBreak,
+          current_pomodoro_id: currentPomodoroId,
+          last_update: new Date().toISOString()
         })
-        .eq('id', user.id)
         .select()
         .single();
 
       if (error) throw error;
 
       // Only update if the remote state is newer
-      if (data?.pomodoro_state) {
-        const remoteState = data.pomodoro_state;
-        const localLastUpdate = localStorage.getItem('lastUpdate');
-        
-        if (localLastUpdate && new Date(remoteState.last_update) > new Date(localLastUpdate)) {
-          setTime(remoteState.time);
-          setIsActive(remoteState.is_active);
-          setIsBreak(remoteState.is_break);
-          setCurrentPomodoroId(remoteState.current_pomodoro_id);
-          localStorage.setItem('lastUpdate', remoteState.last_update);
-        }
+      if (data && new Date(data.last_update) > new Date(localStorage.getItem('lastUpdate') || '')) {
+        setTime(data.time);
+        setIsActive(data.is_active);
+        setIsBreak(data.is_break);
+        setCurrentPomodoroId(data.current_pomodoro_id);
+        localStorage.setItem('lastUpdate', data.last_update);
       }
     } catch (error) {
       console.error('Error syncing with Supabase:', error);
     }
-  }, [user?.id, time, isActive, isBreak, currentPomodoroId]);
+  }, [user?.id, time, isActive, isBreak, currentPomodoroId, supabase]);
 
   // Subscribe to real-time updates
   useEffect(() => {
     if (!user?.id) return;
 
     const channel = supabase
-      .channel('users_updates')
+      .channel('pomodoro_states')
       .on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: '*',
           schema: 'public',
-          table: 'users',
-          filter: `id=eq.${user.id}`
+          table: 'pomodoro_states',
+          filter: `user_id=eq.${user.id}`
         },
         (payload) => {
-          const remoteState = payload.new.pomodoro_state;
-          if (remoteState) {
-            const localLastUpdate = localStorage.getItem('lastUpdate');
-            if (localLastUpdate && new Date(remoteState.last_update) > new Date(localLastUpdate)) {
-              setTime(remoteState.time);
-              setIsActive(remoteState.is_active);
-              setIsBreak(remoteState.is_break);
-              setCurrentPomodoroId(remoteState.current_pomodoro_id);
-              localStorage.setItem('lastUpdate', remoteState.last_update);
-            }
+          const newState: PomodoroState = payload.new as PomodoroState;
+          if (new Date(newState.last_update) > new Date(localStorage.getItem('lastUpdate') || '')) {
+            setTime(newState.time);
+            setIsActive(newState.is_active);
+            setIsBreak(newState.is_break);
+            setCurrentPomodoroId(newState.current_pomodoro_id);
+            localStorage.setItem('lastUpdate', newState.last_update);
           }
         }
       )
@@ -186,75 +123,79 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id]);
+  }, [user?.id, supabase]);
 
-  // Improved notification sound handling
+  // Sync periodically
+  useEffect(() => {
+    const syncInterval = setInterval(syncWithSupabase, 5000);
+    return () => clearInterval(syncInterval);
+  }, [syncWithSupabase]);
+
   const playNotificationSound = useCallback(async () => {
     try {
       if (!settings?.sound_enabled) return;
 
-      // Create a new AudioContext each time to ensure fresh state
-      const context = new AudioContext();
+      // Resume audio context if suspended
+      if (audioContextRef.current?.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+
+      const context = audioContextRef.current || new AudioContext();
       const oscillator = context.createOscillator();
       const gainNode = context.createGain();
 
       oscillator.connect(gainNode);
       gainNode.connect(context.destination);
 
+      // Use a more pleasant notification sound
       oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(440, context.currentTime);
-      gainNode.gain.setValueAtTime(0.2, context.currentTime); // Slightly louder
+      oscillator.frequency.setValueAtTime(440, context.currentTime); // A4 note
+      gainNode.gain.setValueAtTime(0.1, context.currentTime);
 
       oscillator.start(context.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + 1.0); // Longer duration
-      oscillator.stop(context.currentTime + 1.0);
+      gainNode.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + 0.5);
+      oscillator.stop(context.currentTime + 0.5);
 
-      // Show notification with both visual and audio
-      if (Notification.permission === 'granted') {
-        const notification = new Notification(isBreak ? 'Break time!' : 'Focus time!', {
-          body: isBreak ? 'Time to take a break!' : 'Time to focus!',
-          icon: '/favicon.ico',
-          tag: 'pomodoro-notification', // Prevent duplicate notifications
-          requireInteraction: true // Keep notification until user interacts
-        });
-
-        // Close notification after 5 seconds
-        setTimeout(() => notification.close(), 5000);
-      }
-    } catch (error) {
-      console.error('Error playing notification:', error);
-      // Fallback to basic notification
+      // Show notification if permission granted
       if (Notification.permission === 'granted') {
         new Notification(isBreak ? 'Break time!' : 'Focus time!', {
           body: isBreak ? 'Time to take a break!' : 'Time to focus!',
-          icon: '/favicon.ico'
+          icon: '/favicon.ico',
+          silent: true // We're handling the sound ourselves
+        });
+      }
+    } catch (error) {
+      console.error('Error playing notification:', error);
+      // Fallback to system notification with sound
+      if (Notification.permission === 'granted') {
+        new Notification(isBreak ? 'Break time!' : 'Focus time!', {
+          body: isBreak ? 'Time to take a break!' : 'Time to focus!',
+          icon: '/favicon.ico',
+          silent: false
         });
       }
     }
   }, [settings?.sound_enabled, isBreak]);
 
-  // Improved visibility change handling
+  // Request notification permission on mount
   useEffect(() => {
-    let lastTimestamp = Date.now();
-    
+    if (Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Handle visibility change
+  useEffect(() => {
     const handleVisibilityChange = async () => {
       if (document.hidden) {
-        lastTimestamp = Date.now();
-        localStorage.setItem('pomodoroLastTimestamp', lastTimestamp.toString());
+        // Tab is hidden, sync state immediately
         await syncWithSupabase();
       } else {
-        const storedTimestamp = parseInt(localStorage.getItem('pomodoroLastTimestamp') || lastTimestamp.toString());
-        const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
-        
-        if (isActive && elapsedSeconds > 0) {
-          const newTime = Math.max(0, time - elapsedSeconds);
-          setTime(newTime);
-          if (newTime === 0) {
-            setIsActive(false);
-            playNotificationSound();
-          }
-        }
+        // Tab is visible again, sync and resume audio context
         await syncWithSupabase();
+        if (audioContextRef.current?.state === 'suspended') {
+          await audioContextRef.current.resume();
+        }
       }
     };
 
@@ -262,13 +203,7 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isActive, time, syncWithSupabase, playNotificationSound]);
-
-  // More frequent sync when active
-  useEffect(() => {
-    const syncInterval = setInterval(syncWithSupabase, isActive ? 2000 : 5000);
-    return () => clearInterval(syncInterval);
-  }, [syncWithSupabase, isActive]);
+  }, [syncWithSupabase]);
 
   // Timer logic with improved reliability
   useEffect(() => {
@@ -295,6 +230,49 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
       }
     };
   }, [isActive]);
+
+  // Save state to localStorage whenever relevant state changes
+  useEffect(() => {
+    if (time >= 0) {
+      localStorage.setItem('pomodoroState', JSON.stringify({
+        time,
+        isActive,
+        isBreak,
+        currentPomodoroId,
+        startTime: Date.now()
+      }));
+    }
+  }, [time, isActive, isBreak, currentPomodoroId]);
+
+  // Load initial state
+  useEffect(() => {
+    const loadInitialState = async () => {
+      try {
+        const pomodoroSettings = await getPomodoroSettings();
+        setSettings(pomodoroSettings);
+
+        const savedState = localStorage.getItem('pomodoroState');
+        if (savedState) {
+          const { time: savedTime, isActive: savedIsActive, isBreak: savedIsBreak, currentPomodoroId: savedPomodoroId } = JSON.parse(savedState);
+          setTime(savedTime);
+          setIsBreak(savedIsBreak);
+          setIsActive(savedIsActive);
+          if (savedPomodoroId) {
+            setCurrentPomodoroId(savedPomodoroId);
+          }
+        } else {
+          setTime(pomodoroSettings.work_duration * 60);
+        }
+
+        const pomodoroStats = await getPomodoroStats();
+        setStats(pomodoroStats);
+      } catch (error) {
+        console.error('Error loading initial state:', error);
+      }
+    };
+
+    loadInitialState();
+  }, []);
 
   const handleTimerComplete = async () => {
     if (!settings) return;
