@@ -43,6 +43,7 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
         const pomodoroSettings = await getPomodoroSettings();
         setSettings(pomodoroSettings);
         setTime(pomodoroSettings.work_duration * 60);
+        setDailyGoal(pomodoroSettings.daily_goal || 8); // Update daily goal from settings
         
         const pomodoroStats = await getPomodoroStats();
         setStats(pomodoroStats);
@@ -315,14 +316,48 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
         onOpenChange={setSettingsOpen}
         onSettingsUpdate={async (newSettings) => {
           try {
+            // Update local state immediately
+            setSettings(prev => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                work_duration: newSettings.work_duration ?? prev.work_duration,
+                break_duration: newSettings.break_duration ?? prev.break_duration,
+                long_break_duration: newSettings.long_break_duration ?? prev.long_break_duration,
+                pomodoros_until_long_break: newSettings.pomodoros_until_long_break ?? prev.pomodoros_until_long_break,
+                auto_start_pomodoros: newSettings.auto_start_pomodoros ?? prev.auto_start_pomodoros,
+                auto_start_breaks: newSettings.auto_start_breaks ?? prev.auto_start_breaks,
+                sound_enabled: newSettings.sound_enabled ?? prev.sound_enabled,
+                notification_enabled: newSettings.notification_enabled ?? prev.notification_enabled,
+                vibration_enabled: newSettings.vibration_enabled ?? prev.vibration_enabled,
+                theme: newSettings.theme ?? prev.theme
+              };
+            });
+            if (newSettings.daily_goal) {
+              setDailyGoal(newSettings.daily_goal);
+            }
+            if (newSettings.work_duration && !isActive) {
+              setTime(newSettings.work_duration * 60);
+            }
+            
+            // Save to database
             await updatePomodoroSettings(newSettings);
+            
+            // Refresh from database to ensure consistency
             const updatedSettings = await getPomodoroSettings();
             setSettings(updatedSettings);
+            setDailyGoal(updatedSettings.daily_goal || 8);
+            
             toast({
               title: "Settings Updated",
               description: "Your pomodoro settings have been saved.",
             });
           } catch (error) {
+            // Revert local changes on error
+            const currentSettings = await getPomodoroSettings();
+            setSettings(currentSettings);
+            setDailyGoal(currentSettings.daily_goal || 8);
+            
             toast({
               title: "Error",
               description: "Failed to update settings",
