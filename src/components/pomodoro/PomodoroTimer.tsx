@@ -31,6 +31,11 @@ interface Task {
   text: string;
   completed: boolean;
   progress: number;
+  metrics: {
+    totalMinutes: number;
+    completedPomodoros: number;
+    currentStreak: number;
+  };
 }
 
 interface PomodoroTimerProps {
@@ -57,12 +62,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [focusLabel, setFocusLabel] = useState<string>('');
   const [dailyGoal, setDailyGoal] = useState<number>(8);
-  const [tasks, setTasks] = useState<Array<{ 
-    id: string; 
-    text: string; 
-    completed: boolean;
-    progress: number; 
-  }>>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [showCompletedTasks, setShowCompletedTasks] = useState(false);
   const [currentTask, setCurrentTask] = useState<string>('');
   const timerRef = useRef<HTMLDivElement>(null);
@@ -308,97 +308,98 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     return () => clearInterval(syncInterval);
   }, [syncWithSupabase]);
 
-  const handleTimerComplete = async () => {
-    console.log('Timer completed, updating stats and resetting timer.');
-    if (!settings) return;
+  // Add activeTaskId state
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
 
-    let retryCount = 0;
-    const maxRetries = 3;
-
-    while (retryCount < maxRetries) {
-      try {
-        // Stop the timer first
-        setIsActive(false);
-
-        // Complete current pomodoro if it exists
-        if (currentPomodoroId) {
-          await completePomodoro(currentPomodoroId);
-          setCurrentPomodoroId(null);
-        }
-
-        // Refresh stats before checking daily goal
-        const newStats = await getPomodoroStats();
-        setStats(newStats);
-
-        // Check if daily goal is achieved
-        const dailyGoal = settings.daily_goal || 4;
-        if (newStats.daily_completed >= dailyGoal) {
-          // Play celebration sound
-          playNotificationSound();
-
-          // Show congratulations message
-          toast({
-            title: "🎉 Daily Goal Achieved! 🎉",
-            description: "Amazing work! You've completed your pomodoros for today. Take a well-deserved rest!",
-            duration: 5000,
-          });
-
-          // Stop timer and prevent auto-start
-          setIsActive(false);
-          setTime(settings.work_duration * 60);
-          setCurrentPomodoroId(null);
-          
-          // Update streak
-          updateStreak();
-          
-          return; // Exit the function early
-        }
-
-        // If daily goal not achieved, continue with normal completion logic
-        playNotificationSound();
-
-        // Toggle break state
-        const newIsBreak = !isBreak;
-        setIsBreak(newIsBreak);
-
-        // Calculate new time based on type
-        const newTime = newIsBreak
-          ? (settings.break_duration * 60)
-          : (settings.work_duration * 60);
-        setTime(newTime);
-
-        // Show notification
-        toast({
-          title: newIsBreak ? 'Time for a break! 🎉' : 'Break complete!',
-          description: newIsBreak ? 'Great work! Take some time to rest.' : 'Ready to focus again?',
-        });
-
-        // Auto-start only if daily goal not reached
-        if ((newIsBreak && settings.auto_start_breaks) || (!newIsBreak && settings.auto_start_pomodoros)) {
-          const newPomodoro = await startPomodoro(newIsBreak ? 'break' : 'work');
-          setCurrentPomodoroId(newPomodoro.id);
-          setIsActive(true);
-        }
-
-        // Update streak
-        updateStreak();
-
-        break; // Exit the retry loop on success
-      } catch (error) {
-        // Error handling remains the same
-        console.error(`Error completing timer (attempt ${retryCount + 1}):`, error);
-        retryCount++;
-        
-        if (retryCount === maxRetries) {
-          toast({
-            title: 'Connection Error',
-            description: 'Unable to save your progress. Please check your connection.',
-            variant: 'destructive'
-          });
-        }
-        
-        await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+  const addTask = async (text: string) => {
+    const newTaskId = crypto.randomUUID();
+    const newTask: Task = {
+      id: newTaskId,
+      text,
+      completed: false,
+      progress: 0,
+      metrics: {
+        totalMinutes: 0,
+        completedPomodoros: 0,
+        currentStreak: 0
       }
+    };
+
+    setTasks(prev => [...prev, newTask]);
+    setActiveTaskId(newTaskId); // Set as active task
+    
+    // Reset timer for new task
+    setTime(settings?.work_duration ? settings.work_duration * 60 : 25 * 60);
+    setIsActive(false);
+    setIsBreak(false);
+    
+    if (currentPomodoroId) {
+      await completePomodoro(currentPomodoroId);
+      setCurrentPomodoroId(null);
+    }
+  };
+
+  const setTaskActive = async (taskId: string) => {
+    setActiveTaskId(taskId);
+    // Reset timer for selected task
+    setTime(settings?.work_duration ? settings.work_duration * 60 : 25 * 60);
+    setIsActive(false);
+    setIsBreak(false);
+    
+    if (currentPomodoroId) {
+      await completePomodoro(currentPomodoroId);
+      setCurrentPomodoroId(null);
+    }
+  };
+
+  // Update handleTimerComplete to track metrics per task
+  const handleTimerComplete = async () => {
+    if (!settings || !activeTaskId) return;
+
+    try {
+      // Complete current pomodoro if it exists
+      if (currentPomodoroId) {
+        await completePomodoro(currentPomodoroId);
+        setCurrentPomodoroId(null);
+
+        // Update task metrics
+        setTasks(prev => prev.map(task => {
+          if (task.id === activeTaskId) {
+            return {
+              ...task,
+              metrics: {
+                ...task.metrics,
+                totalMinutes: task.metrics.totalMinutes + (isBreak ? 0 : settings.work_duration),
+                completedPomodoros: task.metrics.completedPomodoros + (isBreak ? 0 : 1)
+              }
+            };
+          }
+          return task;
+        }));
+      }
+
+      // Rest of your existing handleTimerComplete logic...
+      playNotificationSound();
+      const newIsBreak = !isBreak;
+      setIsBreak(newIsBreak);
+      const newTime = newIsBreak
+        ? (settings.break_duration * 60)
+        : (settings.work_duration * 60);
+      setTime(newTime);
+
+      if ((newIsBreak && settings.auto_start_breaks) || (!newIsBreak && settings.auto_start_pomodoros)) {
+        const newPomodoro = await startPomodoro(newIsBreak ? 'break' : 'work');
+        setCurrentPomodoroId(newPomodoro.id);
+        setIsActive(true);
+      }
+
+    } catch (error) {
+      console.error('Error completing timer:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to complete timer session',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -470,29 +471,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     return "Stay hydrated during your break";
   }, [stats]);
 
-  const addTask = async (text: string) => {
-    // Reset all metrics
-    setTime(settings?.work_duration ? settings.work_duration * 60 : 25 * 60);
-    setIsActive(false);
-    setIsBreak(false);
-    if (currentPomodoroId) {
-      await completePomodoro(currentPomodoroId);
-      setCurrentPomodoroId(null);
-    }
-    
-    // Add the new task
-    setTasks(prev => [...prev, { 
-      id: crypto.randomUUID(), 
-      text, 
-      completed: false,
-      progress: 0
-    }]);
-    
-    // Reset stats for the new task
-    const newStats = await getPomodoroStats();
-    setStats(newStats);
-  };
-
   const toggleTask = (id: string) => {
     setTasks(prev => prev.map(task => 
       task.id === id ? { ...task, completed: !task.completed } : task
@@ -506,7 +484,17 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
   useEffect(() => {
     const savedTasks = localStorage.getItem('pomodoroTasks');
     if (savedTasks) {
-      setTasks(JSON.parse(savedTasks));
+      const parsedTasks = JSON.parse(savedTasks);
+      // Ensure all tasks have metrics
+      const tasksWithMetrics = parsedTasks.map((task: any) => ({
+        ...task,
+        metrics: task.metrics || {
+          totalMinutes: 0,
+          completedPomodoros: 0,
+          currentStreak: 0
+        }
+      }));
+      setTasks(tasksWithMetrics);
     }
   }, []);
 
@@ -538,6 +526,58 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
       }
     }
   }, [stats, settings]);
+
+  // Update task list rendering to show active task and metrics
+  const renderTaskList = () => (
+    <ul className="space-y-2">
+      {tasks.filter(task => showCompletedTasks || !task.completed).map((task: Task) => (
+        <li 
+          key={task.id} 
+          className={cn(
+            "flex items-center gap-2 p-3 rounded-lg transition-colors",
+            activeTaskId === task.id ? "bg-primary/10" : "bg-muted/30",
+            "hover:bg-primary/5"
+          )}
+        >
+          <Checkbox 
+            checked={task.completed} 
+            onCheckedChange={() => toggleTask(task.id)}
+          />
+          <div className="flex-1">
+            <div className={cn(
+              "font-medium",
+              task.completed && "line-through text-muted-foreground"
+            )}>
+              {task.text}
+            </div>
+            {activeTaskId === task.id && (
+              <div className="text-xs text-muted-foreground mt-1">
+                {task.metrics.completedPomodoros} pomodoros • {Math.floor(task.metrics.totalMinutes / 60)}h {task.metrics.totalMinutes % 60}m
+              </div>
+            )}
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setTaskActive(task.id)}
+            className={cn(
+              "mr-2",
+              activeTaskId === task.id && "bg-primary/20"
+            )}
+          >
+            {activeTaskId === task.id ? "Active" : "Start"}
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => removeTask(task.id)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </li>
+      ))}
+    </ul>
+  );
 
   return (
     <Card className="p-6 max-w-md mx-auto">
@@ -594,32 +634,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               <Button onClick={() => setShowCompletedTasks(prev => !prev)}>{showCompletedTasks ? 'Hide Completed' : 'Show Completed'}</Button>
             </div>
             
-            <ul>
-              {tasks.filter(task => showCompletedTasks || !task.completed).map(task => (
-                <li key={task.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
-                  <Checkbox 
-                    checked={task.completed} 
-                    onChange={() => toggleTask(task.id)} 
-                  />
-                  <span className={cn(
-                    "flex-1",
-                    task.completed && "line-through text-muted-foreground"
-                  )}>
-                    {task.text}
-                  </span>
-                  <div className="w-24">
-                    <Progress value={task.progress} />
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => removeTask(task.id)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </li>
-              ))}
-            </ul>
+            {renderTaskList()}
           </div>
         )}
         
