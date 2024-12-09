@@ -33,6 +33,24 @@ interface PomodoroState {
   current_pomodoro_id: string;
 }
 
+const timerWorkerCode = `
+  let interval = null;
+  
+  self.onmessage = function(e) {
+    if (e.data.command === 'start') {
+      if (interval) clearInterval(interval);
+      interval = setInterval(() => {
+        self.postMessage({ type: 'tick' });
+      }, 1000);
+    } else if (e.data.command === 'stop') {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+      }
+    }
+  };
+`;
+
 export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
   const [time, setTime] = useState(25 * 60);
   const [isActive, setIsActive] = useState(false);
@@ -44,11 +62,11 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
   const [focusLabel, setFocusLabel] = useState<string>('');
   const [dailyGoal, setDailyGoal] = useState<number>(8);
   const timerRef = useRef<HTMLDivElement>(null);
+  const workerRef = useRef<Worker | null>(null);
+  const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
-
-  // Keep audio context reference
-  const audioContextRef = useRef<AudioContext | null>(null);
 
   // Initialize audio context
   useEffect(() => {
@@ -74,6 +92,118 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
       }
     };
   }, []);
+
+  // Initialize worker and broadcast channel
+  useEffect(() => {
+    // Create a Blob containing the worker code
+    const blob = new Blob([timerWorkerCode], { type: 'application/javascript' });
+    const workerUrl = URL.createObjectURL(blob);
+    workerRef.current = new Worker(workerUrl);
+    
+    // Initialize broadcast channel
+    broadcastChannelRef.current = new BroadcastChannel('pomodoro-sync');
+    
+    // Load state from localStorage
+    const savedState = localStorage.getItem('pomodoroState');
+    if (savedState) {
+      const state = JSON.parse(savedState);
+      const now = Date.now();
+      const elapsed = Math.floor((now - state.lastUpdate) / 1000);
+      
+      if (state.isActive) {
+        const newTime = Math.max(0, state.time - elapsed);
+        setTime(newTime);
+        setIsActive(true);
+        setIsBreak(state.isBreak);
+        setCurrentPomodoroId(state.currentPomodoroId);
+      }
+    }
+    
+    // Clean up
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.terminate();
+      }
+      if (broadcastChannelRef.current) {
+        broadcastChannelRef.current.close();
+      }
+      URL.revokeObjectURL(workerUrl);
+    };
+  }, []);
+
+  // Handle broadcast channel messages
+  useEffect(() => {
+    if (!broadcastChannelRef.current) return;
+    
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'stateUpdate') {
+        setTime(event.data.time);
+        setIsActive(event.data.isActive);
+        setIsBreak(event.data.isBreak);
+        setCurrentPomodoroId(event.data.currentPomodoroId);
+      }
+    };
+    
+    broadcastChannelRef.current.onmessage = handleMessage;
+    
+    return () => {
+      if (broadcastChannelRef.current) {
+        broadcastChannelRef.current.onmessage = null;
+      }
+    };
+  }, []);
+
+  // Handle worker messages
+  useEffect(() => {
+    if (!workerRef.current) return;
+    
+    const handleWorkerMessage = (e: MessageEvent) => {
+      if (e.data.type === 'tick' && isActive) {
+        setTime(prevTime => {
+          const newTime = Math.max(0, prevTime - 1);
+          
+          // Save state to localStorage
+          const state = {
+            time: newTime,
+            isActive,
+            isBreak,
+            currentPomodoroId,
+            lastUpdate: Date.now()
+          };
+          localStorage.setItem('pomodoroState', JSON.stringify(state));
+          
+          // Broadcast state to other tabs
+          if (broadcastChannelRef.current) {
+            broadcastChannelRef.current.postMessage({
+              type: 'stateUpdate',
+              ...state
+            });
+          }
+          
+          return newTime;
+        });
+      }
+    };
+    
+    workerRef.current.onmessage = handleWorkerMessage;
+    
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.onmessage = null;
+      }
+    };
+  }, [isActive, isBreak, currentPomodoroId]);
+
+  // Start/stop worker based on isActive state
+  useEffect(() => {
+    if (!workerRef.current) return;
+    
+    if (isActive) {
+      workerRef.current.postMessage({ command: 'start' });
+    } else {
+      workerRef.current.postMessage({ command: 'stop' });
+    }
+  }, [isActive]);
 
   // Handle visibility change
   useEffect(() => {
@@ -203,51 +333,30 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     return () => clearInterval(syncInterval);
   }, [syncWithSupabase]);
 
-  const playNotificationSound = useCallback(async () => {
-    try {
-      if (!settings?.sound_enabled) return;
-
-      // Resume audio context if suspended
-      if (audioContextRef.current?.state === 'suspended') {
-        await audioContextRef.current.resume();
-      }
-
-      const context = audioContextRef.current || new AudioContext();
-      const oscillator = context.createOscillator();
-      const gainNode = context.createGain();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(context.destination);
-
-      // Use a more pleasant notification sound
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(440, context.currentTime); // A4 note
-      gainNode.gain.setValueAtTime(0.1, context.currentTime);
-
-      oscillator.start(context.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + 0.5);
-      oscillator.stop(context.currentTime + 0.5);
-
-      // Show notification if permission granted
-      if (Notification.permission === 'granted') {
-        new Notification(isBreak ? 'Break time!' : 'Focus time!', {
-          body: isBreak ? 'Time to take a break!' : 'Time to focus!',
-          icon: '/favicon.ico',
-          silent: true // We're handling the sound ourselves
-        });
-      }
-    } catch (error) {
-      console.error('Error playing notification:', error);
-      // Fallback to system notification with sound
-      if (Notification.permission === 'granted') {
-        new Notification(isBreak ? 'Break time!' : 'Focus time!', {
-          body: isBreak ? 'Time to take a break!' : 'Time to focus!',
-          icon: '/favicon.ico',
-          silent: false
-        });
-      }
+  // Play notification sound
+  const playNotificationSound = useCallback(() => {
+    if (!audioContextRef.current) return;
+    
+    const oscillator = audioContextRef.current.createOscillator();
+    const gainNode = audioContextRef.current.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContextRef.current.destination);
+    
+    oscillator.frequency.setValueAtTime(440, audioContextRef.current.currentTime);
+    gainNode.gain.setValueAtTime(0.1, audioContextRef.current.currentTime);
+    
+    oscillator.start();
+    oscillator.stop(audioContextRef.current.currentTime + 0.5);
+    
+    // Show notification if permission is granted
+    if (Notification.permission === 'granted') {
+      new Notification('Pomodoro Timer', {
+        body: isBreak ? 'Break time is over!' : 'Time to take a break!',
+        icon: '/favicon.ico'
+      });
     }
-  }, [settings?.sound_enabled, isBreak]);
+  }, [isBreak]);
 
   // Request notification permission on mount
   useEffect(() => {
@@ -276,32 +385,6 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [syncWithSupabase]);
-
-  // Timer logic with improved reliability
-  useEffect(() => {
-    let timer: NodeJS.Timeout | null = null;
-
-    if (isActive && time > 0) {
-      timer = setInterval(() => {
-        setTime((prevTime) => {
-          const newTime = Math.max(0, prevTime - 1);
-          if (newTime === 0) {
-            handleTimerComplete();
-          }
-          return newTime;
-        });
-      }, 1000);
-
-      // Sync immediately when timer starts
-      syncWithSupabase();
-    }
-
-    return () => {
-      if (timer) {
-        clearInterval(timer);
-      }
-    };
-  }, [isActive]);
 
   const handleTimerComplete = async () => {
     if (!settings) return;

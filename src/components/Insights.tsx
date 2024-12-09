@@ -191,7 +191,7 @@ export function Insights({ items }: Props) {
 
     return patterns;
   }, [items]);
-  
+
   return (
     <div className="space-y-8">
       {/* Metrics Grid */}
