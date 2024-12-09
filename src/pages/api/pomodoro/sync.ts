@@ -51,26 +51,15 @@ export default async function handler(
     }
 
     // Update the user's timer state
-    const updatedState = await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id: user.id },
       data: {
         pomodoroState: {
-          upsert: {
-            create: {
-              time,
-              isActive,
-              isBreak,
-              currentPomodoroId,
-              lastUpdate: new Date(lastUpdate)
-            },
-            update: {
-              time,
-              isActive,
-              isBreak,
-              currentPomodoroId,
-              lastUpdate: new Date(lastUpdate)
-            }
-          }
+          time,
+          isActive,
+          isBreak,
+          currentPomodoroId,
+          lastUpdate: new Date(lastUpdate)
         }
       },
       select: {
@@ -81,7 +70,7 @@ export default async function handler(
     // Return the current state
     return res.status(200).json({
       sync: true,
-      state: updatedState.pomodoroState
+      state: updatedUser.pomodoroState
     });
   } catch (error) {
     console.error('Error syncing pomodoro state:', error);

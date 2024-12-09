@@ -138,55 +138,65 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
 
     try {
       const { data, error } = await supabase
-        .from('pomodoro_states')
-        .upsert({
-          user_id: user.id,
-          time,
-          is_active: isActive,
-          is_break: isBreak,
-          current_pomodoro_id: currentPomodoroId,
-          last_update: new Date().toISOString()
+        .from('users')
+        .update({
+          pomodoro_state: {
+            time,
+            is_active: isActive,
+            is_break: isBreak,
+            current_pomodoro_id: currentPomodoroId,
+            last_update: new Date().toISOString()
+          }
         })
+        .eq('id', user.id)
         .select()
         .single();
 
       if (error) throw error;
 
       // Only update if the remote state is newer
-      if (data && new Date(data.last_update) > new Date(localStorage.getItem('lastUpdate') || '')) {
-        setTime(data.time);
-        setIsActive(data.is_active);
-        setIsBreak(data.is_break);
-        setCurrentPomodoroId(data.current_pomodoro_id);
-        localStorage.setItem('lastUpdate', data.last_update);
+      if (data?.pomodoro_state) {
+        const remoteState = data.pomodoro_state;
+        const localLastUpdate = localStorage.getItem('lastUpdate');
+        
+        if (localLastUpdate && new Date(remoteState.last_update) > new Date(localLastUpdate)) {
+          setTime(remoteState.time);
+          setIsActive(remoteState.is_active);
+          setIsBreak(remoteState.is_break);
+          setCurrentPomodoroId(remoteState.current_pomodoro_id);
+          localStorage.setItem('lastUpdate', remoteState.last_update);
+        }
       }
     } catch (error) {
       console.error('Error syncing with Supabase:', error);
     }
-  }, [user?.id, time, isActive, isBreak, currentPomodoroId, supabase]);
+  }, [user?.id, time, isActive, isBreak, currentPomodoroId]);
 
   // Subscribe to real-time updates
   useEffect(() => {
     if (!user?.id) return;
 
     const channel = supabase
-      .channel('pomodoro_states')
+      .channel('users_updates')
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'UPDATE',
           schema: 'public',
-          table: 'pomodoro_states',
-          filter: `user_id=eq.${user.id}`
+          table: 'users',
+          filter: `id=eq.${user.id}`
         },
         (payload) => {
-          const newState: PomodoroState = payload.new as PomodoroState;
-          if (new Date(newState.last_update) > new Date(localStorage.getItem('lastUpdate') || '')) {
-            setTime(newState.time);
-            setIsActive(newState.is_active);
-            setIsBreak(newState.is_break);
-            setCurrentPomodoroId(newState.current_pomodoro_id);
-            localStorage.setItem('lastUpdate', newState.last_update);
+          const remoteState = payload.new.pomodoro_state;
+          if (remoteState) {
+            const localLastUpdate = localStorage.getItem('lastUpdate');
+            if (localLastUpdate && new Date(remoteState.last_update) > new Date(localLastUpdate)) {
+              setTime(remoteState.time);
+              setIsActive(remoteState.is_active);
+              setIsBreak(remoteState.is_break);
+              setCurrentPomodoroId(remoteState.current_pomodoro_id);
+              localStorage.setItem('lastUpdate', remoteState.last_update);
+            }
           }
         }
       )
@@ -195,7 +205,7 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, supabase]);
+  }, [user?.id]);
 
   // Sync periodically
   useEffect(() => {
