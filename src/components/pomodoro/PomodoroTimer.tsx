@@ -174,7 +174,7 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
         // Calculate elapsed time when tab becomes visible
         const storedTimestamp = parseInt(localStorage.getItem('pomodoroLastTimestamp') || lastTimestamp.toString());
         const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
-
+        
         console.log('Visibility change detected. Current time:', time);
         console.log('Elapsed seconds:', elapsedSeconds);
 
@@ -184,10 +184,6 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
             console.log('Adjusted time after visibility change:', adjustedTime);
             return adjustedTime;
           });
-        } else if (!isActive && time <= 0) {
-          console.log('Timer has completed, resetting state.');
-          setIsActive(false);
-          setTime(0);
         }
       }
     };
@@ -236,12 +232,6 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
   }, [syncWithSupabase]);
 
   const handleTimerComplete = async () => {
-    console.log('Timer completed. Current time:', time);
-    if (time <= 0) {
-      console.log('Timer has completed, resetting state.');
-      setIsActive(false);
-      setTime(0);
-    }
     console.log('Timer completed, updating stats and resetting timer.');
     if (!settings) return;
 
@@ -273,25 +263,17 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
       console.log('Updated stats:', newStats);
       setStats(newStats);
 
-      // Check for completed Pomodoros and trigger long break if conditions are met
-      if (newStats.completedPomodoros >= settings.pomodoros_until_long_break) {
-        // Trigger long break
-        const newPomodoro = await startPomodoro('long_break');
+      // Show notification
+      toast({
+        title: newIsBreak ? 'Time for a break! 🎉' : 'Break complete!',
+        description: newIsBreak ? 'Great work! Take some time to rest.' : 'Ready to focus again?',
+      });
+
+      // Auto-start if enabled
+      if ((newIsBreak && settings.auto_start_breaks) || (!newIsBreak && settings.auto_start_pomodoros)) {
+        const newPomodoro = await startPomodoro(newIsBreak ? 'break' : 'work');
         setCurrentPomodoroId(newPomodoro.id);
         setIsActive(true);
-      } else {
-        // Show notification
-        toast({
-          title: newIsBreak ? 'Time for a break! 🎉' : 'Break complete!',
-          description: newIsBreak ? 'Great work! Take some time to rest.' : 'Ready to focus again?',
-        });
-
-        // Auto-start if enabled
-        if ((newIsBreak && settings.auto_start_breaks) || (!newIsBreak && settings.auto_start_pomodoros)) {
-          const newPomodoro = await startPomodoro(newIsBreak ? 'break' : 'work');
-          setCurrentPomodoroId(newPomodoro.id);
-          setIsActive(true);
-        }
       }
     } catch (error) {
       console.error('Error completing timer:', error);
