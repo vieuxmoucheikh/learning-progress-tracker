@@ -36,6 +36,70 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
   const timerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
+  // Load timer state from localStorage
+  useEffect(() => {
+    const savedState = localStorage.getItem('pomodoroState');
+    if (savedState) {
+      const { time, isActive, isBreak, currentPomodoroId, startTime } = JSON.parse(savedState);
+      
+      // Calculate elapsed time if timer was active
+      if (isActive && startTime) {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const remainingTime = Math.max(0, time - elapsed);
+        setTime(remainingTime);
+      } else {
+        setTime(time);
+      }
+      
+      setIsActive(isActive);
+      setIsBreak(isBreak);
+      setCurrentPomodoroId(currentPomodoroId);
+    }
+  }, []);
+
+  // Save timer state to localStorage
+  useEffect(() => {
+    localStorage.setItem('pomodoroState', JSON.stringify({
+      time,
+      isActive,
+      isBreak,
+      currentPomodoroId,
+      startTime: isActive ? Date.now() : null
+    }));
+  }, [time, isActive, isBreak, currentPomodoroId]);
+
+  // Handle visibility change
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Tab is hidden, save current state
+        localStorage.setItem('pomodoroState', JSON.stringify({
+          time,
+          isActive,
+          isBreak,
+          currentPomodoroId,
+          startTime: isActive ? Date.now() : null
+        }));
+      } else {
+        // Tab is visible again, sync state
+        const savedState = localStorage.getItem('pomodoroState');
+        if (savedState) {
+          const { time: savedTime, isActive: savedIsActive, startTime } = JSON.parse(savedState);
+          if (savedIsActive && startTime) {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const remainingTime = Math.max(0, savedTime - elapsed);
+            setTime(remainingTime);
+          }
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [time, isActive, isBreak, currentPomodoroId]);
+
   // Load settings and stats
   useEffect(() => {
     const loadData = async () => {
@@ -59,13 +123,22 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     loadData();
   }, []);
 
-  // Timer logic
+  // Timer logic with improved persistence
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 
     if (isActive && time > 0) {
       interval = setInterval(() => {
-        setTime((time) => time - 1);
+        setTime((prevTime) => {
+          const newTime = prevTime - 1;
+          // Update localStorage with new time
+          const savedState = JSON.parse(localStorage.getItem('pomodoroState') || '{}');
+          localStorage.setItem('pomodoroState', JSON.stringify({
+            ...savedState,
+            time: newTime
+          }));
+          return newTime;
+        });
       }, 1000);
     } else if (time === 0) {
       handleTimerComplete();
@@ -74,7 +147,7 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isActive, time]);
+  }, [isActive]);
 
   const handleTimerComplete = async () => {
     if (!settings) return;
