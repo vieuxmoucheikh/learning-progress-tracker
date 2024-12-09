@@ -1,3 +1,4 @@
+import GoalManager from './GoalManager';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,8 +25,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { X } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import GoalManager from './GoalManager';
-
 interface PomodoroTimerProps {
   onSessionComplete?: (sessionData: { duration: number; label: string; type: 'work' | 'break' }) => void;
 }
