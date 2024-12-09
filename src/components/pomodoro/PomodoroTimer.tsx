@@ -27,6 +27,7 @@ import { X } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 interface PomodoroTimerProps {
   onSessionComplete?: (sessionData: { duration: number; label: string; type: 'work' | 'break' }) => void;
+  sessionId?: string;
 }
 
 interface PomodoroState {
@@ -37,7 +38,7 @@ interface PomodoroState {
   current_pomodoro_id: string;
 }
 
-export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
+export function PomodoroTimer({  }: PomodoroTimerProps) {
   let lastTimestamp = 0; // Initialize lastTimestamp to store the last recorded timestamp
   const [time, setTime] = useState(25 * 60);
   const [isActive, setIsActive] = useState(false);
