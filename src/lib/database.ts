@@ -1007,7 +1007,7 @@ export async function getPomodoroStats(): Promise<PomodoroStats> {
       totalPomodoros: todayPomodoros.length,
       completedPomodoros: todayPomodoros.filter(p => p.completed).length,
       daily_completed: todayPomodoros.filter(p => p.completed).length,
-      totalWorkMinutes: (todayPomodoros.filter(p => p.type === 'work').reduce((acc, p) => { if (p.end_time) { const duration = (new Date(p.end_time).getTime() - new Date(p.start_time).getTime()) / 1000 / 60; return acc + duration; } return acc; }, 0) / 60),
+      totalWorkMinutes: Math.round(todayPomodoros.filter(p => p.type === 'work').reduce((acc, p) => { if (p.end_time) { const duration = (new Date(p.end_time).getTime() - new Date(p.start_time).getTime()) / 1000 / 60; return acc + duration; } return acc; }, 0) / 60),
       totalBreakMinutes: todayPomodoros
         .filter(p => p.type === 'break' || p.type === 'long_break')
         .reduce((acc, p) => {

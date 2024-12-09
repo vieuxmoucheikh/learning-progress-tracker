@@ -24,6 +24,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { X } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import GoalManager from './GoalManager';
 
 interface PomodoroTimerProps {
   onSessionComplete?: (sessionData: { duration: number; label: string; type: 'work' | 'break' }) => void;
@@ -491,7 +492,8 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
 
   return (
     <Card className="p-6 max-w-md mx-auto">
-      <div className="space-y-6 p-6">
+      <div className="pomodoro-timer space-y-6 p-6">
+        <GoalManager />
         {stats && (
           <div className="flex justify-between items-center">
             <motion.div 
