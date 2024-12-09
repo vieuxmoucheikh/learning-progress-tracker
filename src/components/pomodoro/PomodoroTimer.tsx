@@ -38,38 +38,52 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
 
   // Load timer state from localStorage
   useEffect(() => {
-    const savedState = localStorage.getItem('pomodoroState');
-    if (savedState) {
-      const { time, isActive, isBreak, currentPomodoroId, startTime } = JSON.parse(savedState);
-      
-      // Calculate elapsed time if timer was active
-      if (isActive && startTime) {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        const remainingTime = Math.max(0, time - elapsed);
-        setTime(remainingTime);
-      } else {
-        setTime(time);
+    const loadTimerState = async () => {
+      try {
+        const savedState = localStorage.getItem('pomodoroState');
+        if (savedState) {
+          const { time, isActive, isBreak, currentPomodoroId, startTime } = JSON.parse(savedState);
+          
+          if (isActive && startTime) {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const remainingTime = Math.max(0, time - elapsed);
+            setTime(remainingTime);
+            setIsActive(true); // Ensure timer starts if it was active
+          } else {
+            setTime(time);
+            setIsActive(false);
+          }
+          
+          setIsBreak(isBreak);
+          if (currentPomodoroId) {
+            setCurrentPomodoroId(currentPomodoroId);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading timer state:', error);
       }
-      
-      setIsActive(isActive);
-      setIsBreak(isBreak);
-      setCurrentPomodoroId(currentPomodoroId);
-    }
+    };
+
+    loadTimerState();
   }, []);
 
   // Save timer state to localStorage
   useEffect(() => {
-    localStorage.setItem('pomodoroState', JSON.stringify({
-      time,
-      isActive,
-      isBreak,
-      currentPomodoroId,
-      startTime: isActive ? Date.now() : null
-    }));
+    if (time >= 0) { // Only save valid time values
+      localStorage.setItem('pomodoroState', JSON.stringify({
+        time,
+        isActive,
+        isBreak,
+        currentPomodoroId,
+        startTime: isActive ? Date.now() : null
+      }));
+    }
   }, [time, isActive, isBreak, currentPomodoroId]);
 
   // Handle visibility change
   useEffect(() => {
+    let visibilityTimeout: NodeJS.Timeout;
+    
     const handleVisibilityChange = () => {
       if (document.hidden) {
         // Tab is hidden, save current state
@@ -81,22 +95,25 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
           startTime: isActive ? Date.now() : null
         }));
       } else {
-        // Tab is visible again, sync state
-        const savedState = localStorage.getItem('pomodoroState');
-        if (savedState) {
-          const { time: savedTime, isActive: savedIsActive, startTime } = JSON.parse(savedState);
-          if (savedIsActive && startTime) {
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            const remainingTime = Math.max(0, savedTime - elapsed);
-            setTime(remainingTime);
+        // Tab is visible again, sync state after a short delay
+        visibilityTimeout = setTimeout(() => {
+          const savedState = localStorage.getItem('pomodoroState');
+          if (savedState) {
+            const { time: savedTime, isActive: savedIsActive, startTime } = JSON.parse(savedState);
+            if (savedIsActive && startTime) {
+              const elapsed = Math.floor((Date.now() - startTime) / 1000);
+              const remainingTime = Math.max(0, savedTime - elapsed);
+              setTime(remainingTime);
+            }
           }
-        }
+        }, 100); // Small delay to ensure proper state sync
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearTimeout(visibilityTimeout);
     };
   }, [time, isActive, isBreak, currentPomodoroId]);
 
@@ -130,18 +147,13 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     if (isActive && time > 0) {
       interval = setInterval(() => {
         setTime((prevTime) => {
-          const newTime = prevTime - 1;
-          // Update localStorage with new time
-          const savedState = JSON.parse(localStorage.getItem('pomodoroState') || '{}');
-          localStorage.setItem('pomodoroState', JSON.stringify({
-            ...savedState,
-            time: newTime
-          }));
+          const newTime = Math.max(0, prevTime - 1); // Prevent negative values
+          if (newTime === 0) {
+            handleTimerComplete();
+          }
           return newTime;
         });
       }, 1000);
-    } else if (time === 0) {
-      handleTimerComplete();
     }
 
     return () => {
@@ -218,7 +230,8 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
   };
 
   const skipCurrentInterval = () => {
-    setTime(0);
+    setTime(0); // Set to 0 instead of just decrementing
+    handleTimerComplete();
   };
 
   const formatTime = (seconds: number): string => {
@@ -228,8 +241,36 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
   };
 
   const playNotificationSound = () => {
-    const audio = new Audio('/notification.mp3'); // Make sure to add this sound file to your public folder
-    audio.play().catch(error => console.error('Error playing sound:', error));
+    try {
+      const audio = new Audio('/sounds/notification.mp3'); // Update path to your sound file
+      audio.addEventListener('error', (e) => {
+        console.error('Audio error:', e);
+        // Fallback to system notification if sound fails
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('Pomodoro Timer', {
+            body: isBreak ? 'Break time is over!' : 'Time to take a break!',
+          });
+        }
+      });
+      
+      // Preload the audio
+      audio.load();
+      
+      // Play only if sound is enabled in settings
+      if (settings?.sound_enabled) {
+        audio.play().catch((error) => {
+          console.error('Error playing sound:', error);
+          // Fallback to system notification
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('Pomodoro Timer', {
+              body: isBreak ? 'Break time is over!' : 'Time to take a break!',
+            });
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error with audio:', error);
+    }
   };
 
   // Keyboard shortcuts
