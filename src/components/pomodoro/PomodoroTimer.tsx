@@ -174,7 +174,7 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
         // Calculate elapsed time when tab becomes visible
         const storedTimestamp = parseInt(localStorage.getItem('pomodoroLastTimestamp') || lastTimestamp.toString());
         const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
-        
+
         console.log('Visibility change detected. Current time:', time);
         console.log('Elapsed seconds:', elapsedSeconds);
 
@@ -232,6 +232,12 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
   }, [syncWithSupabase]);
 
   const handleTimerComplete = async () => {
+    console.log('Timer completed. Current time:', time);
+    if (time <= 0) {
+      console.log('Timer has completed, resetting state.');
+      setIsActive(false);
+      setTime(0);
+    }
     console.log('Timer completed, updating stats and resetting timer.');
     if (!settings) return;
 
