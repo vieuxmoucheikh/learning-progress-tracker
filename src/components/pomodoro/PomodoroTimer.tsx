@@ -242,34 +242,47 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
 
   const playNotificationSound = () => {
     try {
-      const audio = new Audio('/sounds/notification.mp3'); // Update path to your sound file
-      audio.addEventListener('error', (e) => {
-        console.error('Audio error:', e);
-        // Fallback to system notification if sound fails
+      // Use a simple beep sound as a fallback
+      const beep = () => {
+        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const oscillator = context.createOscillator();
+        const gainNode = context.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(context.destination);
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 800;
+        gainNode.gain.value = 0.1;
+        
+        oscillator.start(0);
+        gainNode.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + 0.5);
+        
+        setTimeout(() => {
+          oscillator.stop();
+          context.close();
+        }, 500);
+      };
+
+      // Only play if sound is enabled in settings
+      if (settings?.sound_enabled) {
+        beep();
+        
+        // Also show notification if available
         if ('Notification' in window && Notification.permission === 'granted') {
           new Notification('Pomodoro Timer', {
             body: isBreak ? 'Break time is over!' : 'Time to take a break!',
           });
         }
-      });
-      
-      // Preload the audio
-      audio.load();
-      
-      // Play only if sound is enabled in settings
-      if (settings?.sound_enabled) {
-        audio.play().catch((error) => {
-          console.error('Error playing sound:', error);
-          // Fallback to system notification
-          if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('Pomodoro Timer', {
-              body: isBreak ? 'Break time is over!' : 'Time to take a break!',
-            });
-          }
-        });
       }
     } catch (error) {
       console.error('Error with audio:', error);
+      // Fallback to just notification if audio fails
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Pomodoro Timer', {
+          body: isBreak ? 'Break time is over!' : 'Time to take a break!',
+        });
+      }
     }
   };
 
