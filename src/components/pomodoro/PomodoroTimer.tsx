@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import Label from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   startPomodoro, 
   completePomodoro,
@@ -18,7 +19,6 @@ import { PomodoroSettings, PomodoroStats } from '@/types';
 import { PomodoroSettingsDialog } from './PomodoroSettingsDialog';
 import { PomodoroStats as PomodoroStatsComponent } from './PomodoroStats';
 import { PlayIcon, PauseIcon, SkipForwardIcon, Settings2Icon, Brain, Target, Trophy } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
 
 interface PomodoroTimerProps {
@@ -75,37 +75,42 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     };
   }, []);
 
-  // Synchronize timer state with Supabase
-  const syncWithSupabase = useCallback(async () => {
-    if (!user?.id) return;
+  // Synchronize timer state with server
+  const syncWithSupabase = async () => {
+    if (!isActive) return;
+
     try {
-      const { data, error } = await supabase
-        .from('pomodoro_states')
-        .upsert({
-          user_id: user.id,
+      const response = await fetch('/api/pomodoro/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           time,
-          is_active: isActive,
-          is_break: isBreak,
-          current_pomodoro_id: currentPomodoroId,
-          last_update: new Date().toISOString()
-        })
-        .select()
-        .single();
+          isActive,
+          isBreak,
+          currentPomodoroId,
+          lastUpdate: Date.now(),
+        }),
+      });
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-      // Update state if the remote state is newer
-      if (data && new Date(data.last_update) > new Date(localStorage.getItem('lastUpdate') || '')) {
-        setTime(data.time);
-        setIsActive(data.is_active);
-        setIsBreak(data.is_break);
-        setCurrentPomodoroId(data.current_pomodoro_id);
-        localStorage.setItem('lastUpdate', data.last_update);
+      const data = await response.json();
+      
+      // If server has newer state, update local state
+      if (!data.sync && data.state) {
+        setTime(data.state.time);
+        setIsActive(data.state.isActive);
+        setIsBreak(data.state.isBreak);
+        setCurrentPomodoroId(data.state.currentPomodoroId);
       }
     } catch (error) {
-      console.error('Error syncing with Supabase:', error);
+      console.error('Error syncing with server:', error);
     }
-  }, [user?.id, time, isActive, isBreak, currentPomodoroId, supabase]);
+  };
 
   // Play notification sound
   const playNotificationSound = useCallback(() => {
@@ -501,7 +506,19 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
           }
         }}
         initialSettings={settings}
-      />
+      >
+        <DialogContent 
+          className="sm:max-w-[425px]"
+          aria-describedby="timer-settings-description"
+        >
+          <DialogHeader>
+            <DialogTitle>Timer Settings</DialogTitle>
+            <p id="timer-settings-description" className="text-sm text-muted-foreground">
+              Customize your timer preferences and notifications.
+            </p>
+          </DialogHeader>
+        </DialogContent>
+      </PomodoroSettingsDialog>
     </Card>
   );
 }
