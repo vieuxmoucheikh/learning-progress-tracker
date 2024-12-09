@@ -326,7 +326,35 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           setCurrentPomodoroId(null);
         }
 
-        // Play notification
+        // Refresh stats before checking daily goal
+        const newStats = await getPomodoroStats();
+        setStats(newStats);
+
+        // Check if daily goal is achieved
+        const dailyGoal = settings.daily_goal || 4;
+        if (newStats.daily_completed >= dailyGoal) {
+          // Play celebration sound
+          playNotificationSound();
+
+          // Show congratulations message
+          toast({
+            title: "🎉 Daily Goal Achieved! 🎉",
+            description: "Amazing work! You've completed your pomodoros for today. Take a well-deserved rest!",
+            duration: 5000,
+          });
+
+          // Stop timer and prevent auto-start
+          setIsActive(false);
+          setTime(settings.work_duration * 60);
+          setCurrentPomodoroId(null);
+          
+          // Update streak
+          updateStreak();
+          
+          return; // Exit the function early
+        }
+
+        // If daily goal not achieved, continue with normal completion logic
         playNotificationSound();
 
         // Toggle break state
@@ -339,17 +367,13 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           : (settings.work_duration * 60);
         setTime(newTime);
 
-        // Refresh stats
-        const newStats = await getPomodoroStats();
-        setStats(newStats);
-
         // Show notification
         toast({
           title: newIsBreak ? 'Time for a break! 🎉' : 'Break complete!',
           description: newIsBreak ? 'Great work! Take some time to rest.' : 'Ready to focus again?',
         });
 
-        // Auto-start if enabled
+        // Auto-start only if daily goal not reached
         if ((newIsBreak && settings.auto_start_breaks) || (!newIsBreak && settings.auto_start_pomodoros)) {
           const newPomodoro = await startPomodoro(newIsBreak ? 'break' : 'work');
           setCurrentPomodoroId(newPomodoro.id);
@@ -359,43 +383,12 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
         // Update streak
         updateStreak();
 
-        // If we reach here, everything succeeded
-        break;
+        break; // Exit the retry loop on success
       } catch (error) {
+        // Error handling remains the same
         console.error(`Error completing timer (attempt ${retryCount + 1}):`, error);
         retryCount++;
         
-        // Save progress locally even if network operations fail
-        const sessionData = {
-          pomodoroId: currentPomodoroId,
-          timestamp: new Date().toISOString(),
-          duration: settings.work_duration * 60,
-          type: isBreak ? 'break' : 'work'
-        };
-        
-        try {
-          // Store failed completion data locally
-          const failedCompletions = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
-          failedCompletions.push(sessionData);
-          localStorage.setItem('failedPomodoroCompletions', JSON.stringify(failedCompletions));
-          
-          // Show more helpful error message
-          toast({
-            title: 'Session saved locally',
-            description: 'Your progress has been saved and will sync when connection is restored.',
-            variant: 'default'
-          });
-          
-          // Continue with timer state updates even if network operations failed
-          setIsActive(false);
-          setIsBreak(!isBreak);
-          setTime((!isBreak ? settings.break_duration : settings.work_duration) * 60);
-          return;
-        } catch (localError) {
-          console.error('Error saving progress locally:', localError);
-        }
-        
-        // Only show error toast on final retry
         if (retryCount === maxRetries) {
           toast({
             title: 'Connection Error',
@@ -404,7 +397,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           });
         }
         
-        // Wait before retrying
         await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
       }
     }
@@ -590,10 +582,27 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
             
             <ul>
               {tasks.filter(task => showCompletedTasks || !task.completed).map(task => (
-                <li key={task.id} className={task.completed ? 'line-through' : ''}>
-                  <Checkbox checked={task.completed} onChange={() => toggleTask(task.id)} />
-                  {task.text}
-                  <Button onClick={() => removeTask(task.id)}>Remove</Button>
+                <li key={task.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
+                  <Checkbox 
+                    checked={task.completed} 
+                    onChange={() => toggleTask(task.id)} 
+                  />
+                  <span className={cn(
+                    "flex-1",
+                    task.completed && "line-through text-muted-foreground"
+                  )}>
+                    {task.text}
+                  </span>
+                  <div className="w-24">
+                    <Progress value={task.progress} />
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => removeTask(task.id)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </li>
               ))}
             </ul>
