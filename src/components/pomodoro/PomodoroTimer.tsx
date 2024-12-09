@@ -34,6 +34,7 @@ interface PomodoroState {
 }
 
 export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
+  let lastTimestamp = 0; // Initialize lastTimestamp to store the last recorded timestamp
   const [time, setTime] = useState(25 * 60);
   const [isActive, setIsActive] = useState(false);
   const [isBreak, setIsBreak] = useState(false);
@@ -162,38 +163,43 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
   }, [isActive]);
 
   // Handle visibility change
-  useEffect(() => {
-    let lastTimestamp = Date.now();
-    
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // Save the current timestamp when tab becomes hidden
-        lastTimestamp = Date.now();
-        localStorage.setItem('pomodoroLastTimestamp', lastTimestamp.toString());
-      } else {
-        // Calculate elapsed time when tab becomes visible
-        const storedTimestamp = parseInt(localStorage.getItem('pomodoroLastTimestamp') || lastTimestamp.toString());
-        const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
-        
-        console.log('Visibility change detected. Current time:', time);
-        console.log('Elapsed seconds:', elapsedSeconds);
+  const handleVisibilityChange = useCallback(() => {
+    if (document.visibilityState === 'hidden') {
+      lastTimestamp = Date.now();
+      localStorage.setItem('pomodoroLastTimestamp', lastTimestamp.toString());
+      
+      // Save current timer state
+      localStorage.setItem('pomodoroTimerState', JSON.stringify({
+        time,
+        isActive,
+        isBreak,
+        currentPomodoroId
+      }));
+    } else {
+      try {
+        // Restore timer state
+        const savedState = localStorage.getItem('pomodoroTimerState');
+        if (savedState) {
+          const parsedState = JSON.parse(savedState);
+          const storedTimestamp = parseInt(localStorage.getItem('pomodoroLastTimestamp') || lastTimestamp.toString());
+          const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
 
-        if (isActive && elapsedSeconds > 0) {
-          setTime(prevTime => {
-            const adjustedTime = Math.max(0, prevTime - elapsedSeconds);
-            console.log('Adjusted time after visibility change:', adjustedTime);
-            return adjustedTime;
-          });
+          if (parsedState.isActive && elapsedSeconds > 0) {
+            const adjustedTime = Math.max(0, parsedState.time - elapsedSeconds);
+            setTime(adjustedTime);
+            
+            // If timer would have completed while in background, handle completion
+            if (adjustedTime === 0) {
+              handleTimerComplete();
+            }
+          }
         }
+      } catch (error) {
+        console.error('Error handling visibility change:', error);
+        // Continue with normal operation even if state restoration fails
       }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [isActive, time]);
+    }
+  }, [time, isActive, isBreak, currentPomodoroId]);
 
   // Persist timer state to localStorage
   useEffect(() => {
@@ -235,53 +241,76 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     console.log('Timer completed, updating stats and resetting timer.');
     if (!settings) return;
 
-    try {
-      // Stop the timer
-      setIsActive(false);
+    let retryCount = 0;
+    const maxRetries = 3;
 
-      // Complete current pomodoro if it exists
-      if (currentPomodoroId) {
-        await completePomodoro(currentPomodoroId);
-        setCurrentPomodoroId(null);
+    while (retryCount < maxRetries) {
+      try {
+        // Stop the timer first
+        setIsActive(false);
+
+        // Complete current pomodoro if it exists
+        if (currentPomodoroId) {
+          await completePomodoro(currentPomodoroId);
+          setCurrentPomodoroId(null);
+        }
+
+        // Play notification
+        playNotificationSound();
+
+        // Toggle break state
+        const newIsBreak = !isBreak;
+        setIsBreak(newIsBreak);
+
+        // Calculate new time based on type
+        const newTime = newIsBreak
+          ? (settings.break_duration * 60)
+          : (settings.work_duration * 60);
+        setTime(newTime);
+
+        // Refresh stats
+        const newStats = await getPomodoroStats();
+        setStats(newStats);
+
+        // Show notification
+        toast({
+          title: newIsBreak ? 'Time for a break! 🎉' : 'Break complete!',
+          description: newIsBreak ? 'Great work! Take some time to rest.' : 'Ready to focus again?',
+        });
+
+        // Auto-start if enabled
+        if ((newIsBreak && settings.auto_start_breaks) || (!newIsBreak && settings.auto_start_pomodoros)) {
+          const newPomodoro = await startPomodoro(newIsBreak ? 'break' : 'work');
+          setCurrentPomodoroId(newPomodoro.id);
+          setIsActive(true);
+        }
+
+        // If we reach here, everything succeeded
+        break;
+      } catch (error) {
+        console.error(`Error completing timer (attempt ${retryCount + 1}):`, error);
+        retryCount++;
+
+        if (retryCount === maxRetries) {
+          toast({
+            title: 'Error completing timer session',
+            description: 'Please check your connection and try again. Your progress has been saved.',
+            variant: 'destructive',
+          });
+          
+          // Even if we fail, ensure the timer is stopped and reset
+          setIsActive(false);
+          const newIsBreak = !isBreak;
+          setIsBreak(newIsBreak);
+          const newTime = newIsBreak
+            ? (settings.break_duration * 60)
+            : (settings.work_duration * 60);
+          setTime(newTime);
+        } else {
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
       }
-
-      // Play notification
-      playNotificationSound();
-
-      // Toggle break state
-      const newIsBreak = !isBreak;
-      setIsBreak(newIsBreak);
-
-      // Calculate new time based on type
-      const newTime = newIsBreak
-        ? (settings.break_duration * 60)
-        : (settings.work_duration * 60);
-      setTime(newTime);
-
-      console.log('Refreshing stats...');
-      const newStats = await getPomodoroStats();
-      console.log('Updated stats:', newStats);
-      setStats(newStats);
-
-      // Show notification
-      toast({
-        title: newIsBreak ? 'Time for a break! 🎉' : 'Break complete!',
-        description: newIsBreak ? 'Great work! Take some time to rest.' : 'Ready to focus again?',
-      });
-
-      // Auto-start if enabled
-      if ((newIsBreak && settings.auto_start_breaks) || (!newIsBreak && settings.auto_start_pomodoros)) {
-        const newPomodoro = await startPomodoro(newIsBreak ? 'break' : 'work');
-        setCurrentPomodoroId(newPomodoro.id);
-        setIsActive(true);
-      }
-    } catch (error) {
-      console.error('Error completing timer:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to complete the timer session',
-        variant: 'destructive',
-      });
     }
   };
 
