@@ -1006,6 +1006,7 @@ export async function getPomodoroStats(): Promise<PomodoroStats> {
     const stats: PomodoroStats = {
       totalPomodoros: todayPomodoros.length,
       completedPomodoros: todayPomodoros.filter(p => p.completed).length,
+      daily_completed: todayPomodoros.filter(p => p.completed).length,
       totalWorkMinutes: todayPomodoros
         .filter(p => p.type === 'work')
         .reduce((acc, p) => {

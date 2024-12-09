@@ -143,4 +143,5 @@ export interface PomodoroStats {
   longestStreak: number;
   focusLabels?: string[];
   weeklyCompletion?: number[];
+  daily_completed: number;
 }

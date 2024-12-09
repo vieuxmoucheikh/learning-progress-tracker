@@ -20,6 +20,10 @@ import { PomodoroSettingsDialog } from './PomodoroSettingsDialog';
 import { PomodoroStats as PomodoroStatsComponent } from './PomodoroStats';
 import { PlayIcon, PauseIcon, SkipForwardIcon, Settings2Icon, Brain, Target, Trophy } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { X } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface PomodoroTimerProps {
   onSessionComplete?: (sessionData: { duration: number; label: string; type: 'work' | 'break' }) => void;
@@ -44,9 +48,43 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [focusLabel, setFocusLabel] = useState<string>('');
   const [dailyGoal, setDailyGoal] = useState<number>(8);
+  const [tasks, setTasks] = useState<Array<{ id: string; text: string; completed: boolean }>>([]);
+  const [showCompletedTasks, setShowCompletedTasks] = useState(false);
+  const [currentTask, setCurrentTask] = useState<string | null>(null);
   const timerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  // Add streak tracking
+  const [streak, setStreak] = useState(0);
+  
+  useEffect(() => {
+    const lastActive = localStorage.getItem('lastActiveDate');
+    const today = new Date().toDateString();
+    
+    if (lastActive === today) {
+      const savedStreak = parseInt(localStorage.getItem('pomodoroStreak') || '0');
+      setStreak(savedStreak);
+    } else if (lastActive === new Date(Date.now() - 86400000).toDateString()) {
+      // If last active yesterday, continue streak
+      const savedStreak = parseInt(localStorage.getItem('pomodoroStreak') || '0');
+      setStreak(savedStreak);
+    } else {
+      // Reset streak if more than a day has passed
+      setStreak(0);
+    }
+  }, []);
+
+  // Update streak when completing a pomodoro
+  const updateStreak = useCallback(() => {
+    if (!isBreak) {
+      const today = new Date().toDateString();
+      localStorage.setItem('lastActiveDate', today);
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+      localStorage.setItem('pomodoroStreak', newStreak.toString());
+    }
+  }, [isBreak, streak]);
 
   // Keep audio context reference
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -304,6 +342,9 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
           setIsActive(true);
         }
 
+        // Update streak
+        updateStreak();
+
         // If we reach here, everything succeeded
         break;
       } catch (error) {
@@ -423,52 +464,175 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     return "Stay hydrated during your break";
   }, [stats]);
 
+  const addTask = (text: string) => {
+    setTasks(prev => [...prev, { id: crypto.randomUUID(), text, completed: false }]);
+  };
+
+  const toggleTask = (id: string) => {
+    setTasks(prev => prev.map(task => 
+      task.id === id ? { ...task, completed: !task.completed } : task
+    ));
+  };
+
+  const removeTask = (id: string) => {
+    setTasks(prev => prev.filter(task => task.id !== id));
+  };
+
+  useEffect(() => {
+    const savedTasks = localStorage.getItem('pomodoroTasks');
+    if (savedTasks) {
+      setTasks(JSON.parse(savedTasks));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
+  }, [tasks]);
+
   return (
     <Card className="p-6 max-w-md mx-auto">
-      <div className="flex flex-col items-center space-y-6">
-        <div className="flex items-center justify-between w-full">
-          <h2 className="text-2xl font-bold">
-            {isBreak ? 'Break Time' : 'Focus Time'}
-          </h2>
-          {stats && (
+      <div className="space-y-6 p-6">
+        {stats && (
+          <div className="flex justify-between items-center">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex gap-2"
+            >
+              <Badge variant={isBreak ? "secondary" : "default"} className="text-sm">
+                {isBreak ? "Break Time" : "Focus Time"}
+              </Badge>
+              <Badge variant="outline" className="text-sm">
+                {stats.daily_completed} / {settings?.daily_goal || 0} Today
+              </Badge>
+            </motion.div>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <Badge variant={stats.completedPomodoros >= dailyGoal ? "secondary" : "default"}>
-                    <Target className="w-4 h-4 mr-1" />
-                    {stats.completedPomodoros}/{dailyGoal}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <motion.div
+                      className={cn(
+                        "w-3 h-3 rounded-full",
+                        isActive ? "bg-green-500" : "bg-gray-300"
+                      )}
+                      animate={{
+                        scale: isActive ? [1, 1.2, 1] : 1,
+                        opacity: isActive ? 1 : 0.5,
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: isActive ? Infinity : 0,
+                      }}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {isActive ? "Recording" : "Paused"}
+                    </span>
+                  </div>
                 </TooltipTrigger>
-                <TooltipContent>
-                  Daily Pomodoro Goal
-                </TooltipContent>
+                <TooltipContent>Timer Status</TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          )}
-        </div>
-
+          </div>
+        )}
+        
         {!isBreak && !isActive && (
-          <div className="w-full">
-            <Label htmlFor="focusLabel">What are you focusing on?</Label>
-            <Input
-              id="focusLabel"
-              value={focusLabel}
-              onChange={(e) => setFocusLabel(e.target.value)}
-              placeholder="e.g., React Hooks, Algorithm Practice"
-              className="mt-1"
-            />
+          <div className="w-full space-y-4">
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder="Add a task..."
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                    addTask(e.currentTarget.value.trim());
+                    e.currentTarget.value = '';
+                  }
+                }}
+                className="flex-1"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowCompletedTasks(prev => !prev)}
+              >
+                {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
+              </Button>
+            </div>
+            
+            <div className="space-y-2 max-h-[200px] overflow-y-auto">
+              <AnimatePresence>
+                {tasks
+                  .filter(task => showCompletedTasks || !task.completed)
+                  .map(task => (
+                    <motion.div
+                      key={task.id}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="flex items-center gap-2 group"
+                    >
+                      <Checkbox
+                        checked={task.completed}
+                        onCheckedChange={() => toggleTask(task.id)}
+                      />
+                      <span
+                        className={cn(
+                          "flex-1 text-sm",
+                          task.completed && "line-through text-muted-foreground",
+                          currentTask === task.id && "font-medium"
+                        )}
+                        onClick={() => setCurrentTask(task.id)}
+                      >
+                        {task.text}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeTask(task.id)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </motion.div>
+                  ))}
+              </AnimatePresence>
+            </div>
           </div>
         )}
         
         <div className="relative" ref={timerRef}>
-          <div className="text-6xl font-mono z-10 relative">
+          <motion.div 
+            className="text-7xl font-mono z-10 relative text-center font-bold"
+            animate={{
+              scale: time <= 60 && isActive ? [1, 1.05, 1] : 1,
+            }}
+            transition={{
+              duration: 1,
+              repeat: time <= 60 && isActive ? Infinity : 0,
+            }}
+          >
             {formatTime(time)}
-          </div>
-          <div className="absolute inset-0 -m-4">
-            <div className="h-2">
-              <Progress value={calculateProgress()} />
+          </motion.div>
+          <motion.div 
+            className="absolute inset-0 -m-4"
+            initial={false}
+            animate={{
+              rotate: isActive ? 360 : 0,
+            }}
+            transition={{
+              duration: 60,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          >
+            <div className={cn(
+              "h-2 transition-colors",
+              isBreak ? "bg-secondary" : "bg-primary",
+              time <= 60 && isActive && "bg-red-500"
+            )}>
+              <Progress 
+                value={calculateProgress()} 
+              />
             </div>
-          </div>
+          </motion.div>
         </div>
 
         <div className="flex space-x-4">
@@ -527,6 +691,48 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
           </div>
         )}
 
+        {stats && (
+          <div className="grid grid-cols-3 gap-4 mt-6">
+            <motion.div
+              className="flex flex-col items-center p-4 rounded-lg bg-muted/50"
+              whileHover={{ scale: 1.05 }}
+            >
+              <Brain className="h-6 w-6 mb-2 text-primary" />
+              <div className="text-2xl font-bold">{stats.totalWorkMinutes}</div>
+              <div className="text-xs text-muted-foreground">Focus Hours</div>
+            </motion.div>
+            
+            <motion.div
+              className="flex flex-col items-center p-4 rounded-lg bg-muted/50"
+              whileHover={{ scale: 1.05 }}
+            >
+              <Target className="h-6 w-6 mb-2 text-primary" />
+              <div className="text-2xl font-bold">{stats.daily_completed} / {settings?.daily_goal || 0}</div>
+              <div className="text-xs text-muted-foreground">Daily Goal</div>
+            </motion.div>
+            
+            <motion.div
+              className="flex flex-col items-center p-4 rounded-lg bg-muted/50"
+              whileHover={{ scale: 1.05 }}
+            >
+              <Trophy className="h-6 w-6 mb-2 text-primary" />
+              <div className="text-2xl font-bold">{streak}</div>
+              <div className="text-xs text-muted-foreground">Day Streak</div>
+            </motion.div>
+          </div>
+        )}
+
+        {isActive && currentTask && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4 p-4 rounded-lg bg-muted/30"
+          >
+            <div className="text-sm text-muted-foreground">Currently focusing on:</div>
+            <div className="font-medium">{tasks.find(t => t.id === currentTask)?.text}</div>
+          </motion.div>
+        )}
+        
         {stats && <PomodoroStatsComponent stats={stats} />}
       </div>
 
