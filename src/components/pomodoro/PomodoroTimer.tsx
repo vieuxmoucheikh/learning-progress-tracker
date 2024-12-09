@@ -130,17 +130,6 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     }
   }, [isBreak]);
 
-  const handleTimerComplete = async () => {
-    if (!settings) return;
-
-    try {
-      // Stop the timer
-      setIsActive(false);
-    } catch (error) {
-      console.error('Error handling timer completion:', error);
-    }
-  };
-
   // Timer logic with Web Worker
   useEffect(() => {
     const worker = new Worker(new URL('./timerWorker.js', import.meta.url));
@@ -165,13 +154,13 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     return () => {
       worker.terminate();
     };
-  }, [isActive, handleTimerComplete]);
+  }, [isActive]);
 
   // Handle visibility change
   useEffect(() => {
     let lastTimestamp = Date.now();
     
-    const handleVisibilityChange = async () => {
+    const handleVisibilityChange = () => {
       if (document.hidden) {
         // Save the current timestamp when tab becomes hidden
         lastTimestamp = Date.now();
@@ -182,21 +171,7 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
         const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
         
         if (isActive && elapsedSeconds > 0) {
-          // Update time considering the elapsed duration
-          const newTime = Math.max(0, time - elapsedSeconds);
-          setTime(newTime);
-          
-          // If timer completed while away, handle completion
-          if (newTime === 0) {
-            handleTimerComplete();
-          }
-          
-          // Sync with Supabase immediately when becoming visible
-          await syncWithSupabase();
-          
-          // Refresh stats to ensure they're up to date
-          const newStats = await getPomodoroStats();
-          setStats(newStats);
+          setTime(prevTime => Math.max(0, prevTime - elapsedSeconds));
         }
       }
     };
@@ -206,7 +181,95 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isActive, time, handleTimerComplete, syncWithSupabase]);
+  }, [isActive]);
+
+  // Persist timer state to localStorage
+  useEffect(() => {
+    const timerState = {
+      time,
+      isActive,
+      isBreak,
+      currentPomodoroId,
+      lastUpdate: new Date().toISOString()
+    };
+    localStorage.setItem('pomodoroState', JSON.stringify(timerState));
+  }, [time, isActive, isBreak, currentPomodoroId]);
+
+  // Load persisted state on mount
+  useEffect(() => {
+    const savedState = localStorage.getItem('pomodoroState');
+    if (savedState) {
+      const parsedState = JSON.parse(savedState);
+      const elapsedSeconds = Math.floor((Date.now() - new Date(parsedState.lastUpdate).getTime()) / 1000);
+      
+      if (parsedState.isActive) {
+        setTime(Math.max(0, parsedState.time - elapsedSeconds));
+      } else {
+        setTime(parsedState.time);
+      }
+      setIsActive(parsedState.isActive);
+      setIsBreak(parsedState.isBreak);
+      setCurrentPomodoroId(parsedState.currentPomodoroId);
+    }
+  }, []);
+
+  // Sync periodically
+  useEffect(() => {
+    const syncInterval = setInterval(syncWithSupabase, 5000);
+    return () => clearInterval(syncInterval);
+  }, [syncWithSupabase]);
+
+  const handleTimerComplete = async () => {
+    if (!settings) return;
+
+    try {
+      // Stop the timer
+      setIsActive(false);
+
+      // Complete current pomodoro if it exists
+      if (currentPomodoroId) {
+        await completePomodoro(currentPomodoroId);
+        setCurrentPomodoroId(null);
+      }
+
+      // Play notification
+      playNotificationSound();
+
+      // Toggle break state
+      const newIsBreak = !isBreak;
+      setIsBreak(newIsBreak);
+
+      // Calculate new time based on type
+      const newTime = newIsBreak
+        ? (settings.break_duration * 60)
+        : (settings.work_duration * 60);
+      setTime(newTime);
+
+      // Refresh stats
+      const newStats = await getPomodoroStats();
+      setStats(newStats);
+
+      // Show notification
+      toast({
+        title: newIsBreak ? 'Time for a break! 🎉' : 'Break complete!',
+        description: newIsBreak ? 'Great work! Take some time to rest.' : 'Ready to focus again?',
+      });
+
+      // Auto-start if enabled
+      if ((newIsBreak && settings.auto_start_breaks) || (!newIsBreak && settings.auto_start_pomodoros)) {
+        const newPomodoro = await startPomodoro(newIsBreak ? 'break' : 'work');
+        setCurrentPomodoroId(newPomodoro.id);
+        setIsActive(true);
+      }
+    } catch (error) {
+      console.error('Error completing timer:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to complete the timer session',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const startNewPomodoro = async (type: 'work' | 'break' = 'work') => {
     try {
