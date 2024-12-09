@@ -34,7 +34,6 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
   const [focusLabel, setFocusLabel] = useState<string>('');
   const [dailyGoal, setDailyGoal] = useState<number>(8);
   const timerRef = useRef<HTMLDivElement>(null);
-  const lastTickRef = useRef<number>(Date.now());
   const { toast } = useToast();
 
   // Load timer state from localStorage and start background sync
@@ -59,7 +58,6 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
             if (currentPomodoroId) {
               setCurrentPomodoroId(currentPomodoroId);
             }
-            lastTickRef.current = now;
           } else {
             const defaultTime = isBreak ? 
               (pomodoroSettings.break_duration * 60) : 
@@ -92,7 +90,6 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
           const now = Date.now();
           const elapsed = Math.floor((now - startTime) / 1000);
           setTime(prev => Math.max(0, prev - elapsed));
-          lastTickRef.current = now;
         }
       }
     }, 1000);
@@ -114,41 +111,66 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     }
   }, [time, isActive, isBreak, currentPomodoroId, settings]);
 
-  // Timer logic with performance optimization
+  // Timer logic
   useEffect(() => {
-    let animationFrameId: number;
-    let lastUpdate = Date.now();
-
-    const updateTimer = () => {
-      if (isActive && time > 0) {
-        const now = Date.now();
-        const delta = now - lastUpdate;
-
-        if (delta >= 1000) {
-          setTime(prevTime => {
-            const newTime = Math.max(0, prevTime - Math.floor(delta / 1000));
-            if (newTime === 0) {
-              handleTimerComplete();
-            }
-            return newTime;
-          });
-          lastUpdate = now - (delta % 1000);
-        }
-
-        animationFrameId = requestAnimationFrame(updateTimer);
-      }
-    };
+    let interval: NodeJS.Timeout | null = null;
 
     if (isActive && time > 0) {
-      animationFrameId = requestAnimationFrame(updateTimer);
+      const startTime = Date.now();
+      
+      interval = setInterval(() => {
+        const currentTime = Date.now();
+        const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+        
+        setTime((prevTime) => {
+          const newTime = Math.max(0, prevTime - 1);
+          
+          // Save state to localStorage
+          const state = {
+            time: newTime,
+            isActive,
+            isBreak,
+            currentPomodoroId,
+            startTime: currentTime - ((settings?.work_duration || 25) * 60 - newTime) * 1000
+          };
+          localStorage.setItem('pomodoroState', JSON.stringify(state));
+          
+          if (newTime === 0) {
+            handleTimerComplete();
+          }
+          return newTime;
+        });
+      }, 1000);
     }
 
     return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
+      if (interval) {
+        clearInterval(interval);
       }
     };
-  }, [isActive, time]);
+  }, [isActive, isBreak]);
+
+  // Handle visibility change
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && isActive) {
+        const savedState = localStorage.getItem('pomodoroState');
+        if (savedState) {
+          const { time: savedTime, startTime } = JSON.parse(savedState);
+          if (startTime) {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const remainingTime = Math.max(0, savedTime - elapsed);
+            setTime(remainingTime);
+          }
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isActive]);
 
   const handleTimerComplete = async () => {
     if (!settings) return;
