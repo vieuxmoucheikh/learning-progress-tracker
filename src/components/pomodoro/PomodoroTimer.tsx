@@ -25,6 +25,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { X } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+
+interface Task {
+  id: string;
+  text: string;
+  completed: boolean;
+  progress: number;
+}
+
 interface PomodoroTimerProps {
   onSessionComplete?: (sessionData: { duration: number; label: string; type: 'work' | 'break' }) => void;
   sessionId?: string;
@@ -49,7 +57,12 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [focusLabel, setFocusLabel] = useState<string>('');
   const [dailyGoal, setDailyGoal] = useState<number>(8);
-  const [tasks, setTasks] = useState<Array<{ id: string; text: string; completed: boolean }>>([]);
+  const [tasks, setTasks] = useState<Array<{ 
+    id: string; 
+    text: string; 
+    completed: boolean;
+    progress: number; 
+  }>>([]);
   const [showCompletedTasks, setShowCompletedTasks] = useState(false);
   const [currentTask, setCurrentTask] = useState<string>('');
   const timerRef = useRef<HTMLDivElement>(null);
@@ -466,7 +479,12 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
   }, [stats]);
 
   const addTask = (text: string) => {
-    setTasks(prev => [...prev, { id: crypto.randomUUID(), text, completed: false }]);
+    setTasks(prev => [...prev, { 
+      id: crypto.randomUUID(), 
+      text, 
+      completed: false,
+      progress: 0
+    }]);
   };
 
   const toggleTask = (id: string) => {
@@ -489,6 +507,31 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
   useEffect(() => {
     localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
   }, [tasks]);
+
+  // Update this useEffect to check for task completion when stats change
+  useEffect(() => {
+    if (stats && settings) {
+      const dailyGoal = settings.daily_goal || 4; // Default to 4 if not set
+      const completedCount = stats.daily_completed;
+      
+      if (completedCount >= dailyGoal) {
+        // Mark all tasks as complete when daily goal is reached
+        setTasks(prev => prev.map(task => ({
+          ...task,
+          completed: true,
+          progress: 100
+        })));
+      } else {
+        // Update progress for all tasks
+        const progressPercentage = (completedCount / dailyGoal) * 100;
+        setTasks(prev => prev.map(task => ({
+          ...task,
+          progress: progressPercentage,
+          completed: false // Reset completion if goal is no longer met
+        })));
+      }
+    }
+  }, [stats, settings]);
 
   return (
     <Card className="p-6 max-w-md mx-auto">
