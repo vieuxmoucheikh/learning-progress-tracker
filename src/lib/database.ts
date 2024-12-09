@@ -477,7 +477,7 @@ async function createDatabaseFunctions() {
             user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
             start_time TIMESTAMP WITH TIME ZONE NOT NULL,
             end_time TIMESTAMP WITH TIME ZONE,
-            type VARCHAR(10) CHECK (type IN ('work', 'break')),
+            type VARCHAR(10) CHECK (type IN ('work', 'break', 'long_break')),
             completed BOOLEAN DEFAULT false,
             created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now()),
             updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now())
@@ -854,7 +854,7 @@ async function getCurrentUser() {
 }
 
 // Pomodoro Management Functions
-export async function startPomodoro(type: 'work' | 'break' = 'work'): Promise<Pomodoro> {
+export async function startPomodoro(type: 'work' | 'break' | 'long_break' = 'work'): Promise<Pomodoro> {
   try {
     const user = await getCurrentUser();
     if (!user) throw new Error('No authenticated user');
@@ -1016,7 +1016,7 @@ export async function getPomodoroStats(): Promise<PomodoroStats> {
           return acc;
         }, 0),
       totalBreakMinutes: todayPomodoros
-        .filter(p => p.type === 'break')
+        .filter(p => p.type === 'break' || p.type === 'long_break')
         .reduce((acc, p) => {
           if (p.end_time) {
             const duration = (new Date(p.end_time).getTime() - new Date(p.start_time).getTime()) / 1000 / 60;
