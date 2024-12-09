@@ -66,29 +66,21 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     };
 
     document.addEventListener('click', handleInteraction);
-    
     return () => {
       document.removeEventListener('click', handleInteraction);
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
     };
   }, []);
 
   // Handle visibility change
   useEffect(() => {
     let lastTimestamp = Date.now();
-    
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        // Save the current timestamp when tab becomes hidden
         lastTimestamp = Date.now();
         localStorage.setItem('pomodoroLastTimestamp', lastTimestamp.toString());
       } else {
-        // Calculate elapsed time when tab becomes visible
         const storedTimestamp = parseInt(localStorage.getItem('pomodoroLastTimestamp') || lastTimestamp.toString());
         const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
-        
         if (isActive && elapsedSeconds > 0) {
           setTime(prevTime => Math.max(0, prevTime - elapsedSeconds));
         }
@@ -96,7 +88,6 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
@@ -120,7 +111,6 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     if (savedState) {
       const parsedState = JSON.parse(savedState);
       const elapsedSeconds = Math.floor((Date.now() - new Date(parsedState.lastUpdate).getTime()) / 1000);
-      
       if (parsedState.isActive) {
         setTime(Math.max(0, parsedState.time - elapsedSeconds));
       } else {
@@ -154,11 +144,9 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
 
       if (error) throw error;
 
-      // Only update if the remote state is newer
       if (data?.pomodoro_state) {
         const remoteState = data.pomodoro_state;
         const localLastUpdate = localStorage.getItem('lastUpdate');
-        
         if (localLastUpdate && new Date(remoteState.last_update) > new Date(localLastUpdate)) {
           setTime(remoteState.time);
           setIsActive(remoteState.is_active);
