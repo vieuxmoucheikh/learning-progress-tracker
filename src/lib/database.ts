@@ -983,11 +983,11 @@ export async function getPomodoroStats(): Promise<PomodoroStats> {
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
+    // Get today's pomodoros
     const { data: todayPomodoros, error: todayError } = await supabase
       .from('pomodoros')
       .select('*')
       .eq('user_id', user.id)
-      .eq('completed', true)
       .gte('start_time', today.toISOString());
 
     if (todayError) throw todayError;
@@ -995,30 +995,44 @@ export async function getPomodoroStats(): Promise<PomodoroStats> {
     // Get all pomodoros for streak calculation
     const { data: allPomodoros, error: allError } = await supabase
       .from('pomodoros')
-      .select('start_time')
+      .select('*')
       .eq('user_id', user.id)
-      .eq('completed', true)
       .order('start_time', { ascending: false });
 
     if (allError) throw allError;
 
-    // Calculate stats
+    // Calculate total work minutes more accurately
+    const totalWorkMinutes = todayPomodoros
+      .filter(p => p.type === 'work' && p.completed)
+      .reduce((acc, p) => {
+        if (p.end_time && p.start_time) {
+          const duration = (new Date(p.end_time).getTime() - new Date(p.start_time).getTime()) / (1000 * 60);
+          return acc + duration;
+        }
+        return acc;
+      }, 0);
+
+    // Calculate daily completed pomodoros
+    const daily_completed = todayPomodoros.filter(p => p.completed && p.type === 'work').length;
+
     const stats: PomodoroStats = {
-      totalPomodoros: todayPomodoros.length,
-      completedPomodoros: todayPomodoros.filter(p => p.completed).length,
-      daily_completed: todayPomodoros.filter(p => p.completed).length,
-      totalWorkMinutes: Math.round(todayPomodoros.filter(p => p.type === 'work').reduce((acc, p) => { if (p.end_time) { const duration = (new Date(p.end_time).getTime() - new Date(p.start_time).getTime()) / 1000 / 60; return acc + duration; } return acc; }, 0) / 60),
-      totalBreakMinutes: todayPomodoros
-        .filter(p => p.type === 'break' || p.type === 'long_break')
-        .reduce((acc, p) => {
-          if (p.end_time) {
-            const duration = (new Date(p.end_time).getTime() - new Date(p.start_time).getTime()) / 1000 / 60;
-            return acc + duration;
-          }
-          return acc;
-        }, 0),
-      dailyAverage: 0,
-      mostProductiveTime: calculateMostProductiveTime(todayPomodoros),
+      totalPomodoros: allPomodoros.length,
+      completedPomodoros: allPomodoros.filter(p => p.completed).length,
+      daily_completed,
+      totalWorkMinutes: Math.round(totalWorkMinutes),
+      totalBreakMinutes: Math.round(
+        todayPomodoros
+          .filter(p => (p.type === 'break' || p.type === 'long_break') && p.completed)
+          .reduce((acc, p) => {
+            if (p.end_time && p.start_time) {
+              const duration = (new Date(p.end_time).getTime() - new Date(p.start_time).getTime()) / (1000 * 60);
+              return acc + duration;
+            }
+            return acc;
+          }, 0)
+      ),
+      dailyAverage: calculateDailyAverage(allPomodoros),
+      mostProductiveTime: calculateMostProductiveTime(allPomodoros),
       currentStreak: calculateCurrentStreak(allPomodoros),
       longestStreak: calculateLongestStreak(allPomodoros)
     };
@@ -1092,4 +1106,14 @@ function calculateLongestStreak(pomodoros: Pick<Pomodoro, 'start_time'>[]): numb
   }
 
   return maxStreak;
+}
+
+function calculateDailyAverage(pomodoros: Pomodoro[]): number {
+  if (pomodoros.length === 0) return 0;
+  
+  const uniqueDays = new Set(
+    pomodoros.map(p => new Date(p.start_time).toISOString().split('T')[0])
+  );
+  
+  return Math.round(pomodoros.length / uniqueDays.size);
 }
