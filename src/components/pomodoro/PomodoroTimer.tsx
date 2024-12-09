@@ -18,9 +18,19 @@ import { PomodoroSettings, PomodoroStats } from '@/types';
 import { PomodoroSettingsDialog } from './PomodoroSettingsDialog';
 import { PomodoroStats as PomodoroStatsComponent } from './PomodoroStats';
 import { PlayIcon, PauseIcon, SkipForwardIcon, Settings2Icon, Brain, Target, Trophy } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/lib/auth';
 
 interface PomodoroTimerProps {
   onSessionComplete?: (sessionData: { duration: number; label: string; type: 'work' | 'break' }) => void;
+}
+
+interface PomodoroState {
+  last_update: string;
+  time: number;
+  is_active: boolean;
+  is_break: boolean;
+  current_pomodoro_id: string;
 }
 
 export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
@@ -35,8 +45,167 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
   const [dailyGoal, setDailyGoal] = useState<number>(8);
   const timerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  // Timer logic
+  // Keep audio context reference
+  const audioContextRef = useRef<AudioContext | null>(null);
+
+  // Initialize audio context
+  useEffect(() => {
+    audioContextRef.current = new AudioContext();
+    return () => {
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+    };
+  }, []);
+
+  // Sync timer state with Supabase
+  const syncWithSupabase = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('pomodoro_states')
+        .upsert({
+          user_id: user.id,
+          time,
+          is_active: isActive,
+          is_break: isBreak,
+          current_pomodoro_id: currentPomodoroId,
+          last_update: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Only update if the remote state is newer
+      if (data && new Date(data.last_update) > new Date(localStorage.getItem('lastUpdate') || '')) {
+        setTime(data.time);
+        setIsActive(data.is_active);
+        setIsBreak(data.is_break);
+        setCurrentPomodoroId(data.current_pomodoro_id);
+        localStorage.setItem('lastUpdate', data.last_update);
+      }
+    } catch (error) {
+      console.error('Error syncing with Supabase:', error);
+    }
+  }, [user?.id, time, isActive, isBreak, currentPomodoroId, supabase]);
+
+  // Subscribe to real-time updates
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel('pomodoro_states')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'pomodoro_states',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          const newState: PomodoroState = payload.new as PomodoroState;
+          if (new Date(newState.last_update) > new Date(localStorage.getItem('lastUpdate') || '')) {
+            setTime(newState.time);
+            setIsActive(newState.is_active);
+            setIsBreak(newState.is_break);
+            setCurrentPomodoroId(newState.current_pomodoro_id);
+            localStorage.setItem('lastUpdate', newState.last_update);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, supabase]);
+
+  // Sync periodically
+  useEffect(() => {
+    const syncInterval = setInterval(syncWithSupabase, 5000);
+    return () => clearInterval(syncInterval);
+  }, [syncWithSupabase]);
+
+  const playNotificationSound = useCallback(async () => {
+    try {
+      if (!settings?.sound_enabled) return;
+
+      // Resume audio context if suspended
+      if (audioContextRef.current?.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+
+      const context = audioContextRef.current || new AudioContext();
+      const oscillator = context.createOscillator();
+      const gainNode = context.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(context.destination);
+
+      // Use a more pleasant notification sound
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(440, context.currentTime); // A4 note
+      gainNode.gain.setValueAtTime(0.1, context.currentTime);
+
+      oscillator.start(context.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + 0.5);
+      oscillator.stop(context.currentTime + 0.5);
+
+      // Show notification if permission granted
+      if (Notification.permission === 'granted') {
+        new Notification(isBreak ? 'Break time!' : 'Focus time!', {
+          body: isBreak ? 'Time to take a break!' : 'Time to focus!',
+          icon: '/favicon.ico',
+          silent: true // We're handling the sound ourselves
+        });
+      }
+    } catch (error) {
+      console.error('Error playing notification:', error);
+      // Fallback to system notification with sound
+      if (Notification.permission === 'granted') {
+        new Notification(isBreak ? 'Break time!' : 'Focus time!', {
+          body: isBreak ? 'Time to take a break!' : 'Time to focus!',
+          icon: '/favicon.ico',
+          silent: false
+        });
+      }
+    }
+  }, [settings?.sound_enabled, isBreak]);
+
+  // Request notification permission on mount
+  useEffect(() => {
+    if (Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Handle visibility change
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.hidden) {
+        // Tab is hidden, sync state immediately
+        await syncWithSupabase();
+      } else {
+        // Tab is visible again, sync and resume audio context
+        await syncWithSupabase();
+        if (audioContextRef.current?.state === 'suspended') {
+          await audioContextRef.current.resume();
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [syncWithSupabase]);
+
+  // Timer logic with improved reliability
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
 
@@ -50,6 +219,9 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
           return newTime;
         });
       }, 1000);
+
+      // Sync immediately when timer starts
+      syncWithSupabase();
     }
 
     return () => {
@@ -186,52 +358,6 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
-  const playNotificationSound = () => {
-    try {
-      // Use a simple beep sound as a fallback
-      const beep = () => {
-        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const oscillator = context.createOscillator();
-        const gainNode = context.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(context.destination);
-        
-        oscillator.type = 'sine';
-        oscillator.frequency.value = 800;
-        gainNode.gain.value = 0.1;
-        
-        oscillator.start(0);
-        gainNode.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + 0.5);
-        
-        setTimeout(() => {
-          oscillator.stop();
-          context.close();
-        }, 500);
-      };
-
-      // Only play if sound is enabled in settings
-      if (settings?.sound_enabled) {
-        beep();
-        
-        // Also show notification if available
-        if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification('Pomodoro Timer', {
-            body: isBreak ? 'Break time is over!' : 'Time to take a break!',
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Error with audio:', error);
-      // Fallback to just notification if audio fails
-      if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('Pomodoro Timer', {
-          body: isBreak ? 'Break time is over!' : 'Time to take a break!',
-        });
-      }
-    }
   };
 
   const handleButtonClick = useCallback(async (action: 'start' | 'pause' | 'skip') => {
