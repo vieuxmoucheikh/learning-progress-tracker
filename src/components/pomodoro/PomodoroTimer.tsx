@@ -50,7 +50,7 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
   const [dailyGoal, setDailyGoal] = useState<number>(8);
   const [tasks, setTasks] = useState<Array<{ id: string; text: string; completed: boolean }>>([]);
   const [showCompletedTasks, setShowCompletedTasks] = useState(false);
-  const [currentTask, setCurrentTask] = useState<string | null>(null);
+  const [currentTask, setCurrentTask] = useState<string>('');
   const timerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -538,63 +538,20 @@ export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
         {!isBreak && !isActive && (
           <div className="w-full space-y-4">
             <div className="flex items-center gap-2">
-              <Input
-                placeholder="Add a task..."
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                    addTask(e.currentTarget.value.trim());
-                    e.currentTarget.value = '';
-                  }
-                }}
-                className="flex-1"
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowCompletedTasks(prev => !prev)}
-              >
-                {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
-              </Button>
+              <Input value={currentTask} onChange={(e) => setCurrentTask(e.target.value)} placeholder="Add a new task" />
+              <Button onClick={() => { if (currentTask) { addTask(currentTask); setCurrentTask(''); } }}>Add Task</Button>
+              <Button onClick={() => setShowCompletedTasks(prev => !prev)}>{showCompletedTasks ? 'Hide Completed' : 'Show Completed'}</Button>
             </div>
             
-            <div className="space-y-2 max-h-[200px] overflow-y-auto">
-              <AnimatePresence>
-                {tasks
-                  .filter(task => showCompletedTasks || !task.completed)
-                  .map(task => (
-                    <motion.div
-                      key={task.id}
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="flex items-center gap-2 group"
-                    >
-                      <Checkbox
-                        checked={task.completed}
-                        onCheckedChange={() => toggleTask(task.id)}
-                      />
-                      <span
-                        className={cn(
-                          "flex-1 text-sm",
-                          task.completed && "line-through text-muted-foreground",
-                          currentTask === task.id && "font-medium"
-                        )}
-                        onClick={() => setCurrentTask(task.id)}
-                      >
-                        {task.text}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => removeTask(task.id)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </motion.div>
-                  ))}
-              </AnimatePresence>
-            </div>
+            <ul>
+              {tasks.filter(task => showCompletedTasks || !task.completed).map(task => (
+                <li key={task.id} className={task.completed ? 'line-through' : ''}>
+                  <Checkbox checked={task.completed} onChange={() => toggleTask(task.id)} />
+                  {task.text}
+                  <Button onClick={() => removeTask(task.id)}>Remove</Button>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
         
