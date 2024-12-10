@@ -942,7 +942,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
   // Update active task stats display
   return (
-    <Card className="p-4 md:p-6 max-w-md mx-auto bg-gradient-to-b from-background to-muted/20">
+    <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-white/5 border-white/10 shadow-2xl">
       <div className="pomodoro-timer space-y-6 md:space-y-8">
         {/* Session Type Indicator */}
         <SessionTypeIndicator isBreak={isBreak} />
@@ -954,7 +954,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               value={currentTask} 
               onChange={(e) => setCurrentTask(e.target.value)} 
               placeholder="Add a new task..."
-              className="bg-background/50 border-muted"
+              className="bg-white/10 border-white/10 focus:border-blue-500/50 placeholder:text-white/30"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && currentTask.trim()) {
                   addTask(currentTask);
@@ -969,20 +969,20 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                   setCurrentTask(''); 
                 } 
               }}
-              className="bg-blue-500 hover:bg-blue-600"
+              className="bg-blue-500/80 hover:bg-blue-600/80 text-white shadow-lg shadow-blue-500/20"
             >
               Add
             </Button>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">
+          <div className="flex justify-between items-center px-1">
+            <span className="text-sm text-white/60">
               {tasks.filter(t => !t.completed).length} active tasks
             </span>
             <Button 
               variant="ghost" 
               size="sm"
               onClick={() => setShowCompletedTasks(prev => !prev)}
-              className="text-muted-foreground hover:text-foreground"
+              className="text-white/60 hover:text-white hover:bg-white/10"
             >
               {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
             </Button>
@@ -1009,10 +1009,11 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                   disabled={!activeTaskId}
                   size="lg"
                   className={cn(
-                    "w-24 transition-all duration-300",
+                    "w-24 transition-all duration-300 shadow-lg",
                     isActive 
-                      ? "bg-blue-500 hover:bg-blue-600" 
-                      : "bg-blue-500/90 hover:bg-blue-500"
+                      ? "bg-blue-500/80 hover:bg-blue-600/80 shadow-blue-500/20" 
+                      : "bg-blue-500/60 hover:bg-blue-500/80 shadow-blue-500/10",
+                    !activeTaskId && "opacity-50"
                   )}
                 >
                   {isActive ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
@@ -1030,7 +1031,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                   disabled={!activeTaskId || !isActive}
                   variant="outline"
                   size="lg"
-                  className="border-blue-200/20 hover:border-blue-200/30"
+                  className="border-white/10 hover:border-white/20 hover:bg-white/5"
                 >
                   <SkipForwardIcon className="h-6 w-6" />
                 </Button>
@@ -1046,7 +1047,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                   onClick={() => setSettingsOpen(true)}
                   variant="outline"
                   size="lg"
-                  className="border-blue-200/20 hover:border-blue-200/30"
+                  className="border-white/10 hover:border-white/20 hover:bg-white/5"
                 >
                   <Settings2Icon className="h-6 w-6" />
                 </Button>
@@ -1063,31 +1064,58 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-4 rounded-xl bg-gradient-to-r from-blue-500/5 to-blue-400/5 border border-blue-200/10"
+            className="p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-blue-400/5 border border-white/10"
           >
-            <div className="text-sm font-medium text-blue-600 mb-3">Task Progress</div>
+            <div className="text-sm font-medium text-blue-400 mb-3">Task Progress</div>
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-500">
+                <div className="text-2xl font-bold text-white">
                   {tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0}
                 </div>
-                <div className="text-xs text-muted-foreground">Pomodoros</div>
+                <div className="text-xs text-white/60">Pomodoros</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-500">
+                <div className="text-2xl font-bold text-white">
                   {formatTotalTime(tasks.find(t => t.id === activeTaskId)?.metrics.totalMinutes || 0)}
                 </div>
-                <div className="text-xs text-muted-foreground">Total Time</div>
+                <div className="text-xs text-white/60">Total Time</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-500">
+                <div className="text-2xl font-bold text-white">
                   {tasks.find(t => t.id === activeTaskId)?.metrics.currentStreak || 0}
                 </div>
-                <div className="text-xs text-muted-foreground">Streak</div>
+                <div className="text-xs text-white/60">Streak</div>
               </div>
             </div>
           </motion.div>
         )}
+
+        {/* Settings Dialog */}
+        <PomodoroSettingsDialog
+          open={settingsOpen}
+          onOpenChange={setSettingsOpen}
+          onSettingsUpdate={async (newSettings) => {
+            try {
+              await updatePomodoroSettings(newSettings);
+              const updatedSettings = await getPomodoroSettings();
+              setSettings(updatedSettings);
+              if (updatedSettings.work_duration && !isActive) {
+                setTime(updatedSettings.work_duration * 60);
+              }
+              toast({
+                title: "Settings Updated",
+                description: "Your pomodoro settings have been saved.",
+              });
+            } catch (error) {
+              toast({
+                title: "Error",
+                description: "Failed to update settings",
+                variant: "destructive",
+              });
+            }
+          }}
+          initialSettings={settings}
+        />
       </div>
     </Card>
   );
