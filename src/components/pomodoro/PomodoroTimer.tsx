@@ -355,33 +355,78 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
   // Add this component for pomodoro progress
   const PomodoroProgress = ({ task, settings }: { task: Task, settings: PomodoroSettings }) => {
     const dailyGoal = settings?.daily_goal || 4;
-    const completed = task.metrics.completedPomodoros;
+    const completed = Math.min(task.metrics.completedPomodoros, dailyGoal);
     const remaining = Math.max(0, dailyGoal - completed);
-    const percentage = (completed / dailyGoal) * 100;
+    const percentage = Math.min(100, (completed / dailyGoal) * 100);
 
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="p-4 rounded-lg bg-muted/30 mt-4"
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="p-6 rounded-xl bg-gradient-to-br from-muted/30 to-muted/10 backdrop-blur-sm shadow-lg mt-6"
       >
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium">Pomodoro Progress</span>
-          <span className="text-sm text-muted-foreground">
-            {completed}/{dailyGoal} ({remaining} remaining)
-          </span>
+        <div className="flex justify-between items-center mb-3">
+          <motion.span 
+            className="text-base font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            Daily Progress
+          </motion.span>
+          <motion.div 
+            className="flex items-center gap-2 text-sm"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <span className="font-bold text-primary">{completed}</span>
+            <span className="text-muted-foreground">/</span>
+            <span className="font-medium text-muted-foreground">{dailyGoal}</span>
+            {remaining > 0 && (
+              <span className="text-xs text-muted-foreground ml-1">
+                ({remaining} to go)
+              </span>
+            )}
+          </motion.div>
         </div>
-        <Progress value={percentage} />
-        <div className="flex justify-between mt-2">
+
+        <div className="relative h-3 mb-4">
+          <motion.div
+            className="absolute w-full h-full bg-muted/20 rounded-full overflow-hidden"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <motion.div
+              className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full"
+              initial={{ width: "0%" }}
+              animate={{ width: `${percentage}%` }}
+              transition={{ 
+                duration: 1,
+                ease: "easeOut",
+                delay: 0.4
+              }}
+            />
+          </motion.div>
+        </div>
+
+        <motion.div 
+          className="flex justify-between text-xs"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-primary" />
-            <span className="text-xs text-muted-foreground">Completed</span>
+            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-primary/80" />
+            <span className="text-muted-foreground">Completed</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-muted" />
-            <span className="text-xs text-muted-foreground">Remaining</span>
+            <div className="w-2 h-2 rounded-full bg-muted/40" />
+            <span className="text-muted-foreground">Remaining</span>
           </div>
-        </div>
+        </motion.div>
       </motion.div>
     );
   };
