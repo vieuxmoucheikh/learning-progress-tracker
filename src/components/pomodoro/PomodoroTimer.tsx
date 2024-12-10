@@ -382,8 +382,8 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
       >
         {/* Background Glow */}
         <div className={cn(
-          "absolute inset-0 rounded-full blur-3xl opacity-20 transition-colors duration-300",
-          isBreak ? "bg-secondary" : "bg-primary"
+          "absolute inset-0 rounded-full blur-2xl opacity-25 transition-colors duration-300",
+          isBreak ? "bg-blue-400" : "bg-blue-500"
         )} />
 
         {/* Progress Ring */}
@@ -393,8 +393,8 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
             cx="150"
             cy="150"
             r="120"
-            className="stroke-muted/25 fill-none"
-            strokeWidth="8"
+            className="stroke-slate-200 dark:stroke-slate-800 fill-none"
+            strokeWidth="12"
           />
           {/* Progress Ring */}
           <circle
@@ -404,10 +404,10 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
             className={cn(
               "fill-none transition-all duration-500",
               isBreak 
-                ? "stroke-secondary/80 drop-shadow-[0_0_8px_rgba(var(--secondary),0.4)]" 
-                : "stroke-primary/80 drop-shadow-[0_0_8px_rgba(var(--primary),0.4)]"
+                ? "stroke-blue-400 drop-shadow-[0_0_10px_rgba(96,165,250,0.5)]" 
+                : "stroke-blue-500 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]"
             )}
-            strokeWidth="8"
+            strokeWidth="12"
             strokeDasharray={circumference}
             strokeDashoffset={circumference - (progress / 100) * circumference}
             strokeLinecap="round"
@@ -425,8 +425,8 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               className={cn(
                 "transition-colors duration-300",
                 isActive 
-                  ? isBreak ? "text-secondary" : "text-primary" 
-                  : "text-muted-foreground/80"
+                  ? isBreak ? "text-blue-400" : "text-blue-500" 
+                  : "text-slate-600 dark:text-slate-400"
               )}
             >
               {String(minutes).padStart(2, '0')}
@@ -434,8 +434,8 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
             <span className={cn(
               "mx-2 transition-colors duration-300",
               isActive 
-                ? isBreak ? "text-secondary/60" : "text-primary/60"
-                : "text-muted-foreground/60"
+                ? isBreak ? "text-blue-400" : "text-blue-500"
+                : "text-slate-400 dark:text-slate-600"
             )}>:</span>
             <motion.span
               key={seconds}
@@ -446,18 +446,18 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                 "transition-colors duration-300",
                 isActive 
                   ? time <= 60 ? "text-red-500" 
-                  : isBreak ? "text-secondary" : "text-primary"
-                  : "text-muted-foreground/80"
+                  : isBreak ? "text-blue-400" : "text-blue-500"
+                  : "text-slate-600 dark:text-slate-400"
               )}
             >
               {String(seconds).padStart(2, '0')}
             </motion.span>
           </div>
           <span className={cn(
-            "text-sm font-medium mt-2 transition-colors duration-300",
+            "text-sm font-medium mt-3 transition-colors duration-300",
             isActive 
-              ? isBreak ? "text-secondary/80" : "text-primary/80"
-              : "text-muted-foreground/60"
+              ? isBreak ? "text-blue-400" : "text-blue-500"
+              : "text-slate-500 dark:text-slate-400"
           )}>
             {isBreak ? "Break Time" : "Focus Time"}
           </span>
@@ -474,35 +474,35 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     const percentage = Math.min(100, (completed / dailyGoal) * 100);
 
     return (
-      <div className="p-6 rounded-xl bg-gradient-to-br from-background/50 to-muted/20 shadow-xl backdrop-blur-sm border border-muted/20">
+      <div className="p-6 rounded-xl bg-white dark:bg-slate-900 shadow-lg border border-slate-200 dark:border-slate-800">
         <div className="flex justify-between items-center mb-4">
-          <span className="text-base font-semibold text-foreground/80">
+          <span className="text-base font-semibold text-slate-900 dark:text-slate-100">
             Daily Progress
           </span>
           <div className="flex items-center gap-2">
             <span className={cn(
               "text-xl font-bold",
-              percentage === 100 ? "text-primary" : "text-foreground/80"
+              percentage === 100 ? "text-blue-500" : "text-slate-900 dark:text-slate-100"
             )}>
               {completed}
             </span>
-            <span className="text-muted-foreground">/</span>
-            <span className="text-foreground/60 font-medium">{dailyGoal}</span>
+            <span className="text-slate-500">/</span>
+            <span className="text-slate-700 dark:text-slate-300 font-medium">{dailyGoal}</span>
             {remaining > 0 && (
-              <span className="text-xs text-muted-foreground ml-1">
+              <span className="text-xs text-slate-500 ml-1">
                 ({remaining} to go)
               </span>
             )}
           </div>
         </div>
-        <div className="relative h-3">
-          <div className="absolute w-full h-full bg-muted/20 rounded-full overflow-hidden">
+        <div className="relative h-4">
+          <div className="absolute w-full h-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
             <div 
               className={cn(
                 "h-full transition-all duration-300 rounded-full",
                 percentage === 100 
-                  ? "bg-gradient-to-r from-primary/80 to-primary" 
-                  : "bg-gradient-to-r from-muted-foreground/40 to-muted-foreground/60"
+                  ? "bg-gradient-to-r from-blue-500 to-blue-400" 
+                  : "bg-gradient-to-r from-blue-500/90 to-blue-400/90"
               )}
               style={{ width: `${percentage}%` }}
             />
