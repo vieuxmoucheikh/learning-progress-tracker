@@ -362,6 +362,101 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     }
   };
 
+  // Add helper function for time formatting
+  const formatTotalTime = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    if (hours === 0) return `${remainingMinutes}m`;
+    if (remainingMinutes === 0) return `${hours}h`;
+    return `${hours}h ${remainingMinutes}m`;
+  };
+
+  // Update task persistence
+  useEffect(() => {
+    const loadTasks = async () => {
+      try {
+        const savedTasks = localStorage.getItem('pomodoroTasks');
+        if (savedTasks) {
+          const parsedTasks = JSON.parse(savedTasks);
+          const tasksWithMetrics = parsedTasks.map((task: any) => ({
+            ...task,
+            metrics: task.metrics || {
+              totalMinutes: 0,
+              completedPomodoros: 0,
+              currentStreak: 0
+            }
+          }));
+          setTasks(tasksWithMetrics);
+        }
+      } catch (error) {
+        console.error('Error loading tasks:', error);
+      }
+    };
+
+    loadTasks();
+  }, []);
+
+  // Save tasks whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
+    } catch (error) {
+      console.error('Error saving tasks:', error);
+    }
+  }, [tasks]);
+
+  // Update task list rendering
+  const renderTaskList = () => (
+    <ul className="space-y-2">
+      {tasks.filter(task => showCompletedTasks || !task.completed).map((task: Task) => (
+        <li 
+          key={task.id} 
+          className={cn(
+            "flex items-center gap-2 p-3 rounded-lg transition-colors",
+            activeTaskId === task.id ? "bg-primary/10" : "bg-muted/30",
+            "hover:bg-primary/5"
+          )}
+        >
+          <Checkbox 
+            checked={task.completed} 
+            onCheckedChange={() => toggleTask(task.id)}
+          />
+          <div className="flex-1">
+            <div className={cn(
+              "font-medium",
+              task.completed && "line-through text-muted-foreground"
+            )}>
+              {task.text}
+            </div>
+            {activeTaskId === task.id && (
+              <div className="text-xs text-muted-foreground mt-1">
+                {task.metrics.completedPomodoros} pomodoros • {formatTotalTime(task.metrics.totalMinutes)}
+              </div>
+            )}
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setTaskActive(task.id)}
+            className={cn(
+              "mr-2",
+              activeTaskId === task.id && "bg-primary/20"
+            )}
+          >
+            {activeTaskId === task.id ? "Active" : "Start"}
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => removeTask(task.id)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </li>
+      ))}
+    </ul>
+  );
+
   // Enhanced TimerDisplay with better styling
   const TimerDisplay = ({ time, isActive, totalTime }: { time: number; isActive: boolean; totalTime: number }) => {
     const minutes = Math.floor(time / 60);
@@ -762,108 +857,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     setTasks(prev => prev.filter(task => task.id !== id));
   };
 
-  useEffect(() => {
-    const savedTasks = localStorage.getItem('pomodoroTasks');
-    if (savedTasks) {
-      try {
-        const parsedTasks = JSON.parse(savedTasks);
-        const tasksWithMetrics = parsedTasks.map((task: any) => ({
-          ...task,
-          metrics: task.metrics || {
-            totalMinutes: 0,
-            completedPomodoros: 0,
-            currentStreak: 0
-          }
-        }));
-        setTasks(tasksWithMetrics);
-      } catch (error) {
-        console.error('Error parsing saved tasks:', error);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
-  }, [tasks]);
-
-  // Update this useEffect to check for task completion when stats change
-  useEffect(() => {
-    if (stats && settings) {
-      const dailyGoal = settings.daily_goal || 4; // Default to 4 if not set
-      const completedCount = stats.daily_completed;
-      
-      if (completedCount >= dailyGoal) {
-        // Mark all tasks as complete when daily goal is reached
-        setTasks(prev => prev.map(task => ({
-          ...task,
-          completed: true,
-          progress: 100
-        })));
-      } else {
-        // Update progress for all tasks
-        const progressPercentage = (completedCount / dailyGoal) * 100;
-        setTasks(prev => prev.map(task => ({
-          ...task,
-          progress: progressPercentage,
-          completed: false // Reset completion if goal is no longer met
-        })));
-      }
-    }
-  }, [stats, settings]);
-
-  // Update task list rendering to show active task and metrics
-  const renderTaskList = () => (
-    <ul className="space-y-2">
-      {tasks.filter(task => showCompletedTasks || !task.completed).map((task: Task) => (
-        <li 
-          key={task.id} 
-          className={cn(
-            "flex items-center gap-2 p-3 rounded-lg transition-colors",
-            activeTaskId === task.id ? "bg-primary/10" : "bg-muted/30",
-            "hover:bg-primary/5"
-          )}
-        >
-          <Checkbox 
-            checked={task.completed} 
-            onCheckedChange={() => toggleTask(task.id)}
-          />
-          <div className="flex-1">
-            <div className={cn(
-              "font-medium",
-              task.completed && "line-through text-muted-foreground"
-            )}>
-              {task.text}
-            </div>
-            {activeTaskId === task.id && (
-              <div className="text-xs text-muted-foreground mt-1">
-                {task.metrics.completedPomodoros} pomodoros • {Math.floor(task.metrics.totalMinutes / 60)}h {task.metrics.totalMinutes % 60}m
-              </div>
-            )}
-          </div>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => setTaskActive(task.id)}
-            className={cn(
-              "mr-2",
-              activeTaskId === task.id && "bg-primary/20"
-            )}
-          >
-            {activeTaskId === task.id ? "Active" : "Start"}
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => removeTask(task.id)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </li>
-      ))}
-    </ul>
-  );
-
-  // Update the main return to improve mobile layout
+  // Update active task stats display
   return (
     <Card className="p-4 md:p-6 max-w-md mx-auto">
       <div className="pomodoro-timer space-y-6 md:space-y-8">
@@ -1032,9 +1026,9 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold">
-                  {Math.floor((tasks.find(t => t.id === activeTaskId)?.metrics.totalMinutes || 0) / 60)}h
+                  {formatTotalTime(tasks.find(t => t.id === activeTaskId)?.metrics.totalMinutes || 0)}
                 </div>
-                <div className="text-xs text-muted-foreground">Total Hours</div>
+                <div className="text-xs text-muted-foreground">Total Time</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold">
