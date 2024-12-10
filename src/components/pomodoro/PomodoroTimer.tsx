@@ -25,6 +25,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { X } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Clock } from 'lucide-react';
 
 interface Task {
   id: string;
@@ -405,56 +406,138 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     }
   }, [tasks]);
 
-  // Update task list rendering
-  const renderTaskList = () => (
-    <ul className="space-y-2">
-      {tasks.filter(task => showCompletedTasks || !task.completed).map((task: Task) => (
-        <li 
-          key={task.id} 
+  // Add session type indicator component
+  const SessionTypeIndicator = ({ isBreak }: { isBreak: boolean }) => (
+    <motion.div 
+      className={cn(
+        "absolute top-0 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full shadow-lg",
+        isBreak 
+          ? "bg-indigo-500/10 text-indigo-600 border border-indigo-200/20" 
+          : "bg-blue-500/10 text-blue-600 border border-blue-200/20"
+      )}
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -20, opacity: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="flex items-center gap-2">
+        <div className={cn(
+          "w-2 h-2 rounded-full animate-pulse",
+          isBreak ? "bg-indigo-500" : "bg-blue-500"
+        )} />
+        <span className="text-sm font-medium">
+          {isBreak ? "Break Time" : "Focus Time"}
+        </span>
+      </div>
+    </motion.div>
+  );
+
+  // Add keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement) return;
+      
+      switch(e.key.toLowerCase()) {
+        case ' ':
+          e.preventDefault();
+          if (activeTaskId) {
+            handleButtonClick(isActive ? 'pause' : 'start');
+          }
+          break;
+        case 's':
+          e.preventDefault();
+          if (activeTaskId && isActive) {
+            handleButtonClick('skip');
+          }
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [isActive, activeTaskId]);
+
+  // Enhanced task list item
+  const TaskListItem = ({ task }: { task: Task }) => (
+    <motion.li 
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className={cn(
+        "flex items-center gap-3 p-4 rounded-xl transition-all duration-200",
+        activeTaskId === task.id 
+          ? "bg-gradient-to-r from-blue-500/10 to-blue-400/5 shadow-sm" 
+          : "bg-muted/30 hover:bg-muted/50",
+        "border border-transparent hover:border-blue-500/10"
+      )}
+    >
+      <Checkbox 
+        checked={task.completed} 
+        onCheckedChange={() => toggleTask(task.id)}
+        className="data-[state=checked]:bg-blue-500"
+      />
+      <div className="flex-1 min-w-0">
+        <div className={cn(
+          "font-medium truncate",
+          task.completed && "line-through text-muted-foreground"
+        )}>
+          {task.text}
+        </div>
+        {activeTaskId === task.id && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-xs text-muted-foreground mt-1 flex items-center gap-2"
+          >
+            <span className="flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {formatTotalTime(task.metrics.totalMinutes)}
+            </span>
+            <span>•</span>
+            <span className="flex items-center gap-1">
+              <Target className="w-3 h-3" />
+              {task.metrics.completedPomodoros} pomodoros
+            </span>
+          </motion.div>
+        )}
+      </div>
+      <div className="flex items-center gap-2">
+        <Button 
+          variant={activeTaskId === task.id ? "default" : "ghost"}
+          size="sm"
+          onClick={() => setTaskActive(task.id)}
           className={cn(
-            "flex items-center gap-2 p-3 rounded-lg transition-colors",
-            activeTaskId === task.id ? "bg-primary/10" : "bg-muted/30",
-            "hover:bg-primary/5"
+            "transition-all duration-200",
+            activeTaskId === task.id && "bg-blue-500 hover:bg-blue-600"
           )}
         >
-          <Checkbox 
-            checked={task.completed} 
-            onCheckedChange={() => toggleTask(task.id)}
-          />
-          <div className="flex-1">
-            <div className={cn(
-              "font-medium",
-              task.completed && "line-through text-muted-foreground"
-            )}>
-              {task.text}
-            </div>
-            {activeTaskId === task.id && (
-              <div className="text-xs text-muted-foreground mt-1">
-                {task.metrics.completedPomodoros} pomodoros • {formatTotalTime(task.metrics.totalMinutes)}
-              </div>
-            )}
-          </div>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => setTaskActive(task.id)}
-            className={cn(
-              "mr-2",
-              activeTaskId === task.id && "bg-primary/20"
-            )}
-          >
-            {activeTaskId === task.id ? "Active" : "Start"}
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => removeTask(task.id)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </li>
-      ))}
-    </ul>
+          {activeTaskId === task.id ? "Active" : "Start"}
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={() => removeTask(task.id)}
+          className="text-muted-foreground hover:text-red-500"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    </motion.li>
+  );
+
+  // Enhanced task list
+  const renderTaskList = () => (
+    <AnimatePresence mode="popLayout">
+      <motion.ul className="space-y-3">
+        {tasks
+          .filter(task => showCompletedTasks || !task.completed)
+          .map(task => (
+            <TaskListItem key={task.id} task={task} />
+          ))
+        }
+      </motion.ul>
+    </AnimatePresence>
   );
 
   // Enhanced TimerDisplay with better styling
@@ -859,51 +942,10 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
   // Update active task stats display
   return (
-    <Card className="p-4 md:p-6 max-w-md mx-auto">
+    <Card className="p-4 md:p-6 max-w-md mx-auto bg-gradient-to-b from-background to-muted/20">
       <div className="pomodoro-timer space-y-6 md:space-y-8">
-        {/* Timer Status */}
-        <div className="flex justify-between items-center">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex gap-2"
-          >
-            <Badge variant={isBreak ? "secondary" : "default"}>
-              {isBreak ? "Break Time" : "Focus Time"}
-            </Badge>
-            {activeTaskId && (
-              <Badge variant="outline">
-                {tasks.find(t => t.id === activeTaskId)?.text}
-              </Badge>
-            )}
-          </motion.div>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <div className="flex items-center gap-2">
-                  <motion.div
-                    className={cn(
-                      "w-3 h-3 rounded-full",
-                      isActive ? "bg-green-500" : "bg-gray-300"
-                    )}
-                    animate={{
-                      scale: isActive ? [1, 1.2, 1] : 1,
-                      opacity: isActive ? 1 : 0.5,
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: isActive ? Infinity : 0,
-                    }}
-                  />
-                  <span className="text-sm text-muted-foreground">
-                    {isActive ? "Recording" : "Paused"}
-                  </span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>Timer Status</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+        {/* Session Type Indicator */}
+        <SessionTypeIndicator isBreak={isBreak} />
 
         {/* Task Management */}
         <div className="w-full space-y-4">
@@ -911,25 +953,36 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
             <Input 
               value={currentTask} 
               onChange={(e) => setCurrentTask(e.target.value)} 
-              placeholder="Add a new task"
+              placeholder="Add a new task..."
+              className="bg-background/50 border-muted"
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && currentTask) {
+                if (e.key === 'Enter' && currentTask.trim()) {
                   addTask(currentTask);
                   setCurrentTask('');
                 }
               }}
             />
-            <Button onClick={() => { 
-              if (currentTask) { 
-                addTask(currentTask); 
-                setCurrentTask(''); 
-              } 
-            }}>
-              Add Task
-            </Button>
             <Button 
-              variant="outline"
+              onClick={() => { 
+                if (currentTask.trim()) { 
+                  addTask(currentTask); 
+                  setCurrentTask(''); 
+                } 
+              }}
+              className="bg-blue-500 hover:bg-blue-600"
+            >
+              Add
+            </Button>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">
+              {tasks.filter(t => !t.completed).length} active tasks
+            </span>
+            <Button 
+              variant="ghost" 
+              size="sm"
               onClick={() => setShowCompletedTasks(prev => !prev)}
+              className="text-muted-foreground hover:text-foreground"
             >
               {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
             </Button>
@@ -947,16 +1000,20 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
         </div>
 
         {/* Timer Controls */}
-        <div className="flex justify-center space-x-3 md:space-x-4">
+        <div className="flex justify-center gap-4">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   onClick={() => handleButtonClick(isActive ? 'pause' : 'start')}
-                  variant="default"
-                  size="lg"
                   disabled={!activeTaskId}
-                  className="w-24"
+                  size="lg"
+                  className={cn(
+                    "w-24 transition-all duration-300",
+                    isActive 
+                      ? "bg-blue-500 hover:bg-blue-600" 
+                      : "bg-blue-500/90 hover:bg-blue-500"
+                  )}
                 >
                   {isActive ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
                 </Button>
@@ -970,15 +1027,16 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               <TooltipTrigger asChild>
                 <Button
                   onClick={() => handleButtonClick('skip')}
+                  disabled={!activeTaskId || !isActive}
                   variant="outline"
                   size="lg"
-                  disabled={!activeTaskId || !isActive}
+                  className="border-blue-200/20 hover:border-blue-200/30"
                 >
                   <SkipForwardIcon className="h-6 w-6" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                Skip current interval
+                Press 'S' to Skip
               </TooltipContent>
             </Tooltip>
 
@@ -988,50 +1046,41 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                   onClick={() => setSettingsOpen(true)}
                   variant="outline"
                   size="lg"
+                  className="border-blue-200/20 hover:border-blue-200/30"
                 >
                   <Settings2Icon className="h-6 w-6" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                Timer Settings
+                Settings
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
-
-        {/* Progress Display */}
-        {activeTaskId && settings && (
-          <div className="mt-8">
-            <PomodoroProgress 
-              task={tasks.find(t => t.id === activeTaskId)!} 
-              settings={settings} 
-            />
-          </div>
-        )}
 
         {/* Active Task Stats */}
         {activeTaskId && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-4 p-4 rounded-lg bg-muted/30"
+            className="p-4 rounded-xl bg-gradient-to-r from-blue-500/5 to-blue-400/5 border border-blue-200/10"
           >
-            <div className="text-sm font-medium mb-2">Current Task Progress</div>
+            <div className="text-sm font-medium text-blue-600 mb-3">Task Progress</div>
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold text-blue-500">
                   {tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0}
                 </div>
                 <div className="text-xs text-muted-foreground">Pomodoros</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold text-blue-500">
                   {formatTotalTime(tasks.find(t => t.id === activeTaskId)?.metrics.totalMinutes || 0)}
                 </div>
                 <div className="text-xs text-muted-foreground">Total Time</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold text-blue-500">
                   {tasks.find(t => t.id === activeTaskId)?.metrics.currentStreak || 0}
                 </div>
                 <div className="text-xs text-muted-foreground">Streak</div>
@@ -1039,40 +1088,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
             </div>
           </motion.div>
         )}
-
-        {/* Break Suggestion */}
-        {isBreak && (
-          <div className="text-center text-sm text-muted-foreground">
-            <p>{getBreakSuggestion()}</p>
-          </div>
-        )}
-
-        {/* Settings Dialog */}
-        <PomodoroSettingsDialog
-          open={settingsOpen}
-          onOpenChange={setSettingsOpen}
-          onSettingsUpdate={async (newSettings) => {
-            try {
-              await updatePomodoroSettings(newSettings);
-              const updatedSettings = await getPomodoroSettings();
-              setSettings(updatedSettings);
-              if (updatedSettings.work_duration && !isActive) {
-                setTime(updatedSettings.work_duration * 60);
-              }
-              toast({
-                title: "Settings Updated",
-                description: "Your pomodoro settings have been saved.",
-              });
-            } catch (error) {
-              toast({
-                title: "Error",
-                description: "Failed to update settings",
-                variant: "destructive",
-              });
-            }
-          }}
-          initialSettings={settings}
-        />
       </div>
     </Card>
   );
