@@ -362,7 +362,111 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     }
   };
 
-  // Simplified PomodoroProgress without animations
+  // Enhanced TimerDisplay with better styling
+  const TimerDisplay = ({ time, isActive, totalTime }: { time: number; isActive: boolean; totalTime: number }) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    const progress = ((totalTime - time) / totalTime) * 100;
+    const circumference = 2 * Math.PI * 120;
+
+    return (
+      <motion.div 
+        className="relative flex justify-center items-center py-12"
+        initial={false}
+        animate={isActive ? { scale: [1, 1.02, 1] } : { scale: 1 }}
+        transition={{ 
+          duration: 2, 
+          repeat: isActive ? Infinity : 0, 
+          ease: "easeInOut" 
+        }}
+      >
+        {/* Background Glow */}
+        <div className={cn(
+          "absolute inset-0 rounded-full blur-3xl opacity-20 transition-colors duration-300",
+          isBreak ? "bg-secondary" : "bg-primary"
+        )} />
+
+        {/* Progress Ring */}
+        <svg className="absolute w-[300px] h-[300px] -rotate-90">
+          {/* Background Ring */}
+          <circle
+            cx="150"
+            cy="150"
+            r="120"
+            className="stroke-muted/25 fill-none"
+            strokeWidth="8"
+          />
+          {/* Progress Ring */}
+          <circle
+            cx="150"
+            cy="150"
+            r="120"
+            className={cn(
+              "fill-none transition-all duration-500",
+              isBreak 
+                ? "stroke-secondary/80 drop-shadow-[0_0_8px_rgba(var(--secondary),0.4)]" 
+                : "stroke-primary/80 drop-shadow-[0_0_8px_rgba(var(--primary),0.4)]"
+            )}
+            strokeWidth="8"
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference - (progress / 100) * circumference}
+            strokeLinecap="round"
+          />
+        </svg>
+
+        {/* Timer Display */}
+        <div className="relative flex flex-col items-center z-10">
+          <div className="text-8xl font-mono font-bold tracking-tight flex items-center">
+            <motion.span
+              key={minutes}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className={cn(
+                "transition-colors duration-300",
+                isActive 
+                  ? isBreak ? "text-secondary" : "text-primary" 
+                  : "text-muted-foreground/80"
+              )}
+            >
+              {String(minutes).padStart(2, '0')}
+            </motion.span>
+            <span className={cn(
+              "mx-2 transition-colors duration-300",
+              isActive 
+                ? isBreak ? "text-secondary/60" : "text-primary/60"
+                : "text-muted-foreground/60"
+            )}>:</span>
+            <motion.span
+              key={seconds}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className={cn(
+                "transition-colors duration-300",
+                isActive 
+                  ? time <= 60 ? "text-red-500" 
+                  : isBreak ? "text-secondary" : "text-primary"
+                  : "text-muted-foreground/80"
+              )}
+            >
+              {String(seconds).padStart(2, '0')}
+            </motion.span>
+          </div>
+          <span className={cn(
+            "text-sm font-medium mt-2 transition-colors duration-300",
+            isActive 
+              ? isBreak ? "text-secondary/80" : "text-primary/80"
+              : "text-muted-foreground/60"
+          )}>
+            {isBreak ? "Break Time" : "Focus Time"}
+          </span>
+        </div>
+      </motion.div>
+    );
+  };
+
+  // Enhanced PomodoroProgress with better styling
   const PomodoroProgress = ({ task, settings }: { task: Task, settings: PomodoroSettings }) => {
     const dailyGoal = settings?.daily_goal || 4;
     const completed = Math.min(task.metrics.completedPomodoros, dailyGoal);
@@ -370,15 +474,20 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     const percentage = Math.min(100, (completed / dailyGoal) * 100);
 
     return (
-      <div className="p-6 rounded-xl bg-gradient-to-br from-muted/30 to-muted/10 backdrop-blur-sm shadow-lg mt-6">
-        <div className="flex justify-between items-center mb-3">
-          <span className="text-base font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
+      <div className="p-6 rounded-xl bg-gradient-to-br from-background/50 to-muted/20 shadow-xl backdrop-blur-sm border border-muted/20">
+        <div className="flex justify-between items-center mb-4">
+          <span className="text-base font-semibold text-foreground/80">
             Daily Progress
           </span>
-          <div className="flex items-center gap-2 text-sm">
-            <span className="font-bold text-primary">{completed}</span>
+          <div className="flex items-center gap-2">
+            <span className={cn(
+              "text-xl font-bold",
+              percentage === 100 ? "text-primary" : "text-foreground/80"
+            )}>
+              {completed}
+            </span>
             <span className="text-muted-foreground">/</span>
-            <span className="font-medium text-muted-foreground">{dailyGoal}</span>
+            <span className="text-foreground/60 font-medium">{dailyGoal}</span>
             {remaining > 0 && (
               <span className="text-xs text-muted-foreground ml-1">
                 ({remaining} to go)
@@ -389,87 +498,17 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
         <div className="relative h-3">
           <div className="absolute w-full h-full bg-muted/20 rounded-full overflow-hidden">
             <div 
-              className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-300"
+              className={cn(
+                "h-full transition-all duration-300 rounded-full",
+                percentage === 100 
+                  ? "bg-gradient-to-r from-primary/80 to-primary" 
+                  : "bg-gradient-to-r from-muted-foreground/40 to-muted-foreground/60"
+              )}
               style={{ width: `${percentage}%` }}
             />
           </div>
         </div>
       </div>
-    );
-  };
-
-  // Enhanced TimerDisplay with progress ring
-  const TimerDisplay = ({ time, isActive, totalTime }: { time: number; isActive: boolean; totalTime: number }) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-    const progress = ((totalTime - time) / totalTime) * 100;
-    const circumference = 2 * Math.PI * 120; // radius = 120
-
-    return (
-      <motion.div 
-        className="relative flex justify-center items-center py-8"
-        initial={false}
-        animate={isActive ? { scale: [1, 1.02, 1] } : { scale: 1 }}
-        transition={{ 
-          duration: 2, 
-          repeat: isActive ? Infinity : 0, 
-          ease: "easeInOut" 
-        }}
-      >
-        {/* Progress Ring */}
-        <svg className="absolute w-[280px] h-[280px] -rotate-90">
-          <circle
-            cx="140"
-            cy="140"
-            r="120"
-            className="stroke-muted fill-none"
-            strokeWidth="4"
-          />
-          <circle
-            cx="140"
-            cy="140"
-            r="120"
-            className={cn(
-              "fill-none transition-all duration-500",
-              isBreak ? "stroke-secondary" : "stroke-primary"
-            )}
-            strokeWidth="4"
-            strokeDasharray={circumference}
-            strokeDashoffset={circumference - (progress / 100) * circumference}
-            strokeLinecap="round"
-          />
-        </svg>
-
-        {/* Timer Display */}
-        <div className="text-8xl font-mono font-bold tracking-tight flex items-center z-10">
-          <motion.span
-            key={minutes}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className={cn(
-              "transition-colors duration-300",
-              isActive ? "text-primary" : "text-muted-foreground"
-            )}
-          >
-            {String(minutes).padStart(2, '0')}
-          </motion.span>
-          <span className="mx-2 opacity-75">:</span>
-          <motion.span
-            key={seconds}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className={cn(
-              "transition-colors duration-300",
-              isActive ? "text-primary" : "text-muted-foreground",
-              time <= 60 && isActive && "text-red-500"
-            )}
-          >
-            {String(seconds).padStart(2, '0')}
-          </motion.span>
-        </div>
-      </motion.div>
     );
   };
 
