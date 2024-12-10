@@ -365,13 +365,32 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
         // Update task metrics only for focus sessions
         setTasks(prev => prev.map(task => {
           if (task.id === activeTaskId) {
+            const updatedMetrics = {
+              ...task.metrics,
+              totalMinutes: task.metrics.totalMinutes + settings.work_duration,
+              completedPomodoros: task.metrics.completedPomodoros + 1
+            };
+
+            // Check if daily goal is achieved
+            if (updatedMetrics.completedPomodoros >= (settings.daily_goal || 4)) {
+              // Show achievement message
+              toast({
+                title: "🎉 Daily Goal Achieved! 🌟",
+                description: "Incredible work! You've crushed your daily goal. This task is now complete. Time to celebrate your success! 🎯✨",
+                duration: 6000,
+              });
+
+              // Complete the task
+              return {
+                ...task,
+                completed: true,
+                metrics: updatedMetrics
+              };
+            }
+
             return {
               ...task,
-              metrics: {
-                ...task.metrics,
-                totalMinutes: task.metrics.totalMinutes + settings.work_duration,
-                completedPomodoros: task.metrics.completedPomodoros + 1
-              }
+              metrics: updatedMetrics
             };
           }
           return task;
@@ -392,10 +411,17 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
       playNotificationSound();
 
       // Show appropriate notification
-      toast({
-        title: newIsBreak ? 'Time for a break! 🎉' : 'Break complete!',
-        description: newIsBreak ? 'Great work! Take some time to rest.' : 'Ready to focus again?',
-      });
+      if (!newIsBreak) {
+        toast({
+          title: 'Break complete! 💪',
+          description: 'Ready for another focused session? You\'re doing great!',
+        });
+      } else {
+        toast({
+          title: 'Time for a break! 🌟',
+          description: 'Great work! Take a moment to recharge.',
+        });
+      }
 
       // Auto-start next session if enabled
       if ((newIsBreak && settings.auto_start_breaks) || (!newIsBreak && settings.auto_start_pomodoros)) {
