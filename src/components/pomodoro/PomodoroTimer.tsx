@@ -457,7 +457,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [isActive, activeTaskId]);
 
-  // Enhanced task list item
+  // Enhanced TaskListItem component
   const TaskListItem = ({ task }: { task: Task }) => (
     <motion.li 
       layout
@@ -467,9 +467,8 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
       className={cn(
         "flex items-center gap-3 p-4 rounded-xl transition-all duration-200",
         activeTaskId === task.id 
-          ? "bg-gradient-to-r from-blue-500/10 to-blue-400/5 shadow-sm" 
-          : "bg-muted/30 hover:bg-muted/50",
-        "border border-transparent hover:border-blue-500/10"
+          ? "bg-gradient-to-r from-blue-500/20 to-blue-400/10 shadow-lg border border-blue-500/20" 
+          : "bg-white/5 hover:bg-white/10 border border-white/5",
       )}
     >
       <Checkbox 
@@ -480,7 +479,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
       <div className="flex-1 min-w-0">
         <div className={cn(
           "font-medium truncate",
-          task.completed && "line-through text-muted-foreground"
+          task.completed ? "text-white/40 line-through" : "text-white"
         )}>
           {task.text}
         </div>
@@ -488,7 +487,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-xs text-muted-foreground mt-1 flex items-center gap-2"
+            className="text-xs text-white/60 mt-1 flex items-center gap-2"
           >
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
@@ -509,7 +508,9 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           onClick={() => setTaskActive(task.id)}
           className={cn(
             "transition-all duration-200",
-            activeTaskId === task.id && "bg-blue-500 hover:bg-blue-600"
+            activeTaskId === task.id 
+              ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20" 
+              : "text-white/60 hover:text-white hover:bg-white/10"
           )}
         >
           {activeTaskId === task.id ? "Active" : "Start"}
@@ -518,7 +519,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           variant="ghost" 
           size="sm"
           onClick={() => removeTask(task.id)}
-          className="text-muted-foreground hover:text-red-500"
+          className="text-white/40 hover:text-red-400 hover:bg-red-500/10"
         >
           <X className="h-4 w-4" />
         </Button>
@@ -526,18 +527,43 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     </motion.li>
   );
 
-  // Enhanced task list
-  const renderTaskList = () => (
-    <AnimatePresence mode="popLayout">
-      <motion.ul className="space-y-3">
-        {tasks
-          .filter(task => showCompletedTasks || !task.completed)
-          .map(task => (
-            <TaskListItem key={task.id} task={task} />
-          ))
-        }
-      </motion.ul>
-    </AnimatePresence>
+  // Task Progress component
+  const TaskProgress = ({ task }: { task: Task }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="p-6 rounded-xl bg-gradient-to-r from-blue-500/20 to-blue-400/10 border border-blue-500/20 shadow-lg"
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div className="text-sm font-medium text-white">
+          <span className="text-blue-400">Current Task:</span>
+          <span className="ml-2 text-white/80">{task.text}</span>
+        </div>
+        <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20">
+          In Progress
+        </Badge>
+      </div>
+      <div className="grid grid-cols-3 gap-6">
+        <div className="text-center p-3 rounded-lg bg-white/5">
+          <div className="text-2xl font-bold text-white mb-1">
+            {task.metrics.completedPomodoros}
+          </div>
+          <div className="text-xs text-white/60 font-medium">Pomodoros</div>
+        </div>
+        <div className="text-center p-3 rounded-lg bg-white/5">
+          <div className="text-2xl font-bold text-white mb-1">
+            {formatTotalTime(task.metrics.totalMinutes)}
+          </div>
+          <div className="text-xs text-white/60 font-medium">Total Time</div>
+        </div>
+        <div className="text-center p-3 rounded-lg bg-white/5">
+          <div className="text-2xl font-bold text-white mb-1">
+            {task.metrics.currentStreak}
+          </div>
+          <div className="text-xs text-white/60 font-medium">Streak</div>
+        </div>
+      </div>
+    </motion.div>
   );
 
   // Enhanced TimerDisplay with better styling
@@ -974,10 +1000,16 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               Add
             </Button>
           </div>
+
           <div className="flex justify-between items-center px-1">
-            <span className="text-sm text-white/60">
-              {tasks.filter(t => !t.completed).length} active tasks
-            </span>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20">
+                {tasks.filter(t => !t.completed).length} active
+              </Badge>
+              <Badge variant="outline" className="bg-white/5 text-white/60 border-white/10">
+                {tasks.filter(t => t.completed).length} completed
+              </Badge>
+            </div>
             <Button 
               variant="ghost" 
               size="sm"
@@ -987,7 +1019,17 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
             </Button>
           </div>
-          {renderTaskList()}
+
+          <AnimatePresence mode="popLayout">
+            <motion.ul className="space-y-3">
+              {tasks
+                .filter(task => showCompletedTasks || !task.completed)
+                .map(task => (
+                  <TaskListItem key={task.id} task={task} />
+                ))
+              }
+            </motion.ul>
+          </AnimatePresence>
         </div>
 
         {/* Timer Display */}
@@ -1059,35 +1101,9 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           </TooltipProvider>
         </div>
 
-        {/* Active Task Stats */}
+        {/* Active Task Progress */}
         {activeTaskId && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-blue-400/5 border border-white/10"
-          >
-            <div className="text-sm font-medium text-blue-400 mb-3">Task Progress</div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white">
-                  {tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0}
-                </div>
-                <div className="text-xs text-white/60">Pomodoros</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white">
-                  {formatTotalTime(tasks.find(t => t.id === activeTaskId)?.metrics.totalMinutes || 0)}
-                </div>
-                <div className="text-xs text-white/60">Total Time</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white">
-                  {tasks.find(t => t.id === activeTaskId)?.metrics.currentStreak || 0}
-                </div>
-                <div className="text-xs text-white/60">Streak</div>
-              </div>
-            </div>
-          </motion.div>
+          <TaskProgress task={tasks.find(t => t.id === activeTaskId)!} />
         )}
 
         {/* Settings Dialog */}
