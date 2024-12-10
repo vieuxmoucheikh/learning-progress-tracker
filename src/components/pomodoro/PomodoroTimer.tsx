@@ -371,20 +371,49 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
     return (
       <motion.div 
-        className="relative flex justify-center items-center py-12"
+        className="relative flex justify-center items-center py-14"
         initial={false}
-        animate={isActive ? { scale: [1, 1.02, 1] } : { scale: 1 }}
+        animate={isActive ? { scale: [1, 1.03, 1] } : { scale: 1 }}
         transition={{ 
-          duration: 2, 
-          repeat: isActive ? Infinity : 0, 
-          ease: "easeInOut" 
+          duration: 3,
+          repeat: isActive ? Infinity : 0,
+          ease: "easeInOut"
         }}
       >
-        {/* Background Glow */}
-        <div className={cn(
-          "absolute inset-0 rounded-full blur-2xl opacity-25 transition-colors duration-300",
-          isBreak ? "bg-blue-400" : "bg-blue-500"
-        )} />
+        {/* Animated Background Rings */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <motion.div
+            className={cn(
+              "absolute w-[320px] h-[320px] rounded-full opacity-20",
+              isBreak ? "bg-blue-400" : "bg-blue-500"
+            )}
+            animate={{
+              scale: isActive ? [1, 1.1, 1] : 1,
+              opacity: isActive ? [0.2, 0.15, 0.2] : 0.2,
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+          <motion.div
+            className={cn(
+              "absolute w-[280px] h-[280px] rounded-full blur-md",
+              isBreak ? "bg-indigo-400" : "bg-indigo-500"
+            )}
+            animate={{
+              scale: isActive ? [1.1, 1, 1.1] : 1,
+              opacity: isActive ? [0.15, 0.1, 0.15] : 0.15,
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.5
+            }}
+          />
+        </div>
 
         {/* Progress Ring */}
         <svg className="absolute w-[300px] h-[300px] -rotate-90">
@@ -393,74 +422,111 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
             cx="150"
             cy="150"
             r="120"
-            className="stroke-slate-200 dark:stroke-slate-800 fill-none"
+            className="stroke-slate-200/50 dark:stroke-slate-800/50 fill-none"
             strokeWidth="12"
           />
-          {/* Progress Ring */}
+          {/* Progress Ring with Gradient */}
           <circle
             cx="150"
             cy="150"
             r="120"
-            className={cn(
-              "fill-none transition-all duration-500",
-              isBreak 
-                ? "stroke-blue-400 drop-shadow-[0_0_10px_rgba(96,165,250,0.5)]" 
-                : "stroke-blue-500 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-            )}
+            className="fill-none transition-all duration-500"
+            stroke={isBreak ? "url(#gradientBreak)" : "url(#gradientFocus)"}
             strokeWidth="12"
             strokeDasharray={circumference}
             strokeDashoffset={circumference - (progress / 100) * circumference}
             strokeLinecap="round"
           />
+          {/* Gradient Definitions */}
+          <defs>
+            <linearGradient id="gradientFocus" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#3B82F6" />
+              <stop offset="100%" stopColor="#60A5FA" />
+            </linearGradient>
+            <linearGradient id="gradientBreak" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#818CF8" />
+              <stop offset="100%" stopColor="#A5B4FC" />
+            </linearGradient>
+          </defs>
         </svg>
 
         {/* Timer Display */}
         <div className="relative flex flex-col items-center z-10">
-          <div className="text-8xl font-mono font-bold tracking-tight flex items-center">
+          <motion.div 
+            className="text-8xl font-mono font-bold tracking-tight flex items-center"
+            animate={isActive ? {
+              filter: ["brightness(1)", "brightness(1.2)", "brightness(1)"],
+            } : {}}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
             <motion.span
               key={minutes}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
               className={cn(
                 "transition-colors duration-300",
                 isActive 
-                  ? isBreak ? "text-blue-400" : "text-blue-500" 
+                  ? isBreak ? "text-indigo-500" : "text-blue-500" 
                   : "text-slate-600 dark:text-slate-400"
               )}
             >
               {String(minutes).padStart(2, '0')}
             </motion.span>
-            <span className={cn(
-              "mx-2 transition-colors duration-300",
-              isActive 
-                ? isBreak ? "text-blue-400" : "text-blue-500"
-                : "text-slate-400 dark:text-slate-600"
-            )}>:</span>
+            <motion.span 
+              className={cn(
+                "mx-2 transition-colors duration-300",
+                isActive 
+                  ? isBreak ? "text-indigo-400" : "text-blue-400"
+                  : "text-slate-400 dark:text-slate-600"
+              )}
+              animate={isActive ? { opacity: [1, 0.5, 1] } : {}}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >:</motion.span>
             <motion.span
               key={seconds}
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
               className={cn(
                 "transition-colors duration-300",
                 isActive 
                   ? time <= 60 ? "text-red-500" 
-                  : isBreak ? "text-blue-400" : "text-blue-500"
+                  : isBreak ? "text-indigo-500" : "text-blue-500"
                   : "text-slate-600 dark:text-slate-400"
               )}
             >
               {String(seconds).padStart(2, '0')}
             </motion.span>
-          </div>
-          <span className={cn(
-            "text-sm font-medium mt-3 transition-colors duration-300",
-            isActive 
-              ? isBreak ? "text-blue-400" : "text-blue-500"
-              : "text-slate-500 dark:text-slate-400"
-          )}>
+          </motion.div>
+          <motion.span 
+            className={cn(
+              "text-sm font-medium mt-4 px-4 py-1 rounded-full transition-colors duration-300",
+              isActive 
+                ? isBreak 
+                  ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400" 
+                  : "bg-blue-100 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400"
+                : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+            )}
+            animate={isActive ? {
+              scale: [1, 1.05, 1],
+            } : {}}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
             {isBreak ? "Break Time" : "Focus Time"}
-          </span>
+          </motion.span>
         </div>
       </motion.div>
     );
