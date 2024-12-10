@@ -357,20 +357,20 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     if (!settings || !activeTaskId) return;
 
     try {
-      // Complete current pomodoro if it exists
-      if (currentPomodoroId) {
+      // Complete current pomodoro if it exists and it's not a break
+      if (currentPomodoroId && !isBreak) {
         await completePomodoro(currentPomodoroId);
         setCurrentPomodoroId(null);
 
-        // Update task metrics
+        // Update task metrics only for focus sessions
         setTasks(prev => prev.map(task => {
           if (task.id === activeTaskId) {
             return {
               ...task,
               metrics: {
                 ...task.metrics,
-                totalMinutes: task.metrics.totalMinutes + (isBreak ? 0 : settings.work_duration),
-                completedPomodoros: task.metrics.completedPomodoros + (isBreak ? 0 : 1)
+                totalMinutes: task.metrics.totalMinutes + settings.work_duration,
+                completedPomodoros: task.metrics.completedPomodoros + 1
               }
             };
           }
@@ -378,20 +378,36 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
         }));
       }
 
-      // Rest of your existing handleTimerComplete logic...
-      playNotificationSound();
+      // Toggle break state
       const newIsBreak = !isBreak;
       setIsBreak(newIsBreak);
+
+      // Set appropriate duration based on session type
       const newTime = newIsBreak
         ? (settings.break_duration * 60)
         : (settings.work_duration * 60);
       setTime(newTime);
 
+      // Play notification
+      playNotificationSound();
+
+      // Show appropriate notification
+      toast({
+        title: newIsBreak ? 'Time for a break! 🎉' : 'Break complete!',
+        description: newIsBreak ? 'Great work! Take some time to rest.' : 'Ready to focus again?',
+      });
+
+      // Auto-start next session if enabled
       if ((newIsBreak && settings.auto_start_breaks) || (!newIsBreak && settings.auto_start_pomodoros)) {
         const newPomodoro = await startPomodoro(newIsBreak ? 'break' : 'work');
         setCurrentPomodoroId(newPomodoro.id);
         setIsActive(true);
+      } else {
+        setIsActive(false);
       }
+
+      // Save tasks to localStorage after updating
+      localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
 
     } catch (error) {
       console.error('Error completing timer:', error);
@@ -484,17 +500,20 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
   useEffect(() => {
     const savedTasks = localStorage.getItem('pomodoroTasks');
     if (savedTasks) {
-      const parsedTasks = JSON.parse(savedTasks);
-      // Ensure all tasks have metrics
-      const tasksWithMetrics = parsedTasks.map((task: any) => ({
-        ...task,
-        metrics: task.metrics || {
-          totalMinutes: 0,
-          completedPomodoros: 0,
-          currentStreak: 0
-        }
-      }));
-      setTasks(tasksWithMetrics);
+      try {
+        const parsedTasks = JSON.parse(savedTasks);
+        const tasksWithMetrics = parsedTasks.map((task: any) => ({
+          ...task,
+          metrics: task.metrics || {
+            totalMinutes: 0,
+            completedPomodoros: 0,
+            currentStreak: 0
+          }
+        }));
+        setTasks(tasksWithMetrics);
+      } catch (error) {
+        console.error('Error parsing saved tasks:', error);
+      }
     }
   }, []);
 
@@ -647,6 +666,12 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               } 
             }}>
               Add Task
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => setShowCompletedTasks(prev => !prev)}
+            >
+              {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
             </Button>
           </div>
           {renderTaskList()}
