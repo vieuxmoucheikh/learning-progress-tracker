@@ -371,7 +371,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
     return (
       <motion.div 
-        className="relative flex justify-center items-center my-8"
+        className="relative flex justify-center items-center my-12 md:my-8"
         initial={false}
         animate={isActive ? { scale: [1, 1.03, 1] } : { scale: 1 }}
         transition={{ 
@@ -384,7 +384,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <motion.div
             className={cn(
-              "absolute w-[320px] h-[320px] rounded-full opacity-20 blur-xl",
+              "absolute w-[280px] md:w-[320px] h-[280px] md:h-[320px] rounded-full opacity-20 blur-xl",
               isBreak ? "bg-blue-400" : "bg-blue-500"
             )}
             animate={{
@@ -399,7 +399,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           />
           <motion.div
             className={cn(
-              "absolute w-[280px] h-[280px] rounded-full blur-xl",
+              "absolute w-[240px] md:w-[280px] h-[240px] md:h-[280px] rounded-full blur-xl",
               isBreak ? "bg-indigo-400" : "bg-indigo-500"
             )}
             animate={{
@@ -416,20 +416,20 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
         </div>
 
         {/* Progress Ring */}
-        <svg className="absolute w-[300px] h-[300px] -rotate-90 pointer-events-none">
+        <svg className="absolute w-[260px] md:w-[300px] h-[260px] md:h-[300px] -rotate-90 pointer-events-none">
           {/* Background Ring */}
           <circle
-            cx="150"
-            cy="150"
-            r="120"
-            className="stroke-white/10 dark:stroke-white/5 fill-none"
+            cx="130"
+            cy="130"
+            r="100"
+            className="stroke-white/10 fill-none"
             strokeWidth="12"
           />
           {/* Progress Ring with Gradient */}
           <circle
-            cx="150"
-            cy="150"
-            r="120"
+            cx="130"
+            cy="130"
+            r="100"
             className="fill-none transition-all duration-500"
             stroke={isBreak ? "url(#gradientBreak)" : "url(#gradientFocus)"}
             strokeWidth="12"
@@ -453,7 +453,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
         {/* Timer Display */}
         <div className="relative flex flex-col items-center z-10">
           <motion.div 
-            className="text-8xl font-mono font-bold tracking-tight flex items-center"
+            className="text-6xl md:text-8xl font-mono font-bold tracking-tight flex items-center"
             animate={isActive ? {
               filter: ["brightness(1)", "brightness(1.2)", "brightness(1)"],
             } : {}}
@@ -472,7 +472,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                 "transition-colors duration-300",
                 isActive 
                   ? isBreak ? "text-indigo-500" : "text-blue-500" 
-                  : "text-slate-600 dark:text-slate-400"
+                  : "text-slate-600"
               )}
             >
               {String(minutes).padStart(2, '0')}
@@ -482,7 +482,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                 "mx-2 transition-colors duration-300",
                 isActive 
                   ? isBreak ? "text-indigo-400" : "text-blue-400"
-                  : "text-slate-400 dark:text-slate-600"
+                  : "text-slate-400"
               )}
               animate={isActive ? { opacity: [1, 0.5, 1] } : {}}
               transition={{
@@ -501,7 +501,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                 isActive 
                   ? time <= 60 ? "text-red-500" 
                   : isBreak ? "text-indigo-500" : "text-blue-500"
-                  : "text-slate-600 dark:text-slate-400"
+                  : "text-slate-600"
               )}
             >
               {String(seconds).padStart(2, '0')}
@@ -512,9 +512,9 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               "text-sm font-medium mt-4 px-4 py-1 rounded-full transition-colors duration-300",
               isActive 
                 ? isBreak 
-                  ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400" 
-                  : "bg-blue-100 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400"
-                : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                  ? "bg-indigo-100 text-indigo-600" 
+                  : "bg-blue-100 text-blue-600"
+                : "bg-slate-100 text-slate-600"
             )}
             animate={isActive ? {
               scale: [1, 1.05, 1],
@@ -863,9 +863,10 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     </ul>
   );
 
+  // Update the main return to improve mobile layout
   return (
-    <Card className="p-6 max-w-md mx-auto">
-      <div className="pomodoro-timer space-y-8">
+    <Card className="p-4 md:p-6 max-w-md mx-auto">
+      <div className="pomodoro-timer space-y-6 md:space-y-8">
         {/* Timer Status */}
         <div className="flex justify-between items-center">
           <motion.div 
@@ -943,7 +944,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
         </div>
 
         {/* Timer Display */}
-        <div className="relative" ref={timerRef}>
+        <div className="relative mb-8" ref={timerRef}>
           <TimerDisplay 
             time={time} 
             isActive={isActive} 
@@ -952,7 +953,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
         </div>
 
         {/* Timer Controls */}
-        <div className="flex justify-center space-x-4 mt-6">
+        <div className="flex justify-center space-x-3 md:space-x-4">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -1006,7 +1007,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
         {/* Progress Display */}
         {activeTaskId && settings && (
-          <div className="mt-6">
+          <div className="mt-8">
             <PomodoroProgress 
               task={tasks.find(t => t.id === activeTaskId)!} 
               settings={settings} 
