@@ -352,7 +352,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     }
   };
 
-  // Add this component for pomodoro progress
+  // Simplified PomodoroProgress without animations
   const PomodoroProgress = ({ task, settings }: { task: Task, settings: PomodoroSettings }) => {
     const dailyGoal = settings?.daily_goal || 4;
     const completed = Math.min(task.metrics.completedPomodoros, dailyGoal);
@@ -360,27 +360,12 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     const percentage = Math.min(100, (completed / dailyGoal) * 100);
 
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="p-6 rounded-xl bg-gradient-to-br from-muted/30 to-muted/10 backdrop-blur-sm shadow-lg mt-6"
-      >
+      <div className="p-6 rounded-xl bg-gradient-to-br from-muted/30 to-muted/10 backdrop-blur-sm shadow-lg mt-6">
         <div className="flex justify-between items-center mb-3">
-          <motion.span 
-            className="text-base font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
+          <span className="text-base font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
             Daily Progress
-          </motion.span>
-          <motion.div 
-            className="flex items-center gap-2 text-sm"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
+          </span>
+          <div className="flex items-center gap-2 text-sm">
             <span className="font-bold text-primary">{completed}</span>
             <span className="text-muted-foreground">/</span>
             <span className="font-medium text-muted-foreground">{dailyGoal}</span>
@@ -389,111 +374,93 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                 ({remaining} to go)
               </span>
             )}
-          </motion.div>
+          </div>
         </div>
-
-        <div className="relative h-3 mb-4">
-          <motion.div
-            className="absolute w-full h-full bg-muted/20 rounded-full overflow-hidden"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <motion.div
-              className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full"
-              initial={{ width: "0%" }}
-              animate={{ width: `${percentage}%` }}
-              transition={{ 
-                duration: 1,
-                ease: "easeOut",
-                delay: 0.4
-              }}
+        <div className="relative h-3">
+          <div className="absolute w-full h-full bg-muted/20 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-300"
+              style={{ width: `${percentage}%` }}
             />
-          </motion.div>
+          </div>
         </div>
-
-        <motion.div 
-          className="flex justify-between text-xs"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-primary/80" />
-            <span className="text-muted-foreground">Completed</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-muted/40" />
-            <span className="text-muted-foreground">Remaining</span>
-          </div>
-        </motion.div>
-      </motion.div>
+      </div>
     );
   };
 
-  // Add this for better timer animations
+  // Enhanced TimerDisplay with beautiful animations
   const TimerDisplay = ({ time, isActive }: { time: number; isActive: boolean }) => {
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
 
     return (
       <motion.div 
-        className="relative flex justify-center items-center"
+        className="relative flex justify-center items-center py-8"
         initial={false}
         animate={isActive ? { scale: [1, 1.02, 1] } : { scale: 1 }}
-        transition={{ duration: 1, repeat: isActive ? Infinity : 0, ease: "easeInOut" }}
+        transition={{ 
+          duration: 2, 
+          repeat: isActive ? Infinity : 0, 
+          ease: "easeInOut" 
+        }}
       >
-        <motion.div
-          className="text-8xl font-mono font-bold tracking-tight"
-          initial={false}
-          animate={{ opacity: isActive ? 1 : 0.7 }}
-        >
+        <div className="text-8xl font-mono font-bold tracking-tight flex items-center">
           <motion.span
-            key={`min-${minutes}`}
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.4 }}
+            key={minutes}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className={cn(
+              "transition-colors duration-300",
+              isActive ? "text-primary" : "text-muted-foreground"
+            )}
           >
             {String(minutes).padStart(2, '0')}
           </motion.span>
-          <span className="mx-2">:</span>
+          <span className="mx-2 opacity-75">:</span>
           <motion.span
-            key={`sec-${seconds}`}
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.4 }}
+            key={seconds}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className={cn(
+              "transition-colors duration-300",
+              isActive ? "text-primary" : "text-muted-foreground",
+              time <= 60 && isActive && "text-red-500"
+            )}
           >
             {String(seconds).padStart(2, '0')}
           </motion.span>
-        </motion.div>
+        </div>
       </motion.div>
     );
   };
 
-  // Update handleTimerComplete to fix pomodoro counting
+  // Fix handleTimerComplete function
   const handleTimerComplete = async () => {
     if (!settings || !activeTaskId) return;
 
     try {
-      // Only update metrics and complete pomodoro when focus session ends
-      if (currentPomodoroId && !isBreak) {
-        await completePomodoro(currentPomodoroId);
-        setCurrentPomodoroId(null);
+      const activeTask = tasks.find(t => t.id === activeTaskId);
+      if (!activeTask) return;
 
-        // Update task metrics
-        setTasks(prev => prev.map(task => {
+      if (!isBreak) {
+        // Complete current pomodoro
+        if (currentPomodoroId) {
+          await completePomodoro(currentPomodoroId);
+          setCurrentPomodoroId(null);
+        }
+
+        // Update task metrics for focus session
+        const updatedTasks = tasks.map(task => {
           if (task.id === activeTaskId) {
-            const updatedMetrics = {
-              ...task.metrics,
-              totalMinutes: task.metrics.totalMinutes + settings.work_duration,
-              completedPomodoros: task.metrics.completedPomodoros + 1
-            };
-
+            const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
+            
             // Check if daily goal is achieved
-            if (updatedMetrics.completedPomodoros >= (settings.daily_goal || 4)) {
+            if (newCompletedPomodoros >= (settings.daily_goal || 4)) {
               toast({
                 title: "🎉 Daily Goal Achieved! 🌟",
-                description: "Incredible work! You've crushed your daily goal. This task is now complete. Time to celebrate your success! 🎯✨",
+                description: "Incredible work! You've crushed your daily goal. This task is now complete!",
                 duration: 6000,
               });
 
@@ -505,50 +472,59 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               return {
                 ...task,
                 completed: true,
-                metrics: updatedMetrics
+                metrics: {
+                  ...task.metrics,
+                  totalMinutes: task.metrics.totalMinutes + settings.work_duration,
+                  completedPomodoros: newCompletedPomodoros
+                }
               };
             }
 
             return {
               ...task,
-              metrics: updatedMetrics
+              metrics: {
+                ...task.metrics,
+                totalMinutes: task.metrics.totalMinutes + settings.work_duration,
+                completedPomodoros: newCompletedPomodoros
+              }
             };
           }
           return task;
-        }));
-      }
-
-      // If task is not completed, continue with break/focus cycle
-      const activeTask = tasks.find(t => t.id === activeTaskId);
-      if (!activeTask?.completed) {
-        // Toggle break state
-        const newIsBreak = !isBreak;
-        setIsBreak(newIsBreak);
-
-        // Set new time based on session type
-        const newTime = newIsBreak
-          ? (settings.break_duration * 60)
-          : (settings.work_duration * 60);
-        setTime(newTime);
-
-        playNotificationSound();
-
-        // Show appropriate notification
-        toast({
-          title: newIsBreak ? 'Time for a break! 🌟' : 'Break complete! 💪',
-          description: newIsBreak 
-            ? 'Great work! Take a moment to recharge.' 
-            : 'Ready for another focused session? You\'re doing great!',
         });
 
-        // Start next session if auto-start is enabled
-        if ((newIsBreak && settings.auto_start_breaks) || (!newIsBreak && settings.auto_start_pomodoros)) {
-          const newPomodoro = await startPomodoro(newIsBreak ? 'break' : 'work');
-          setCurrentPomodoroId(newPomodoro.id);
-          setIsActive(true);
-        } else {
-          setIsActive(false);
+        setTasks(updatedTasks);
+        
+        // If task is now completed, don't start break
+        const updatedTask = updatedTasks.find(t => t.id === activeTaskId);
+        if (updatedTask?.completed) {
+          return;
         }
+      }
+
+      // Continue with break/focus cycle if task not completed
+      const newIsBreak = !isBreak;
+      setIsBreak(newIsBreak);
+      
+      const newTime = newIsBreak
+        ? (settings.break_duration * 60)
+        : (settings.work_duration * 60);
+      setTime(newTime);
+
+      playNotificationSound();
+
+      toast({
+        title: newIsBreak ? 'Time for a break! 🌟' : 'Break complete! 💪',
+        description: newIsBreak 
+          ? 'Great work! Take a moment to recharge.' 
+          : 'Ready for another focused session? You\'re doing great!',
+      });
+
+      if ((newIsBreak && settings.auto_start_breaks) || (!newIsBreak && settings.auto_start_pomodoros)) {
+        const newPomodoro = await startPomodoro(newIsBreak ? 'break' : 'work');
+        setCurrentPomodoroId(newPomodoro.id);
+        setIsActive(true);
+      } else {
+        setIsActive(false);
       }
 
       localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
