@@ -371,7 +371,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
     return (
       <motion.div 
-        className="relative flex justify-center items-center py-14"
+        className="relative flex justify-center items-center my-8"
         initial={false}
         animate={isActive ? { scale: [1, 1.03, 1] } : { scale: 1 }}
         transition={{ 
@@ -381,10 +381,10 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
         }}
       >
         {/* Animated Background Rings */}
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <motion.div
             className={cn(
-              "absolute w-[320px] h-[320px] rounded-full opacity-20",
+              "absolute w-[320px] h-[320px] rounded-full opacity-20 blur-xl",
               isBreak ? "bg-blue-400" : "bg-blue-500"
             )}
             animate={{
@@ -399,7 +399,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           />
           <motion.div
             className={cn(
-              "absolute w-[280px] h-[280px] rounded-full blur-md",
+              "absolute w-[280px] h-[280px] rounded-full blur-xl",
               isBreak ? "bg-indigo-400" : "bg-indigo-500"
             )}
             animate={{
@@ -416,13 +416,13 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
         </div>
 
         {/* Progress Ring */}
-        <svg className="absolute w-[300px] h-[300px] -rotate-90">
+        <svg className="absolute w-[300px] h-[300px] -rotate-90 pointer-events-none">
           {/* Background Ring */}
           <circle
             cx="150"
             cy="150"
             r="120"
-            className="stroke-slate-200/50 dark:stroke-slate-800/50 fill-none"
+            className="stroke-white/10 dark:stroke-white/5 fill-none"
             strokeWidth="12"
           />
           {/* Progress Ring with Gradient */}
@@ -865,7 +865,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
   return (
     <Card className="p-6 max-w-md mx-auto">
-      <div className="pomodoro-timer space-y-6">
+      <div className="pomodoro-timer space-y-8">
         {/* Timer Status */}
         <div className="flex justify-between items-center">
           <motion.div 
@@ -951,16 +951,8 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           />
         </div>
 
-        {/* Add Pomodoro Progress after timer display */}
-        {activeTaskId && settings && (
-          <PomodoroProgress 
-            task={tasks.find(t => t.id === activeTaskId)!} 
-            settings={settings} 
-          />
-        )}
-
         {/* Timer Controls */}
-        <div className="flex justify-center space-x-4">
+        <div className="flex justify-center space-x-4 mt-6">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -1011,6 +1003,16 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
             </Tooltip>
           </TooltipProvider>
         </div>
+
+        {/* Progress Display */}
+        {activeTaskId && settings && (
+          <div className="mt-6">
+            <PomodoroProgress 
+              task={tasks.find(t => t.id === activeTaskId)!} 
+              settings={settings} 
+            />
+          </div>
+        )}
 
         {/* Active Task Stats */}
         {activeTaskId && (
