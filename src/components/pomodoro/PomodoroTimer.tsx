@@ -431,15 +431,56 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     );
   };
 
-  // Update handleTimerComplete to stop timer on goal completion
+  // Add this for better timer animations
+  const TimerDisplay = ({ time, isActive }: { time: number; isActive: boolean }) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+
+    return (
+      <motion.div 
+        className="relative flex justify-center items-center"
+        initial={false}
+        animate={isActive ? { scale: [1, 1.02, 1] } : { scale: 1 }}
+        transition={{ duration: 1, repeat: isActive ? Infinity : 0, ease: "easeInOut" }}
+      >
+        <motion.div
+          className="text-8xl font-mono font-bold tracking-tight"
+          initial={false}
+          animate={{ opacity: isActive ? 1 : 0.7 }}
+        >
+          <motion.span
+            key={`min-${minutes}`}
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            {String(minutes).padStart(2, '0')}
+          </motion.span>
+          <span className="mx-2">:</span>
+          <motion.span
+            key={`sec-${seconds}`}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            {String(seconds).padStart(2, '0')}
+          </motion.span>
+        </motion.div>
+      </motion.div>
+    );
+  };
+
+  // Update handleTimerComplete to fix pomodoro counting
   const handleTimerComplete = async () => {
     if (!settings || !activeTaskId) return;
 
     try {
+      // Only update metrics and complete pomodoro when focus session ends
       if (currentPomodoroId && !isBreak) {
         await completePomodoro(currentPomodoroId);
         setCurrentPomodoroId(null);
 
+        // Update task metrics
         setTasks(prev => prev.map(task => {
           if (task.id === activeTaskId) {
             const updatedMetrics = {
@@ -450,19 +491,17 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
             // Check if daily goal is achieved
             if (updatedMetrics.completedPomodoros >= (settings.daily_goal || 4)) {
-              // Show achievement message
               toast({
                 title: "🎉 Daily Goal Achieved! 🌟",
                 description: "Incredible work! You've crushed your daily goal. This task is now complete. Time to celebrate your success! 🎯✨",
                 duration: 6000,
               });
 
-              // Stop the timer and reset states
+              // Stop timer and reset states
               setIsActive(false);
               setIsBreak(false);
               setTime(settings.work_duration * 60);
 
-              // Complete the task
               return {
                 ...task,
                 completed: true,
@@ -477,42 +516,42 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           }
           return task;
         }));
+      }
 
-        // If goal not achieved, continue with normal flow
-        if (!tasks.find(t => t.id === activeTaskId)?.completed) {
-          const newIsBreak = !isBreak;
-          setIsBreak(newIsBreak);
-          const newTime = newIsBreak
-            ? (settings.break_duration * 60)
-            : (settings.work_duration * 60);
-          setTime(newTime);
+      // If task is not completed, continue with break/focus cycle
+      const activeTask = tasks.find(t => t.id === activeTaskId);
+      if (!activeTask?.completed) {
+        // Toggle break state
+        const newIsBreak = !isBreak;
+        setIsBreak(newIsBreak);
 
-          playNotificationSound();
+        // Set new time based on session type
+        const newTime = newIsBreak
+          ? (settings.break_duration * 60)
+          : (settings.work_duration * 60);
+        setTime(newTime);
 
-          if (!newIsBreak) {
-            toast({
-              title: 'Break complete! 💪',
-              description: 'Ready for another focused session? You\'re doing great!',
-            });
-          } else {
-            toast({
-              title: 'Time for a break! 🌟',
-              description: 'Great work! Take a moment to recharge.',
-            });
-          }
+        playNotificationSound();
 
-          if ((newIsBreak && settings.auto_start_breaks) || (!newIsBreak && settings.auto_start_pomodoros)) {
-            const newPomodoro = await startPomodoro(newIsBreak ? 'break' : 'work');
-            setCurrentPomodoroId(newPomodoro.id);
-            setIsActive(true);
-          } else {
-            setIsActive(false);
-          }
+        // Show appropriate notification
+        toast({
+          title: newIsBreak ? 'Time for a break! 🌟' : 'Break complete! 💪',
+          description: newIsBreak 
+            ? 'Great work! Take a moment to recharge.' 
+            : 'Ready for another focused session? You\'re doing great!',
+        });
+
+        // Start next session if auto-start is enabled
+        if ((newIsBreak && settings.auto_start_breaks) || (!newIsBreak && settings.auto_start_pomodoros)) {
+          const newPomodoro = await startPomodoro(newIsBreak ? 'break' : 'work');
+          setCurrentPomodoroId(newPomodoro.id);
+          setIsActive(true);
+        } else {
+          setIsActive(false);
         }
       }
 
       localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
-
     } catch (error) {
       console.error('Error completing timer:', error);
       toast({
@@ -783,18 +822,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
         {/* Timer Display */}
         <div className="relative" ref={timerRef}>
-          <motion.div 
-            className="text-7xl font-mono z-10 relative text-center font-bold"
-            animate={{
-              scale: time <= 60 && isActive ? [1, 1.05, 1] : 1,
-            }}
-            transition={{
-              duration: 1,
-              repeat: time <= 60 && isActive ? Infinity : 0,
-            }}
-          >
-            {formatTime(time)}
-          </motion.div>
+          <TimerDisplay time={time} isActive={isActive} />
           <div className="mt-4">
             <Progress value={calculateProgress()} />
           </div>
