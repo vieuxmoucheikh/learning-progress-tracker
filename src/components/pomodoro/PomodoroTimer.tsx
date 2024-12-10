@@ -388,10 +388,12 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     );
   };
 
-  // Enhanced TimerDisplay with beautiful animations
-  const TimerDisplay = ({ time, isActive }: { time: number; isActive: boolean }) => {
+  // Enhanced TimerDisplay with progress ring
+  const TimerDisplay = ({ time, isActive, totalTime }: { time: number; isActive: boolean; totalTime: number }) => {
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
+    const progress = ((totalTime - time) / totalTime) * 100;
+    const circumference = 2 * Math.PI * 120; // radius = 120
 
     return (
       <motion.div 
@@ -404,7 +406,32 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           ease: "easeInOut" 
         }}
       >
-        <div className="text-8xl font-mono font-bold tracking-tight flex items-center">
+        {/* Progress Ring */}
+        <svg className="absolute w-[280px] h-[280px] -rotate-90">
+          <circle
+            cx="140"
+            cy="140"
+            r="120"
+            className="stroke-muted fill-none"
+            strokeWidth="4"
+          />
+          <circle
+            cx="140"
+            cy="140"
+            r="120"
+            className={cn(
+              "fill-none transition-all duration-500",
+              isBreak ? "stroke-secondary" : "stroke-primary"
+            )}
+            strokeWidth="4"
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference - (progress / 100) * circumference}
+            strokeLinecap="round"
+          />
+        </svg>
+
+        {/* Timer Display */}
+        <div className="text-8xl font-mono font-bold tracking-tight flex items-center z-10">
           <motion.span
             key={minutes}
             initial={{ opacity: 0, y: 20 }}
@@ -444,19 +471,17 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
       const activeTask = tasks.find(t => t.id === activeTaskId);
       if (!activeTask) return;
 
+      // Handle focus session completion
       if (!isBreak) {
-        // Complete current pomodoro
         if (currentPomodoroId) {
           await completePomodoro(currentPomodoroId);
           setCurrentPomodoroId(null);
         }
 
-        // Update task metrics for focus session
         const updatedTasks = tasks.map(task => {
           if (task.id === activeTaskId) {
             const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
             
-            // Check if daily goal is achieved
             if (newCompletedPomodoros >= (settings.daily_goal || 4)) {
               toast({
                 title: "🎉 Daily Goal Achieved! 🌟",
@@ -464,7 +489,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                 duration: 6000,
               });
 
-              // Stop timer and reset states
               setIsActive(false);
               setIsBreak(false);
               setTime(settings.work_duration * 60);
@@ -494,14 +518,13 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
         setTasks(updatedTasks);
         
-        // If task is now completed, don't start break
         const updatedTask = updatedTasks.find(t => t.id === activeTaskId);
         if (updatedTask?.completed) {
           return;
         }
       }
 
-      // Continue with break/focus cycle if task not completed
+      // Switch between break and focus
       const newIsBreak = !isBreak;
       setIsBreak(newIsBreak);
       
@@ -512,6 +535,10 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
       playNotificationSound();
 
+      // Start new session
+      const newPomodoro = await startPomodoro(newIsBreak ? 'break' : 'work');
+      setCurrentPomodoroId(newPomodoro.id);
+
       toast({
         title: newIsBreak ? 'Time for a break! 🌟' : 'Break complete! 💪',
         description: newIsBreak 
@@ -519,9 +546,8 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           : 'Ready for another focused session? You\'re doing great!',
       });
 
+      // Auto-start based on settings
       if ((newIsBreak && settings.auto_start_breaks) || (!newIsBreak && settings.auto_start_pomodoros)) {
-        const newPomodoro = await startPomodoro(newIsBreak ? 'break' : 'work');
-        setCurrentPomodoroId(newPomodoro.id);
         setIsActive(true);
       } else {
         setIsActive(false);
@@ -798,10 +824,11 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
         {/* Timer Display */}
         <div className="relative" ref={timerRef}>
-          <TimerDisplay time={time} isActive={isActive} />
-          <div className="mt-4">
-            <Progress value={calculateProgress()} />
-          </div>
+          <TimerDisplay 
+            time={time} 
+            isActive={isActive} 
+            totalTime={isBreak ? (settings?.break_duration || 5) * 60 : (settings?.work_duration || 25) * 60} 
+          />
         </div>
 
         {/* Add Pomodoro Progress after timer display */}
