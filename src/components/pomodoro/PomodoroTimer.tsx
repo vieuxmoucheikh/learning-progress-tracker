@@ -481,7 +481,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
       const activeTask = tasks.find(t => t.id === activeTaskId);
       if (!activeTask) return;
 
-      // Handle focus session completion
+      // Handle focus session completion and metrics update
       if (!isBreak) {
         if (currentPomodoroId) {
           await completePomodoro(currentPomodoroId);
@@ -535,19 +535,24 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
         }
       }
 
+      // Complete current session if exists
+      if (currentPomodoroId) {
+        await completePomodoro(currentPomodoroId);
+        setCurrentPomodoroId(null);
+      }
+
       // Switch between break and focus
       const newIsBreak = !isBreak;
       setIsBreak(newIsBreak);
       
+      // Set new time based on session type
       const newTime = newIsBreak
         ? (settings.break_duration * 60)
         : (settings.work_duration * 60);
       setTime(newTime);
 
-      // Play sound before starting new session
+      // Play sound and show notification
       playNotificationSound();
-
-      // Show appropriate notification
       toast({
         title: newIsBreak ? 'Time for a break! 🌟' : 'Break complete! 💪',
         description: newIsBreak 
@@ -560,11 +565,8 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
       setCurrentPomodoroId(newPomodoro.id);
 
       // Auto-start based on settings
-      if ((newIsBreak && settings.auto_start_breaks) || (!newIsBreak && settings.auto_start_pomodoros)) {
-        setIsActive(true);
-      } else {
-        setIsActive(false);
-      }
+      const shouldAutoStart = newIsBreak ? settings.auto_start_breaks : settings.auto_start_pomodoros;
+      setIsActive(shouldAutoStart);
 
       localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
     } catch (error) {
