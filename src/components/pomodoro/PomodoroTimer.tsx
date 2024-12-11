@@ -527,44 +527,191 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     </motion.li>
   );
 
-  // Task Progress component
-  const TaskProgress = ({ task }: { task: Task }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="p-6 rounded-xl bg-gradient-to-r from-blue-500/20 to-blue-400/10 border border-blue-500/20 shadow-lg"
-    >
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-sm font-medium text-white">
-          <span className="text-blue-400">Current Task:</span>
-          <span className="ml-2 text-white/80">{task.text}</span>
-        </div>
-        <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20">
-          In Progress
-        </Badge>
-      </div>
-      <div className="grid grid-cols-3 gap-6">
-        <div className="text-center p-3 rounded-lg bg-white/5">
-          <div className="text-2xl font-bold text-white mb-1">
-            {task.metrics.completedPomodoros}
-          </div>
-          <div className="text-xs text-white/60 font-medium">Pomodoros</div>
-        </div>
-        <div className="text-center p-3 rounded-lg bg-white/5">
-          <div className="text-2xl font-bold text-white mb-1">
-            {formatTotalTime(task.metrics.totalMinutes)}
-          </div>
-          <div className="text-xs text-white/60 font-medium">Total Time</div>
-        </div>
-        <div className="text-center p-3 rounded-lg bg-white/5">
-          <div className="text-2xl font-bold text-white mb-1">
-            {task.metrics.currentStreak}
-          </div>
-          <div className="text-xs text-white/60 font-medium">Streak</div>
-        </div>
-      </div>
-    </motion.div>
+  // Task input section
+  const TaskInput = () => (
+    <div className="flex items-center gap-2 mb-4">
+      <Input 
+        type="text"
+        value={currentTask} 
+        onChange={(e) => setCurrentTask(e.target.value)} 
+        placeholder="Add a new task..."
+        className="bg-slate-800/80 border-slate-600/30 focus:border-blue-500/50 text-blue-50 placeholder:text-slate-400"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && currentTask.trim()) {
+            addTask(currentTask);
+            setCurrentTask('');
+          }
+        }}
+      />
+      <Button 
+        onClick={() => { 
+          if (currentTask.trim()) { 
+            addTask(currentTask); 
+            setCurrentTask(''); 
+          } 
+        }}
+        className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+      >
+        Add
+      </Button>
+    </div>
   );
+
+  // Render task list
+  const renderTaskList = () => (
+    <AnimatePresence mode="popLayout">
+      <motion.ul className="space-y-3">
+        {tasks
+          .filter(task => showCompletedTasks || !task.completed)
+          .map(task => (
+            <motion.li 
+              key={task.id}
+              layout
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className={cn(
+                "flex items-center gap-3 p-4 rounded-xl transition-all duration-200",
+                activeTaskId === task.id 
+                  ? "bg-blue-600/30 shadow-lg border border-blue-400/30" 
+                  : "bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/30",
+              )}
+            >
+              <Checkbox 
+                checked={task.completed} 
+                onCheckedChange={() => toggleTask(task.id)}
+                className="data-[state=checked]:bg-blue-500"
+              />
+              <div className="flex-1 min-w-0">
+                <div className={cn(
+                  "font-medium truncate",
+                  task.completed ? "text-slate-400 line-through" : "text-blue-100"
+                )}>
+                  {task.text}
+                </div>
+                {activeTaskId === task.id && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-xs text-blue-200 mt-1 flex items-center gap-2"
+                  >
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {formatTotalTime(task.metrics.totalMinutes)}
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1">
+                      <Target className="w-3 h-3" />
+                      {task.metrics.completedPomodoros} pomodoros
+                    </span>
+                  </motion.div>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant={activeTaskId === task.id ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setTaskActive(task.id)}
+                  className={cn(
+                    "transition-all duration-200",
+                    activeTaskId === task.id 
+                      ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20" 
+                      : "bg-blue-500/20 text-blue-100 hover:bg-blue-500/30"
+                  )}
+                >
+                  {activeTaskId === task.id ? "Active" : "Start"}
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => removeTask(task.id)}
+                  className="bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-red-100"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </motion.li>
+          ))}
+      </motion.ul>
+    </AnimatePresence>
+  );
+
+  // Get motivational message based on streak
+  const getMotivationalMessage = (streak: number) => {
+    if (streak === 0) return "Let's get started! 🚀";
+    if (streak <= 2) return "Great start! Keep going! 💪";
+    if (streak <= 4) return "You're on fire! 🔥";
+    return "Incredible streak! You're unstoppable! ⭐";
+  };
+
+  // Calculate progress percentages
+  const getProgressStats = (task: Task) => {
+    const streakPercentage = Math.min((task.metrics.currentStreak / 4) * 100, 100);
+    const dailyGoalPercentage = Math.min((task.metrics.completedPomodoros / 8) * 100, 100);
+    return { streakPercentage, dailyGoalPercentage };
+  };
+
+  // Active Task Progress section
+  const TaskProgress = ({ task }: { task: Task }) => {
+    const { streakPercentage, dailyGoalPercentage } = getProgressStats(task);
+    
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="p-6 rounded-xl bg-blue-600/20 border border-blue-400/30 shadow-lg"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-sm font-medium">
+            <span className="text-blue-300">Current Task:</span>
+            <span className="ml-2 text-blue-100">{task.text}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
+              {isBreak ? 'Break Time' : 'Focus Time'}
+            </Badge>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="text-center p-4 rounded-lg bg-blue-500/10 relative overflow-hidden">
+            <div className="relative z-10">
+              <div className="text-3xl font-bold text-blue-100 mb-1">
+                {task.metrics.currentStreak}
+              </div>
+              <div className="text-sm text-blue-300 font-medium">Current Streak</div>
+            </div>
+            <div 
+              className="absolute inset-0 bg-gradient-to-t from-blue-500/20 to-transparent" 
+              style={{ 
+                transform: `translateY(${100 - streakPercentage}%)`,
+                transition: 'transform 0.3s ease-out'
+              }} 
+            />
+          </div>
+          <div className="text-center p-4 rounded-lg bg-blue-500/10 relative overflow-hidden">
+            <div className="relative z-10">
+              <div className="text-3xl font-bold text-blue-100 mb-1">
+                {Math.round(dailyGoalPercentage)}%
+              </div>
+              <div className="text-sm text-blue-300 font-medium">Daily Goal Progress</div>
+            </div>
+            <div 
+              className="absolute inset-0 bg-gradient-to-t from-green-500/20 to-transparent" 
+              style={{ 
+                transform: `translateY(${100 - dailyGoalPercentage}%)`,
+                transition: 'transform 0.3s ease-out'
+              }} 
+            />
+          </div>
+        </div>
+        <div className="mt-4 text-center">
+          <p className="text-sm text-blue-200">
+            {getMotivationalMessage(task.metrics.currentStreak)}
+          </p>
+        </div>
+      </motion.div>
+    );
+  };
 
   // Enhanced TimerDisplay with better styling
   const TimerDisplay = ({ time, isActive, totalTime }: { time: number; isActive: boolean; totalTime: number }) => {
@@ -988,122 +1135,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     </div>
   );
 
-  // Task input section
-  const TaskInput = () => (
-    <div className="flex items-center gap-2 mb-4">
-      <Input 
-        value={currentTask} 
-        onChange={(e) => setCurrentTask(e.target.value)} 
-        placeholder="Add a new task..."
-        className="bg-slate-800/80 border-slate-600/30 focus:border-blue-500/50 text-blue-50 placeholder:text-slate-400"
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && currentTask.trim()) {
-            addTask(currentTask);
-            setCurrentTask('');
-          }
-        }}
-      />
-      <Button 
-        onClick={() => { 
-          if (currentTask.trim()) { 
-            addTask(currentTask); 
-            setCurrentTask(''); 
-          } 
-        }}
-        className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20"
-      >
-        Add
-      </Button>
-    </div>
-  );
-
-  // Render task list
-  const renderTaskList = () => (
-    <AnimatePresence mode="popLayout">
-      <motion.ul className="space-y-3">
-        {tasks
-          .filter(task => showCompletedTasks || !task.completed)
-          .map(task => (
-            <motion.li 
-              key={task.id}
-              layout
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className={cn(
-                "flex items-center gap-3 p-4 rounded-xl transition-all duration-200",
-                activeTaskId === task.id 
-                  ? "bg-blue-600/30 shadow-lg border border-blue-400/30" 
-                  : "bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/30",
-              )}
-            >
-              <Checkbox 
-                checked={task.completed} 
-                onCheckedChange={() => toggleTask(task.id)}
-                className="data-[state=checked]:bg-blue-500"
-              />
-              <div className="flex-1 min-w-0">
-                <div className={cn(
-                  "font-medium truncate",
-                  task.completed ? "text-slate-400 line-through" : "text-blue-100"
-                )}>
-                  {task.text}
-                </div>
-                {activeTaskId === task.id && (
-                  <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-xs text-blue-200 mt-1 flex items-center gap-2"
-                  >
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {formatTotalTime(task.metrics.totalMinutes)}
-                    </span>
-                    <span>•</span>
-                    <span className="flex items-center gap-1">
-                      <Target className="w-3 h-3" />
-                      {task.metrics.completedPomodoros} pomodoros
-                    </span>
-                  </motion.div>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant={activeTaskId === task.id ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setTaskActive(task.id)}
-                  className={cn(
-                    "transition-all duration-200",
-                    activeTaskId === task.id 
-                      ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20" 
-                      : "bg-blue-500/20 text-blue-100 hover:bg-blue-500/30"
-                  )}
-                >
-                  {activeTaskId === task.id ? "Active" : "Start"}
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => removeTask(task.id)}
-                  className="bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-red-100"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </motion.li>
-          ))}
-      </motion.ul>
-    </AnimatePresence>
-  );
-
-  // Get motivational message based on streak
-  const getMotivationalMessage = (streak: number) => {
-    if (streak === 0) return "Let's get started! 🚀";
-    if (streak <= 2) return "Great start! Keep going! 💪";
-    if (streak <= 4) return "You're on fire! 🔥";
-    return "Incredible streak! You're unstoppable! ⭐";
-  };
-
   // Update active task stats display
   return (
     <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate-700/30 shadow-2xl">
@@ -1189,60 +1220,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
         {/* Active Task Progress */}
         {activeTaskId && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-6 rounded-xl bg-blue-600/20 border border-blue-400/30 shadow-lg"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-sm font-medium">
-                <span className="text-blue-300">Current Task:</span>
-                <span className="ml-2 text-blue-100">{tasks.find(t => t.id === activeTaskId)?.text}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
-                  {isBreak ? 'Break Time' : 'Focus Time'}
-                </Badge>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="text-center p-4 rounded-lg bg-blue-500/10 relative overflow-hidden">
-                <div className="relative z-10">
-                  <div className="text-3xl font-bold text-blue-100 mb-1">
-                    {tasks.find(t => t.id === activeTaskId)?.metrics.currentStreak || 0}
-                  </div>
-                  <div className="text-sm text-blue-300 font-medium">Current Streak</div>
-                </div>
-                <div 
-                  className="absolute inset-0 bg-gradient-to-t from-blue-500/20 to-transparent" 
-                  style={{ 
-                    transform: `translateY(${100 - (((tasks.find(t => t.id === activeTaskId)?.metrics.currentStreak || 0) / 4) * 100)}%)`,
-                    transition: 'transform 0.3s ease-out'
-                  }} 
-                />
-              </div>
-              <div className="text-center p-4 rounded-lg bg-blue-500/10 relative overflow-hidden">
-                <div className="relative z-10">
-                  <div className="text-3xl font-bold text-blue-100 mb-1">
-                    {Math.round((tasks.find(t => t.id === activeTaskId)?.metrics.totalMinutes || 0) / 25)}%
-                  </div>
-                  <div className="text-sm text-blue-300 font-medium">Daily Goal Progress</div>
-                </div>
-                <div 
-                  className="absolute inset-0 bg-gradient-to-t from-green-500/20 to-transparent" 
-                  style={{ 
-                    transform: `translateY(${100 - ((tasks.find(t => t.id === activeTaskId)?.metrics.totalMinutes || 0) / 25)}%)`,
-                    transition: 'transform 0.3s ease-out'
-                  }} 
-                />
-              </div>
-            </div>
-            <div className="mt-4 text-center">
-              <p className="text-sm text-blue-200">
-                {getMotivationalMessage(tasks.find(t => t.id === activeTaskId)?.metrics.currentStreak || 0)}
-              </p>
-            </div>
-          </motion.div>
+          <TaskProgress task={tasks.find(t => t.id === activeTaskId)!} />
         )}
 
         {/* Settings Dialog */}
