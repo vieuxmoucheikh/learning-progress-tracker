@@ -1096,6 +1096,14 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     </AnimatePresence>
   );
 
+  // Get motivational message based on streak
+  const getMotivationalMessage = (streak: number) => {
+    if (streak === 0) return "Let's get started! 🚀";
+    if (streak <= 2) return "Great start! Keep going! 💪";
+    if (streak <= 4) return "You're on fire! 🔥";
+    return "Incredible streak! You're unstoppable! ⭐";
+  };
+
   // Update active task stats display
   return (
     <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate-700/30 shadow-2xl">
@@ -1191,29 +1199,48 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                 <span className="text-blue-300">Current Task:</span>
                 <span className="ml-2 text-blue-100">{tasks.find(t => t.id === activeTaskId)?.text}</span>
               </div>
-              <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
-                In Progress
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
+                  {isBreak ? 'Break Time' : 'Focus Time'}
+                </Badge>
+              </div>
             </div>
-            <div className="grid grid-cols-3 gap-6">
-              <div className="text-center p-3 rounded-lg bg-blue-500/10">
-                <div className="text-2xl font-bold text-blue-100 mb-1">
-                  {tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0}
+            <div className="grid grid-cols-2 gap-6">
+              <div className="text-center p-4 rounded-lg bg-blue-500/10 relative overflow-hidden">
+                <div className="relative z-10">
+                  <div className="text-3xl font-bold text-blue-100 mb-1">
+                    {tasks.find(t => t.id === activeTaskId)?.metrics.currentStreak || 0}
+                  </div>
+                  <div className="text-sm text-blue-300 font-medium">Current Streak</div>
                 </div>
-                <div className="text-xs text-blue-300 font-medium">Pomodoros</div>
+                <div 
+                  className="absolute inset-0 bg-gradient-to-t from-blue-500/20 to-transparent" 
+                  style={{ 
+                    transform: `translateY(${100 - (((tasks.find(t => t.id === activeTaskId)?.metrics.currentStreak || 0) / 4) * 100)}%)`,
+                    transition: 'transform 0.3s ease-out'
+                  }} 
+                />
               </div>
-              <div className="text-center p-3 rounded-lg bg-blue-500/10">
-                <div className="text-2xl font-bold text-blue-100 mb-1">
-                  {formatTotalTime(tasks.find(t => t.id === activeTaskId)?.metrics.totalMinutes || 0)}
+              <div className="text-center p-4 rounded-lg bg-blue-500/10 relative overflow-hidden">
+                <div className="relative z-10">
+                  <div className="text-3xl font-bold text-blue-100 mb-1">
+                    {Math.round((tasks.find(t => t.id === activeTaskId)?.metrics.totalMinutes || 0) / 25)}%
+                  </div>
+                  <div className="text-sm text-blue-300 font-medium">Daily Goal Progress</div>
                 </div>
-                <div className="text-xs text-blue-300 font-medium">Total Time</div>
+                <div 
+                  className="absolute inset-0 bg-gradient-to-t from-green-500/20 to-transparent" 
+                  style={{ 
+                    transform: `translateY(${100 - ((tasks.find(t => t.id === activeTaskId)?.metrics.totalMinutes || 0) / 25)}%)`,
+                    transition: 'transform 0.3s ease-out'
+                  }} 
+                />
               </div>
-              <div className="text-center p-3 rounded-lg bg-blue-500/10">
-                <div className="text-2xl font-bold text-blue-100 mb-1">
-                  {tasks.find(t => t.id === activeTaskId)?.metrics.currentStreak || 0}
-                </div>
-                <div className="text-xs text-blue-300 font-medium">Streak</div>
-              </div>
+            </div>
+            <div className="mt-4 text-center">
+              <p className="text-sm text-blue-200">
+                {getMotivationalMessage(tasks.find(t => t.id === activeTaskId)?.metrics.currentStreak || 0)}
+              </p>
             </div>
           </motion.div>
         )}
