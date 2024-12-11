@@ -479,7 +479,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
       <div className="flex-1 min-w-0">
         <div className={cn(
           "font-medium truncate",
-          task.completed ? "text-white/40 line-through" : "text-white"
+          task.completed ? "text-blue-200/40 line-through" : "text-blue-200"
         )}>
           {task.text}
         </div>
@@ -487,7 +487,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-xs text-white/60 mt-1 flex items-center gap-2"
+            className="text-xs text-blue-300/80 mt-1 flex items-center gap-2"
           >
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
@@ -510,7 +510,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
             "transition-all duration-200",
             activeTaskId === task.id 
               ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20" 
-              : "text-white/60 hover:text-white hover:bg-white/10"
+              : "text-blue-300 hover:text-blue-200 hover:bg-blue-500/10"
           )}
         >
           {activeTaskId === task.id ? "Active" : "Start"}
@@ -519,7 +519,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           variant="ghost" 
           size="sm"
           onClick={() => removeTask(task.id)}
-          className="text-white/40 hover:text-red-400 hover:bg-red-500/10"
+          className="text-blue-300/60 hover:text-red-400 hover:bg-red-500/10"
         >
           <X className="h-4 w-4" />
         </Button>
@@ -993,7 +993,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               <div className="flex-1 min-w-0">
                 <div className={cn(
                   "font-medium truncate",
-                  task.completed ? "text-white/40 line-through" : "text-white"
+                  task.completed ? "text-blue-200/40 line-through" : "text-blue-200"
                 )}>
                   {task.text}
                 </div>
@@ -1001,7 +1001,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                   <motion.div 
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="text-xs text-white/60 mt-1 flex items-center gap-2"
+                    className="text-xs text-blue-300/80 mt-1 flex items-center gap-2"
                   >
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
@@ -1024,7 +1024,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                     "transition-all duration-200",
                     activeTaskId === task.id 
                       ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20" 
-                      : "text-white/60 hover:text-white hover:bg-white/10"
+                      : "text-blue-300 hover:text-blue-200 hover:bg-blue-500/10"
                   )}
                 >
                   {activeTaskId === task.id ? "Active" : "Start"}
@@ -1033,7 +1033,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                   variant="ghost" 
                   size="sm"
                   onClick={() => removeTask(task.id)}
-                  className="text-white/40 hover:text-red-400 hover:bg-red-500/10"
+                  className="text-blue-300/60 hover:text-red-400 hover:bg-red-500/10"
                 >
                   <X className="h-4 w-4" />
                 </Button>
