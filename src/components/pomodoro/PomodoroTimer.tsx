@@ -467,8 +467,8 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
       className={cn(
         "flex items-center gap-3 p-4 rounded-xl transition-all duration-200",
         activeTaskId === task.id 
-          ? "bg-gradient-to-r from-blue-500/20 to-blue-400/10 shadow-lg border border-blue-500/20" 
-          : "bg-white/5 hover:bg-white/10 border border-white/5",
+          ? "bg-blue-600/30 shadow-lg border border-blue-400/30" 
+          : "bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/30",
       )}
     >
       <Checkbox 
@@ -479,7 +479,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
       <div className="flex-1 min-w-0">
         <div className={cn(
           "font-medium truncate",
-          task.completed ? "text-blue-200/40 line-through" : "text-blue-200"
+          task.completed ? "text-slate-400 line-through" : "text-blue-100"
         )}>
           {task.text}
         </div>
@@ -487,7 +487,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-xs text-blue-300/80 mt-1 flex items-center gap-2"
+            className="text-xs text-blue-200 mt-1 flex items-center gap-2"
           >
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
@@ -510,7 +510,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
             "transition-all duration-200",
             activeTaskId === task.id 
               ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20" 
-              : "text-blue-300 hover:text-blue-200 hover:bg-blue-500/10"
+              : "bg-blue-500/20 text-blue-100 hover:bg-blue-500/30"
           )}
         >
           {activeTaskId === task.id ? "Active" : "Start"}
@@ -519,7 +519,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           variant="ghost" 
           size="sm"
           onClick={() => removeTask(task.id)}
-          className="text-blue-300/60 hover:text-red-400 hover:bg-red-500/10"
+          className="bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-red-100"
         >
           <X className="h-4 w-4" />
         </Button>
@@ -966,6 +966,58 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     setTasks(prev => prev.filter(task => task.id !== id));
   };
 
+  // Task list header
+  const TaskListHeader = () => (
+    <div className="flex justify-between items-center px-1 mb-3">
+      <div className="flex items-center gap-2">
+        <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
+          {tasks.filter(t => !t.completed).length} active
+        </Badge>
+        <Badge variant="outline" className="bg-slate-700/50 text-slate-200 border-slate-500/30">
+          {tasks.filter(t => t.completed).length} completed
+        </Badge>
+      </div>
+      <Button 
+        variant="ghost" 
+        size="sm"
+        onClick={() => setShowCompletedTasks(prev => !prev)}
+        className="bg-slate-700/50 text-slate-200 hover:bg-slate-600/50 hover:text-white"
+      >
+        {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
+      </Button>
+    </div>
+  );
+
+  // Task input section
+  const TaskInput = () => (
+    <div className="flex items-center gap-2 mb-4">
+      <Input 
+        value={currentTask} 
+        onChange={(e) => setCurrentTask(e.target.value)} 
+        placeholder="Add a new task..."
+        className="bg-slate-800/80 border-slate-600/30 focus:border-blue-500/50 text-blue-50 placeholder:text-slate-400"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && currentTask.trim()) {
+            addTask(currentTask);
+            setCurrentTask('');
+          }
+        }}
+      />
+      <Button 
+        onClick={() => { 
+          if (currentTask.trim()) { 
+            addTask(currentTask); 
+            setCurrentTask(''); 
+          } 
+        }}
+        className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+      >
+        Add
+      </Button>
+    </div>
+  );
+
+  // Render task list
   const renderTaskList = () => (
     <AnimatePresence mode="popLayout">
       <motion.ul className="space-y-3">
@@ -981,8 +1033,8 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               className={cn(
                 "flex items-center gap-3 p-4 rounded-xl transition-all duration-200",
                 activeTaskId === task.id 
-                  ? "bg-gradient-to-r from-blue-500/20 to-blue-400/10 shadow-lg border border-blue-500/20" 
-                  : "bg-white/5 hover:bg-white/10 border border-white/5",
+                  ? "bg-blue-600/30 shadow-lg border border-blue-400/30" 
+                  : "bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/30",
               )}
             >
               <Checkbox 
@@ -993,7 +1045,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               <div className="flex-1 min-w-0">
                 <div className={cn(
                   "font-medium truncate",
-                  task.completed ? "text-blue-200/40 line-through" : "text-blue-200"
+                  task.completed ? "text-slate-400 line-through" : "text-blue-100"
                 )}>
                   {task.text}
                 </div>
@@ -1001,7 +1053,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                   <motion.div 
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="text-xs text-blue-300/80 mt-1 flex items-center gap-2"
+                    className="text-xs text-blue-200 mt-1 flex items-center gap-2"
                   >
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
@@ -1024,7 +1076,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                     "transition-all duration-200",
                     activeTaskId === task.id 
                       ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20" 
-                      : "text-blue-300 hover:text-blue-200 hover:bg-blue-500/10"
+                      : "bg-blue-500/20 text-blue-100 hover:bg-blue-500/30"
                   )}
                 >
                   {activeTaskId === task.id ? "Active" : "Start"}
@@ -1033,7 +1085,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                   variant="ghost" 
                   size="sm"
                   onClick={() => removeTask(task.id)}
-                  className="text-blue-300/60 hover:text-red-400 hover:bg-red-500/10"
+                  className="bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-red-100"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -1046,58 +1098,15 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
   // Update active task stats display
   return (
-    <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-white/5 border-white/10 shadow-2xl">
+    <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate-700/30 shadow-2xl">
       <div className="pomodoro-timer space-y-6 md:space-y-8">
         {/* Session Type Indicator */}
         <SessionTypeIndicator isBreak={isBreak} />
 
         {/* Task Management */}
-        <div className="w-full space-y-4">
-          <div className="flex items-center gap-2">
-            <Input 
-              value={currentTask} 
-              onChange={(e) => setCurrentTask(e.target.value)} 
-              placeholder="Add a new task..."
-              className="bg-white/10 border-white/10 focus:border-blue-500/50 placeholder:text-white/30"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && currentTask.trim()) {
-                  addTask(currentTask);
-                  setCurrentTask('');
-                }
-              }}
-            />
-            <Button 
-              onClick={() => { 
-                if (currentTask.trim()) { 
-                  addTask(currentTask); 
-                  setCurrentTask(''); 
-                } 
-              }}
-              className="bg-blue-500/80 hover:bg-blue-600/80 text-white shadow-lg shadow-blue-500/20"
-            >
-              Add
-            </Button>
-          </div>
-
-          <div className="flex justify-between items-center px-1">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20">
-                {tasks.filter(t => !t.completed).length} active
-              </Badge>
-              <Badge variant="outline" className="bg-white/5 text-white/60 border-white/10">
-                {tasks.filter(t => t.completed).length} completed
-              </Badge>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => setShowCompletedTasks(prev => !prev)}
-              className="text-white/60 hover:text-white hover:bg-white/10"
-            >
-              {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
-            </Button>
-          </div>
-
+        <div className="w-full">
+          <TaskInput />
+          <TaskListHeader />
           {renderTaskList()}
         </div>
 
@@ -1175,35 +1184,35 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 rounded-xl bg-gradient-to-r from-blue-500/20 to-blue-400/10 border border-blue-500/20 shadow-lg"
+            className="p-6 rounded-xl bg-blue-600/20 border border-blue-400/30 shadow-lg"
           >
             <div className="flex items-center justify-between mb-4">
-              <div className="text-sm font-medium text-white">
-                <span className="text-blue-400">Current Task:</span>
-                <span className="ml-2 text-white/80">{tasks.find(t => t.id === activeTaskId)?.text}</span>
+              <div className="text-sm font-medium">
+                <span className="text-blue-300">Current Task:</span>
+                <span className="ml-2 text-blue-100">{tasks.find(t => t.id === activeTaskId)?.text}</span>
               </div>
-              <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20">
+              <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
                 In Progress
               </Badge>
             </div>
             <div className="grid grid-cols-3 gap-6">
-              <div className="text-center p-3 rounded-lg bg-white/5">
-                <div className="text-2xl font-bold text-white mb-1">
+              <div className="text-center p-3 rounded-lg bg-blue-500/10">
+                <div className="text-2xl font-bold text-blue-100 mb-1">
                   {tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0}
                 </div>
-                <div className="text-xs text-white/60 font-medium">Pomodoros</div>
+                <div className="text-xs text-blue-300 font-medium">Pomodoros</div>
               </div>
-              <div className="text-center p-3 rounded-lg bg-white/5">
-                <div className="text-2xl font-bold text-white mb-1">
+              <div className="text-center p-3 rounded-lg bg-blue-500/10">
+                <div className="text-2xl font-bold text-blue-100 mb-1">
                   {formatTotalTime(tasks.find(t => t.id === activeTaskId)?.metrics.totalMinutes || 0)}
                 </div>
-                <div className="text-xs text-white/60 font-medium">Total Time</div>
+                <div className="text-xs text-blue-300 font-medium">Total Time</div>
               </div>
-              <div className="text-center p-3 rounded-lg bg-white/5">
-                <div className="text-2xl font-bold text-white mb-1">
+              <div className="text-center p-3 rounded-lg bg-blue-500/10">
+                <div className="text-2xl font-bold text-blue-100 mb-1">
                   {tasks.find(t => t.id === activeTaskId)?.metrics.currentStreak || 0}
                 </div>
-                <div className="text-xs text-white/60 font-medium">Streak</div>
+                <div className="text-xs text-blue-300 font-medium">Streak</div>
               </div>
             </div>
           </motion.div>
