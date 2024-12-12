@@ -1066,6 +1066,39 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     </div>
   );
 
+  // Play notification sound
+  const playNotificationSound = useCallback(() => {
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext();
+      }
+
+      const oscillator = audioContextRef.current.createOscillator();
+      const gainNode = audioContextRef.current.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContextRef.current.destination);
+
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(440, audioContextRef.current.currentTime);
+      gainNode.gain.setValueAtTime(0.1, audioContextRef.current.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContextRef.current.currentTime + 0.5);
+
+      oscillator.start(audioContextRef.current.currentTime);
+      oscillator.stop(audioContextRef.current.currentTime + 0.5);
+
+      // Show notification if enabled
+      if (Notification.permission === 'granted' && settings?.notification_enabled) {
+        new Notification('Pomodoro Timer', {
+          body: isBreak ? 'Break time is over!' : 'Time to take a break!',
+          icon: '/favicon.ico'
+        });
+      }
+    } catch (error) {
+      console.error('Error playing sound:', error);
+    }
+  }, [isBreak, settings]);
+
   // Update active task stats display
   return (
     <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate-700/30 shadow-2xl">
