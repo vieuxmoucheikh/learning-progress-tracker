@@ -1180,7 +1180,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-        </div>
+        </div> 
 
         {/* Active Task Progress */}
         {activeTaskId && (
