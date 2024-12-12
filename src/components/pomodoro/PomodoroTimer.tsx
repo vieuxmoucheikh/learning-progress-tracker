@@ -52,7 +52,7 @@ interface PomodoroState {
   current_pomodoro_id: string;
 }
 
-export function PomodoroTimer({  }: PomodoroTimerProps) {
+export function PomodoroTimer({ }: PomodoroTimerProps) {
   let lastTimestamp = 0; // Initialize lastTimestamp to store the last recorded timestamp
   const [time, setTime] = useState(25 * 60);
   const [isActive, setIsActive] = useState(false);
@@ -902,6 +902,12 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
   // Handle timer completion
   const handleTimerComplete = () => {
     if (!settings) return;
+
+    // Stop any ongoing sound
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null; // Reset audio context
+    }
 
     // Play sound if enabled
     if (settings.sound_enabled) {
