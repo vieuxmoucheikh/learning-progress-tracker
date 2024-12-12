@@ -1216,4 +1216,4 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
       </div>
     </Card>
   );
-}
+} 
