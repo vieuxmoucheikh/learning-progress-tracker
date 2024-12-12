@@ -530,12 +530,12 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
   // Task input section
   const TaskInput = () => (
     <div className="flex items-center gap-2 mb-4">
-      <Input 
+      <input 
         type="text"
         value={currentTask} 
         onChange={(e) => setCurrentTask(e.target.value)} 
         placeholder="Add a new task..."
-        className="bg-slate-800/80 border-slate-600/30 focus:border-blue-500/50 text-blue-50 placeholder:text-slate-400"
+        className="flex h-10 w-full rounded-md border border-slate-600/30 bg-slate-800/80 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-blue-50"
         onKeyDown={(e) => {
           if (e.key === 'Enter' && currentTask.trim()) {
             addTask(currentTask);
@@ -646,8 +646,9 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
   // Calculate progress percentages
   const getProgressStats = (task: Task) => {
+    const dailyGoal = settings?.daily_goal || 4; // Get daily goal from settings
     const streakPercentage = Math.min((task.metrics.currentStreak / 4) * 100, 100);
-    const dailyGoalPercentage = Math.min((task.metrics.completedPomodoros / 8) * 100, 100);
+    const dailyGoalPercentage = Math.min((task.metrics.completedPomodoros / dailyGoal) * 100, 100);
     return { streakPercentage, dailyGoalPercentage };
   };
 
@@ -929,110 +930,42 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     );
   };
 
-  // Fix handleTimerComplete function
-  const handleTimerComplete = async () => {
-    if (!settings || !activeTaskId) return;
-
-    try {
-      const activeTask = tasks.find(t => t.id === activeTaskId);
-      if (!activeTask) return;
-
-      // Handle focus session completion and metrics update
-      if (!isBreak) {
-        if (currentPomodoroId) {
-          await completePomodoro(currentPomodoroId);
-          setCurrentPomodoroId(null);
-        }
-
-        const updatedTasks = tasks.map(task => {
-          if (task.id === activeTaskId) {
-            const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
-            
-            if (newCompletedPomodoros >= (settings.daily_goal || 4)) {
-              playNotificationSound();
-              toast({
-                title: "🎉 Daily Goal Achieved! 🌟",
-                description: "Incredible work! You've crushed your daily goal. This task is now complete!",
-                duration: 6000,
-              });
-
-              setIsActive(false);
-              setIsBreak(false);
-              setTime(settings.work_duration * 60);
-
-              return {
-                ...task,
-                completed: true,
-                metrics: {
-                  ...task.metrics,
-                  totalMinutes: task.metrics.totalMinutes + settings.work_duration,
-                  completedPomodoros: newCompletedPomodoros
-                }
-              };
-            }
-
-            return {
-              ...task,
-              metrics: {
-                ...task.metrics,
-                totalMinutes: task.metrics.totalMinutes + settings.work_duration,
-                completedPomodoros: newCompletedPomodoros
-              }
-            };
+  // Handle timer completion
+  const handleTimerComplete = () => {
+    if (!isBreak && activeTaskId) {
+      // Update task metrics
+      setTasks(prev => prev.map(task => {
+        if (task.id === activeTaskId) {
+          const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
+          const dailyGoal = settings?.daily_goal || 4;
+          
+          // Check if daily goal is achieved
+          if (newCompletedPomodoros >= dailyGoal && !task.completed) {
+            // Show congratulations message
+            toast({
+              title: "Daily Goal Achieved! 🎉",
+              description: "Great job! You've reached your daily pomodoro goal!",
+              duration: 5000,
+            });
           }
-          return task;
-        });
-
-        setTasks(updatedTasks);
-        
-        const updatedTask = updatedTasks.find(t => t.id === activeTaskId);
-        if (updatedTask?.completed) {
-          return;
+          
+          return {
+            ...task,
+            metrics: {
+              ...task.metrics,
+              currentStreak: task.metrics.currentStreak + 1,
+              completedPomodoros: newCompletedPomodoros,
+              totalMinutes: task.metrics.totalMinutes + (settings?.work_duration || 25)
+            }
+          };
         }
-      }
-
-      // Complete current session if exists
-      if (currentPomodoroId) {
-        await completePomodoro(currentPomodoroId);
-        setCurrentPomodoroId(null);
-      }
-
-      // Switch between break and focus
-      const newIsBreak = !isBreak;
-      setIsBreak(newIsBreak);
-      
-      // Set new time based on session type
-      const newTime = newIsBreak
-        ? (settings.break_duration * 60)
-        : (settings.work_duration * 60);
-      setTime(newTime);
-
-      // Play sound and show notification
-      playNotificationSound();
-      toast({
-        title: newIsBreak ? 'Time for a break! 🌟' : 'Break complete! 💪',
-        description: newIsBreak 
-          ? 'Great work! Take a moment to recharge.' 
-          : 'Ready for another focused session? You\'re doing great!',
-      });
-
-      // Start new session
-      const newPomodoro = await startPomodoro(newIsBreak ? 'break' : 'work');
-      setCurrentPomodoroId(newPomodoro.id);
-
-      // Auto-start based on settings
-      const shouldAutoStart = newIsBreak ? settings.auto_start_breaks : settings.auto_start_pomodoros;
-      setIsActive(shouldAutoStart);
-
-      localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
-    } catch (error) {
-      console.error('Error completing timer:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to complete timer session',
-        variant: 'destructive'
-      });
+        return task;
+      }));
     }
+    
+    // Switch between focus and break
+    setIsBreak(!isBreak);
+    resetTimer();
   };
 
   const startNewPomodoro = async (type: 'work' | 'break' = 'work') => {
