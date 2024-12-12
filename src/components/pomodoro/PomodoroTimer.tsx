@@ -1236,5 +1236,7 @@ return (
       />
     </div>
   </Card>
-)
-}
+);
+};
+
+export default PomodoroTimer;
