@@ -52,7 +52,7 @@ interface PomodoroState {
   current_pomodoro_id: string;
 }
 
-export function PomodoroTimer({ }: PomodoroTimerProps) {
+export function PomodoroTimer({  }: PomodoroTimerProps) {
   let lastTimestamp = 0; // Initialize lastTimestamp to store the last recorded timestamp
   const [time, setTime] = useState(25 * 60);
   const [isActive, setIsActive] = useState(false);
@@ -895,71 +895,54 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
   // Reset timer based on session type
   const resetTimer = () => {
-    setTime(isBreak ? (settings?.break_duration || 300) * 60 : (settings?.work_duration || 1500) * 60);
+    setTime(isBreak ? (settings?.break_duration || 5) * 60 : (settings?.work_duration || 25) * 60);
     setIsActive(false);
   };
 
   // Handle timer completion
-  const handleTimerComplete = async () => {
-    console.log('Timer completed, updating stats and resetting timer.');
+  const handleTimerComplete = () => {
     if (!settings) return;
 
-    try {
-      // Stop the timer
-      setIsActive(false);
-      
-      // Stop sound notification
-      stopNotificationSound(); 
-
-      // Complete current pomodoro if it exists
-      if (currentPomodoroId) {
-        await completePomodoro(currentPomodoroId);
-        setCurrentPomodoroId(null);
-      }
-
-      // Toggle break state
-      const newIsBreak = !isBreak;
-      setIsBreak(newIsBreak);
-
-      // Calculate new time based on type
-      const newTime = newIsBreak
-        ? (settings.break_duration || 300) * 60
-        : (settings.work_duration || 1500) * 60;
-      setTime(newTime);
-
-      // Refresh stats
-      const newStats = await getPomodoroStats();
-      console.log('Updated stats:', newStats);
-      setStats(newStats);
-
-      // Show notification
-      toast({
-        title: newIsBreak ? 'Time for a break! 🎉' : 'Break complete!',
-        description: newIsBreak ? 'Great work! Take some time to rest.' : 'Ready to focus again?',
-      });
-
-      // Auto-start if enabled
-      if ((newIsBreak && settings.auto_start_breaks) || (!newIsBreak && settings.auto_start_pomodoros)) {
-        const newPomodoro = await startPomodoro(newIsBreak ? 'break' : 'work');
-        setCurrentPomodoroId(newPomodoro.id);
-        setIsActive(true);
-      }
-    } catch (error) {
-      console.error('Error completing timer:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to complete the timer session',
-        variant: 'destructive',
-      });
+    // Play sound if enabled
+    if (settings.sound_enabled) {
+      playNotificationSound();
     }
-  };
+
+    if (!isBreak && activeTaskId) {
+      // Update task metrics
+      setTasks(prev => prev.map(task => {
+        if (task.id === activeTaskId) {
+          const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
+          const dailyGoal = settings.daily_goal || 4;
+          
+          if (newCompletedPomodoros >= dailyGoal && !task.completed) {
+            toast({
+              title: "Daily Goal Achieved! 🎉",
+              description: "Great job! You've reached your daily pomodoro goal!",
+              duration: 5000,
+            });
+          }
+          
+          return {
+            ...task,
+            metrics: {
+              ...task.metrics,
+              currentStreak: task.metrics.currentStreak + 1,
+              completedPomodoros: newCompletedPomodoros,
+              totalMinutes: task.metrics.totalMinutes + (settings.work_duration || 25)
+            }
+          };
+        }
+        return task;
+      }));
+    }
 
     // Switch between break and focus
     const newIsBreak = !isBreak;
     setIsBreak(newIsBreak);
 
     // Set new time based on session type
-    const newTime = newIsBreak ? (settings?.break_duration || 300) * 60 : (settings?.work_duration || 1500) * 60;
+    const newTime = newIsBreak ? settings.break_duration * 60 : settings.work_duration * 60;
     setTime(newTime);
 
     // Show session change notification
@@ -972,271 +955,261 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     });
 
     // Auto-start based on settings
-    const shouldAutoStart = settings ? (newIsBreak ? settings.auto_start_breaks : settings.auto_start_pomodoros) : false;
+    const shouldAutoStart = newIsBreak ? settings.auto_start_breaks : settings.auto_start_pomodoros;
     setIsActive(shouldAutoStart);
 
     // Save tasks to localStorage
-useEffect(() => {
-  localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
-}, [tasks]);
+    localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
+  };
 
-const startNewPomodoro = async (type: 'work' | 'break' = 'work') => {
-  try {
-    const pomodoro = await startPomodoro(type);
-    setCurrentPomodoroId(pomodoro.id);
-    setIsActive(true);
-  } catch (error) {
-    console.error('Error starting Pomodoro:', error);
-    toast({
-      title: 'Error',
-      description: 'Failed to start Pomodoro session',
-      variant: 'destructive',
-    });
-  }
-};
-
-const toggleTimer = async () => {
-  if (!isActive) {
-    await startNewPomodoro(isBreak ? 'break' : 'work');
-  } else {
-    setIsActive(false);
-  }
-};
-
-const skipCurrentInterval = () => {
-  setTime(0); // Set to 0 instead of just decrementing
-  handleTimerComplete();
-};
-
-const formatTime = (seconds: number): string => {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-};
-
-const handleButtonClick = useCallback(async (action: 'start' | 'pause' | 'skip') => {
-  switch (action) {
-    case 'start':
-      if (!isActive) {
-        await startNewPomodoro(isBreak ? 'break' : 'work');
-      }
-      break;
-    case 'pause':
-      setIsActive(false);
-      break;
-    case 'skip':
-      skipCurrentInterval();
-      break;
-  }
-}, [isActive, isBreak]);
-
-const calculateProgress = useCallback(() => {
-  if (!settings) return 0;
-  const totalTime = isBreak ? (settings.break_duration || 5) * 60 : (settings.work_duration || 25) * 60;
-  return ((totalTime - time) / totalTime) * 100;
-}, [time, isBreak, settings]);
-
-const getBreakSuggestion = useCallback(() => {
-  if (!stats || !settings) return null;
-  
-  const completedToday = stats.completedPomodoros;
-  if (completedToday >= 4) {
-    return "Consider taking a longer break to maintain productivity";
-  } else if (completedToday === 2) {
-    return "Quick stretching exercises can help maintain focus";
-  }
-  return "Stay hydrated during your break";
-}, [stats, settings]);
-
-const toggleTask = (id: string) => {
-  setTasks(prev => prev.map(task => 
-    task.id === id ? { ...task, completed: !task.completed } : task
-  ));
-};
-
-const removeTask = (id: string) => {
-  setTasks(prev => prev.filter(task => task.id !== id));
-};
-
-// Task list header
-const TaskListHeader = () => (
-  <div className="flex justify-between items-center px-1 mb-3">
-    <div className="flex items-center gap-2">
-      <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
-        {tasks.filter(t => !t.completed).length} active
-      </Badge>
-      <Badge variant="outline" className="bg-slate-700/50 text-slate-200 border-slate-500/30">
-        {tasks.filter(t => t.completed).length} completed
-      </Badge>
-    </div>
-    <Button 
-      variant="ghost" 
-      size="sm"
-      onClick={() => setShowCompletedTasks(prev => !prev)}
-      className="bg-slate-700/50 text-slate-200 hover:bg-slate-600/50 hover:text-white"
-    >
-      {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
-    </Button>
-  </div>
-);
-
-// Play notification sound
-const playNotificationSound = useCallback(() => {
-  try {
-    if (!audioContextRef.current) {
-      audioContextRef.current = new AudioContext();
-    }
-
-    const oscillator = audioContextRef.current.createOscillator();
-    const gainNode = audioContextRef.current.createGain();
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContextRef.current.destination);
-
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(440, audioContextRef.current.currentTime);
-    gainNode.gain.setValueAtTime(0.1, audioContextRef.current.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContextRef.current.currentTime + 0.5);
-
-    oscillator.start(audioContextRef.current.currentTime);
-    oscillator.stop(audioContextRef.current.currentTime + 0.5);
-
-    // Show notification if enabled
-    if (Notification.permission === 'granted' && settings?.notification_enabled) {
-      new Notification('Pomodoro Timer', {
-        body: isBreak ? 'Break time is over!' : 'Time to take a break!',
-        icon: '/favicon.ico'
+  const startNewPomodoro = async (type: 'work' | 'break' = 'work') => {
+    try {
+      const pomodoro = await startPomodoro(type);
+      setCurrentPomodoroId(pomodoro.id);
+      setIsActive(true);
+    } catch (error) {
+      console.error('Error starting Pomodoro:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to start Pomodoro session',
+        variant: 'destructive',
       });
     }
-  } catch (error) {
-    console.error('Error playing sound:', error);
-  }
-}, [isBreak, settings]);
+  };
 
-const stopNotificationSound = useCallback(() => {
-  if (audioContextRef.current) {
-    audioContextRef.current.close();
-    audioContextRef.current = null;
-  }
-}, []);
+  const toggleTimer = async () => {
+    if (!isActive) {
+      await startNewPomodoro(isBreak ? 'break' : 'work');
+    } else {
+      setIsActive(false);
+    }
+  };
 
-// Update active task stats display
-return (
-  <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate-700/30 shadow-2xl">
-    <div className="pomodoro-timer space-y-6 md:space-y-8">
-      {/* Session Type Indicator */}
-      <SessionTypeIndicator isBreak={isBreak} />
+  const skipCurrentInterval = () => {
+    setTime(0); // Set to 0 instead of just decrementing
+    handleTimerComplete();
+  };
 
-      {/* Task Management */}
-      <div className="w-full">
-        <TaskInput />
-        <TaskListHeader />
-        {renderTaskList()}
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  const handleButtonClick = useCallback(async (action: 'start' | 'pause' | 'skip') => {
+    switch (action) {
+      case 'start':
+        if (!isActive) {
+          await startNewPomodoro(isBreak ? 'break' : 'work');
+        }
+        break;
+      case 'pause':
+        setIsActive(false);
+        break;
+      case 'skip':
+        skipCurrentInterval();
+        break;
+    }
+  }, [isActive, isBreak]);
+
+  const calculateProgress = useCallback(() => {
+    if (!settings) return 0;
+    const totalTime = isBreak ? settings.break_duration * 60 : settings.work_duration * 60;
+    return ((totalTime - time) / totalTime) * 100;
+  }, [time, isBreak, settings]);
+
+  const getBreakSuggestion = useCallback(() => {
+    if (!stats || !settings) return null;
+    
+    const completedToday = stats.completedPomodoros;
+    if (completedToday >= 4) {
+      return "Consider taking a longer break to maintain productivity";
+    } else if (completedToday === 2) {
+      return "Quick stretching exercises can help maintain focus";
+    }
+    return "Stay hydrated during your break";
+  }, [stats]);
+
+  const toggleTask = (id: string) => {
+    setTasks(prev => prev.map(task => 
+      task.id === id ? { ...task, completed: !task.completed } : task
+    ));
+  };
+
+  const removeTask = (id: string) => {
+    setTasks(prev => prev.filter(task => task.id !== id));
+  };
+
+  // Task list header
+  const TaskListHeader = () => (
+    <div className="flex justify-between items-center px-1 mb-3">
+      <div className="flex items-center gap-2">
+        <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
+          {tasks.filter(t => !t.completed).length} active
+        </Badge>
+        <Badge variant="outline" className="bg-slate-700/50 text-slate-200 border-slate-500/30">
+          {tasks.filter(t => t.completed).length} completed
+        </Badge>
       </div>
+      <Button 
+        variant="ghost" 
+        size="sm"
+        onClick={() => setShowCompletedTasks(prev => !prev)}
+        className="bg-slate-700/50 text-slate-200 hover:bg-slate-600/50 hover:text-white"
+      >
+        {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
+      </Button>
+    </div>
+  );
 
-      {/* Timer Display */}
-      <div className="relative mb-8" ref={timerRef}>
-        <TimerDisplay 
-          time={time} 
-          isActive={isActive} 
-          totalTime={isBreak ? (settings?.break_duration || 5) * 60 : (settings?.work_duration || 25) * 60} 
+  // Play notification sound
+  const playNotificationSound = useCallback(() => {
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext();
+      }
+
+      const oscillator = audioContextRef.current.createOscillator();
+      const gainNode = audioContextRef.current.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContextRef.current.destination);
+
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(440, audioContextRef.current.currentTime);
+      gainNode.gain.setValueAtTime(0.1, audioContextRef.current.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContextRef.current.currentTime + 0.5);
+
+      oscillator.start(audioContextRef.current.currentTime);
+      oscillator.stop(audioContextRef.current.currentTime + 0.5);
+
+      // Show notification if enabled
+      if (Notification.permission === 'granted' && settings?.notification_enabled) {
+        new Notification('Pomodoro Timer', {
+          body: isBreak ? 'Break time is over!' : 'Time to take a break!',
+          icon: '/favicon.ico'
+        });
+      }
+    } catch (error) {
+      console.error('Error playing sound:', error);
+    }
+  }, [isBreak, settings]);
+
+  // Update active task stats display
+  return (
+    <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate-700/30 shadow-2xl">
+      <div className="pomodoro-timer space-y-6 md:space-y-8">
+        {/* Session Type Indicator */}
+        <SessionTypeIndicator isBreak={isBreak} />
+
+        {/* Task Management */}
+        <div className="w-full">
+          <TaskInput />
+          <TaskListHeader />
+          {renderTaskList()}
+        </div>
+
+        {/* Timer Display */}
+        <div className="relative mb-8" ref={timerRef}>
+          <TimerDisplay 
+            time={time} 
+            isActive={isActive} 
+            totalTime={isBreak ? (settings?.break_duration || 5) * 60 : (settings?.work_duration || 25) * 60} 
+          />
+        </div>
+
+        {/* Timer Controls */}
+        <div className="flex justify-center gap-4">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => handleButtonClick(isActive ? 'pause' : 'start')}
+                  disabled={!activeTaskId}
+                  size="lg"
+                  className={cn(
+                    "w-24 transition-all duration-300 shadow-lg",
+                    isActive 
+                      ? "bg-blue-500/80 hover:bg-blue-600/80 shadow-blue-500/20" 
+                      : "bg-blue-500/60 hover:bg-blue-500/80 shadow-blue-500/10",
+                    !activeTaskId && "opacity-50"
+                  )}
+                >
+                  {isActive ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {!activeTaskId ? 'Select a task first' : `Space to ${isActive ? 'Pause' : 'Start'}`}
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => handleButtonClick('skip')}
+                  disabled={!activeTaskId || !isActive}
+                  variant="outline"
+                  size="lg"
+                  className="border-white/10 hover:border-white/20 hover:bg-white/5"
+                >
+                  <SkipForwardIcon className="h-6 w-6" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                Press 'S' to Skip
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => setSettingsOpen(true)}
+                  variant="outline"
+                  size="lg"
+                  className="border-white/10 hover:border-white/20 hover:bg-white/5"
+                >
+                  <Settings2Icon className="h-6 w-6" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                Settings
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+
+        {/* Active Task Progress */}
+        {activeTaskId && (
+          <TaskProgress task={tasks.find(t => t.id === activeTaskId)!} />
+        )}
+
+        {/* Settings Dialog */}
+        <PomodoroSettingsDialog
+          open={settingsOpen}
+          onOpenChange={setSettingsOpen}
+          onSettingsUpdate={async (newSettings) => {
+            try {
+              await updatePomodoroSettings(newSettings);
+              const updatedSettings = await getPomodoroSettings();
+              setSettings(updatedSettings);
+              if (updatedSettings.work_duration && !isActive) {
+                setTime(updatedSettings.work_duration * 60);
+              }
+              toast({
+                title: "Settings Updated",
+                description: "Your pomodoro settings have been saved.",
+              });
+            } catch (error) {
+              toast({
+                title: "Error",
+                description: "Failed to update settings",
+                variant: "destructive",
+              });
+            }
+          }}
+          initialSettings={settings}
         />
       </div>
-
-      {/* Timer Controls */}
-      <div className="flex justify-center gap-4">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={() => handleButtonClick(isActive ? 'pause' : 'start')}
-                disabled={!activeTaskId}
-                size="lg"
-                className={cn(
-                  "w-24 transition-all duration-300 shadow-lg",
-                  isActive 
-                    ? "bg-blue-500/80 hover:bg-blue-600/80 shadow-blue-500/20" 
-                    : "bg-blue-500/60 hover:bg-blue-500/80 shadow-blue-500/10",
-                  !activeTaskId && "opacity-50"
-                )}
-              >
-                {isActive ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              {!activeTaskId ? 'Select a task first' : `Space to ${isActive ? 'Pause' : 'Start'}`}
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={() => handleButtonClick('skip')}
-                disabled={!activeTaskId || !isActive}
-                variant="outline"
-                size="lg"
-                className="border-white/10 hover:border-white/20 hover:bg-white/5"
-              >
-                <SkipForwardIcon className="h-6 w-6" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              Press 'S' to Skip
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={() => setSettingsOpen(true)}
-                variant="outline"
-                size="lg"
-                className="border-white/10 hover:border-white/20 hover:bg-white/5"
-              >
-                <Settings2Icon className="h-6 w-6" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              Settings
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-
-      {/* Active Task Progress */}
-      {activeTaskId && (
-        <TaskProgress task={tasks.find(t => t.id === activeTaskId)!} />
-      )}
-
-      {/* Settings Dialog */}
-      <PomodoroSettingsDialog
-        open={settingsOpen}
-        onOpenChange={setSettingsOpen}
-        onSettingsUpdate={async (newSettings) => {
-          try {
-            await updatePomodoroSettings(newSettings);
-            const updatedSettings = await getPomodoroSettings();
-            setSettings(updatedSettings);
-            if (updatedSettings.work_duration && !isActive) {
-              setTime(updatedSettings.work_duration * 60);
-            }
-            toast({
-              title: "Settings Updated",
-              description: "Your pomodoro settings have been saved.",
-            });
-          } catch (error) {
-            toast({
-              title: "Error",
-              description: "Failed to update settings",
-              variant: "destructive",
-            });
-          }
-        }}
-        initialSettings={settings}
-      />
-    </div>
-  </Card>
-);
-};
-
-export default PomodoroTimer;
+    </Card>
+  );
+}
