@@ -936,14 +936,27 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     setIsActive(false);
   };
 
+  // Play notification sound
+  const playNotificationSound = () => {
+    const audio = new Audio('/notification.mp3');
+    audio.play().catch(error => console.log('Error playing sound:', error));
+  };
+
   // Handle timer completion
   const handleTimerComplete = () => {
+    if (!settings) return;
+
+    // Play sound if enabled
+    if (settings.sound_enabled) {
+      playNotificationSound();
+    }
+
     if (!isBreak && activeTaskId) {
       // Update task metrics
       setTasks(prev => prev.map(task => {
         if (task.id === activeTaskId) {
           const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
-          const dailyGoal = settings?.daily_goal || 4;
+          const dailyGoal = settings.daily_goal || 4;
           
           if (newCompletedPomodoros >= dailyGoal && !task.completed) {
             toast({
@@ -959,16 +972,37 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               ...task.metrics,
               currentStreak: task.metrics.currentStreak + 1,
               completedPomodoros: newCompletedPomodoros,
-              totalMinutes: task.metrics.totalMinutes + (settings?.work_duration || 25)
+              totalMinutes: task.metrics.totalMinutes + (settings.work_duration || 25)
             }
           };
         }
         return task;
       }));
     }
-    
-    setIsBreak(!isBreak);
-    resetTimer();
+
+    // Switch between break and focus
+    const newIsBreak = !isBreak;
+    setIsBreak(newIsBreak);
+
+    // Set new time based on session type
+    const newTime = newIsBreak ? settings.break_duration * 60 : settings.work_duration * 60;
+    setTime(newTime);
+
+    // Show session change notification
+    toast({
+      title: newIsBreak ? "Time for a break! 🌟" : "Break complete! 💪",
+      description: newIsBreak 
+        ? "Great work! Take a moment to recharge." 
+        : "Ready for another focused session? You're doing great!",
+      duration: 3000,
+    });
+
+    // Auto-start based on settings
+    const shouldAutoStart = newIsBreak ? settings.auto_start_breaks : settings.auto_start_pomodoros;
+    setIsActive(shouldAutoStart);
+
+    // Save tasks to localStorage
+    localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
   };
 
   const startNewPomodoro = async (type: 'work' | 'break' = 'work') => {
