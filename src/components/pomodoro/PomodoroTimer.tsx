@@ -930,6 +930,12 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     );
   };
 
+  // Reset timer based on session type
+  const resetTimer = () => {
+    setTime(isBreak ? (settings?.break_duration || 5) * 60 : (settings?.work_duration || 25) * 60);
+    setIsActive(false);
+  };
+
   // Handle timer completion
   const handleTimerComplete = () => {
     if (!isBreak && activeTaskId) {
@@ -939,9 +945,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
           const dailyGoal = settings?.daily_goal || 4;
           
-          // Check if daily goal is achieved
           if (newCompletedPomodoros >= dailyGoal && !task.completed) {
-            // Show congratulations message
             toast({
               title: "Daily Goal Achieved! 🎉",
               description: "Great job! You've reached your daily pomodoro goal!",
@@ -963,7 +967,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
       }));
     }
     
-    // Switch between focus and break
     setIsBreak(!isBreak);
     resetTimer();
   };
