@@ -185,39 +185,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     }
   }, [time, isActive, isBreak, currentPomodoroId]);
 
-  // Improve sound handling
-  const playNotificationSound = useCallback(() => {
-    try {
-      if (!audioContextRef.current) {
-        audioContextRef.current = new AudioContext();
-      }
-
-      const oscillator = audioContextRef.current.createOscillator();
-      const gainNode = audioContextRef.current.createGain();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContextRef.current.destination);
-
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(440, audioContextRef.current.currentTime);
-      gainNode.gain.setValueAtTime(0.1, audioContextRef.current.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContextRef.current.currentTime + 0.5);
-
-      oscillator.start(audioContextRef.current.currentTime);
-      oscillator.stop(audioContextRef.current.currentTime + 0.5);
-
-      // Show notification if enabled
-      if (Notification.permission === 'granted' && settings?.notification_enabled) {
-        new Notification('Pomodoro Timer', {
-          body: isBreak ? 'Break time is over!' : 'Time to take a break!',
-          icon: '/favicon.ico'
-        });
-      }
-    } catch (error) {
-      console.error('Error playing sound:', error);
-    }
-  }, [isBreak, settings]);
-
   // Timer logic with Web Worker
   useEffect(() => {
     const worker = new Worker(new URL('./timerWorker.js', import.meta.url));
@@ -934,12 +901,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
   const resetTimer = () => {
     setTime(isBreak ? (settings?.break_duration || 5) * 60 : (settings?.work_duration || 25) * 60);
     setIsActive(false);
-  };
-
-  // Play notification sound
-  const playNotificationSound = () => {
-    const audio = new Audio('/notification.mp3');
-    audio.play().catch(error => console.log('Error playing sound:', error));
   };
 
   // Handle timer completion
