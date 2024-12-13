@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import Label from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Dialog, DialogTitle, DialogContent } from '@radixui/react-dialog';
+import { Dialog, DialogTitle, DialogContent } from '@radix-ui/react-dialog';
 import {
   startPomodoro, 
   completePomodoro,
