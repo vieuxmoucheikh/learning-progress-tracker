@@ -44,14 +44,6 @@ interface PomodoroTimerProps {
   sessionId?: string;
 }
 
-interface PomodoroState {
-  last_update: string;
-  time: number;
-  is_active: boolean;
-  is_break: boolean;
-  current_pomodoro_id: string;
-}
-
 export function PomodoroTimer({  }: PomodoroTimerProps) {
   let lastTimestamp = 0; // Initialize lastTimestamp to store the last recorded timestamp
   const [time, setTime] = useState(25 * 60);
@@ -289,7 +281,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     setActiveTaskId(newTaskId); // Set as active task
     
     // Reset timer for new task
-    setTime(settings?.work_duration? settings.work_duration * 60 : 25 * 60);
+    setTime(settings?.work_duration ? settings.work_duration * 60 : 25 * 60);
     setIsActive(false);
     setIsBreak(false);
     
@@ -302,7 +294,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
   const setTaskActive = async (taskId: string) => {
     setActiveTaskId(taskId);
     // Reset timer for selected task
-    setTime(settings?.work_duration? settings.work_duration * 60 : 25 * 60);
+    setTime(settings?.work_duration ? settings.work_duration * 60 : 25 * 60);
     setIsActive(false);
     setIsBreak(false);
     
@@ -383,7 +375,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
           const dailyGoal = settings.daily_goal || 4;
           
-          if (newCompletedPomodoros >= dailyGoal &&!task.completed) {
+          if (newCompletedPomodoros >= dailyGoal && !task.completed) {
             toast({
               title: "Daily Goal Achieved! 🎉",
               description: "Great job! You've reached your daily pomodoro goal!",
@@ -406,16 +398,16 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     }
 
     // Switch between break and focus
-    const newIsBreak =!isBreak;
+    const newIsBreak = !isBreak;
     setIsBreak(newIsBreak);
 
     // Set new time based on session type
-    const newTime = newIsBreak? settings.break_duration * 60 : settings.work_duration * 60;
+    const newTime = newIsBreak ? settings.break_duration * 60 : settings.work_duration * 60;
     setTime(newTime);
 
     // Show session change notification
     toast({
-      title: newIsBreak? "Time for a break! 🌟" : "Break complete! 💪",
+      title: newIsBreak ? "Time for a break! 🌟" : "Break complete! 💪",
       description: newIsBreak 
        ? "Great work! Take a moment to recharge." 
         : "Ready for another focused session? You're doing great!",
@@ -423,7 +415,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     });
 
     // Auto-start based on settings
-    const shouldAutoStart = newIsBreak? settings.auto_start_breaks : settings.auto_start_pomodoros;
+    const shouldAutoStart = newIsBreak ? settings.auto_start_breaks : settings.auto_start_pomodoros;
     setIsActive(shouldAutoStart);
 
     // Save tasks to localStorage
@@ -456,7 +448,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
         // Show notification if enabled
         if (Notification.permission === 'granted' && settings?.notification_enabled) {
           new Notification('Pomodoro Timer', {
-            body: isBreak? 'Break time is over!' : 'Time to take a break!',
+            body: isBreak ? 'Break time is over!' : 'Time to take a break!',
             icon: '/favicon.ico'
           });
         }
@@ -494,7 +486,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
   // Toggle timer
   const toggleTimer = async () => {
     if (!isActive) {
-      await startNewPomodoro(isBreak? 'break' : 'work');
+      await startNewPomodoro(isBreak ? 'break' : 'work');
     } else {
       setIsActive(false);
     }
@@ -524,75 +516,20 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     }
   };
 
-  // Update active task stats display
-  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const target = event.target as HTMLInputElement;
-    const isChecked = target.checked;
-    if (event.target.name === 'autoStartPomodoros') {
-      setSettings(prevSettings => ({
-        auto_start_pomodoros: isChecked,
-        work_duration: prevSettings?.work_duration !== undefined ? prevSettings.work_duration : 25,
-        break_duration: prevSettings?.break_duration !== undefined ? prevSettings.break_duration : 5,
-        long_break_duration: prevSettings?.long_break_duration !== undefined ? prevSettings.long_break_duration : 15,
-        pomodoros_until_long_break: prevSettings?.pomodoros_until_long_break !== undefined ? prevSettings.pomodoros_until_long_break : 4,
-        sound_enabled: prevSettings?.sound_enabled !== undefined ? prevSettings.sound_enabled : false,
-        notification_enabled: prevSettings?.notification_enabled !== undefined ? prevSettings.notification_enabled : false,
-        auto_start_breaks: prevSettings?.auto_start_breaks ?? false,
-        theme: prevSettings?.theme !== undefined ? prevSettings.theme : 'light',
-      }));
-    } else if (event.target.name === 'autoStartBreaks') {
-      setSettings(prevSettings => ({
-        auto_start_breaks: isChecked,
-        work_duration: prevSettings?.work_duration !== undefined ? prevSettings.work_duration : 25,
-        break_duration: prevSettings?.break_duration !== undefined ? prevSettings.break_duration : 5,
-        long_break_duration: prevSettings?.long_break_duration !== undefined ? prevSettings.long_break_duration : 15,
-        pomodoros_until_long_break: prevSettings?.pomodoros_until_long_break !== undefined ? prevSettings.pomodoros_until_long_break : 4,
-        sound_enabled: prevSettings?.sound_enabled !== undefined ? prevSettings.sound_enabled : false,
-        notification_enabled: prevSettings?.notification_enabled !== undefined ? prevSettings.notification_enabled : false,
-        auto_start_pomodoros: prevSettings?.auto_start_pomodoros !== undefined ? prevSettings.auto_start_pomodoros : false,
-        theme: prevSettings?.theme !== undefined ? prevSettings.theme : 'light',
-      }));
-    } else if (event.target.name === 'soundEnabled') {
-      setSettings(prevSettings => ({
-        sound_enabled: isChecked,
-        work_duration: prevSettings?.work_duration !== undefined ? prevSettings.work_duration : 25,
-        break_duration: prevSettings?.break_duration !== undefined ? prevSettings.break_duration : 5,
-        long_break_duration: prevSettings?.long_break_duration !== undefined ? prevSettings.long_break_duration : 15,
-        pomodoros_until_long_break: prevSettings?.pomodoros_until_long_break !== undefined ? prevSettings.pomodoros_until_long_break : 4,
-        auto_start_pomodoros: prevSettings?.auto_start_pomodoros !== undefined ? prevSettings.auto_start_pomodoros : false,
-        auto_start_breaks: prevSettings?.auto_start_breaks ?? false,
-        notification_enabled: prevSettings?.notification_enabled !== undefined ? prevSettings.notification_enabled : false,
-        theme: prevSettings?.theme !== undefined ? prevSettings.theme : 'light',
-      }));
-    } else if (event.target.name === 'notificationEnabled') {
-      setSettings(prevSettings => ({
-        notification_enabled: isChecked,
-        work_duration: prevSettings?.work_duration !== undefined ? prevSettings.work_duration : 25,
-        break_duration: prevSettings?.break_duration !== undefined ? prevSettings.break_duration : 5,
-        long_break_duration: prevSettings?.long_break_duration !== undefined ? prevSettings.long_break_duration : 15,
-        pomodoros_until_long_break: prevSettings?.pomodoros_until_long_break !== undefined ? prevSettings.pomodoros_until_long_break : 4,
-        auto_start_pomodoros: prevSettings?.auto_start_pomodoros !== undefined ? prevSettings.auto_start_pomodoros : false,
-        auto_start_breaks: prevSettings?.auto_start_breaks ?? false,
-        sound_enabled: prevSettings?.sound_enabled !== undefined ? prevSettings.sound_enabled : false,
-        theme: prevSettings?.theme !== undefined ? prevSettings.theme : 'light',
-      }));
-    }
-  };
-
   return (
     <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate-700/30 shadow-2xl">
-      <div className="pomodoro-timer space-y-6 md:space-y-8">
+            <div className="pomodoro-timer space-y-6 md:space-y-8">
         {/* Session Type Indicator */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full shadow-lg">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full animate-pulse bg-blue-500" />
             <span className="text-sm font-medium">
-              {isBreak? "Break Time" : "Focus Time"}
+              {isBreak ? "Break Time" : "Focus Time"}
             </span>
           </div>
         </div>
 
-                      {/* Task Management */}
+        {/* Task Management */}
         <div className="w-full">
           <div className="flex items-center gap-2 mb-4">
             <input 
@@ -617,7 +554,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
-                {tasks.filter(t =>!t.completed).length} active
+                {tasks.filter(t => !t.completed).length} active
               </Badge>
               <Badge variant="outline" className="bg-slate-700/50 text-slate-200 border-slate-500/30">
                 {tasks.filter(t => t.completed).length} completed
@@ -626,16 +563,16 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => setShowCompletedTasks(prev =>!prev)}
+              onClick={() => setShowCompletedTasks(prev => !prev)}
               className="bg-slate-700/50 text-slate-200 hover:bg-slate-600/50 hover:text-white"
             >
-              {showCompletedTasks? 'Hide Completed' : 'Show Completed'}
+              {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
             </Button>
           </div>
           <ul>
             {tasks
-             .filter(task => showCompletedTasks ||!task.completed)
-             .map(task => (
+              .filter(task => showCompletedTasks || !task.completed)
+              .map(task => (
                 <li key={task.id} className="flex items-center gap-3 p-4 rounded-xl transition-all duration-200">
                   <Checkbox 
                     checked={task.completed} 
@@ -645,7 +582,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                   <div className="flex-1 min-w-0">
                     <div className={cn(
                       "font-medium truncate",
-                      task.completed? "text-slate-400 line-through" : "text-blue-100"
+                      task.completed ? "text-slate-400 line-through" : "text-blue-100"
                     )}>
                       {task.text}
                     </div>
@@ -665,17 +602,17 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                   </div>
                   <div className="flex items-center gap-2">
                     <Button 
-                      variant={activeTaskId === task.id? "default" : "ghost"}
+                      variant={activeTaskId === task.id ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setTaskActive(task.id)}
                       className={cn(
                         "transition-all duration-200",
                         activeTaskId === task.id 
-                         ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20" 
+                          ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20" 
                           : "bg-blue-500/20 text-blue-100 hover:bg-blue-500/30"
                       )}
                     >
-                      {activeTaskId === task.id? "Active" : "Start"}
+                      {activeTaskId === task.id ? "Active" : "Start"}
                     </Button>
                     <Button 
                       variant="ghost" 
@@ -696,7 +633,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           <TimerDisplay 
             time={time} 
             isActive={isActive} 
-            totalTime={isBreak? (settings?.break_duration || 5) * 60 : (settings?.work_duration || 25) * 60} 
+            totalTime={isBreak ? (settings?.break_duration || 5) * 60 : (settings?.work_duration || 25) * 60} 
           />
         </div>
 
@@ -713,16 +650,16 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                   className={cn(
                     "w-24 transition-all duration-300 shadow-lg",
                     isActive 
-                     ? "bg-blue-500/80 hover:bg-blue-600/80 shadow-blue-500/20" 
+                      ? "bg-blue-500/80 hover:bg-blue-600/80 shadow-blue-500/20" 
                       : "bg-blue-500/60 hover:bg-blue-500/80 shadow-blue-500/10",
-                   !activeTaskId && "opacity-50"
+                    !activeTaskId && "opacity-50"
                   )}
                 >
-                  {isActive? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
+                  {isActive ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                {!activeTaskId? 'Select a task first' : `Space to ${isActive? 'Pause' : 'Start'}`}
+                {!activeTaskId ? 'Select a task first' : `Space to ${isActive ? 'Pause' : 'Start'}`}
               </TooltipContent>
             </Tooltip>
 
@@ -731,7 +668,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
                 <Button
                   name="skip"
                   onClick={handleButtonClick}
-                  disabled={!activeTaskId ||!isActive}
+                  disabled={!activeTaskId || !isActive}
                   variant="outline"
                   size="lg"
                   className="border-white/10 hover:border-white/20 hover:bg-white/5"
@@ -747,8 +684,8 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  name="pause"
-                  onClick={handleButtonClick}
+                  name="settings"
+                  onClick={() => setSettingsOpen(true)}
                   variant="outline"
                   size="lg"
                   className="border-white/10 hover:border-white/20 hover:bg-white/5"
@@ -777,7 +714,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
               await updatePomodoroSettings(newSettings);
               const updatedSettings = await getPomodoroSettings();
               setSettings(updatedSettings);
-              if (updatedSettings.work_duration &&!isActive) {
+              if (updatedSettings.work_duration && !isActive) {
                 setTime(updatedSettings.work_duration * 60);
               }
               toast({
@@ -812,13 +749,13 @@ function TimerDisplay({ time, isActive, totalTime }: { time: number; isActive: b
         <div
           className={cn(
             "absolute w-[280px] md:w-[320px] h-[280px] md:h-[320px] rounded-full opacity-20 blur-xl",
-            isActive? "bg-blue-400" : "bg-blue-500"
+            isActive ? "bg-blue-400" : "bg-blue-500"
           )}
         />
         <div
           className={cn(
             "absolute w-[240px] md:w-[280px] h-[240px] md:h-[280px] rounded-full blur-xl",
-            isActive? "bg-indigo-400" : "bg-indigo-500"
+            isActive ? "bg-indigo-400" : "bg-indigo-500"
           )}
         />
       </div>
@@ -839,7 +776,7 @@ function TimerDisplay({ time, isActive, totalTime }: { time: number; isActive: b
           cy="130"
           r="100"
           className="fill-none transition-all duration-500"
-          stroke={isActive? "url(#gradientFocus)" : "url(#gradientBreak)"}
+          stroke={isActive ? "url(#gradientFocus)" : "url(#gradientBreak)"}
           strokeWidth="12"
           strokeDasharray={circumference}
           strokeDashoffset={circumference - (progress / 100) * circumference}
@@ -865,7 +802,7 @@ function TimerDisplay({ time, isActive, totalTime }: { time: number; isActive: b
           <span className="mx-2 text-blue-200">:</span>
           <span className="text-blue-100">{String(seconds).padStart(2, '0')}</span>
         </div>
-        <span className="text-sm font-medium mt-4">{isActive? "Focus Time" : "Break Time"}</span>
+        <span className="text-sm font-medium mt-4">{isActive ? "Focus Time" : "Break Time"}</span>
       </div>
     </div>
   );
@@ -976,8 +913,7 @@ function PomodoroSettingsDialogComponent({
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
-    const { name, checked } = target;
+    const { name, checked } = e.target;
     switch (name) {
       case "autoStartPomodoros":
         setAutoStartPomodoros(checked);
@@ -1089,9 +1025,11 @@ function PomodoroSettingsDialogComponent({
               />
             </div>
           </div>
-          <Button type="submit">Update Settings</Button>
+          <Button type="submit" className="mt-4">Update Settings</Button>
         </form>
       </DialogContent>
     </Dialog>
   );
 }
+
+export default PomodoroTimer;
