@@ -18,7 +18,6 @@ import {
 } from '@/lib/database';
 import { PomodoroSettings, PomodoroStats } from '@/types';
 import { PomodoroSettingsDialog } from './PomodoroSettingsDialog';
-import { PomodoroStats as PomodoroStatsComponent } from './PomodoroStats';
 import { PlayIcon, PauseIcon, SkipForwardIcon, Settings2Icon, Brain, Target, Trophy } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { motion, AnimatePresence } from "framer-motion";
@@ -45,7 +44,6 @@ interface PomodoroTimerProps {
 }
 
 export function PomodoroTimer({  }: PomodoroTimerProps) {
-  let lastTimestamp = 0; // Initialize lastTimestamp to store the last recorded timestamp
   const [time, setTime] = useState(25 * 60);
   const [isActive, setIsActive] = useState(false);
   const [isBreak, setIsBreak] = useState(false);
@@ -108,7 +106,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
   // Synchronize timer state with server
   const syncWithSupabase = useCallback(async () => {
     try {
-      // Try to sync any failed completions first
       const failedCompletions = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
       if (failedCompletions.length > 0) {
         for (const session of failedCompletions) {
@@ -116,13 +113,10 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
             await completePomodoro(session.pomodoroId);
           } catch (error) {
             console.error('Error syncing failed completion:', error);
-            // Stop trying to sync if we still have connection issues
             return;
           }
         }
-        // Clear failed completions after successful sync
         localStorage.removeItem('failedPomodoroCompletions');
-        // Refresh stats after syncing
         const newStats = await getPomodoroStats();
         setStats(newStats);
       }
@@ -149,7 +143,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
       const data = await response.json();
       
-      // If server has newer state, update local state
       if (!data.sync && data.state) {
         setTime(data.state.time);
         setIsActive(data.state.isActive);
@@ -190,10 +183,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
   // Handle visibility change
   const handleVisibilityChange = useCallback(() => {
     if (document.visibilityState === 'hidden') {
-      lastTimestamp = Date.now();
-      localStorage.setItem('pomodoroLastTimestamp', lastTimestamp.toString());
-      
-      // Save current timer state
+      localStorage.setItem('pomodoroLastTimestamp', Date.now().toString());
       localStorage.setItem('pomodoroTimerState', JSON.stringify({
         time,
         isActive,
@@ -202,18 +192,15 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
       }));
     } else {
       try {
-        // Restore timer state
         const savedState = localStorage.getItem('pomodoroTimerState');
         if (savedState) {
           const parsedState = JSON.parse(savedState);
-          const storedTimestamp = parseInt(localStorage.getItem('pomodoroLastTimestamp') || lastTimestamp.toString());
+          const storedTimestamp = parseInt(localStorage.getItem('pomodoroLastTimestamp') || Date.now().toString());
           const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
 
           if (parsedState.isActive && elapsedSeconds > 0) {
             const adjustedTime = Math.max(0, parsedState.time - elapsedSeconds);
             setTime(adjustedTime);
-            
-            // If timer would have completed while in background, handle completion
             if (adjustedTime === 0) {
               handleTimerComplete();
             }
@@ -221,7 +208,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
         }
       } catch (error) {
         console.error('Error handling visibility change:', error);
-        // Continue with normal operation even if state restoration fails
       }
     }
   }, [time, isActive, isBreak, currentPomodoroId]);
@@ -262,7 +248,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     return () => clearInterval(syncInterval);
   }, [syncWithSupabase]);
 
-  // Add activeTaskId state
   const addTask = async (text: string) => {
     const newTaskId = crypto.randomUUID();
     const newTask: Task = {
@@ -278,9 +263,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     };
 
     setTasks(prev => [...prev, newTask]);
-    setActiveTaskId(newTaskId); // Set as active task
-    
-    // Reset timer for new task
+    setActiveTaskId(newTaskId);
     setTime(settings?.work_duration ? settings.work_duration * 60 : 25 * 60);
     setIsActive(false);
     setIsBreak(false);
@@ -293,7 +276,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
   const setTaskActive = async (taskId: string) => {
     setActiveTaskId(taskId);
-    // Reset timer for selected task
     setTime(settings?.work_duration ? settings.work_duration * 60 : 25 * 60);
     setIsActive(false);
     setIsBreak(false);
@@ -316,7 +298,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
   };
 
-  // Add helper function for time formatting
   const formatTotalTime = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
@@ -325,7 +306,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     return `${hours}h ${remainingMinutes}m`;
   };
 
-  // Update task persistence
   useEffect(() => {
     const loadTasks = async () => {
       try {
@@ -333,7 +313,7 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
         if (savedTasks) {
           const parsedTasks = JSON.parse(savedTasks);
           const tasksWithMetrics = parsedTasks.map((task: any) => ({
-           ...task,
+            ...task,
             metrics: task.metrics || {
               totalMinutes: 0,
               completedPomodoros: 0,
@@ -350,7 +330,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     loadTasks();
   }, []);
 
-  // Save tasks whenever they change
   useEffect(() => {
     try {
       localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
@@ -359,17 +338,14 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     }
   }, [tasks]);
 
-  // Handle timer completion
   const handleTimerComplete = () => {
     if (!settings) return;
 
-    // Play sound if enabled
     if (settings.sound_enabled) {
       playNotificationSound();
     }
 
     if (!isBreak && activeTaskId) {
-      // Update task metrics
       setTasks(prev => prev.map(task => {
         if (task.id === activeTaskId) {
           const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
@@ -384,9 +360,9 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           }
           
           return {
-           ...task,
+            ...task,
             metrics: {
-             ...task.metrics,
+              ...task.metrics,
               currentStreak: task.metrics.currentStreak + 1,
               completedPomodoros: newCompletedPomodoros,
               totalMinutes: task.metrics.totalMinutes + (settings.work_duration || 25)
@@ -397,28 +373,25 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
       }));
     }
 
-    // Switch between break and focus
     const newIsBreak = !isBreak;
     setIsBreak(newIsBreak);
 
-    // Set new time based on session type
     const newTime = newIsBreak ? settings.break_duration * 60 : settings.work_duration * 60;
     setTime(newTime);
 
-    // Show session change notification
     toast({
       title: newIsBreak ? "Time for a break! 🌟" : "Break complete! 💪",
       description: newIsBreak 
-       ? "Great work! Take a moment to recharge." 
+        ? "Great work! Take a moment to recharge." 
         : "Ready for another focused session? You're doing great!",
       duration: 3000,
     });
 
-    // Auto-start based on settings
     const shouldAutoStart = newIsBreak ? settings.auto_start_breaks : settings.auto_start_pomodoros;
     setIsActive(shouldAutoStart);
 
-    // Save tasks to localStorage
+    updateStreak();
+
     localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
   };
 
@@ -445,7 +418,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
         setOscillator(oscillator);
 
-        // Show notification if enabled
         if (Notification.permission === 'granted' && settings?.notification_enabled) {
           new Notification('Pomodoro Timer', {
             body: isBreak ? 'Break time is over!' : 'Time to take a break!',
@@ -458,7 +430,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     }
   }, [isBreak, settings]);
 
-  // Stop sound when component unmounts or new timer starts
   useEffect(() => {
     return () => {
       if (oscillator) {
@@ -467,7 +438,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     };
   }, [oscillator]);
 
-  // Start new pomodoro session
   const startNewPomodoro = async (type: 'work' | 'break' = 'work') => {
     try {
       const pomodoro = await startPomodoro(type);
@@ -483,7 +453,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     }
   };
 
-  // Toggle timer
   const toggleTimer = async () => {
     if (!isActive) {
       await startNewPomodoro(isBreak ? 'break' : 'work');
@@ -492,13 +461,11 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
     }
   };
 
-  // Skip current interval
   const skipCurrentInterval = () => {
-    setTime(0); // Set to 0 instead of just decrementing
+    setTime(0);
     handleTimerComplete();
   };
 
-  // New function for handling button clicks
   const handleButtonClick = (event: React.FormEvent<HTMLButtonElement>) => {
     const action = event.currentTarget.name;
     switch (action) {
@@ -518,21 +485,19 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
 
   return (
     <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate-700/30 shadow-2xl">
-            <div className="pomodoro-timer space-y-6 md:space-y-8">
-        {/* Session Type Indicator */}
+      <div className="pomodoro-timer space-y-6 md:space-y-8">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full shadow-lg">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full animate-pulse bg-blue-500" />
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium text-blue-100">
               {isBreak ? "Break Time" : "Focus Time"}
             </span>
           </div>
         </div>
 
-        {/* Task Management */}
         <div className="w-full">
           <div className="flex items-center gap-2 mb-4">
-            <input 
+            <Input 
               type="text"
               value={currentTask} 
               onChange={(e) => setCurrentTask(e.target.value)} 
@@ -628,7 +593,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           </ul>
         </div>
 
-        {/* Timer Display */}
         <div className="relative mb-8" ref={timerRef}>
           <TimerDisplay 
             time={time} 
@@ -637,7 +601,6 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           />
         </div>
 
-        {/* Timer Controls */}
         <div className="flex justify-center gap-4">
           <TooltipProvider>
             <Tooltip>
@@ -700,12 +663,10 @@ export function PomodoroTimer({  }: PomodoroTimerProps) {
           </TooltipProvider>
         </div>
 
-        {/* Active Task Progress */}
         {activeTaskId && (
           <TaskProgress task={tasks.find(t => t.id === activeTaskId)!} />
         )}
 
-        {/* Settings Dialog */}
         <PomodoroSettingsDialogComponent
           open={settingsOpen}
           onOpenChange={setSettingsOpen}
@@ -987,7 +948,7 @@ function PomodoroSettingsDialogComponent({
                 onChange={(e) => setAutoStartPomodoros((e.target as HTMLInputElement).checked)}
               />
             </div>
-            <div>
+                <div>
               <Label>Auto-Start Breaks</Label>
               <Checkbox
                 checked={autoStartBreaks}
