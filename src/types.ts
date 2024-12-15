@@ -119,29 +119,29 @@ export interface Pomodoro {
 }
 
 export interface PomodoroSettings {
-  work_duration: number;
-  break_duration: number;
-  long_break_duration: number;
-  pomodoros_until_long_break: number;
-  sound_enabled: boolean;
-  auto_start_breaks: boolean;
-  auto_start_pomodoros: boolean;
-  daily_goal?: number;
-  notification_enabled?: boolean;
-  vibration_enabled?: boolean;
-  theme?: 'light' | 'dark' | 'system';
+    work_duration: number;
+    break_duration: number;
+    long_break_duration: number;
+    pomodoros_until_long_break: number;
+    sound_enabled: boolean;
+    auto_start_breaks: boolean;
+    auto_start_pomodoros: boolean;
+    daily_goal?: number;
+    notification_enabled?: boolean;
+    vibration_enabled?: boolean;
+    theme?: 'light' | 'dark' | 'system';
 }
 
 export interface PomodoroStats {
-  totalPomodoros: number;
-  completedPomodoros: number;
-  totalWorkMinutes: number;
-  totalBreakMinutes: number;
-  dailyAverage: number;
-  mostProductiveTime: string;
-  currentStreak: number;
-  longestStreak: number;
-  focusLabels?: string[];
-  weeklyCompletion?: number[];
-  daily_completed: number;
+    totalPomodoros: number;
+    completedPomodoros: number;
+    totalWorkMinutes: number;
+    totalBreakMinutes: number;
+    dailyAverage: number;
+    mostProductiveTime: string;
+    currentStreak: number;
+    longestStreak: number;
+    focusLabels?: string[];
+    weeklyCompletion?: number[];
+    daily_completed: number;
 }

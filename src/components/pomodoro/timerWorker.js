@@ -1,15 +1,13 @@
-let interval = null;
-
-self.onmessage = function(e) {
-    if (e.data.command === 'start') {
-        if (interval) clearInterval(interval);
-        interval = setInterval(() => {
+self.onmessage = (e) => {
+    const { command } = e.data;
+    if (command === 'start') {
+        const interval = setInterval(() => {
             self.postMessage({ type: 'tick' });
         }, 1000);
-    } else if (e.data.command === 'stop') {
-        if (interval) {
-            clearInterval(interval);
-            interval = null;
-        }
+        self.onmessage = (e) => {
+            if (e.data.command === 'stop') {
+                clearInterval(interval);
+            }
+        };
     }
 };

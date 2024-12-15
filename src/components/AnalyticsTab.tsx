@@ -340,7 +340,7 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
                 <Bar
                   dataKey="count"
                   name="Number of Items"
-                  fill={COLORS[3]}
+                  fill={COLORS[3]} 
                 />
               </BarChart>
             </ResponsiveContainer>

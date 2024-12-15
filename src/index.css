@@ -49,6 +49,10 @@
   }
 }
 
+.pomodoro-settings {
+    color: #ffffff; /* Ensure text is visible */
+}
+
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
