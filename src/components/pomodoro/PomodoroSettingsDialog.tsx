@@ -23,6 +23,7 @@ interface PomodoroSettingsDialogProps {
   onOpenChange: (open: boolean) => void;
   onSettingsUpdate: (settings: Partial<PomodoroSettings>) => void;
   initialSettings: PomodoroSettings | null;
+  isActive: boolean;
   children?: React.ReactNode;
 }
 
@@ -31,6 +32,7 @@ export function PomodoroSettingsDialog({
   onOpenChange,
   onSettingsUpdate,
   initialSettings,
+  isActive,
   children
 }: PomodoroSettingsDialogProps) {
   const [settings, setSettings] = React.useState<Partial<PomodoroSettings>>({});
