@@ -72,6 +72,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     const [streak, setStreak] = useState(0);
     const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
     const [oscillator, setOscillator] = useState<OscillatorNode | null>(null);
+    const [isCompleted, setIsCompleted] = useState(false);
 
     // Add streak tracking
     useEffect(() => {
@@ -323,16 +324,23 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     }, [tasks]);
 
-    const handleTimerComplete = () => {
-        if (!settings) return;
+    const handleTimerComplete = useCallback(() => {
+        if (!settings || isCompleted) return; // Vérifier si déjà complété
+        
+        // Marquer comme complété
+        setIsCompleted(true);
+        
         if (settings.sound_enabled) {
             playNotificationSound();
         }
+
+        // Ne mettre à jour les métriques que pendant les sessions de travail
         if (!isBreak && activeTaskId) {
             setTasks(prev => prev.map(task => {
                 if (task.id === activeTaskId) {
                     const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
                     const dailyGoal = settings.daily_goal || 4;
+                    
                     if (newCompletedPomodoros >= dailyGoal && !task.completed) {
                         toast({
                             title: "Daily Goal Achieved!",
@@ -340,6 +348,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             duration: 5000,
                         });
                     }
+
                     return {
                         ...task,
                         metrics: {
@@ -352,11 +361,21 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 }
                 return task;
             }));
+
+            // Sauvegarder les tâches
+            localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
         }
+
         const newIsBreak = !isBreak;
         setIsBreak(newIsBreak);
+        
+        // Réinitialiser le timer et l'état
         const newTime = newIsBreak ? settings.break_duration * 60 : settings.work_duration * 60;
         setTime(newTime);
+        setIsCompleted(false);
+        setIsActive(false);
+
+        // Notification
         toast({
             title: newIsBreak ? "Time for a break!" : "Break complete!",
             description: newIsBreak
@@ -364,11 +383,18 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 : "Ready for another focused session? You're doing great!",
             duration: 3000,
         });
+
+        // Auto-start selon les paramètres
         const shouldAutoStart = newIsBreak ? settings.auto_start_breaks : settings.auto_start_pomodoros;
-        setIsActive(shouldAutoStart);
-        updateStreak();
-        localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
-    };
+        if (shouldAutoStart) {
+            startNewPomodoro(newIsBreak ? 'break' : 'work');
+        }
+
+        // Mettre à jour le streak seulement pour les sessions de travail
+        if (!isBreak) {
+            updateStreak();
+        }
+    }, [settings, isBreak, activeTaskId, isCompleted, tasks]);
 
     const playNotificationSound = useCallback(() => {
         try {
@@ -409,6 +435,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
     const startNewPomodoro = async (type: 'work' | 'break' = 'work') => {
         try {
+            setIsCompleted(false);
             const pomodoro = await startPomodoro(type);
             setCurrentPomodoroId(pomodoro.id);
             setIsActive(true);
