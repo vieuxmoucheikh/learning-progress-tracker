@@ -324,23 +324,24 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     }, [tasks]);
 
-    const handleTimerComplete = useCallback(() => {
-        if (!settings || isCompleted) return; // Vérifier si déjà complété
+    const handleTimerComplete = useCallback(async () => {
+        if (!settings) return;
+
+        // Arrêter le timer actif
+        setIsActive(false);
         
-        // Marquer comme complété
-        setIsCompleted(true);
-        
-        if (settings.sound_enabled) {
-            playNotificationSound();
+        // Compléter le pomodoro actuel si existe
+        if (currentPomodoroId) {
+            await completePomodoro(currentPomodoroId);
+            setCurrentPomodoroId(null);
         }
 
-        // Ne mettre à jour les métriques que pendant les sessions de travail
+        // Mettre à jour les métriques seulement pendant les sessions de travail
         if (!isBreak && activeTaskId) {
             setTasks(prev => prev.map(task => {
                 if (task.id === activeTaskId) {
                     const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
                     const dailyGoal = settings.daily_goal || 4;
-                    
                     if (newCompletedPomodoros >= dailyGoal && !task.completed) {
                         toast({
                             title: "Daily Goal Achieved!",
@@ -348,7 +349,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             duration: 5000,
                         });
                     }
-
                     return {
                         ...task,
                         metrics: {
@@ -361,19 +361,23 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 }
                 return task;
             }));
-
-            // Sauvegarder les tâches
+            // Sauvegarder et mettre à jour le streak
+            updateStreak();
             localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
         }
 
+        // Jouer le son une seule fois si activé
+        if (settings.sound_enabled) {
+            await playNotificationSound();
+        }
+
+        // Basculer entre focus et pause
         const newIsBreak = !isBreak;
         setIsBreak(newIsBreak);
-        
-        // Réinitialiser le timer et l'état
+
+        // Définir la nouvelle durée
         const newTime = newIsBreak ? settings.break_duration * 60 : settings.work_duration * 60;
         setTime(newTime);
-        setIsCompleted(false);
-        setIsActive(false);
 
         // Notification
         toast({
@@ -384,58 +388,62 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             duration: 3000,
         });
 
-        // Auto-start selon les paramètres
+        // Démarrer automatiquement selon les paramètres
         const shouldAutoStart = newIsBreak ? settings.auto_start_breaks : settings.auto_start_pomodoros;
         if (shouldAutoStart) {
-            startNewPomodoro(newIsBreak ? 'break' : 'work');
+            // Petit délai pour éviter les conflits d'état
+            setTimeout(async () => {
+                await startNewPomodoro(newIsBreak ? 'break' : 'work');
+            }, 100);
         }
+    }, [settings, isBreak, activeTaskId, currentPomodoroId, tasks]);
 
-        // Mettre à jour le streak seulement pour les sessions de travail
-        if (!isBreak) {
-            updateStreak();
-        }
-    }, [settings, isBreak, activeTaskId, isCompleted, tasks]);
-
-    const playNotificationSound = useCallback(() => {
+    const playNotificationSound = useCallback(async () => {
         try {
             if (!audioContext) {
-                setAudioContext(new AudioContext());
+                const newAudioContext = new AudioContext();
+                setAudioContext(newAudioContext);
             }
+            
             if (audioContext) {
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
+                
                 oscillator.connect(gainNode);
                 gainNode.connect(audioContext.destination);
+                
                 oscillator.type = 'sine';
                 oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                
                 gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
                 oscillator.start(audioContext.currentTime);
                 oscillator.stop(audioContext.currentTime + 0.5);
-                setOscillator(oscillator);
-                if (Notification.permission === 'granted' && settings?.notification_enabled) {
-                    new Notification('Pomodoro Timer', {
-                        body: isBreak ? 'Break time is over!' : 'Time to take a break!',
-                        icon: 'favicon.ico'
-                    });
+                
+                // Ne pas stocker l'oscillateur dans l'état pour éviter la double lecture
+                if (settings?.notification_enabled) {
+                    if (Notification.permission === 'granted') {
+                        new Notification('Pomodoro Timer', {
+                            body: isBreak ? 'Break time is over!' : 'Time to take a break!',
+                            icon: 'favicon.ico'
+                        });
+                    }
                 }
+                
+                // Retourner une promesse qui se résout quand le son est terminé
+                return new Promise(resolve => setTimeout(resolve, 500));
             }
         } catch (error) {
             console.error('Error playing sound:', error);
         }
-    }, [isBreak, settings]);
-
-    useEffect(() => {
-        return () => {
-            if (oscillator) {
-                oscillator.stop();
-            }
-        };
-    }, [oscillator]);
+    }, [isBreak, settings, audioContext]);
 
     const startNewPomodoro = async (type: 'work' | 'break' = 'work') => {
         try {
-            setIsCompleted(false);
+            if (currentPomodoroId) {
+                await completePomodoro(currentPomodoroId);
+            }
             const pomodoro = await startPomodoro(type);
             setCurrentPomodoroId(pomodoro.id);
             setIsActive(true);
