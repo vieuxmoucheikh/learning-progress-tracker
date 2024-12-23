@@ -51,6 +51,35 @@ interface PomodoroTimerProps {
     sessionId?: string;
 }
 
+// Ajouter une fonction pour le son de célébration
+const playGoalAchievedSound = async (audioContext: AudioContext) => {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Séquence de notes joyeuses
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // Do, Mi, Sol, Do (octave supérieure)
+    const startTime = audioContext.currentTime;
+    
+    notes.forEach((freq, index) => {
+      const noteOscillator = audioContext.createOscillator();
+      const noteGain = audioContext.createGain();
+      
+      noteOscillator.connect(noteGain);
+      noteGain.connect(audioContext.destination);
+      
+      noteOscillator.frequency.value = freq;
+      noteGain.gain.value = 0.1;
+      
+      noteOscillator.start(startTime + index * 0.2);
+      noteOscillator.stop(startTime + (index * 0.2) + 0.2);
+    });
+    
+    return new Promise(resolve => setTimeout(resolve, notes.length * 200));
+  };
+
 export function PomodoroTimer({ }: PomodoroTimerProps) {
     const [time, setTime] = useState(25 * 60);
     const [isActive, setIsActive] = useState(false);
@@ -351,7 +380,19 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         loadSettings();
     }, []);
 
-    // Ajouter cette fonction pour vérifier et gérer l'objectif quotidien
+    // Function to celebrate goal achievement with sound and visual feedback
+    const celebrateGoalAchievement = useCallback(async () => {
+        if (audioContext) {
+            await playGoalAchievedSound(audioContext);
+        }
+        toast({
+            title: "Daily Goal Achieved! 🎉",
+            description: "Congratulations! You've reached your daily goal.",
+            duration: 5000,
+        });
+    }, [audioContext, toast]);
+
+    // Function to check and handle daily goal
     const checkDailyGoal = useCallback((completedCount: number) => {
         if (settings?.daily_goal && completedCount >= settings.daily_goal) {
             const currentTask = tasks.find(t => t.id === activeTaskId);
@@ -361,14 +402,10 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         ? { ...task, completed: true }
                         : task
                 ));
-                toast({
-                    title: "Daily Goal Achieved! 🎉",
-                    description: `Congratulations! You've completed your daily goal of ${settings.daily_goal} pomodoros!`,
-                    duration: 5000,
-                });
+                celebrateGoalAchievement();
             }
         }
-    }, [settings, activeTaskId, tasks]);
+    }, [settings, activeTaskId, tasks, celebrateGoalAchievement]);
 
     // Modifier handleTimerComplete pour mieux gérer les paramètres
     const handleTimerComplete = useCallback(async () => {
@@ -581,6 +618,8 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             case 'start':
                 if (!isActive) {
                     startNewPomodoro(isBreak ? 'break' : 'work');
+                } else {
+                    setIsActive(false); // Permettre la pause
                 }
                 break;
             case 'pause':
@@ -732,7 +771,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
-                                    name="start"
+                                    name={isActive ? 'pause' : 'start'}
                                     onClick={handleButtonClick}
                                     disabled={!activeTaskId}
                                     size="lg"
@@ -741,7 +780,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                         isActive
                                             ? "bg-blue-500/80 hover:bg-blue-600/80 shadow-blue-500/20"
                                             : "bg-blue-500/60 hover:bg-blue-500/80 shadow-blue-500/10",
-                                        activeTaskId && "opacity-50"
+                                        !activeTaskId && "opacity-50"
                                     )}
                                 >
                                     {isActive ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
