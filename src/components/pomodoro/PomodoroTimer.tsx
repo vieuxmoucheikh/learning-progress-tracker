@@ -412,6 +412,17 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         if (!settings) return;
 
         try {
+            // S'assurer que l'AudioContext est créé si nécessaire
+            if (!audioContext) {
+                const newAudioContext = new AudioContext();
+                setAudioContext(newAudioContext);
+            }
+
+            // Jouer le son avant toute autre opération si activé
+            if (settings.sound_enabled && audioContext) {
+                await playNotificationSound();
+            }
+
             // Arrêter le timer actif
             setIsActive(false);
             
@@ -496,7 +507,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 variant: 'destructive',
             });
         }
-    }, [settings, isBreak, activeTaskId, currentPomodoroId, tasks, pomodoroCount]);
+    }, [settings, isBreak, activeTaskId, currentPomodoroId, tasks, pomodoroCount, audioContext]);
 
     const playNotificationSound = useCallback(async () => {
         try {
@@ -647,6 +658,22 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         const interval = setInterval(checkNewDay, 60000); // Vérifier toutes les minutes
         
         return () => clearInterval(interval);
+    }, []);
+
+    // Ajouter une initialisation de l'AudioContext au montage du composant
+    useEffect(() => {
+        // Créer l'AudioContext au premier rendu
+        if (!audioContext) {
+            const newAudioContext = new AudioContext();
+            setAudioContext(newAudioContext);
+        }
+        
+        // Cleanup
+        return () => {
+            if (audioContext) {
+                audioContext.close();
+            }
+        };
     }, []);
 
     return (
@@ -862,6 +889,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     );
 }
 
+// Modifier TimerDisplay pour corriger l'affichage du statut
 function TimerDisplay({ time, isActive, totalTime }: { time: number; isActive: boolean; totalTime: number }) {
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
@@ -925,7 +953,18 @@ function TimerDisplay({ time, isActive, totalTime }: { time: number; isActive: b
                     <span className="mx-2 text-blue-200">:</span>
                     <span className="text-blue-100">{String(seconds).padStart(2, '0')}</span>
                 </div>
-                <span className="text-sm font-medium mt-4">{isActive ? "Focus Time" : "Break Time"}</span>
+                <AnimatePresence mode="wait">
+                    <motion.span
+                        key={isActive ? 'active' : 'inactive'}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        transition={{ duration: 0.2 }}
+                        className="text-sm font-medium mt-4"
+                    >
+                        {`${isActive ? 'Focus' : 'Break'} Time`}
+                    </motion.span>
+                </AnimatePresence>
             </div>
         </div>
     );
