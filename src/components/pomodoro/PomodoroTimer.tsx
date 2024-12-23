@@ -374,81 +374,92 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     const handleTimerComplete = useCallback(async () => {
         if (!settings) return;
 
-        // Arrêter le timer actif et le son
-        setIsActive(false);
-        if (oscillator) {
-            oscillator.stop();
-        }
-        
-        // Compléter le pomodoro actuel
-        if (currentPomodoroId) {
-            await completePomodoro(currentPomodoroId);
-            setCurrentPomodoroId(null);
-        }
-
-        // Mettre à jour les métriques pour le focus time uniquement
-        if (!isBreak && activeTaskId) {
-            const newPomodoroCount = pomodoroCount + 1;
-            setPomodoroCount(newPomodoroCount);
+        try {
+            // Arrêter le timer actif
+            setIsActive(false);
             
-            setTasks(prev => prev.map(task => {
-                if (task.id === activeTaskId) {
-                    const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
-                    checkDailyGoal(newCompletedPomodoros);
-                    return {
-                        ...task,
-                        metrics: {
-                            ...task.metrics,
-                            currentStreak: task.metrics.currentStreak + 1,
-                            completedPomodoros: newCompletedPomodoros,
-                            totalMinutes: task.metrics.totalMinutes + settings.work_duration
-                        }
-                    };
+            // Compléter le pomodoro actuel
+            if (currentPomodoroId) {
+                await completePomodoro(currentPomodoroId);
+                setCurrentPomodoroId(null);
+            }
+    
+            // Mettre à jour les métriques pour le focus time uniquement
+            if (!isBreak && activeTaskId) {
+                const newPomodoroCount = pomodoroCount + 1;
+                setPomodoroCount(newPomodoroCount);
+                
+                setTasks(prev => prev.map(task => {
+                    if (task.id === activeTaskId) {
+                        const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
+                        checkDailyGoal(newCompletedPomodoros);
+                        return {
+                            ...task,
+                            metrics: {
+                                ...task.metrics,
+                                currentStreak: task.metrics.currentStreak + 1,
+                                completedPomodoros: newCompletedPomodoros,
+                                totalMinutes: task.metrics.totalMinutes + settings.work_duration
+                            }
+                        };
+                    }
+                    return task;
+                }));
+                updateStreak();
+                localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
+            }
+    
+            // Jouer le son si activé
+            if (settings.sound_enabled) {
+                await playNotificationSound();
+            }
+    
+            // Basculer entre focus et pause
+            const newIsBreak = !isBreak;
+            setIsBreak(newIsBreak);
+    
+            // Calculer la durée suivante
+            const newDuration = await (async () => {
+                if (newIsBreak) {
+                    const completedPomodoros = tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0;
+                    const isLongBreak = completedPomodoros > 0 && completedPomodoros % settings.pomodoros_until_long_break === 0;
+                    return isLongBreak ? settings.long_break_duration : settings.break_duration;
                 }
-                return task;
-            }));
-            updateStreak();
-            localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
+                return settings.work_duration;
+            })();
+    
+            setTime(newDuration * 60);
+    
+            // Notification
+            toast({
+                title: newIsBreak ? "Time for a break!" : "Break complete!",
+                description: newIsBreak
+                    ? `Taking a ${newDuration}-minute break.`
+                    : "Ready for another focused session!",
+                duration: 3000,
+            });
+    
+            // Démarrer automatiquement avec un délai
+            const shouldAutoStart = newIsBreak ? settings.auto_start_breaks : settings.auto_start_pomodoros;
+            if (shouldAutoStart) {
+                // Attendre que les états soient mis à jour
+                setTimeout(async () => {
+                    try {
+                        await startNewPomodoro(newIsBreak ? 'break' : 'work');
+                    } catch (error) {
+                        console.error('Error auto-starting next session:', error);
+                    }
+                }, 500);
+            }
+        } catch (error) {
+            console.error('Error completing timer:', error);
+            toast({
+                title: 'Error',
+                description: 'Failed to complete the session. Please try again.',
+                variant: 'destructive',
+            });
         }
-
-        // Jouer le son si activé
-        if (settings.sound_enabled) {
-            await playNotificationSound();
-        }
-
-        // Basculer entre focus et pause
-        const newIsBreak = !isBreak;
-        setIsBreak(newIsBreak);
-
-        // Calculer la durée suivante selon le type et les paramètres
-        let newDuration;
-        if (newIsBreak) {
-            // Vérifier si c'est l'heure d'une longue pause
-            const completedPomodoros = tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0;
-            const isLongBreak = completedPomodoros % settings.pomodoros_until_long_break === 0;
-            newDuration = isLongBreak ? settings.long_break_duration : settings.break_duration;
-        } else {
-            newDuration = settings.work_duration;
-        }
-        setTime(newDuration * 60);
-
-        // Notification
-        toast({
-            title: newIsBreak ? "Time for a break!" : "Break complete!",
-            description: newIsBreak
-                ? `Taking a ${newDuration}-minute break. ${newIsBreak && newDuration === settings.long_break_duration ? "It's a long break!" : ''}`
-                : "Ready for another focused session?",
-            duration: 3000,
-        });
-
-        // Démarrer automatiquement selon les paramètres
-        const shouldAutoStart = newIsBreak ? settings.auto_start_breaks : settings.auto_start_pomodoros;
-        if (shouldAutoStart) {
-            setTimeout(async () => {
-                await startNewPomodoro(newIsBreak ? 'break' : 'work');
-            }, 300);
-        }
-    }, [settings, isBreak, activeTaskId, currentPomodoroId, tasks, oscillator, pomodoroCount, checkDailyGoal]);
+    }, [settings, isBreak, activeTaskId, currentPomodoroId, tasks, pomodoroCount]);
 
     const playNotificationSound = useCallback(async () => {
         try {
@@ -491,40 +502,61 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     }, [isBreak, settings, audioContext]);
 
-    // Modifier startNewPomodoro pour inclure le type de pause
+    // Modifier startNewPomodoro pour s'assurer que le type est correct
     const startNewPomodoro = async (type: 'work' | 'break' | 'long_break' = 'work') => {
         try {
-            if (!settings) return;
-
-            if (currentPomodoroId) {
-                await completePomodoro(currentPomodoroId);
+            if (!settings || !activeTaskId) {
+                toast({
+                    title: 'Error',
+                    description: 'Please select a task first',
+                    variant: 'destructive',
+                });
+                return;
             }
-
-            // Vérifier si c'est une longue pause
+    
+            // Nettoyer d'abord tout pomodoro actif
+            if (currentPomodoroId) {
+                try {
+                    await completePomodoro(currentPomodoroId);
+                    setCurrentPomodoroId(null);
+                } catch (error) {
+                    console.error('Error completing previous pomodoro:', error);
+                }
+            }
+    
+            // Vérifier et ajuster le type de pause
+            let pomodoroType = type;
             if (type === 'break') {
                 const completedPomodoros = tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0;
-                const isLongBreak = completedPomodoros % settings.pomodoros_until_long_break === 0;
-                type = isLongBreak ? 'long_break' : 'break';
+                const shouldBeLongBreak = completedPomodoros > 0 && completedPomodoros % settings.pomodoros_until_long_break === 0;
+                pomodoroType = shouldBeLongBreak ? 'long_break' : 'break';
             }
-
-            const pomodoro = await startPomodoro(type);
+    
+            // S'assurer que le type est l'une des valeurs autorisées
+            const validType = ['work', 'break', 'long_break'].includes(pomodoroType) ? pomodoroType : 'work';
+    
+            const pomodoro = await startPomodoro(validType);
             setCurrentPomodoroId(pomodoro.id);
             setIsActive(true);
-
+    
             // Mettre à jour le temps en fonction du type
-            const duration = type === 'long_break' 
+            const duration = pomodoroType === 'long_break' 
                 ? settings.long_break_duration 
-                : type === 'break' 
+                : pomodoroType === 'break' 
                     ? settings.break_duration 
                     : settings.work_duration;
             setTime(duration * 60);
+    
         } catch (error) {
             console.error('Error starting Pomodoro:', error);
             toast({
                 title: 'Error',
-                description: 'Failed to start Pomodoro session',
+                description: 'Failed to start Pomodoro session. Please try again.',
                 variant: 'destructive',
             });
+            // Réinitialiser l'état en cas d'erreur
+            setIsActive(false);
+            setCurrentPomodoroId(null);
         }
     };
 
