@@ -791,6 +791,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         time={time}
                         isActive={isActive}
                         totalTime={isBreak ? (settings?.break_duration || 5) * 60 : (settings?.work_duration || 25) * 60}
+                        isBreak={isBreak}
                     />
                 </div>
                 <div className="flex justify-center gap-4">
@@ -889,12 +890,20 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     );
 }
 
-// Modifier TimerDisplay pour corriger l'affichage du statut
-function TimerDisplay({ time, isActive, totalTime }: { time: number; isActive: boolean; totalTime: number }) {
+function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; isActive: boolean; totalTime: number; isBreak: boolean }) {
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
     const progress = ((totalTime - time) / totalTime) * 100;
     const circumference = 2 * Math.PI * 120;
+    
+    // État local pour suivre le type de période
+    const [periodType, setPeriodType] = useState<'Focus' | 'Break'>('Focus');
+
+    // Effet pour mettre à jour le type de période quand isBreak change
+    useEffect(() => {
+        setPeriodType(isBreak ? 'Break' : 'Focus');
+    }, [isBreak]);
+
     return (
         <div className="relative flex justify-center items-center my-12 md:my-8">
             {/* Animated Background Rings */}
@@ -955,14 +964,14 @@ function TimerDisplay({ time, isActive, totalTime }: { time: number; isActive: b
                 </div>
                 <AnimatePresence mode="wait">
                     <motion.span
-                        key={isActive ? 'active' : 'inactive'}
+                        key={periodType} // Utiliser periodType comme clé pour l'animation
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
                         transition={{ duration: 0.2 }}
                         className="text-sm font-medium mt-4"
                     >
-                        {`${isActive ? 'Focus' : 'Break'} Time`}
+                        {`${periodType} Time`}
                     </motion.span>
                 </AnimatePresence>
             </div>
