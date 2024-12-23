@@ -528,18 +528,20 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             let pomodoroType = type;
             if (type === 'break') {
                 const completedPomodoros = tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0;
-                const shouldBeLongBreak = completedPomodoros > 0 && completedPomodoros % settings.pomodoros_until_long_break === 0;
+                // Corriger la condition pour la pause longue (maintenant correctement à partir du nombre défini)
+                const shouldBeLongBreak = completedPomodoros > 0 && 
+                    completedPomodoros % settings.pomodoros_until_long_break === 0;
                 pomodoroType = shouldBeLongBreak ? 'long_break' : 'break';
             }
     
-            // S'assurer que le type est l'une des valeurs autorisées
-            const validType = ['work', 'break', 'long_break'].includes(pomodoroType) ? pomodoroType : 'work';
+            // S'assurer que le type est valide pour la base de données
+            const validType = pomodoroType === 'long_break' ? 'break' : pomodoroType;
     
             const pomodoro = await startPomodoro(validType);
             setCurrentPomodoroId(pomodoro.id);
             setIsActive(true);
     
-            // Mettre à jour le temps en fonction du type
+            // Mettre à jour le temps en fonction du type réel
             const duration = pomodoroType === 'long_break' 
                 ? settings.long_break_duration 
                 : pomodoroType === 'break' 
@@ -785,7 +787,10 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     </TooltipProvider>
                 </div>
                 {activeTaskId && (
-                    <TaskProgress task={tasks.find(t => t.id === activeTaskId)!} />
+                    <TaskProgress 
+                        task={tasks.find(t => t.id === activeTaskId)!} 
+                        settings={settings}
+                    />
                 )}
                 <PomodoroSettingsDialog
                 open={settingsOpen}
@@ -887,8 +892,17 @@ function TimerDisplay({ time, isActive, totalTime }: { time: number; isActive: b
     );
 }
 
-function TaskProgress({ task }: { task: Task }) {
-    const { streakPercentage, dailyGoalPercentage } = getProgressStats(task);
+// Modifier la fonction getProgressStats pour utiliser le daily_goal des settings
+function getProgressStats(task: Task, settings?: PomodoroSettings | null) {
+    const dailyGoal = settings?.daily_goal || 8; // Utiliser la valeur des settings ou 8 par défaut
+    const streakPercentage = Math.min((task.metrics.currentStreak / 4) * 100, 100);
+    const dailyGoalPercentage = Math.min((task.metrics.completedPomodoros / dailyGoal) * 100, 100);
+    return { streakPercentage, dailyGoalPercentage };
+}
+
+// Modifier le composant TaskProgress pour recevoir les settings
+function TaskProgress({ task, settings }: { task: Task; settings: PomodoroSettings | null }) {
+    const { streakPercentage, dailyGoalPercentage } = getProgressStats(task, settings);
     return (
         <div className="p-6 rounded-xl bg-blue-600/20 border border-blue-400/30 shadow-lg">
             <div className="flex items-center justify-between mb-4">
@@ -941,13 +955,6 @@ function TaskProgress({ task }: { task: Task }) {
             </div>
         </div>
     );
-}
-
-function getProgressStats(task: Task) {
-    const dailyGoal = 4; // default daily goal
-    const streakPercentage = Math.min((task.metrics.currentStreak / 4) * 100, 100);
-    const dailyGoalPercentage = Math.min((task.metrics.completedPomodoros / dailyGoal) * 100, 100);
-    return { streakPercentage, dailyGoalPercentage };
 }
 
 function getMotivationalMessage(streak: number) {
@@ -1040,7 +1047,10 @@ function PomodoroSettingsDialogComponent({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogTitle>Pomodoro Settings</DialogTitle>
-            <DialogContent>
+            <DialogContent aria-describedby="settings-description">
+                <div id="settings-description" className="sr-only">
+                    Configure your Pomodoro timer settings including work duration, break duration, and other preferences
+                </div>
                 <form onSubmit={handleSubmit}>
                     <div className="space-y-4">
                         <div>
