@@ -82,6 +82,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
     const [oscillator, setOscillator] = useState<OscillatorNode | null>(null);
     const [isCompleted, setIsCompleted] = useState(false);
+    const [pomodoroCount, setPomodoroCount] = useState(0); // Ajouter ce state
 
     // Add streak tracking
     useEffect(() => {
@@ -350,6 +351,25 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         loadSettings();
     }, []);
 
+    // Ajouter cette fonction pour vérifier et gérer l'objectif quotidien
+    const checkDailyGoal = useCallback((completedCount: number) => {
+        if (settings?.daily_goal && completedCount >= settings.daily_goal) {
+            const currentTask = tasks.find(t => t.id === activeTaskId);
+            if (currentTask && !currentTask.completed) {
+                setTasks(prev => prev.map(task => 
+                    task.id === activeTaskId 
+                        ? { ...task, completed: true }
+                        : task
+                ));
+                toast({
+                    title: "Daily Goal Achieved! 🎉",
+                    description: `Congratulations! You've completed your daily goal of ${settings.daily_goal} pomodoros!`,
+                    duration: 5000,
+                });
+            }
+        }
+    }, [settings, activeTaskId, tasks]);
+
     // Modifier handleTimerComplete pour mieux gérer les paramètres
     const handleTimerComplete = useCallback(async () => {
         if (!settings) return;
@@ -368,16 +388,13 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
         // Mettre à jour les métriques pour le focus time uniquement
         if (!isBreak && activeTaskId) {
+            const newPomodoroCount = pomodoroCount + 1;
+            setPomodoroCount(newPomodoroCount);
+            
             setTasks(prev => prev.map(task => {
                 if (task.id === activeTaskId) {
                     const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
-                    if (newCompletedPomodoros >= (settings?.daily_goal ?? 8) && !task.completed) {
-                        toast({
-                            title: "Daily Goal Achieved!",
-                            description: "Great job! You've reached your daily pomodoro goal!",
-                            duration: 5000,
-                        });
-                    }
+                    checkDailyGoal(newCompletedPomodoros);
                     return {
                         ...task,
                         metrics: {
@@ -431,7 +448,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 await startNewPomodoro(newIsBreak ? 'break' : 'work');
             }, 300);
         }
-    }, [settings, isBreak, activeTaskId, currentPomodoroId, tasks, oscillator]);
+    }, [settings, isBreak, activeTaskId, currentPomodoroId, tasks, oscillator, pomodoroCount, checkDailyGoal]);
 
     const playNotificationSound = useCallback(async () => {
         try {
@@ -540,6 +557,24 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 break;
         }
     };
+
+    // Ajouter useEffect pour réinitialiser le compteur quotidien
+    useEffect(() => {
+        const checkNewDay = () => {
+            const lastPomodoro = localStorage.getItem('lastPomodoroDate');
+            const today = new Date().toDateString();
+            
+            if (lastPomodoro !== today) {
+                setPomodoroCount(0);
+                localStorage.setItem('lastPomodoroDate', today);
+            }
+        };
+        
+        checkNewDay();
+        const interval = setInterval(checkNewDay, 60000); // Vérifier toutes les minutes
+        
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate700/30 shadow-2xl">
