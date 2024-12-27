@@ -55,7 +55,26 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
   const [time, setTime] = useState(25 * 60);
   const [isActive, setIsActive] = useState(false);
   const [isBreak, setIsBreak] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>(
+    (localStorage.getItem('theme') as 'light' | 'dark' | 'system') || 'system'
+  );
+
+  // Apply theme on mount and when it changes
+  useEffect(() => {
+    const root = document.documentElement;
+    const applyTheme = (theme: 'light' | 'dark' | 'system') => {
+      if (theme === 'system') {
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        root.classList.remove('light', 'dark');
+        root.classList.add(systemTheme);
+      } else {
+        root.classList.remove('light', 'dark');
+        root.classList.add(theme);
+      }
+      localStorage.setItem('theme', theme);
+    };
+    applyTheme(theme);
+  }, [theme]);
   const [settings, setSettings] = useState<PomodoroSettings | null>({
         work_duration: 25,
         break_duration: 5,
@@ -583,9 +602,9 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
     return (
         <Card className={`p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm ${
-          theme === 'dark' ? 'bg-slate-900/90 border-slate700/30' : 
-          theme === 'light' ? 'bg-white/90 border-slate-200/30' : 
-          'dark:bg-slate-900/90 dark:border-slate700/30 bg-white/90 border-slate-200/30'
+        theme === 'dark' ? 'bg-gray-900/95 border-gray-800/50' : 
+        theme === 'light' ? 'bg-white/95 border-gray-200/50' : 
+        'dark:bg-gray-900/95 dark:border-gray-800/50 bg-white/95 border-gray-200/50'
         } shadow-2xl`}>
             <div className="pomodoro-timer space-y-6 md:space-y-8">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full shadow-lg">
@@ -854,11 +873,13 @@ function TimerDisplay({ time, isActive, totalTime }: { time: number; isActive: b
             {/* Timer Display */}
             <div className="relative flex flex-col items-center z-10">
                 <div className="text-6xl md:text-8xl font-mono font-bold tracking-tight flex items-center">
-                    <span className="text-blue-100">{String(minutes).padStart(2, '0')}</span>
-                    <span className="mx-2 text-blue-200">:</span>
-                    <span className="text-blue-100">{String(seconds).padStart(2, '0')}</span>
+                    <span className="text-blue-100 dark:text-blue-200">{String(minutes).padStart(2, '0')}</span>
+                    <span className="mx-2 text-blue-200 dark:text-blue-300">:</span>
+                    <span className="text-blue-100 dark:text-blue-200">{String(seconds).padStart(2, '0')}</span>
                 </div>
-                <span className="text-sm font-medium mt-4">{isActive ? "Focus Time" : "Break Time"}</span>
+                <span className="text-sm font-medium mt-4 text-blue-200 dark:text-blue-300">
+                    {isActive ? "Focus Time" : "Break Time"}
+                </span>
             </div>
         </div>
     );
