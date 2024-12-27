@@ -512,10 +512,49 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     };
 
     const toggleTimer = async () => {
-        if (!isActive) {
-            await startNewPomodoro(isBreak ? 'break' : 'work');
-        } else {
-            setIsActive(false);
+        try {
+            if (!isActive) {
+                await startNewPomodoro(isBreak ? 'break' : 'work');
+            } else {
+                // Stop the timer and clean up resources
+                setIsActive(false);
+                
+                // If there's an active pomodoro session, mark it as incomplete
+                if (currentPomodoroId) {
+                    try {
+                        await completePomodoro(currentPomodoroId);
+                    } catch (error) {
+                        console.error('Error completing pomodoro:', error);
+                        toast({
+                            title: 'Error',
+                            description: 'Failed to stop Pomodoro session',
+                            variant: 'destructive',
+                        });
+                    }
+                }
+                
+                // Stop any running sounds
+                if (oscillator) {
+                    oscillator.stop();
+                    setOscillator(null);
+                }
+                
+                // Update local storage
+                localStorage.setItem('pomodoroState', JSON.stringify({
+                    time,
+                    isActive: false,
+                    isBreak,
+                    currentPomodoroId: null,
+                    lastUpdate: new Date().toISOString()
+                }));
+            }
+        } catch (error) {
+            console.error('Error toggling timer:', error);
+            toast({
+                title: 'Error',
+                description: 'Failed to toggle timer',
+                variant: 'destructive',
+            });
         }
     };
 
