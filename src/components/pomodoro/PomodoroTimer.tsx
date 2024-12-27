@@ -497,35 +497,66 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     // Modifier startNewPomodoro pour inclure le type de pause
     const startNewPomodoro = async (type: 'work' | 'break' | 'long_break' = 'work') => {
         try {
-            if (!settings) return;
-
-            if (currentPomodoroId) {
-                await completePomodoro(currentPomodoroId);
+            if (!settings) {
+                throw new Error('Settings not loaded');
             }
 
-            // Vérifier si c'est une longue pause
+            if (!activeTaskId) {
+                throw new Error('No active task selected');
+            }
+
+            // Complete any existing pomodoro
+            if (currentPomodoroId) {
+                try {
+                    await completePomodoro(currentPomodoroId);
+                } catch (error) {
+                    console.error('Error completing previous pomodoro:', error);
+                }
+            }
+
+            // Determine if this should be a long break
             if (type === 'break') {
                 const completedPomodoros = tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0;
                 const isLongBreak = completedPomodoros % settings.pomodoros_until_long_break === 0;
                 type = isLongBreak ? 'long_break' : 'break';
             }
 
+            // Start new pomodoro session
             const pomodoro = await startPomodoro(type);
+            if (!pomodoro?.id) {
+                throw new Error('Failed to create pomodoro session');
+            }
+
             setCurrentPomodoroId(pomodoro.id);
             setIsActive(true);
 
-            // Mettre à jour le temps en fonction du type
+            // Set timer duration based on type
             const duration = type === 'long_break' 
                 ? settings.long_break_duration 
                 : type === 'break' 
                     ? settings.break_duration 
                     : settings.work_duration;
             setTime(duration * 60);
+
+            // Update UI state
+            setTasks(prevTasks => prevTasks.map(task => {
+                if (task.id === activeTaskId) {
+                    return {
+                        ...task,
+                        metrics: {
+                            ...task.metrics,
+                            currentStreak: task.metrics.currentStreak + 1
+                        }
+                    };
+                }
+                return task;
+            }));
+
         } catch (error) {
             console.error('Error starting Pomodoro:', error);
             toast({
                 title: 'Error',
-                description: 'Failed to start Pomodoro session',
+                description: error instanceof Error ? error.message : 'Failed to start Pomodoro session',
                 variant: 'destructive',
             });
         }
