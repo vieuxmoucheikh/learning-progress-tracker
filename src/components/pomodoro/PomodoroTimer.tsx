@@ -586,28 +586,61 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     };
 
     // Modifier handleButtonClick pour gérer tous les boutons
-    const handleButtonClick = (event: React.FormEvent<HTMLButtonElement>) => {
+    const handleButtonClick = async (event: React.FormEvent<HTMLButtonElement>) => {
         const action = event.currentTarget.name;
         switch (action) {
             case 'start':
-                if (isActive) {
-                    setIsActive(false);
-                } else {
-                    startNewPomodoro(isBreak ? 'break' : 'work');
-                }
-                break;
             case 'pause':
-                setIsActive(false);
+                await handleStart();
                 break;
             case 'skip':
-                if (isActive) {
-                    skipCurrentInterval();
-                }
+                await handleSkip();
                 break;
             case 'settings':
-                setSettingsOpen(true);
+                handleSettings();
                 break;
         }
+    };
+
+    // Modifier les fonctions de gestion des boutons
+    const handleStart = async () => {
+        if (!activeTaskId) {
+            toast({
+                title: "Select a task",
+                description: "Please select a task first to start the timer",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        if (isActive) {
+            setIsActive(false);
+        } else {
+            await startNewPomodoro(isBreak ? 'break' : 'work');
+        }
+    };
+
+    const handleSkip = async () => {
+        if (!activeTaskId || !isActive) return;
+        
+        try {
+            if (currentPomodoroId) {
+                await completePomodoro(currentPomodoroId);
+                setCurrentPomodoroId(null);
+            }
+            await handleTimerComplete();
+        } catch (error) {
+            console.error('Error skipping interval:', error);
+            toast({
+                title: "Error",
+                description: "Failed to skip interval",
+                variant: "destructive",
+            });
+        }
+    };
+
+    const handleSettings = () => {
+        setSettingsOpen(true);
     };
 
     return (
@@ -780,7 +813,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             <TooltipTrigger asChild>
                                 <Button
                                     name="settings"
-                                    onClick={() => setSettingsOpen(true)}
+                                    onClick={handleButtonClick}
                                     variant="outline"
                                     size="lg"
                                     className="border-white/10 hover:border-white/20 hover:bg-white/5"
