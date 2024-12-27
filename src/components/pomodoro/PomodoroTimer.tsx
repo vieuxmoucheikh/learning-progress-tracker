@@ -24,6 +24,24 @@ import { cn } from "@/lib/utils";
 import { X } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Clock } from 'lucide-react';
+import { useTheme } from 'next-themes';
+
+const THEME_COLORS = {
+    light: {
+      focus: { primary: '#2563EB', secondary: '#3B82F6', ring: '#60A5FA' },
+      break: { primary: '#6D28D9', secondary: '#7C3AED', ring: '#8B5CF6' },
+      background: 'bg-white/95',
+      text: 'text-slate-900',
+      card: 'bg-white/90 shadow-xl border-slate-200/50'
+    },
+    dark: {
+      focus: { primary: '#3B82F6', secondary: '#2563EB', ring: '#1D4ED8' },
+      break: { primary: '#8B5CF6', secondary: '#7C3AED', ring: '#6D28D9' },
+      background: 'bg-slate-900/95',
+      text: 'text-slate-50',
+      card: 'bg-slate-900/90 shadow-2xl border-slate-700/30'
+    }
+  };
 
 interface Task {
     id: string;
@@ -51,31 +69,19 @@ interface PomodoroTimerProps {
     sessionId?: string;
 }
 
-export function PomodoroTimer({ }: PomodoroTimerProps) {
-  const [time, setTime] = useState(25 * 60);
-  const [isActive, setIsActive] = useState(false);
-  const [isBreak, setIsBreak] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>(
-    (localStorage.getItem('theme') as 'light' | 'dark' | 'system') || 'system'
-  );
+interface TimerDisplayProps {
+    time: number;
+    isActive: boolean;
+    totalTime: number;
+    isBreak: boolean; // Ajouter cette prop
+    theme: 'light' | 'dark'; // Ajouter cette prop
+  }
 
-  // Apply theme on mount and when it changes
-  useEffect(() => {
-    const root = document.documentElement;
-    const applyTheme = (theme: 'light' | 'dark' | 'system') => {
-      if (theme === 'system') {
-        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        root.classList.remove('light', 'dark');
-        root.classList.add(systemTheme);
-      } else {
-        root.classList.remove('light', 'dark');
-        root.classList.add(theme);
-      }
-      localStorage.setItem('theme', theme);
-    };
-    applyTheme(theme);
-  }, [theme]);
-  const [settings, setSettings] = useState<PomodoroSettings | null>({
+export function PomodoroTimer({ }: PomodoroTimerProps) {
+    const [time, setTime] = useState(25 * 60);
+    const [isActive, setIsActive] = useState(false);
+    const [isBreak, setIsBreak] = useState(false);
+    const [settings, setSettings] = useState<PomodoroSettings | null>({
         work_duration: 25,
         break_duration: 5,
         daily_goal: 8,
@@ -102,6 +108,8 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
     const [oscillator, setOscillator] = useState<OscillatorNode | null>(null);
     const [isCompleted, setIsCompleted] = useState(false);
+    const { theme } = useTheme();
+    const currentTheme = theme as 'light' | 'dark';
 
     // Add streak tracking
     useEffect(() => {
@@ -414,32 +422,26 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
         }
 
-        // Play sound if enabled
-        try {
-            if (settings?.sound_enabled) {
-                await playNotificationSound();
-            }
-        } catch (error) {
-            console.error('Error playing sound:', error);
+        // Jouer le son si activé
+        if (settings.sound_enabled) {
+            await playNotificationSound();
         }
 
-        // Toggle between focus and break
+        // Basculer entre focus et pause
         const newIsBreak = !isBreak;
         setIsBreak(newIsBreak);
 
-        // Calculate next duration based on type and settings
+        // Calculer la durée suivante selon le type et les paramètres
         let newDuration;
         if (newIsBreak) {
-            // Check if it's time for a long break
+            // Vérifier si c'est l'heure d'une longue pause
             const completedPomodoros = tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0;
-            const isLongBreak = completedPomodoros > 0 && 
-                              (completedPomodoros + 1) % settings.pomodoros_until_long_break === 0;
+            const isLongBreak = completedPomodoros % settings.pomodoros_until_long_break === 0;
             newDuration = isLongBreak ? settings.long_break_duration : settings.break_duration;
         } else {
             newDuration = settings.work_duration;
         }
         setTime(newDuration * 60);
-        setIsActive(false); // Ensure timer is paused before next session
 
         // Notification
         toast({
@@ -503,115 +505,68 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     // Modifier startNewPomodoro pour inclure le type de pause
     const startNewPomodoro = async (type: 'work' | 'break' | 'long_break' = 'work') => {
         try {
-            if (!settings) {
-                throw new Error('Settings not loaded');
-            }
-
-            if (!activeTaskId) {
-                throw new Error('No active task selected');
-            }
-
-            // Complete any existing pomodoro
-            if (currentPomodoroId) {
+            if (!settings || !activeTaskId) {
+                toast({
+                  title: 'Cannot start timer',
+                  description: 'Please select a task first',
+                  variant: 'destructive',
+                });
+                return;
+              }
+        
+              // S'assurer que le pomodoro précédent est complété
+              if (currentPomodoroId) {
                 try {
-                    await completePomodoro(currentPomodoroId);
+                  await completePomodoro(currentPomodoroId);
+                  setCurrentPomodoroId(null);
                 } catch (error) {
-                    console.error('Error completing previous pomodoro:', error);
+                  console.error('Error completing previous pomodoro:', error);
                 }
-            }
-
-            // Determine if this should be a long break
-            if (type === 'break') {
+              }
+        
+              // Déterminer le type correct de pause
+              let pomodoroType = type;
+              if (type === 'break') {
                 const completedPomodoros = tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0;
-                const isLongBreak = completedPomodoros % settings.pomodoros_until_long_break === 0;
-                type = isLongBreak ? 'long_break' : 'break';
-            }
-
-            // Start new pomodoro session
-            const pomodoro = await startPomodoro(type);
-            if (!pomodoro?.id) {
-                throw new Error('Failed to create pomodoro session');
-            }
-
-            setCurrentPomodoroId(pomodoro.id);
-            setIsActive(true);
-
-            // Set timer duration based on type
-            const duration = type === 'long_break' 
+                const shouldBeLongBreak = completedPomodoros > 0 && 
+                  completedPomodoros % settings.pomodoros_until_long_break === 0;
+                pomodoroType = shouldBeLongBreak ? 'long_break' : 'break';
+              }
+        
+              // Convertir le type pour la base de données
+              const dbType = pomodoroType === 'long_break' ? 'break' : pomodoroType;
+              
+              const pomodoro = await startPomodoro(dbType);
+              if (!pomodoro) throw new Error('Failed to create pomodoro');
+              
+              setCurrentPomodoroId(pomodoro.id);
+              setIsActive(true);
+        
+              const duration = pomodoroType === 'long_break' 
                 ? settings.long_break_duration 
-                : type === 'break' 
-                    ? settings.break_duration 
-                    : settings.work_duration;
-            setTime(duration * 60);
-
-            // Update UI state
-            setTasks(prevTasks => prevTasks.map(task => {
-                if (task.id === activeTaskId) {
-                    return {
-                        ...task,
-                        metrics: {
-                            ...task.metrics,
-                            currentStreak: task.metrics.currentStreak + 1
-                        }
-                    };
-                }
-                return task;
-            }));
-
-        } catch (error) {
-            console.error('Error starting Pomodoro:', error);
-            toast({
+                : pomodoroType === 'break' 
+                  ? settings.break_duration 
+                  : settings.work_duration;
+              
+              setTime(duration * 60);
+        
+            } catch (error) {
+              console.error('Error starting Pomodoro:', error);
+              toast({
                 title: 'Error',
-                description: error instanceof Error ? error.message : 'Failed to start Pomodoro session',
+                description: 'Failed to start timer. Please try again.',
                 variant: 'destructive',
-            });
-        }
-    };
+              });
+              setIsActive(false);
+              setCurrentPomodoroId(null);
+            }
+          };
 
     const toggleTimer = async () => {
-        try {
-            if (!isActive) {
-                await startNewPomodoro(isBreak ? 'break' : 'work');
-            } else {
-                // Stop the timer and clean up resources
-                setIsActive(false);
-                
-                // If there's an active pomodoro session, mark it as incomplete
-                if (currentPomodoroId) {
-                    try {
-                        await completePomodoro(currentPomodoroId);
-                    } catch (error) {
-                        console.error('Error completing pomodoro:', error);
-                        toast({
-                            title: 'Error',
-                            description: 'Failed to stop Pomodoro session',
-                            variant: 'destructive',
-                        });
-                    }
-                }
-                
-                // Stop any running sounds
-                if (oscillator) {
-                    oscillator.stop();
-                    setOscillator(null);
-                }
-                
-                // Update local storage
-                localStorage.setItem('pomodoroState', JSON.stringify({
-                    time,
-                    isActive: false,
-                    isBreak,
-                    currentPomodoroId: null,
-                    lastUpdate: new Date().toISOString()
-                }));
-            }
-        } catch (error) {
-            console.error('Error toggling timer:', error);
-            toast({
-                title: 'Error',
-                description: 'Failed to toggle timer',
-                variant: 'destructive',
-            });
+        if (!isActive) {
+            await startNewPomodoro(isBreak ? 'break' : 'work');
+        } else {
+            setIsActive(false);
         }
     };
 
@@ -638,11 +593,10 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     };
 
     return (
-        <Card className={`p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm ${
-        theme === 'dark' ? 'bg-gray-900/95 border-gray-800/50' : 
-        theme === 'light' ? 'bg-white/95 border-gray-200/50' : 
-        'dark:bg-gray-900/95 dark:border-gray-800/50 bg-white/95 border-gray-200/50'
-        } shadow-2xl`}>
+        <Card className={cn(
+            "p-4 md:p-6 max-w-md mx-auto",
+            currentTheme === 'dark' ? THEME_COLORS.dark.card : THEME_COLORS.light.card
+          )}>
             <div className="pomodoro-timer space-y-6 md:space-y-8">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full shadow-lg">
                     <div className="flex items-center gap-2">
@@ -756,6 +710,8 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         time={time}
                         isActive={isActive}
                         totalTime={isBreak ? (settings?.break_duration || 5) * 60 : (settings?.work_duration || 25) * 60}
+                        isBreak={isBreak}
+                        theme={currentTheme}
                     />
                 </div>
                 <div className="flex justify-center gap-4">
@@ -820,8 +776,8 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 {activeTaskId && (
                     <TaskProgress task={tasks.find(t => t.id === activeTaskId)!} />
                 )}
-                <PomodoroSettingsDialog 
-                open={settingsOpen}  
+                <PomodoroSettingsDialog
+                open={settingsOpen}
                 onOpenChange={setSettingsOpen}
                 isActive={isActive}
                 onSettingsUpdate={async (newSettings) => {
@@ -851,76 +807,82 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     );
 }
 
-function TimerDisplay({ time, isActive, totalTime }: { time: number; isActive: boolean; totalTime: number }) {
+function TimerDisplay({ time, isActive, totalTime, isBreak, theme }: TimerDisplayProps) {
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
     const progress = ((totalTime - time) / totalTime) * 100;
     const circumference = 2 * Math.PI * 120;
+    
+    const colors = theme === 'dark' ? THEME_COLORS.dark : THEME_COLORS.light;
+    const currentColors = isBreak ? colors.break : colors.focus;
+  
     return (
-        <div className="relative flex justify-center items-center my-12 md:my-8">
-            {/* Animated Background Rings */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div
-                    className={cn(
-                        "absolute w-[280px] md:w-[320px] h-[280px] md:h-[320px] rounded-full opacity-20 blur-xl",
-                        isActive ? "bg-blue-400" : "bg-blue-500"
-                    )}
-                />
-                <div
-                    className={cn(
-                        "absolute w-[240px] md:w-[280px] h-[240px] md:h-[280px] rounded-full blur-xl",
-                        isActive ? "bg-indigo-400" : "bg-indigo-500"
-                    )}
-                />
-            </div>
-            {/* Progress Ring */}
-            <svg className="absolute w-[260px] md:w-[300px] h-[260px] md:h-[300px] -rotate-90 pointer-events-none">
-                {/* Background Ring */}
-                <circle
-                    cx="130"
-                    cy="130"
-                    r="100"
-                    className="stroke-white/10 fill-none"
-                    strokeWidth="12"
-                />
-                {/* Progress Ring with Gradient */}
-                <circle
-                    cx="130"
-                    cy="130"
-                    r="100"
-                    className="fill-none transition-all duration-500"
-                    stroke={isActive ? "url(#gradientFocus)" : "url(#gradientBreak)"}
-                    strokeWidth="12"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={circumference - (progress / 100) * circumference}
-                    strokeLinecap="round"
-                />
-                {/* Gradient Definitions */}
-                <defs>
-                    <linearGradient id="gradientFocus" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#3B82F6" />
-                        <stop offset="100%" stopColor="#60A5FA" />
-                    </linearGradient>
-                    <linearGradient id="gradientBreak" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#818CF8" />
-                        <stop offset="100%" stopColor="#A5B4FC" />
-                    </linearGradient>
-                </defs>
-            </svg>
-            {/* Timer Display */}
-            <div className="relative flex flex-col items-center z-10">
-                <div className="text-6xl md:text-8xl font-mono font-bold tracking-tight flex items-center">
-                    <span className="text-blue-100 dark:text-blue-200">{String(minutes).padStart(2, '0')}</span>
-                    <span className="mx-2 text-blue-200 dark:text-blue-300">:</span>
-                    <span className="text-blue-100 dark:text-blue-200">{String(seconds).padStart(2, '0')}</span>
-                </div>
-                <span className="text-sm font-medium mt-4 text-blue-200 dark:text-blue-300">
-                    {isActive ? "Focus Time" : "Break Time"}
-                </span>
-            </div>
+      <div className="relative flex justify-center items-center my-8 md:my-12">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className={cn(
+            "absolute w-[260px] md:w-[320px] h-[260px] md:h-[320px] rounded-full",
+            "opacity-20 blur-xl transition-colors duration-300",
+            isBreak ? "bg-purple-400" : "bg-blue-400"
+          )} />
         </div>
+        
+        <svg className="absolute w-[240px] md:w-[300px] h-[240px] md:h-[300px] -rotate-90">
+          <circle
+            cx="120"
+            cy="120"
+            r="100"
+            className={cn(
+              "stroke-current fill-none transition-all duration-300",
+              theme === 'dark' ? 'text-white/10' : 'text-black/10'
+            )}
+            strokeWidth="12"
+          />
+          <circle
+            cx="120"
+            cy="120"
+            r="100"
+            className="fill-none transition-all duration-500"
+            stroke={`url(#gradient-${isBreak ? 'break' : 'focus'})`}
+            strokeWidth="12"
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference - (progress / 100) * circumference}
+            strokeLinecap="round"
+          />
+          <defs>
+            <linearGradient id={`gradient-${isBreak ? 'break' : 'focus'}`} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={currentColors.primary} />
+              <stop offset="100%" stopColor={currentColors.secondary} />
+            </linearGradient>
+          </defs>
+        </svg>
+  
+        <div className="relative flex flex-col items-center z-10">
+          <div className={cn(
+            "text-5xl md:text-7xl font-mono font-bold tracking-tight flex items-center",
+            theme === 'dark' ? 'text-white' : 'text-slate-900'
+          )}>
+            <span>{String(minutes).padStart(2, '0')}</span>
+            <span className="mx-2">:</span>
+            <span>{String(seconds).padStart(2, '0')}</span>
+          </div>
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={`${isBreak}-${isActive}`}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className={cn(
+                "text-sm font-medium mt-4",
+                theme === 'dark' ? 'text-slate-200' : 'text-slate-700'
+              )}
+            >
+              {isBreak ? "Break Time" : "Focus Time"}
+            </motion.span>
+          </AnimatePresence>
+        </div>
+      </div>
     );
-}
+  }
 
 function TaskProgress({ task }: { task: Task }) {
     const { streakPercentage, dailyGoalPercentage } = getProgressStats(task);
