@@ -720,8 +720,8 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 {activeTaskId && (
                     <TaskProgress task={tasks.find(t => t.id === activeTaskId)!} />
                 )}
-                <PomodoroSettingsDialog
-                open={settingsOpen}
+                <PomodoroSettingsDialog 
+                open={settingsOpen}  
                 onOpenChange={setSettingsOpen}
                 isActive={isActive}
                 onSettingsUpdate={async (newSettings) => {
