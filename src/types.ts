@@ -144,4 +144,5 @@ export interface PomodoroStats {
     focusLabels?: string[];
     weeklyCompletion?: number[];
     daily_completed: number;
+    dailyGoalProgress?: number;
 }

@@ -979,16 +979,21 @@ export async function getPomodoroStats(): Promise<PomodoroStats> {
     const user = await getCurrentUser();
     if (!user) throw new Error('No authenticated user');
 
-    // Get today's date at midnight UTC
+    // Get settings to access daily goal
+    const settings = await getPomodoroSettings();
+
+    // Get today's date at midnight in user's timezone
     const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
+    const timezoneOffset = today.getTimezoneOffset() * 60000;
+    const todayStart = new Date(today.getTime() - timezoneOffset);
+    todayStart.setUTCHours(0, 0, 0, 0);
 
     // Get today's pomodoros
     const { data: todayPomodoros, error: todayError } = await supabase
       .from('pomodoros')
       .select('*')
       .eq('user_id', user.id)
-      .gte('start_time', today.toISOString());
+      .gte('start_time', todayStart.toISOString());
 
     if (todayError) throw todayError;
 
@@ -1014,11 +1019,14 @@ export async function getPomodoroStats(): Promise<PomodoroStats> {
 
     // Calculate daily completed pomodoros
     const daily_completed = todayPomodoros.filter(p => p.completed && p.type === 'work').length;
+    const dailyGoalProgress = settings.daily_goal ? 
+      Math.min((daily_completed / settings.daily_goal) * 100, 100) : 0;
 
     const stats: PomodoroStats = {
       totalPomodoros: allPomodoros.length,
       completedPomodoros: allPomodoros.filter(p => p.completed).length,
       daily_completed,
+      dailyGoalProgress,
       totalWorkMinutes: Math.round(totalWorkMinutes),
       totalBreakMinutes: Math.round(
         todayPomodoros
