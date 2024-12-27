@@ -414,26 +414,32 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
         }
 
-        // Jouer le son si activé
-        if (settings.sound_enabled) {
-            await playNotificationSound();
+        // Play sound if enabled
+        try {
+            if (settings?.sound_enabled) {
+                await playNotificationSound();
+            }
+        } catch (error) {
+            console.error('Error playing sound:', error);
         }
 
-        // Basculer entre focus et pause
+        // Toggle between focus and break
         const newIsBreak = !isBreak;
         setIsBreak(newIsBreak);
 
-        // Calculer la durée suivante selon le type et les paramètres
+        // Calculate next duration based on type and settings
         let newDuration;
         if (newIsBreak) {
-            // Vérifier si c'est l'heure d'une longue pause
+            // Check if it's time for a long break
             const completedPomodoros = tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0;
-            const isLongBreak = completedPomodoros % settings.pomodoros_until_long_break === 0;
+            const isLongBreak = completedPomodoros > 0 && 
+                              (completedPomodoros + 1) % settings.pomodoros_until_long_break === 0;
             newDuration = isLongBreak ? settings.long_break_duration : settings.break_duration;
         } else {
             newDuration = settings.work_duration;
         }
         setTime(newDuration * 60);
+        setIsActive(false); // Ensure timer is paused before next session
 
         // Notification
         toast({
