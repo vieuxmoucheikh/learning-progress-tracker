@@ -77,6 +77,9 @@ interface TimerDisplayProps {
     theme: 'light' | 'dark'; // Ajouter cette prop
   }
 
+// Ajouter un son pour la notification (au début du fichier)
+const NOTIFICATION_SOUND = new Audio('/notification.mp3');
+
 export function PomodoroTimer({ }: PomodoroTimerProps) {
     const [time, setTime] = useState(25 * 60);
     const [isActive, setIsActive] = useState(false);
@@ -461,46 +464,53 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     }, [settings, isBreak, activeTaskId, currentPomodoroId, tasks, oscillator]);
 
+    // Ajouter les gestionnaires d'événements clavier
+    useEffect(() => {
+        const handleKeyPress = (e: KeyboardEvent) => {
+            if (!activeTaskId) return;
+
+            switch (e.key.toLowerCase()) {
+                case ' ':
+                    e.preventDefault();
+                    toggleTimer();
+                    break;
+                case 's':
+                    if (isActive) {
+                        e.preventDefault();
+                        skipCurrentInterval();
+                    }
+                    break;
+                case 'p':
+                    e.preventDefault();
+                    setIsActive(false);
+                    break;
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyPress);
+        return () => window.removeEventListener('keydown', handleKeyPress);
+    }, [isActive, activeTaskId]);
+
+    // Modifier la fonction de son
     const playNotificationSound = useCallback(async () => {
         try {
-            if (!audioContext) {
-                const newAudioContext = new AudioContext();
-                setAudioContext(newAudioContext);
-            }
-            
-            if (audioContext) {
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
-                
-                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-                
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.5);
-                
-                // Ne pas stocker l'oscillateur dans l'état pour éviter la double lecture
-                if (settings?.notification_enabled) {
-                    if (Notification.permission === 'granted') {
-                        new Notification('Pomodoro Timer', {
-                            body: isBreak ? 'Break time is over!' : 'Time to take a break!',
-                            icon: 'favicon.ico'
-                        });
-                    }
+            if (settings?.sound_enabled) {
+                // Utiliser l'élément audio pour le son
+                NOTIFICATION_SOUND.currentTime = 0;
+                await NOTIFICATION_SOUND.play();
+
+                // Notifications du système
+                if (settings.notification_enabled && Notification.permission === 'granted') {
+                    new Notification('Pomodoro Timer', {
+                        body: isBreak ? 'Break time is over!' : 'Time to take a break!',
+                        icon: '/favicon.ico'
+                    });
                 }
-                
-                // Retourner une promesse qui se résout quand le son est terminé
-                return new Promise(resolve => setTimeout(resolve, 500));
             }
         } catch (error) {
             console.error('Error playing sound:', error);
         }
-    }, [isBreak, settings, audioContext]);
+    }, [settings, isBreak]);
 
     // Modifier startNewPomodoro pour inclure le type de pause
     const startNewPomodoro = async (type: 'work' | 'break' | 'long_break' = 'work') => {
@@ -575,11 +585,14 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         handleTimerComplete();
     };
 
+    // Modifier handleButtonClick pour gérer tous les boutons
     const handleButtonClick = (event: React.FormEvent<HTMLButtonElement>) => {
         const action = event.currentTarget.name;
         switch (action) {
             case 'start':
-                if (!isActive) {
+                if (isActive) {
+                    setIsActive(false);
+                } else {
                     startNewPomodoro(isBreak ? 'break' : 'work');
                 }
                 break;
@@ -587,7 +600,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 setIsActive(false);
                 break;
             case 'skip':
-                skipCurrentInterval();
+                if (isActive) {
+                    skipCurrentInterval();
+                }
+                break;
+            case 'settings':
+                setSettingsOpen(true);
                 break;
         }
     };
@@ -719,7 +737,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
-                                    name="start"
+                                    name={isActive ? 'pause' : 'start'}
                                     onClick={handleButtonClick}
                                     disabled={!activeTaskId}
                                     size="lg"
@@ -728,14 +746,14 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                         isActive
                                             ? "bg-blue-500/80 hover:bg-blue-600/80 shadow-blue-500/20"
                                             : "bg-blue-500/60 hover:bg-blue-500/80 shadow-blue-500/10",
-                                        activeTaskId && "opacity-50"
+                                        !activeTaskId && "opacity-50"
                                     )}
                                 >
                                     {isActive ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                {activeTaskId ? 'Select a task first' : `Space to ${isActive ? 'Pause' : 'Start'}`}
+                                {!activeTaskId ? 'Select a task first' : isActive ? 'Pause' : 'Start'}
                             </TooltipContent>
                         </Tooltip>
                         <Tooltip>
@@ -746,13 +764,16 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     disabled={!activeTaskId || !isActive}
                                     variant="outline"
                                     size="lg"
-                                    className="border-white/10 hover:border-white/20 hover:bg-white/5"
+                                    className={cn(
+                                        "border-white/10 hover:border-white/20 hover:bg-white/5",
+                                        (!activeTaskId || !isActive) && "opacity-50"
+                                    )}
                                 >
                                     <SkipForwardIcon className="h-6 w-6" />
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                Press 'S' to Skip
+                                Skip current interval (S)
                             </TooltipContent>
                         </Tooltip>
                         <Tooltip>
