@@ -52,10 +52,11 @@ interface PomodoroTimerProps {
 }
 
 export function PomodoroTimer({ }: PomodoroTimerProps) {
-    const [time, setTime] = useState(25 * 60);
-    const [isActive, setIsActive] = useState(false);
-    const [isBreak, setIsBreak] = useState(false);
-    const [settings, setSettings] = useState<PomodoroSettings | null>({
+  const [time, setTime] = useState(25 * 60);
+  const [isActive, setIsActive] = useState(false);
+  const [isBreak, setIsBreak] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
+  const [settings, setSettings] = useState<PomodoroSettings | null>({
         work_duration: 25,
         break_duration: 5,
         daily_goal: 8,
@@ -581,7 +582,11 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     };
 
     return (
-        <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate700/30 shadow-2xl">
+        <Card className={`p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm ${
+          theme === 'dark' ? 'bg-slate-900/90 border-slate700/30' : 
+          theme === 'light' ? 'bg-white/90 border-slate-200/30' : 
+          'dark:bg-slate-900/90 dark:border-slate700/30 bg-white/90 border-slate-200/30'
+        } shadow-2xl`}>
             <div className="pomodoro-timer space-y-6 md:space-y-8">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full shadow-lg">
                     <div className="flex items-center gap-2">
