@@ -455,15 +455,14 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         setTasks(prevTasks =>
             prevTasks.map(task => {
                 if (task.id === id) {
+                    // Only update metrics when manually completing a task
                     const updatedTask = { 
                         ...task, 
-                        completed: !task.completed,
-                        metrics: {
-                            ...task.metrics,
-                            completedPomodoros: task.completed ? task.metrics.completedPomodoros : task.metrics.completedPomodoros + 1,
-                            currentStreak: task.completed ? task.metrics.currentStreak : task.metrics.currentStreak + 1
-                        }
+                        completed: !task.completed 
                     };
+                    // Save to localStorage immediately after update
+                    const updatedTasks = prevTasks.map(t => t.id === id ? updatedTask : t);
+                    localStorage.setItem('pomodoroTasks', JSON.stringify(updatedTasks));
                     return updatedTask;
                 }
                 return task;
@@ -585,13 +584,11 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     }, [time, isActive, isBreak, settings, playSessionEndSound]);
 
     const handleTimerComplete = useCallback(async () => {
-        if (!settings) return;
-
         try {
             setIsActive(false);
             
             // Play sound first
-            if (settings.sound_enabled) {
+            if (settings && settings.sound_enabled) {
                 playSessionEndSound();
             }
 
@@ -600,56 +597,53 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 setCurrentPomodoroId(null);
             }
 
-            // Update metrics for focus time only
+            // Only update metrics for focus sessions, not breaks
             if (!isBreak && activeTaskId) {
-                const newPomodoroCount = pomodoroCount + 1;
-                setPomodoroCount(newPomodoroCount);
+                const workDuration = settings?.work_duration || 25;
                 
-                setTasks(prev => prev.map(task => {
-                    if (task.id === activeTaskId) {
-                        const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
-                        const newTotalMinutes = task.metrics.totalMinutes + settings.work_duration;
-                        
-                        // Update streak to match completed pomodoros
-                        const updatedMetrics = {
-                            ...task.metrics,
-                            completedPomodoros: newCompletedPomodoros,
-                            totalMinutes: newTotalMinutes,
-                            currentStreak: newCompletedPomodoros // Streak matches completed pomodoros
-                        };
-
-                        // Check if daily goal is reached
-                        if (settings && settings.daily_goal !== undefined && newCompletedPomodoros >= settings.daily_goal && !task.completed) {
-                            playGoalAchievedSound();
+                setTasks(prev => {
+                    const updatedTasks = prev.map(task => {
+                        if (task.id === activeTaskId) {
+                            const newMetrics = {
+                                ...task.metrics,
+                                totalMinutes: task.metrics.totalMinutes + workDuration,
+                                completedPomodoros: task.metrics.completedPomodoros + 1,
+                                currentStreak: task.metrics.currentStreak + 1
+                            };
+                            
                             return {
                                 ...task,
-                                completed: true,
-                                metrics: updatedMetrics
+                                metrics: newMetrics,
+                                // Don't auto-complete the task, let user do it manually
+                                completed: task.completed
                             };
                         }
-
-                        return {
-                            ...task,
-                            metrics: updatedMetrics
-                        };
-                    }
-                    return task;
-                }));
-
-                // Update localStorage
-                localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
+                        return task;
+                    });
+                    
+                    // Save to localStorage immediately
+                    localStorage.setItem('pomodoroTasks', JSON.stringify(updatedTasks));
+                    return updatedTasks;
+                });
             }
 
-            // Start break
-            if (settings.auto_start_breaks) {
+            // Handle break timer
+            if (settings?.auto_start_breaks && !isBreak) {
                 setIsBreak(true);
                 setTime(settings.break_duration * 60);
                 setIsActive(true);
+            } else if (isBreak) {
+                // After break, start new work session
+                setIsBreak(false);
+                setTime(settings?.work_duration ? settings.work_duration * 60 : 25 * 60);
+                if (settings?.auto_start_pomodoros) {
+                    setIsActive(true);
+                }
             }
         } catch (error) {
             console.error('Error handling timer complete:', error);
         }
-    }, [settings, isBreak, activeTaskId, pomodoroCount, tasks]);
+    }, [settings, isBreak, activeTaskId, playSessionEndSound]);
 
     const playNotificationSound = useCallback(async () => {
         if (!settings?.sound_enabled) return;
