@@ -298,6 +298,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     const parsedState = JSON.parse(savedState);
                     const storedTimestamp = parseInt(localStorage.getItem('pomodoroLastTimestamp') || Date.now().toString());
                     const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
+                    
                     if (parsedState.isActive && elapsedSeconds > 0) {
                         const adjustedTime = Math.max(0, parsedState.time - elapsedSeconds);
                         setTime(adjustedTime);
@@ -385,10 +386,9 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         if (savedState) {
             const state = JSON.parse(savedState);
             const lastUpdate = new Date(state.lastUpdate);
-            const now = new Date('2024-12-28T19:09:01+01:00');
+            const now = new Date('2024-12-28T19:17:20+01:00');
             const elapsedSeconds = Math.floor((now.getTime() - lastUpdate.getTime()) / 1000);
             
-            // Only restore state if it's from the current session
             if (state.currentPomodoroId === currentPomodoroId) {
                 const newTime = Math.max(0, state.time - (state.isActive ? elapsedSeconds : 0));
                 setTime(newTime);
@@ -453,9 +453,21 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
     const toggleTask = (id: string) => {
         setTasks(prevTasks =>
-            prevTasks.map(task =>
-                task.id === id ? { ...task, completed: !task.completed } : task
-            )
+            prevTasks.map(task => {
+                if (task.id === id) {
+                    const updatedTask = { 
+                        ...task, 
+                        completed: !task.completed,
+                        metrics: {
+                            ...task.metrics,
+                            completedPomodoros: task.completed ? task.metrics.completedPomodoros : task.metrics.completedPomodoros + 1,
+                            currentStreak: task.completed ? task.metrics.currentStreak : task.metrics.currentStreak + 1
+                        }
+                    };
+                    return updatedTask;
+                }
+                return task;
+            })
         );
     };
 
@@ -810,6 +822,23 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     };
 
+    // Save state whenever important values change
+    useEffect(() => {
+        const state = {
+            time,
+            isActive,
+            isBreak,
+            currentPomodoroId,
+            lastUpdate: new Date('2024-12-28T19:17:20+01:00').toISOString()
+        };
+        localStorage.setItem('pomodoroState', JSON.stringify(state));
+    }, [time, isActive, isBreak, currentPomodoroId]);
+
+    // Save tasks whenever they change
+    useEffect(() => {
+        localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
+    }, [tasks]);
+
     return (
         <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate700/30 shadow-2xl">
             <div className="pomodoro-timer space-y-6 md:space-y-8">
@@ -1025,9 +1054,9 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 }
 
 function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; isActive: boolean; totalTime: number; isBreak: boolean }) {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-    const progress = ((totalTime - time) / totalTime) * 100;
+    const minutes = Math.floor(time / 60) || 0;
+    const seconds = time % 60 || 0;
+    const progress = totalTime > 0 ? ((totalTime - time) / totalTime) * 100 : 0;
     const circumference = 2 * Math.PI * 120;
     
     // État local pour suivre le type de période
