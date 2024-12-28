@@ -495,11 +495,28 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     const playNotificationSound = useCallback(async () => {
         try {
             if (settings?.sound_enabled) {
-                // Utiliser l'élément audio pour le son
+                // Ensure audio context is ready
+                if (!audioContext) {
+                    const newAudioContext = new AudioContext();
+                    setAudioContext(newAudioContext);
+                }
+                
+                // Use both notification sound and beep
                 NOTIFICATION_SOUND.currentTime = 0;
                 await NOTIFICATION_SOUND.play();
+                
+                // Add a short beep sound
+                if (audioContext) {
+                    const oscillator = audioContext.createOscillator();
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                    oscillator.connect(audioContext.destination);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                    setOscillator(oscillator);
+                }
 
-                // Notifications du système
+                // System notifications
                 if (settings.notification_enabled && Notification.permission === 'granted') {
                     new Notification('Pomodoro Timer', {
                         body: isBreak ? 'Break time is over!' : 'Time to take a break!',
@@ -510,7 +527,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         } catch (error) {
             console.error('Error playing sound:', error);
         }
-    }, [settings, isBreak]);
+    }, [settings, isBreak, audioContext]);
 
     // Modifier startNewPomodoro pour inclure le type de pause
     const startNewPomodoro = async (type: 'work' | 'break' | 'long_break' = 'work') => {
@@ -807,7 +824,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     </Button>
                 </div>
                 {activeTaskId && (
-                    <TaskProgress task={tasks.find(t => t.id === activeTaskId)!} />
+                    <TaskProgress task={tasks.find(t => t.id === activeTaskId)!} settings={settings} />
                 )}
                 <PomodoroSettingsDialog
                 open={settingsOpen}
@@ -917,8 +934,8 @@ function TimerDisplay({ time, isActive, totalTime, isBreak, theme }: TimerDispla
     );
   }
 
-function TaskProgress({ task }: { task: Task }) {
-    const { streakPercentage, dailyGoalPercentage } = getProgressStats(task);
+function TaskProgress({ task, settings }: { task: Task; settings: PomodoroSettings | null }) {
+    const { streakPercentage, dailyGoalPercentage } = getProgressStats(task, settings);
     return (
         <div className="p-6 rounded-xl bg-blue-600/20 border border-blue-400/30 shadow-lg">
             <div className="flex items-center justify-between mb-4">
@@ -973,8 +990,8 @@ function TaskProgress({ task }: { task: Task }) {
     );
 }
 
-function getProgressStats(task: Task) {
-    const dailyGoal = 4; // default daily goal
+function getProgressStats(task: Task, settings: PomodoroSettings | null) {
+    const dailyGoal = settings?.daily_goal || 8;
     const streakPercentage = Math.min((task.metrics.currentStreak / 4) * 100, 100);
     const dailyGoalPercentage = Math.min((task.metrics.completedPomodoros / dailyGoal) * 100, 100);
     return { streakPercentage, dailyGoalPercentage };
