@@ -231,56 +231,26 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
     // Initialize audio context
     useEffect(() => {
-        let context: AudioContext | null = null;
-        
-        const initAudio = async () => {
-            if (settings?.sound_enabled) {
-                try {
-                    // Try to reuse existing context if possible
-                    if (audioContextState && audioContextState.state !== 'closed') {
-                        context = audioContextState;
-                    } else {
-                        context = new (window.AudioContext || (window as any).webkitAudioContext)();
-                    }
-                    await context.resume();
-                    setAudioContextState(context);
-                    setSoundEnabledState(true);
-                } catch (error) {
-                    console.error('Failed to create audio context:', error);
-                    setSoundEnabledState(false);
-                }
-            } else {
-                setSoundEnabledState(false);
-            }
-        };
+        if (settings?.sound_enabled && !audioContextState) {
+            const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+            setAudioContextState(context);
+        }
+    }, [settings?.sound_enabled, audioContextState]);
 
-        initAudio();
+    const playSessionEndSound = useCallback(() => {
+        // Different sounds for focus and break
+        if (isBreak) {
+            playSound(392, 0.3); // G4 - gentler sound for break end
+        } else {
+            playSound(523.25, 0.3); // C5 - brighter sound for focus end
+        }
+    }, [isBreak, playSound]);
 
-        const handleVisibilityChange = async () => {
-            if (document.visibilityState === 'visible' && context) {
-                await context.resume();
-            }
-        };
-
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-
-        return () => {
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-            if (context && context !== audioContextState) {
-                if (activeOscillatorState || activeGainNodeState) {
-                    stopSound();
-                }
-                context.close().catch(console.error);
-            }
-        };
-    }, [settings?.sound_enabled, stopSound, activeOscillatorState, activeGainNodeState, audioContextState]);
-
-    // Timer completion handler
     const handleTimerComplete = useCallback(async () => {
         try {
             // Play completion sound if enabled
             if (settings?.sound_enabled && audioContextState && Date.now() - lastSoundTime > 1000) {
-                await playSound(440, 0.2);
+                playSessionEndSound();
                 setLastSoundTime(Date.now());
             }
 
@@ -335,110 +305,27 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         isBreak, settings, audioContextState, lastSoundTime,
         activeTaskId, currentPomodoroId, pomodoroCount,
         tasks, streak, completePomodoro, getPomodoroStats,
-        playSound
+        playSessionEndSound
     ]);
 
-    // Handle visibility change and page refresh
+    // Timer countdown effect
     useEffect(() => {
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'hidden') {
-                // Store the current state and timestamp when tab becomes hidden
-                const stateToStore = {
-                    time,
-                    isActive,
-                    isBreak,
-                    currentPomodoroId,
-                    activeTaskId,
-                    timestamp: Date.now(),
-                    settings
-                };
-                localStorage.setItem('pomodoroBackgroundState', JSON.stringify(stateToStore));
-            } else if (document.visibilityState === 'visible') {
-                // Restore state and calculate elapsed time when tab becomes visible
-                const storedState = localStorage.getItem('pomodoroBackgroundState');
-                if (storedState) {
-                    const parsedState = JSON.parse(storedState);
-                    if (parsedState.isActive) {
-                        const elapsedSeconds = Math.floor((Date.now() - parsedState.timestamp) / 1000);
-                        const newTime = Math.max(0, parsedState.time - elapsedSeconds);
-                        
-                        setTime(newTime);
-                        // Only set active if there's still time remaining
-                        setIsActive(newTime > 0);
-                        setIsBreak(parsedState.isBreak);
-                        setCurrentPomodoroId(parsedState.currentPomodoroId);
-                        setActiveTaskId(parsedState.activeTaskId);
-                        
-                        // Only handle timer complete if we just reached zero
-                        if (newTime === 0 && parsedState.time > 0) {
-                            handleTimerComplete();
-                        }
-                    }
-                }
-            }
-        };
-
-        // Handle initial page load
-        const loadInitialState = () => {
-            const storedState = localStorage.getItem('pomodoroBackgroundState');
-            if (storedState) {
-                const parsedState = JSON.parse(storedState);
-                if (parsedState.isActive) {
-                    const elapsedSeconds = Math.floor((Date.now() - parsedState.timestamp) / 1000);
-                    const newTime = Math.max(0, parsedState.time - elapsedSeconds);
-                    
-                    setTime(newTime);
-                    // Only set active if there's still time remaining
-                    setIsActive(newTime > 0);
-                    setIsBreak(parsedState.isBreak);
-                    setCurrentPomodoroId(parsedState.currentPomodoroId);
-                    setActiveTaskId(parsedState.activeTaskId);
-                    
-                    // Only handle timer complete if we just reached zero
-                    if (newTime === 0 && parsedState.time > 0) {
-                        handleTimerComplete();
-                    }
-                }
-            }
-        };
-
-        // Load state on mount
-        loadInitialState();
-
-        // Add visibility change listener
-        document.addEventListener('visibilitychange', handleVisibilityChange);
+        let interval: NodeJS.Timeout;
+        
+        if (isActive && time > 0) {
+            interval = setInterval(() => {
+                setTime((prevTime) => prevTime - 1);
+            }, 1000);
+        } else if (time === 0 && isActive) {
+            handleTimerComplete();
+        }
         
         return () => {
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            if (interval) {
+                clearInterval(interval);
+            }
         };
-    }, [time, isActive, isBreak, currentPomodoroId, activeTaskId, settings, handleTimerComplete]);
-
-    const playTimerSound = useCallback(() => {
-        if (!settings?.sound_enabled) return;
-        
-        const now = Date.now();
-        if (now - lastSoundTime < 1000) return;
-        setLastSoundTime(now);
-        
-        const audio = new Audio('/notification.mp3');
-        audio.play().catch(console.error);
-        
-        if (settings?.notification_enabled && Notification.permission === 'granted') {
-            new Notification('Pomodoro Timer', {
-                body: isBreak ? 'Break time is over!' : 'Time to take a break!',
-                icon: '/favicon.ico'
-            });
-        }
-    }, [settings, isBreak, lastSoundTime]);
-
-    const playSessionEndSound = useCallback(() => {
-        // Different sounds for focus and break
-        if (isBreak) {
-            playSound(392, 0.3); // G4 - gentler sound for break end
-        } else {
-            playSound(523.25, 0.3); // C5 - brighter sound for focus end
-        }
-    }, [isBreak, playSound]);
+    }, [isActive, time, handleTimerComplete]);
 
     useEffect(() => {
         if (time === 0 && isActive) {
