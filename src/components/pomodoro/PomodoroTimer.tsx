@@ -90,6 +90,9 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     const { user } = useAuth();
     const [streak, setStreak] = useState(0);
     const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+    const [soundEnabled, setSoundEnabled] = useState(settings?.sound_enabled || false);
+    const [activeOscillator, setActiveOscillator] = useState<OscillatorNode | null>(null);
+    const [activeGainNode, setActiveGainNode] = useState<GainNode | null>(null);
     const [oscillator, setOscillator] = useState<OscillatorNode | null>(null);
     const [isCompleted, setIsCompleted] = useState(false);
     const [pomodoroCount, setPomodoroCount] = useState(0); // Ajouter ce state
@@ -126,41 +129,119 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
     // Initialize audio context
     useEffect(() => {
-        if (settings?.sound_enabled) {
+        if (settings?.sound_enabled && !audioContext) {
             const context = new (window.AudioContext || (window as any).webkitAudioContext)();
             setAudioContext(context);
+            setSoundEnabled(true);
             return () => {
                 context.close();
             };
+        } else if (!settings?.sound_enabled && audioContext) {
+            audioContext.close();
+            setAudioContext(null);
+            setSoundEnabled(false);
         }
     }, [settings?.sound_enabled]);
 
-    const playGoalAchievedSound = useCallback(async (context: AudioContext) => {
-        if (!settings?.sound_enabled) return;
+    // Cleanup sound when component unmounts
+    useEffect(() => {
+        return () => {
+            if (activeOscillator) {
+                activeOscillator.stop();
+                activeOscillator.disconnect();
+            }
+            if (activeGainNode) {
+                activeGainNode.disconnect();
+            }
+            if (audioContext) {
+                audioContext.close();
+            }
+        };
+    }, []);
+
+    const stopSound = useCallback(() => {
+        if (activeOscillator) {
+            activeOscillator.stop();
+            activeOscillator.disconnect();
+            setActiveOscillator(null);
+        }
+        if (activeGainNode) {
+            activeGainNode.disconnect();
+            setActiveGainNode(null);
+        }
+    }, [activeOscillator, activeGainNode]);
+
+    const playSound = useCallback(async (frequency: number = 440, duration: number = 0.5) => {
+        if (!soundEnabled || !audioContext) return;
         
         try {
-            const oscillator = context.createOscillator();
-            const gainNode = context.createGain();
+            // Stop any existing sound
+            stopSound();
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
             
             oscillator.connect(gainNode);
-            gainNode.connect(context.destination);
+            gainNode.connect(audioContext.destination);
             
-            // Configure sound
             oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(880, context.currentTime); // A5 note
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
             
-            // Configure volume envelope
-            gainNode.gain.setValueAtTime(0, context.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.5, context.currentTime + 0.1);
-            gainNode.gain.linearRampToValueAtTime(0, context.currentTime + 0.5);
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
             
-            // Play sound
-            oscillator.start();
-            oscillator.stop(context.currentTime + 0.5);
+            setActiveOscillator(oscillator);
+            setActiveGainNode(gainNode);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+            
+            // Cleanup after duration
+            setTimeout(() => {
+                stopSound();
+            }, duration * 1000 + 100);
+            
         } catch (error) {
             console.error('Error playing sound:', error);
+            stopSound();
         }
-    }, [settings?.sound_enabled]);
+    }, [soundEnabled, audioContext, stopSound]);
+
+    const playGoalAchievedSound = useCallback(async () => {
+        if (!soundEnabled || !audioContext) return;
+        
+        try {
+            // Stop any existing sound
+            stopSound();
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + 0.1);
+            gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.5);
+            
+            setActiveOscillator(oscillator);
+            setActiveGainNode(gainNode);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+            
+            // Cleanup after duration
+            setTimeout(() => {
+                stopSound();
+            }, 600);
+        } catch (error) {
+            console.error('Error playing sound:', error);
+            stopSound();
+        }
+    }, [soundEnabled, audioContext, stopSound]);
 
     const handleTimerComplete = useCallback(async () => {
         console.log('Starting timer completion...');
@@ -171,7 +252,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         try {
             // Play sound if enabled and enough time has passed since last sound
             if (settings?.sound_enabled && audioContext && Date.now() - lastSoundTime > 1000) {
-                await playGoalAchievedSound(audioContext);
+                await playGoalAchievedSound();
                 setLastSoundTime(Date.now());
             }
 
@@ -305,11 +386,16 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     setTime(duration * 60);
                 }
                 setIsActive(prev => !prev);
+                // Stop sound when pausing
+                if (isActive) {
+                    stopSound();
+                }
                 break;
                 
             case 'reset':
-                // Stop the timer
+                // Stop the timer and sound
                 setIsActive(false);
+                stopSound();
                 
                 // Reset to current mode duration
                 const duration = !isBreak 
@@ -326,7 +412,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 setSettingsOpen(true);
                 break;
         }
-    }, [time, isBreak, settings, handleTimerComplete]);
+    }, [time, isBreak, settings, handleTimerComplete, stopSound, isActive]);
 
     // Timer logic with Web Worker
     useEffect(() => {
@@ -740,36 +826,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             });
         }
     }, [settings, isBreak, lastSoundTime]);
-
-    const playSound = useCallback(async (frequency: number = 440, duration: number = 0.5) => {
-        if (!settings?.sound_enabled) return;
-        
-        try {
-            const context = new (window.AudioContext || (window as any).webkitAudioContext)();
-            const oscillator = context.createOscillator();
-            const gainNode = context.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(context.destination);
-            
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(frequency, context.currentTime);
-            
-            gainNode.gain.setValueAtTime(0.1, context.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + duration);
-            
-            oscillator.start(context.currentTime);
-            oscillator.stop(context.currentTime + duration);
-            
-            // Clean up
-            setTimeout(() => {
-                context.close();
-            }, duration * 1000 + 500);
-            
-        } catch (error) {
-            console.error('Error playing sound:', error);
-        }
-    }, [settings]);
 
     const playSessionEndSound = useCallback(() => {
         // Different sounds for focus and break
@@ -1432,4 +1488,3 @@ function PomodoroSettingsDialogComponent({
     );
 }
 export default PomodoroTimer;
-
