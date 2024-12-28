@@ -134,15 +134,13 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 if (e.data.type === 'tick' && !isCompleting) {
                     setTime(prevTime => {
                         const newTime = Math.max(0, prevTime - 1);
-                        if (newTime === 0 && isActive && !isCompleting) {
+                        // Check if timer just reached zero
+                        if (newTime === 0 && prevTime > 0 && isActive && !isCompleting) {
                             worker.postMessage({ command: 'stop' });
                             setIsCompleting(true);
-                            // Use setTimeout to avoid state update during render
-                            completionTimeout = setTimeout(() => {
-                                handleTimerComplete().finally(() => {
-                                    setIsCompleting(false);
-                                });
-                            }, 100);
+                            handleTimerComplete().finally(() => {
+                                setIsCompleting(false);
+                            });
                         }
                         return newTime;
                     });
@@ -170,14 +168,11 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 clearTimeout(completionTimeout);
             }
         };
-    }, [isActive, time, isCompleting]);
+    }, [isActive, time, isCompleting, handleTimerComplete]);
 
     const handleTimerComplete = useCallback(async () => {
         // Prevent multiple executions
         if (isCompleting) return;
-        
-        // Immediately stop the timer
-        setIsActive(false);
 
         try {
             // Play sound if enabled and enough time has passed since last sound
@@ -197,20 +192,24 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         const updatedTasks = prevTasks.map(task => {
                             if (task.id === activeTaskId) {
                                 const workDuration = settings?.work_duration || 25;
-                                return {
+                                const updatedMetrics = {
+                                    totalMinutes: (task.metrics?.totalMinutes || 0) + workDuration,
+                                    completedPomodoros: (task.metrics?.completedPomodoros || 0) + 1,
+                                    currentStreak: (task.metrics?.currentStreak || 0) + 1
+                                };
+                                
+                                const updatedTask = {
                                     ...task,
                                     completed: true,
-                                    metrics: {
-                                        totalMinutes: (task.metrics?.totalMinutes || 0) + workDuration,
-                                        completedPomodoros: (task.metrics?.completedPomodoros || 0) + 1,
-                                        currentStreak: (task.metrics?.currentStreak || 0) + 1
-                                    }
+                                    metrics: updatedMetrics
                                 };
+                                
+                                return updatedTask;
                             }
                             return task;
                         });
                         
-                        // Save to localStorage
+                        // Save to localStorage immediately
                         localStorage.setItem('pomodoroTasks', JSON.stringify(updatedTasks));
                         return updatedTasks;
                     });
@@ -240,6 +239,9 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     description: "Ready to focus again?",
                 });
             }
+
+            // Stop the timer first
+            setIsActive(false);
 
             // Prepare next session
             const nextIsBreak = !isBreak;
@@ -278,7 +280,8 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         isBreak, settings, audioContext, lastSoundTime,
         activeTaskId, currentPomodoroId, pomodoroCount,
         updateStreak, completePomodoro, getPomodoroStats,
-        isCompleting
+        isCompleting, setTime, setIsActive, setIsBreak,
+        toast
     ]);
 
     // Sync with Supabase periodically
