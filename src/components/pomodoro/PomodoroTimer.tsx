@@ -777,16 +777,16 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     className={cn(
                                         "w-24 transition-all duration-300 shadow-lg",
                                         isActive
-                                            ? "bg-blue-500/80 hover:bg-blue-600/80 shadow-blue-500/20"
-                                            : "bg-blue-500/60 hover:bg-blue-500/80 shadow-blue-500/10",
-                                        !activeTaskId && "opacity-50"
+                                            ? "bg-blue-600 hover:bg-blue-700 shadow-blue-600/30"
+                                            : "bg-blue-500 hover:bg-blue-600 shadow-blue-500/20",
+                                        !activeTaskId && "bg-gray-400 hover:bg-gray-400 cursor-not-allowed"
                                     )}
                                 >
                                     {isActive ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                {!activeTaskId ? 'Select a task first' : isActive ? 'Pause' : 'Start'}
+                                {!activeTaskId ? 'Select a task first' : isActive ? 'Pause timer (Space)' : 'Start timer (Space)'}
                             </TooltipContent>
                         </Tooltip>
                         <Tooltip>
@@ -798,15 +798,16 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     variant="outline"
                                     size="lg"
                                     className={cn(
-                                        "border-white/10 hover:border-white/20 hover:bg-white/5",
-                                        (!activeTaskId || !isActive) && "opacity-50"
+                                        "border-blue-500/50 hover:border-blue-600/70 hover:bg-blue-500/10",
+                                        "text-blue-500 hover:text-blue-600",
+                                        (!activeTaskId || !isActive) && "border-gray-400/50 text-gray-400 hover:bg-transparent hover:border-gray-400/50 cursor-not-allowed"
                                     )}
                                 >
                                     <SkipForwardIcon className="h-6 w-6" />
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                Skip current interval (S)
+                                {!activeTaskId ? 'Select a task first' : !isActive ? 'Timer not running' : 'Skip to next interval (S)'}
                             </TooltipContent>
                         </Tooltip>
                         <Tooltip>
@@ -816,13 +817,13 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     onClick={handleButtonClick}
                                     variant="outline"
                                     size="lg"
-                                    className="border-white/10 hover:border-white/20 hover:bg-white/5"
+                                    className="border-blue-500/50 hover:border-blue-600/70 hover:bg-blue-500/10 text-blue-500 hover:text-blue-600"
                                 >
                                     <Settings2Icon className="h-6 w-6" />
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                Settings
+                                Configure Pomodoro settings
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
