@@ -1217,3 +1217,4 @@ function PomodoroSettingsDialogComponent({
 }
 
 export default PomodoroTimer;
+ 
