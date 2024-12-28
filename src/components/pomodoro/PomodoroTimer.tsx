@@ -136,20 +136,25 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             updateStreak();
             setPomodoroCount(prev => prev + 1);
             
-            // Update task metrics
+            // Update task metrics and mark as complete
             if (activeTaskId) {
                 setTasks(prevTasks =>
                     prevTasks.map(task => {
                         if (task.id === activeTaskId) {
                             const workDuration = settings?.work_duration || 25;
-                            return {
+                            const updatedTask = {
                                 ...task,
+                                completed: true,
                                 metrics: {
                                     totalMinutes: task.metrics.totalMinutes + workDuration,
                                     completedPomodoros: task.metrics.completedPomodoros + 1,
                                     currentStreak: task.metrics.currentStreak + 1
                                 }
                             };
+                            // Save to localStorage immediately
+                            const updatedTasks = prevTasks.map(t => t.id === activeTaskId ? updatedTask : t);
+                            localStorage.setItem('pomodoroTasks', JSON.stringify(updatedTasks));
+                            return updatedTask;
                         }
                         return task;
                     })
@@ -346,126 +351,105 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         };
     }, [isActive, handleTimerComplete]);
 
-    // Handle visibility change
-    const handleVisibilityChange = useCallback(() => {
-        if (document.visibilityState === 'hidden') {
-            localStorage.setItem('pomodoroLastTimestamp', Date.now().toString());
-            localStorage.setItem('pomodoroTimerState', JSON.stringify({
-                time,
-                isActive,
-                isBreak,
-                currentPomodoroId
-            }));
-        } else {
-            try {
-                const savedState = localStorage.getItem('pomodoroTimerState');
-                if (savedState) {
-                    const parsedState = JSON.parse(savedState);
-                    const storedTimestamp = parseInt(localStorage.getItem('pomodoroLastTimestamp') || Date.now().toString());
-                    const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
-                    
-                    if (parsedState.isActive && elapsedSeconds > 0) {
-                        const adjustedTime = Math.max(0, parsedState.time - (parsedState.isActive ? elapsedSeconds : 0));
-                        setTime(adjustedTime);
-                        if (adjustedTime === 0) {
+    // Handle visibility change and page refresh
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                // Store the current state and timestamp when tab becomes hidden
+                const stateToStore = {
+                    time,
+                    isActive,
+                    isBreak,
+                    currentPomodoroId,
+                    activeTaskId,
+                    timestamp: Date.now(),
+                    settings
+                };
+                localStorage.setItem('pomodoroBackgroundState', JSON.stringify(stateToStore));
+            } else if (document.visibilityState === 'visible') {
+                // Restore state and calculate elapsed time when tab becomes visible
+                const storedState = localStorage.getItem('pomodoroBackgroundState');
+                if (storedState) {
+                    const parsedState = JSON.parse(storedState);
+                    if (parsedState.isActive) {
+                        const elapsedSeconds = Math.floor((Date.now() - parsedState.timestamp) / 1000);
+                        const newTime = Math.max(0, parsedState.time - elapsedSeconds);
+                        
+                        setTime(newTime);
+                        setIsActive(true);
+                        setIsBreak(parsedState.isBreak);
+                        setCurrentPomodoroId(parsedState.currentPomodoroId);
+                        setActiveTaskId(parsedState.activeTaskId);
+                        
+                        // If timer completed while in background
+                        if (newTime === 0) {
                             handleTimerComplete();
                         }
                     }
                 }
-            } catch (error) {
-                console.error('Error handling visibility change:', error);
+            }
+        };
+
+        // Handle initial page load
+        const loadInitialState = () => {
+            const storedState = localStorage.getItem('pomodoroBackgroundState');
+            if (storedState) {
+                const parsedState = JSON.parse(storedState);
+                if (parsedState.isActive) {
+                    const elapsedSeconds = Math.floor((Date.now() - parsedState.timestamp) / 1000);
+                    const newTime = Math.max(0, parsedState.time - elapsedSeconds);
+                    
+                    setTime(newTime);
+                    setIsActive(true);
+                    setIsBreak(parsedState.isBreak);
+                    setCurrentPomodoroId(parsedState.currentPomodoroId);
+                    setActiveTaskId(parsedState.activeTaskId);
+                    
+                    // If timer completed while page was closed
+                    if (newTime === 0) {
+                        handleTimerComplete();
+                    }
+                }
+            }
+        };
+
+        // Load state on mount
+        loadInitialState();
+
+        // Add visibility change listener
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [time, isActive, isBreak, currentPomodoroId, activeTaskId, settings, handleTimerComplete]);
+
+    // Load persisted state function
+    const loadPersistedState = useCallback(() => {
+        const persistedState = localStorage.getItem(`pomodoroState-${currentPomodoroId}`);
+        if (persistedState) {
+            const parsedState = JSON.parse(persistedState);
+            const currentTime = new Date().getTime();
+            const timeDiff = Math.floor((currentTime - parsedState.timestamp) / 1000);
+            const newTime = Math.max(0, parsedState.time - timeDiff);
+            
+            setTime(newTime);
+            setIsActive(parsedState.isActive);
+            setIsBreak(parsedState.isBreak);
+            setCurrentPomodoroId(parsedState.currentPomodoroId);
+            setActiveTaskId(parsedState.activeTaskId);
+            
+            // If timer completed while page was closed
+            if (newTime === 0) {
+                handleTimerComplete();
             }
         }
-    }, [time, isActive, isBreak, currentPomodoroId]);
+    }, [currentPomodoroId, handleTimerComplete, setTime, setIsActive, setIsBreak, setCurrentPomodoroId, setActiveTaskId]);
 
     // Load persisted state on mount
     useEffect(() => {
-        const savedState = localStorage.getItem('pomodoroState');
-        if (savedState) {
-            const parsedState = JSON.parse(savedState);
-            const elapsedSeconds = Math.floor((Date.now() - new Date(parsedState.lastUpdate).getTime()) / 1000);
-            
-            // Always start with timer paused when loading
-            setIsActive(false);
-            
-            // If there was an active session, calculate remaining time
-            if (parsedState.isActive) {
-                const remainingTime = Math.max(0, parsedState.time - elapsedSeconds);
-                setTime(remainingTime);
-            } else {
-                setTime(parsedState.time);
-            }
-            
-            setIsBreak(parsedState.isBreak);
-            setCurrentPomodoroId(parsedState.currentPomodoroId);
-        }
-    }, []);
-
-    // Add state persistence with improved handling
-    useEffect(() => {
-        const saveState = () => {
-            const timerState = {
-                time,
-                isActive,
-                isBreak,
-                currentPomodoroId,
-                lastUpdate: new Date().toISOString()
-            };
-            localStorage.setItem('pomodoroState', JSON.stringify(timerState));
-        };
-
-        // Save state when component updates
-        saveState();
-
-        // Also save state before unload
-        window.addEventListener('beforeunload', saveState);
-        return () => window.removeEventListener('beforeunload', saveState);
-    }, [time, isActive, isBreak, currentPomodoroId]);
-
-    // Persist timer state to localStorage
-    useEffect(() => {
-        const timerState = {
-            time,
-            isActive,
-            isBreak,
-            currentPomodoroId,
-            lastUpdate: new Date().toISOString()
-        };
-        localStorage.setItem('pomodoroState', JSON.stringify(timerState));
-    }, [time, isActive, isBreak, currentPomodoroId]);
-
-    // Update document title with timer
-    useEffect(() => {
-        const minutes = Math.floor(time / 60);
-        const seconds = time % 60;
-        const timeString = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        document.title = isActive ? `${timeString} - ${isBreak ? 'Break' : 'Focus'} Time` : 'Pomodoro Timer';
-
-        return () => {
-            document.title = 'Pomodoro Timer';
-        };
-    }, [time, isActive, isBreak]);
-
-    const loadPersistedState = useCallback(() => {
-        const savedState = localStorage.getItem('pomodoroState');
-        if (savedState) {
-            const state = JSON.parse(savedState);
-            const lastUpdate = new Date(state.lastUpdate);
-            const now = new Date('2024-12-28T19:17:20+01:00');
-            const elapsedSeconds = Math.floor((now.getTime() - lastUpdate.getTime()) / 1000);
-            
-            if (state.currentPomodoroId === currentPomodoroId) {
-                const newTime = Math.max(0, state.time - (state.isActive ? elapsedSeconds : 0));
-                setTime(newTime);
-                setIsBreak(state.isBreak);
-                if (newTime === 0) {
-                    setIsActive(false);
-                } else {
-                    setIsActive(state.isActive);
-                }
-            }
-        }
-    }, [currentPomodoroId]);
+        loadPersistedState();
+    }, [currentPomodoroId, handleTimerComplete, setTime]);
 
     useEffect(() => {
         const handleVisibilityChange = () => {
