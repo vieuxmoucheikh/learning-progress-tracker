@@ -765,68 +765,46 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         theme={currentTheme}
                     />
                 </div>
-                <div className="flex justify-center gap-4">
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    name={isActive ? 'pause' : 'start'}
-                                    onClick={handleButtonClick}
-                                    disabled={!activeTaskId}
-                                    size="lg"
-                                    className={cn(
-                                        "w-24 transition-all duration-300 shadow-lg",
-                                        isActive
-                                            ? "bg-blue-600 hover:bg-blue-700 shadow-blue-600/30"
-                                            : "bg-blue-500 hover:bg-blue-600 shadow-blue-500/20",
-                                        !activeTaskId && "bg-gray-400 hover:bg-gray-400 cursor-not-allowed"
-                                    )}
-                                >
-                                    {isActive ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                {!activeTaskId ? 'Select a task first' : isActive ? 'Pause timer (Space)' : 'Start timer (Space)'}
-                            </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    name="skip"
-                                    onClick={handleButtonClick}
-                                    disabled={!activeTaskId || !isActive}
-                                    variant="outline"
-                                    size="lg"
-                                    className={cn(
-                                        "border-blue-500/50 hover:border-blue-600/70 hover:bg-blue-500/10",
-                                        "text-blue-500 hover:text-blue-600",
-                                        (!activeTaskId || !isActive) && "border-gray-400/50 text-gray-400 hover:bg-transparent hover:border-gray-400/50 cursor-not-allowed"
-                                    )}
-                                >
-                                    <SkipForwardIcon className="h-6 w-6" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                {!activeTaskId ? 'Select a task first' : !isActive ? 'Timer not running' : 'Skip to next interval (S)'}
-                            </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    name="settings"
-                                    onClick={handleButtonClick}
-                                    variant="outline"
-                                    size="lg"
-                                    className="border-blue-500/50 hover:border-blue-600/70 hover:bg-blue-500/10 text-blue-500 hover:text-blue-600"
-                                >
-                                    <Settings2Icon className="h-6 w-6" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                Configure Pomodoro settings
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+                <div className="flex justify-center gap-4 relative z-50">
+                    <Button
+                        name={isActive ? 'pause' : 'start'}
+                        onClick={handleButtonClick}
+                        disabled={!activeTaskId}
+                        size="lg"
+                        className={cn(
+                            "w-24 transition-all duration-300 shadow-lg",
+                            "text-white font-semibold",
+                            isActive
+                                ? "bg-blue-600 hover:bg-blue-700 shadow-blue-600/30 border-2 border-blue-700"
+                                : "bg-blue-500 hover:bg-blue-600 shadow-blue-500/20 border-2 border-blue-600",
+                            !activeTaskId && "bg-gray-400 hover:bg-gray-400 cursor-not-allowed border-gray-500"
+                        )}
+                    >
+                        {isActive ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
+                    </Button>
+                    <Button
+                        name="skip"
+                        onClick={handleButtonClick}
+                        disabled={!activeTaskId || !isActive}
+                        variant="outline"
+                        size="lg"
+                        className={cn(
+                            "border-blue-500/50 hover:border-blue-600/70 hover:bg-blue-500/10",
+                            "text-blue-500 hover:text-blue-600 font-semibold",
+                            (!activeTaskId || !isActive) && "border-gray-400/50 text-gray-400 hover:bg-transparent hover:border-gray-400/50 cursor-not-allowed"
+                        )}
+                    >
+                        <SkipForwardIcon className="h-6 w-6" />
+                    </Button>
+                    <Button
+                        name="settings"
+                        onClick={handleButtonClick}
+                        variant="outline"
+                        size="lg"
+                        className="border-blue-500/50 hover:border-blue-600/70 hover:bg-blue-500/10 text-blue-500 hover:text-blue-600 font-semibold"
+                    >
+                        <Settings2Icon className="h-6 w-6" />
+                    </Button>
                 </div>
                 {activeTaskId && (
                     <TaskProgress task={tasks.find(t => t.id === activeTaskId)!} />
