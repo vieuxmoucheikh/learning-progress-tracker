@@ -1401,5 +1401,5 @@ function PomodoroSettingsDialogComponent({
         </Dialog>
     );
 }
-
-export default PomodoroTimer;
+export default PomodoroTimer;   
+ 
