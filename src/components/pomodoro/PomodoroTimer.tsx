@@ -144,6 +144,73 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     }, [isBreak, streak]);
 
+    // Sync with Supabase periodically
+    useEffect(() => {
+        const syncWithServer = async () => {
+            if (!user) return;
+            
+            try {
+                // Only sync if we have an active pomodoro
+                if (currentPomodoroId && isActive) {
+                    const { error } = await supabase
+                        .from('pomodoros')
+                        .update({
+                            current_time: time,
+                            is_active: isActive,
+                            is_break: isBreak,
+                            last_update: new Date().toISOString()
+                        })
+                        .eq('id', currentPomodoroId);
+
+                    if (error) {
+                        console.error('Error syncing with Supabase:', error);
+                    }
+                }
+            } catch (error) {
+                console.error('Error in sync operation:', error);
+            }
+        };
+
+        const syncInterval = setInterval(syncWithServer, 10000); // Sync every 10 seconds
+        return () => clearInterval(syncInterval);
+    }, [user, currentPomodoroId, time, isActive, isBreak]);
+
+    // Load initial state from Supabase
+    useEffect(() => {
+        const loadFromServer = async () => {
+            if (!user) return;
+
+            try {
+                const { data: activePomodoro, error } = await supabase
+                    .from('pomodoros')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('completed', false)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+
+                if (error) {
+                    if (error.code !== 'PGRST116') { // No rows returned
+                        console.error('Error loading from Supabase:', error);
+                    }
+                    return;
+                }
+
+                if (activePomodoro) {
+                    setCurrentPomodoroId(activePomodoro.id);
+                    setIsBreak(activePomodoro.is_break);
+                    // Don't auto-start, just set the remaining time
+                    setTime(activePomodoro.current_time);
+                }
+            } catch (error) {
+                console.error('Error in initial load:', error);
+            }
+        };
+
+        loadFromServer();
+    }, [user]);
+
     // Synchronize timer state with server
     const syncWithSupabase = useCallback(async () => {
         try {
@@ -245,6 +312,50 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     }, [time, isActive, isBreak, currentPomodoroId]);
 
+    // Load persisted state on mount
+    useEffect(() => {
+        const savedState = localStorage.getItem('pomodoroState');
+        if (savedState) {
+            const parsedState = JSON.parse(savedState);
+            const elapsedSeconds = Math.floor((Date.now() - new Date(parsedState.lastUpdate).getTime()) / 1000);
+            
+            // Always start with timer paused when loading
+            setIsActive(false);
+            
+            // If there was an active session, calculate remaining time
+            if (parsedState.isActive) {
+                const remainingTime = Math.max(0, parsedState.time - elapsedSeconds);
+                setTime(remainingTime);
+            } else {
+                setTime(parsedState.time);
+            }
+            
+            setIsBreak(parsedState.isBreak);
+            setCurrentPomodoroId(parsedState.currentPomodoroId);
+        }
+    }, []);
+
+    // Add state persistence with improved handling
+    useEffect(() => {
+        const saveState = () => {
+            const timerState = {
+                time,
+                isActive,
+                isBreak,
+                currentPomodoroId,
+                lastUpdate: new Date().toISOString()
+            };
+            localStorage.setItem('pomodoroState', JSON.stringify(timerState));
+        };
+
+        // Save state when component updates
+        saveState();
+
+        // Also save state before unload
+        window.addEventListener('beforeunload', saveState);
+        return () => window.removeEventListener('beforeunload', saveState);
+    }, [time, isActive, isBreak, currentPomodoroId]);
+
     // Persist timer state to localStorage
     useEffect(() => {
         const timerState = {
@@ -256,94 +367,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         };
         localStorage.setItem('pomodoroState', JSON.stringify(timerState));
     }, [time, isActive, isBreak, currentPomodoroId]);
-
-    // Load persisted state on mount
-    useEffect(() => {
-        const savedState = localStorage.getItem('pomodoroState');
-        if (savedState) {
-            const parsedState = JSON.parse(savedState);
-            const elapsedSeconds = Math.floor((Date.now() - new Date(parsedState.lastUpdate).getTime()) / 1000);
-            if (parsedState.isActive) {
-                setTime(Math.max(0, parsedState.time - elapsedSeconds));
-            } else {
-                setTime(parsedState.time);
-            }
-            setIsActive(parsedState.isActive);
-            setIsBreak(parsedState.isBreak);
-            setCurrentPomodoroId(parsedState.currentPomodoroId);
-        }
-    }, []);
-
-    // Sync periodically
-    useEffect(() => {
-        const syncInterval = setInterval(syncWithSupabase, 5000);
-        return () => clearInterval(syncInterval);
-    }, [syncWithSupabase]);
-
-    // Add state persistence
-    const loadPersistedState = useCallback(async () => {
-        try {
-            // Get the current pomodoro if it exists
-            const user = await getCurrentUser();
-            if (!user) return;
-
-            const { data: pomodoros } = await supabase
-                .from('pomodoros')
-                .select('*')
-                .eq('user_id', user.id)
-                .eq('completed', false)
-                .order('start_time', { ascending: false })
-                .limit(1);
-
-            if (pomodoros && pomodoros.length > 0) {
-                const currentPomodoro = pomodoros[0];
-                setCurrentPomodoroId(currentPomodoro.id);
-                
-                // Calculate remaining time
-                const startTime = new Date(currentPomodoro.start_time);
-                const duration = currentPomodoro.type === 'break' 
-                    ? settings?.break_duration || 5
-                    : settings?.work_duration || 25;
-                const endTime = new Date(startTime.getTime() + duration * 60 * 1000);
-                const now = new Date();
-                const remainingTime = Math.max(0, Math.floor((endTime.getTime() - now.getTime()) / 1000));
-                
-                if (remainingTime > 0) {
-                    setTime(remainingTime);
-                    setIsBreak(currentPomodoro.type === 'break');
-                    setIsActive(true);
-                } else {
-                    // If time has expired, complete the pomodoro
-                    await completePomodoro(currentPomodoro.id);
-                    setCurrentPomodoroId(null);
-                }
-            }
-
-            // Load task state
-            if (activeTaskId) {
-                const { data: task } = await supabase
-                    .from('tasks')
-                    .select('*')
-                    .eq('id', activeTaskId)
-                    .single();
-                
-                if (task) {
-                    setTasks(prevTasks => {
-                        const updatedTasks = prevTasks.map(t => 
-                            t.id === task.id ? { ...t, ...task } : t
-                        );
-                        return updatedTasks;
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('Error loading persisted state:', error);
-        }
-    }, [settings, activeTaskId, setTime, setIsBreak, setIsActive, setCurrentPomodoroId, setTasks]);
-
-    useEffect(() => {
-        loadPersistedState();
-    }, [loadPersistedState]);
 
     // Update document title with timer
     useEffect(() => {
@@ -357,7 +380,28 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         };
     }, [time, isActive, isBreak]);
 
-    // Handle visibility change
+    const loadPersistedState = useCallback(() => {
+        const savedState = localStorage.getItem('pomodoroState');
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            const lastUpdate = new Date(state.lastUpdate);
+            const now = new Date('2024-12-28T19:09:01+01:00');
+            const elapsedSeconds = Math.floor((now.getTime() - lastUpdate.getTime()) / 1000);
+            
+            // Only restore state if it's from the current session
+            if (state.currentPomodoroId === currentPomodoroId) {
+                const newTime = Math.max(0, state.time - (state.isActive ? elapsedSeconds : 0));
+                setTime(newTime);
+                setIsBreak(state.isBreak);
+                if (newTime === 0) {
+                    setIsActive(false);
+                } else {
+                    setIsActive(state.isActive);
+                }
+            }
+        }
+    }, [currentPomodoroId]);
+
     useEffect(() => {
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible' && isActive) {
