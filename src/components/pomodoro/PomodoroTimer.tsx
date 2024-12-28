@@ -33,6 +33,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Clock } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { getCurrentUser } from '@/lib/database';
+import { RefreshCwIcon } from 'lucide-react';
 
 interface Task {
     id: string;
@@ -123,52 +124,43 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     }, [isBreak, streak]);
 
-    // Timer logic with Web Worker
+    // Initialize audio context
     useEffect(() => {
-        let workerInstance: Worker | undefined = undefined;
-        let completionTimeout: NodeJS.Timeout | undefined = undefined;
-        
-        const initializeWorker = () => {
-            const worker = new Worker(new URL('./timerWorker.js', import.meta.url));
-            worker.onmessage = (e) => {
-                if (e.data.type === 'tick') {
-                    setTime(prevTime => {
-                        const newTime = Math.max(0, prevTime - 1);
-                        // Only trigger completion if we're active and just hit zero
-                        if (newTime === 0 && prevTime > 0 && isActive) {
-                            worker.postMessage({ command: 'stop' });
-                            // Use setTimeout to avoid state update during render
-                            completionTimeout = setTimeout(() => {
-                                handleTimerComplete();
-                            }, 100);
-                        }
-                        return newTime;
-                    });
-                }
+        if (settings?.sound_enabled) {
+            const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+            setAudioContext(context);
+            return () => {
+                context.close();
             };
-            return worker;
-        };
-
-        // Initialize worker
-        workerInstance = initializeWorker();
-
-        // Control worker based on timer state
-        if (workerInstance && isActive && time > 0) {
-            workerInstance.postMessage({ command: 'start' });
-        } else if (workerInstance) {
-            workerInstance.postMessage({ command: 'stop' });
         }
+    }, [settings?.sound_enabled]);
 
-        // Cleanup function
-        return () => {
-            if (workerInstance) {
-                workerInstance.terminate();
-            }
-            if (completionTimeout) {
-                clearTimeout(completionTimeout);
-            }
-        };
-    }, [isActive, time]);
+    const playGoalAchievedSound = useCallback(async (context: AudioContext) => {
+        if (!settings?.sound_enabled) return;
+        
+        try {
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(context.destination);
+            
+            // Configure sound
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, context.currentTime); // A5 note
+            
+            // Configure volume envelope
+            gainNode.gain.setValueAtTime(0, context.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.5, context.currentTime + 0.1);
+            gainNode.gain.linearRampToValueAtTime(0, context.currentTime + 0.5);
+            
+            // Play sound
+            oscillator.start();
+            oscillator.stop(context.currentTime + 0.5);
+        } catch (error) {
+            console.error('Error playing sound:', error);
+        }
+    }, [settings?.sound_enabled]);
 
     const handleTimerComplete = useCallback(async () => {
         console.log('Starting timer completion...');
@@ -295,39 +287,138 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     }, [
         isBreak, settings, audioContext, lastSoundTime,
         activeTaskId, currentPomodoroId, pomodoroCount,
-        tasks, streak, completePomodoro, getPomodoroStats
+        tasks, streak, completePomodoro, getPomodoroStats,
+        playGoalAchievedSound
     ]);
 
-    // Sync with Supabase periodically
-    useEffect(() => {
-        const syncWithServer = async () => {
-            if (!user) return;
-            
-            try {
-                // Only sync if we have an active pomodoro
-                if (currentPomodoroId && isActive) {
-                    const { error } = await supabase
-                        .from('pomodoros')
-                        .update({
-                            current_time: time,
-                            is_active: isActive,
-                            is_break: isBreak,
-                            last_update: new Date().toISOString()
-                        })
-                        .eq('id', currentPomodoroId);
-
-                    if (error) {
-                        console.error('Error syncing with Supabase:', error);
-                    }
+    const onButtonClick = useCallback((event: React.FormEvent<HTMLButtonElement>) => {
+        const buttonName = event.currentTarget.name;
+        
+        switch (buttonName) {
+            case 'start':
+            case 'pause':
+                if (time === 0) {
+                    // Reset timer based on current mode
+                    const duration = !isBreak 
+                        ? settings?.work_duration || 25 
+                        : settings?.break_duration || 5;
+                    setTime(duration * 60);
                 }
-            } catch (error) {
-                console.error('Error in sync operation:', error);
-            }
+                setIsActive(prev => !prev);
+                break;
+                
+            case 'reset':
+                // Stop the timer
+                setIsActive(false);
+                
+                // Reset to current mode duration
+                const duration = !isBreak 
+                    ? settings?.work_duration || 25 
+                    : settings?.break_duration || 5;
+                setTime(duration * 60);
+                break;
+                
+            case 'skip':
+                handleTimerComplete();
+                break;
+                
+            case 'settings':
+                setSettingsOpen(true);
+                break;
+        }
+    }, [time, isBreak, settings, handleTimerComplete]);
+
+    // Timer logic with Web Worker
+    useEffect(() => {
+        let workerInstance: Worker | undefined = undefined;
+        let completionTimeout: NodeJS.Timeout | undefined = undefined;
+        
+        const initializeWorker = () => {
+            const worker = new Worker(new URL('./timerWorker.js', import.meta.url));
+            worker.onmessage = (e) => {
+                if (e.data.type === 'tick') {
+                    setTime(prevTime => {
+                        const newTime = Math.max(0, prevTime - 1);
+                        // Only trigger completion if we're active and just hit zero
+                        if (newTime === 0 && prevTime > 0 && isActive) {
+                            worker.postMessage({ command: 'stop' });
+                            // Use setTimeout to avoid state update during render
+                            completionTimeout = setTimeout(() => {
+                                handleTimerComplete();
+                            }, 100);
+                        }
+                        return newTime;
+                    });
+                }
+            };
+            return worker;
         };
 
-        const syncInterval = setInterval(syncWithServer, 10000); // Sync every 10 seconds
+        // Initialize worker
+        try {
+            workerInstance = initializeWorker();
+
+            // Control worker based on timer state
+            if (workerInstance && isActive && time > 0) {
+                workerInstance.postMessage({ command: 'start' });
+            } else if (workerInstance) {
+                workerInstance.postMessage({ command: 'stop' });
+            }
+        } catch (error) {
+            console.error('Error initializing timer worker:', error);
+            setIsActive(false);
+        }
+
+        // Cleanup function
+        return () => {
+            if (workerInstance) {
+                workerInstance.terminate();
+            }
+            if (completionTimeout) {
+                clearTimeout(completionTimeout);
+            }
+        };
+    }, [isActive, time]);
+
+    // Sync with Supabase periodically - with error handling
+    useEffect(() => {
+        const syncInterval = setInterval(async () => {
+            if (!isActive) return; // Only sync when timer is active
+            
+            try {
+                const response = await fetch('/api/sync', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        time,
+                        isActive,
+                        isBreak,
+                        currentPomodoroId,
+                        lastUpdate: Date.now(),
+                    }),
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                if (!data.sync && data.state) {
+                    setTime(data.state.time);
+                    setIsActive(data.state.isActive);
+                    setIsBreak(data.state.isBreak);
+                    setCurrentPomodoroId(data.state.currentPomodoroId);
+                }
+            } catch (error) {
+                // Log error but don't affect timer functionality
+                console.error('Error syncing with server:', error);
+            }
+        }, 30000); // Sync every 30 seconds
+
         return () => clearInterval(syncInterval);
-    }, [user, currentPomodoroId, time, isActive, isBreak]);
+    }, [time, isActive, isBreak, currentPomodoroId]);
 
     // Load initial state from Supabase
     useEffect(() => {
@@ -680,33 +771,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     }, [settings]);
 
-    const playGoalAchievedSound = async (context: AudioContext) => {
-        if (!settings?.sound_enabled) return;
-        
-        try {
-            const oscillator = context.createOscillator();
-            const gainNode = context.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(context.destination);
-            
-            // Configure sound
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(880, context.currentTime); // A5 note
-            
-            // Configure volume envelope
-            gainNode.gain.setValueAtTime(0, context.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.5, context.currentTime + 0.1);
-            gainNode.gain.linearRampToValueAtTime(0, context.currentTime + 0.5);
-            
-            // Play sound
-            oscillator.start();
-            oscillator.stop(context.currentTime + 0.5);
-        } catch (error) {
-            console.error('Error playing sound:', error);
-        }
-    };
-
     const playSessionEndSound = useCallback(() => {
         // Different sounds for focus and break
         if (isBreak) {
@@ -745,21 +809,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         startNewPomodoro(!isBreak ? 'break' : 'work');
     };
 
-    const handleButtonClick = (event: React.FormEvent<HTMLButtonElement>) => {
-        const action = event.currentTarget.name;
-        switch (action) {
-            case 'start':
-                toggleTimer();
-                break;
-            case 'pause':
-                setIsActive(false);
-                break;
-            case 'skip':
-                skipCurrentInterval();
-                break;
-        }
-    };
-
     // Ajouter useEffect pour réinitialiser le compteur quotidien
     useEffect(() => {
         const checkNewDay = () => {
@@ -776,18 +825,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         const interval = setInterval(checkNewDay, 60000); // Vérifier toutes les minutes
         
         return () => clearInterval(interval);
-    }, []);
-
-    // Initialize audio context
-    useEffect(() => {
-        if (typeof window !== 'undefined' && !audioContext) {
-            try {
-                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                setAudioContext(new AudioContextClass());
-            } catch (error) {
-                console.error('Web Audio API is not supported in this browser:', error);
-            }
-        }
     }, []);
 
     const startNewPomodoro = async (type: 'work' | 'break' | 'long_break' = 'work') => {
@@ -983,68 +1020,44 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     <TimerDisplay
                         time={time}
                         isActive={isActive}
-                        totalTime={isBreak ? (settings?.break_duration || 5) * 60 : (settings?.work_duration || 25) * 60}
+                        totalTime={
+                            !isBreak
+                                ? (settings?.work_duration || 25) * 60
+                                : (settings?.break_duration || 5) * 60
+                        }
                         isBreak={isBreak}
                     />
                 </div>
-                <div className="flex justify-center gap-4">
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    name={isActive ? 'pause' : 'start'}
-                                    onClick={handleButtonClick}
-                                    disabled={!activeTaskId}
-                                    size="lg"
-                                    className={cn(
-                                        "w-24 transition-all duration-300 shadow-lg",
-                                        isActive
-                                            ? "bg-blue-500/80 hover:bg-blue-600/80 shadow-blue-500/20"
-                                            : "bg-blue-500/60 hover:bg-blue-500/80 shadow-blue-500/10",
-                                        !activeTaskId && "opacity-50"
-                                    )}
-                                >
-                                    {isActive ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                {activeTaskId ? 'Select a task first' : `Space to ${isActive ? 'Pause' : 'Start'}`}
-                            </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    name="skip"
-                                    onClick={handleButtonClick}
-                                    disabled={!activeTaskId || !isActive}
-                                    variant="outline"
-                                    size="lg"
-                                    className="border-white/10 hover:border-white/20 hover:bg-white/5"
-                                >
-                                    <SkipForwardIcon className="h-6 w-6" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                Press 'S' to Skip
-                            </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    name="settings"
-                                    onClick={() => setSettingsOpen(true)}
-                                    variant="outline"
-                                    size="lg"
-                                    className="border-white/10 hover:border-white/20 hover:bg-white/5"
-                                >
-                                    <Settings2Icon className="h-6 w-6" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                Settings
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+                <div className="flex justify-center space-x-4">
+                    <Button
+                        name={isActive ? 'pause' : 'start'}
+                        onClick={onButtonClick}
+                        variant={isActive ? "destructive" : "default"}
+                        className="w-24"
+                    >
+                        {isActive ? (
+                            <><PauseIcon className="h-4 w-4 mr-2" /> Stop</>
+                        ) : (
+                            <><PlayIcon className="h-4 w-4 mr-2" /> Start</>
+                        )}
+                    </Button>
+                    <Button
+                        name="reset"
+                        onClick={onButtonClick}
+                        variant="outline"
+                        className="w-24"
+                        disabled={isActive}
+                    >
+                        <RefreshCwIcon className="h-4 w-4 mr-2" /> Reset
+                    </Button>
+                    <Button
+                        name="settings"
+                        onClick={onButtonClick}
+                        variant="outline"
+                        className="w-10"
+                    >
+                        <Settings2Icon className="h-4 w-4" />
+                    </Button>
                 </div>
                 {activeTaskId && (
                     <TaskProgress 
@@ -1419,3 +1432,4 @@ function PomodoroSettingsDialogComponent({
     );
 }
 export default PomodoroTimer;
+
