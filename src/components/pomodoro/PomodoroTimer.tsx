@@ -127,34 +127,13 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     }, [isBreak, streak]);
 
-    // Audio context management
+    // Audio state
     const [audioContextState, setAudioContextState] = useState<AudioContext | null>(null);
     const [soundEnabledState, setSoundEnabledState] = useState(settings?.sound_enabled || false);
     const [activeOscillatorState, setActiveOscillatorState] = useState<OscillatorNode | null>(null);
     const [activeGainNodeState, setActiveGainNodeState] = useState<GainNode | null>(null);
 
-    // Initialize audio context
-    useEffect(() => {
-        let context: AudioContext | null = null;
-        
-        if (settings?.sound_enabled) {
-            try {
-                context = new (window.AudioContext || (window as any).webkitAudioContext)();
-                setAudioContextState(context);
-                setSoundEnabledState(true);
-            } catch (error) {
-                console.error('Failed to create audio context:', error);
-                setSoundEnabledState(false);
-            }
-        }
-
-        return () => {
-            if (context) {
-                context.close().catch(console.error);
-            }
-        };
-    }, [settings?.sound_enabled]);
-
+    // Sound control functions
     const stopSound = useCallback(() => {
         if (activeOscillatorState) {
             try {
@@ -174,6 +153,38 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             setActiveGainNodeState(null);
         }
     }, [activeOscillatorState, activeGainNodeState]);
+
+    // Initialize audio context
+    useEffect(() => {
+        let context: AudioContext | null = null;
+        
+        const initAudio = async () => {
+            if (settings?.sound_enabled) {
+                try {
+                    context = new (window.AudioContext || (window as any).webkitAudioContext)();
+                    await context.resume();
+                    setAudioContextState(context);
+                    setSoundEnabledState(true);
+                } catch (error) {
+                    console.error('Failed to create audio context:', error);
+                    setSoundEnabledState(false);
+                }
+            } else {
+                setSoundEnabledState(false);
+            }
+        };
+
+        initAudio();
+
+        return () => {
+            if (context) {
+                if (activeOscillatorState || activeGainNodeState) {
+                    stopSound();
+                }
+                context.close().catch(console.error);
+            }
+        };
+    }, [settings?.sound_enabled, stopSound, activeOscillatorState, activeGainNodeState]);
 
     const playSound = useCallback(async (frequency: number = 440, duration: number = 0.5) => {
         if (!soundEnabledState || !audioContextState || audioContextState.state === 'closed') {
@@ -415,242 +426,96 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         };
     }, [isActive, time, stopSound, handleTimerComplete]);
 
-    // Sync pomodoro state with Supabase
-    const updateSupabaseState = useCallback(async () => {
-        if (!user || !currentPomodoroId) return;
-
-        let retryCount = 0;
-        const maxRetries = 3;
-        const retryDelay = 1000;
-
-        const attemptUpdate = async (): Promise<void> => {
-            try {
-                const { error } = await supabase
-                    .from('pomodoros')
-                    .update({
-                        current_time: time,
-                        is_active: isActive,
-                        is_break: isBreak,
-                        last_updated: new Date().toISOString()
-                    })
-                    .eq('id', currentPomodoroId);
-
-                if (error) throw error;
-            } catch (error) {
-                console.error('Error updating Supabase state:', error);
-                if (retryCount < maxRetries) {
-                    retryCount++;
-                    await new Promise(resolve => setTimeout(resolve, retryDelay));
-                    return attemptUpdate();
-                }
-            }
-        };
-
-        await attemptUpdate();
-    }, [user, currentPomodoroId, time, isActive, isBreak]);
-
-    // Sync interval
-    useEffect(() => {
-        // Only sync when timer is active
-        if (!isActive) return;
-
-        const syncInterval = setInterval(updateSupabaseState, 30000);
-        updateSupabaseState(); // Initial sync
-
-        return () => clearInterval(syncInterval);
-    }, [updateSupabaseState, isActive]);
-
     // Initial Supabase state load
     useEffect(() => {
         const loadInitialState = async () => {
             if (!user) return;
 
             try {
-                const { data: pomodoro, error } = await supabase
+                const { data, error } = await supabase
                     .from('pomodoros')
-                    .select('*')
+                    .select()
                     .eq('user_id', user.id)
                     .eq('completed', false)
                     .order('created_at', { ascending: false })
-                    .limit(1)
-                    .single();
+                    .limit(1);
 
-                if (error) {
-                    console.error('Error loading initial state:', error);
-                    return;
-                }
+                if (error) throw error;
+
+                const pomodoro = data && data.length > 0 ? data[0] : null;
 
                 if (pomodoro) {
                     setCurrentPomodoroId(pomodoro.id);
                     setTime(pomodoro.current_time || (settings?.work_duration || 25) * 60);
                     setIsBreak(pomodoro.is_break || false);
-                    // Don't auto-start, let user control the timer
-                    setIsActive(false);
+                    setIsActive(false); // Don't auto-start
+                } else {
+                    // Create new pomodoro if none exists
+                    const { data: newPomodoro, error: createError } = await supabase
+                        .from('pomodoros')
+                        .insert([{
+                            user_id: user.id,
+                            current_time: (settings?.work_duration || 25) * 60,
+                            is_break: false,
+                            completed: false,
+                            created_at: new Date().toISOString()
+                        }])
+                        .select()
+                        .single();
+
+                    if (createError) throw createError;
+
+                    if (newPomodoro) {
+                        setCurrentPomodoroId(newPomodoro.id);
+                        setTime((settings?.work_duration || 25) * 60);
+                        setIsBreak(false);
+                        setIsActive(false);
+                    }
                 }
-            } catch (error) {
-                console.error('Error in loadInitialState:', error);
+            } catch (error: any) {
+                console.error('Error loading initial state:', error);
+                // Set default state on error
+                setTime((settings?.work_duration || 25) * 60);
+                setIsBreak(false);
+                setIsActive(false);
             }
         };
 
         loadInitialState();
     }, [user, settings?.work_duration]);
 
-    // Load initial state from Supabase
-    useEffect(() => {
-        const loadFromServer = async () => {
-            if (!user) return;
+    // Update Supabase state
+    const updateSupabaseState = useCallback(async () => {
+        if (!user || !currentPomodoroId) return;
 
-            try {
-                const { data: activePomodoro, error } = await supabase
-                    .from('pomodoros')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .eq('completed', false)
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .single();
-
-                if (error) {
-                    if (error.code !== 'PGRST116') { // No rows returned
-                        console.error('Error loading from Supabase:', error);
-                    }
-                    return;
-                }
-
-                if (activePomodoro) {
-                    setCurrentPomodoroId(activePomodoro.id);
-                    setIsBreak(activePomodoro.is_break);
-                    // Don't auto-start, just set the remaining time
-                    setTime(activePomodoro.current_time);
-                }
-            } catch (error) {
-                console.error('Error in initial load:', error);
-            }
-        };
-
-        loadFromServer();
-    }, [user]);
-
-    // Synchronize timer state with server
-    const syncWithSupabase = useCallback(async () => {
         try {
-            const failedCompletions = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
-            if (failedCompletions.length > 0) {
-                for (const session of failedCompletions) {
-                    try {
-                        await completePomodoro(session.pomodoroId);
-                    } catch (error) {
-                        console.error('Error syncing failed completion:', error);
-                        return;
-                    }
-                }
-                localStorage.removeItem('failedPomodoroCompletions');
-                const newStats = await getPomodoroStats();
-                setStats(newStats);
-            }
-            if (!isActive) return;
-            const response = await fetch('/api/pomodoro/sync', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    time,
-                    isActive,
-                    isBreak,
-                    currentPomodoroId,
-                    lastUpdate: Date.now(),
-                }),
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            if (!data.sync && data.state) {
-                setTime(data.state.time);
-                setIsActive(data.state.isActive);
-                setIsBreak(data.state.isBreak);
-                setCurrentPomodoroId(data.state.currentPomodoroId);
-            }
+            const { error } = await supabase
+                .from('pomodoros')
+                .update({
+                    current_time: time,
+                    is_active: isActive,
+                    is_break: isBreak,
+                    last_updated: new Date().toISOString()
+                })
+                .eq('id', currentPomodoroId)
+                .select()
+                .single();
+
+            if (error) throw error;
         } catch (error) {
-            console.error('Error syncing with server:', error);
+            console.error('Error updating Supabase state:', error);
         }
-    }, [time, isActive, isBreak, currentPomodoroId]);
+    }, [user, currentPomodoroId, time, isActive, isBreak]);
 
-    // Handle visibility change and page refresh
+    // Sync interval
     useEffect(() => {
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'hidden') {
-                // Store the current state and timestamp when tab becomes hidden
-                const stateToStore = {
-                    time,
-                    isActive,
-                    isBreak,
-                    currentPomodoroId,
-                    activeTaskId,
-                    timestamp: Date.now(),
-                    settings
-                };
-                localStorage.setItem('pomodoroBackgroundState', JSON.stringify(stateToStore));
-            } else if (document.visibilityState === 'visible') {
-                // Restore state and calculate elapsed time when tab becomes visible
-                const storedState = localStorage.getItem('pomodoroBackgroundState');
-                if (storedState) {
-                    const parsedState = JSON.parse(storedState);
-                    if (parsedState.isActive) {
-                        const elapsedSeconds = Math.floor((Date.now() - parsedState.timestamp) / 1000);
-                        const newTime = Math.max(0, parsedState.time - elapsedSeconds);
-                        
-                        setTime(newTime);
-                        // Only set active if there's still time remaining
-                        setIsActive(newTime > 0);
-                        setIsBreak(parsedState.isBreak);
-                        setCurrentPomodoroId(parsedState.currentPomodoroId);
-                        setActiveTaskId(parsedState.activeTaskId);
-                        
-                        // Only handle timer complete if we just reached zero
-                        if (newTime === 0 && parsedState.time > 0) {
-                            handleTimerComplete();
-                        }
-                    }
-                }
-            }
-        };
+        if (!isActive || !currentPomodoroId) return;
 
-        // Handle initial page load
-        const loadInitialState = () => {
-            const storedState = localStorage.getItem('pomodoroBackgroundState');
-            if (storedState) {
-                const parsedState = JSON.parse(storedState);
-                if (parsedState.isActive) {
-                    const elapsedSeconds = Math.floor((Date.now() - parsedState.timestamp) / 1000);
-                    const newTime = Math.max(0, parsedState.time - elapsedSeconds);
-                    
-                    setTime(newTime);
-                    // Only set active if there's still time remaining
-                    setIsActive(newTime > 0);
-                    setIsBreak(parsedState.isBreak);
-                    setCurrentPomodoroId(parsedState.currentPomodoroId);
-                    setActiveTaskId(parsedState.activeTaskId);
-                    
-                    // Only handle timer complete if we just reached zero
-                    if (newTime === 0 && parsedState.time > 0) {
-                        handleTimerComplete();
-                    }
-                }
-            }
-        };
+        const syncInterval = setInterval(updateSupabaseState, 30000);
+        updateSupabaseState(); // Initial sync
 
-        // Load state on mount
-        loadInitialState();
-
-        // Add visibility change listener
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        
-        return () => {
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-        };
-    }, [time, isActive, isBreak, currentPomodoroId, activeTaskId, settings, handleTimerComplete]);
+        return () => clearInterval(syncInterval);
+    }, [updateSupabaseState, isActive, currentPomodoroId]);
 
     // Load persisted state function
     const loadPersistedState = useCallback(() => {
