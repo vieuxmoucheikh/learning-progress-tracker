@@ -136,6 +136,26 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             updateStreak();
             setPomodoroCount(prev => prev + 1);
             
+            // Update task metrics
+            if (activeTaskId) {
+                setTasks(prevTasks =>
+                    prevTasks.map(task => {
+                        if (task.id === activeTaskId) {
+                            const workDuration = settings?.work_duration || 25;
+                            return {
+                                ...task,
+                                metrics: {
+                                    totalMinutes: task.metrics.totalMinutes + workDuration,
+                                    completedPomodoros: task.metrics.completedPomodoros + 1,
+                                    currentStreak: task.metrics.currentStreak + 1
+                                }
+                            };
+                        }
+                        return task;
+                    })
+                );
+            }
+            
             if (currentPomodoroId) {
                 try {
                     await completePomodoro(currentPomodoroId);
