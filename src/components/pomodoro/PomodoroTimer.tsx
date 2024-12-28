@@ -134,13 +134,15 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 if (e.data.type === 'tick' && !isCompleting) {
                     setTime(prevTime => {
                         const newTime = Math.max(0, prevTime - 1);
-                        // Check if timer just reached zero
-                        if (newTime === 0 && prevTime > 0 && isActive && !isCompleting) {
+                        if (newTime === 0 && isActive && !isCompleting) {
                             worker.postMessage({ command: 'stop' });
                             setIsCompleting(true);
-                            handleTimerComplete().finally(() => {
-                                setIsCompleting(false);
-                            });
+                            // Use setTimeout to avoid state update during render
+                            completionTimeout = setTimeout(() => {
+                                handleTimerComplete().finally(() => {
+                                    setIsCompleting(false);
+                                });
+                            }, 100);
                         }
                         return newTime;
                     });
@@ -168,11 +170,15 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 clearTimeout(completionTimeout);
             }
         };
-    }, [isActive, time, isCompleting, handleTimerComplete]);
+    }, [isActive, time, isCompleting]);
 
     const handleTimerComplete = useCallback(async () => {
         // Prevent multiple executions
         if (isCompleting) return;
+        
+        // Immediately stop the timer
+        setIsActive(false);
+        setIsCompleting(true);
 
         try {
             // Play sound if enabled and enough time has passed since last sound
@@ -181,50 +187,54 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 setLastSoundTime(Date.now());
             }
 
-            if (!isBreak) {
-                // Handle work session completion
-                updateStreak();
-                setPomodoroCount(prev => prev + 1);
+            // Create a copy of current state for atomic updates
+            const currentTask = tasks.find(t => t.id === activeTaskId);
+            const currentPomodoro = currentPomodoroId;
+            const isCurrentBreak = isBreak;
 
-                // Update task metrics
-                if (activeTaskId) {
-                    setTasks(prevTasks => {
-                        const updatedTasks = prevTasks.map(task => {
-                            if (task.id === activeTaskId) {
-                                const workDuration = settings?.work_duration || 25;
-                                const updatedMetrics = {
+            if (!isCurrentBreak) {
+                // Update streak and pomodoro count
+                const newStreak = streak + 1;
+                const newPomodoroCount = pomodoroCount + 1;
+                
+                // Update task metrics if active task exists
+                let updatedTasks = tasks;
+                if (currentTask) {
+                    const workDuration = settings?.work_duration || 25;
+                    updatedTasks = tasks.map(task => {
+                        if (task.id === activeTaskId) {
+                            return {
+                                ...task,
+                                completed: true,
+                                metrics: {
                                     totalMinutes: (task.metrics?.totalMinutes || 0) + workDuration,
                                     completedPomodoros: (task.metrics?.completedPomodoros || 0) + 1,
                                     currentStreak: (task.metrics?.currentStreak || 0) + 1
-                                };
-                                
-                                const updatedTask = {
-                                    ...task,
-                                    completed: true,
-                                    metrics: updatedMetrics
-                                };
-                                
-                                return updatedTask;
-                            }
-                            return task;
-                        });
-                        
-                        // Save to localStorage immediately
-                        localStorage.setItem('pomodoroTasks', JSON.stringify(updatedTasks));
-                        return updatedTasks;
+                                }
+                            };
+                        }
+                        return task;
                     });
                 }
 
+                // Update state and local storage atomically
+                setTasks(updatedTasks);
+                localStorage.setItem('pomodoroTasks', JSON.stringify(updatedTasks));
+                setStreak(newStreak);
+                localStorage.setItem('pomodoroStreak', newStreak.toString());
+                setPomodoroCount(newPomodoroCount);
+                localStorage.setItem('lastPomodoroDate', new Date().toDateString());
+
                 // Handle Supabase operations
-                if (currentPomodoroId) {
+                if (currentPomodoro) {
                     try {
-                        await completePomodoro(currentPomodoroId);
+                        await completePomodoro(currentPomodoro);
                         const newStats = await getPomodoroStats();
                         setStats(newStats);
                     } catch (error) {
                         console.error('Error completing pomodoro:', error);
                         const failedCompletions = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
-                        failedCompletions.push({ pomodoroId: currentPomodoroId });
+                        failedCompletions.push({ pomodoroId: currentPomodoro });
                         localStorage.setItem('failedPomodoroCompletions', JSON.stringify(failedCompletions));
                     }
                 }
@@ -240,8 +250,13 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 });
             }
 
-            // Stop the timer first
-            setIsActive(false);
+            // Log completion for debugging
+            console.log('Timer completed:', {
+                isBreak: isCurrentBreak,
+                task: currentTask,
+                pomodoroId: currentPomodoro,
+                timestamp: new Date().toISOString()
+            });
 
             // Prepare next session
             const nextIsBreak = !isBreak;
@@ -280,8 +295,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         isBreak, settings, audioContext, lastSoundTime,
         activeTaskId, currentPomodoroId, pomodoroCount,
         updateStreak, completePomodoro, getPomodoroStats,
-        isCompleting, setTime, setIsActive, setIsBreak,
-        toast
+        isCompleting
     ]);
 
     // Sync with Supabase periodically
@@ -1404,5 +1418,4 @@ function PomodoroSettingsDialogComponent({
         </Dialog>
     );
 }
-export default PomodoroTimer;   
- 
+export default PomodoroTimer;
