@@ -262,8 +262,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             const currentPomodoro = currentPomodoroId;
             const isCurrentBreak = isBreak;
 
-            console.log('Current state:', { currentTask, isCurrentBreak, pomodoroCount });
-
             if (!isCurrentBreak) {
                 // Update streak and pomodoro count
                 const newStreak = streak + 1;
@@ -328,24 +326,35 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                               pomodoroCount > 0 && 
                               pomodoroCount % (settings.pomodoros_until_long_break || 4) === 0;
 
-            setIsBreak(nextIsBreak);
-
+            // Set next duration before changing break state
             const nextDuration = nextIsBreak 
                 ? (isLongBreak ? settings?.long_break_duration : settings?.break_duration) || 5
                 : settings?.work_duration || 25;
-            setTime(nextDuration * 60);
 
-            // Auto-start if enabled
-            if ((nextIsBreak && settings?.auto_start_breaks) || 
-                (!nextIsBreak && settings?.auto_start_pomodoros)) {
+            // Update states in correct order
+            setTime(nextDuration * 60);
+            setIsBreak(nextIsBreak);
+            
+            // Don't auto-start by default
+            const shouldAutoStart = nextIsBreak 
+                ? settings?.auto_start_breaks === true
+                : settings?.auto_start_pomodoros === true;
+
+            if (shouldAutoStart) {
+                // Add a longer delay for auto-start to prevent rapid switching
                 setTimeout(() => {
+                    // Double check if we should still auto-start
+                    if (settings?.sound_enabled) {
+                        playSound(440, 0.2); // Gentle notification sound
+                    }
                     setIsActive(true);
-                }, 500);
+                }, 1500);
             }
 
         } catch (error) {
             console.error('Error in handleTimerComplete:', error);
             stopSound();
+            setIsActive(false);
             toast({
                 title: "Error",
                 description: "There was an error completing the session",
@@ -356,7 +365,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         isBreak, settings, audioContext, lastSoundTime,
         activeTaskId, currentPomodoroId, pomodoroCount,
         tasks, streak, completePomodoro, getPomodoroStats,
-        playGoalAchievedSound, stopSound
+        playGoalAchievedSound, stopSound, playSound
     ]);
 
     const onButtonClick = useCallback((event: React.FormEvent<HTMLButtonElement>) => {
@@ -457,7 +466,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             }
             stopSound();
         };
-    }, [isActive, time, stopSound]);
+    }, [isActive, time, stopSound, handleTimerComplete]);
 
     // Sync with Supabase periodically - with error handling
     useEffect(() => {
