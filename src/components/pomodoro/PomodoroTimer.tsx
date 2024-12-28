@@ -1,3 +1,10 @@
+// Global type declaration for WebKit Audio Context
+declare global {
+    interface Window {
+        webkitAudioContext: typeof AudioContext;
+    }
+}
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -117,8 +124,18 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
     const handleTimerComplete = useCallback(async () => {
         setIsActive(false);
+        
+        // Play completion sound if enabled in settings
+        if (settings?.sound_enabled && audioContext && Date.now() - lastSoundTime > 500) {
+            await playGoalAchievedSound(audioContext);
+            setLastSoundTime(Date.now());
+        }
+
         if (!isBreak) {
+            // Handle work session completion
             updateStreak();
+            setPomodoroCount(prev => prev + 1);
+            
             if (currentPomodoroId) {
                 try {
                     await completePomodoro(currentPomodoroId);
@@ -126,34 +143,48 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     setStats(newStats);
                 } catch (error) {
                     console.error('Error completing pomodoro:', error);
-                    // Store failed completion for later sync
                     const failedCompletions = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
                     failedCompletions.push({ pomodoroId: currentPomodoroId });
                     localStorage.setItem('failedPomodoroCompletions', JSON.stringify(failedCompletions));
                 }
             }
             
-            // Play completion sound
-            if (audioContext && Date.now() - lastSoundTime > 1000) {
-                await playGoalAchievedSound(audioContext);
-                setLastSoundTime(Date.now());
-            }
-            
             toast({
                 title: "Pomodoro completed!",
                 description: "Time for a break!",
+            });
+        } else {
+            toast({
+                title: "Break completed!",
+                description: "Ready to focus again?",
             });
         }
         
         // Toggle between work and break
         setIsBreak(!isBreak);
-        setTime(isBreak ? (settings?.break_duration ?? 5) * 60 : (settings?.work_duration ?? 25) * 60);
         
-        // Start a new pomodoro session if needed
-        if (!isBreak) {
+        // Determine next session duration
+        const nextIsBreak = !isBreak;
+        const isLongBreak = nextIsBreak && settings?.pomodoros_until_long_break && 
+                           pomodoroCount > 0 && pomodoroCount % settings.pomodoros_until_long_break === 0;
+        
+        if (nextIsBreak) {
+            const breakDuration = isLongBreak ? settings?.long_break_duration : settings?.break_duration;
+            setTime((breakDuration ?? 5) * 60);
+            // Auto-start break if enabled
+            if (settings?.auto_start_breaks) {
+                setIsActive(true);
+            }
+        } else {
+            setTime((settings?.work_duration ?? 25) * 60);
+            // Auto-start work session if enabled
+            if (settings?.auto_start_pomodoros) {
+                setIsActive(true);
+            }
             startNewPomodoro();
         }
-    }, [isBreak, currentPomodoroId, audioContext, lastSoundTime, settings, updateStreak]);
+        
+    }, [isBreak, currentPomodoroId, audioContext, lastSoundTime, settings, updateStreak, pomodoroCount]);
 
     // Sync with Supabase periodically
     useEffect(() => {
@@ -567,33 +598,32 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     }, [settings]);
 
-    const playGoalAchievedSound = useCallback(async (audioContext: AudioContext) => {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
+    const playGoalAchievedSound = async (context: AudioContext) => {
+        if (!settings?.sound_enabled) return;
         
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        // Séquence de notes joyeuses
-        const notes = [523.25, 659.25, 783.99, 1046.50]; // Do, Mi, Sol, Do (octave supérieure)
-        const startTime = audioContext.currentTime;
-        
-        notes.forEach((freq, index) => {
-          const noteOscillator = audioContext.createOscillator();
-          const noteGain = audioContext.createGain();
-          
-          noteOscillator.connect(noteGain);
-          noteGain.connect(audioContext.destination);
-          
-          noteOscillator.frequency.value = freq;
-          noteGain.gain.value = 0.1;
-          
-          noteOscillator.start(startTime + index * 0.2);
-          noteOscillator.stop(startTime + (index * 0.2) + 0.2);
-        });
-        
-        return new Promise(resolve => setTimeout(resolve, notes.length * 200));
-      }, []);
+        try {
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(context.destination);
+            
+            // Configure sound
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, context.currentTime); // A5 note
+            
+            // Configure volume envelope
+            gainNode.gain.setValueAtTime(0, context.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.5, context.currentTime + 0.1);
+            gainNode.gain.linearRampToValueAtTime(0, context.currentTime + 0.5);
+            
+            // Play sound
+            oscillator.start();
+            oscillator.stop(context.currentTime + 0.5);
+        } catch (error) {
+            console.error('Error playing sound:', error);
+        }
+    };
 
     const playSessionEndSound = useCallback(() => {
         // Different sounds for focus and break
@@ -666,20 +696,16 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         return () => clearInterval(interval);
     }, []);
 
-    // Ajouter une initialisation de l'AudioContext au montage du composant
+    // Initialize audio context
     useEffect(() => {
-        // Créer l'AudioContext au premier rendu
-        if (!audioContext) {
-            const newAudioContext = new AudioContext();
-            setAudioContext(newAudioContext);
-        }
-        
-        // Cleanup
-        return () => {
-            if (audioContext) {
-                audioContext.close();
+        if (typeof window !== 'undefined' && !audioContext) {
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                setAudioContext(new AudioContextClass());
+            } catch (error) {
+                console.error('Web Audio API is not supported in this browser:', error);
             }
-        };
+        }
     }, []);
 
     const startNewPomodoro = async (type: 'work' | 'break' | 'long_break' = 'work') => {
