@@ -444,47 +444,109 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
 
     const playNotificationSound = useCallback(async () => {
+        if (!settings?.sound_enabled) return;
+        
         try {
-            if (!audioContext) {
-                const newAudioContext = new AudioContext();
-                setAudioContext(newAudioContext);
+            const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(context.destination);
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(440, context.currentTime);
+            
+            gainNode.gain.setValueAtTime(0.1, context.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5);
+            
+            oscillator.start(context.currentTime);
+            oscillator.stop(context.currentTime + 0.5);
+            
+            // Show notification if enabled
+            if (settings?.notification_enabled) {
+                if (Notification.permission === 'granted') {
+                    new Notification('Pomodoro Timer', {
+                        body: isBreak ? 'Break time is over!' : 'Time to take a break!',
+                        icon: 'favicon.ico'
+                    });
+                }
             }
             
-            if (audioContext) {
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
-                
-                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-                
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.5);
-                
-                // Ne pas stocker l'oscillateur dans l'état pour éviter la double lecture
-                if (settings?.notification_enabled) {
-                    if (Notification.permission === 'granted') {
-                        new Notification('Pomodoro Timer', {
-                            body: isBreak ? 'Break time is over!' : 'Time to take a break!',
-                            icon: 'favicon.ico'
-                        });
-                    }
-                }
-                
-                // Retourner une promesse qui se résout quand le son est terminé
-                return new Promise(resolve => setTimeout(resolve, 500));
-            }
+            // Clean up
+            setTimeout(() => {
+                context.close();
+            }, 1000);
+            
         } catch (error) {
             console.error('Error playing sound:', error);
         }
-    }, [isBreak, settings, audioContext]);
+    }, [isBreak, settings]);
 
-    // Modifier startNewPomodoro pour s'assurer que le type est correct
+    const skipCurrentInterval = () => {
+        if (!isActive) return;
+        
+        // Complete current pomodoro if it exists
+        if (currentPomodoroId) {
+            completePomodoro(currentPomodoroId);
+            setCurrentPomodoroId(null);
+        }
+        
+        // Toggle break state and start new session
+        setIsBreak(!isBreak);
+        setTime(0);
+        startNewPomodoro(!isBreak ? 'break' : 'work');
+    };
+
+    const handleButtonClick = (event: React.FormEvent<HTMLButtonElement>) => {
+        const action = event.currentTarget.name;
+        switch (action) {
+            case 'start':
+                toggleTimer();
+                break;
+            case 'pause':
+                setIsActive(false);
+                break;
+            case 'skip':
+                skipCurrentInterval();
+                break;
+        }
+    };
+
+    // Ajouter useEffect pour réinitialiser le compteur quotidien
+    useEffect(() => {
+        const checkNewDay = () => {
+            const lastPomodoro = localStorage.getItem('lastPomodoroDate');
+            const today = new Date().toDateString();
+            
+            if (lastPomodoro !== today) {
+                setPomodoroCount(0);
+                localStorage.setItem('lastPomodoroDate', today);
+            }
+        };
+        
+        checkNewDay();
+        const interval = setInterval(checkNewDay, 60000); // Vérifier toutes les minutes
+        
+        return () => clearInterval(interval);
+    }, []);
+
+    // Ajouter une initialisation de l'AudioContext au montage du composant
+    useEffect(() => {
+        // Créer l'AudioContext au premier rendu
+        if (!audioContext) {
+            const newAudioContext = new AudioContext();
+            setAudioContext(newAudioContext);
+        }
+        
+        // Cleanup
+        return () => {
+            if (audioContext) {
+                audioContext.close();
+            }
+        };
+    }, []);
+
     const startNewPomodoro = async (type: 'work' | 'break' | 'long_break' = 'work') => {
         try {
             if (!settings || !activeTaskId) {
@@ -551,64 +613,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             setIsActive(false);
         }
     };
-
-    const skipCurrentInterval = () => {
-        setTime(0);
-        handleTimerComplete();
-    };
-
-    const handleButtonClick = (event: React.FormEvent<HTMLButtonElement>) => {
-        const action = event.currentTarget.name;
-        switch (action) {
-            case 'start':
-                if (!isActive) {
-                    startNewPomodoro(isBreak ? 'break' : 'work');
-                } else {
-                    setIsActive(false); // Permettre la pause
-                }
-                break;
-            case 'pause':
-                setIsActive(false);
-                break;
-            case 'skip':
-                skipCurrentInterval();
-                break;
-        }
-    };
-
-    // Ajouter useEffect pour réinitialiser le compteur quotidien
-    useEffect(() => {
-        const checkNewDay = () => {
-            const lastPomodoro = localStorage.getItem('lastPomodoroDate');
-            const today = new Date().toDateString();
-            
-            if (lastPomodoro !== today) {
-                setPomodoroCount(0);
-                localStorage.setItem('lastPomodoroDate', today);
-            }
-        };
-        
-        checkNewDay();
-        const interval = setInterval(checkNewDay, 60000); // Vérifier toutes les minutes
-        
-        return () => clearInterval(interval);
-    }, []);
-
-    // Ajouter une initialisation de l'AudioContext au montage du composant
-    useEffect(() => {
-        // Créer l'AudioContext au premier rendu
-        if (!audioContext) {
-            const newAudioContext = new AudioContext();
-            setAudioContext(newAudioContext);
-        }
-        
-        // Cleanup
-        return () => {
-            if (audioContext) {
-                audioContext.close();
-            }
-        };
-    }, []);
 
     return (
         <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate700/30 shadow-2xl">
