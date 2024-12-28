@@ -93,6 +93,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     const [isCompleted, setIsCompleted] = useState(false);
     const [pomodoroCount, setPomodoroCount] = useState(0); // Ajouter ce state
     const [lastSoundTime, setLastSoundTime] = useState<number>(0);
+    const [isCompleting, setIsCompleting] = useState(false);
 
     // Add streak tracking
     useEffect(() => {
@@ -125,19 +126,23 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     // Timer logic with Web Worker
     useEffect(() => {
         let workerInstance: Worker | undefined = undefined;
+        let completionTimeout: NodeJS.Timeout | undefined = undefined;
         
         const initializeWorker = () => {
             const worker = new Worker(new URL('./timerWorker.js', import.meta.url));
             worker.onmessage = (e) => {
-                if (e.data.type === 'tick') {
+                if (e.data.type === 'tick' && !isCompleting) {
                     setTime(prevTime => {
                         const newTime = Math.max(0, prevTime - 1);
-                        if (newTime === 0 && isActive) {
+                        if (newTime === 0 && isActive && !isCompleting) {
                             worker.postMessage({ command: 'stop' });
+                            setIsCompleting(true);
                             // Use setTimeout to avoid state update during render
-                            setTimeout(() => {
-                                handleTimerComplete();
-                            }, 0);
+                            completionTimeout = setTimeout(() => {
+                                handleTimerComplete().finally(() => {
+                                    setIsCompleting(false);
+                                });
+                            }, 100);
                         }
                         return newTime;
                     });
@@ -150,7 +155,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         workerInstance = initializeWorker();
 
         // Control worker based on timer state
-        if (workerInstance && isActive && time > 0) {
+        if (workerInstance && isActive && time > 0 && !isCompleting) {
             workerInstance.postMessage({ command: 'start' });
         } else if (workerInstance) {
             workerInstance.postMessage({ command: 'stop' });
@@ -161,16 +166,22 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             if (workerInstance) {
                 workerInstance.terminate();
             }
+            if (completionTimeout) {
+                clearTimeout(completionTimeout);
+            }
         };
-    }, [isActive, time]);
+    }, [isActive, time, isCompleting]);
 
     const handleTimerComplete = useCallback(async () => {
+        // Prevent multiple executions
+        if (isCompleting) return;
+        
         // Immediately stop the timer
         setIsActive(false);
 
         try {
-            // Play sound if enabled
-            if (settings?.sound_enabled && audioContext && Date.now() - lastSoundTime > 500) {
+            // Play sound if enabled and enough time has passed since last sound
+            if (settings?.sound_enabled && audioContext && Date.now() - lastSoundTime > 1000) {
                 await playGoalAchievedSound(audioContext);
                 setLastSoundTime(Date.now());
             }
@@ -186,7 +197,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         const updatedTasks = prevTasks.map(task => {
                             if (task.id === activeTaskId) {
                                 const workDuration = settings?.work_duration || 25;
-                                const updatedTask = {
+                                return {
                                     ...task,
                                     completed: true,
                                     metrics: {
@@ -195,7 +206,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                         currentStreak: (task.metrics?.currentStreak || 0) + 1
                                     }
                                 };
-                                return updatedTask;
                             }
                             return task;
                         });
@@ -247,13 +257,13 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 setTime((breakDuration ?? 5) * 60);
                 // Auto-start break if enabled
                 if (settings?.auto_start_breaks) {
-                    setTimeout(() => setIsActive(true), 100);
+                    setTimeout(() => setIsActive(true), 500);
                 }
             } else {
                 setTime((settings?.work_duration ?? 25) * 60);
                 // Auto-start work session if enabled
                 if (settings?.auto_start_pomodoros) {
-                    setTimeout(() => setIsActive(true), 100);
+                    setTimeout(() => setIsActive(true), 500);
                 }
             }
         } catch (error) {
@@ -267,7 +277,8 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     }, [
         isBreak, settings, audioContext, lastSoundTime,
         activeTaskId, currentPomodoroId, pomodoroCount,
-        updateStreak, completePomodoro, getPomodoroStats
+        updateStreak, completePomodoro, getPomodoroStats,
+        isCompleting
     ]);
 
     // Sync with Supabase periodically
