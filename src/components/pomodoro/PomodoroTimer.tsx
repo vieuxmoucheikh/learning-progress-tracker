@@ -161,7 +161,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         const initAudio = async () => {
             if (settings?.sound_enabled) {
                 try {
-                    context = new (window.AudioContext || (window as any).webkitAudioContext)();
+                    // Try to reuse existing context if possible
+                    if (audioContextState && audioContextState.state !== 'closed') {
+                        context = audioContextState;
+                    } else {
+                        context = new (window.AudioContext || (window as any).webkitAudioContext)();
+                    }
                     await context.resume();
                     setAudioContextState(context);
                     setSoundEnabledState(true);
@@ -176,15 +181,99 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
         initAudio();
 
+        const handleVisibilityChange = async () => {
+            if (document.visibilityState === 'visible' && context) {
+                await context.resume();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
         return () => {
-            if (context) {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            if (context && context !== audioContextState) {
                 if (activeOscillatorState || activeGainNodeState) {
                     stopSound();
                 }
                 context.close().catch(console.error);
             }
         };
-    }, [settings?.sound_enabled, stopSound, activeOscillatorState, activeGainNodeState]);
+    }, [settings?.sound_enabled, stopSound, activeOscillatorState, activeGainNodeState, audioContextState]);
+
+    // Handle visibility change and page refresh
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                // Store the current state and timestamp when tab becomes hidden
+                const stateToStore = {
+                    time,
+                    isActive,
+                    isBreak,
+                    currentPomodoroId,
+                    activeTaskId,
+                    timestamp: Date.now(),
+                    settings
+                };
+                localStorage.setItem('pomodoroBackgroundState', JSON.stringify(stateToStore));
+            } else if (document.visibilityState === 'visible') {
+                // Restore state and calculate elapsed time when tab becomes visible
+                const storedState = localStorage.getItem('pomodoroBackgroundState');
+                if (storedState) {
+                    const parsedState = JSON.parse(storedState);
+                    if (parsedState.isActive) {
+                        const elapsedSeconds = Math.floor((Date.now() - parsedState.timestamp) / 1000);
+                        const newTime = Math.max(0, parsedState.time - elapsedSeconds);
+                        
+                        setTime(newTime);
+                        // Only set active if there's still time remaining
+                        setIsActive(newTime > 0);
+                        setIsBreak(parsedState.isBreak);
+                        setCurrentPomodoroId(parsedState.currentPomodoroId);
+                        setActiveTaskId(parsedState.activeTaskId);
+                        
+                        // Only handle timer complete if we just reached zero
+                        if (newTime === 0 && parsedState.time > 0) {
+                            handleTimerComplete();
+                        }
+                    }
+                }
+            }
+        };
+
+        // Handle initial page load
+        const loadInitialState = () => {
+            const storedState = localStorage.getItem('pomodoroBackgroundState');
+            if (storedState) {
+                const parsedState = JSON.parse(storedState);
+                if (parsedState.isActive) {
+                    const elapsedSeconds = Math.floor((Date.now() - parsedState.timestamp) / 1000);
+                    const newTime = Math.max(0, parsedState.time - elapsedSeconds);
+                    
+                    setTime(newTime);
+                    // Only set active if there's still time remaining
+                    setIsActive(newTime > 0);
+                    setIsBreak(parsedState.isBreak);
+                    setCurrentPomodoroId(parsedState.currentPomodoroId);
+                    setActiveTaskId(parsedState.activeTaskId);
+                    
+                    // Only handle timer complete if we just reached zero
+                    if (newTime === 0 && parsedState.time > 0) {
+                        handleTimerComplete();
+                    }
+                }
+            }
+        };
+
+        // Load state on mount
+        loadInitialState();
+
+        // Add visibility change listener
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [time, isActive, isBreak, currentPomodoroId, activeTaskId, settings, handleTimerComplete]);
 
     const playSound = useCallback(async (frequency: number = 440, duration: number = 0.5) => {
         if (!soundEnabledState || !audioContextState || audioContextState.state === 'closed') {
