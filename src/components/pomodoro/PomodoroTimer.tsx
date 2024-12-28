@@ -374,6 +374,66 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     }, [settings, isBreak, lastSoundTime]);
 
+    const playSound = useCallback(async (frequency: number = 440, duration: number = 0.5) => {
+        if (!settings?.sound_enabled) return;
+        
+        try {
+            const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(context.destination);
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(frequency, context.currentTime);
+            
+            gainNode.gain.setValueAtTime(0.1, context.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + duration);
+            
+            oscillator.start(context.currentTime);
+            oscillator.stop(context.currentTime + duration);
+            
+            // Clean up
+            setTimeout(() => {
+                context.close();
+            }, duration * 1000 + 500);
+            
+        } catch (error) {
+            console.error('Error playing sound:', error);
+        }
+    }, [settings]);
+
+    const playGoalAchievedSound = useCallback(() => {
+        // Play a celebratory sound sequence
+        playSound(523.25, 0.2); // C5
+        setTimeout(() => playSound(659.25, 0.2), 200); // E5
+        setTimeout(() => playSound(783.99, 0.3), 400); // G5
+    }, [playSound]);
+
+    const playSessionEndSound = useCallback(() => {
+        // Different sounds for focus and break
+        if (isBreak) {
+            playSound(392, 0.3); // G4 - gentler sound for break end
+        } else {
+            playSound(523.25, 0.3); // C5 - brighter sound for focus end
+        }
+    }, [isBreak, playSound]);
+
+    useEffect(() => {
+        if (time === 0 && isActive) {
+            playSessionEndSound();
+            if (settings?.notification_enabled) {
+                if (Notification.permission === 'granted') {
+                    new Notification('Pomodoro Timer', {
+                        body: isBreak ? 'Break time is over!' : 'Time to take a break!',
+                        icon: 'favicon.ico'
+                    });
+                }
+            }
+        }
+    }, [time, isActive, isBreak, settings, playSessionEndSound]);
+
     const handleTimerComplete = useCallback(async () => {
         if (!settings) return;
 
@@ -382,7 +442,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             
             // Play sound first
             if (settings.sound_enabled) {
-                playTimerSound();
+                playSessionEndSound();
             }
 
             if (currentPomodoroId) {
@@ -410,8 +470,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
                         // Check if daily goal is reached
                         if (settings && settings.daily_goal !== undefined && newCompletedPomodoros >= settings.daily_goal && !task.completed) {
-                            const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-                            playGoalAchievedSound(audioContext);
+                            playGoalAchievedSound();
                             return {
                                 ...task,
                                 completed: true,
@@ -441,7 +500,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             console.error('Error handling timer complete:', error);
         }
     }, [settings, isBreak, activeTaskId, pomodoroCount, tasks]);
-
 
     const playNotificationSound = useCallback(async () => {
         if (!settings?.sound_enabled) return;
