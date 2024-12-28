@@ -112,6 +112,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     const [oscillator, setOscillator] = useState<OscillatorNode | null>(null);
     const [isCompleted, setIsCompleted] = useState(false);
     const [pomodoroCount, setPomodoroCount] = useState(0); // Ajouter ce state
+    const [lastSoundTime, setLastSoundTime] = useState<number>(0);
 
     // Add streak tracking
     useEffect(() => {
@@ -340,10 +341,10 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     const parsedTasks = JSON.parse(savedTasks);
                     const tasksWithMetrics = parsedTasks.map((task: any) => ({
                         ...task,
-                        metrics: task.metrics || {
-                            totalMinutes: 0,
-                            completedPomodoros: 0,
-                            currentStreak: 0
+                        metrics: {
+                            totalMinutes: task.metrics.totalMinutes || 0,
+                            completedPomodoros: task.metrics.completedPomodoros || 0,
+                            currentStreak: task.metrics.currentStreak || 0
                         }
                     }));
                     setTasks(tasksWithMetrics);
@@ -355,84 +356,41 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         loadTasks();
     }, []);
 
-    useEffect(() => {
-        try {
-            localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
-        } catch (error) {
-            console.error('Error saving tasks:', error);
+    const playTimerSound = useCallback(() => {
+        if (!settings?.sound_enabled) return;
+        
+        const now = Date.now();
+        if (now - lastSoundTime < 1000) return;
+        setLastSoundTime(now);
+        
+        const audio = new Audio('/notification.mp3');
+        audio.play().catch(console.error);
+        
+        if (settings?.notification_enabled && Notification.permission === 'granted') {
+            new Notification('Pomodoro Timer', {
+                body: isBreak ? 'Break time is over!' : 'Time to take a break!',
+                icon: '/favicon.ico'
+            });
         }
-    }, [tasks]);
+    }, [settings, isBreak, lastSoundTime]);
 
-    // Ajouter un effet pour charger les paramètres au démarrage
-    useEffect(() => {
-        const loadSettings = async () => {
-            try {
-                const userSettings = await getPomodoroSettings();
-                setSettings(userSettings);
-                // Initialiser le timer avec la bonne durée
-                if (!isActive) {
-                    setTime(userSettings.work_duration * 60);
-                }
-            } catch (error) {
-                console.error('Error loading settings:', error);
-            }
-        };
-        loadSettings();
-    }, []);
-
-    // Function to celebrate goal achievement with sound and visual feedback
-    const celebrateGoalAchievement = useCallback(async () => {
-        if (audioContext) {
-            await playGoalAchievedSound(audioContext);
-        }
-        toast({
-            title: "Daily Goal Achieved! 🎉",
-            description: "Congratulations! You've reached your daily goal.",
-            duration: 5000,
-        });
-    }, [audioContext, toast]);
-
-    // Function to check and handle daily goal
-    const checkDailyGoal = useCallback((completedCount: number) => {
-        if (settings?.daily_goal && completedCount >= settings.daily_goal) {
-            const currentTask = tasks.find(t => t.id === activeTaskId);
-            if (currentTask && !currentTask.completed) {
-                setTasks(prev => prev.map(task => 
-                    task.id === activeTaskId 
-                        ? { ...task, completed: true }
-                        : task
-                ));
-                celebrateGoalAchievement();
-            }
-        }
-    }, [settings, activeTaskId, tasks, celebrateGoalAchievement]);
-
-    // Modifier handleTimerComplete pour mieux gérer les paramètres
     const handleTimerComplete = useCallback(async () => {
         if (!settings) return;
 
         try {
-            // S'assurer que l'AudioContext est créé si nécessaire
-            if (!audioContext) {
-                const newAudioContext = new AudioContext();
-                setAudioContext(newAudioContext);
-            }
-
-            // Jouer le son avant toute autre opération si activé
-            if (settings.sound_enabled && audioContext) {
-                await playNotificationSound();
-            }
-
-            // Arrêter le timer actif
             setIsActive(false);
             
-            // Compléter le pomodoro actuel
+            // Play sound first
+            if (settings.sound_enabled) {
+                playTimerSound();
+            }
+
             if (currentPomodoroId) {
                 await completePomodoro(currentPomodoroId);
                 setCurrentPomodoroId(null);
             }
-    
-            // Mettre à jour les métriques pour le focus time uniquement
+
+            // Update metrics for focus time only
             if (!isBreak && activeTaskId) {
                 const newPomodoroCount = pomodoroCount + 1;
                 setPomodoroCount(newPomodoroCount);
@@ -440,74 +398,50 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 setTasks(prev => prev.map(task => {
                     if (task.id === activeTaskId) {
                         const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
-                        checkDailyGoal(newCompletedPomodoros);
+                        const newTotalMinutes = task.metrics.totalMinutes + settings.work_duration;
+                        
+                        // Update streak to match completed pomodoros
+                        const updatedMetrics = {
+                            ...task.metrics,
+                            completedPomodoros: newCompletedPomodoros,
+                            totalMinutes: newTotalMinutes,
+                            currentStreak: newCompletedPomodoros // Streak matches completed pomodoros
+                        };
+
+                        // Check if daily goal is reached
+                        if (settings && settings.daily_goal !== undefined && newCompletedPomodoros >= settings.daily_goal && !task.completed) {
+                            const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+                            playGoalAchievedSound(audioContext);
+                            return {
+                                ...task,
+                                completed: true,
+                                metrics: updatedMetrics
+                            };
+                        }
+
                         return {
                             ...task,
-                            metrics: {
-                                ...task.metrics,
-                                currentStreak: task.metrics.currentStreak + 1,
-                                completedPomodoros: newCompletedPomodoros,
-                                totalMinutes: task.metrics.totalMinutes + settings.work_duration
-                            }
+                            metrics: updatedMetrics
                         };
                     }
                     return task;
                 }));
-                updateStreak();
+
+                // Update localStorage
                 localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
             }
-    
-            // Jouer le son si activé
-            if (settings.sound_enabled) {
-                await playNotificationSound();
-            }
-    
-            // Basculer entre focus et pause
-            const newIsBreak = !isBreak;
-            setIsBreak(newIsBreak);
-    
-            // Calculer la durée suivante
-            const newDuration = await (async () => {
-                if (newIsBreak) {
-                    const completedPomodoros = tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0;
-                    const isLongBreak = completedPomodoros > 0 && completedPomodoros % settings.pomodoros_until_long_break === 0;
-                    return isLongBreak ? settings.long_break_duration : settings.break_duration;
-                }
-                return settings.work_duration;
-            })();
-    
-            setTime(newDuration * 60);
-    
-            // Notification
-            toast({
-                title: newIsBreak ? "Time for a break!" : "Break complete!",
-                description: newIsBreak
-                    ? `Taking a ${newDuration}-minute break.`
-                    : "Ready for another focused session!",
-                duration: 3000,
-            });
-    
-            // Démarrer automatiquement avec un délai
-            const shouldAutoStart = newIsBreak ? settings.auto_start_breaks : settings.auto_start_pomodoros;
-            if (shouldAutoStart) {
-                // Attendre que les états soient mis à jour
-                setTimeout(async () => {
-                    try {
-                        await startNewPomodoro(newIsBreak ? 'break' : 'work');
-                    } catch (error) {
-                        console.error('Error auto-starting next session:', error);
-                    }
-                }, 500);
+
+            // Start break
+            if (settings.auto_start_breaks) {
+                setIsBreak(true);
+                setTime(settings.break_duration * 60);
+                setIsActive(true);
             }
         } catch (error) {
-            console.error('Error completing timer:', error);
-            toast({
-                title: 'Error',
-                description: 'Failed to complete the session. Please try again.',
-                variant: 'destructive',
-            });
+            console.error('Error handling timer complete:', error);
         }
-    }, [settings, isBreak, activeTaskId, currentPomodoroId, tasks, pomodoroCount, audioContext]);
+    }, [settings, isBreak, activeTaskId, pomodoroCount, tasks]);
+
 
     const playNotificationSound = useCallback(async () => {
         try {
@@ -1217,4 +1151,3 @@ function PomodoroSettingsDialogComponent({
 }
 
 export default PomodoroTimer;
- 
