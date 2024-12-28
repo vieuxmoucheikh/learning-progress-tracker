@@ -123,8 +123,9 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     }, [isBreak, streak]);
 
     const handleTimerComplete = useCallback(async () => {
-        setIsActive(false);
-        
+        // Guard against multiple triggers
+        if (!isActive || time !== 0) return;
+
         // Play completion sound if enabled in settings
         if (settings?.sound_enabled && audioContext && Date.now() - lastSoundTime > 500) {
             await playGoalAchievedSound(audioContext);
@@ -135,7 +136,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             // Handle work session completion
             updateStreak();
             setPomodoroCount(prev => prev + 1);
-            
+
             // Update task metrics and mark as complete
             if (activeTaskId) {
                 setTasks(prevTasks =>
@@ -160,7 +161,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     })
                 );
             }
-            
+
             if (currentPomodoroId) {
                 try {
                     await completePomodoro(currentPomodoroId);
@@ -173,7 +174,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     localStorage.setItem('failedPomodoroCompletions', JSON.stringify(failedCompletions));
                 }
             }
-            
+
             toast({
                 title: "Pomodoro completed!",
                 description: "Time for a break!",
@@ -184,15 +185,15 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 description: "Ready to focus again?",
             });
         }
-        
+
         // Toggle between work and break
         setIsBreak(!isBreak);
-        
+
         // Determine next session duration
         const nextIsBreak = !isBreak;
-        const isLongBreak = nextIsBreak && settings?.pomodoros_until_long_break && 
-                           pomodoroCount > 0 && pomodoroCount % settings.pomodoros_until_long_break === 0;
-        
+        const isLongBreak = nextIsBreak && settings?.pomodoros_until_long_break &&
+            pomodoroCount > 0 && pomodoroCount % settings.pomodoros_until_long_break === 0;
+
         if (nextIsBreak) {
             const breakDuration = isLongBreak ? settings?.long_break_duration : settings?.break_duration;
             setTime((breakDuration ?? 5) * 60);
@@ -208,14 +209,44 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             }
             startNewPomodoro();
         }
-        
+
     }, [isBreak, currentPomodoroId, audioContext, lastSoundTime, settings, updateStreak, pomodoroCount]);
+
+    // Timer logic with Web Worker
+    useEffect(() => {
+        const worker = new Worker(new URL('./timerWorker.js', import.meta.url));
+        worker.onmessage = (e) => {
+            if (e.data.type === 'tick') {
+                setTime(prevTime => {
+                    const newTime = Math.max(0, prevTime - 1);
+                    if (newTime === 0 && isActive) {
+                        // Stop the timer first
+                        worker.postMessage({ command: 'stop' });
+                        setIsActive(false);
+                        // Then handle completion
+                        handleTimerComplete();
+                    }
+                    return newTime;
+                });
+            }
+        };
+
+        if (isActive && time > 0) {
+            worker.postMessage({ command: 'start' });
+        } else {
+            worker.postMessage({ command: 'stop' });
+        }
+
+        return () => {
+            worker.terminate();
+        };
+    }, [isActive, handleTimerComplete, time]);
 
     // Sync with Supabase periodically
     useEffect(() => {
         const syncWithServer = async () => {
             if (!user) return;
-            
+
             try {
                 // Only sync if we have an active pomodoro
                 if (currentPomodoroId && isActive) {
@@ -324,33 +355,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     }, [time, isActive, isBreak, currentPomodoroId]);
 
-    // Timer logic with Web Worker
-    useEffect(() => {
-        const worker = new Worker(new URL('./timerWorker.js', import.meta.url));
-        worker.onmessage = (e) => {
-            if (e.data.type === 'tick') {
-                setTime(prevTime => {
-                    const newTime = Math.max(0, prevTime - 1);
-                    if (newTime === 0 && isActive) {
-                        handleTimerComplete();
-                        worker.postMessage({ command: 'stop' });
-                    }
-                    return newTime;
-                });
-            }
-        };
-        
-        if (isActive && time > 0) {
-            worker.postMessage({ command: 'start' });
-        } else {
-            worker.postMessage({ command: 'stop' });
-        }
-        
-        return () => {
-            worker.terminate();
-        };
-    }, [isActive, handleTimerComplete]);
-
     // Handle visibility change and page refresh
     useEffect(() => {
         const handleVisibilityChange = () => {
@@ -374,13 +378,13 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     if (parsedState.isActive) {
                         const elapsedSeconds = Math.floor((Date.now() - parsedState.timestamp) / 1000);
                         const newTime = Math.max(0, parsedState.time - elapsedSeconds);
-                        
+
                         setTime(newTime);
                         setIsActive(true);
                         setIsBreak(parsedState.isBreak);
                         setCurrentPomodoroId(parsedState.currentPomodoroId);
                         setActiveTaskId(parsedState.activeTaskId);
-                        
+
                         // If timer completed while in background
                         if (newTime === 0) {
                             handleTimerComplete();
@@ -398,13 +402,13 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 if (parsedState.isActive) {
                     const elapsedSeconds = Math.floor((Date.now() - parsedState.timestamp) / 1000);
                     const newTime = Math.max(0, parsedState.time - elapsedSeconds);
-                    
+
                     setTime(newTime);
                     setIsActive(true);
                     setIsBreak(parsedState.isBreak);
                     setCurrentPomodoroId(parsedState.currentPomodoroId);
                     setActiveTaskId(parsedState.activeTaskId);
-                    
+
                     // If timer completed while page was closed
                     if (newTime === 0) {
                         handleTimerComplete();
@@ -418,7 +422,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
         // Add visibility change listener
         document.addEventListener('visibilitychange', handleVisibilityChange);
-        
+
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
@@ -432,13 +436,13 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             const currentTime = new Date().getTime();
             const timeDiff = Math.floor((currentTime - parsedState.timestamp) / 1000);
             const newTime = Math.max(0, parsedState.time - timeDiff);
-            
+
             setTime(newTime);
             setIsActive(parsedState.isActive);
             setIsBreak(parsedState.isBreak);
             setCurrentPomodoroId(parsedState.currentPomodoroId);
             setActiveTaskId(parsedState.activeTaskId);
-            
+
             // If timer completed while page was closed
             if (newTime === 0) {
                 handleTimerComplete();
@@ -505,9 +509,9 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             prevTasks.map(task => {
                 if (task.id === id) {
                     // Only update metrics when manually completing a task
-                    const updatedTask = { 
-                        ...task, 
-                        completed: !task.completed 
+                    const updatedTask = {
+                        ...task,
+                        completed: !task.completed
                     };
                     // Save to localStorage immediately after update
                     const updatedTasks = prevTasks.map(t => t.id === id ? updatedTask : t);
@@ -556,14 +560,14 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
     const playTimerSound = useCallback(() => {
         if (!settings?.sound_enabled) return;
-        
+
         const now = Date.now();
         if (now - lastSoundTime < 1000) return;
         setLastSoundTime(now);
-        
+
         const audio = new Audio('/notification.mp3');
         audio.play().catch(console.error);
-        
+
         if (settings?.notification_enabled && Notification.permission === 'granted') {
             new Notification('Pomodoro Timer', {
                 body: isBreak ? 'Break time is over!' : 'Time to take a break!',
@@ -574,29 +578,29 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
     const playSound = useCallback(async (frequency: number = 440, duration: number = 0.5) => {
         if (!settings?.sound_enabled) return;
-        
+
         try {
             const context = new (window.AudioContext || (window as any).webkitAudioContext)();
             const oscillator = context.createOscillator();
             const gainNode = context.createGain();
-            
+
             oscillator.connect(gainNode);
             gainNode.connect(context.destination);
-            
+
             oscillator.type = 'sine';
             oscillator.frequency.setValueAtTime(frequency, context.currentTime);
-            
+
             gainNode.gain.setValueAtTime(0.1, context.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + duration);
-            
+
             oscillator.start(context.currentTime);
             oscillator.stop(context.currentTime + duration);
-            
+
             // Clean up
             setTimeout(() => {
                 context.close();
             }, duration * 1000 + 500);
-            
+
         } catch (error) {
             console.error('Error playing sound:', error);
         }
@@ -604,23 +608,23 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
     const playGoalAchievedSound = async (context: AudioContext) => {
         if (!settings?.sound_enabled) return;
-        
+
         try {
             const oscillator = context.createOscillator();
             const gainNode = context.createGain();
-            
+
             oscillator.connect(gainNode);
             gainNode.connect(context.destination);
-            
+
             // Configure sound
             oscillator.type = 'sine';
             oscillator.frequency.setValueAtTime(880, context.currentTime); // A5 note
-            
+
             // Configure volume envelope
             gainNode.gain.setValueAtTime(0, context.currentTime);
             gainNode.gain.linearRampToValueAtTime(0.5, context.currentTime + 0.1);
             gainNode.gain.linearRampToValueAtTime(0, context.currentTime + 0.5);
-            
+
             // Play sound
             oscillator.start();
             oscillator.stop(context.currentTime + 0.5);
@@ -654,13 +658,13 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
     const skipCurrentInterval = () => {
         if (!isActive) return;
-        
+
         // Complete current pomodoro if it exists
         if (currentPomodoroId) {
             completePomodoro(currentPomodoroId);
             setCurrentPomodoroId(null);
         }
-        
+
         // Toggle break state and start new session
         setIsBreak(!isBreak);
         setTime(0);
@@ -687,16 +691,16 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         const checkNewDay = () => {
             const lastPomodoro = localStorage.getItem('lastPomodoroDate');
             const today = new Date().toDateString();
-            
+
             if (lastPomodoro !== today) {
                 setPomodoroCount(0);
                 localStorage.setItem('lastPomodoroDate', today);
             }
         };
-        
+
         checkNewDay();
         const interval = setInterval(checkNewDay, 60000); // Vérifier toutes les minutes
-        
+
         return () => clearInterval(interval);
     }, []);
 
@@ -722,7 +726,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 });
                 return;
             }
-    
+
             // Nettoyer d'abord tout pomodoro actif
             if (currentPomodoroId) {
                 try {
@@ -732,32 +736,32 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     console.error('Error completing previous pomodoro:', error);
                 }
             }
-    
+
             // Vérifier et ajuster le type de pause
             let pomodoroType = type;
             if (type === 'break') {
                 const completedPomodoros = tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0;
                 // Corriger la condition pour la pause longue (maintenant correctement à partir du nombre défini)
-                const shouldBeLongBreak = completedPomodoros > 0 && 
+                const shouldBeLongBreak = completedPomodoros > 0 &&
                     completedPomodoros % settings.pomodoros_until_long_break === 0;
                 pomodoroType = shouldBeLongBreak ? 'long_break' : 'break';
             }
-    
+
             // S'assurer que le type est valide pour la base de données
             const validType = pomodoroType === 'long_break' ? 'break' : pomodoroType;
-    
+
             const pomodoro = await startPomodoro(validType);
             setCurrentPomodoroId(pomodoro.id);
             setIsActive(true);
-    
+
             // Mettre à jour le temps en fonction du type réel
-            const duration = pomodoroType === 'long_break' 
-                ? settings.long_break_duration 
-                : pomodoroType === 'break' 
-                    ? settings.break_duration 
+            const duration = pomodoroType === 'long_break'
+                ? settings.long_break_duration
+                : pomodoroType === 'break'
+                    ? settings.break_duration
                     : settings.work_duration;
             setTime(duration * 60);
-    
+
         } catch (error) {
             console.error('Error starting Pomodoro:', error);
             toast({
@@ -974,27 +978,27 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     </TooltipProvider>
                 </div>
                 {activeTaskId && (
-                    <TaskProgress 
-                        task={tasks.find(t => t.id === activeTaskId)!} 
+                    <TaskProgress
+                        task={tasks.find(t => t.id === activeTaskId)!}
                         settings={settings}
                     />
                 )}
                 <PomodoroSettingsDialog
-                open={settingsOpen}
-                onOpenChange={setSettingsOpen}
-                isActive={isActive}
-                onSettingsUpdate={async (newSettings) => {
-                    try {
-                        await updatePomodoroSettings(newSettings);
-                        const updatedSettings = await getPomodoroSettings();
-                        setSettings(updatedSettings);
-                        if (updatedSettings.work_duration && !isActive) {
-                            setTime(updatedSettings.work_duration * 60);
-                        }
-                        toast({
-                            title: "Settings Updated",
-                            description: "Your pomodoro settings have been saved.",
-                        });
+                    open={settingsOpen}
+                    onOpenChange={setSettingsOpen}
+                    isActive={isActive}
+                    onSettingsUpdate={async (newSettings) => {
+                        try {
+                            await updatePomodoroSettings(newSettings);
+                            const updatedSettings = await getPomodoroSettings();
+                            setSettings(updatedSettings);
+                            if (updatedSettings.work_duration && !isActive) {
+                                setTime(updatedSettings.work_duration * 60);
+                            }
+                            toast({
+                                title: "Settings Updated",
+                                description: "Your pomodoro settings have been saved.",
+                            });
                         } catch (error) {
                             toast({
                                 title: "Error",
@@ -1015,7 +1019,7 @@ function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; is
     const seconds = time % 60 || 0;
     const progress = totalTime > 0 ? ((totalTime - time) / totalTime) * 100 : 0;
     const circumference = 2 * Math.PI * 120;
-    
+
     // État local pour suivre le type de période
     const [periodType, setPeriodType] = useState<'Focus' | 'Break'>('Focus');
 
@@ -1201,7 +1205,7 @@ function PomodoroSettingsDialogComponent({
     };
 
     const handleBreakDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setBreakDuration(parseInt(event.target.value)); 
+        setBreakDuration(parseInt(event.target.value));
     };
 
     const handleDailyGoalChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -1242,12 +1246,12 @@ function PomodoroSettingsDialogComponent({
             pomodoros_until_long_break: pomodorosUntilLongBreak,
         };
         await onSettingsUpdate(newSettings);
-        
+
         // Mettre à jour immédiatement le timer si inactif
         if (!isActive) {
             setTime(newSettings.work_duration * 60);
         }
-        
+
         onOpenChange(false);
     };
 
