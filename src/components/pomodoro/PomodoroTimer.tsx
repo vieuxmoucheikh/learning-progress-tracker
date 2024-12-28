@@ -24,6 +24,8 @@ import { cn } from "@/lib/utils";
 import { X } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Clock } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/database';
 
 interface Task {
     id: string;
@@ -277,6 +279,98 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         const syncInterval = setInterval(syncWithSupabase, 5000);
         return () => clearInterval(syncInterval);
     }, [syncWithSupabase]);
+
+    // Add state persistence
+    const loadPersistedState = useCallback(async () => {
+        try {
+            // Get the current pomodoro if it exists
+            const user = await getCurrentUser();
+            if (!user) return;
+
+            const { data: pomodoros } = await supabase
+                .from('pomodoros')
+                .select('*')
+                .eq('user_id', user.id)
+                .eq('completed', false)
+                .order('start_time', { ascending: false })
+                .limit(1);
+
+            if (pomodoros && pomodoros.length > 0) {
+                const currentPomodoro = pomodoros[0];
+                setCurrentPomodoroId(currentPomodoro.id);
+                
+                // Calculate remaining time
+                const startTime = new Date(currentPomodoro.start_time);
+                const duration = currentPomodoro.type === 'break' 
+                    ? settings?.break_duration || 5
+                    : settings?.work_duration || 25;
+                const endTime = new Date(startTime.getTime() + duration * 60 * 1000);
+                const now = new Date();
+                const remainingTime = Math.max(0, Math.floor((endTime.getTime() - now.getTime()) / 1000));
+                
+                if (remainingTime > 0) {
+                    setTime(remainingTime);
+                    setIsBreak(currentPomodoro.type === 'break');
+                    setIsActive(true);
+                } else {
+                    // If time has expired, complete the pomodoro
+                    await completePomodoro(currentPomodoro.id);
+                    setCurrentPomodoroId(null);
+                }
+            }
+
+            // Load task state
+            if (activeTaskId) {
+                const { data: task } = await supabase
+                    .from('tasks')
+                    .select('*')
+                    .eq('id', activeTaskId)
+                    .single();
+                
+                if (task) {
+                    setTasks(prevTasks => {
+                        const updatedTasks = prevTasks.map(t => 
+                            t.id === task.id ? { ...t, ...task } : t
+                        );
+                        return updatedTasks;
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error loading persisted state:', error);
+        }
+    }, [settings, activeTaskId, setTime, setIsBreak, setIsActive, setCurrentPomodoroId, setTasks]);
+
+    useEffect(() => {
+        loadPersistedState();
+    }, [loadPersistedState]);
+
+    // Update document title with timer
+    useEffect(() => {
+        const minutes = Math.floor(time / 60);
+        const seconds = time % 60;
+        const timeString = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        document.title = isActive ? `${timeString} - ${isBreak ? 'Break' : 'Focus'} Time` : 'Pomodoro Timer';
+
+        return () => {
+            document.title = 'Pomodoro Timer';
+        };
+    }, [time, isActive, isBreak]);
+
+    // Handle visibility change
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible' && isActive) {
+                // Refresh the timer state when tab becomes visible
+                loadPersistedState();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [isActive, loadPersistedState]);
 
     const addTask = async (text: string) => {
         const newTaskId = crypto.randomUUID();

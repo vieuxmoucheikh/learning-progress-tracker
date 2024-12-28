@@ -845,7 +845,7 @@ export async function addSession(goalId: string, sessionData: { date: string; du
   }
 }
 
-async function getCurrentUser() {
+export async function getCurrentUser() {
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
     throw new Error('Authentication required');
