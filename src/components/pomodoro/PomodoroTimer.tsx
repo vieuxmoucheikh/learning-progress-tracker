@@ -60,7 +60,7 @@ interface PomodoroTimerProps {
     sessionId?: string;
 }
 
-export function PomodoroTimer({ }: PomodoroTimerProps) {
+export function PomodoroTimer({ onSessionComplete }: PomodoroTimerProps) {
     const [time, setTime] = useState(25 * 60);
     const [isActive, setIsActive] = useState(false);
     const [isBreak, setIsBreak] = useState(false);
@@ -91,8 +91,71 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
     const [oscillator, setOscillator] = useState<OscillatorNode | null>(null);
     const [isCompleted, setIsCompleted] = useState(false);
-    const [pomodoroCount, setPomodoroCount] = useState(0); // Ajouter ce state
+    const [pomodoroCount, setPomodoroCount] = useState(0);
     const [lastSoundTime, setLastSoundTime] = useState<number>(0);
+
+    // Initialize audio context
+    useEffect(() => {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            setAudioContext(new AudioContext());
+        } catch (error) {
+            console.error('Web Audio API is not supported in this browser');
+        }
+    }, []);
+
+    // Load settings on mount
+    useEffect(() => {
+        const loadSettings = async () => {
+            try {
+                if (user) {
+                    const userSettings = await getPomodoroSettings();
+                    if (userSettings) {
+                        setSettings(userSettings);
+                        setTime(userSettings.work_duration * 60);
+                    }
+                } else {
+                    const savedSettings = localStorage.getItem('pomodoroSettings');
+                    if (savedSettings) {
+                        const parsedSettings = JSON.parse(savedSettings);
+                        setSettings(parsedSettings);
+                        setTime(parsedSettings.work_duration * 60);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        };
+        loadSettings();
+    }, [user]);
+
+    // Load tasks on mount
+    useEffect(() => {
+        const loadTasks = async () => {
+            try {
+                const savedTasks = localStorage.getItem('pomodoroTasks');
+                if (savedTasks) {
+                    const parsedTasks = JSON.parse(savedTasks);
+                    const tasksWithMetrics = parsedTasks.map((task: any) => ({
+                        id: task.id || crypto.randomUUID(),
+                        text: task.text || '',
+                        completed: task.completed || false,
+                        progress: task.progress || 0,
+                        metrics: {
+                            totalMinutes: task.metrics?.totalMinutes || 0,
+                            completedPomodoros: task.metrics?.completedPomodoros || 0,
+                            currentStreak: task.metrics?.currentStreak || 0
+                        }
+                    }));
+                    setTasks(tasksWithMetrics);
+                }
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+                setTasks([]);
+            }
+        };
+        loadTasks();
+    }, []);
 
     // Add streak tracking
     useEffect(() => {
@@ -712,18 +775,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         return () => clearInterval(interval);
     }, []);
 
-    // Initialize audio context
-    useEffect(() => {
-        if (typeof window !== 'undefined' && !audioContext) {
-            try {
-                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                setAudioContext(new AudioContextClass());
-            } catch (error) {
-                console.error('Web Audio API is not supported in this browser:', error);
-            }
-        }
-    }, []);
-
     const startNewPomodoro = async (type: 'work' | 'break' | 'long_break' = 'work') => {
         try {
             if (!settings || !activeTaskId) {
@@ -809,216 +860,173 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     }, [tasks]);
 
     return (
-        <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate700/30 shadow-2xl">
-            <div className="pomodoro-timer space-y-6 md:space-y-8">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full shadow-lg">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full animate-pulse bg-blue-500" />
-                        <span className="text-sm font-medium text-blue-100">
-                            {isBreak ? "Break Time" : "Focus Time"}
-                        </span>
-                    </div>
-                </div>
-                <div className="w-full">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Input
-                            type="text"
-                            value={currentTask}
-                            onChange={(e) => setCurrentTask(e.target.value)}
-                            placeholder="Add a new task..."
-                            className="flex h-10 w-full rounded-md border border-slate-600/30 bg-slate-800/80 px-3 py-2
-                            text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium
-                            placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-blue-50"
-                        />
-                        <Button
-                            onClick={() => {
-                                if (currentTask.trim()) {
-                                    addTask(currentTask);
-                                    setCurrentTask("");
-                                }
-                            }}
-                            className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20"
-                        >
-                            Add
-                        </Button>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
-                                {tasks.filter(t => !t.completed).length} active
-                            </Badge>
-                            <Badge variant="outline" className="bg-slate-700/50 text-slate-200 border-slate-500/30">
-                                {tasks.filter(t => t.completed).length} completed
-                            </Badge>
+        <div className="pomodoro-container">
+            <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate700/30 shadow-2xl">
+                <div className="pomodoro-timer space-y-6 md:space-y-8">
+                    <div className="relative">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full shadow-lg">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full animate-pulse bg-blue-500" />
+                                <span className="text-sm font-medium text-blue-100">
+                                    {isBreak ? "Break Time" : "Focus Time"}
+                                </span>
+                            </div>
                         </div>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowCompletedTasks(prev => !prev)}
-                            className="bg-slate-700/50 text-slate-200 hover:bg-slate-600/50 hover:text-white"
-                        >
-                            {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
-                        </Button>
+                        
+                        <TimerDisplay 
+                            time={time}
+                            isActive={isActive}
+                            totalTime={settings ? (isBreak ? settings.break_duration * 60 : settings.work_duration * 60) : 25 * 60}
+                            isBreak={isBreak}
+                        />
+
+                        <div className="flex justify-center gap-4 mt-6">
+                            <Button
+                                onClick={() => {
+                                    if (isActive) {
+                                        setIsActive(false);
+                                    } else {
+                                        setIsActive(true);
+                                        if (!currentPomodoroId) {
+                                            startNewPomodoro();
+                                        }
+                                    }
+                                }}
+                                className={cn(
+                                    "bg-blue-500 hover:bg-blue-600 text-white shadow-lg",
+                                    isActive ? "bg-red-500 hover:bg-red-600" : ""
+                                )}
+                            >
+                                {isActive ? <PauseIcon /> : <PlayIcon />}
+                            </Button>
+                            
+                            <Button
+                                onClick={() => {
+                                    if (window.confirm('Are you sure you want to skip the current session?')) {
+                                        handleTimerComplete();
+                                    }
+                                }}
+                                className="bg-slate-700 hover:bg-slate-600 text-white"
+                                disabled={!isActive}
+                            >
+                                <SkipForwardIcon />
+                            </Button>
+                            
+                            <Button
+                                onClick={() => setSettingsOpen(true)}
+                                className="bg-slate-700 hover:bg-slate-600 text-white"
+                            >
+                                <Settings2Icon />
+                            </Button>
+                        </div>
                     </div>
-                    <ul>
-                        {tasks
-                            .filter(task => showCompletedTasks || !task.completed)
-                            .map(task => (
-                                <li key={task.id} className="flex items-center gap-3 p-4 rounded-xl transition-all duration-200">
-                                    <Checkbox
-                                        checked={task.completed}
-                                        onChange={() => toggleTask(task.id)}
-                                        className="data-[state=checked]:bg-blue-500"
-                                    />
-                                    <div className="flex-1 min-w-0">
-                                        <div className={cn(
-                                            "font-medium truncate",
-                                            task.completed ? "text-slate-400 line-through" : "text-blue-100"
-                                        )}>
-                                            {task.text}
-                                        </div>
-                                        {activeTaskId === task.id && (
-                                            <div className="text-xs text-blue-200 mt-1 flex items-center gap-2">
-                                                <span className="flex items-center gap-1">
-                                                    <Clock className="w-3 h-3" />
-                                                    {formatTotalTime(task.metrics.totalMinutes)}
-                                                </span>
-                                                <span>*</span>
-                                                <span className="flex items-center gap-1">
-                                                    <Target className="w-3 h-3" />
-                                                    {task.metrics.completedPomodoros} pomodoros
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
+
+                    <div className="task-section mt-8">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Input
+                                type="text"
+                                value={currentTask}
+                                onChange={(e) => setCurrentTask(e.target.value)}
+                                placeholder="Add a new task..."
+                                className="flex h-10 w-full rounded-md border border-slate-600/30 bg-slate-800/80 px-3 py-2
+                                text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium
+                                placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-blue-50"
+                            />
+                            <Button
+                                onClick={() => {
+                                    if (currentTask.trim()) {
+                                        addTask(currentTask);
+                                        setCurrentTask("");
+                                    }
+                                }}
+                                className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+                            >
+                                Add
+                            </Button>
+                        </div>
+
+                        {tasks.length > 0 ? (
+                            <>
+                                <div className="flex justify-between items-center mb-4">
                                     <div className="flex items-center gap-2">
-                                        <Button
-                                            variant={activeTaskId === task.id ? "default" : "ghost"}
-                                            size="sm"
-                                            onClick={() => setTaskActive(task.id)}
-                                            className={cn(
-                                                "transition-all duration-200",
-                                                activeTaskId === task.id
-                                                    ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20"
-                                                    : "bg-blue-500/20 text-blue-100 hover:bg-blue-500/30"
-                                            )}
-                                        >
-                                            {activeTaskId === task.id ? "Active" : "Start"}
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => removeTask(task.id)}
-                                            className="bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-red-100"
-                                        >
-                                            <X className="h-4 w-4" />
-                                        </Button>
+                                        <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
+                                            {tasks.filter(t => !t.completed).length} active
+                                        </Badge>
+                                        <Badge variant="outline" className="bg-slate-700/50 text-slate-200 border-slate-500/30">
+                                            {tasks.filter(t => t.completed).length} completed
+                                        </Badge>
                                     </div>
-                                </li>
-                            ))}
-                    </ul>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setShowCompletedTasks(prev => !prev)}
+                                        className="bg-slate-700/50 text-slate-200 hover:bg-slate-600/50 hover:text-white"
+                                    >
+                                        {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
+                                    </Button>
+                                </div>
+
+                                <ul className="space-y-2">
+                                    {tasks
+                                        .filter(task => showCompletedTasks || !task.completed)
+                                        .map(task => (
+                                            <li key={task.id} className="flex items-center gap-3 p-4 rounded-xl transition-all duration-200">
+                                                <Checkbox
+                                                    checked={task.completed}
+                                                    onCheckedChange={() => toggleTask(task.id)}
+                                                    className="data-[state=checked]:bg-blue-500"
+                                                />
+                                                <div className="flex-1 min-w-0">
+                                                    <div className={cn(
+                                                        "font-medium truncate",
+                                                        task.completed ? "text-slate-400 line-through" : "text-blue-100"
+                                                    )}>
+                                                        {task.text}
+                                                    </div>
+                                                    {task.metrics && (
+                                                        <div className="text-xs text-blue-200 mt-1">
+                                                            {formatTotalTime(task.metrics.totalMinutes)} · {task.metrics.completedPomodoros} pomodoros
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => removeTask(task.id)}
+                                                    className="text-slate-400 hover:text-red-400"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </Button>
+                                            </li>
+                                        ))}
+                                </ul>
+                            </>
+                        ) : (
+                            <div className="text-center text-slate-400 py-8">
+                                No tasks yet. Add your first task to get started!
+                            </div>
+                        )}
+                    </div>
                 </div>
-                <div className="relative mb-8" ref={timerRef}>
-                    <TimerDisplay
-                        time={time}
-                        isActive={isActive}
-                        totalTime={isBreak ? (settings?.break_duration || 5) * 60 : (settings?.work_duration || 25) * 60}
-                        isBreak={isBreak}
-                    />
-                </div>
-                <div className="flex justify-center gap-4">
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    name={isActive ? 'pause' : 'start'}
-                                    onClick={handleButtonClick}
-                                    disabled={!activeTaskId}
-                                    size="lg"
-                                    className={cn(
-                                        "w-24 transition-all duration-300 shadow-lg",
-                                        isActive
-                                            ? "bg-blue-500/80 hover:bg-blue-600/80 shadow-blue-500/20"
-                                            : "bg-blue-500/60 hover:bg-blue-500/80 shadow-blue-500/10",
-                                        !activeTaskId && "opacity-50"
-                                    )}
-                                >
-                                    {isActive ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                {activeTaskId ? 'Select a task first' : `Space to ${isActive ? 'Pause' : 'Start'}`}
-                            </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    name="skip"
-                                    onClick={handleButtonClick}
-                                    disabled={!activeTaskId || !isActive}
-                                    variant="outline"
-                                    size="lg"
-                                    className="border-white/10 hover:border-white/20 hover:bg-white/5"
-                                >
-                                    <SkipForwardIcon className="h-6 w-6" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                Press 'S' to Skip
-                            </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    name="settings"
-                                    onClick={() => setSettingsOpen(true)}
-                                    variant="outline"
-                                    size="lg"
-                                    className="border-white/10 hover:border-white/20 hover:bg-white/5"
-                                >
-                                    <Settings2Icon className="h-6 w-6" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                Settings
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                </div>
-                {activeTaskId && (
-                    <TaskProgress 
-                        task={tasks.find(t => t.id === activeTaskId)!} 
-                        settings={settings}
-                    />
-                )}
-                <PomodoroSettingsDialog
+            </Card>
+
+            <PomodoroSettingsDialog
                 open={settingsOpen}
                 onOpenChange={setSettingsOpen}
-                isActive={isActive}
+                initialSettings={settings}
                 onSettingsUpdate={async (newSettings) => {
-                    try {
+                    setSettings(newSettings);
+                    setTime(newSettings.work_duration * 60);
+                    if (user) {
                         await updatePomodoroSettings(newSettings);
-                        const updatedSettings = await getPomodoroSettings();
-                        setSettings(updatedSettings);
-                        if (updatedSettings.work_duration && !isActive) {
-                            setTime(updatedSettings.work_duration * 60);
-                        }
-                        toast({
-                            title: "Settings Updated",
-                            description: "Your pomodoro settings have been saved.",
-                        });
-                        } catch (error) {
-                            toast({
-                                title: "Error",
-                                description: "Failed to update settings",
-                                variant: "destructive",
-                            });
-                        }
-                    }}
-                    initialSettings={settings}
-                />
-            </div>
-        </Card>
+                    } else {
+                        localStorage.setItem('pomodoroSettings', JSON.stringify(newSettings));
+                    }
+                }}
+                isActive={isActive}
+                setTime={setTime}
+            />
+        </div>
     );
 }
 
