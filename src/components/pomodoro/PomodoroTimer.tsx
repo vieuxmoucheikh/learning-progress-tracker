@@ -467,6 +467,35 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         };
     }, [isActive, loadPersistedState]);
 
+    useEffect(() => {
+        const loadTasks = async () => {
+            try {
+                const savedTasks = localStorage.getItem('pomodoroTasks');
+                if (savedTasks) {
+                    const parsedTasks = JSON.parse(savedTasks);
+                    const tasksWithMetrics = parsedTasks.map((task: any) => ({
+                        id: task.id || crypto.randomUUID(),
+                        text: task.text || '',
+                        completed: task.completed || false,
+                        progress: task.progress || 0,
+                        metrics: {
+                            totalMinutes: task.metrics?.totalMinutes || 0,
+                            completedPomodoros: task.metrics?.completedPomodoros || 0,
+                            currentStreak: task.metrics?.currentStreak || 0
+                        }
+                    }));
+                    setTasks(tasksWithMetrics);
+                }
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+                // Initialize with empty array if there's an error
+                setTasks([]);
+            }
+        };
+        
+        loadTasks();
+    }, []);
+
     const addTask = async (text: string) => {
         const newTaskId = crypto.randomUUID();
         const newTask: Task = {
@@ -480,7 +509,11 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 currentStreak: 0
             }
         };
-        setTasks(prev => [...prev, newTask]);
+        setTasks(prev => {
+            const updatedTasks = [...prev, newTask];
+            localStorage.setItem('pomodoroTasks', JSON.stringify(updatedTasks));
+            return updatedTasks;
+        });
         setActiveTaskId(newTaskId);
         setTime(settings?.work_duration ? settings.work_duration * 60 : 25 * 60);
         setIsActive(false);
@@ -532,29 +565,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         if (remainingMinutes === 0) return `${hours}h`;
         return `${hours}h ${remainingMinutes}m`;
     };
-
-    useEffect(() => {
-        const loadTasks = async () => {
-            try {
-                const savedTasks = localStorage.getItem('pomodoroTasks');
-                if (savedTasks) {
-                    const parsedTasks = JSON.parse(savedTasks);
-                    const tasksWithMetrics = parsedTasks.map((task: any) => ({
-                        ...task,
-                        metrics: {
-                            totalMinutes: task.metrics.totalMinutes || 0,
-                            completedPomodoros: task.metrics.completedPomodoros || 0,
-                            currentStreak: task.metrics.currentStreak || 0
-                        }
-                    }));
-                    setTasks(tasksWithMetrics);
-                }
-            } catch (error) {
-                console.error('Error loading tasks:', error);
-            }
-        };
-        loadTasks();
-    }, []);
 
     const playTimerSound = useCallback(() => {
         if (!settings?.sound_enabled) return;
