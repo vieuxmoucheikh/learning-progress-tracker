@@ -127,74 +127,86 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     }, [isBreak, streak]);
 
+    // Audio context management
+    const [audioContextState, setAudioContextState] = useState<AudioContext | null>(null);
+    const [soundEnabledState, setSoundEnabledState] = useState(settings?.sound_enabled || false);
+    const [activeOscillatorState, setActiveOscillatorState] = useState<OscillatorNode | null>(null);
+    const [activeGainNodeState, setActiveGainNodeState] = useState<GainNode | null>(null);
+
     // Initialize audio context
     useEffect(() => {
-        if (settings?.sound_enabled && !audioContext) {
-            const context = new (window.AudioContext || (window as any).webkitAudioContext)();
-            setAudioContext(context);
-            setSoundEnabled(true);
-            return () => {
-                context.close();
-            };
-        } else if (!settings?.sound_enabled && audioContext) {
-            audioContext.close();
-            setAudioContext(null);
-            setSoundEnabled(false);
+        let context: AudioContext | null = null;
+        
+        if (settings?.sound_enabled) {
+            try {
+                context = new (window.AudioContext || (window as any).webkitAudioContext)();
+                setAudioContextState(context);
+                setSoundEnabledState(true);
+            } catch (error) {
+                console.error('Failed to create audio context:', error);
+                setSoundEnabledState(false);
+            }
         }
-    }, [settings?.sound_enabled]);
 
-    // Cleanup sound when component unmounts
-    useEffect(() => {
         return () => {
-            if (activeOscillator) {
-                activeOscillator.stop();
-                activeOscillator.disconnect();
-            }
-            if (activeGainNode) {
-                activeGainNode.disconnect();
-            }
-            if (audioContext) {
-                audioContext.close();
+            if (context) {
+                context.close().catch(console.error);
             }
         };
-    }, []);
+    }, [settings?.sound_enabled]);
 
     const stopSound = useCallback(() => {
-        if (activeOscillator) {
-            activeOscillator.stop();
-            activeOscillator.disconnect();
-            setActiveOscillator(null);
+        if (activeOscillatorState) {
+            try {
+                activeOscillatorState.stop();
+                activeOscillatorState.disconnect();
+            } catch (error) {
+                console.error('Error stopping oscillator:', error);
+            }
+            setActiveOscillatorState(null);
         }
-        if (activeGainNode) {
-            activeGainNode.disconnect();
-            setActiveGainNode(null);
+        if (activeGainNodeState) {
+            try {
+                activeGainNodeState.disconnect();
+            } catch (error) {
+                console.error('Error disconnecting gain node:', error);
+            }
+            setActiveGainNodeState(null);
         }
-    }, [activeOscillator, activeGainNode]);
+    }, [activeOscillatorState, activeGainNodeState]);
 
     const playSound = useCallback(async (frequency: number = 440, duration: number = 0.5) => {
-        if (!soundEnabled || !audioContext) return;
+        if (!soundEnabledState || !audioContextState || audioContextState.state === 'closed') {
+            console.log('Sound disabled or context closed');
+            return;
+        }
         
         try {
+            // Resume context if suspended
+            if (audioContextState.state === 'suspended') {
+                await audioContextState.resume();
+            }
+
             // Stop any existing sound
             stopSound();
 
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
+            const oscillator = audioContextState.createOscillator();
+            const gainNode = audioContextState.createGain();
             
             oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
+            gainNode.connect(audioContextState.destination);
             
             oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(frequency, audioContextState.currentTime);
             
-            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            gainNode.gain.setValueAtTime(0.1, audioContextState.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContextState.currentTime + duration);
             
-            setActiveOscillator(oscillator);
-            setActiveGainNode(gainNode);
+            setActiveOscillatorState(oscillator);
+            setActiveGainNodeState(gainNode);
 
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + duration);
+            oscillator.start(audioContextState.currentTime);
+            oscillator.stop(audioContextState.currentTime + duration);
             
             // Cleanup after duration
             setTimeout(() => {
@@ -205,49 +217,13 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             console.error('Error playing sound:', error);
             stopSound();
         }
-    }, [soundEnabled, audioContext, stopSound]);
-
-    const playGoalAchievedSound = useCallback(async () => {
-        if (!soundEnabled || !audioContext) return;
-        
-        try {
-            // Stop any existing sound
-            stopSound();
-
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
-            
-            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + 0.1);
-            gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.5);
-            
-            setActiveOscillator(oscillator);
-            setActiveGainNode(gainNode);
-
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.5);
-            
-            // Cleanup after duration
-            setTimeout(() => {
-                stopSound();
-            }, 600);
-        } catch (error) {
-            console.error('Error playing sound:', error);
-            stopSound();
-        }
-    }, [soundEnabled, audioContext, stopSound]);
+    }, [soundEnabledState, audioContextState, stopSound]);
 
     const handleTimerComplete = useCallback(async () => {
         try {
             // Play completion sound if enabled
-            if (settings?.sound_enabled && audioContext && Date.now() - lastSoundTime > 1000) {
-                await playGoalAchievedSound();
+            if (settings?.sound_enabled && audioContextState && Date.now() - lastSoundTime > 1000) {
+                await playSound(440, 0.2);
                 setLastSoundTime(Date.now());
             }
 
@@ -347,10 +323,10 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             });
         }
     }, [
-        isBreak, settings, audioContext, lastSoundTime,
+        isBreak, settings, audioContextState, lastSoundTime,
         activeTaskId, currentPomodoroId, pomodoroCount,
         tasks, streak, completePomodoro, getPomodoroStats,
-        playGoalAchievedSound, stopSound, playSound
+        playSound
     ]);
 
     const onButtonClick = useCallback((event: React.FormEvent<HTMLButtonElement>) => {
@@ -395,7 +371,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     }, [time, isBreak, settings, handleTimerComplete, stopSound, isActive]);
 
-    // Timer logic with Web Worker
+    // Timer worker logic
     useEffect(() => {
         let workerInstance: Worker | undefined = undefined;
         
@@ -405,14 +381,10 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 if (e.data.type === 'tick') {
                     setTime(prevTime => {
                         const newTime = Math.max(0, prevTime - 1);
-                        // Only handle completion at zero
-                        if (newTime === 0 && prevTime > 0) {
-                            // Stop the worker immediately
+                        if (newTime === 0 && prevTime > 0 && isActive) {
                             worker.postMessage({ command: 'stop' });
                             setIsActive(false);
                             stopSound();
-                            
-                            // Handle completion
                             handleTimerComplete();
                         }
                         return newTime;
@@ -422,71 +394,106 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             return worker;
         };
 
-        // Initialize worker
-        try {
-            workerInstance = initializeWorker();
-
-            // Control worker based on timer state
-            if (workerInstance && isActive && time > 0) {
+        if (isActive && time > 0) {
+            try {
+                workerInstance = initializeWorker();
                 workerInstance.postMessage({ command: 'start' });
-            } else if (workerInstance) {
-                workerInstance.postMessage({ command: 'stop' });
+            } catch (error) {
+                console.error('Error initializing timer worker:', error);
+                setIsActive(false);
                 stopSound();
             }
-        } catch (error) {
-            console.error('Error initializing timer worker:', error);
-            setIsActive(false);
-            stopSound();
         }
 
-        // Cleanup function
         return () => {
             if (workerInstance) {
                 workerInstance.terminate();
             }
-            stopSound();
-        };
-    }, [isActive, time, stopSound]);
-
-    // Sync with Supabase periodically - with error handling
-    useEffect(() => {
-        const syncInterval = setInterval(async () => {
-            if (!isActive) return; // Only sync when timer is active
-            
-            try {
-                const response = await fetch('/api/sync', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        time,
-                        isActive,
-                        isBreak,
-                        currentPomodoroId,
-                        lastUpdate: Date.now(),
-                    }),
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                if (!data.sync && data.state) {
-                    setTime(data.state.time);
-                    setIsActive(data.state.isActive);
-                    setIsBreak(data.state.isBreak);
-                    setCurrentPomodoroId(data.state.currentPomodoroId);
-                }
-            } catch (error) {
-                // Log error but don't affect timer functionality
-                console.error('Error syncing with server:', error);
+            if (isActive) {
+                stopSound();
             }
-        }, 30000); // Sync every 30 seconds
+        };
+    }, [isActive, time, stopSound, handleTimerComplete]);
+
+    // Sync pomodoro state with Supabase
+    const updateSupabaseState = useCallback(async () => {
+        if (!user || !currentPomodoroId) return;
+
+        let retryCount = 0;
+        const maxRetries = 3;
+        const retryDelay = 1000;
+
+        const attemptUpdate = async (): Promise<void> => {
+            try {
+                const { error } = await supabase
+                    .from('pomodoros')
+                    .update({
+                        current_time: time,
+                        is_active: isActive,
+                        is_break: isBreak,
+                        last_updated: new Date().toISOString()
+                    })
+                    .eq('id', currentPomodoroId);
+
+                if (error) throw error;
+            } catch (error) {
+                console.error('Error updating Supabase state:', error);
+                if (retryCount < maxRetries) {
+                    retryCount++;
+                    await new Promise(resolve => setTimeout(resolve, retryDelay));
+                    return attemptUpdate();
+                }
+            }
+        };
+
+        await attemptUpdate();
+    }, [user, currentPomodoroId, time, isActive, isBreak]);
+
+    // Sync interval
+    useEffect(() => {
+        // Only sync when timer is active
+        if (!isActive) return;
+
+        const syncInterval = setInterval(updateSupabaseState, 30000);
+        updateSupabaseState(); // Initial sync
 
         return () => clearInterval(syncInterval);
-    }, [time, isActive, isBreak, currentPomodoroId]);
+    }, [updateSupabaseState, isActive]);
+
+    // Initial Supabase state load
+    useEffect(() => {
+        const loadInitialState = async () => {
+            if (!user) return;
+
+            try {
+                const { data: pomodoro, error } = await supabase
+                    .from('pomodoros')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('completed', false)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+
+                if (error) {
+                    console.error('Error loading initial state:', error);
+                    return;
+                }
+
+                if (pomodoro) {
+                    setCurrentPomodoroId(pomodoro.id);
+                    setTime(pomodoro.current_time || (settings?.work_duration || 25) * 60);
+                    setIsBreak(pomodoro.is_break || false);
+                    // Don't auto-start, let user control the timer
+                    setIsActive(false);
+                }
+            } catch (error) {
+                console.error('Error in loadInitialState:', error);
+            }
+        };
+
+        loadInitialState();
+    }, [user, settings?.work_duration]);
 
     // Load initial state from Supabase
     useEffect(() => {
