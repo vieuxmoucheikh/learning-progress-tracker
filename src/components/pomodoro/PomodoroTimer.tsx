@@ -53,35 +53,6 @@ interface PomodoroTimerProps {
     sessionId?: string;
 }
 
-// Ajouter une fonction pour le son de célébration
-const playGoalAchievedSound = async (audioContext: AudioContext) => {
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    // Séquence de notes joyeuses
-    const notes = [523.25, 659.25, 783.99, 1046.50]; // Do, Mi, Sol, Do (octave supérieure)
-    const startTime = audioContext.currentTime;
-    
-    notes.forEach((freq, index) => {
-      const noteOscillator = audioContext.createOscillator();
-      const noteGain = audioContext.createGain();
-      
-      noteOscillator.connect(noteGain);
-      noteGain.connect(audioContext.destination);
-      
-      noteOscillator.frequency.value = freq;
-      noteGain.gain.value = 0.1;
-      
-      noteOscillator.start(startTime + index * 0.2);
-      noteOscillator.stop(startTime + (index * 0.2) + 0.2);
-    });
-    
-    return new Promise(resolve => setTimeout(resolve, notes.length * 200));
-  };
-
 export function PomodoroTimer({ }: PomodoroTimerProps) {
     const [time, setTime] = useState(25 * 60);
     const [isActive, setIsActive] = useState(false);
@@ -143,6 +114,46 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             localStorage.setItem('pomodoroStreak', newStreak.toString());
         }
     }, [isBreak, streak]);
+
+    const handleTimerComplete = useCallback(async () => {
+        setIsActive(false);
+        if (!isBreak) {
+            updateStreak();
+            if (currentPomodoroId) {
+                try {
+                    await completePomodoro(currentPomodoroId);
+                    const newStats = await getPomodoroStats();
+                    setStats(newStats);
+                } catch (error) {
+                    console.error('Error completing pomodoro:', error);
+                    // Store failed completion for later sync
+                    const failedCompletions = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
+                    failedCompletions.push({ pomodoroId: currentPomodoroId });
+                    localStorage.setItem('failedPomodoroCompletions', JSON.stringify(failedCompletions));
+                }
+            }
+            
+            // Play completion sound
+            if (audioContext && Date.now() - lastSoundTime > 1000) {
+                await playGoalAchievedSound(audioContext);
+                setLastSoundTime(Date.now());
+            }
+            
+            toast({
+                title: "Pomodoro completed!",
+                description: "Time for a break!",
+            });
+        }
+        
+        // Toggle between work and break
+        setIsBreak(!isBreak);
+        setTime(isBreak ? (settings?.break_duration ?? 5) * 60 : (settings?.work_duration ?? 25) * 60);
+        
+        // Start a new pomodoro session if needed
+        if (!isBreak) {
+            startNewPomodoro();
+        }
+    }, [isBreak, currentPomodoroId, audioContext, lastSoundTime, settings, updateStreak]);
 
     // Sync with Supabase periodically
     useEffect(() => {
@@ -264,22 +275,25 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             if (e.data.type === 'tick') {
                 setTime(prevTime => {
                     const newTime = Math.max(0, prevTime - 1);
-                    if (newTime === 0) {
+                    if (newTime === 0 && isActive) {
                         handleTimerComplete();
+                        worker.postMessage({ command: 'stop' });
                     }
                     return newTime;
                 });
             }
         };
-        if (isActive) {
+        
+        if (isActive && time > 0) {
             worker.postMessage({ command: 'start' });
         } else {
             worker.postMessage({ command: 'stop' });
         }
+        
         return () => {
             worker.terminate();
         };
-    }, [isActive]);
+    }, [isActive, handleTimerComplete]);
 
     // Handle visibility change
     const handleVisibilityChange = useCallback(() => {
@@ -300,7 +314,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
                     
                     if (parsedState.isActive && elapsedSeconds > 0) {
-                        const adjustedTime = Math.max(0, parsedState.time - elapsedSeconds);
+                        const adjustedTime = Math.max(0, parsedState.time - (parsedState.isActive ? elapsedSeconds : 0));
                         setTime(adjustedTime);
                         if (adjustedTime === 0) {
                             handleTimerComplete();
@@ -553,12 +567,33 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     }, [settings]);
 
-    const playGoalAchievedSound = useCallback(() => {
-        // Play a celebratory sound sequence
-        playSound(523.25, 0.2); // C5
-        setTimeout(() => playSound(659.25, 0.2), 200); // E5
-        setTimeout(() => playSound(783.99, 0.3), 400); // G5
-    }, [playSound]);
+    const playGoalAchievedSound = useCallback(async (audioContext: AudioContext) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // Séquence de notes joyeuses
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // Do, Mi, Sol, Do (octave supérieure)
+        const startTime = audioContext.currentTime;
+        
+        notes.forEach((freq, index) => {
+          const noteOscillator = audioContext.createOscillator();
+          const noteGain = audioContext.createGain();
+          
+          noteOscillator.connect(noteGain);
+          noteGain.connect(audioContext.destination);
+          
+          noteOscillator.frequency.value = freq;
+          noteGain.gain.value = 0.1;
+          
+          noteOscillator.start(startTime + index * 0.2);
+          noteOscillator.stop(startTime + (index * 0.2) + 0.2);
+        });
+        
+        return new Promise(resolve => setTimeout(resolve, notes.length * 200));
+      }, []);
 
     const playSessionEndSound = useCallback(() => {
         // Different sounds for focus and break
@@ -582,108 +617,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             }
         }
     }, [time, isActive, isBreak, settings, playSessionEndSound]);
-
-    const handleTimerComplete = useCallback(async () => {
-        try {
-            setIsActive(false);
-            
-            // Play sound first
-            if (settings && settings.sound_enabled) {
-                playSessionEndSound();
-            }
-
-            if (currentPomodoroId) {
-                await completePomodoro(currentPomodoroId);
-                setCurrentPomodoroId(null);
-            }
-
-            // Only update metrics for focus sessions, not breaks
-            if (!isBreak && activeTaskId) {
-                const workDuration = settings?.work_duration || 25;
-                
-                setTasks(prev => {
-                    const updatedTasks = prev.map(task => {
-                        if (task.id === activeTaskId) {
-                            const newMetrics = {
-                                ...task.metrics,
-                                totalMinutes: task.metrics.totalMinutes + workDuration,
-                                completedPomodoros: task.metrics.completedPomodoros + 1,
-                                currentStreak: task.metrics.currentStreak + 1
-                            };
-                            
-                            return {
-                                ...task,
-                                metrics: newMetrics,
-                                // Don't auto-complete the task, let user do it manually
-                                completed: task.completed
-                            };
-                        }
-                        return task;
-                    });
-                    
-                    // Save to localStorage immediately
-                    localStorage.setItem('pomodoroTasks', JSON.stringify(updatedTasks));
-                    return updatedTasks;
-                });
-            }
-
-            // Handle break timer
-            if (settings?.auto_start_breaks && !isBreak) {
-                setIsBreak(true);
-                setTime(settings.break_duration * 60);
-                setIsActive(true);
-            } else if (isBreak) {
-                // After break, start new work session
-                setIsBreak(false);
-                setTime(settings?.work_duration ? settings.work_duration * 60 : 25 * 60);
-                if (settings?.auto_start_pomodoros) {
-                    setIsActive(true);
-                }
-            }
-        } catch (error) {
-            console.error('Error handling timer complete:', error);
-        }
-    }, [settings, isBreak, activeTaskId, playSessionEndSound]);
-
-    const playNotificationSound = useCallback(async () => {
-        if (!settings?.sound_enabled) return;
-        
-        try {
-            const context = new (window.AudioContext || (window as any).webkitAudioContext)();
-            const oscillator = context.createOscillator();
-            const gainNode = context.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(context.destination);
-            
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(440, context.currentTime);
-            
-            gainNode.gain.setValueAtTime(0.1, context.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5);
-            
-            oscillator.start(context.currentTime);
-            oscillator.stop(context.currentTime + 0.5);
-            
-            // Show notification if enabled
-            if (settings?.notification_enabled) {
-                if (Notification.permission === 'granted') {
-                    new Notification('Pomodoro Timer', {
-                        body: isBreak ? 'Break time is over!' : 'Time to take a break!',
-                        icon: 'favicon.ico'
-                    });
-                }
-            }
-            
-            // Clean up
-            setTimeout(() => {
-                context.close();
-            }, 1000);
-            
-        } catch (error) {
-            console.error('Error playing sound:', error);
-        }
-    }, [isBreak, settings]);
 
     const skipCurrentInterval = () => {
         if (!isActive) return;
