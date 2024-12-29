@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Highlight from '@tiptap/extension-highlight';
@@ -14,6 +14,9 @@ import {
   Heading1,
   Heading2,
   CheckSquare,
+  Edit,
+  Save,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -109,9 +112,13 @@ const MenuBar = ({ editor }: { editor: any }) => {
 export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   content,
   onChange,
-  readOnly = false,
+  readOnly: initialReadOnly = false,
   className,
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [localContent, setLocalContent] = useState(content);
+  const readOnly = initialReadOnly || !isEditing;
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -121,10 +128,10 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
         nested: true,
       }),
     ],
-    content,
+    content: localContent,
     editable: !readOnly,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      setLocalContent(editor.getHTML());
     },
   });
 
@@ -134,16 +141,63 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     }
   }, [content, editor]);
 
+  const handleSave = () => {
+    onChange(localContent);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setLocalContent(content);
+    if (editor) {
+      editor.commands.setContent(content);
+    }
+    setIsEditing(false);
+  };
+
   return (
     <div className={cn('border rounded-lg', className)}>
-      {!readOnly && editor && <MenuBar editor={editor} />}
-      <EditorContent 
-        editor={editor} 
-        className={cn(
-          'prose prose-sm max-w-none p-4',
-          !readOnly && 'min-h-[150px] cursor-text'
-        )}
-      />
+      {isEditing && editor && <MenuBar editor={editor} />}
+      <div className="relative">
+        <EditorContent 
+          editor={editor} 
+          className={cn(
+            'prose prose-sm max-w-none p-4',
+            !readOnly && 'min-h-[150px] cursor-text'
+          )}
+        />
+        <div className="absolute bottom-2 right-2 flex gap-2">
+          {!initialReadOnly && !isEditing && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsEditing(true)}
+            >
+              <Edit className="h-4 w-4 mr-1" />
+              Edit Content
+            </Button>
+          )}
+          {isEditing && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSave}
+              >
+                <Save className="h-4 w-4 mr-1" />
+                Save
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCancel}
+              >
+                <X className="h-4 w-4 mr-1" />
+                Cancel
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

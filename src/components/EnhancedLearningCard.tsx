@@ -113,6 +113,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           content={content}
           onChange={setContent}
           readOnly={!isEditing}
+          className="border-none"
         />
       </div>
 
