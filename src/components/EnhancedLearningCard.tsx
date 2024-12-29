@@ -1,28 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Edit,
-  Save,
-  X,
-  Tag,
-  Clock,
-  Image as ImageIcon,
-  Link as LinkIcon,
-  FileText,
-  Plus,
-  Trash,
-} from 'lucide-react';
+import { Edit, Save, X, Tag, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-
-interface CardMedia {
-  type: 'image' | 'link';
-  url: string;
-  description?: string;
-}
+import { CardMedia } from '@/types';
 
 interface EnhancedLearningCardProps {
   id: string;
@@ -58,7 +41,6 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   const [media, setMedia] = useState<CardMedia[]>(initialMedia);
   const [tags, setTags] = useState<string[]>(initialTags);
   const [newTag, setNewTag] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSave = async () => {
     const result = await onSave({
@@ -86,25 +68,75 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
-  const handleAddImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // In a real app, you would upload this to your storage service
-      // For now, we'll create a local URL
-      const url = URL.createObjectURL(file);
-      setMedia([...media, { type: 'image', url, description: file.name }]);
-    }
-  };
+  const handlePaste = useCallback(async (e: React.ClipboardEvent) => {
+    const items = Array.from(e.clipboardData.items);
+    const imageItems = items.filter(item => item.type.startsWith('image'));
+    
+    if (imageItems.length > 0) {
+      e.preventDefault();
+      const file = imageItems[0].getAsFile();
+      if (!file) return;
 
-  const handleAddLink = () => {
-    const url = window.prompt('Enter the URL:');
-    if (url) {
-      setMedia([...media, { type: 'link', url }]);
+      try {
+        // Create a local preview URL
+        const previewUrl = URL.createObjectURL(file);
+        
+        // Insert the image into the content at cursor position
+        const textarea = e.currentTarget as HTMLTextAreaElement;
+        const cursorPos = textarea.selectionStart;
+        const textBefore = content.substring(0, cursorPos);
+        const textAfter = content.substring(textarea.selectionEnd);
+        
+        // Add the image markdown
+        const imageMarkdown = `![${file.name}](${previewUrl})\n`;
+        setContent(textBefore + imageMarkdown + textAfter);
+        
+        // Update media array
+        setMedia([...media, { type: 'image', url: previewUrl, description: file.name }]);
+      } catch (error) {
+        console.error('Failed to handle pasted image:', error);
+      }
     }
-  };
+  }, [content, media]);
 
-  const handleRemoveMedia = (index: number) => {
-    setMedia(media.filter((_, i) => i !== index));
+  const renderContent = (text: string) => {
+    // Simple markdown-like rendering for images and links
+    const lines = text.split('\n');
+    return lines.map((line, index) => {
+      // Image syntax: ![alt](url)
+      const imageMatch = line.match(/!\[(.*?)\]\((.*?)\)/);
+      if (imageMatch) {
+        return (
+          <div key={index} className="my-2">
+            <img 
+              src={imageMatch[2]} 
+              alt={imageMatch[1]} 
+              className="max-w-full rounded-lg shadow-sm hover:shadow-md transition-shadow"
+            />
+          </div>
+        );
+      }
+      
+      // Link syntax: [text](url)
+      const linkMatch = line.match(/\[(.*?)\]\((.*?)\)/);
+      if (linkMatch) {
+        return (
+          <div key={index}>
+            <a 
+              href={linkMatch[2]}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              {linkMatch[1]}
+            </a>
+          </div>
+        );
+      }
+      
+      // Regular text
+      return <div key={index}>{line}</div>;
+    });
   };
 
   return (
@@ -178,90 +210,19 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       <CardContent className="flex-1 space-y-4">
         <div className="min-h-[150px] relative">
           {isEditing ? (
-            <Textarea
+            <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="min-h-[150px] w-full resize-none p-4 text-base leading-relaxed border-2 focus:border-primary"
-              placeholder="Enter your learning notes here..."
+              onPaste={handlePaste}
+              className="min-h-[150px] w-full resize-none p-4 text-base leading-relaxed border-2 focus:border-primary rounded-md"
+              placeholder="Enter your learning notes here... You can paste images directly!"
             />
           ) : (
             <div className="prose prose-sm max-w-none whitespace-pre-wrap p-4 bg-muted/30 rounded-lg text-base leading-relaxed">
-              {content || "No content yet. Click edit to add some notes!"}
+              {renderContent(content)}
             </div>
           )}
         </div>
-
-        {(media.length > 0 || isEditing) && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium">Attachments</h4>
-              {isEditing && (
-                <div className="flex gap-2">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleAddImage}
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <ImageIcon className="h-4 w-4 mr-1" />
-                    Add Image
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleAddLink}
-                  >
-                    <LinkIcon className="h-4 w-4 mr-1" />
-                    Add Link
-                  </Button>
-                </div>
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {media.map((item, index) => (
-                <div key={index} className="relative group">
-                  {item.type === 'image' ? (
-                    <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
-                      <img
-                        src={item.url}
-                        alt={item.description || 'Card attachment'}
-                        className="object-cover w-full h-full"
-                      />
-                      {isEditing && (
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => handleRemoveMedia(index)}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  ) : (
-                    <a
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
-                    >
-                      <div className="flex items-center">
-                        <LinkIcon className="h-4 w-4 mr-2" />
-                        <span className="text-sm truncate">{item.url}</span>
-                      </div>
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         <div className="flex flex-wrap gap-2 items-center">
           {tags.map((tag) => (
