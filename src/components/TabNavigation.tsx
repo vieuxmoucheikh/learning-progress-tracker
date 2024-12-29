@@ -1,4 +1,4 @@
-import { BarChart3, BookOpen, LayoutDashboard, Timer } from "lucide-react";
+import { BarChart3, BookOpen, LayoutDashboard, Timer, Notebook } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCallback } from "react";
 
@@ -17,6 +17,11 @@ const tabs = [
     id: "items",
     label: "Learning Items",
     icon: BookOpen
+  },
+  {
+    id: "learning-cards",
+    label: "Learning Cards",
+    icon: Notebook
   },
   {
     id: "analytics",

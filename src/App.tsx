@@ -40,7 +40,8 @@ const TAB_OPTIONS = {
   DASHBOARD: 'dashboard',
   ITEMS: 'items',
   ANALYTICS: 'analytics',
-  POMODORO: 'pomodoro'
+  POMODORO: 'pomodoro',
+  LEARNING_CARDS: 'learning-cards'
 } as const;
 
 function reducer(state: State, action: Action): State {
@@ -649,6 +650,9 @@ export default function App() {
 
           {selectedTab === TAB_OPTIONS.POMODORO && (
             <PomodoroTimer />
+          )}
+          {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
+            <LearningCardsPage />
           )}
         </main>
       </div>
