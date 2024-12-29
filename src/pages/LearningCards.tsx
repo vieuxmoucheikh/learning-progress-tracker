@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/select';
 import { EnhancedLearningCard } from '@/components/EnhancedLearningCard';
 import { learningCardsService } from '@/lib/learningCards';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { Plus, Search, SearchX, FileText } from 'lucide-react';
 import type { EnhancedLearningCard as CardType, CardMedia } from '@/types';
 
@@ -161,14 +161,14 @@ export function LearningCardsPage() {
           />
         </div>
         <Select
-          value={selectedTags.join(',')}
-          onValueChange={(value) => setSelectedTags(value ? value.split(',') : [])}
+          value={selectedTags.join(',') || 'all'}
+          onValueChange={(value) => setSelectedTags(value === 'all' ? [] : value.split(','))}
         >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by tags" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Tags</SelectItem>
+            <SelectItem value="all">All Tags</SelectItem>
             {allTags.map(tag => (
               <SelectItem key={tag} value={tag}>
                 {tag}
