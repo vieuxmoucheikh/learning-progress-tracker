@@ -143,7 +143,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             content={content}
             onChange={setContent}
             editable={isEditing}
-            className="min-h-[150px]"
+            className="min-h-[150px] w-full"
           />
         </div>
 
