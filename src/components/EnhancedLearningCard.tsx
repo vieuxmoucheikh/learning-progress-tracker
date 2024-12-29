@@ -38,7 +38,7 @@ interface EnhancedLearningCardProps {
     content: string;
     media?: CardMedia[];
     tags: string[];
-  }) => void;
+  }) => Promise<boolean>;
   onDelete: (id: string) => void;
 }
 
@@ -60,15 +60,17 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   const [newTag, setNewTag] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSave = () => {
-    onSave({
+  const handleSave = async () => {
+    const result = await onSave({
       id,
       title,
       content,
       media,
       tags,
     });
-    setIsEditing(false);
+    if (result) {
+      setIsEditing(false);
+    }
   };
 
   const handleAddTag = (e: React.KeyboardEvent) => {

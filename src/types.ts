@@ -147,6 +147,24 @@ export interface PomodoroStats {
     dailyGoalProgress?: number;
 }
 
+export interface CardMedia {
+  type: 'image' | 'link';
+  url: string;
+  description?: string;
+}
+
+export interface EnhancedLearningCard {
+  id: string;
+  title: string;
+  content: string;
+  media?: CardMedia[];
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type NewEnhancedLearningCard = Omit<EnhancedLearningCard, 'id' | 'createdAt' | 'updatedAt'>;
+
 export interface EnhancedLearningContent {
   id: string;
   title: string;

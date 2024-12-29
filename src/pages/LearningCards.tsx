@@ -1,54 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { EnhancedLearningCard } from '@/components/EnhancedLearningCard';
-import { learningCardsService } from '@/lib/learningCards';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Plus, Search, Grid, List, SearchX, FileText } from 'lucide-react';
-import type { EnhancedLearningContent } from '@/types';
-import { useToast } from '@/hooks/useToast';
+} from '@/components/ui/select';
+import { EnhancedLearningCard } from '@/components/EnhancedLearningCard';
+import { learningCardsService } from '@/lib/learningCards';
+import { useToast } from '@/components/ui/use-toast';
+import { Plus, Search, SearchX, FileText } from 'lucide-react';
+import type { EnhancedLearningCard as CardType, CardMedia } from '@/types';
 
-export const LearningCardsPage: React.FC = () => {
-  const [cards, setCards] = useState<EnhancedLearningContent[]>([]);
+export function LearningCardsPage() {
+  const [cards, setCards] = useState<CardType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [isLoading, setIsLoading] = useState(true);
-  const [allTags, setAllTags] = useState<string[]>([]);
   const { toast } = useToast();
 
-  const loadCards = async () => {
+  const fetchCards = async () => {
     try {
-      setIsLoading(true);
-      let fetchedCards: EnhancedLearningContent[];
-      
-      if (searchQuery) {
-        fetchedCards = await learningCardsService.search(searchQuery);
-      } else if (selectedTags.length > 0) {
-        fetchedCards = await learningCardsService.getByTags(selectedTags);
-      } else {
-        fetchedCards = await learningCardsService.getAll();
-      }
-      
+      const fetchedCards = await learningCardsService.getCards();
       setCards(fetchedCards);
-      
-      // Update all unique tags
-      const tags = new Set<string>();
-      fetchedCards.forEach(card => {
-        card.tags.forEach(tag => tags.add(tag));
-      });
-      setAllTags(Array.from(tags));
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to load learning cards",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to fetch cards. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -56,27 +37,27 @@ export const LearningCardsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadCards();
-  }, [searchQuery, selectedTags]);
+    fetchCards();
+  }, []);
 
   const handleCreateCard = async () => {
     try {
-      const newCard = await learningCardsService.create({
-        title: "New Learning Card",
-        content: "",
+      const newCard = await learningCardsService.createCard({
+        title: 'New Card',
+        content: '',
+        media: [],
         tags: [],
       });
-      setCards(prev => [newCard, ...prev]);
+      setCards(prevCards => [newCard, ...prevCards]);
       toast({
-        title: "Success",
-        description: "New card created",
+        title: 'Success',
+        description: 'New card created successfully!',
       });
     } catch (error) {
-      console.error('Failed to create card:', error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create new card",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to create card. Please try again.',
+        variant: 'destructive',
       });
     }
   };
@@ -85,54 +66,70 @@ export const LearningCardsPage: React.FC = () => {
     id: string;
     title: string;
     content: string;
+    media?: CardMedia[];
     tags: string[];
-  }) => {
+  }): Promise<boolean> => {
     try {
-      const updatedCard = await learningCardsService.update(cardData.id, cardData);
-      setCards(prev => prev.map(card => 
-        card.id === updatedCard.id ? updatedCard : card
-      ));
-      // Update allTags with any new tags
-      setAllTags(prev => {
-        const newTags = cardData.tags.filter(tag => !prev.includes(tag));
-        return newTags.length > 0 ? [...prev, ...newTags] : prev;
-      });
+      const updatedCard = await learningCardsService.updateCard(cardData.id, cardData);
+      setCards(prevCards =>
+        prevCards.map(c => (c.id === cardData.id ? updatedCard : c))
+      );
       toast({
-        title: "Success",
-        description: "Card updated successfully",
+        title: 'Success',
+        description: 'Card updated successfully!',
       });
+      return true;
     } catch (error) {
-      console.error('Failed to update card:', error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update card",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update card. Please try again.',
+        variant: 'destructive',
       });
+      return false;
     }
   };
 
   const handleDeleteCard = async (id: string) => {
     try {
-      await learningCardsService.delete(id);
-      setCards(prev => prev.filter(card => card.id !== id));
+      await learningCardsService.deleteCard(id);
+      setCards(prevCards => prevCards.filter(card => card.id !== id));
       toast({
-        title: "Success",
-        description: "Card deleted successfully",
+        title: 'Success',
+        description: 'Card deleted successfully!',
       });
-      loadCards(); // Refresh to update tags
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete card",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to delete card. Please try again.',
+        variant: 'destructive',
       });
     }
   };
 
-  const filteredCards = cards.filter(card => 
-    (!searchQuery || card.title.toLowerCase().includes(searchQuery.toLowerCase())) 
-    && (selectedTags.length === 0 || card.tags.some(tag => selectedTags.includes(tag)))
-  );
+  const allTags = Array.from(
+    new Set(cards.flatMap(card => card.tags))
+  ).sort();
+
+  const filteredCards = cards.filter(card => {
+    const matchesSearch = !searchQuery || 
+      card.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      card.content.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesTags = selectedTags.length === 0 || 
+      selectedTags.every(tag => card.tags.includes(tag));
+    
+    return matchesSearch && matchesTags;
+  });
+
+  if (isLoading) {
+    return (
+      <div className="container py-8">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container py-8 space-y-8">
@@ -171,7 +168,7 @@ export const LearningCardsPage: React.FC = () => {
             <SelectValue placeholder="Filter by tags" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Tags</SelectItem>
+            <SelectItem value="">All Tags</SelectItem>
             {allTags.map(tag => (
               <SelectItem key={tag} value={tag}>
                 {tag}
@@ -211,4 +208,4 @@ export const LearningCardsPage: React.FC = () => {
       </div>
     </div>
   );
-};
+}

@@ -1,86 +1,118 @@
 import { supabase } from './supabase';
-import type { EnhancedLearningContent } from '../types';
+import type { EnhancedLearningCard, NewEnhancedLearningCard, CardMedia } from '@/types';
 
-type SaveCardData = {
-  id: string;
-  title: string;
-  content: string;
-  tags: string[];
-};
-
-export const learningCardsService = {
-  async getAll() {
+class LearningCardsService {
+  async getCards(): Promise<EnhancedLearningCard[]> {
     const { data, error } = await supabase
       .from('enhanced_learning_cards')
       .select('*')
       .order('updated_at', { ascending: false });
 
-    if (error) throw error;
-    return data as EnhancedLearningContent[];
-  },
+    if (error) {
+      console.error('Error fetching cards:', error);
+      throw new Error('Failed to fetch cards');
+    }
 
-  async getByTags(tags: string[]) {
+    return data.map(card => ({
+      id: card.id,
+      title: card.title,
+      content: card.content || '',
+      media: card.media || [],
+      tags: card.tags || [],
+      createdAt: card.created_at,
+      updatedAt: card.updated_at
+    }));
+  }
+
+  async createCard(card: NewEnhancedLearningCard): Promise<EnhancedLearningCard> {
     const { data, error } = await supabase
       .from('enhanced_learning_cards')
-      .select('*')
-      .contains('tags', tags)
-      .order('updated_at', { ascending: false });
-
-    if (error) throw error;
-    return data as EnhancedLearningContent[];
-  },
-
-  async search(query: string) {
-    const { data, error } = await supabase
-      .from('enhanced_learning_cards')
-      .select('*')
-      .or(`title.ilike.%${query}%,content.ilike.%${query}%`)
-      .order('updated_at', { ascending: false });
-
-    if (error) throw error;
-    return data as EnhancedLearningContent[];
-  },
-
-  async create(card: Omit<SaveCardData, 'id'>) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    const { data, error } = await supabase
-      .from('enhanced_learning_cards')
-      .insert([{
-        ...card,
-        user_id: user.id,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }])
+      .insert({
+        title: card.title,
+        content: card.content,
+        media: card.media || [],
+        tags: card.tags || []
+      })
       .select()
       .single();
 
-    if (error) throw error;
-    return data as EnhancedLearningContent;
-  },
+    if (error) {
+      console.error('Error creating card:', error);
+      throw new Error('Failed to create card');
+    }
 
-  async update(id: string, updates: Partial<SaveCardData>) {
+    return {
+      id: data.id,
+      title: data.title,
+      content: data.content || '',
+      media: data.media || [],
+      tags: data.tags || [],
+      createdAt: data.created_at,
+      updatedAt: data.updated_at
+    };
+  }
+
+  async updateCard(id: string, updates: Partial<NewEnhancedLearningCard>): Promise<EnhancedLearningCard> {
     const { data, error } = await supabase
       .from('enhanced_learning_cards')
       .update({
-        ...updates,
-        updated_at: new Date().toISOString(),
+        title: updates.title,
+        content: updates.content,
+        media: updates.media || [],
+        tags: updates.tags || []
       })
       .eq('id', id)
       .select()
       .single();
 
-    if (error) throw error;
-    return data as EnhancedLearningContent;
-  },
+    if (error) {
+      console.error('Error updating card:', error);
+      throw new Error('Failed to update card');
+    }
 
-  async delete(id: string) {
+    return {
+      id: data.id,
+      title: data.title,
+      content: data.content || '',
+      media: data.media || [],
+      tags: data.tags || [],
+      createdAt: data.created_at,
+      updatedAt: data.updated_at
+    };
+  }
+
+  async deleteCard(id: string): Promise<void> {
     const { error } = await supabase
       .from('enhanced_learning_cards')
       .delete()
       .eq('id', id);
 
-    if (error) throw error;
-  },
-};
+    if (error) {
+      console.error('Error deleting card:', error);
+      throw new Error('Failed to delete card');
+    }
+  }
+
+  async uploadImage(file: File): Promise<string> {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('card-images')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      console.error('Error uploading image:', uploadError);
+      throw new Error('Failed to upload image');
+    }
+
+    const { data } = supabase.storage
+      .from('card-images')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  }
+}
+
+export const learningCardsService = new LearningCardsService();

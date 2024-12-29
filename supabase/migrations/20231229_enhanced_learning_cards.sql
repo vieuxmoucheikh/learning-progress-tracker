@@ -1,46 +1,59 @@
 -- Create enhanced learning cards table
-create table if not exists public.enhanced_learning_cards (
-    id uuid default gen_random_uuid() primary key,
-    title text not null,
-    content text not null,
-    tags text[] default '{}',
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    user_id uuid references auth.users(id) on delete cascade not null
+CREATE TABLE IF NOT EXISTS public.enhanced_learning_cards (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    content TEXT,
+    media JSONB DEFAULT '[]'::jsonb,
+    tags TEXT[] DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now()),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now())
 );
 
--- Enable RLS
-alter table public.enhanced_learning_cards enable row level security;
+-- Create index for user_id for faster queries
+CREATE INDEX IF NOT EXISTS idx_learning_cards_user_id ON public.enhanced_learning_cards(user_id);
 
--- Create policies
-create policy "Users can view their own learning cards"
-    on public.enhanced_learning_cards for select
-    using (auth.uid() = user_id);
+-- Create index for tags for faster filtering
+CREATE INDEX IF NOT EXISTS idx_learning_cards_tags ON public.enhanced_learning_cards USING GIN(tags);
 
-create policy "Users can insert their own learning cards"
-    on public.enhanced_learning_cards for insert
-    with check (auth.uid() = user_id);
+-- Enable Row Level Security
+ALTER TABLE public.enhanced_learning_cards ENABLE ROW LEVEL SECURITY;
 
-create policy "Users can update their own learning cards"
-    on public.enhanced_learning_cards for update
-    using (auth.uid() = user_id)
-    with check (auth.uid() = user_id);
+-- Create policy to allow users to see only their own cards
+CREATE POLICY "Users can view their own cards"
+    ON public.enhanced_learning_cards
+    FOR SELECT
+    USING (auth.uid() = user_id);
 
-create policy "Users can delete their own learning cards"
-    on public.enhanced_learning_cards for delete
-    using (auth.uid() = user_id);
+-- Create policy to allow users to insert their own cards
+CREATE POLICY "Users can insert their own cards"
+    ON public.enhanced_learning_cards
+    FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
 
--- Create indexes
-create index enhanced_learning_cards_user_id_idx on public.enhanced_learning_cards(user_id);
-create index enhanced_learning_cards_updated_at_idx on public.enhanced_learning_cards(updated_at);
-create index enhanced_learning_cards_tags_idx on public.enhanced_learning_cards using gin(tags);
+-- Create policy to allow users to update their own cards
+CREATE POLICY "Users can update their own cards"
+    ON public.enhanced_learning_cards
+    FOR UPDATE
+    USING (auth.uid() = user_id);
 
--- Enable full-text search
-alter table public.enhanced_learning_cards
-    add column if not exists fts tsvector
-    generated always as (
-        setweight(to_tsvector('english', coalesce(title, '')), 'A') ||
-        setweight(to_tsvector('english', coalesce(content, '')), 'B')
-    ) stored;
+-- Create policy to allow users to delete their own cards
+CREATE POLICY "Users can delete their own cards"
+    ON public.enhanced_learning_cards
+    FOR DELETE
+    USING (auth.uid() = user_id);
 
-create index enhanced_learning_cards_fts_idx on public.enhanced_learning_cards using gin(fts);
+-- Function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = timezone('utc', now());
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Trigger to automatically update updated_at
+CREATE TRIGGER update_enhanced_learning_cards_updated_at
+    BEFORE UPDATE ON public.enhanced_learning_cards
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
