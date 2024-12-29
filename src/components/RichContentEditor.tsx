@@ -1,11 +1,9 @@
 import React from 'react';
-import { Editor } from '@tiptap/react';
+import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Highlight from '@tiptap/extension-highlight';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import { lowlight } from 'lowlight';
 import {
   Bold,
   Italic,
@@ -17,8 +15,8 @@ import {
   Heading2,
   CheckSquare,
 } from 'lucide-react';
-import { Button } from '../ui/button';
-import { cn } from '../lib/utils';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface RichContentEditorProps {
   content: string;
@@ -27,7 +25,7 @@ interface RichContentEditorProps {
   className?: string;
 }
 
-const MenuBar = ({ editor }: { editor: Editor | null }) => {
+const MenuBar = ({ editor }: { editor: any }) => {
   if (!editor) return null;
 
   return (
@@ -121,9 +119,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
       TaskList,
       TaskItem.configure({
         nested: true,
-      }),
-      CodeBlockLowlight.configure({
-        lowlight,
       }),
     ],
     content,
