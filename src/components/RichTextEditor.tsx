@@ -23,6 +23,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       extensions: [
         StarterKit,
         Image.configure({
+          inline: true,
+          allowBase64: true,
           HTMLAttributes: {
             class: 'max-w-full rounded-lg shadow-sm hover:shadow-md transition-shadow',
           },
@@ -42,6 +44,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         onChange(editor.getHTML());
       },
       editorProps: {
+        attributes: {
+          class: cn(
+            'prose prose-sm max-w-none focus:outline-none min-h-[150px]',
+            'prose-img:my-2 prose-img:rounded-lg prose-img:shadow-sm',
+            'prose-a:text-primary prose-a:no-underline hover:prose-a:underline'
+          ),
+        },
         handlePaste: (view, event) => {
           const items = Array.from(event.clipboardData?.items || []);
           const imageItems = items.filter(item => item.type.startsWith('image'));
@@ -56,11 +65,37 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
               reader.onload = (e) => {
                 const dataUrl = e.target?.result as string;
                 if (dataUrl) {
-                  view.dispatch(
-                    view.state.tr.replaceSelectionWith(
-                      view.state.schema.nodes.image.create({ src: dataUrl })
-                    )
-                  );
+                  const image = document.createElement('img');
+                  image.src = dataUrl;
+                  image.onload = () => {
+                    // Resize image if too large
+                    const maxWidth = 800;
+                    const maxHeight = 600;
+                    let width = image.width;
+                    let height = image.height;
+
+                    if (width > maxWidth) {
+                      height = (height * maxWidth) / width;
+                      width = maxWidth;
+                    }
+                    if (height > maxHeight) {
+                      width = (width * maxHeight) / height;
+                      height = maxHeight;
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx?.drawImage(image, 0, 0, width, height);
+
+                    const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    view.dispatch(
+                      view.state.tr.replaceSelectionWith(
+                        view.state.schema.nodes.image.create({ src: optimizedDataUrl })
+                      )
+                    );
+                  };
                 }
               };
               reader.readAsDataURL(file);
@@ -83,10 +118,37 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
               reader.onload = (e) => {
                 const dataUrl = e.target?.result as string;
                 if (dataUrl) {
-                  const { schema } = view.state;
-                  const node = schema.nodes.image.create({ src: dataUrl });
-                  const transaction = view.state.tr.replaceSelectionWith(node);
-                  view.dispatch(transaction);
+                  const image = document.createElement('img');
+                  image.src = dataUrl;
+                  image.onload = () => {
+                    // Resize image if too large
+                    const maxWidth = 800;
+                    const maxHeight = 600;
+                    let width = image.width;
+                    let height = image.height;
+
+                    if (width > maxWidth) {
+                      height = (height * maxWidth) / width;
+                      width = maxWidth;
+                    }
+                    if (height > maxHeight) {
+                      width = (width * maxHeight) / height;
+                      height = maxHeight;
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx?.drawImage(image, 0, 0, width, height);
+
+                    const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    view.dispatch(
+                      view.state.tr.replaceSelectionWith(
+                        view.state.schema.nodes.image.create({ src: optimizedDataUrl })
+                      )
+                    );
+                  };
                 }
               };
               reader.readAsDataURL(file);
@@ -119,9 +181,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   return (
     <div 
       className={cn(
-        'prose prose-sm max-w-none',
-        editable && 'border-2 focus-within:border-primary rounded-md p-4',
-        !editable && 'bg-muted/30 rounded-lg p-4',
+        'rounded-md transition-colors',
+        editable && 'border-2 border-input hover:border-primary focus-within:border-primary',
+        !editable && 'bg-muted/30',
         className
       )}
       onClick={() => {
@@ -130,7 +192,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         }
       }}
     >
-      <EditorContent editor={editor} />
+      <EditorContent editor={editor} className="p-3" />
     </div>
   );
 };

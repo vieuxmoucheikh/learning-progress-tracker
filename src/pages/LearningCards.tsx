@@ -62,7 +62,7 @@ export function LearningCardsPage() {
     }
   };
 
-  const handleSaveCard = async (cardData: {
+  const handleSaveCard = async (card: {
     id: string;
     title: string;
     content: string;
@@ -70,20 +70,23 @@ export function LearningCardsPage() {
     tags: string[];
   }): Promise<boolean> => {
     try {
-      const updatedCard = await learningCardsService.updateCard(cardData.id, cardData);
-      setCards(prevCards =>
-        prevCards.map(c => (c.id === cardData.id ? updatedCard : c))
-      );
+      await learningCardsService.updateCard(card.id, {
+        title: card.title,
+        content: card.content,
+        tags: card.tags,
+      });
+      await fetchCards();
       toast({
-        title: 'Success',
-        description: 'Card updated successfully!',
+        title: "Success",
+        description: "Card updated successfully",
       });
       return true;
     } catch (error) {
+      console.error('Error updating card:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to update card. Please try again.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to update card. Please try again.",
+        variant: "destructive",
       });
       return false;
     }
