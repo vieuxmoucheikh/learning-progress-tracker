@@ -9,7 +9,6 @@ import {
   Save,
   X,
   Tag,
-  Bookmark,
 } from 'lucide-react';
 
 interface EnhancedLearningCardProps {
@@ -24,8 +23,6 @@ interface EnhancedLearningCardProps {
     title: string;
     content: string;
     tags: string[];
-    createdAt?: string;
-    updatedAt?: string;
   }) => void;
   onDelete: (id: string) => void;
 }
@@ -56,7 +53,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
   const handleAddTag = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && newTag.trim()) {
-      setTags([...tags, newTag.trim()]);
+      if (!tags.includes(newTag.trim())) {
+        setTags([...tags, newTag.trim()]);
+      }
       setNewTag('');
     }
   };
@@ -72,13 +71,13 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           <Input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="text-lg font-semibold"
+            className="text-lg font-semibold flex-1 mr-2"
             placeholder="Enter title..."
           />
         ) : (
           <h3 className="text-lg font-semibold">{title}</h3>
         )}
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-shrink-0">
           <Button
             variant="ghost"
             size="icon"
@@ -109,17 +108,16 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="min-h-[200px] border rounded-lg">
         <RichContentEditor
           content={content}
           onChange={setContent}
           readOnly={!isEditing}
-          className="min-h-[200px]"
         />
       </div>
 
       <div className="space-y-2">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
           {tags.map((tag) => (
             <Badge
               key={tag}

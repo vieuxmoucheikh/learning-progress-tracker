@@ -81,26 +81,31 @@ export const LearningCardsPage: React.FC = () => {
     }
   };
 
-  const handleSaveCard = async (data: {
+  const handleSaveCard = async (cardData: {
     id: string;
     title: string;
     content: string;
     tags: string[];
   }) => {
     try {
-      const updatedCard = await learningCardsService.update(data.id, data);
+      const updatedCard = await learningCardsService.update(cardData.id, cardData);
       setCards(prev => prev.map(card => 
-        card.id === data.id ? updatedCard : card
+        card.id === updatedCard.id ? updatedCard : card
       ));
+      // Update allTags with any new tags
+      setAllTags(prev => {
+        const newTags = cardData.tags.filter(tag => !prev.includes(tag));
+        return newTags.length > 0 ? [...prev, ...newTags] : prev;
+      });
       toast({
         title: "Success",
         description: "Card updated successfully",
       });
-      loadCards(); // Refresh to update tags
     } catch (error) {
+      console.error('Failed to update card:', error);
       toast({
         title: "Error",
-        description: "Failed to update card",
+        description: error instanceof Error ? error.message : "Failed to update card",
         variant: "destructive",
       });
     }
