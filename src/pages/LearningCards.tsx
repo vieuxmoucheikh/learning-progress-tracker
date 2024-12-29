@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, Grid, List } from 'lucide-react';
+import { Plus, Search, Grid, List, SearchX, FileText } from 'lucide-react';
 import type { EnhancedLearningContent } from '@/types';
 import { useToast } from '@/hooks/useToast';
 
@@ -181,21 +181,30 @@ export const LearningCardsPage: React.FC = () => {
         </Select>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 auto-rows-fr">
         {filteredCards.map((card) => (
-          <EnhancedLearningCard
-            key={card.id}
-            {...card}
-            onSave={handleSaveCard}
-            onDelete={handleDeleteCard}
-          />
+          <div key={card.id} className="h-full">
+            <EnhancedLearningCard
+              {...card}
+              onSave={handleSaveCard}
+              onDelete={handleDeleteCard}
+            />
+          </div>
         ))}
         {filteredCards.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground">
+          <div className="col-span-full text-center py-12 text-muted-foreground bg-muted/30 rounded-lg">
             {searchQuery || selectedTags.length > 0 ? (
-              <p>No cards match your search criteria</p>
+              <>
+                <SearchX className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                <p className="text-lg font-medium">No cards match your search criteria</p>
+                <p className="mt-1">Try adjusting your search or filters</p>
+              </>
             ) : (
-              <p>No cards yet. Click "New Card" to create one!</p>
+              <>
+                <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                <p className="text-lg font-medium">No cards yet</p>
+                <p className="mt-1">Click "New Card" to create your first learning card!</p>
+              </>
             )}
           </div>
         )}
