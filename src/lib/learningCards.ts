@@ -17,7 +17,7 @@ class LearningCardsService {
       id: card.id,
       title: card.title,
       content: card.content || '',
-      media: Array.isArray(card.media) ? card.media : [],
+      media: this.parseMedia(card.media),
       tags: Array.isArray(card.tags) ? card.tags : [],
       createdAt: card.created_at,
       updatedAt: card.updated_at
@@ -33,7 +33,6 @@ class LearningCardsService {
       .insert({
         title: card.title,
         content: card.content,
-        media: card.media || [],
         tags: card.tags || [],
         user_id: user.id
       })
@@ -49,7 +48,7 @@ class LearningCardsService {
       id: data.id,
       title: data.title,
       content: data.content || '',
-      media: Array.isArray(data.media) ? data.media : [],
+      media: [],
       tags: Array.isArray(data.tags) ? data.tags : [],
       createdAt: data.created_at,
       updatedAt: data.updated_at
@@ -57,33 +56,51 @@ class LearningCardsService {
   }
 
   async updateCard(id: string, updates: Partial<NewEnhancedLearningCard>): Promise<EnhancedLearningCard> {
-    const { data, error } = await supabase
-      .from('enhanced_learning_cards')
-      .update({
+    try {
+      const updateData: any = {
         title: updates.title,
         content: updates.content,
-        media: updates.media || [],
         tags: updates.tags || [],
         updated_at: new Date().toISOString()
-      })
-      .eq('id', id)
-      .select()
-      .single();
+      };
 
-    if (error) {
+      // Only include media if it exists
+      if (updates.media) {
+        const { data: tableInfo } = await supabase
+          .from('enhanced_learning_cards')
+          .select('media')
+          .limit(1);
+
+        if (tableInfo && tableInfo[0]?.media !== undefined) {
+          updateData.media = updates.media;
+        }
+      }
+
+      const { data, error } = await supabase
+        .from('enhanced_learning_cards')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating card:', error);
+        throw new Error('Failed to update card');
+      }
+
+      return {
+        id: data.id,
+        title: data.title,
+        content: data.content || '',
+        media: this.parseMedia(data.media),
+        tags: Array.isArray(data.tags) ? data.tags : [],
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
+      };
+    } catch (error) {
       console.error('Error updating card:', error);
       throw new Error('Failed to update card');
     }
-
-    return {
-      id: data.id,
-      title: data.title,
-      content: data.content || '',
-      media: Array.isArray(data.media) ? data.media : [],
-      tags: Array.isArray(data.tags) ? data.tags : [],
-      createdAt: data.created_at,
-      updatedAt: data.updated_at
-    };
   }
 
   async deleteCard(id: string): Promise<void> {
@@ -119,6 +136,17 @@ class LearningCardsService {
       .getPublicUrl(fileName);
 
     return data.publicUrl;
+  }
+
+  private parseMedia(media: any): CardMedia[] {
+    if (!media) return [];
+    if (Array.isArray(media)) return media;
+    try {
+      const parsed = JSON.parse(media);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   }
 }
 
