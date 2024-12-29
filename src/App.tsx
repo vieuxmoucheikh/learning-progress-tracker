@@ -15,6 +15,7 @@ import { ItemsTab } from './components/ItemsTab';
 import { AnalyticsTab } from './components/AnalyticsTab';
 import { Toaster } from "@/components/ui/toaster";
 import { PomodoroTimer } from './components/pomodoro/PomodoroTimer';
+import { LearningCardsPage } from './pages/LearningCards';
 
 interface State {
   items: LearningItem[];
