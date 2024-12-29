@@ -17,21 +17,25 @@ class LearningCardsService {
       id: card.id,
       title: card.title,
       content: card.content || '',
-      media: card.media || [],
-      tags: card.tags || [],
+      media: Array.isArray(card.media) ? card.media : [],
+      tags: Array.isArray(card.tags) ? card.tags : [],
       createdAt: card.created_at,
       updatedAt: card.updated_at
     }));
   }
 
   async createCard(card: NewEnhancedLearningCard): Promise<EnhancedLearningCard> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     const { data, error } = await supabase
       .from('enhanced_learning_cards')
       .insert({
         title: card.title,
         content: card.content,
         media: card.media || [],
-        tags: card.tags || []
+        tags: card.tags || [],
+        user_id: user.id
       })
       .select()
       .single();
@@ -45,8 +49,8 @@ class LearningCardsService {
       id: data.id,
       title: data.title,
       content: data.content || '',
-      media: data.media || [],
-      tags: data.tags || [],
+      media: Array.isArray(data.media) ? data.media : [],
+      tags: Array.isArray(data.tags) ? data.tags : [],
       createdAt: data.created_at,
       updatedAt: data.updated_at
     };
@@ -59,7 +63,8 @@ class LearningCardsService {
         title: updates.title,
         content: updates.content,
         media: updates.media || [],
-        tags: updates.tags || []
+        tags: updates.tags || [],
+        updated_at: new Date().toISOString()
       })
       .eq('id', id)
       .select()
@@ -74,8 +79,8 @@ class LearningCardsService {
       id: data.id,
       title: data.title,
       content: data.content || '',
-      media: data.media || [],
-      tags: data.tags || [],
+      media: Array.isArray(data.media) ? data.media : [],
+      tags: Array.isArray(data.tags) ? data.tags : [],
       createdAt: data.created_at,
       updatedAt: data.updated_at
     };
@@ -94,13 +99,15 @@ class LearningCardsService {
   }
 
   async uploadImage(file: File): Promise<string> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `${fileName}`;
+    const fileName = `${user.id}/${Math.random()}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
       .from('card-images')
-      .upload(filePath, file);
+      .upload(fileName, file);
 
     if (uploadError) {
       console.error('Error uploading image:', uploadError);
@@ -109,7 +116,7 @@ class LearningCardsService {
 
     const { data } = supabase.storage
       .from('card-images')
-      .getPublicUrl(filePath);
+      .getPublicUrl(fileName);
 
     return data.publicUrl;
   }

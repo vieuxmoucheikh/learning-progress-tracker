@@ -1,5 +1,8 @@
--- Create enhanced learning cards table
-CREATE TABLE IF NOT EXISTS public.enhanced_learning_cards (
+-- Drop existing table if it exists
+DROP TABLE IF EXISTS public.enhanced_learning_cards;
+
+-- Create enhanced_learning_cards table
+CREATE TABLE public.enhanced_learning_cards (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
@@ -11,10 +14,10 @@ CREATE TABLE IF NOT EXISTS public.enhanced_learning_cards (
 );
 
 -- Create index for user_id for faster queries
-CREATE INDEX IF NOT EXISTS idx_learning_cards_user_id ON public.enhanced_learning_cards(user_id);
+CREATE INDEX idx_learning_cards_user_id ON public.enhanced_learning_cards(user_id);
 
 -- Create index for tags for faster filtering
-CREATE INDEX IF NOT EXISTS idx_learning_cards_tags ON public.enhanced_learning_cards USING GIN(tags);
+CREATE INDEX idx_learning_cards_tags ON public.enhanced_learning_cards USING GIN(tags);
 
 -- Enable Row Level Security
 ALTER TABLE public.enhanced_learning_cards ENABLE ROW LEVEL SECURITY;
@@ -53,6 +56,7 @@ END;
 $$ language 'plpgsql';
 
 -- Trigger to automatically update updated_at
+DROP TRIGGER IF EXISTS update_enhanced_learning_cards_updated_at ON public.enhanced_learning_cards;
 CREATE TRIGGER update_enhanced_learning_cards_updated_at
     BEFORE UPDATE ON public.enhanced_learning_cards
     FOR EACH ROW
