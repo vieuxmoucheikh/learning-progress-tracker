@@ -128,12 +128,21 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     },
   });
 
+  React.useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
+
   return (
     <div className={cn('border rounded-lg', className)}>
-      {!readOnly && <MenuBar editor={editor} />}
+      {!readOnly && editor && <MenuBar editor={editor} />}
       <EditorContent 
         editor={editor} 
-        className="prose prose-sm max-w-none p-4"
+        className={cn(
+          'prose prose-sm max-w-none p-4',
+          !readOnly && 'min-h-[150px] cursor-text'
+        )}
       />
     </div>
   );
