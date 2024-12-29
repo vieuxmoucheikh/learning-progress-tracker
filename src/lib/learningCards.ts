@@ -13,7 +13,7 @@ export const learningCardsService = {
     const { data, error } = await supabase
       .from('enhanced_learning_cards')
       .select('*')
-      .order('updatedAt', { ascending: false });
+      .order('updated_at', { ascending: false });
 
     if (error) throw error;
     return data as EnhancedLearningContent[];
@@ -24,7 +24,7 @@ export const learningCardsService = {
       .from('enhanced_learning_cards')
       .select('*')
       .contains('tags', tags)
-      .order('updatedAt', { ascending: false });
+      .order('updated_at', { ascending: false });
 
     if (error) throw error;
     return data as EnhancedLearningContent[];
@@ -35,7 +35,7 @@ export const learningCardsService = {
       .from('enhanced_learning_cards')
       .select('*')
       .or(`title.ilike.%${query}%,content.ilike.%${query}%`)
-      .order('updatedAt', { ascending: false });
+      .order('updated_at', { ascending: false });
 
     if (error) throw error;
     return data as EnhancedLearningContent[];
@@ -46,8 +46,9 @@ export const learningCardsService = {
       .from('enhanced_learning_cards')
       .insert([{
         ...card,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        user_id: supabase.auth.getUser().then(({ data }) => data.user?.id),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       }])
       .select()
       .single();
@@ -61,7 +62,7 @@ export const learningCardsService = {
       .from('enhanced_learning_cards')
       .update({
         ...updates,
-        updatedAt: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
       .eq('id', id)
       .select()

@@ -152,6 +152,7 @@ export interface EnhancedLearningContent {
   title: string;
   content: string;
   tags: string[];
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
 }

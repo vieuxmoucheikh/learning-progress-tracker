@@ -153,7 +153,7 @@ export const LearningCardsPage: React.FC = () => {
             <SelectValue placeholder="Filter by tags" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Tags</SelectItem>
+            <SelectItem value="all">All Tags</SelectItem>
             {allTags.map(tag => (
               <SelectItem key={tag} value={tag}>
                 {tag}
