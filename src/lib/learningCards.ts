@@ -42,11 +42,14 @@ export const learningCardsService = {
   },
 
   async create(card: Omit<SaveCardData, 'id'>) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     const { data, error } = await supabase
       .from('enhanced_learning_cards')
       .insert([{
         ...card,
-        user_id: supabase.auth.getUser().then(({ data }) => data.user?.id),
+        user_id: user.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }])

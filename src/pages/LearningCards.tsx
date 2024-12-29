@@ -72,9 +72,10 @@ export const LearningCardsPage: React.FC = () => {
         description: "New card created",
       });
     } catch (error) {
+      console.error('Failed to create card:', error);
       toast({
         title: "Error",
-        description: "Failed to create new card",
+        description: error instanceof Error ? error.message : "Failed to create new card",
         variant: "destructive",
       });
     }
