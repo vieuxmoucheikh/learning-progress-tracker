@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { RichContentEditor } from './RichContentEditor';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Edit,
   Save,
@@ -67,16 +67,18 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   return (
     <Card className="w-full max-w-2xl p-4 space-y-4 bg-card">
       <div className="flex items-center justify-between">
-        {isEditing ? (
-          <Input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="text-lg font-semibold flex-1 mr-2"
-            placeholder="Enter title..."
-          />
-        ) : (
-          <h3 className="text-lg font-semibold">{title}</h3>
-        )}
+        <div className="flex-1 mr-4">
+          {isEditing ? (
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="text-lg font-semibold"
+              placeholder="Enter title..."
+            />
+          ) : (
+            <h3 className="text-lg font-semibold">{title}</h3>
+          )}
+        </div>
         <div className="flex gap-2 flex-shrink-0">
           <Button
             variant="ghost"
@@ -108,13 +110,19 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         </div>
       </div>
 
-      <div className="min-h-[200px] border rounded-lg">
-        <RichContentEditor
-          content={content}
-          onChange={setContent}
-          readOnly={!isEditing}
-          className="border-none"
-        />
+      <div className="min-h-[200px]">
+        {isEditing ? (
+          <Textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="min-h-[200px] w-full"
+            placeholder="Enter content..."
+          />
+        ) : (
+          <div className="prose prose-sm max-w-none whitespace-pre-wrap">
+            {content}
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
