@@ -129,28 +129,40 @@ export const LearningCardsPage: React.FC = () => {
     }
   };
 
+  const filteredCards = cards.filter(card => 
+    (!searchQuery || card.title.toLowerCase().includes(searchQuery.toLowerCase())) 
+    && (selectedTags.length === 0 || card.tags.some(tag => selectedTags.includes(tag)))
+  );
+
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Learning Cards</h1>
-        <Button onClick={handleCreateCard}>
-          <Plus className="mr-2 h-4 w-4" /> New Card
+    <div className="container py-8 space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Learning Cards</h1>
+          <p className="text-muted-foreground mt-1">
+            Create and manage your learning notes
+          </p>
+        </div>
+        <Button
+          onClick={handleCreateCard}
+          size="default"
+          className="hover:scale-105 transition-transform"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          New Card
         </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search cards..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8"
-            />
-          </div>
+      <div className="flex flex-wrap gap-4 items-center">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search cards..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
         </div>
-
         <Select
           value={selectedTags.join(',')}
           onValueChange={(value) => setSelectedTags(value ? value.split(',') : [])}
@@ -167,45 +179,27 @@ export const LearningCardsPage: React.FC = () => {
             ))}
           </SelectContent>
         </Select>
-
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => setViewMode(prev => prev === 'grid' ? 'list' : 'grid')}
-        >
-          {viewMode === 'grid' ? (
-            <List className="h-4 w-4" />
-          ) : (
-            <Grid className="h-4 w-4" />
-          )}
-        </Button>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center items-center min-h-[200px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-        </div>
-      ) : (
-        <div className={`grid gap-6 ${
-          viewMode === 'grid' 
-            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
-            : 'grid-cols-1'
-        }`}>
-          {cards.map(card => (
-            <EnhancedLearningCard
-              key={card.id}
-              {...card}
-              onSave={handleSaveCard}
-              onDelete={handleDeleteCard}
-            />
-          ))}
-          {cards.length === 0 && !isLoading && (
-            <div className="col-span-full text-center text-muted-foreground py-12">
-              No learning cards found. Create one to get started!
-            </div>
-          )}
-        </div>
-      )}
+      <div className="grid gap-6">
+        {filteredCards.map((card) => (
+          <EnhancedLearningCard
+            key={card.id}
+            {...card}
+            onSave={handleSaveCard}
+            onDelete={handleDeleteCard}
+          />
+        ))}
+        {filteredCards.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">
+            {searchQuery || selectedTags.length > 0 ? (
+              <p>No cards match your search criteria</p>
+            ) : (
+              <p>No cards yet. Click "New Card" to create one!</p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
