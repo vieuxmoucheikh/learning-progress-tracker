@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Highlight from '@tiptap/extension-highlight';
@@ -117,7 +117,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [localContent, setLocalContent] = useState(content);
-  const readOnly = initialReadOnly || !isEditing;
 
   const editor = useEditor({
     extensions: [
@@ -129,17 +128,27 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
       }),
     ],
     content: localContent,
-    editable: !readOnly,
+    editable: isEditing,
     onUpdate: ({ editor }) => {
-      setLocalContent(editor.getHTML());
+      const newContent = editor.getHTML();
+      setLocalContent(newContent);
     },
   });
 
-  React.useEffect(() => {
+  // Update editor state when content prop changes
+  useEffect(() => {
+    setLocalContent(content);
     if (editor && content !== editor.getHTML()) {
       editor.commands.setContent(content);
     }
   }, [content, editor]);
+
+  // Update editor editable state
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(isEditing);
+    }
+  }, [isEditing, editor]);
 
   const handleSave = () => {
     onChange(localContent);
@@ -162,7 +171,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
           editor={editor} 
           className={cn(
             'prose prose-sm max-w-none p-4',
-            !readOnly && 'min-h-[150px] cursor-text'
+            isEditing && 'min-h-[150px] cursor-text'
           )}
         />
         <div className="absolute bottom-2 right-2 flex gap-2">
