@@ -14,6 +14,7 @@ import type { EnhancedLearningCard as CardType } from '@/types';
 import { Plus, Search, Tag as TagIcon, Loader2, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Badge } from '@/components/ui/badge';
 
 interface CardMedia {
   id: string;
@@ -152,20 +153,20 @@ export const LearningCardsPage = () => {
     }
   });
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const toggleTag = (tag: string) => {
+    if (selectedTags.includes(tag)) {
+      setSelectedTags(selectedTags.filter((t) => t !== tag));
+    } else {
+      setSelectedTags([...selectedTags, tag]);
+    }
+  };
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex-1 w-full sm:w-auto">
+    <div className="container mx-auto p-4 space-y-6">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="flex-1 w-full sm:w-auto space-y-2">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -173,38 +174,24 @@ export const LearningCardsPage = () => {
               className="pl-9 w-full"
             />
           </div>
+          <div className="flex flex-wrap gap-2">
+            {allTags.map((tag) => (
+              <Badge
+                key={tag}
+                variant={selectedTags.includes(tag) ? "default" : "outline"}
+                className="cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => toggleTag(tag)}
+              >
+                <TagIcon className="h-3 w-3 mr-1" />
+                {tag}
+              </Badge>
+            ))}
+          </div>
         </div>
-        <div className="flex items-center gap-4 w-full sm:w-auto">
-          <Select
-            value={selectedTags.join(',') || 'all'}
-            onValueChange={(value) =>
-              setSelectedTags(value === 'all' ? [] : value.split(','))
-            }
-          >
-            <SelectTrigger className="w-[180px]">
-              <div className="flex items-center">
-                <TagIcon className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Filter by tags" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Tags</SelectItem>
-              {allTags.map((tag) => (
-                <SelectItem key={tag} value={tag}>
-                  {tag}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            value={sortBy}
-            onValueChange={(value: 'updated' | 'created' | 'mastered') => setSortBy(value)}
-          >
-            <SelectTrigger className="w-[180px]">
-              <div className="flex items-center">
-                <Clock className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Sort by" />
-              </div>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Sort by..." />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="updated">Last Updated</SelectItem>
@@ -213,47 +200,23 @@ export const LearningCardsPage = () => {
             </SelectContent>
           </Select>
           <Button onClick={handleCreateCard} className="whitespace-nowrap">
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="h-4 w-4 mr-2" />
             New Card
           </Button>
         </div>
       </div>
 
-      <AnimatePresence>
-        {filteredCards.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="flex flex-col items-center justify-center h-[400px] text-center"
-          >
-            <div className="text-muted-foreground">
-              {searchTerm || selectedTags.length > 0 ? (
-                <>
-                  <h3 className="text-lg font-semibold mb-2">No matching cards found</h3>
-                  <p>Try adjusting your search or filters</p>
-                </>
-              ) : (
-                <>
-                  <h3 className="text-lg font-semibold mb-2">No cards yet</h3>
-                  <p>Create your first card to get started</p>
-                </>
-              )}
-            </div>
-            <Button
-              onClick={handleCreateCard}
-              variant="outline"
-              className="mt-4"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Card
-            </Button>
-          </motion.div>
-        ) : (
-          <motion.div
-            layout
-            className="grid grid-cols-1 lg:grid-cols-2 gap-6 auto-rows-[450px]"
-          >
+      {loading ? (
+        <div className="flex items-center justify-center min-h-[200px]">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      ) : filteredCards.length === 0 ? (
+        <div className="text-center py-12 bg-muted/50 rounded-lg">
+          <p className="text-muted-foreground">No cards found. Create your first card to get started!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <AnimatePresence mode="popLayout">
             {sortedAndFilteredCards.map((card) => (
               <motion.div
                 key={card.id}
@@ -262,24 +225,17 @@ export const LearningCardsPage = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.2 }}
-                className="h-[450px]"
               >
                 <EnhancedLearningCard
-                  id={card.id}
-                  title={card.title}
-                  content={card.content}
-                  media={card.media}
-                  tags={card.tags}
-                  createdAt={card.createdAt}
-                  updatedAt={card.updatedAt}
+                  {...card}
                   onSave={handleSaveCard}
                   onDelete={handleDeleteCard}
                 />
               </motion.div>
             ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 };

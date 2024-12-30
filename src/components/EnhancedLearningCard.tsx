@@ -129,27 +129,28 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
   return (
     <Card className={cn(
-      "relative w-full transition-all duration-200 ease-in-out",
-      mastered && "border-green-500",
+      "relative w-full h-full transition-all duration-200 ease-in-out hover:shadow-lg",
+      "bg-card border-2",
+      mastered ? "border-green-500/50 hover:border-green-500" : "border-transparent hover:border-primary/50",
       isEditing && "border-blue-500"
     )}>
-      <CardHeader className="relative pb-2">
+      <CardHeader className="relative pb-3 space-y-2">
         {isEditing ? (
           <Input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="font-semibold"
+            className="font-semibold text-lg"
             placeholder="Card Title"
           />
         ) : (
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold">{title}</h3>
-            <div className="flex gap-1">
+            <h3 className="font-semibold text-lg line-clamp-2">{title}</h3>
+            <div className="flex gap-1 ml-2 flex-shrink-0">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsZoomed(true)}
-                className="h-8 w-8"
+                className="h-8 w-8 hover:bg-primary/10"
               >
                 <ZoomIn className="h-4 w-4" />
               </Button>
@@ -157,7 +158,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 variant="ghost"
                 size="icon"
                 onClick={toggleContentVisibility}
-                className="h-8 w-8"
+                className="h-8 w-8 hover:bg-primary/10"
               >
                 {isContentHidden ? (
                   <Eye className="h-4 w-4" />
@@ -169,7 +170,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsEditing(true)}
-                className="h-8 w-8"
+                className="h-8 w-8 hover:bg-primary/10"
               >
                 <Edit className="h-4 w-4" />
               </Button>
@@ -183,30 +184,31 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       </CardHeader>
 
       <CardContent ref={contentRef} className={cn(
-        "space-y-2 transition-all duration-200",
+        "space-y-3 transition-all duration-200",
         isContentHidden && "blur-md select-none"
       )}>
         {isEditing ? (
           <RichTextEditor
             content={content}
             onChange={setContent}
-            className="min-h-[100px] border rounded-md p-2"
+            className="min-h-[150px] border rounded-md p-2"
           />
         ) : (
           <div 
-            className="prose prose-sm max-w-none dark:prose-invert"
+            className="prose prose-sm max-w-none dark:prose-invert line-clamp-6 hover:line-clamp-none transition-all cursor-pointer"
+            onClick={() => setIsZoomed(true)}
             dangerouslySetInnerHTML={{ __html: content }}
           />
         )}
         
-        <div className="flex flex-wrap gap-1 mt-2">
+        <div className="flex flex-wrap gap-1.5 pt-2">
           {tags.map((tag, index) => (
             <Badge
               key={index}
               variant={isEditing ? "outline" : "secondary"}
               className={cn(
-                "flex items-center gap-1",
-                isEditing && "pr-1"
+                "flex items-center gap-1 transition-colors",
+                isEditing ? "pr-1 hover:bg-destructive/10" : "hover:bg-primary/20"
               )}
             >
               {tag}
@@ -234,11 +236,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         </div>
       </CardContent>
 
-      <CardFooter className="flex justify-between pt-2">
+      <CardFooter className="flex justify-between pt-3 pb-4">
         <div className="flex gap-2">
           {isEditing ? (
             <>
-              <Button onClick={handleSave} size="sm">
+              <Button onClick={handleSave} size="sm" className="shadow-sm hover:shadow">
                 <Save className="h-4 w-4 mr-1" />
                 Save
               </Button>
@@ -246,6 +248,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 variant="outline"
                 onClick={() => setIsEditing(false)}
                 size="sm"
+                className="shadow-sm hover:shadow"
               >
                 <X className="h-4 w-4 mr-1" />
                 Cancel
@@ -257,6 +260,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={handleCopyContent}
+                className="hover:bg-primary/10"
               >
                 <Copy className="h-4 w-4 mr-1" />
                 Copy
@@ -266,6 +270,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 size="sm"
                 onClick={toggleMastered}
                 className={cn(
+                  "hover:bg-primary/10",
                   mastered && "text-green-500"
                 )}
               >
@@ -284,7 +289,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
         <DialogContent className="max-w-4xl w-[90vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
+            <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
           </DialogHeader>
           <div className="prose prose-lg max-w-none dark:prose-invert mt-4">
             <div dangerouslySetInnerHTML={{ __html: content }} />
