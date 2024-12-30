@@ -47,13 +47,17 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       StarterKit.configure({
         codeBlock: false,
         bulletList: {
+          keepMarks: true,
+          keepAttributes: false,
           HTMLAttributes: {
-            class: 'list-disc list-inside',
+            class: 'list-disc ml-4 space-y-1',
           },
         },
         orderedList: {
+          keepMarks: true,
+          keepAttributes: false,
           HTMLAttributes: {
-            class: 'list-decimal list-inside',
+            class: 'list-decimal ml-4 space-y-1',
           },
         },
         blockquote: {
@@ -88,7 +92,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm dark:prose-invert focus:outline-none max-w-none min-h-[150px] px-3 py-2',
+        class: 'prose prose-sm dark:prose-invert focus:outline-none max-w-none min-h-[150px] px-3 py-2 [&_ul]:list-none [&_ol]:list-none',
       },
       handlePaste: (view, event) => {
         const items = Array.from(event.clipboardData?.items || []);
