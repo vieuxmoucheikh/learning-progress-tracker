@@ -29,15 +29,17 @@ class LearningCardsService {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
+    const cardData = {
+      title: card.title,
+      content: card.content,
+      tags: card.tags || [],
+      user_id: user.id,
+      mastered: card.mastered || false
+    };
+
     const { data, error } = await supabase
       .from('enhanced_learning_cards')
-      .insert({
-        title: card.title,
-        content: card.content,
-        tags: card.tags || [],
-        user_id: user.id,
-        mastered: card.mastered || false
-      })
+      .insert(cardData)
       .select()
       .single();
 
@@ -60,25 +62,16 @@ class LearningCardsService {
 
   async updateCard(id: string, updates: Partial<NewEnhancedLearningCard>): Promise<EnhancedLearningCard> {
     try {
-      const updateData: any = {
-        title: updates.title,
-        content: updates.content,
-        tags: updates.tags || [],
-        updated_at: new Date().toISOString(),
-        mastered: updates.mastered
+      const updateData: Record<string, any> = {
+        updated_at: new Date().toISOString()
       };
 
-      // Only include media if it exists
-      if (updates.media) {
-        const { data: tableInfo } = await supabase
-          .from('enhanced_learning_cards')
-          .select('media')
-          .limit(1);
-
-        if (tableInfo && tableInfo[0]?.media !== undefined) {
-          updateData.media = updates.media;
-        }
-      }
+      // Only include defined fields
+      if (updates.title !== undefined) updateData.title = updates.title;
+      if (updates.content !== undefined) updateData.content = updates.content;
+      if (updates.tags !== undefined) updateData.tags = updates.tags;
+      if (updates.mastered !== undefined) updateData.mastered = updates.mastered;
+      if (updates.media !== undefined) updateData.media = updates.media;
 
       const { data, error } = await supabase
         .from('enhanced_learning_cards')
