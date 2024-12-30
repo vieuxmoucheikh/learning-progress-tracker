@@ -181,11 +181,17 @@ export function LearningCardsPage() {
         </Select>
       </div>
 
-      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 auto-rows-fr">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[400px]">
         {filteredCards.map((card) => (
-          <div key={card.id} className="h-full">
+          <div key={card.id} className="h-[400px]">
             <EnhancedLearningCard
-              {...card}
+              id={card.id}
+              title={card.title}
+              content={card.content}
+              media={card.media}
+              tags={card.tags}
+              createdAt={card.createdAt}
+              updatedAt={card.updatedAt}
               onSave={handleSaveCard}
               onDelete={handleDeleteCard}
             />

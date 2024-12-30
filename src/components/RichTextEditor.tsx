@@ -45,7 +45,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     editorProps: {
       attributes: {
         class: cn(
-          'prose prose-sm max-w-none focus:outline-none min-h-[150px] h-full',
+          'prose prose-sm max-w-none focus:outline-none h-full',
           'prose-img:my-2 prose-img:rounded-lg prose-img:shadow-sm',
           'prose-a:text-primary prose-a:no-underline hover:prose-a:underline'
         ),
@@ -170,7 +170,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   return (
     <div 
       className={cn(
-        'rounded-md transition-colors h-full flex flex-col',
+        'h-full flex flex-col overflow-hidden rounded-md transition-colors',
         editable && 'border-2 border-input hover:border-primary focus-within:border-primary',
         !editable && 'bg-muted/30',
         className
@@ -178,7 +178,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     >
       <EditorContent 
         editor={editor} 
-        className="p-3 flex-1 overflow-auto"
+        className="p-3 flex-1 overflow-y-auto"
       />
     </div>
   );

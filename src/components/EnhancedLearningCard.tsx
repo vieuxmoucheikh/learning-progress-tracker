@@ -70,8 +70,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   };
 
   return (
-    <Card className="w-full h-full bg-card hover:shadow-lg transition-shadow duration-200 flex flex-col">
-      <CardHeader className="space-y-0 pb-2">
+    <Card className="w-full h-full flex flex-col bg-card">
+      <CardHeader className="space-y-0 pb-2 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex-1 mr-4">
             {isEditing ? (
@@ -137,8 +137,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         )}
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col space-y-4">
-        <div className="flex-1">
+      <CardContent className="flex-1 flex flex-col min-h-0">
+        <div className="flex-1 min-h-0">
           <RichTextEditor
             content={content}
             onChange={setContent}
@@ -147,7 +147,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           />
         </div>
 
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex flex-wrap gap-2 items-center mt-4 flex-shrink-0">
           {tags.map((tag) => (
             <Badge
               key={tag}
@@ -179,7 +179,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       </CardContent>
 
       {isEditing && (
-        <CardFooter className="flex justify-end pt-2">
+        <CardFooter className="flex justify-end pt-2 flex-shrink-0">
           <Button
             variant="destructive"
             size="sm"
