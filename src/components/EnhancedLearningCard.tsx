@@ -137,13 +137,13 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         )}
       </CardHeader>
 
-      <CardContent className="flex-1 space-y-4">
-        <div className="min-h-[150px] relative">
+      <CardContent className="flex-1 flex flex-col space-y-4">
+        <div className="flex-1">
           <RichTextEditor
             content={content}
             onChange={setContent}
             editable={isEditing}
-            className="min-h-[150px] w-full"
+            className="h-full"
           />
         </div>
 

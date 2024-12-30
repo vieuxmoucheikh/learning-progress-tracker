@@ -18,155 +18,144 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   editable = true,
   className,
 }) => {
-  const editor = useEditor(
-    {
-      extensions: [
-        StarterKit,
-        Image.configure({
-          inline: true,
-          allowBase64: true,
-          HTMLAttributes: {
-            class: 'max-w-full rounded-lg shadow-sm hover:shadow-md transition-shadow',
-          },
-        }),
-        Link.configure({
-          openOnClick: true,
-          HTMLAttributes: {
-            class: 'text-primary hover:underline',
-            target: '_blank',
-            rel: 'noopener noreferrer',
-          },
-        }),
-      ],
-      content: content || '',
-      editable,
-      onUpdate: ({ editor }) => {
-        onChange(editor.getHTML());
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Image.configure({
+        inline: true,
+        allowBase64: true,
+        HTMLAttributes: {
+          class: 'max-w-full rounded-lg shadow-sm hover:shadow-md transition-shadow',
+        },
+      }),
+      Link.configure({
+        openOnClick: true,
+        HTMLAttributes: {
+          class: 'text-primary hover:underline',
+          target: '_blank',
+          rel: 'noopener noreferrer',
+        },
+      }),
+    ],
+    content: content || '',
+    editable,
+    onUpdate: ({ editor }) => {
+      onChange(editor.getHTML());
+    },
+    editorProps: {
+      attributes: {
+        class: cn(
+          'prose prose-sm max-w-none focus:outline-none min-h-[150px] h-full',
+          'prose-img:my-2 prose-img:rounded-lg prose-img:shadow-sm',
+          'prose-a:text-primary prose-a:no-underline hover:prose-a:underline'
+        ),
       },
-      editorProps: {
-        attributes: {
-          class: cn(
-            'prose prose-sm max-w-none focus:outline-none min-h-[150px]',
-            'prose-img:my-2 prose-img:rounded-lg prose-img:shadow-sm',
-            'prose-a:text-primary prose-a:no-underline hover:prose-a:underline'
-          ),
-        },
-        handlePaste: (view, event) => {
-          const items = Array.from(event.clipboardData?.items || []);
-          const imageItems = items.filter(item => item.type.startsWith('image'));
+      handlePaste: (view, event) => {
+        const items = Array.from(event.clipboardData?.items || []);
+        const imageItems = items.filter(item => item.type.startsWith('image'));
 
-          if (imageItems.length > 0) {
-            event.preventDefault();
-            imageItems.forEach(item => {
-              const file = item.getAsFile();
-              if (!file) return;
+        if (imageItems.length > 0) {
+          event.preventDefault();
+          imageItems.forEach(item => {
+            const file = item.getAsFile();
+            if (!file) return;
 
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                const dataUrl = e.target?.result as string;
-                if (dataUrl) {
-                  const image = document.createElement('img');
-                  image.src = dataUrl;
-                  image.onload = () => {
-                    // Resize image if too large
-                    const maxWidth = 800;
-                    const maxHeight = 600;
-                    let width = image.width;
-                    let height = image.height;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const dataUrl = e.target?.result as string;
+              if (dataUrl) {
+                const image = document.createElement('img');
+                image.src = dataUrl;
+                image.onload = () => {
+                  const maxWidth = 800;
+                  const maxHeight = 600;
+                  let width = image.width;
+                  let height = image.height;
 
-                    if (width > maxWidth) {
-                      height = (height * maxWidth) / width;
-                      width = maxWidth;
-                    }
-                    if (height > maxHeight) {
-                      width = (width * maxHeight) / height;
-                      height = maxHeight;
-                    }
+                  if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                  }
+                  if (height > maxHeight) {
+                    width = (width * maxHeight) / height;
+                    height = maxHeight;
+                  }
 
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx?.drawImage(image, 0, 0, width, height);
+                  const canvas = document.createElement('canvas');
+                  canvas.width = width;
+                  canvas.height = height;
+                  const ctx = canvas.getContext('2d');
+                  ctx?.drawImage(image, 0, 0, width, height);
 
-                    const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                    view.dispatch(
-                      view.state.tr.replaceSelectionWith(
-                        view.state.schema.nodes.image.create({ src: optimizedDataUrl })
-                      )
-                    );
-                  };
-                }
-              };
-              reader.readAsDataURL(file);
-            });
-            return true;
-          }
-          return false;
-        },
-        handleDrop: (view, event) => {
-          const hasFiles = event.dataTransfer?.files?.length;
-          
-          if (hasFiles) {
-            event.preventDefault();
-            const images = Array.from(event.dataTransfer.files).filter(file => 
-              file.type.startsWith('image/')
-            );
+                  const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                  view.dispatch(
+                    view.state.tr.replaceSelectionWith(
+                      view.state.schema.nodes.image.create({ src: optimizedDataUrl })
+                    )
+                  );
+                };
+              }
+            };
+            reader.readAsDataURL(file);
+          });
+          return true;
+        }
+        return false;
+      },
+      handleDrop: (view, event) => {
+        const hasFiles = event.dataTransfer?.files?.length;
+        
+        if (hasFiles) {
+          event.preventDefault();
+          const images = Array.from(event.dataTransfer.files).filter(file => 
+            file.type.startsWith('image/')
+          );
 
-            images.forEach(file => {
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                const dataUrl = e.target?.result as string;
-                if (dataUrl) {
-                  const image = document.createElement('img');
-                  image.src = dataUrl;
-                  image.onload = () => {
-                    // Resize image if too large
-                    const maxWidth = 800;
-                    const maxHeight = 600;
-                    let width = image.width;
-                    let height = image.height;
+          images.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const dataUrl = e.target?.result as string;
+              if (dataUrl) {
+                const image = document.createElement('img');
+                image.src = dataUrl;
+                image.onload = () => {
+                  const maxWidth = 800;
+                  const maxHeight = 600;
+                  let width = image.width;
+                  let height = image.height;
 
-                    if (width > maxWidth) {
-                      height = (height * maxWidth) / width;
-                      width = maxWidth;
-                    }
-                    if (height > maxHeight) {
-                      width = (width * maxHeight) / height;
-                      height = maxHeight;
-                    }
+                  if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                  }
+                  if (height > maxHeight) {
+                    width = (width * maxHeight) / height;
+                    height = maxHeight;
+                  }
 
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx?.drawImage(image, 0, 0, width, height);
+                  const canvas = document.createElement('canvas');
+                  canvas.width = width;
+                  canvas.height = height;
+                  const ctx = canvas.getContext('2d');
+                  ctx?.drawImage(image, 0, 0, width, height);
 
-                    const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                    view.dispatch(
-                      view.state.tr.replaceSelectionWith(
-                        view.state.schema.nodes.image.create({ src: optimizedDataUrl })
-                      )
-                    );
-                  };
-                }
-              };
-              reader.readAsDataURL(file);
-            });
-            return true;
-          }
-          return false;
-        },
+                  const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                  view.dispatch(
+                    view.state.tr.replaceSelectionWith(
+                      view.state.schema.nodes.image.create({ src: optimizedDataUrl })
+                    )
+                  );
+                };
+              }
+            };
+            reader.readAsDataURL(file);
+          });
+          return true;
+        }
+        return false;
       },
     },
-    [content, editable]
-  );
-
-  React.useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content || '');
-    }
-  }, [editor, content]);
+  });
 
   React.useEffect(() => {
     if (editor && editor.isEditable !== editable) {
@@ -181,18 +170,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   return (
     <div 
       className={cn(
-        'rounded-md transition-colors',
+        'rounded-md transition-colors h-full flex flex-col',
         editable && 'border-2 border-input hover:border-primary focus-within:border-primary',
         !editable && 'bg-muted/30',
         className
       )}
-      onClick={() => {
-        if (editable && editor) {
-          editor.chain().focus().run();
-        }
-      }}
     >
-      <EditorContent editor={editor} className="p-3" />
+      <EditorContent 
+        editor={editor} 
+        className="p-3 flex-1 overflow-auto"
+      />
     </div>
   );
 };
