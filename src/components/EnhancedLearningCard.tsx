@@ -307,17 +307,23 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       </CardFooter>
 
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="max-w-4xl w-[90vw] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto p-6">
+          <DialogHeader className="mb-4">
             <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
           </DialogHeader>
-          <div className="prose prose-lg max-w-none dark:prose-invert mt-4">
+          <div 
+            className="prose prose-lg max-w-none dark:prose-invert mx-auto"
+            style={{ 
+              maxWidth: '65ch',
+              margin: '0 auto'
+            }}
+          >
             <div dangerouslySetInnerHTML={{ __html: content }} />
           </div>
           <Button
             variant="outline"
             onClick={() => setIsZoomed(false)}
-            className="absolute top-2 right-2"
+            className="absolute top-4 right-4"
             size="icon"
           >
             <ZoomOut className="h-4 w-4" />
