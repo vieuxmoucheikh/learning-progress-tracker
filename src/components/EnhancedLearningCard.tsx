@@ -3,7 +3,7 @@ import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Save, X, Tag, Clock, Copy, Eye, EyeOff, Bookmark, BookmarkCheck, ZoomIn, ZoomOut } from 'lucide-react';
+import { Edit, Save, X, Tag, Clock, Copy, Eye, EyeOff, Bookmark, BookmarkCheck, ZoomIn, ZoomOut, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import type { EnhancedLearningCard as CardType, NewEnhancedLearningCard } from '@/types';
 import { RichTextEditor } from './RichTextEditor';
@@ -15,6 +15,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 type EnhancedLearningCardProps = CardType & {
   onSave: (data: Partial<CardType>) => Promise<boolean>;
@@ -191,7 +202,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           <RichTextEditor
             content={content}
             onChange={setContent}
-            className="min-h-[150px] border rounded-md p-2"
+            className="min-h-[150px]"
           />
         ) : (
           <div 
@@ -253,6 +264,15 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 <X className="h-4 w-4 mr-1" />
                 Cancel
               </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => onDelete(id)}
+                className="shadow-sm hover:shadow ml-auto"
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Delete
+              </Button>
             </>
           ) : (
             <>
@@ -304,6 +324,35 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           </Button>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-2 right-2 h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Card</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this card? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => onDelete(id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };

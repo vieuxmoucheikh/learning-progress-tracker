@@ -2,8 +2,22 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { common, createLowlight } from 'lowlight';
 import React from 'react';
 import { cn } from '@/lib/utils';
+import {
+  Bold,
+  Italic,
+  Code,
+  List,
+  ListOrdered,
+  Quote,
+  Undo,
+  Redo,
+  Link as LinkIcon,
+} from 'lucide-react';
+import { Button } from './ui/button';
 
 interface RichTextEditorProps {
   content: string;
@@ -11,6 +25,8 @@ interface RichTextEditorProps {
   editable?: boolean;
   className?: string;
 }
+
+const lowlight = createLowlight(common);
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   content,
@@ -20,166 +36,114 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
   const editor = useEditor({
     extensions: [
-      StarterKit,
-      Image.configure({
-        inline: true,
-        allowBase64: true,
+      StarterKit.configure({
+        codeBlock: false,
+      }),
+      Image,
+      Link.configure({
+        openOnClick: false,
         HTMLAttributes: {
-          class: 'max-w-full rounded-lg shadow-sm hover:shadow-md transition-shadow',
+          class: 'text-primary underline',
         },
       }),
-      Link.configure({
-        openOnClick: true,
+      CodeBlockLowlight.configure({
+        lowlight,
         HTMLAttributes: {
-          class: 'text-primary hover:underline',
-          target: '_blank',
-          rel: 'noopener noreferrer',
+          class: 'rounded-md bg-muted p-4 my-2 overflow-x-auto',
+          'data-language': 'typescript',
         },
       }),
     ],
-    content: content || '',
+    content,
     editable,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
     editorProps: {
       attributes: {
-        class: cn(
-          'prose prose-sm max-w-none focus:outline-none h-full',
-          'prose-img:my-2 prose-img:rounded-lg prose-img:shadow-sm',
-          'prose-a:text-primary prose-a:no-underline hover:prose-a:underline'
-        ),
-      },
-      handlePaste: (view, event) => {
-        const items = Array.from(event.clipboardData?.items || []);
-        const imageItems = items.filter(item => item.type.startsWith('image'));
-
-        if (imageItems.length > 0) {
-          event.preventDefault();
-          imageItems.forEach(item => {
-            const file = item.getAsFile();
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              const dataUrl = e.target?.result as string;
-              if (dataUrl) {
-                const image = document.createElement('img');
-                image.src = dataUrl;
-                image.onload = () => {
-                  const maxWidth = 800;
-                  const maxHeight = 600;
-                  let width = image.width;
-                  let height = image.height;
-
-                  if (width > maxWidth) {
-                    height = (height * maxWidth) / width;
-                    width = maxWidth;
-                  }
-                  if (height > maxHeight) {
-                    width = (width * maxHeight) / height;
-                    height = maxHeight;
-                  }
-
-                  const canvas = document.createElement('canvas');
-                  canvas.width = width;
-                  canvas.height = height;
-                  const ctx = canvas.getContext('2d');
-                  ctx?.drawImage(image, 0, 0, width, height);
-
-                  const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                  view.dispatch(
-                    view.state.tr.replaceSelectionWith(
-                      view.state.schema.nodes.image.create({ src: optimizedDataUrl })
-                    )
-                  );
-                };
-              }
-            };
-            reader.readAsDataURL(file);
-          });
-          return true;
-        }
-        return false;
-      },
-      handleDrop: (view, event) => {
-        const hasFiles = event.dataTransfer?.files?.length;
-        
-        if (hasFiles) {
-          event.preventDefault();
-          const images = Array.from(event.dataTransfer.files).filter(file => 
-            file.type.startsWith('image/')
-          );
-
-          images.forEach(file => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              const dataUrl = e.target?.result as string;
-              if (dataUrl) {
-                const image = document.createElement('img');
-                image.src = dataUrl;
-                image.onload = () => {
-                  const maxWidth = 800;
-                  const maxHeight = 600;
-                  let width = image.width;
-                  let height = image.height;
-
-                  if (width > maxWidth) {
-                    height = (height * maxWidth) / width;
-                    width = maxWidth;
-                  }
-                  if (height > maxHeight) {
-                    width = (width * maxHeight) / height;
-                    height = maxHeight;
-                  }
-
-                  const canvas = document.createElement('canvas');
-                  canvas.width = width;
-                  canvas.height = height;
-                  const ctx = canvas.getContext('2d');
-                  ctx?.drawImage(image, 0, 0, width, height);
-
-                  const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                  view.dispatch(
-                    view.state.tr.replaceSelectionWith(
-                      view.state.schema.nodes.image.create({ src: optimizedDataUrl })
-                    )
-                  );
-                };
-              }
-            };
-            reader.readAsDataURL(file);
-          });
-          return true;
-        }
-        return false;
+        class: 'prose prose-sm dark:prose-invert focus:outline-none max-w-none',
       },
     },
   });
-
-  React.useEffect(() => {
-    if (editor && editor.isEditable !== editable) {
-      editor.setEditable(editable);
-    }
-  }, [editor, editable]);
 
   if (!editor) {
     return null;
   }
 
   return (
-    <div 
-      className={cn(
-        'h-full flex flex-col overflow-hidden rounded-md transition-colors',
-        editable && 'border-2 border-input hover:border-primary focus-within:border-primary',
-        !editable && 'bg-muted/30',
-        className
+    <div className={cn("rounded-md border", className)}>
+      {editable && (
+        <div className="flex flex-wrap gap-1 p-1 border-b bg-muted/50">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={cn("h-8 w-8", editor.isActive('bold') && "bg-muted")}
+          >
+            <Bold className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            className={cn("h-8 w-8", editor.isActive('italic') && "bg-muted")}
+          >
+            <Italic className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+            className={cn("h-8 w-8", editor.isActive('codeBlock') && "bg-muted")}
+          >
+            <Code className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            className={cn("h-8 w-8", editor.isActive('bulletList') && "bg-muted")}
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            className={cn("h-8 w-8", editor.isActive('orderedList') && "bg-muted")}
+          >
+            <ListOrdered className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            className={cn("h-8 w-8", editor.isActive('blockquote') && "bg-muted")}
+          >
+            <Quote className="h-4 w-4" />
+          </Button>
+          <div className="w-px h-8 bg-border mx-1" />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => editor.chain().focus().undo().run()}
+            disabled={!editor.can().undo()}
+            className="h-8 w-8"
+          >
+            <Undo className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => editor.chain().focus().redo().run()}
+            disabled={!editor.can().redo()}
+            className="h-8 w-8"
+          >
+            <Redo className="h-4 w-4" />
+          </Button>
+        </div>
       )}
-    >
-      <EditorContent 
-        editor={editor} 
-        className="p-3 flex-1 overflow-y-auto"
-      />
+      <EditorContent editor={editor} className="p-3" />
     </div>
   );
 };
