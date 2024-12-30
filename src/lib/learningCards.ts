@@ -66,12 +66,14 @@ class LearningCardsService {
         updated_at: new Date().toISOString()
       };
 
-      // Only include defined fields
+      // Only include fields that exist in the database
       if (updates.title !== undefined) updateData.title = updates.title;
       if (updates.content !== undefined) updateData.content = updates.content;
       if (updates.tags !== undefined) updateData.tags = updates.tags;
       if (updates.mastered !== undefined) updateData.mastered = updates.mastered;
-      if (updates.media !== undefined) updateData.media = updates.media;
+      
+      // Remove media updates for now since the column doesn't exist
+      // if (updates.media !== undefined) updateData.media = updates.media;
 
       const { data, error } = await supabase
         .from('enhanced_learning_cards')
@@ -111,29 +113,6 @@ class LearningCardsService {
       console.error('Error deleting card:', error);
       throw new Error('Failed to delete card');
     }
-  }
-
-  async uploadImage(file: File): Promise<string> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/${Math.random()}.${fileExt}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('card-images')
-      .upload(fileName, file);
-
-    if (uploadError) {
-      console.error('Error uploading image:', uploadError);
-      throw new Error('Failed to upload image');
-    }
-
-    const { data } = supabase.storage
-      .from('card-images')
-      .getPublicUrl(fileName);
-
-    return data.publicUrl;
   }
 
   private parseMedia(media: any): CardMedia[] {
