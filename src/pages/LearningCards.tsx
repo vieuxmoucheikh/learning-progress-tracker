@@ -10,16 +10,24 @@ import {
 } from '@/components/ui/select';
 import { EnhancedLearningCard } from '@/components/EnhancedLearningCard';
 import { learningCardsService } from '@/lib/learningCards';
-import { EnhancedLearningCard as CardType } from '@/types';
-import { Plus, Search, Tag as TagIcon, Loader2 } from 'lucide-react';
+import type { EnhancedLearningCard as CardType } from '@/types';
+import { Plus, Search, Tag as TagIcon, Loader2, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { motion, AnimatePresence } from 'framer-motion';
+
+interface CardMedia {
+  id: string;
+  url: string;
+  type: 'link' | 'image';
+  createdAt?: string;
+}
 
 export const LearningCardsPage = () => {
   const [cards, setCards] = useState<CardType[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<'updated' | 'created' | 'mastered'>('updated');
   const { toast } = useToast();
 
   const allTags = Array.from(
@@ -29,7 +37,7 @@ export const LearningCardsPage = () => {
   const fetchCards = async () => {
     try {
       const fetchedCards = await learningCardsService.getCards();
-      setCards(fetchedCards);
+      setCards(fetchedCards as CardType[]);
     } catch (error) {
       console.error('Error fetching cards:', error);
       toast({
@@ -68,18 +76,14 @@ export const LearningCardsPage = () => {
     }
   };
 
-  const handleSaveCard = async (card: {
-    id: string;
-    title: string;
-    content: string;
-    media?: CardMedia[];
-    tags: string[];
-  }): Promise<boolean> => {
+  const handleSaveCard = async (card: Partial<CardType>): Promise<boolean> => {
     try {
-      await learningCardsService.updateCard(card.id, {
+      await learningCardsService.updateCard(card.id!, {
         title: card.title,
         content: card.content,
+        media: card.media,
         tags: card.tags,
+        mastered: card.mastered,
       });
       await fetchCards();
       toast({
@@ -129,6 +133,25 @@ export const LearningCardsPage = () => {
     return matchesSearch && matchesTags;
   });
 
+  const sortedAndFilteredCards = filteredCards.sort((a, b) => {
+    switch (sortBy) {
+      case 'updated':
+        return new Date(b.updatedAt || '').getTime() - new Date(a.updatedAt || '').getTime();
+      case 'created':
+        return new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime();
+      case 'mastered':
+        // Safely handle mastered property with type assertion
+        const aMastered = (a as any).mastered || false;
+        const bMastered = (b as any).mastered || false;
+        if (aMastered === bMastered) {
+          return new Date(b.updatedAt || '').getTime() - new Date(a.updatedAt || '').getTime();
+        }
+        return (bMastered ? 1 : 0) - (aMastered ? 1 : 0);
+      default:
+        return 0;
+    }
+  });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[400px]">
@@ -173,6 +196,22 @@ export const LearningCardsPage = () => {
               ))}
             </SelectContent>
           </Select>
+          <Select
+            value={sortBy}
+            onValueChange={(value: 'updated' | 'created' | 'mastered') => setSortBy(value)}
+          >
+            <SelectTrigger className="w-[180px]">
+              <div className="flex items-center">
+                <Clock className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Sort by" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="updated">Last Updated</SelectItem>
+              <SelectItem value="created">Created Date</SelectItem>
+              <SelectItem value="mastered">Mastery Status</SelectItem>
+            </SelectContent>
+          </Select>
           <Button onClick={handleCreateCard} className="whitespace-nowrap">
             <Plus className="w-4 h-4 mr-2" />
             New Card
@@ -215,7 +254,7 @@ export const LearningCardsPage = () => {
             layout
             className="grid grid-cols-1 lg:grid-cols-2 gap-6 auto-rows-[450px]"
           >
-            {filteredCards.map((card) => (
+            {sortedAndFilteredCards.map((card) => (
               <motion.div
                 key={card.id}
                 layout

@@ -150,6 +150,7 @@ export interface PomodoroStats {
 export interface CardMedia {
   type: 'image' | 'link';
   url: string;
+  id: string;
   description?: string;
 }
 
@@ -161,9 +162,12 @@ export interface EnhancedLearningCard {
   tags: string[];
   createdAt: string;
   updatedAt: string;
+  mastered?: boolean;
 }
 
-export type NewEnhancedLearningCard = Omit<EnhancedLearningCard, 'id' | 'createdAt' | 'updatedAt'>;
+export type NewEnhancedLearningCard = Omit<EnhancedLearningCard, 'id' | 'createdAt' | 'updatedAt'> & {
+  mastered?: boolean;
+}
 
 export interface EnhancedLearningContent {
   id: string;

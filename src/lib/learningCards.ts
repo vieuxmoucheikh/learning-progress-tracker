@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { EnhancedLearningCard, NewEnhancedLearningCard, CardMedia } from '@/types';
+import type { CardMedia, EnhancedLearningCard, NewEnhancedLearningCard } from '@/types';
 
 class LearningCardsService {
   async getCards(): Promise<EnhancedLearningCard[]> {
@@ -20,7 +20,8 @@ class LearningCardsService {
       media: this.parseMedia(card.media),
       tags: Array.isArray(card.tags) ? card.tags : [],
       createdAt: card.created_at,
-      updatedAt: card.updated_at
+      updatedAt: card.updated_at,
+      mastered: card.mastered || false
     }));
   }
 
@@ -34,7 +35,8 @@ class LearningCardsService {
         title: card.title,
         content: card.content,
         tags: card.tags || [],
-        user_id: user.id
+        user_id: user.id,
+        mastered: card.mastered || false
       })
       .select()
       .single();
@@ -51,7 +53,8 @@ class LearningCardsService {
       media: [],
       tags: Array.isArray(data.tags) ? data.tags : [],
       createdAt: data.created_at,
-      updatedAt: data.updated_at
+      updatedAt: data.updated_at,
+      mastered: data.mastered || false
     };
   }
 
@@ -61,7 +64,8 @@ class LearningCardsService {
         title: updates.title,
         content: updates.content,
         tags: updates.tags || [],
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        mastered: updates.mastered
       };
 
       // Only include media if it exists
@@ -95,7 +99,8 @@ class LearningCardsService {
         media: this.parseMedia(data.media),
         tags: Array.isArray(data.tags) ? data.tags : [],
         createdAt: data.created_at,
-        updatedAt: data.updated_at
+        updatedAt: data.updated_at,
+        mastered: data.mastered || false
       };
     } catch (error) {
       console.error('Error updating card:', error);
@@ -140,10 +145,18 @@ class LearningCardsService {
 
   private parseMedia(media: any): CardMedia[] {
     if (!media) return [];
-    if (Array.isArray(media)) return media;
+    if (Array.isArray(media)) {
+      return media.map(item => ({
+        ...item,
+        type: item.type === 'link' || item.type === 'image' ? item.type : 'image'
+      }));
+    }
     try {
       const parsed = JSON.parse(media);
-      return Array.isArray(parsed) ? parsed : [];
+      return Array.isArray(parsed) ? parsed.map(item => ({
+        ...item,
+        type: item.type === 'link' || item.type === 'image' ? item.type : 'image'
+      })) : [];
     } catch {
       return [];
     }

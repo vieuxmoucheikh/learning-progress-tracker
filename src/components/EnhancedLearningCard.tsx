@@ -3,28 +3,18 @@ import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Save, X, Tag, Clock } from 'lucide-react';
+import { Edit, Save, X, Tag, Clock, Copy, Eye, EyeOff, Bookmark, BookmarkCheck } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { CardMedia } from '@/types';
+import type { EnhancedLearningCard as CardType, NewEnhancedLearningCard } from '@/types';
 import { RichTextEditor } from './RichTextEditor';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/useToast';
 
-interface EnhancedLearningCardProps {
-  id: string;
-  title: string;
-  content: string;
-  media?: CardMedia[];
-  tags: string[];
-  createdAt?: string;
-  updatedAt?: string;
-  onSave: (data: {
-    id: string;
-    title: string;
-    content: string;
-    media?: CardMedia[];
-    tags: string[];
-  }) => Promise<boolean>;
+type EnhancedLearningCardProps = CardType & {
+  onSave: (data: Partial<CardType>) => Promise<boolean>;
   onDelete: (id: string) => void;
-}
+  mastered?: boolean;
+};
 
 export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   id,
@@ -32,16 +22,21 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   content: initialContent,
   media: initialMedia = [],
   tags: initialTags,
+  createdAt,
   updatedAt,
   onSave,
   onDelete,
+  mastered: initialMastered = false,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
-  const [media, setMedia] = useState<CardMedia[]>(initialMedia);
+  const [media, setMedia] = useState<CardType['media']>(initialMedia);
   const [tags, setTags] = useState<string[]>(initialTags);
   const [newTag, setNewTag] = useState('');
+  const [isContentHidden, setIsContentHidden] = useState(false);
+  const [mastered, setMastered] = useState(initialMastered);
+  const { toast } = useToast();
 
   const handleSave = async () => {
     const result = await onSave({
@@ -50,9 +45,14 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       content,
       media,
       tags,
+      mastered,
     });
     if (result) {
       setIsEditing(false);
+      toast({
+        title: "Success",
+        description: "Card updated successfully",
+      });
     }
   };
 
@@ -69,8 +69,42 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
+  const handleCopyContent = async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      toast({
+        title: "Copied!",
+        description: "Card content copied to clipboard",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy content",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleMastered = async () => {
+    const newMasteredState = !mastered;
+    const result = await onSave({
+      id,
+      mastered: newMasteredState,
+    });
+    if (result) {
+      setMastered(newMasteredState);
+      toast({
+        title: newMasteredState ? "Mastered!" : "Unmastered",
+        description: newMasteredState ? "Card marked as mastered" : "Card marked as not mastered",
+      });
+    }
+  };
+
   return (
-    <Card className="w-full h-full flex flex-col bg-card hover:shadow-lg transition-all duration-200">
+    <Card className={cn(
+      "w-full h-full flex flex-col bg-card hover:shadow-lg transition-all duration-200",
+      mastered && "border-primary/50"
+    )}>
       <CardHeader className="space-y-0 pb-2 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex-1 mr-4">
@@ -86,6 +120,40 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             )}
           </div>
           <div className="flex gap-2 flex-shrink-0">
+            {!isEditing && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsContentHidden(!isContentHidden)}
+                  className="hover:scale-105 transition-transform"
+                  title={isContentHidden ? "Show content" : "Hide content"}
+                >
+                  {isContentHidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCopyContent}
+                  className="hover:scale-105 transition-transform"
+                  title="Copy content"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleMastered}
+                  className={cn(
+                    "hover:scale-105 transition-transform",
+                    mastered && "text-primary"
+                  )}
+                  title={mastered ? "Mark as not mastered" : "Mark as mastered"}
+                >
+                  {mastered ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
+                </Button>
+              </>
+            )}
             <Button
               variant={isEditing ? "default" : "ghost"}
               size="sm"
@@ -138,7 +206,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col min-h-0">
-        <div className="flex-1 min-h-0">
+        <div className={cn(
+          "flex-1 min-h-0 transition-opacity duration-200",
+          isContentHidden && !isEditing && "opacity-0"
+        )}>
           <RichTextEditor
             content={content}
             onChange={setContent}
