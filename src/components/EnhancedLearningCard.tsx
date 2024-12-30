@@ -70,7 +70,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   };
 
   return (
-    <Card className="w-full h-full flex flex-col bg-card">
+    <Card className="w-full h-full flex flex-col bg-card hover:shadow-lg transition-all duration-200">
       <CardHeader className="space-y-0 pb-2 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex-1 mr-4">
@@ -78,7 +78,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="text-xl font-semibold border-2 focus:border-primary"
+                className="text-xl font-semibold focus-visible:ring-2 ring-offset-2 ring-primary"
                 placeholder="Enter title..."
               />
             ) : (
@@ -152,7 +152,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             <Badge
               key={tag}
               variant="secondary"
-              className="px-2 py-1 text-sm hover:bg-secondary/80 transition-colors"
+              className="px-2 py-1 text-sm hover:bg-primary/10 transition-colors"
             >
               <Tag className="h-3 w-3 mr-1 inline-block" />
               {tag}
@@ -172,7 +172,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               onChange={(e) => setNewTag(e.target.value)}
               onKeyDown={handleAddTag}
               placeholder="Add tag..."
-              className="w-24 h-7 text-sm"
+              className="w-28 h-7 text-sm focus-visible:ring-2 ring-offset-2 ring-primary"
             />
           )}
         </div>

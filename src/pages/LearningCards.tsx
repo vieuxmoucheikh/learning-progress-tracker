@@ -10,29 +10,35 @@ import {
 } from '@/components/ui/select';
 import { EnhancedLearningCard } from '@/components/EnhancedLearningCard';
 import { learningCardsService } from '@/lib/learningCards';
+import { EnhancedLearningCard as CardType } from '@/types';
+import { Plus, Search, Tag as TagIcon, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
-import { Plus, Search, SearchX, FileText } from 'lucide-react';
-import type { EnhancedLearningCard as CardType, CardMedia } from '@/types';
+import { motion, AnimatePresence } from 'framer-motion';
 
-export function LearningCardsPage() {
+export const LearningCardsPage = () => {
   const [cards, setCards] = useState<CardType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const { toast } = useToast();
+
+  const allTags = Array.from(
+    new Set(cards.flatMap((card) => card.tags))
+  ).sort();
 
   const fetchCards = async () => {
     try {
       const fetchedCards = await learningCardsService.getCards();
       setCards(fetchedCards);
     } catch (error) {
+      console.error('Error fetching cards:', error);
       toast({
         title: 'Error',
         description: 'Failed to fetch cards. Please try again.',
         variant: 'destructive',
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -45,15 +51,15 @@ export function LearningCardsPage() {
       const newCard = await learningCardsService.createCard({
         title: 'New Card',
         content: '',
-        media: [],
         tags: [],
       });
-      setCards(prevCards => [newCard, ...prevCards]);
+      setCards((prevCards) => [newCard, ...prevCards]);
       toast({
         title: 'Success',
-        description: 'New card created successfully!',
+        description: 'Card created successfully',
       });
     } catch (error) {
+      console.error('Error creating card:', error);
       toast({
         title: 'Error',
         description: 'Failed to create card. Please try again.',
@@ -95,12 +101,13 @@ export function LearningCardsPage() {
   const handleDeleteCard = async (id: string) => {
     try {
       await learningCardsService.deleteCard(id);
-      setCards(prevCards => prevCards.filter(card => card.id !== id));
+      setCards((prevCards) => prevCards.filter((card) => card.id !== id));
       toast({
         title: 'Success',
-        description: 'Card deleted successfully!',
+        description: 'Card deleted successfully',
       });
     } catch (error) {
+      console.error('Error deleting card:', error);
       toast({
         title: 'Error',
         description: 'Failed to delete card. Please try again.',
@@ -109,112 +116,131 @@ export function LearningCardsPage() {
     }
   };
 
-  const allTags = Array.from(
-    new Set(cards.flatMap(card => card.tags))
-  ).sort();
+  const filteredCards = cards.filter((card) => {
+    const matchesSearch =
+      searchTerm === '' ||
+      card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      card.content.toLowerCase().includes(searchTerm.toLowerCase());
 
-  const filteredCards = cards.filter(card => {
-    const matchesSearch = !searchQuery || 
-      card.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      card.content.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesTags = selectedTags.length === 0 || 
-      selectedTags.every(tag => card.tags.includes(tag));
-    
+    const matchesTags =
+      selectedTags.length === 0 ||
+      selectedTags.every((tag) => card.tags.includes(tag));
+
     return matchesSearch && matchesTags;
   });
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="container py-8">
-        <div className="flex justify-center items-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-        </div>
+      <div className="flex items-center justify-center h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="container py-8 space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Learning Cards</h1>
-          <p className="text-muted-foreground mt-1">
-            Create and manage your learning notes
-          </p>
-        </div>
-        <Button
-          onClick={handleCreateCard}
-          size="default"
-          className="hover:scale-105 transition-transform"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          New Card
-        </Button>
-      </div>
-
-      <div className="flex flex-wrap gap-4 items-center">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search cards..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-        <Select
-          value={selectedTags.join(',') || 'all'}
-          onValueChange={(value) => setSelectedTags(value === 'all' ? [] : value.split(','))}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by tags" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Tags</SelectItem>
-            {allTags.map(tag => (
-              <SelectItem key={tag} value={tag}>
-                {tag}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[400px]">
-        {filteredCards.map((card) => (
-          <div key={card.id} className="h-[400px]">
-            <EnhancedLearningCard
-              id={card.id}
-              title={card.title}
-              content={card.content}
-              media={card.media}
-              tags={card.tags}
-              createdAt={card.createdAt}
-              updatedAt={card.updatedAt}
-              onSave={handleSaveCard}
-              onDelete={handleDeleteCard}
+    <div className="container mx-auto p-6 max-w-7xl space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex-1 w-full sm:w-auto">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search cards..."
+              className="pl-9 w-full"
             />
           </div>
-        ))}
-        {filteredCards.length === 0 && (
-          <div className="col-span-full text-center py-12 text-muted-foreground bg-muted/30 rounded-lg">
-            {searchQuery || selectedTags.length > 0 ? (
-              <>
-                <SearchX className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                <p className="text-lg font-medium">No cards match your search criteria</p>
-                <p className="mt-1">Try adjusting your search or filters</p>
-              </>
-            ) : (
-              <>
-                <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                <p className="text-lg font-medium">No cards yet</p>
-                <p className="mt-1">Click "New Card" to create your first learning card!</p>
-              </>
-            )}
-          </div>
-        )}
+        </div>
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          <Select
+            value={selectedTags.join(',') || 'all'}
+            onValueChange={(value) =>
+              setSelectedTags(value === 'all' ? [] : value.split(','))
+            }
+          >
+            <SelectTrigger className="w-[180px]">
+              <div className="flex items-center">
+                <TagIcon className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Filter by tags" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Tags</SelectItem>
+              {allTags.map((tag) => (
+                <SelectItem key={tag} value={tag}>
+                  {tag}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button onClick={handleCreateCard} className="whitespace-nowrap">
+            <Plus className="w-4 h-4 mr-2" />
+            New Card
+          </Button>
+        </div>
       </div>
+
+      <AnimatePresence>
+        {filteredCards.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="flex flex-col items-center justify-center h-[400px] text-center"
+          >
+            <div className="text-muted-foreground">
+              {searchTerm || selectedTags.length > 0 ? (
+                <>
+                  <h3 className="text-lg font-semibold mb-2">No matching cards found</h3>
+                  <p>Try adjusting your search or filters</p>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-lg font-semibold mb-2">No cards yet</h3>
+                  <p>Create your first card to get started</p>
+                </>
+              )}
+            </div>
+            <Button
+              onClick={handleCreateCard}
+              variant="outline"
+              className="mt-4"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Create Card
+            </Button>
+          </motion.div>
+        ) : (
+          <motion.div
+            layout
+            className="grid grid-cols-1 lg:grid-cols-2 gap-6 auto-rows-[450px]"
+          >
+            {filteredCards.map((card) => (
+              <motion.div
+                key={card.id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.2 }}
+                className="h-[450px]"
+              >
+                <EnhancedLearningCard
+                  id={card.id}
+                  title={card.title}
+                  content={card.content}
+                  media={card.media}
+                  tags={card.tags}
+                  createdAt={card.createdAt}
+                  updatedAt={card.updatedAt}
+                  onSave={handleSaveCard}
+                  onDelete={handleDeleteCard}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
-}
+};
