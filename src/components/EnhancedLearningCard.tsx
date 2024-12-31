@@ -54,6 +54,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   const [isContentHidden, setIsContentHidden] = useState(false);
   const [mastered, setMastered] = useState(initialMastered);
   const [isZoomed, setIsZoomed] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -275,7 +276,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => onDelete(id)}
+                onClick={() => setIsDeleteDialogOpen(true)}
                 className="shadow-sm hover:shadow text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
               >
                 <Trash2 className="h-4 w-4 mr-1" />
@@ -312,7 +313,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => onDelete(id)}
+                onClick={() => setIsDeleteDialogOpen(true)}
                 className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
               >
                 <Trash2 className="h-4 w-4 mr-1" />
@@ -350,10 +351,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         </DialogContent>
       </Dialog>
 
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <span /> {/* Empty trigger since we're using custom buttons */}
-        </AlertDialogTrigger>
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent className="fixed inset-x-0 mx-auto top-[50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-md p-4 sm:p-6">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl text-center text-red-600 dark:text-red-400">
