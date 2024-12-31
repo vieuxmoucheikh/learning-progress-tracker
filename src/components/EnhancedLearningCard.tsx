@@ -156,7 +156,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           />
         ) : (
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-lg line-clamp-2 text-foreground/90">{title}</h3>
+            <h3 className="font-semibold text-lg line-clamp-2 bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+              {title}
+            </h3>
             <div className="flex gap-1 ml-2 flex-shrink-0">
               <Button
                 variant="ghost"
@@ -270,6 +272,15 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 <X className="h-4 w-4 mr-1" />
                 Cancel
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onDelete(id)}
+                className="shadow-sm hover:shadow text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Delete
+              </Button>
             </>
           ) : (
             <>
@@ -298,13 +309,22 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 )}
                 {mastered ? "Mastered" : "Mark as Mastered"}
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onDelete(id)}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Delete
+              </Button>
             </>
           )}
         </div>
       </CardFooter>
 
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="w-[95vw] sm:w-[90vw] max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+        <DialogContent className="fixed inset-x-0 mx-auto top-[50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader className="mb-6">
             <DialogTitle className="text-xl sm:text-2xl font-semibold text-center bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
               {title}
@@ -332,15 +352,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 right-2 h-8 w-8 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/50 dark:hover:text-red-400"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <span /> {/* Empty trigger since we're using custom buttons */}
         </AlertDialogTrigger>
-        <AlertDialogContent className="w-[95vw] sm:w-[90vw] max-w-md p-4 sm:p-6">
+        <AlertDialogContent className="fixed inset-x-0 mx-auto top-[50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-md p-4 sm:p-6">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl text-center text-red-600 dark:text-red-400">
               Delete Card
