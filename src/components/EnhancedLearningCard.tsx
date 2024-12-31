@@ -144,8 +144,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       "relative w-full h-full transition-all duration-200 ease-in-out",
       "bg-card border-2 shadow-sm hover:shadow-md",
       mastered ? "border-emerald-500/50 hover:border-emerald-500 hover:shadow-emerald-100" : 
-                "border-transparent hover:border-blue-500/50 hover:shadow-blue-50",
-      isEditing && "border-blue-500 shadow-blue-100"
+                "border-transparent hover:border-blue-600/50 hover:shadow-blue-100",
+      isEditing && "border-blue-600 shadow-blue-100"
     )}>
       <CardHeader className="relative pb-3 space-y-2">
         {isEditing ? (
@@ -157,7 +157,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           />
         ) : (
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-lg line-clamp-2 bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+            <h3 className="font-semibold text-lg line-clamp-2 bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
               {title}
             </h3>
             <div className="flex gap-1 ml-2 flex-shrink-0">
@@ -165,29 +165,29 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsZoomed(true)}
-                className="h-8 w-8 hover:bg-blue-50 dark:hover:bg-blue-950/50"
+                className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
               >
-                <ZoomIn className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <ZoomIn className="h-4 w-4 text-blue-700 dark:text-blue-400" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={toggleContentVisibility}
-                className="h-8 w-8 hover:bg-blue-50 dark:hover:bg-blue-950/50"
+                className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
               >
                 {isContentHidden ? (
-                  <Eye className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <Eye className="h-4 w-4 text-blue-700 dark:text-blue-400" />
                 ) : (
-                  <EyeOff className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <EyeOff className="h-4 w-4 text-blue-700 dark:text-blue-400" />
                 )}
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsEditing(true)}
-                className="h-8 w-8 hover:bg-blue-50 dark:hover:bg-blue-950/50"
+                className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
               >
-                <Edit className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <Edit className="h-4 w-4 text-blue-700 dark:text-blue-400" />
               </Button>
             </div>
           </div>
@@ -259,7 +259,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               <Button 
                 onClick={handleSave} 
                 size="sm" 
-                className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow dark:bg-blue-700 dark:hover:bg-blue-800"
+                className="bg-blue-700 hover:bg-blue-800 text-white shadow-sm hover:shadow dark:bg-blue-800 dark:hover:bg-blue-900"
               >
                 <Save className="h-4 w-4 mr-1" />
                 Save
@@ -289,7 +289,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={handleCopyContent}
-                className="hover:bg-blue-50 text-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/50"
+                className="hover:bg-blue-100 text-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/50"
               >
                 <Copy className="h-4 w-4 mr-1" />
                 Copy
@@ -300,7 +300,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 onClick={toggleMastered}
                 className={cn(
                   "hover:bg-emerald-50 dark:hover:bg-emerald-950/50",
-                  mastered ? "text-emerald-600 dark:text-emerald-400" : "text-blue-600 dark:text-blue-400"
+                  mastered ? "text-emerald-600 dark:text-emerald-400" : "text-blue-700 dark:text-blue-400"
                 )}
               >
                 {mastered ? (
@@ -325,9 +325,13 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       </CardFooter>
 
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+        <DialogContent className={cn(
+          "fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6",
+          "sm:translate-x-[-50%] sm:translate-y-[-50%]",
+          "translate-x-[-48%] translate-y-[-52%]" // Slight adjustment for mobile
+        )}>
           <DialogHeader className="mb-6">
-            <DialogTitle className="text-xl sm:text-2xl font-semibold text-center bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+            <DialogTitle className="text-xl sm:text-2xl font-semibold text-center bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
               {title}
             </DialogTitle>
           </DialogHeader>
@@ -335,9 +339,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             <div 
               className={cn(
                 "prose prose-lg dark:prose-invert",
-                "prose-headings:text-blue-800 dark:prose-headings:text-blue-300",
-                "prose-a:text-blue-600 dark:prose-a:text-blue-400",
-                "prose-strong:text-blue-800 dark:prose-strong:text-blue-300",
+                "prose-headings:text-blue-900 dark:prose-headings:text-blue-300",
+                "prose-a:text-blue-700 dark:prose-a:text-blue-400",
+                "prose-strong:text-blue-900 dark:prose-strong:text-blue-300",
                 "[&_ul]:list-disc [&_ol]:list-decimal",
                 "[&_ul>li]:pl-0 [&_ol>li]:pl-0",
                 "[&_ul>li]:my-0 [&_ol>li]:my-0",
@@ -352,7 +356,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       </Dialog>
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-md p-4 sm:p-6">
+        <AlertDialogContent className={cn(
+          "fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-md p-4 sm:p-6",
+          "sm:translate-x-[-50%] sm:translate-y-[-50%]",
+          "translate-x-[-48%] translate-y-[-52%]" // Slight adjustment for mobile
+        )}>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl text-center text-red-600 dark:text-red-400">
               Delete Card
