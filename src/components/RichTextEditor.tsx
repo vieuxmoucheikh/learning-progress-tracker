@@ -50,14 +50,19 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           keepMarks: true,
           keepAttributes: false,
           HTMLAttributes: {
-            class: 'list-disc ml-4 space-y-1',
+            class: 'pl-0 my-0 space-y-0',
           },
         },
         orderedList: {
           keepMarks: true,
           keepAttributes: false,
           HTMLAttributes: {
-            class: 'list-decimal ml-4 space-y-1',
+            class: 'pl-0 my-0 space-y-0',
+          },
+        },
+        listItem: {
+          HTMLAttributes: {
+            class: 'my-0 pl-0',
           },
         },
         blockquote: {
@@ -92,7 +97,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm dark:prose-invert focus:outline-none max-w-none min-h-[150px] px-3 py-2 [&_ul]:list-none [&_ol]:list-none',
+        class: cn(
+          'prose prose-sm dark:prose-invert focus:outline-none max-w-none min-h-[150px] px-3 py-2',
+          '[&_ul]:pl-5 [&_ol]:pl-5',
+          '[&_ul>li]:pl-0 [&_ol>li]:pl-0',
+          '[&_ul>li]:my-0 [&_ol>li]:my-0',
+          '[&_ul]:my-1 [&_ol]:my-1',
+          '[&_ul]:list-disc [&_ol]:list-decimal',
+          '[&_ul>li]:marker:text-foreground/80 [&_ol>li]:marker:text-foreground/80',
+          '[&_p]:my-0'
+        ),
       },
       handlePaste: (view, event) => {
         const items = Array.from(event.clipboardData?.items || []);

@@ -307,24 +307,26 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       </CardFooter>
 
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto p-6 sm:p-8">
+        <DialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto p-6 sm:p-8">
           <DialogHeader className="mb-4">
             <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
           </DialogHeader>
-          <div 
-            className="prose prose-lg max-w-none dark:prose-invert"
-            style={{ 
-              maxWidth: '65ch',
-              margin: '0 auto',
-              padding: '0 16px',
-              width: '100%',
-              boxSizing: 'border-box'
-            }}
-          >
+          <div className="flex justify-center w-full">
             <div 
-              dangerouslySetInnerHTML={{ __html: content }}
-              className="[&_ul]:list-none [&_ol]:list-none [&_ul>li]:ml-4 [&_ol>li]:ml-4"
-            />
+              className={cn(
+                "prose prose-lg dark:prose-invert w-full",
+                "[&_ul]:list-disc [&_ol]:list-decimal",
+                "[&_ul>li]:pl-0 [&_ol>li]:pl-0",
+                "[&_ul>li]:my-0 [&_ol>li]:my-0",
+                "[&_ul]:pl-5 [&_ol]:pl-5",
+                "[&_ul]:my-1 [&_ol]:my-1"
+              )}
+              style={{ 
+                maxWidth: '65ch',
+              }}
+            >
+              <div dangerouslySetInnerHTML={{ __html: content }} />
+            </div>
           </div>
           <Button
             variant="outline"
@@ -347,7 +349,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             <Trash2 className="h-4 w-4" />
           </Button>
         </AlertDialogTrigger>
-        <AlertDialogContent>
+        <AlertDialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] max-w-md w-[95vw]">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Card</AlertDialogTitle>
             <AlertDialogDescription>
