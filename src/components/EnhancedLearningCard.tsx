@@ -140,10 +140,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
   return (
     <Card className={cn(
-      "relative w-full h-full transition-all duration-200 ease-in-out hover:shadow-lg",
-      "bg-card border-2",
-      mastered ? "border-green-500/50 hover:border-green-500" : "border-transparent hover:border-primary/50",
-      isEditing && "border-blue-500"
+      "relative w-full h-full transition-all duration-200 ease-in-out",
+      "bg-card border-2 shadow-sm hover:shadow-md",
+      mastered ? "border-emerald-500/50 hover:border-emerald-500 hover:shadow-emerald-100" : 
+                "border-transparent hover:border-blue-500/50 hover:shadow-blue-50",
+      isEditing && "border-blue-500 shadow-blue-100"
     )}>
       <CardHeader className="relative pb-3 space-y-2">
         {isEditing ? (
@@ -155,35 +156,35 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           />
         ) : (
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-lg line-clamp-2">{title}</h3>
+            <h3 className="font-semibold text-lg line-clamp-2 text-foreground/90">{title}</h3>
             <div className="flex gap-1 ml-2 flex-shrink-0">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsZoomed(true)}
-                className="h-8 w-8 hover:bg-primary/10"
+                className="h-8 w-8 hover:bg-blue-50 dark:hover:bg-blue-950/50"
               >
-                <ZoomIn className="h-4 w-4" />
+                <ZoomIn className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={toggleContentVisibility}
-                className="h-8 w-8 hover:bg-primary/10"
+                className="h-8 w-8 hover:bg-blue-50 dark:hover:bg-blue-950/50"
               >
                 {isContentHidden ? (
-                  <Eye className="h-4 w-4" />
+                  <Eye className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 ) : (
-                  <EyeOff className="h-4 w-4" />
+                  <EyeOff className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 )}
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsEditing(true)}
-                className="h-8 w-8 hover:bg-primary/10"
+                className="h-8 w-8 hover:bg-blue-50 dark:hover:bg-blue-950/50"
               >
-                <Edit className="h-4 w-4" />
+                <Edit className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </Button>
             </div>
           </div>
@@ -194,7 +195,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         </div>
       </CardHeader>
 
-      <CardContent ref={contentRef} className={cn(
+      <CardContent className={cn(
         "space-y-3 transition-all duration-200",
         isContentHidden && "blur-md select-none"
       )}>
@@ -218,8 +219,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               key={index}
               variant={isEditing ? "outline" : "secondary"}
               className={cn(
-                "flex items-center gap-1 transition-colors",
-                isEditing ? "pr-1 hover:bg-destructive/10" : "hover:bg-primary/20"
+                "flex items-center gap-1 transition-colors bg-blue-50 text-blue-700 hover:bg-blue-100",
+                "dark:bg-blue-950/50 dark:text-blue-300 dark:hover:bg-blue-950",
+                isEditing && "pr-1 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/50 dark:hover:text-red-400"
               )}
             >
               {tag}
@@ -228,7 +230,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   variant="ghost"
                   size="icon"
                   onClick={() => handleRemoveTag(tag)}
-                  className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                  className="h-4 w-4 p-0 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-950"
                 >
                   <X className="h-3 w-3" />
                 </Button>
@@ -251,7 +253,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         <div className="flex gap-2">
           {isEditing ? (
             <>
-              <Button onClick={handleSave} size="sm" className="shadow-sm hover:shadow">
+              <Button 
+                onClick={handleSave} 
+                size="sm" 
+                className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow dark:bg-blue-700 dark:hover:bg-blue-800"
+              >
                 <Save className="h-4 w-4 mr-1" />
                 Save
               </Button>
@@ -259,19 +265,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 variant="outline"
                 onClick={() => setIsEditing(false)}
                 size="sm"
-                className="shadow-sm hover:shadow"
+                className="shadow-sm hover:shadow border-blue-200 hover:border-blue-300 dark:border-blue-800 dark:hover:border-blue-700"
               >
                 <X className="h-4 w-4 mr-1" />
                 Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => onDelete(id)}
-                className="shadow-sm hover:shadow ml-auto"
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Delete
               </Button>
             </>
           ) : (
@@ -280,7 +277,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={handleCopyContent}
-                className="hover:bg-primary/10"
+                className="hover:bg-blue-50 text-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/50"
               >
                 <Copy className="h-4 w-4 mr-1" />
                 Copy
@@ -290,8 +287,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 size="sm"
                 onClick={toggleMastered}
                 className={cn(
-                  "hover:bg-primary/10",
-                  mastered && "text-green-500"
+                  "hover:bg-emerald-50 dark:hover:bg-emerald-950/50",
+                  mastered ? "text-emerald-600 dark:text-emerald-400" : "text-blue-600 dark:text-blue-400"
                 )}
               >
                 {mastered ? (
@@ -307,13 +304,19 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       </CardFooter>
 
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto p-6">
-          <DialogHeader className="mb-4">
-            <DialogTitle className="text-xl font-semibold text-center">{title}</DialogTitle>
+        <DialogContent className="w-[95vw] sm:w-[90vw] max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader className="mb-6">
+            <DialogTitle className="text-xl sm:text-2xl font-semibold text-center bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+              {title}
+            </DialogTitle>
           </DialogHeader>
-          <div className="prose prose-lg dark:prose-invert mx-auto" style={{ maxWidth: '65ch' }}>
+          <div className="w-full max-w-[65ch] mx-auto px-2 sm:px-4">
             <div 
               className={cn(
+                "prose prose-lg dark:prose-invert",
+                "prose-headings:text-blue-800 dark:prose-headings:text-blue-300",
+                "prose-a:text-blue-600 dark:prose-a:text-blue-400",
+                "prose-strong:text-blue-800 dark:prose-strong:text-blue-300",
                 "[&_ul]:list-disc [&_ol]:list-decimal",
                 "[&_ul>li]:pl-0 [&_ol>li]:pl-0",
                 "[&_ul>li]:my-0 [&_ol>li]:my-0",
@@ -332,14 +335,16 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-2 right-2 h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+            className="absolute top-2 right-2 h-8 w-8 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/50 dark:hover:text-red-400"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
         </AlertDialogTrigger>
-        <AlertDialogContent>
+        <AlertDialogContent className="w-[95vw] sm:w-[90vw] max-w-md p-4 sm:p-6">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-center">Delete Card</AlertDialogTitle>
+            <AlertDialogTitle className="text-xl text-center text-red-600 dark:text-red-400">
+              Delete Card
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-center">
               Are you sure you want to delete this card? This action cannot be undone.
             </AlertDialogDescription>
@@ -348,7 +353,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             <AlertDialogCancel className="flex-1">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => onDelete(id)}
-              className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="flex-1 bg-red-600 text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
             >
               Delete
             </AlertDialogAction>
