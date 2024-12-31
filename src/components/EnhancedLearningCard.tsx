@@ -325,7 +325,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       </CardFooter>
 
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="fixed inset-x-0 mx-auto top-[50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+        <DialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader className="mb-6">
             <DialogTitle className="text-xl sm:text-2xl font-semibold text-center bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
               {title}
@@ -352,7 +352,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       </Dialog>
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent className="fixed inset-x-0 mx-auto top-[50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-md p-4 sm:p-6">
+        <AlertDialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-md p-4 sm:p-6">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl text-center text-red-600 dark:text-red-400">
               Delete Card
@@ -364,7 +364,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           <AlertDialogFooter className="flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
             <AlertDialogCancel className="flex-1">Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => onDelete(id)}
+              onClick={() => {
+                onDelete(id);
+                setIsDeleteDialogOpen(false);
+              }}
               className="flex-1 bg-red-600 text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
             >
               Delete
