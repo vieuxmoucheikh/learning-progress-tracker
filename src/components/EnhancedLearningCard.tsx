@@ -307,22 +307,23 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       </CardFooter>
 
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto p-6 sm:p-8">
+        <DialogContent className="fixed inset-0 sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] w-full sm:w-[95vw] h-full sm:h-auto sm:max-w-4xl sm:max-h-[90vh] overflow-y-auto p-4 sm:p-8">
           <DialogHeader className="mb-4">
-            <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
+            <DialogTitle className="text-xl font-semibold text-center">{title}</DialogTitle>
           </DialogHeader>
-          <div className="flex justify-center w-full">
+          <div className="flex flex-col items-center justify-start w-full h-full">
             <div 
               className={cn(
-                "prose prose-lg dark:prose-invert w-full",
+                "prose prose-lg dark:prose-invert w-full mx-auto",
                 "[&_ul]:list-disc [&_ol]:list-decimal",
                 "[&_ul>li]:pl-0 [&_ol>li]:pl-0",
                 "[&_ul>li]:my-0 [&_ol>li]:my-0",
                 "[&_ul]:pl-5 [&_ol]:pl-5",
-                "[&_ul]:my-1 [&_ol]:my-1"
+                "[&_ul]:my-1 [&_ol]:my-1",
+                "px-4 sm:px-0"
               )}
               style={{ 
-                maxWidth: '65ch',
+                maxWidth: 'min(65ch, 100%)',
               }}
             >
               <div dangerouslySetInnerHTML={{ __html: content }} />
@@ -331,7 +332,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           <Button
             variant="outline"
             onClick={() => setIsZoomed(false)}
-            className="absolute top-4 right-4"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4"
             size="icon"
           >
             <ZoomOut className="h-4 w-4" />
@@ -349,18 +350,18 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             <Trash2 className="h-4 w-4" />
           </Button>
         </AlertDialogTrigger>
-        <AlertDialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] max-w-md w-[95vw]">
+        <AlertDialogContent className="fixed inset-0 sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] w-full sm:w-[95vw] sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Card</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-center">Delete Card</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
               Are you sure you want to delete this card? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="sm:space-x-2">
+            <AlertDialogCancel className="sm:flex-1">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => onDelete(id)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 sm:flex-1"
             >
               Delete
             </AlertDialogAction>
