@@ -1047,15 +1047,18 @@ export async function trackLearningActivity(category: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const date = new Date('2025-01-02T00:21:06+01:00').toISOString().split('T')[0];
-    console.log('Tracking activity for:', { category, date });
+    const currentDate = new Date('2025-01-02T00:53:19+01:00');
+    const dateStr = currentDate.toISOString().split('T')[0];
+    
+    console.log('Tracking activity:', { category, dateStr, userId: user.id });
 
+    // First check if we already have an entry for this date and category
     const { data: existing, error: selectError } = await supabase
       .from('learning_activity')
       .select('*')
       .eq('user_id', user.id)
       .eq('category', category)
-      .eq('date', date)
+      .eq('date', dateStr)
       .single();
 
     if (selectError && selectError.code !== 'PGRST116') {
@@ -1064,12 +1067,13 @@ export async function trackLearningActivity(category: string) {
     }
 
     if (existing) {
+      // Update existing entry
       console.log('Updating existing activity:', existing);
       const { error: updateError } = await supabase
         .from('learning_activity')
         .update({ 
           count: existing.count + 1,
-          updated_at: new Date().toISOString()
+          updated_at: currentDate.toISOString()
         })
         .eq('id', existing.id);
 
@@ -1077,26 +1081,68 @@ export async function trackLearningActivity(category: string) {
         console.error('Error updating activity:', updateError);
         return;
       }
+      console.log('Activity updated successfully');
     } else {
+      // Create new entry
       console.log('Creating new activity entry');
       const { error: insertError } = await supabase
         .from('learning_activity')
         .insert({
           user_id: user.id,
           category,
-          date,
+          date: dateStr,
           count: 1,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          created_at: currentDate.toISOString(),
+          updated_at: currentDate.toISOString()
         });
 
       if (insertError) {
         console.error('Error inserting activity:', insertError);
         return;
       }
+      console.log('Activity created successfully');
     }
   } catch (error) {
     console.error('Error tracking learning activity:', error);
+  }
+}
+
+export async function getYearlyActivity(category: string) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const currentDate = new Date('2025-01-02T00:53:19+01:00');
+    const startDate = new Date(currentDate);
+    startDate.setMonth(0);
+    startDate.setDate(1);
+
+    console.log('Fetching yearly activity:', {
+      category,
+      startDate: startDate.toISOString(),
+      endDate: currentDate.toISOString(),
+      userId: user.id
+    });
+
+    const { data, error } = await supabase
+      .from('learning_activity')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('category', category)
+      .gte('date', startDate.toISOString().split('T')[0])
+      .lte('date', currentDate.toISOString().split('T')[0])
+      .order('date', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching yearly activity:', error);
+      return [];
+    }
+
+    console.log('Raw activity data:', data);
+    return data || [];
+  } catch (error) {
+    console.error('Error in getYearlyActivity:', error);
+    return [];
   }
 }
 
@@ -1144,44 +1190,5 @@ export async function addTestActivityData() {
     console.log('Test data inserted successfully');
   } catch (error) {
     console.error('Error adding test data:', error);
-  }
-}
-
-export async function getYearlyActivity(category: string) {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
-
-    const currentDate = new Date('2025-01-02T00:25:47+01:00');
-    const startDate = new Date(currentDate);
-    startDate.setMonth(0);
-    startDate.setDate(1);
-
-    console.log('Fetching activity for:', {
-      category,
-      startDate: startDate.toISOString(),
-      endDate: currentDate.toISOString(),
-      userId: user.id
-    });
-
-    const { data, error } = await supabase
-      .from('learning_activity')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('category', category)
-      .gte('date', startDate.toISOString().split('T')[0])
-      .lte('date', currentDate.toISOString().split('T')[0])
-      .order('date', { ascending: true });
-
-    if (error) {
-      console.error('Error fetching yearly activity:', error);
-      return [];
-    }
-
-    console.log('Raw activity data:', data);
-    return data || [];
-  } catch (error) {
-    console.error('Error in getYearlyActivity:', error);
-    return [];
   }
 }

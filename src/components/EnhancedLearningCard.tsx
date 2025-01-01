@@ -62,6 +62,7 @@ import { getLearningItems, trackLearningActivity } from '@/lib/database';
 interface EnhancedLearningCardProps extends CardType {
   onSave: (data: Partial<CardType>) => Promise<boolean>;
   onDelete: () => void;
+  onComplete: () => Promise<boolean>;
 }
 
 export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
@@ -76,6 +77,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   updatedAt,
   onSave,
   onDelete,
+  onComplete,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(initialTitle);
@@ -175,6 +177,24 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       toast({
         title: "Error",
         description: "Failed to copy content",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleComplete = async () => {
+    try {
+      await onComplete();
+      await trackLearningActivity(category);
+      toast({
+        title: "Success",
+        description: "Task marked as complete",
+      });
+    } catch (error) {
+      console.error('Error completing task:', error);
+      toast({
+        title: "Error",
+        description: "Failed to complete task",
         variant: "destructive",
       });
     }
@@ -429,6 +449,15 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               >
                 <Copy className="h-4 w-4 mr-1" />
                 Copy
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleComplete}
+                className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-950/50"
+              >
+                <Check className="h-4 w-4 mr-1" />
+                Complete
               </Button>
               <Button
                 variant="ghost"
