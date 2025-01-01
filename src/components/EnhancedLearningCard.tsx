@@ -232,8 +232,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   <Command>
                     <CommandInput 
                       placeholder="Search category..." 
-                      value={category}
-                      onValueChange={setCategory}
+                      onValueChange={(search) => {
+                        if (!categories.includes(search)) {
+                          setCategory(search);
+                        }
+                      }}
                     />
                     <CommandEmpty>
                       <div className="px-2 py-1.5 text-sm text-muted-foreground">
@@ -248,6 +251,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                             setCategory(cat);
                             setOpen(false);
                           }}
+                          className="cursor-pointer"
                         >
                           <Check
                             className={cn(
@@ -263,6 +267,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                           onSelect={() => {
                             setOpen(false);
                           }}
+                          className="cursor-pointer"
                         >
                           <Plus className="mr-2 h-4 w-4" />
                           Create "{category}"
@@ -338,19 +343,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         "space-y-3 transition-all duration-200",
         isContentHidden && "blur-md select-none"
       )}>
-        {isEditing ? (
-          <RichTextEditor
-            content={content}
-            onChange={setContent}
-            className="min-h-[150px]"
-          />
-        ) : (
-          <div 
-            className="prose prose-sm max-w-none dark:prose-invert line-clamp-6 hover:line-clamp-none transition-all cursor-pointer"
-            onClick={() => setIsZoomed(true)}
-            dangerouslySetInnerHTML={{ __html: content }}
-          />
-        )}
+        <div 
+          className="prose prose-sm max-w-none dark:prose-invert line-clamp-6 hover:line-clamp-none transition-all cursor-pointer"
+          onClick={() => setIsZoomed(true)}
+          dangerouslySetInnerHTML={{ __html: content }}
+        />
         
         <div className="flex flex-wrap gap-1.5 pt-2">
           {tags.map((tag, index) => (
