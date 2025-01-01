@@ -48,8 +48,8 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
   }, [onTabChange]);
 
   return (
-    <div className="flex justify-center mb-8 border-b overflow-x-auto w-full bg-gradient-to-r from-blue-600 to-blue-500">
-      <nav className="flex -mb-px max-w-2xl w-full min-w-max px-1" aria-label="Tabs">
+    <div className="flex justify-center mb-8 border-b overflow-x-auto w-full bg-gradient-to-r from-blue-600 to-blue-500 p-0.5 sm:p-1">
+      <nav className="flex -mb-px max-w-2xl w-full min-w-max px-0.5 sm:px-1" aria-label="Tabs">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -59,7 +59,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                "flex-shrink-0 text-sm font-medium py-3 px-4 border-b-2 flex items-center justify-center gap-2 transition-all min-w-[90px]",
+                "flex-shrink-0 text-sm font-medium py-3 px-2.5 sm:px-4 border-b-2 flex items-center justify-center gap-1.5 sm:gap-2 transition-all min-w-[72px] sm:min-w-[90px]",
                 "hover:bg-white/10",
                 isActive
                   ? "border-white text-white"
