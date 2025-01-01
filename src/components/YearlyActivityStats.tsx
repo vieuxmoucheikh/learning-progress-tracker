@@ -26,7 +26,9 @@ export function YearlyActivityStats() {
     const fetchCategories = async () => {
       try {
         const items = await getLearningItems();
+        console.log('Fetched items:', items);
         const uniqueCategories = [...new Set(items.map(item => item.category).filter(Boolean))] as string[];
+        console.log('Unique categories:', uniqueCategories);
         setCategories(uniqueCategories);
         if (uniqueCategories.length > 0) {
           setSelectedCategory(uniqueCategories[0]);
@@ -44,6 +46,7 @@ export function YearlyActivityStats() {
       setLoading(true);
       try {
         const data = await getYearlyActivity(selectedCategory);
+        console.log('Activity data:', data);
         setActivityData(data);
       } catch (error) {
         console.error('Error fetching activity:', error);
@@ -66,10 +69,16 @@ export function YearlyActivityStats() {
   };
 
   const generateCalendarData = () => {
-    const currentDate = new Date('2025-01-02T00:06:35+01:00');
+    const currentDate = new Date('2025-01-02T00:16:36+01:00');
     const startDate = new Date(currentDate.getFullYear(), 0, 1);
     const weeks: { date: string; count: number }[][] = [];
     let currentWeek: { date: string; count: number }[] = [];
+    let dayOfWeek = startDate.getDay();
+
+    // Add empty days at the start if needed
+    for (let i = 0; i < dayOfWeek; i++) {
+      currentWeek.push({ date: '', count: 0 });
+    }
 
     for (let d = new Date(startDate); d <= currentDate; d.setDate(d.getDate() + 1)) {
       const dateStr = d.toISOString().split('T')[0];
@@ -80,18 +89,29 @@ export function YearlyActivityStats() {
         count: dayData?.count || 0
       });
 
-      if (currentWeek.length === 7 || d.getTime() === currentDate.getTime()) {
+      if (currentWeek.length === 7) {
         weeks.push(currentWeek);
         currentWeek = [];
       }
     }
 
+    // Add remaining days to the last week
+    if (currentWeek.length > 0) {
+      while (currentWeek.length < 7) {
+        currentWeek.push({ date: '', count: 0 });
+      }
+      weeks.push(currentWeek);
+    }
+
+    console.log('Generated calendar data:', weeks);
     return weeks;
   };
 
   if (loading) {
     return <div>Loading...</div>;
   }
+
+  const calendarData = generateCalendarData();
 
   return (
     <div className="space-y-4">
@@ -110,18 +130,20 @@ export function YearlyActivityStats() {
         </Select>
       </div>
 
-      <div className="flex gap-1">
-        {generateCalendarData().map((week, weekIndex) => (
-          <div key={weekIndex} className="flex flex-col gap-1">
-            {week.map(({ date, count }) => (
-              <div
-                key={date}
-                className={`w-3 h-3 rounded-sm transition-colors ${getColorIntensity(count)}`}
-                title={`${date}: ${count} activities`}
-              />
-            ))}
-          </div>
-        ))}
+      <div className="overflow-x-auto">
+        <div className="inline-flex gap-1 min-w-fit">
+          {calendarData.map((week, weekIndex) => (
+            <div key={weekIndex} className="flex flex-col gap-1">
+              {week.map(({ date, count }, dayIndex) => (
+                <div
+                  key={`${weekIndex}-${dayIndex}`}
+                  className={`w-3 h-3 rounded-sm transition-colors ${date ? getColorIntensity(count) : 'bg-transparent'}`}
+                  title={date ? `${date}: ${count} activities` : ''}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
