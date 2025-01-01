@@ -62,10 +62,10 @@ export function YearlyActivityStats() {
 
   const getColorIntensity = (count: number) => {
     if (count === 0) return 'bg-gray-100 dark:bg-gray-800';
-    if (count <= 2) return 'bg-green-200 dark:bg-green-900';
-    if (count <= 4) return 'bg-green-300 dark:bg-green-700';
-    if (count <= 6) return 'bg-green-400 dark:bg-green-600';
-    return 'bg-green-500 dark:bg-green-500';
+    if (count <= 2) return 'bg-blue-200 dark:bg-blue-900';
+    if (count <= 4) return 'bg-blue-300 dark:bg-blue-700';
+    if (count <= 6) return 'bg-blue-400 dark:bg-blue-600';
+    return 'bg-blue-500 dark:bg-blue-500';
   };
 
   const generateCalendarData = () => {
@@ -114,7 +114,7 @@ export function YearlyActivityStats() {
     <div className="space-y-4">
       <div className="w-full max-w-xs">
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger>
+          <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Select a category" />
           </SelectTrigger>
           <SelectContent>
@@ -127,32 +127,46 @@ export function YearlyActivityStats() {
         </Select>
       </div>
 
-      <div className="overflow-x-auto">
-        <div className="inline-flex gap-1 min-w-fit p-4 bg-white dark:bg-gray-800 rounded-lg">
-          {generateCalendarData().map((week, weekIndex) => (
-            <div key={weekIndex} className="flex flex-col gap-1">
-              {week.map(({ date, count }, dayIndex) => (
-                <div
-                  key={`${weekIndex}-${dayIndex}`}
-                  className={`w-3 h-3 rounded-sm transition-colors ${
-                    date ? getColorIntensity(count) : 'bg-transparent'
-                  }`}
-                  title={date ? `${date}: ${count} activities` : ''}
-                />
+      <div className="border rounded-lg p-4 bg-white dark:bg-gray-800">
+        <div className="overflow-x-auto">
+          <div className="inline-flex flex-col gap-1">
+            <div className="flex gap-1 text-xs text-gray-500 mb-1">
+              <div className="w-3" />
+              <div className="w-3 text-center">M</div>
+              <div className="w-3 text-center">T</div>
+              <div className="w-3 text-center">W</div>
+              <div className="w-3 text-center">T</div>
+              <div className="w-3 text-center">F</div>
+              <div className="w-3 text-center">S</div>
+              <div className="w-3 text-center">S</div>
+            </div>
+            <div className="flex gap-1">
+              {generateCalendarData().map((week, weekIndex) => (
+                <div key={weekIndex} className="flex flex-col gap-1">
+                  {week.map(({ date, count }, dayIndex) => (
+                    <div
+                      key={`${weekIndex}-${dayIndex}`}
+                      className={`w-3 h-3 rounded-sm transition-colors ${
+                        date ? getColorIntensity(count) : 'bg-transparent'
+                      }`}
+                      title={date ? `${date}: ${count} activities` : ''}
+                    />
+                  ))}
+                </div>
               ))}
             </div>
-          ))}
+          </div>
         </div>
-      </div>
 
-      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-        <span>Less</span>
-        <div className={`w-3 h-3 rounded-sm ${getColorIntensity(0)}`} />
-        <div className={`w-3 h-3 rounded-sm ${getColorIntensity(2)}`} />
-        <div className={`w-3 h-3 rounded-sm ${getColorIntensity(4)}`} />
-        <div className={`w-3 h-3 rounded-sm ${getColorIntensity(6)}`} />
-        <div className={`w-3 h-3 rounded-sm ${getColorIntensity(8)}`} />
-        <span>More</span>
+        <div className="flex items-center gap-2 mt-4 text-sm text-gray-600 dark:text-gray-400">
+          <span>Less</span>
+          <div className={`w-3 h-3 rounded-sm ${getColorIntensity(0)}`} />
+          <div className={`w-3 h-3 rounded-sm ${getColorIntensity(2)}`} />
+          <div className={`w-3 h-3 rounded-sm ${getColorIntensity(4)}`} />
+          <div className={`w-3 h-3 rounded-sm ${getColorIntensity(6)}`} />
+          <div className={`w-3 h-3 rounded-sm ${getColorIntensity(8)}`} />
+          <span>More</span>
+        </div>
       </div>
     </div>
   );

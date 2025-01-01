@@ -1100,14 +1100,69 @@ export async function trackLearningActivity(category: string) {
   }
 }
 
+export async function addTestActivityData() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const currentDate = new Date('2025-01-02T00:25:47+01:00');
+    const testData = [];
+
+    // Add some test data for the last 30 days
+    for (let i = 0; i < 30; i++) {
+      const date = new Date(currentDate);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+
+      // Add random activity counts for each category
+      const categories = ['Gg', 'RRR', 'SSS'];
+      for (const category of categories) {
+        if (Math.random() > 0.5) { // 50% chance of having activity
+          testData.push({
+            user_id: user.id,
+            category,
+            date: dateStr,
+            count: Math.floor(Math.random() * 5) + 1,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+        }
+      }
+    }
+
+    console.log('Inserting test data:', testData);
+
+    const { error } = await supabase
+      .from('learning_activity')
+      .insert(testData);
+
+    if (error) {
+      console.error('Error inserting test data:', error);
+      return;
+    }
+
+    console.log('Test data inserted successfully');
+  } catch (error) {
+    console.error('Error adding test data:', error);
+  }
+}
+
 export async function getYearlyActivity(category: string) {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    const currentDate = new Date('2025-01-02T00:21:06+01:00');
-    const startDate = new Date(currentDate.getFullYear(), 0, 1);
-    console.log('Fetching activity from:', startDate.toISOString(), 'to:', currentDate.toISOString());
+    const currentDate = new Date('2025-01-02T00:25:47+01:00');
+    const startDate = new Date(currentDate);
+    startDate.setMonth(0);
+    startDate.setDate(1);
+
+    console.log('Fetching activity for:', {
+      category,
+      startDate: startDate.toISOString(),
+      endDate: currentDate.toISOString(),
+      userId: user.id
+    });
 
     const { data, error } = await supabase
       .from('learning_activity')
