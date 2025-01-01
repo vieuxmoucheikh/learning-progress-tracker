@@ -248,8 +248,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                         .map((cat) => (
                           <CommandItem
                             key={cat}
+                            value={cat}
                             className="cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
-                            onSelect={(currentValue) => {
+                            onSelect={() => {
                               setCategory(cat);
                               setOpen(false);
                             }}
@@ -265,8 +266,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                         ))}
                       {category && !categories.includes(category) && (
                         <CommandItem
+                          value={category}
                           className="cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
-                          onSelect={(currentValue) => {
+                          onSelect={() => {
+                            // Keep the typed category and close
                             setOpen(false);
                           }}
                         >

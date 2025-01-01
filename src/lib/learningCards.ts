@@ -63,22 +63,16 @@ class LearningCardsService {
     };
   }
 
-  async updateCard(id: string, updates: Partial<NewEnhancedLearningCard>): Promise<EnhancedLearningCard> {
+  async updateCard(id: string, updates: Partial<EnhancedLearningCard>): Promise<EnhancedLearningCard> {
     try {
-      const updateData: Record<string, any> = {
-        updated_at: new Date().toISOString()
-      };
-
-      // Only include fields that exist in the database
+      const updateData: any = {};
+      
       if (updates.title !== undefined) updateData.title = updates.title;
       if (updates.content !== undefined) updateData.content = updates.content;
       if (updates.tags !== undefined) updateData.tags = updates.tags;
       if (updates.mastered !== undefined) updateData.mastered = updates.mastered;
       if (updates.category !== undefined) updateData.category = updates.category;
       
-      // Remove media updates for now since the column doesn't exist
-      // if (updates.media !== undefined) updateData.media = updates.media;
-
       const { data, error } = await supabase
         .from('enhanced_learning_cards')
         .update(updateData)
