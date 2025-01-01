@@ -472,4 +472,272 @@ export async function initializeTables() {
   }
 }
 
-// ... rest of the code remains the same ...
+// Pomodoro Management Functions
+export async function startPomodoro(type: 'work' | 'break' | 'long_break' = 'work'): Promise<Pomodoro> {
+  try {
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) throw new Error('No authenticated user');
+
+    const { data, error } = await supabase
+      .from('pomodoros')
+      .insert({
+        user_id: user.data.user.id,
+        start_time: new Date().toISOString(),
+        type
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error in startPomodoro:', error);
+    throw error;
+  }
+}
+
+export async function completePomodoro(pomodoroId: string): Promise<Pomodoro> {
+  try {
+    const { data, error } = await supabase
+      .from('pomodoros')
+      .update({
+        end_time: new Date().toISOString(),
+        completed: true,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', pomodoroId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error in completePomodoro:', error);
+    throw error;
+  }
+}
+
+export async function getPomodoroStats(): Promise<PomodoroStats> {
+  try {
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) throw new Error('No authenticated user');
+
+    // Get settings to access daily goal
+    const settings = await getPomodoroSettings();
+
+    // Get today's date at midnight in user's timezone
+    const today = new Date();
+    const timezoneOffset = today.getTimezoneOffset() * 60000;
+    const todayStart = new Date(today.getTime() - timezoneOffset);
+    todayStart.setUTCHours(0, 0, 0, 0);
+
+    // Get today's pomodoros
+    const { data: todayPomodoros, error: todayError } = await supabase
+      .from('pomodoros')
+      .select('*')
+      .eq('user_id', user.data.user.id)
+      .gte('start_time', todayStart.toISOString());
+
+    if (todayError) throw todayError;
+
+    // Get all pomodoros for streak calculation
+    const { data: allPomodoros, error: allError } = await supabase
+      .from('pomodoros')
+      .select('*')
+      .eq('user_id', user.data.user.id)
+      .order('start_time', { ascending: false });
+
+    if (allError) throw allError;
+
+    // Calculate total work minutes
+    const totalWorkMinutes = todayPomodoros
+      .filter(p => p.type === 'work' && p.completed)
+      .reduce((acc, p) => {
+        if (p.end_time && p.start_time) {
+          const duration = (new Date(p.end_time).getTime() - new Date(p.start_time).getTime()) / (1000 * 60);
+          return acc + duration;
+        }
+        return acc;
+      }, 0);
+
+    // Calculate daily completed pomodoros
+    const daily_completed = todayPomodoros.filter(p => p.completed && p.type === 'work').length;
+    const dailyGoalProgress = settings.daily_goal ? 
+      Math.min((daily_completed / settings.daily_goal) * 100, 100) : 0;
+
+    return {
+      totalPomodoros: allPomodoros.length,
+      completedPomodoros: allPomodoros.filter(p => p.completed).length,
+      daily_completed,
+      dailyGoalProgress,
+      totalWorkMinutes: Math.round(totalWorkMinutes),
+      totalBreakMinutes: Math.round(
+        todayPomodoros
+          .filter(p => (p.type === 'break' || p.type === 'long_break') && p.completed)
+          .reduce((acc, p) => {
+            if (p.end_time && p.start_time) {
+              const duration = (new Date(p.end_time).getTime() - new Date(p.start_time).getTime()) / (1000 * 60);
+              return acc + duration;
+            }
+            return acc;
+          }, 0)
+      ),
+      currentStreak: calculateCurrentStreak(allPomodoros),
+      longestStreak: calculateLongestStreak(allPomodoros),
+      mostProductiveTime: calculateMostProductiveTime(allPomodoros),
+      dailyAverage: calculateDailyAverage(allPomodoros)
+    };
+  } catch (error) {
+    console.error('Error in getPomodoroStats:', error);
+    throw error;
+  }
+}
+
+function calculateMostProductiveTime(pomodoros: Pomodoro[]): string {
+  if (pomodoros.length === 0) return 'N/A';
+
+  const hourCounts = new Array(24).fill(0);
+  pomodoros.forEach(p => {
+    const hour = new Date(p.start_time).getHours();
+    hourCounts[hour]++;
+  });
+
+  const maxHour = hourCounts.indexOf(Math.max(...hourCounts));
+  return `${maxHour.toString().padStart(2, '0')}:00`;
+}
+
+function calculateCurrentStreak(pomodoros: Pick<Pomodoro, 'start_time'>[]): number {
+  if (pomodoros.length === 0) return 0;
+
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
+  let currentStreak = 0;
+  let currentDate = today;
+
+  for (const pomodoro of pomodoros) {
+    const pomodoroDate = new Date(pomodoro.start_time);
+    pomodoroDate.setUTCHours(0, 0, 0, 0);
+
+    if (currentDate.getTime() === pomodoroDate.getTime()) {
+      currentStreak++;
+      currentDate.setDate(currentDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+
+  return currentStreak;
+}
+
+function calculateLongestStreak(pomodoros: Pick<Pomodoro, 'start_time'>[]): number {
+  if (pomodoros.length === 0) return 0;
+
+  let currentStreak = 1;
+  let maxStreak = 1;
+  let lastDate = new Date(pomodoros[0].start_time);
+  lastDate.setUTCHours(0, 0, 0, 0);
+
+  for (let i = 1; i < pomodoros.length; i++) {
+    const currentDate = new Date(pomodoros[i].start_time);
+    currentDate.setUTCHours(0, 0, 0, 0);
+
+    const diffDays = Math.floor((lastDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) {
+      currentStreak++;
+      maxStreak = Math.max(maxStreak, currentStreak);
+    } else if (diffDays > 1) {
+      currentStreak = 1;
+    }
+
+    lastDate = currentDate;
+  }
+
+  return maxStreak;
+}
+
+function calculateDailyAverage(pomodoros: Pomodoro[]): number {
+  if (pomodoros.length === 0) return 0;
+  
+  const uniqueDays = new Set(
+    pomodoros.map(p => new Date(p.start_time).toISOString().split('T')[0])
+  );
+  
+  return Math.round(pomodoros.length / uniqueDays.size);
+}
+
+export async function getPomodoroSettings(): Promise<PomodoroSettings> {
+  try {
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) throw new Error('No authenticated user');
+
+    const { data, error } = await supabase
+      .from('pomodoro_settings')
+      .select('*')
+      .eq('user_id', user.data.user.id)
+      .single();
+
+    if (error && error.code === 'PGRST116') {
+      // Settings don't exist, create default settings
+      return createDefaultPomodoroSettings();
+    }
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error in getPomodoroSettings:', error);
+    throw error;
+  }
+}
+
+export async function createDefaultPomodoroSettings(): Promise<PomodoroSettings> {
+  try {
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) throw new Error('No authenticated user');
+
+    const { data, error } = await supabase
+      .from('pomodoro_settings')
+      .insert({
+        user_id: user.data.user.id,
+        work_duration: 25,
+        break_duration: 5,
+        long_break_duration: 15,
+        pomodoros_until_long_break: 4,
+        auto_start_breaks: true,
+        auto_start_pomodoros: false,
+        sound_enabled: true
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error in createDefaultPomodoroSettings:', error);
+    throw error;
+  }
+}
+
+export async function updatePomodoroSettings(settings: Partial<PomodoroSettings>): Promise<PomodoroSettings> {
+  try {
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) throw new Error('No authenticated user');
+
+    const { data, error } = await supabase
+      .from('pomodoro_settings')
+      .update({
+        ...settings,
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', user.data.user.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error in updatePomodoroSettings:', error);
+    throw error;
+  }
+}
