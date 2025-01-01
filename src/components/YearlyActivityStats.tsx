@@ -69,7 +69,7 @@ export function YearlyActivityStats() {
   };
 
   const generateCalendarData = () => {
-    const currentDate = new Date('2025-01-02T00:16:36+01:00');
+    const currentDate = new Date('2025-01-02T00:21:06+01:00');
     const startDate = new Date(currentDate.getFullYear(), 0, 1);
     const weeks: { date: string; count: number }[][] = [];
     let currentWeek: { date: string; count: number }[] = [];
@@ -80,38 +80,35 @@ export function YearlyActivityStats() {
       currentWeek.push({ date: '', count: 0 });
     }
 
+    // Generate all dates from start of year to current date
     for (let d = new Date(startDate); d <= currentDate; d.setDate(d.getDate() + 1)) {
       const dateStr = d.toISOString().split('T')[0];
-      const dayData = activityData.find(a => a.date === dateStr);
       
-      currentWeek.push({
-        date: dateStr,
-        count: dayData?.count || 0
-      });
-
+      // If it's a new week, start a new array
       if (currentWeek.length === 7) {
         weeks.push(currentWeek);
         currentWeek = [];
       }
+      
+      // Add the day to the current week
+      currentWeek.push({
+        date: dateStr,
+        count: activityData.find(a => a.date === dateStr)?.count || 0
+      });
     }
 
-    // Add remaining days to the last week
-    if (currentWeek.length > 0) {
-      while (currentWeek.length < 7) {
-        currentWeek.push({ date: '', count: 0 });
-      }
-      weeks.push(currentWeek);
+    // Fill in the rest of the last week with empty days
+    while (currentWeek.length < 7) {
+      currentWeek.push({ date: '', count: 0 });
     }
+    weeks.push(currentWeek);
 
-    console.log('Generated calendar data:', weeks);
     return weeks;
   };
 
   if (loading) {
     return <div>Loading...</div>;
   }
-
-  const calendarData = generateCalendarData();
 
   return (
     <div className="space-y-4">
@@ -131,13 +128,15 @@ export function YearlyActivityStats() {
       </div>
 
       <div className="overflow-x-auto">
-        <div className="inline-flex gap-1 min-w-fit">
-          {calendarData.map((week, weekIndex) => (
+        <div className="inline-flex gap-1 min-w-fit p-4 bg-white dark:bg-gray-800 rounded-lg">
+          {generateCalendarData().map((week, weekIndex) => (
             <div key={weekIndex} className="flex flex-col gap-1">
               {week.map(({ date, count }, dayIndex) => (
                 <div
                   key={`${weekIndex}-${dayIndex}`}
-                  className={`w-3 h-3 rounded-sm transition-colors ${date ? getColorIntensity(count) : 'bg-transparent'}`}
+                  className={`w-3 h-3 rounded-sm transition-colors ${
+                    date ? getColorIntensity(count) : 'bg-transparent'
+                  }`}
                   title={date ? `${date}: ${count} activities` : ''}
                 />
               ))}

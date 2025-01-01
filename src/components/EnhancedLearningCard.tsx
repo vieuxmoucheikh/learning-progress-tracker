@@ -131,6 +131,26 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     }
   };
 
+  const handleUpdateCategory = async (category: string) => {
+    try {
+      const success = await onSave({ ...{ id, title, content, media, tags, mastered }, category });
+      if (success) {
+        await trackLearningActivity(category);
+        toast({
+          title: "Success",
+          description: "Card updated successfully",
+        });
+      }
+    } catch (error) {
+      console.error('Error updating card:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update card",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleAddTag = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && newTag.trim()) {
       if (!tags.includes(newTag.trim())) {
@@ -253,7 +273,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                             value={cat}
                             className="cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
                             onSelect={() => {
-                              setCategory(cat);
+                              handleUpdateCategory(cat);
                               setOpen(false);
                             }}
                           >
