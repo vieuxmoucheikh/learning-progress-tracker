@@ -229,9 +229,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0">
-                  <Command>
+                  <Command shouldFilter={false}>
                     <CommandInput 
-                      placeholder="Search category..." 
+                      placeholder="Search category..."
+                      onValueChange={setCategory}
                     />
                     <CommandEmpty>
                       <div className="px-2 py-1.5 text-sm text-muted-foreground">
@@ -239,31 +240,30 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                       </div>
                     </CommandEmpty>
                     <CommandGroup>
-                      {categories.map((cat) => (
-                        <CommandItem
-                          key={cat}
-                          value={cat}
-                          className="cursor-pointer"
-                          onSelect={(value) => {
-                            setCategory(value);
-                            setOpen(false);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              category === cat ? "opacity-100" : "opacity-0"
-                            )}
-                          />
-                          {cat}
-                        </CommandItem>
-                      ))}
+                      {categories
+                        .filter(cat => !category || cat.toLowerCase().includes(category.toLowerCase()))
+                        .map((cat) => (
+                          <CommandItem
+                            key={cat}
+                            className="cursor-pointer"
+                            onSelect={() => {
+                              setCategory(cat);
+                              setOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                category === cat ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {cat}
+                          </CommandItem>
+                        ))}
                       {category && !categories.includes(category) && (
                         <CommandItem
-                          value={category}
                           className="cursor-pointer"
-                          onSelect={(value) => {
-                            setCategory(value);
+                          onSelect={() => {
                             setOpen(false);
                           }}
                         >
