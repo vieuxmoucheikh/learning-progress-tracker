@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { LearningItem } from '../types';
 import { BarChart3, Clock, Calendar as CalendarIcon, Trophy, TrendingUp, Target } from 'lucide-react';
 import { calculateTimeByCategory } from '../lib/utils';
+import { YearlyActivityStats } from './YearlyActivityStats';
 
 interface Props {
   items: LearningItem[];
@@ -86,7 +87,7 @@ export function Stats({ items }: Props) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {/* Overall Progress */}
       <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-blue-100 transition-all duration-200 hover:shadow-md">
         <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
@@ -195,6 +196,11 @@ export function Stats({ items }: Props) {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Yearly Activity Stats */}
+      <div className="col-span-full">
+        <YearlyActivityStats />
       </div>
     </div>
   );
