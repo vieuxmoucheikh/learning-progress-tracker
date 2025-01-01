@@ -48,8 +48,8 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
   }, [onTabChange]);
 
   return (
-    <div className="flex justify-center mb-8 border-b overflow-x-auto w-full bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
-      <nav className="flex -mb-px max-w-2xl w-full min-w-max px-1" aria-label="Tabs">
+    <div className="flex justify-center mb-8 border-b overflow-x-auto w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-900/95 backdrop-blur-sm">
+      <nav className="flex -mb-px max-w-2xl w-full min-w-max px-0.5" aria-label="Tabs">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -59,18 +59,18 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                "flex-shrink-0 text-sm font-medium py-3 px-2.5 border-b-2 flex items-center justify-center gap-1.5 transition-all",
-                "hover:bg-gray-50 dark:hover:bg-gray-800/50",
+                "flex-shrink-0 text-sm font-medium py-3 px-2 border-b-2 flex items-center justify-center gap-1.5 transition-all min-w-[70px]",
+                "hover:bg-blue-50/50 dark:hover:bg-blue-950/30",
                 isActive
-                  ? "border-blue-500 text-blue-700 dark:text-blue-300"
-                  : "border-transparent text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 hover:border-gray-300"
+                  ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                  : "border-transparent text-blue-900/70 hover:text-blue-800 dark:text-blue-300/90 dark:hover:text-blue-200 hover:border-blue-200"
               )}
               style={{ transition: "border-color 0.15s ease-in-out, color 0.15s ease-in-out, background-color 0.15s ease-in-out" }}
               aria-current={isActive ? "page" : undefined}
             >
               <Icon className={cn(
                 "w-4 h-4 flex-shrink-0",
-                isActive ? "text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-400"
+                isActive ? "text-blue-500 dark:text-blue-400" : "text-blue-600/60 dark:text-blue-400/60"
               )} />
               <span className="hidden sm:inline whitespace-nowrap">{tab.label}</span>
               <span className="sm:hidden whitespace-nowrap text-[13px]">{tab.shortLabel}</span>
