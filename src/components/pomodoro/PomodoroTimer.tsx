@@ -5,7 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import Progress from '@/components/ui/progress';
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import Label from "@/components/ui/label";
+import { Label } from "@/components/ui/label"; // Update import to use named export
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogTitle, DialogContent } from '@radix-ui/react-dialog';
 import {

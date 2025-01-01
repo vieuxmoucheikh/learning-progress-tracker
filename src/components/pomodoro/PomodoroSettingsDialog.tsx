@@ -5,9 +5,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../ui/dialog';
-import Label from '../ui/label';
+import { Label } from '../ui/label';
 import { Input } from '../ui/input';
-import Switch from '../ui/switch';
+import { Switch } from '../ui/switch';
 import {
   Select,
   SelectContent,

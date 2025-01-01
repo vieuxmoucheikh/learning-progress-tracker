@@ -4,9 +4,9 @@ import { Card } from '@/components/ui/card';
 import Progress from '@/components/ui/progress';
 import { Timer, Pause, Play, SkipForward, Settings2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import Label from '@/components/ui/label';
+import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import Switch from '@/components/ui/switch';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
 import {
   startPomodoro,
