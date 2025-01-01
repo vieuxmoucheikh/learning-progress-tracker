@@ -1,4 +1,4 @@
-import { Card } from "./ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   BarChart,
   Bar,
@@ -23,6 +23,7 @@ import { LearningItem } from "@/types";
 import { useMemo } from "react";
 import { Brain, Target, TrendingUp } from "lucide-react";
 import LearningGoals from './LearningGoals';
+import { YearlyActivityStats } from './YearlyActivityStats';
 
 interface AnalyticsTabProps {
   items: LearningItem[];
@@ -164,7 +165,7 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
   }, [items]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 p-4">
       {/* Learning Goals */}
       <LearningGoals items={items} />
 
@@ -368,6 +369,21 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
             </ResponsiveContainer>
           </div>
         </Card>
+
+        {/* Yearly Activity */}
+        <div className="grid gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Yearly Learning Activity</CardTitle>
+              <CardDescription>
+                Track your learning progress throughout the year by category
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <YearlyActivityStats />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
