@@ -461,107 +461,14 @@ async function ensurePomodoroSettingsTableExists() {
   }
 }
 
-async function createDatabaseFunctions() {
-  try {
-    // Create function for pomodoro table
-    await supabase.rpc('exec_sql', {
-      sql_string: `
-        CREATE OR REPLACE FUNCTION create_pomodoro_table()
-        RETURNS void
-        LANGUAGE plpgsql
-        SECURITY DEFINER
-        AS $$
-        BEGIN
-          CREATE TABLE IF NOT EXISTS pomodoros (
-            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-            user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-            start_time TIMESTAMP WITH TIME ZONE NOT NULL,
-            end_time TIMESTAMP WITH TIME ZONE,
-            type VARCHAR(10) CHECK (type IN ('work', 'break', 'long_break')),
-            completed BOOLEAN DEFAULT false,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now()),
-            updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now())
-          );
-        END;
-        $$;
-      `
-    });
-
-    // Create function for pomodoro settings table
-    await supabase.rpc('exec_sql', {
-      sql_string: `
-        CREATE OR REPLACE FUNCTION create_pomodoro_settings_table()
-        RETURNS void
-        LANGUAGE plpgsql
-        SECURITY DEFINER
-        AS $$
-        BEGIN
-          CREATE TABLE IF NOT EXISTS pomodoro_settings (
-            user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-            work_duration INTEGER DEFAULT 25,
-            break_duration INTEGER DEFAULT 5,
-            long_break_duration INTEGER DEFAULT 15,
-            pomodoros_until_long_break INTEGER DEFAULT 4,
-            auto_start_breaks BOOLEAN DEFAULT true,
-            auto_start_pomodoros BOOLEAN DEFAULT false,
-            sound_enabled BOOLEAN DEFAULT true,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now()),
-            updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now())
-          );
-        END;
-        $$;
-      `
-    });
-  } catch (error) {
-    console.error('Error creating database functions:', error);
-  }
-}
-
-async function addCategoryColumn() {
-  const { error } = await supabase.rpc('add_category_column_if_not_exists');
-  if (error) {
-    console.error('Error adding category column:', error);
-  }
-}
-
 export async function initializeTables() {
   try {
     await ensureGoalsTableExists();
     await ensureSessionsTableExists();
     await ensurePomodoroTableExists();
     await ensurePomodoroSettingsTableExists();
-    await addCategoryColumn();
-    await createDatabaseFunctions();
   } catch (error) {
     console.error('Error initializing tables:', error);
-  }
-}
-
-export async function createDatabaseFunctions() {
-  const { error } = await supabase.rpc('create_database_functions', {
-    function_body: `
-      CREATE OR REPLACE FUNCTION add_category_column_if_not_exists()
-      RETURNS void
-      LANGUAGE plpgsql
-      SECURITY DEFINER
-      AS $$
-      BEGIN
-        IF NOT EXISTS (
-          SELECT 1
-          FROM information_schema.columns
-          WHERE table_name = 'enhanced_learning_cards'
-          AND column_name = 'category'
-        ) THEN
-          ALTER TABLE enhanced_learning_cards
-          ADD COLUMN category TEXT;
-        END IF;
-      END;
-      $$;
-    `
-  });
-
-  if (error) {
-    console.error('Error creating database functions:', error);
   }
 }
 
