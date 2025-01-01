@@ -741,3 +741,297 @@ export async function updatePomodoroSettings(settings: Partial<PomodoroSettings>
     throw error;
   }
 }
+
+export async function getGoals() {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Authentication required');
+    }
+
+    const { data: goals, error: goalsError } = await supabase
+      .from('learning_goals')
+      .select('*')
+      .eq('user_id', user.id);
+
+    if (goalsError) {
+      console.error('Error fetching goals:', goalsError);
+      throw new Error(goalsError.message || 'Failed to fetch goals');
+    }
+
+    // Fetch sessions for each goal
+    const goalsWithSessions = await Promise.all(goals.map(async (goal) => {
+      const sessions = await getSessions(goal.id);
+      return {
+        id: goal.id,
+        userId: goal.user_id,
+        title: goal.title,
+        category: goal.category,
+        targetHours: goal.target_hours,
+        targetDate: goal.target_date,
+        priority: goal.priority,
+        status: goal.status,
+        createdAt: goal.created_at,
+        progress: { sessions }
+      };
+    }));
+
+    return goalsWithSessions;
+  } catch (error) {
+    console.error('Error in getGoals:', error);
+    throw error instanceof Error ? error : new Error('Failed to fetch goals');
+  }
+}
+
+export async function addGoal(goal: Omit<LearningGoal, 'id' | 'userId' | 'createdAt' | 'status'>) {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Authentication required');
+    }
+
+    // Convert property names for database
+    const { targetHours, targetDate, ...rest } = goal;
+    const newGoal = {
+      ...rest,
+      user_id: user.id,
+      target_hours: targetHours,
+      target_date: targetDate,
+      status: 'active' as const,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    const { data: insertedGoal, error: insertError } = await supabase
+      .from('learning_goals')
+      .insert([newGoal])
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('Error adding goal:', insertError);
+      throw new Error(insertError.message || 'Failed to add goal');
+    }
+
+    if (!insertedGoal) {
+      throw new Error('No data returned from insert');
+    }
+
+    // Transform the data to match the LearningGoal interface
+    return {
+      id: insertedGoal.id,
+      userId: insertedGoal.user_id,
+      title: insertedGoal.title,
+      category: insertedGoal.category,
+      targetHours: insertedGoal.target_hours,
+      targetDate: insertedGoal.target_date,
+      priority: insertedGoal.priority,
+      status: insertedGoal.status,
+      createdAt: insertedGoal.created_at,
+      progress: { sessions: [] }  // Initialize with empty sessions
+    };
+  } catch (error) {
+    console.error('Error in addGoal:', error);
+    throw error instanceof Error ? error : new Error('Failed to add goal');
+  }
+}
+
+export async function updateGoal(id: string, updates: Partial<LearningGoal>) {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Authentication required');
+    }
+
+    // Remove progress from updates and convert property names
+    const { progress, targetHours, targetDate, ...rest } = updates;
+    const updatedData = {
+      ...rest,
+      ...(targetHours !== undefined && { target_hours: targetHours }),
+      ...(targetDate !== undefined && { target_date: targetDate }),
+      updated_at: new Date().toISOString()
+    };
+
+    const { data, error } = await supabase
+      .from('learning_goals')
+      .update(updatedData)
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating goal:', error);
+      throw new Error(error.message || 'Failed to update goal');
+    }
+
+    if (!data) {
+      throw new Error('No data returned from update');
+    }
+
+    // Transform the data back to match the LearningGoal interface
+    return {
+      id: data.id,
+      userId: data.user_id,
+      title: data.title,
+      category: data.category,
+      targetHours: data.target_hours,
+      targetDate: data.target_date,
+      priority: data.priority,
+      status: data.status,
+      createdAt: data.created_at,
+      progress: { sessions: [] }
+    };
+  } catch (error) {
+    console.error('Error in updateGoal:', error);
+    throw error instanceof Error ? error : new Error('Failed to update goal');
+  }
+}
+
+export async function deleteGoal(id: string) {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Authentication required');
+    }
+
+    const { error } = await supabase
+      .from('learning_goals')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id);
+    
+    if (error) {
+      console.error('Error deleting goal:', error);
+      throw new Error(error.message || 'Failed to delete goal');
+    }
+  } catch (error) {
+    console.error('Error in deleteGoal:', error);
+    throw error instanceof Error ? error : new Error('Failed to delete goal');
+  }
+}
+
+export async function addSession(goalId: string, sessionData: { date: string; duration: { hours: number; minutes: number }; notes?: string }): Promise<Session> {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('Authentication error:', authError);
+      throw new Error('Authentication required');
+    }
+
+    // Validate input
+    if (!sessionData.date || !sessionData.duration) {
+      throw new Error('Invalid session data: date and duration are required');
+    }
+
+    if (typeof sessionData.duration.hours !== 'number' || typeof sessionData.duration.minutes !== 'number') {
+      throw new Error('Invalid duration format');
+    }
+
+    // Convert local date string to UTC date for storage
+    const localDate = new Date(sessionData.date);
+    if (isNaN(localDate.getTime())) {
+      throw new Error('Invalid date format');
+    }
+    const utcDate = new Date(localDate.getTime() + localDate.getTimezoneOffset() * 60000);
+
+    const { data: session, error } = await supabase
+      .from('goal_sessions')
+      .insert([
+        {
+          goal_id: goalId,
+          user_id: user.id,
+          date: utcDate.toISOString(),
+          duration: {
+            hours: Math.max(0, Math.floor(sessionData.duration.hours)),
+            minutes: Math.max(0, Math.min(59, Math.floor(sessionData.duration.minutes)))
+          },
+          notes: sessionData.notes || ''
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding session:', error);
+      throw error;
+    }
+
+    if (!session) {
+      throw new Error('Failed to create session');
+    }
+
+    // Convert UTC date back to local date string for response
+    const sessionUtcDate = new Date(session.date);
+    const sessionLocalDate = new Date(sessionUtcDate.getTime() - sessionUtcDate.getTimezoneOffset() * 60000);
+    const dateStr = sessionLocalDate.toISOString().split('T')[0];
+
+    return {
+      id: session.id,
+      goal_id: session.goal_id,
+      user_id: session.user_id,
+      date: dateStr,
+      duration: {
+        hours: session.duration.hours,
+        minutes: session.duration.minutes
+      },
+      notes: session.notes || '',
+      created_at: session.created_at,
+      updated_at: session.updated_at
+    };
+  } catch (error) {
+    console.error('Error in addSession:', error);
+    throw error;
+  }
+}
+
+export async function getSessions(goalId: string): Promise<Session[]> {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('Authentication error:', authError);
+      throw new Error('Authentication required');
+    }
+
+    const { data: sessions, error } = await supabase
+      .from('goal_sessions')
+      .select('*')
+      .eq('goal_id', goalId)
+      .eq('user_id', user.id)
+      .order('date', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching sessions:', error);
+      throw error;
+    }
+
+    if (!sessions) {
+      console.log('No sessions found for goal:', goalId);
+      return [];
+    }
+
+    return sessions.map(session => {
+      // Convert UTC date to local date string (YYYY-MM-DD)
+      const utcDate = new Date(session.date);
+      const localDate = new Date(utcDate.getTime() - utcDate.getTimezoneOffset() * 60000);
+      const dateStr = localDate.toISOString().split('T')[0];
+
+      return {
+        id: session.id,
+        goal_id: session.goal_id,
+        user_id: session.user_id,
+        date: dateStr,
+        duration: {
+          hours: session.duration?.hours || 0,
+          minutes: session.duration?.minutes || 0
+        },
+        notes: session.notes || '',
+        created_at: session.created_at,
+        updated_at: session.updated_at
+      };
+    });
+  } catch (error) {
+    console.error('Error in getSessions:', error);
+    throw error;
+  }
+}
