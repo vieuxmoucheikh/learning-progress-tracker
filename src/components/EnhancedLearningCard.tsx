@@ -229,10 +229,13 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0">
-                  <Command shouldFilter={false}>
+                  <Command>
                     <CommandInput 
                       placeholder="Search category..."
-                      onValueChange={setCategory}
+                      value={category}
+                      onValueChange={(value) => {
+                        setCategory(value);
+                      }}
                     />
                     <CommandEmpty>
                       <div className="px-2 py-1.5 text-sm text-muted-foreground">
@@ -245,8 +248,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                         .map((cat) => (
                           <CommandItem
                             key={cat}
-                            className="cursor-pointer"
-                            onSelect={() => {
+                            className="cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
+                            onSelect={(currentValue) => {
                               setCategory(cat);
                               setOpen(false);
                             }}
@@ -262,8 +265,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                         ))}
                       {category && !categories.includes(category) && (
                         <CommandItem
-                          className="cursor-pointer"
-                          onSelect={() => {
+                          className="cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
+                          onSelect={(currentValue) => {
                             setOpen(false);
                           }}
                         >

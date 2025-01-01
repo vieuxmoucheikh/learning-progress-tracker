@@ -19,6 +19,7 @@ class LearningCardsService {
       content: card.content || '',
       media: this.parseMedia(card.media),
       tags: Array.isArray(card.tags) ? card.tags : [],
+      category: card.category || '',
       createdAt: card.created_at,
       updatedAt: card.updated_at,
       mastered: card.mastered || false
@@ -33,6 +34,7 @@ class LearningCardsService {
       title: card.title,
       content: card.content,
       tags: card.tags || [],
+      category: card.category || '',
       user_id: user.id,
       mastered: card.mastered || false
     };
@@ -52,8 +54,9 @@ class LearningCardsService {
       id: data.id,
       title: data.title,
       content: data.content || '',
-      media: [],
+      media: this.parseMedia(data.media),
       tags: Array.isArray(data.tags) ? data.tags : [],
+      category: data.category || '',
       createdAt: data.created_at,
       updatedAt: data.updated_at,
       mastered: data.mastered || false
@@ -71,6 +74,7 @@ class LearningCardsService {
       if (updates.content !== undefined) updateData.content = updates.content;
       if (updates.tags !== undefined) updateData.tags = updates.tags;
       if (updates.mastered !== undefined) updateData.mastered = updates.mastered;
+      if (updates.category !== undefined) updateData.category = updates.category;
       
       // Remove media updates for now since the column doesn't exist
       // if (updates.media !== undefined) updateData.media = updates.media;
@@ -93,6 +97,7 @@ class LearningCardsService {
         content: data.content || '',
         media: this.parseMedia(data.media),
         tags: Array.isArray(data.tags) ? data.tags : [],
+        category: data.category || '',
         createdAt: data.created_at,
         updatedAt: data.updated_at,
         mastered: data.mastered || false
