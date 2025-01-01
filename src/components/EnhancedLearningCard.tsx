@@ -26,6 +26,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 
 type EnhancedLearningCardProps = CardType & {
   onSave: (data: Partial<CardType>) => Promise<boolean>;
@@ -325,11 +326,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       </CardFooter>
 
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className={cn(
-          "fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6",
-          "sm:translate-x-[-50%] sm:translate-y-[-50%]",
-          "translate-x-[-48%] translate-y-[-52%]" // Slight adjustment for mobile
-        )}>
+        <DialogContent className="fixed z-50 left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 sm:rounded-lg">
           <DialogHeader className="mb-6">
             <DialogTitle className="text-xl sm:text-2xl font-semibold text-center bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
               {title}
@@ -352,15 +349,15 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               <div dangerouslySetInnerHTML={{ __html: content }} />
             </div>
           </div>
+          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
         </DialogContent>
       </Dialog>
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent className={cn(
-          "fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-md p-4 sm:p-6",
-          "sm:translate-x-[-50%] sm:translate-y-[-50%]",
-          "translate-x-[-48%] translate-y-[-52%]" // Slight adjustment for mobile
-        )}>
+        <AlertDialogContent className="fixed z-50 left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-md p-4 sm:p-6 sm:rounded-lg">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl text-center text-red-600 dark:text-red-400">
               Delete Card
