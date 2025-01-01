@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { getYearlyActivity, getLearningItems } from '@/lib/database';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ActivityData {
+  id: string;
+  user_id: string;
+  category: string;
   date: string;
   count: number;
 }
@@ -23,7 +25,7 @@ export function YearlyActivityStats() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const items: LearningItem[] = await getLearningItems();
+        const items = await getLearningItems();
         const uniqueCategories = [...new Set(items.map(item => item.category).filter(Boolean))] as string[];
         setCategories(uniqueCategories);
         if (uniqueCategories.length > 0) {
@@ -49,32 +51,42 @@ export function YearlyActivityStats() {
         setLoading(false);
       }
     };
-    fetchActivity();
+
+    if (selectedCategory) {
+      fetchActivity();
+    }
   }, [selectedCategory]);
 
   const getColorIntensity = (count: number) => {
-    if (count === 0) return 'bg-gray-100';
-    if (count <= 2) return 'bg-green-200';
-    if (count <= 4) return 'bg-green-300';
-    if (count <= 6) return 'bg-green-400';
-    return 'bg-green-500';
+    if (count === 0) return 'bg-gray-100 dark:bg-gray-800';
+    if (count <= 2) return 'bg-green-200 dark:bg-green-900';
+    if (count <= 4) return 'bg-green-300 dark:bg-green-700';
+    if (count <= 6) return 'bg-green-400 dark:bg-green-600';
+    return 'bg-green-500 dark:bg-green-500';
   };
 
-  const generateYearGrid = () => {
-    const currentDate = new Date('2025-01-01T23:41:52+01:00');
+  const generateCalendarData = () => {
+    const currentDate = new Date('2025-01-02T00:06:35+01:00');
     const startDate = new Date(currentDate.getFullYear(), 0, 1);
-    const days = [];
+    const weeks: { date: string; count: number }[][] = [];
+    let currentWeek: { date: string; count: number }[] = [];
 
     for (let d = new Date(startDate); d <= currentDate; d.setDate(d.getDate() + 1)) {
       const dateStr = d.toISOString().split('T')[0];
-      const activity = activityData.find(a => a.date === dateStr);
-      days.push({
+      const dayData = activityData.find(a => a.date === dateStr);
+      
+      currentWeek.push({
         date: dateStr,
-        count: activity?.count || 0
+        count: dayData?.count || 0
       });
+
+      if (currentWeek.length === 7 || d.getTime() === currentDate.getTime()) {
+        weeks.push(currentWeek);
+        currentWeek = [];
+      }
     }
 
-    return days;
+    return weeks;
   };
 
   if (loading) {
@@ -82,35 +94,45 @@ export function YearlyActivityStats() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Yearly Learning Activity</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-4">
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a category" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="grid grid-cols-53 gap-1">
-          {generateYearGrid().map((day) => (
-            <div
-              key={day.date}
-              className={`w-3 h-3 rounded-sm ${getColorIntensity(day.count)}`}
-              title={`${day.date}: ${day.count} activities`}
-            />
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <div className="w-full max-w-xs">
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a category" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex gap-1">
+        {generateCalendarData().map((week, weekIndex) => (
+          <div key={weekIndex} className="flex flex-col gap-1">
+            {week.map(({ date, count }) => (
+              <div
+                key={date}
+                className={`w-3 h-3 rounded-sm transition-colors ${getColorIntensity(count)}`}
+                title={`${date}: ${count} activities`}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+        <span>Less</span>
+        <div className={`w-3 h-3 rounded-sm ${getColorIntensity(0)}`} />
+        <div className={`w-3 h-3 rounded-sm ${getColorIntensity(2)}`} />
+        <div className={`w-3 h-3 rounded-sm ${getColorIntensity(4)}`} />
+        <div className={`w-3 h-3 rounded-sm ${getColorIntensity(6)}`} />
+        <div className={`w-3 h-3 rounded-sm ${getColorIntensity(8)}`} />
+        <span>More</span>
+      </div>
+    </div>
   );
 }
