@@ -163,10 +163,12 @@ export interface EnhancedLearningCard {
   createdAt: string;
   updatedAt: string;
   mastered?: boolean;
+  category?: string;
 }
 
 export type NewEnhancedLearningCard = Omit<EnhancedLearningCard, 'id' | 'createdAt' | 'updatedAt'> & {
   mastered?: boolean;
+  category?: string;
 }
 
 export interface EnhancedLearningContent {

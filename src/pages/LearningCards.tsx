@@ -11,10 +11,11 @@ import {
 import { EnhancedLearningCard } from '@/components/EnhancedLearningCard';
 import { learningCardsService } from '@/lib/learningCards';
 import type { EnhancedLearningCard as CardType } from '@/types';
-import { Plus, Search, Tag as TagIcon, Loader2, Clock } from 'lucide-react';
+import { Plus, Search, Tag as TagIcon, Loader2, Clock, Filter } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
+import { getLearningItems } from '@/lib/database';
 
 interface CardMedia {
   id: string;
@@ -28,12 +29,26 @@ export const LearningCardsPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [categories, setCategories] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'updated' | 'created' | 'mastered'>('updated');
   const { toast } = useToast();
 
   const allTags = Array.from(
     new Set(cards.flatMap((card) => card.tags))
   ).sort();
+
+  const fetchCategories = async () => {
+    try {
+      const items = await getLearningItems();
+      const uniqueCategories = Array.from(
+        new Set(items.map(item => item.category).filter(Boolean))
+      ).sort();
+      setCategories(uniqueCategories);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
 
   const fetchCards = async () => {
     try {
@@ -53,6 +68,7 @@ export const LearningCardsPage = () => {
 
   useEffect(() => {
     fetchCards();
+    fetchCategories();
   }, []);
 
   const handleCreateCard = async () => {
@@ -61,6 +77,7 @@ export const LearningCardsPage = () => {
         title: 'New Card',
         content: '',
         tags: [],
+        category: selectedCategory !== 'all' ? selectedCategory : '',
       });
       setCards((prevCards) => [newCard, ...prevCards]);
       toast({
@@ -85,6 +102,7 @@ export const LearningCardsPage = () => {
         media: card.media,
         tags: card.tags,
         mastered: card.mastered,
+        category: card.category,
       });
       await fetchCards();
       toast({
@@ -108,134 +126,146 @@ export const LearningCardsPage = () => {
       await learningCardsService.deleteCard(id);
       setCards((prevCards) => prevCards.filter((card) => card.id !== id));
       toast({
-        title: 'Success',
-        description: 'Card deleted successfully',
+        title: "Success",
+        description: "Card deleted successfully",
       });
     } catch (error) {
       console.error('Error deleting card:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to delete card. Please try again.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to delete card. Please try again.",
+        variant: "destructive",
       });
     }
   };
 
-  const filteredCards = cards.filter((card) => {
-    const matchesSearch =
-      searchTerm === '' ||
-      card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      card.content.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesTags =
-      selectedTags.length === 0 ||
-      selectedTags.every((tag) => card.tags.includes(tag));
-
-    return matchesSearch && matchesTags;
-  });
-
-  const sortedAndFilteredCards = filteredCards.sort((a, b) => {
-    switch (sortBy) {
-      case 'updated':
-        return new Date(b.updatedAt || '').getTime() - new Date(a.updatedAt || '').getTime();
-      case 'created':
-        return new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime();
-      case 'mastered':
-        // Safely handle mastered property with type assertion
-        const aMastered = (a as any).mastered || false;
-        const bMastered = (b as any).mastered || false;
-        if (aMastered === bMastered) {
-          return new Date(b.updatedAt || '').getTime() - new Date(a.updatedAt || '').getTime();
-        }
-        return (bMastered ? 1 : 0) - (aMastered ? 1 : 0);
-      default:
-        return 0;
-    }
-  });
-
-  const toggleTag = (tag: string) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter((t) => t !== tag));
-    } else {
-      setSelectedTags([...selectedTags, tag]);
-    }
-  };
+  const filteredCards = cards
+    .filter((card) => {
+      const matchesSearch = card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        card.content.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesTags = selectedTags.length === 0 || selectedTags.every(tag => card.tags.includes(tag));
+      const matchesCategory = selectedCategory === 'all' || card.category === selectedCategory;
+      return matchesSearch && matchesTags && matchesCategory;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'created':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'mastered':
+          return (b.mastered ? 1 : 0) - (a.mastered ? 1 : 0);
+        default:
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      }
+    });
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex-1 w-full sm:w-auto space-y-2">
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-col space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
+            Learning Cards
+          </h1>
+          <Button onClick={handleCreateCard} className="shrink-0">
+            <Plus className="w-4 h-4 mr-2" />
+            New Card
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
+              type="text"
+              placeholder="Search cards..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search cards..."
-              className="pl-9 w-full"
+              className="pl-9"
             />
           </div>
-          <div className="flex flex-wrap gap-2">
-            {allTags.map((tag) => (
-              <Badge
-                key={tag}
-                variant={selectedTags.includes(tag) ? "default" : "outline"}
-                className="cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={() => toggleTag(tag)}
-              >
-                <TagIcon className="h-3 w-3 mr-1" />
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        </div>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Sort by..." />
+
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger>
+              <Filter className="w-4 h-4 mr-2" />
+              <SelectValue placeholder="Filter by category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger>
+              <Clock className="w-4 h-4 mr-2" />
+              <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="updated">Last Updated</SelectItem>
               <SelectItem value="created">Created Date</SelectItem>
-              <SelectItem value="mastered">Mastery Status</SelectItem>
+              <SelectItem value="mastered">Mastery Level</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={handleCreateCard} className="whitespace-nowrap">
-            <Plus className="h-4 w-4 mr-2" />
-            New Card
-          </Button>
         </div>
-      </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center min-h-[200px]">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      ) : filteredCards.length === 0 ? (
-        <div className="text-center py-12 bg-muted/50 rounded-lg">
-          <p className="text-muted-foreground">No cards found. Create your first card to get started!</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <AnimatePresence mode="popLayout">
-            {sortedAndFilteredCards.map((card) => (
-              <motion.div
-                key={card.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.2 }}
+        {allTags.length > 0 && (
+          <div className="flex flex-wrap gap-2 items-center">
+            <TagIcon className="w-4 h-4 text-gray-400" />
+            {allTags.map((tag) => (
+              <Badge
+                key={tag}
+                variant={selectedTags.includes(tag) ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => {
+                  setSelectedTags((prev) =>
+                    prev.includes(tag)
+                      ? prev.filter((t) => t !== tag)
+                      : [...prev, tag]
+                  );
+                }}
               >
-                <EnhancedLearningCard
-                  {...card}
-                  onSave={handleSaveCard}
-                  onDelete={handleDeleteCard}
-                />
-              </motion.div>
+                {tag}
+              </Badge>
             ))}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex justify-center items-center min-h-[200px]">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+          </div>
+        ) : (
+          <AnimatePresence mode="popLayout">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+              {filteredCards.map((card) => (
+                <motion.div
+                  key={card.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <EnhancedLearningCard
+                    {...card}
+                    onSave={handleSaveCard}
+                    onDelete={() => handleDeleteCard(card.id)}
+                  />
+                </motion.div>
+              ))}
+            </div>
           </AnimatePresence>
-        </div>
-      )}
+        )}
+
+        {!loading && filteredCards.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No cards found. Create one to get started!</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

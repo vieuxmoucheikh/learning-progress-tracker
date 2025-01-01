@@ -28,23 +28,23 @@ import {
 } from "@/components/ui/alert-dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 
-type EnhancedLearningCardProps = CardType & {
+interface EnhancedLearningCardProps extends CardType {
   onSave: (data: Partial<CardType>) => Promise<boolean>;
-  onDelete: (id: string) => void;
-  mastered?: boolean;
-};
+  onDelete: () => void;
+}
 
 export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   id,
   title: initialTitle,
   content: initialContent,
   media: initialMedia = [],
-  tags: initialTags,
+  tags: initialTags = [],
+  category: initialCategory = '',
+  mastered: initialMastered = false,
   createdAt,
   updatedAt,
   onSave,
   onDelete,
-  mastered: initialMastered = false,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(initialTitle);
@@ -56,6 +56,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   const [mastered, setMastered] = useState(initialMastered);
   const [isZoomed, setIsZoomed] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [category, setCategory] = useState(initialCategory);
   const contentRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -66,6 +67,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       content,
       media,
       tags,
+      category,
       mastered,
     });
     if (result) {
@@ -150,17 +152,40 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     )}>
       <CardHeader className="relative pb-3 space-y-2">
         {isEditing ? (
-          <Input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="font-semibold text-lg"
-            placeholder="Card Title"
-          />
+          <div className="flex flex-col gap-4">
+            <div>
+              <label className="block text-sm font-medium text-muted-foreground" htmlFor="title">Title</label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="mt-1.5"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-muted-foreground" htmlFor="category">Category</label>
+              <Input
+                id="category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="mt-1.5"
+                placeholder="Enter category"
+              />
+            </div>
+          </div>
         ) : (
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-lg line-clamp-2 bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
-              {title}
-            </h3>
+            <div className="flex-1">
+              <h3 className="font-semibold text-lg line-clamp-2 bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
+                {title}
+              </h3>
+              {category && (
+                <div className="mt-1 text-sm text-blue-600 dark:text-blue-400">
+                  {category}
+                </div>
+              )}
+            </div>
             <div className="flex gap-1 ml-2 flex-shrink-0">
               <Button
                 variant="ghost"
@@ -366,14 +391,14 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               Are you sure you want to delete this card? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
-            <AlertDialogCancel className="flex-1">Cancel</AlertDialogCancel>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
+              className="bg-red-500 hover:bg-red-600"
               onClick={() => {
-                onDelete(id);
+                onDelete();
                 setIsDeleteDialogOpen(false);
               }}
-              className="flex-1 bg-red-600 text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
             >
               Delete
             </AlertDialogAction>
