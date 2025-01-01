@@ -2,8 +2,26 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Save, X, Tag, Clock, Copy, Eye, EyeOff, Bookmark, BookmarkCheck, ZoomIn, ZoomOut, Trash2 } from 'lucide-react';
+import { 
+  Edit, 
+  Save, 
+  X, 
+  Tag, 
+  Clock, 
+  Copy, 
+  Eye, 
+  EyeOff, 
+  Bookmark, 
+  BookmarkCheck, 
+  ZoomIn, 
+  ZoomOut, 
+  Trash2, 
+  Check, 
+  Plus, 
+  ChevronsUpDown 
+} from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import type { EnhancedLearningCard as CardType, NewEnhancedLearningCard } from '@/types';
 import { RichTextEditor } from './RichTextEditor';
@@ -26,7 +44,20 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { getLearningItems } from '@/lib/database';
 
 interface EnhancedLearningCardProps extends CardType {
   onSave: (data: Partial<CardType>) => Promise<boolean>;
@@ -57,8 +88,28 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   const [isZoomed, setIsZoomed] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [category, setCategory] = useState(initialCategory);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [open, setOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const items = await getLearningItems();
+        const uniqueCategories = Array.from(
+          new Set(items.map(item => item.category).filter(Boolean))
+        ).sort();
+        setCategories(uniqueCategories);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    if (isEditing) {
+      fetchCategories();
+    }
+  }, [isEditing]);
 
   const handleSave = async () => {
     const result = await onSave({
@@ -154,7 +205,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         {isEditing ? (
           <div className="flex flex-col gap-4">
             <div>
-              <label className="block text-sm font-medium text-muted-foreground" htmlFor="title">Title</label>
+              <Label htmlFor="title">Title</Label>
               <Input
                 id="title"
                 value={title}
@@ -163,15 +214,73 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               />
             </div>
 
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="category">Category</Label>
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="justify-between"
+                  >
+                    {category || "Select category..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[200px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search category..." />
+                    <CommandEmpty>
+                      <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                        No category found. Type to create new.
+                      </div>
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {categories.map((cat) => (
+                        <CommandItem
+                          key={cat}
+                          value={cat}
+                          onSelect={(currentValue: string) => {
+                            setCategory(currentValue);
+                            setOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              category === cat ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {cat}
+                        </CommandItem>
+                      ))}
+                      {!categories.includes(category) && category && (
+                        <CommandItem
+                          value={category}
+                          onSelect={(currentValue: string) => {
+                            setCategory(currentValue);
+                            setOpen(false);
+                          }}
+                        >
+                          <Plus className="mr-2 h-4 w-4" />
+                          Create "{category}"
+                        </CommandItem>
+                      )}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+
             <div>
-              <label className="block text-sm font-medium text-muted-foreground" htmlFor="category">Category</label>
-              <Input
-                id="category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="mt-1.5"
-                placeholder="Enter category"
-              />
+              <Label htmlFor="content">Content</Label>
+              <div className="mt-1.5">
+                <RichTextEditor
+                  content={content}
+                  onChange={setContent}
+                />
+              </div>
             </div>
           </div>
         ) : (
