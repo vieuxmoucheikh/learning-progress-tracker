@@ -232,11 +232,6 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   <Command>
                     <CommandInput 
                       placeholder="Search category..." 
-                      onValueChange={(search) => {
-                        if (!categories.includes(search)) {
-                          setCategory(search);
-                        }
-                      }}
                     />
                     <CommandEmpty>
                       <div className="px-2 py-1.5 text-sm text-muted-foreground">
@@ -247,11 +242,12 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                       {categories.map((cat) => (
                         <CommandItem
                           key={cat}
-                          onSelect={() => {
-                            setCategory(cat);
+                          value={cat}
+                          className="cursor-pointer"
+                          onSelect={(value) => {
+                            setCategory(value);
                             setOpen(false);
                           }}
-                          className="cursor-pointer"
                         >
                           <Check
                             className={cn(
@@ -264,10 +260,12 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                       ))}
                       {category && !categories.includes(category) && (
                         <CommandItem
-                          onSelect={() => {
+                          value={category}
+                          className="cursor-pointer"
+                          onSelect={(value) => {
+                            setCategory(value);
                             setOpen(false);
                           }}
-                          className="cursor-pointer"
                         >
                           <Plus className="mr-2 h-4 w-4" />
                           Create "{category}"
@@ -290,98 +288,75 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg line-clamp-2 bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
-                {title}
-              </h3>
-              {category && (
-                <div className="mt-1 text-sm text-blue-600 dark:text-blue-400">
-                  {category}
-                </div>
-              )}
-            </div>
-            <div className="flex gap-1 ml-2 flex-shrink-0">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsZoomed(true)}
-                className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
-              >
-                <ZoomIn className="h-4 w-4 text-blue-700 dark:text-blue-400" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleContentVisibility}
-                className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
-              >
-                {isContentHidden ? (
-                  <Eye className="h-4 w-4 text-blue-700 dark:text-blue-400" />
-                ) : (
-                  <EyeOff className="h-4 w-4 text-blue-700 dark:text-blue-400" />
+          <>
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg line-clamp-2 bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
+                  {title}
+                </h3>
+                {category && (
+                  <div className="mt-1 text-sm text-blue-600 dark:text-blue-400">
+                    {category}
+                  </div>
                 )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsEditing(true)}
-                className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
-              >
-                <Edit className="h-4 w-4 text-blue-700 dark:text-blue-400" />
-              </Button>
-            </div>
-          </div>
-        )}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Clock className="h-4 w-4" />
-          <span>Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</span>
-        </div>
-      </CardHeader>
-
-      <CardContent className={cn(
-        "space-y-3 transition-all duration-200",
-        isContentHidden && "blur-md select-none"
-      )}>
-        <div 
-          className="prose prose-sm max-w-none dark:prose-invert line-clamp-6 hover:line-clamp-none transition-all cursor-pointer"
-          onClick={() => setIsZoomed(true)}
-          dangerouslySetInnerHTML={{ __html: content }}
-        />
-        
-        <div className="flex flex-wrap gap-1.5 pt-2">
-          {tags.map((tag, index) => (
-            <Badge
-              key={index}
-              variant={isEditing ? "outline" : "secondary"}
-              className={cn(
-                "flex items-center gap-1 transition-colors bg-blue-50 text-blue-700 hover:bg-blue-100",
-                "dark:bg-blue-950/50 dark:text-blue-300 dark:hover:bg-blue-950",
-                isEditing && "pr-1 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/50 dark:hover:text-red-400"
-              )}
-            >
-              {tag}
-              {isEditing && (
+              </div>
+              <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => handleRemoveTag(tag)}
-                  className="h-4 w-4 p-0 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-950"
+                  onClick={() => setIsZoomed(true)}
+                  className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
                 >
-                  <X className="h-3 w-3" />
+                  <ZoomIn className="h-4 w-4 text-blue-700 dark:text-blue-400" />
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleContentVisibility}
+                  className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
+                >
+                  {isContentHidden ? (
+                    <Eye className="h-4 w-4 text-blue-700 dark:text-blue-400" />
+                  ) : (
+                    <EyeOff className="h-4 w-4 text-blue-700 dark:text-blue-400" />
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsEditing(true)}
+                  className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
+                >
+                  <Edit className="h-4 w-4 text-blue-700 dark:text-blue-400" />
+                </Button>
+              </div>
+            </div>
+            <div 
+              className={cn(
+                "space-y-3 transition-all duration-200",
+                isContentHidden && "blur-md select-none"
               )}
-            </Badge>
-          ))}
-          {isEditing && (
-            <Input
-              value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
-              onKeyDown={handleAddTag}
-              placeholder="Add tag..."
-              className="w-24 h-6 text-xs"
-            />
-          )}
+            >
+              <div 
+                className="prose prose-sm max-w-none dark:prose-invert line-clamp-6 hover:line-clamp-none transition-all cursor-pointer"
+                onClick={() => setIsZoomed(true)}
+                dangerouslySetInnerHTML={{ __html: content }}
+              />
+              
+              <div className="flex flex-wrap gap-1.5 pt-2">
+                {tags.map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+      </CardHeader>
+      <CardContent>
+        <div className="text-xs text-muted-foreground">
+          Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}
         </div>
       </CardContent>
 
