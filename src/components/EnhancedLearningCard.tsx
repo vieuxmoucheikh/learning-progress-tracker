@@ -57,7 +57,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { getLearningItems } from '@/lib/database';
+import { getLearningItems, trackLearningActivity } from '@/lib/database';
 
 interface EnhancedLearningCardProps extends CardType {
   onSave: (data: Partial<CardType>) => Promise<boolean>;
@@ -127,6 +127,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         title: "Success",
         description: "Card updated successfully",
       });
+      await trackLearningActivity(category);
     }
   };
 
@@ -171,6 +172,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         title: newMasteredState ? "Mastered!" : "Unmastered",
         description: newMasteredState ? "Card marked as mastered" : "Card marked as not mastered",
       });
+      await trackLearningActivity(category);
     }
   };
 
