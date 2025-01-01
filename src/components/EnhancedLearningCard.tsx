@@ -230,7 +230,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0">
                   <Command>
-                    <CommandInput placeholder="Search category..." />
+                    <CommandInput 
+                      placeholder="Search category..." 
+                      value={category}
+                      onValueChange={setCategory}
+                    />
                     <CommandEmpty>
                       <div className="px-2 py-1.5 text-sm text-muted-foreground">
                         No category found. Type to create new.
@@ -240,9 +244,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                       {categories.map((cat) => (
                         <CommandItem
                           key={cat}
-                          value={cat}
-                          onSelect={(currentValue: string) => {
-                            setCategory(currentValue);
+                          onSelect={() => {
+                            setCategory(cat);
                             setOpen(false);
                           }}
                         >
@@ -255,11 +258,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                           {cat}
                         </CommandItem>
                       ))}
-                      {!categories.includes(category) && category && (
+                      {category && !categories.includes(category) && (
                         <CommandItem
-                          value={category}
-                          onSelect={(currentValue: string) => {
-                            setCategory(currentValue);
+                          onSelect={() => {
                             setOpen(false);
                           }}
                         >
