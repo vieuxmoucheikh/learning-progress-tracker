@@ -11,7 +11,7 @@ const tabs = [
   {
     id: "dashboard",
     label: "Dashboard",
-    shortLabel: "Dashboard",
+    shortLabel: "Home",
     icon: LayoutDashboard
   },
   {
@@ -29,13 +29,13 @@ const tabs = [
   {
     id: "analytics",
     label: "Analytics",
-    shortLabel: "Analytics",
+    shortLabel: "Stats",
     icon: BarChart3
   },
   {
     id: "pomodoro",
     label: "Pomodoro",
-    shortLabel: "Pomodoro",
+    shortLabel: "Timer",
     icon: Timer
   }
 ];
@@ -49,7 +49,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
 
   return (
     <div className="flex justify-center mb-8 border-b overflow-x-auto w-full bg-gradient-to-r from-blue-600 to-blue-500">
-      <nav className="flex -mb-px max-w-2xl w-full min-w-max" aria-label="Tabs">
+      <nav className="flex -mb-px max-w-2xl w-full min-w-max px-1" aria-label="Tabs">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -59,7 +59,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                "flex-shrink-0 text-sm font-medium py-3 px-3 border-b-2 flex items-center justify-center gap-2 transition-all min-w-[80px]",
+                "flex-shrink-0 text-sm font-medium py-3 px-4 border-b-2 flex items-center justify-center gap-2 transition-all min-w-[90px]",
                 "hover:bg-white/10",
                 isActive
                   ? "border-white text-white"
@@ -72,13 +72,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
                 "w-4 h-4 flex-shrink-0",
                 isActive ? "text-white" : "text-white/80"
               )} />
-              <span className="hidden sm:inline whitespace-nowrap">{tab.label}</span>
-              <span className="sm:hidden whitespace-nowrap text-[13px] flex items-center gap-0.5">
-                <span className="w-4 h-4 flex-shrink-0">
-                  <Icon className="w-full h-full" />
-                </span>
-                {tab.shortLabel}
-              </span>
+              <span className="whitespace-nowrap">{tab.shortLabel}</span>
             </button>
           );
         })}
