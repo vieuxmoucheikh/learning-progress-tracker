@@ -48,8 +48,8 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
   }, [onTabChange]);
 
   return (
-    <div className="flex justify-center mb-8 border-b overflow-x-auto w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-900/95 backdrop-blur-sm">
-      <nav className="flex -mb-px max-w-2xl w-full min-w-max px-0.5" aria-label="Tabs">
+    <div className="flex justify-center mb-8 border-b overflow-x-auto w-full bg-gradient-to-r from-blue-600 to-blue-500">
+      <nav className="flex -mb-px max-w-2xl w-full min-w-max" aria-label="Tabs">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -59,21 +59,26 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                "flex-shrink-0 text-sm font-medium py-3 px-2 border-b-2 flex items-center justify-center gap-1.5 transition-all min-w-[70px]",
-                "hover:bg-blue-50/50 dark:hover:bg-blue-950/30",
+                "flex-shrink-0 text-sm font-medium py-3 px-3 border-b-2 flex items-center justify-center gap-2 transition-all min-w-[80px]",
+                "hover:bg-white/10",
                 isActive
-                  ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                  : "border-transparent text-blue-900/70 hover:text-blue-800 dark:text-blue-300/90 dark:hover:text-blue-200 hover:border-blue-200"
+                  ? "border-white text-white"
+                  : "border-transparent text-white/80 hover:text-white hover:border-white/30"
               )}
               style={{ transition: "border-color 0.15s ease-in-out, color 0.15s ease-in-out, background-color 0.15s ease-in-out" }}
               aria-current={isActive ? "page" : undefined}
             >
               <Icon className={cn(
                 "w-4 h-4 flex-shrink-0",
-                isActive ? "text-blue-500 dark:text-blue-400" : "text-blue-600/60 dark:text-blue-400/60"
+                isActive ? "text-white" : "text-white/80"
               )} />
               <span className="hidden sm:inline whitespace-nowrap">{tab.label}</span>
-              <span className="sm:hidden whitespace-nowrap text-[13px]">{tab.shortLabel}</span>
+              <span className="sm:hidden whitespace-nowrap text-[13px] flex items-center gap-0.5">
+                <span className="w-4 h-4 flex-shrink-0">
+                  <Icon className="w-full h-full" />
+                </span>
+                {tab.shortLabel}
+              </span>
             </button>
           );
         })}
