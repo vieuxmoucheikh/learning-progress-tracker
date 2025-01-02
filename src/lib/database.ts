@@ -1047,7 +1047,7 @@ export async function trackLearningActivity(category: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return false;
 
-    const currentDate = new Date('2025-01-02T23:14:33+01:00'); // Using provided time
+    const currentDate = new Date('2025-01-02T23:24:08+01:00');
     const dateStr = currentDate.toISOString().split('T')[0];
 
     console.log('Tracking activity:', { category, dateStr, userId: user.id });
@@ -1068,6 +1068,7 @@ export async function trackLearningActivity(category: string) {
 
     const timestamp = currentDate.toISOString();
 
+    let result;
     if (existing) {
       console.log('Updating existing activity:', existing);
       const { data: updated, error: updateError } = await supabase
@@ -1085,6 +1086,7 @@ export async function trackLearningActivity(category: string) {
         return false;
       }
       console.log('Activity updated successfully:', updated);
+      result = updated;
     } else {
       console.log('Creating new activity entry');
       const { data: inserted, error: insertError } = await supabase
@@ -1105,9 +1107,10 @@ export async function trackLearningActivity(category: string) {
         return false;
       }
       console.log('Activity created successfully:', inserted);
+      result = inserted;
     }
 
-    return true;
+    return result;
   } catch (error) {
     console.error('Error tracking learning activity:', error);
     return false;
@@ -1119,7 +1122,7 @@ export async function getYearlyActivity(category: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    const currentDate = new Date('2025-01-02T23:06:24+01:00'); // Using provided time
+    const currentDate = new Date('2025-01-02T23:24:08+01:00');
     const year = currentDate.getFullYear();
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year, 11, 31);
@@ -1173,7 +1176,8 @@ export async function getYearlyActivity(category: string) {
       currentDatePointer.setDate(currentDatePointer.getDate() + 1);
     }
 
-    console.log('Processed activity data:', filledData.filter(d => d.count > 0));
+    const activeDays = filledData.filter(d => d.count > 0);
+    console.log('Active days:', activeDays);
     return filledData;
   } catch (error) {
     console.error('Error in getYearlyActivity:', error);

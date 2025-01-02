@@ -37,7 +37,8 @@ const YearlyActivityStats = () => {
     try {
       console.log('Fetching activities for category:', category);
       const activities = await getYearlyActivity(category);
-      console.log('Received activities:', activities);
+      const activeDays = activities.filter(d => d.count > 0);
+      console.log('Active days for category:', category, activeDays);
       setActivityData(activities);
     } catch (error) {
       console.error('Error fetching activities:', error);
@@ -84,7 +85,7 @@ const YearlyActivityStats = () => {
       if (selectedCategory) {
         fetchActivities(selectedCategory);
       }
-    }, 5000); // Refresh every 5 seconds
+    }, 3000); // Refresh every 3 seconds
 
     return () => clearInterval(refreshInterval);
   }, [selectedCategory]);
@@ -98,43 +99,8 @@ const YearlyActivityStats = () => {
   const activeDays = activityData.filter(day => day.count > 0).length;
   const averagePerDay = activeDays > 0 ? (totalActivities / activeDays).toFixed(1) : '0';
 
-  const generateCalendarData = () => {
-    const currentDate = new Date();
-    const startDate = new Date(currentDate.getFullYear(), 0, 1);
-    startDate.setHours(0, 0, 0, 0);
-    
-    // Pre-calculate all dates and their activities
-    const daysInYear = 365 + (currentDate.getFullYear() % 4 === 0 ? 1 : 0);
-    const allDates: DayData[] = [];
-    
-    for (let i = 0; i < daysInYear; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
-      const dateStr = date.toISOString().split('T')[0];
-      const dayData = activityData.find(a => a.date === dateStr);
-      const count = dayData?.count ?? 0;
-      
-      if (count > 0) {
-        console.log('Found activity for date:', dateStr, { count, dayData });
-      }
-      
-      allDates.push({
-        date: dateStr,
-        count,
-        dayOfWeek: date.getDay()
-      });
-    }
-
-    return allDates;
-  };
-
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-lg font-semibold">Activity Stats</h2>
-        <p className="text-sm text-gray-500">Track your learning progress over time</p>
-      </div>
-
+    <div className="space-y-4">
       <div className="flex flex-col gap-4">
         <Select
           value={selectedCategory}
@@ -153,11 +119,9 @@ const YearlyActivityStats = () => {
         </Select>
 
         {loading ? (
-          <div className="flex justify-center items-center h-48">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-          </div>
-        ) : activityData.length > 0 ? (
-          <div className="space-y-6">
+          <div>Loading...</div>
+        ) : (
+          <div className="space-y-4">
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               <div className="bg-blue-500/10 rounded-lg p-4">
                 <h3 className="text-sm font-medium text-blue-600 dark:text-blue-400">Total Activities</h3>
@@ -173,13 +137,8 @@ const YearlyActivityStats = () => {
               </div>
             </div>
             <div className="relative">
-              <YearlyActivityHeatmap data={generateCalendarData()} />
+              <YearlyActivityHeatmap data={activityData} />
             </div>
-          </div>
-        ) : (
-          <div className="text-center py-12 text-gray-500">
-            <p>No activity data available for this category.</p>
-            <p className="text-sm mt-2">Start learning to see your progress!</p>
           </div>
         )}
       </div>
