@@ -94,9 +94,11 @@ export function YearlyActivityStats() {
 
   const getColorIntensity = (count: number) => {
     if (count === 0) return 'bg-gray-800 dark:bg-gray-800';
+    if (count <= 1) return 'bg-emerald-900/90 dark:bg-emerald-900/90';
     if (count <= 2) return 'bg-emerald-800/90 dark:bg-emerald-800/90';
+    if (count <= 3) return 'bg-emerald-700/90 dark:bg-emerald-700/90';
     if (count <= 4) return 'bg-emerald-600/90 dark:bg-emerald-600/90';
-    if (count <= 6) return 'bg-emerald-500/90 dark:bg-emerald-500/90';
+    if (count <= 5) return 'bg-emerald-500/90 dark:bg-emerald-500/90';
     return 'bg-emerald-400/90 dark:bg-emerald-400/90';
   };
 
@@ -173,7 +175,7 @@ export function YearlyActivityStats() {
           {/* Legend */}
           <div className="flex items-center gap-1 mt-4 text-xs text-gray-400">
             <span>Less</span>
-            {[0, 2, 4, 6, 8].map((count) => (
+            {[0, 1, 2, 3, 4, 5, 6].map((count) => (
               <div
                 key={count}
                 className={`h-4 w-4 ${getColorIntensity(count)}`}
