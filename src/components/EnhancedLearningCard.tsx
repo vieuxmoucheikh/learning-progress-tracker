@@ -20,7 +20,8 @@ import {
   Trash2, 
   Check, 
   Plus, 
-  ChevronsUpDown 
+  ChevronsUpDown,
+  Trophy
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import type { EnhancedLearningCard as CardType, NewEnhancedLearningCard } from '@/types';
@@ -62,7 +63,6 @@ import { getLearningItems, trackLearningActivity } from '@/lib/database';
 interface EnhancedLearningCardProps extends CardType {
   onSave: (data: Partial<CardType>) => Promise<boolean>;
   onDelete: () => void;
-  onComplete: () => Promise<boolean>;
 }
 
 export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
@@ -77,7 +77,6 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   updatedAt,
   onSave,
   onDelete,
-  onComplete,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(initialTitle);
@@ -182,37 +181,19 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     }
   };
 
-  const handleComplete = async () => {
-    try {
-      await onComplete();
-      await trackLearningActivity(category);
-      toast({
-        title: "Success",
-        description: "Task marked as complete",
-      });
-    } catch (error) {
-      console.error('Error completing task:', error);
-      toast({
-        title: "Error",
-        description: "Failed to complete task",
-        variant: "destructive",
-      });
-    }
-  };
-
   const toggleMastered = async () => {
     const newMasteredState = !mastered;
     const result = await onSave({
       id,
       mastered: newMasteredState,
     });
+
     if (result) {
       setMastered(newMasteredState);
       toast({
-        title: newMasteredState ? "Mastered!" : "Unmastered",
-        description: newMasteredState ? "Card marked as mastered" : "Card marked as not mastered",
+        title: newMasteredState ? "Marked as mastered" : "Marked as not mastered",
+        description: `Successfully ${newMasteredState ? 'mastered' : 'unmastered'} the card`,
       });
-      await trackLearningActivity(category);
     }
   };
 
@@ -336,7 +317,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             </div>
           </div>
         ) : (
-          <>
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <h3 className="font-semibold text-lg line-clamp-2 bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
@@ -399,7 +380,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 ))}
               </div>
             </div>
-          </>
+          </div>
         )}
       </CardHeader>
       <CardContent>
@@ -453,26 +434,13 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleComplete}
-                className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-950/50"
-              >
-                <Check className="h-4 w-4 mr-1" />
-                Complete
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
                 onClick={toggleMastered}
                 className={cn(
                   "hover:bg-emerald-50 dark:hover:bg-emerald-950/50",
-                  mastered ? "text-emerald-600 dark:text-emerald-400" : "text-blue-700 dark:text-blue-400"
+                  mastered ? "text-emerald-600 dark:text-emerald-400" : "text-gray-500 dark:text-gray-400"
                 )}
               >
-                {mastered ? (
-                  <BookmarkCheck className="h-4 w-4 mr-1" />
-                ) : (
-                  <Bookmark className="h-4 w-4 mr-1" />
-                )}
+                <Trophy className="h-4 w-4 mr-1" />
                 {mastered ? "Mastered" : "Mark as Mastered"}
               </Button>
               <Button
