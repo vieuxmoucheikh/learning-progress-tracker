@@ -160,7 +160,7 @@ export function YearlyActivityStats() {
   const streakPercentage = (daysWithActivity / totalDays) * 100;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full">
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
           <SelectTrigger className="w-[200px]">
@@ -188,74 +188,78 @@ export function YearlyActivityStats() {
         </div>
       </div>
 
-      <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm">
-        {/* Month labels */}
-        <div className="mb-2 flex text-xs text-gray-500 dark:text-gray-400">
-          <div className="w-8" />
-          <div className="flex-1 relative">
-            {monthLabels.map(({ label, weekIndex }, index) => (
-              <div
-                key={label}
-                className="absolute text-xs font-medium"
-                style={{
-                  left: `${(weekIndex / 52) * 100}%`,
-                  transform: 'translateX(-50%)'
-                }}
-              >
-                {label}
-              </div>
-            ))}
+      <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm overflow-x-auto">
+        <div className="min-w-[800px]">
+          {/* Month labels */}
+          <div className="mb-2 flex text-xs text-gray-500 dark:text-gray-400">
+            <div className="w-8" />
+            <div className="flex-1 relative">
+              {monthLabels.map(({ label, weekIndex }, index) => (
+                <div
+                  key={label}
+                  className="absolute text-xs font-medium"
+                  style={{
+                    left: `${(weekIndex / 52) * 100}%`,
+                    transform: 'translateX(-50%)'
+                  }}
+                >
+                  {label}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Weekday labels */}
-        <div className="mb-2 flex text-xs text-gray-500 dark:text-gray-400">
-          <div className="w-8" />
-          <div className="flex-1 grid grid-cols-7 gap-1 text-center font-medium">
-            <div>Mon</div>
-            <div>Tue</div>
-            <div>Wed</div>
-            <div>Thu</div>
-            <div>Fri</div>
-            <div>Sat</div>
-            <div>Sun</div>
-          </div>
-        </div>
-
-        <div className="flex mt-6">
-          <div className="grid auto-rows-fr gap-1">
-            {calendarData.map((_, weekIndex) => (
-              <div key={weekIndex} className="text-xs text-gray-400 dark:text-gray-500 pr-2 h-5 flex items-center font-medium">
-                {weekIndex + 1}
+          {/* Weekday labels */}
+          <div className="mb-2 flex text-xs text-gray-500 dark:text-gray-400">
+            <div className="w-8" />
+            <div className="flex-1 grid grid-cols-53 gap-1">
+              <div className="col-span-1 grid grid-cols-7 gap-1 text-center font-medium">
+                <div>Mon</div>
+                <div>Tue</div>
+                <div>Wed</div>
+                <div>Thu</div>
+                <div>Fri</div>
+                <div>Sat</div>
+                <div>Sun</div>
               </div>
-            ))}
+            </div>
           </div>
-          
-          <div className="flex-1 grid grid-flow-col gap-1">
-            {calendarData.map((week, weekIndex) => (
-              <div key={weekIndex} className="grid grid-rows-1 gap-1">
-                {week.map(({ date, count }, dayIndex) => (
-                  <div
-                    key={`${weekIndex}-${dayIndex}`}
-                    className={`w-5 h-5 rounded-sm transition-all duration-200 ${
-                      date ? getColorIntensity(count) : 'bg-transparent'
-                    } hover:scale-110 hover:ring-2 hover:ring-blue-400 dark:hover:ring-blue-500 cursor-help shadow-sm`}
-                    title={date ? `${formatDate(date)}: ${count} activities` : ''}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
 
-        <div className="flex items-center gap-2 mt-4 text-sm text-gray-600 dark:text-gray-400">
-          <span>Less</span>
-          <div className={`w-5 h-5 rounded-sm ${getColorIntensity(0)}`} />
-          <div className={`w-5 h-5 rounded-sm ${getColorIntensity(2)}`} />
-          <div className={`w-5 h-5 rounded-sm ${getColorIntensity(4)}`} />
-          <div className={`w-5 h-5 rounded-sm ${getColorIntensity(6)}`} />
-          <div className={`w-5 h-5 rounded-sm ${getColorIntensity(8)}`} />
-          <span>More</span>
+          <div className="flex mt-6">
+            <div className="grid auto-rows-fr gap-1">
+              {calendarData.map((_, weekIndex) => (
+                <div key={weekIndex} className="text-xs text-gray-400 dark:text-gray-500 pr-2 h-5 flex items-center font-medium">
+                  {weekIndex + 1}
+                </div>
+              ))}
+            </div>
+            
+            <div className="flex-1 grid grid-cols-53 gap-1">
+              {calendarData.map((week, weekIndex) => (
+                <div key={weekIndex} className="col-span-1 grid grid-rows-7 gap-1">
+                  {week.map(({ date, count }, dayIndex) => (
+                    <div
+                      key={`${weekIndex}-${dayIndex}`}
+                      className={`w-5 h-5 rounded-sm transition-all duration-200 ${
+                        date ? getColorIntensity(count) : 'bg-transparent'
+                      } hover:scale-110 hover:ring-2 hover:ring-blue-400 dark:hover:ring-blue-500 cursor-help shadow-sm`}
+                      title={date ? `${formatDate(date)}: ${count} activities` : ''}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 mt-4 text-sm text-gray-600 dark:text-gray-400">
+            <span>Less</span>
+            <div className={`w-5 h-5 rounded-sm ${getColorIntensity(0)}`} />
+            <div className={`w-5 h-5 rounded-sm ${getColorIntensity(2)}`} />
+            <div className={`w-5 h-5 rounded-sm ${getColorIntensity(4)}`} />
+            <div className={`w-5 h-5 rounded-sm ${getColorIntensity(6)}`} />
+            <div className={`w-5 h-5 rounded-sm ${getColorIntensity(8)}`} />
+            <span>More</span>
+          </div>
         </div>
       </div>
     </div>

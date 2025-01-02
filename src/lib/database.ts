@@ -1045,11 +1045,12 @@ export async function createLearningActivityTable() {
 export async function trackLearningActivity(category: string) {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) return false;
 
     const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
     const dateStr = currentDate.toISOString().split('T')[0];
+
+    console.log('Tracking activity:', { category, dateStr, userId: user.id });
 
     // First check if we already have an entry for this date and category
     const { data: existing, error: selectError } = await supabase
@@ -1062,11 +1063,11 @@ export async function trackLearningActivity(category: string) {
 
     if (selectError && selectError.code !== 'PGRST116') {
       console.error('Error checking existing activity:', selectError);
-      return;
+      return false;
     }
 
     if (existing) {
-      // Update existing entry
+      console.log('Updating existing activity:', existing);
       const { error: updateError } = await supabase
         .from('learning_activity')
         .update({ 
@@ -1077,10 +1078,11 @@ export async function trackLearningActivity(category: string) {
 
       if (updateError) {
         console.error('Error updating activity:', updateError);
-        return;
+        return false;
       }
+      console.log('Activity updated successfully');
     } else {
-      // Create new entry
+      console.log('Creating new activity entry');
       const { error: insertError } = await supabase
         .from('learning_activity')
         .insert({
@@ -1094,8 +1096,9 @@ export async function trackLearningActivity(category: string) {
 
       if (insertError) {
         console.error('Error inserting activity:', insertError);
-        return;
+        return false;
       }
+      console.log('Activity created successfully');
     }
 
     return true;
@@ -1112,7 +1115,7 @@ export async function getYearlyActivity(category: string) {
 
     const currentDate = new Date();
     const startDate = new Date(currentDate.getFullYear(), 0, 1);
-    const endDate = new Date(currentDate.getFullYear(), 11, 31, 23, 59, 59, 999);
+    const endDate = new Date(currentDate.getFullYear(), 11, 31);
 
     console.log('Fetching activity for:', {
       category,
@@ -1134,6 +1137,8 @@ export async function getYearlyActivity(category: string) {
       console.error('Error fetching yearly activity:', error);
       return [];
     }
+
+    console.log('Raw activity data:', data);
 
     // Fill in missing dates with zero counts
     const filledData = [];
