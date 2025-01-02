@@ -45,16 +45,16 @@ export function YearlyActivityStats() {
           const defaultCategory = uniqueCategories[0];
           console.log('Setting default category:', defaultCategory);
           setSelectedCategory(defaultCategory);
-        }
-        
-        // Only fetch activities if we have a selected category
-        if (selectedCategory) {
+          
+          // Fetch activities for the default category
+          const activities = await getYearlyActivity(defaultCategory);
+          console.log('Initial activities:', activities);
+          setActivityData(activities);
+        } else if (selectedCategory) {
+          // Fetch activities for the selected category
           console.log('Fetching activities for category:', selectedCategory);
           const activities = await getYearlyActivity(selectedCategory);
           console.log('Received activities:', activities);
-          if (activities.some(a => a.count > 0)) {
-            console.log('Found activities with count > 0:', activities.filter(a => a.count > 0));
-          }
           setActivityData(activities);
         }
       } catch (error) {
@@ -65,6 +65,22 @@ export function YearlyActivityStats() {
     };
 
     fetchData();
+  }, [selectedCategory]);
+
+  // Add auto-refresh timer
+  useEffect(() => {
+    const refreshInterval = setInterval(async () => {
+      if (selectedCategory) {
+        try {
+          const activities = await getYearlyActivity(selectedCategory);
+          setActivityData(activities);
+        } catch (error) {
+          console.error('Error refreshing activities:', error);
+        }
+      }
+    }, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(refreshInterval);
   }, [selectedCategory]);
 
   const generateCalendarData = () => {

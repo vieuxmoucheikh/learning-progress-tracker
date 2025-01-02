@@ -58,7 +58,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { getLearningItems, trackLearningActivity } from '@/lib/database';
+import { getLearningItems, trackLearningActivity, updateLearningItem } from '@/lib/database';
 
 interface EnhancedLearningCardProps extends CardType {
   onSave: (data: Partial<CardType>) => Promise<boolean>;
@@ -206,6 +206,33 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       toast({
         title: "Error",
         description: "Failed to update mastered state",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleComplete = async () => {
+    try {
+      // Track the activity for this category
+      await trackLearningActivity(category);
+
+      const updatedItem = await updateLearningItem(id, {
+        completed: true,
+        completed_at: new Date().toISOString(),
+      });
+
+      if (updatedItem) {
+        onSave(updatedItem);
+        toast({
+          title: "Success!",
+          description: "Learning item marked as complete",
+        });
+      }
+    } catch (error) {
+      console.error('Error completing item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to complete learning item",
         variant: "destructive",
       });
     }
@@ -456,6 +483,15 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               >
                 <Trophy className="h-4 w-4 mr-1" />
                 {mastered ? "Mastered" : "Mark as Mastered"}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleComplete}
+                className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-950/50"
+              >
+                <Check className="h-4 w-4 mr-1" />
+                Complete
               </Button>
               <Button
                 variant="ghost"
