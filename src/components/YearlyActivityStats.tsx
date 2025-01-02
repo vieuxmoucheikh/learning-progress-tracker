@@ -83,6 +83,21 @@ export function YearlyActivityStats() {
     return () => clearInterval(refreshInterval);
   }, [selectedCategory]);
 
+  const handleCategoryChange = async (newCategory: string) => {
+    console.log('Category changed to:', newCategory);
+    setSelectedCategory(newCategory);
+    setLoading(true);
+    try {
+      const activities = await getYearlyActivity(newCategory);
+      console.log('Activities for new category:', activities);
+      setActivityData(activities);
+    } catch (error) {
+      console.error('Error fetching activities for new category:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const generateCalendarData = () => {
     const currentDate = new Date();
     const startDate = new Date(currentDate.getFullYear(), 0, 1);
@@ -123,10 +138,7 @@ export function YearlyActivityStats() {
       <div className="flex flex-col gap-4">
         <Select
           value={selectedCategory}
-          onValueChange={(value) => {
-            console.log('Category selected:', value);
-            setSelectedCategory(value);
-          }}
+          onValueChange={(value) => handleCategoryChange(value)}
         >
           <SelectTrigger className="w-full md:w-[200px]">
             <SelectValue placeholder="Select a category" />

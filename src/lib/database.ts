@@ -1073,7 +1073,7 @@ export async function trackLearningActivity(category: string) {
       const { error: updateError } = await supabase
         .from('learning_activity')
         .update({ 
-          count: existing.count + 1,
+          count: (existing.count || 0) + 1,
           updated_at: timestamp
         })
         .eq('id', existing.id);
@@ -1087,14 +1087,14 @@ export async function trackLearningActivity(category: string) {
       console.log('Creating new activity entry');
       const { error: insertError } = await supabase
         .from('learning_activity')
-        .insert({
+        .insert([{
           user_id: user.id,
           category,
           date: dateStr,
           count: 1,
           created_at: timestamp,
           updated_at: timestamp
-        });
+        }]);
 
       if (insertError) {
         console.error('Error inserting activity:', insertError);
@@ -1121,8 +1121,8 @@ export async function getYearlyActivity(category: string) {
 
     console.log('Fetching activity for:', {
       category,
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0],
       userId: user.id
     });
 
@@ -1132,7 +1132,8 @@ export async function getYearlyActivity(category: string) {
       .eq('user_id', user.id)
       .eq('category', category)
       .gte('date', startDate.toISOString().split('T')[0])
-      .lte('date', endDate.toISOString().split('T')[0]);
+      .lte('date', endDate.toISOString().split('T')[0])
+      .order('date', { ascending: true });
 
     if (error) {
       console.error('Error fetching yearly activity:', error);

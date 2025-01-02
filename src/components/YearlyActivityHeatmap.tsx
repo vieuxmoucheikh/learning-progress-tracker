@@ -6,15 +6,15 @@ interface YearlyActivityHeatmapProps {
   data: { date: string; count: number }[];
 }
 
-export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
+export function YearlyActivityHeatmap({ data }: { data: { date: string; count: number }[] }) {
   const getColorIntensity = (count: number) => {
-    if (count === 0) return 'bg-gray-800 dark:bg-gray-800';
-    if (count <= 1) return 'bg-blue-900/90 dark:bg-blue-900/90';
-    if (count <= 2) return 'bg-blue-800/90 dark:bg-blue-800/90';
-    if (count <= 3) return 'bg-blue-700/90 dark:bg-blue-700/90';
-    if (count <= 4) return 'bg-blue-600/90 dark:bg-blue-600/90';
-    if (count <= 5) return 'bg-blue-500/90 dark:bg-blue-500/90';
-    return 'bg-blue-400/90 dark:bg-blue-400/90';
+    if (count === 0) return 'bg-gray-800/50';
+    if (count === 1) return 'bg-blue-900/90';
+    if (count === 2) return 'bg-blue-800/90';
+    if (count === 3) return 'bg-blue-700/90';
+    if (count === 4) return 'bg-blue-600/90';
+    if (count === 5) return 'bg-blue-500/90';
+    return 'bg-blue-400/90';
   };
 
   const formatDate = (dateStr: string) => {
@@ -28,12 +28,11 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
 
   // Generate calendar grid data
   const generateCalendarData = () => {
-    // Get the year from the first activity date or use current year
-    const year = data[0]?.date ? new Date(data[0].date).getFullYear() : new Date().getFullYear();
+    const year = new Date().getFullYear();
     const startDate = new Date(year, 0, 1);
     startDate.setHours(0, 0, 0, 0);
     
-    const daysInYear = 365 + (startDate.getFullYear() % 4 === 0 ? 1 : 0);
+    const daysInYear = 365 + (year % 4 === 0 ? 1 : 0);
     const allDates = [];
     
     for (let i = 0; i < daysInYear; i++) {
@@ -41,6 +40,10 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
       date.setDate(startDate.getDate() + i);
       const dateStr = date.toISOString().split('T')[0];
       const dayData = data.find(d => d.date === dateStr);
+      
+      if (dayData && dayData.count > 0) {
+        console.log('Found activity for date:', dateStr, dayData);
+      }
       
       allDates.push({
         date: dateStr,
@@ -53,6 +56,7 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
   };
 
   const calendarData = generateCalendarData();
+  console.log('Calendar data generated:', calendarData.filter(d => d.count > 0));
 
   return (
     <div className="border border-gray-800 rounded-lg p-4 bg-black/50 shadow-sm overflow-hidden">
@@ -78,7 +82,9 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
                 {calendarData
                   .filter(date => {
                     const dayOfWeek = new Date(date.date).getDay();
-                    return dayOfWeek === (dayIndex === 0 ? 1 : dayIndex === 6 ? 0 : dayIndex);
+                    // Convert Sunday from 0 to 7 for proper display
+                    const adjustedDayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
+                    return adjustedDayOfWeek === dayIndex + 1;
                   })
                   .map((date) => (
                     <div
