@@ -61,20 +61,22 @@ export function YearlyActivityStats() {
   }, [selectedCategory]);
 
   const getColorIntensity = (count: number) => {
-    if (count === 0) return 'bg-slate-100';
-    if (count <= 2) return 'bg-blue-200';
-    if (count <= 4) return 'bg-blue-300';
-    if (count <= 6) return 'bg-blue-400';
-    return 'bg-blue-500';
+    if (count === 0) return 'bg-slate-100 dark:bg-slate-800';
+    if (count <= 2) return 'bg-blue-200/80 dark:bg-blue-900/80';
+    if (count <= 4) return 'bg-blue-300/80 dark:bg-blue-800/80';
+    if (count <= 6) return 'bg-blue-400/80 dark:bg-blue-700/80';
+    return 'bg-blue-500/80 dark:bg-blue-600/80';
   };
 
   const generateCalendarData = () => {
-    const currentDate = new Date('2025-01-02T00:35:24+01:00');
+    const currentDate = new Date();
     const startDate = new Date(currentDate.getFullYear(), 0, 1);
+    startDate.setHours(0, 0, 0, 0);
+    
     const weeks: { date: string; count: number }[][] = [];
     let currentWeek: { date: string; count: number }[] = [];
 
-    // Start with empty cells for days before the first day of the year
+    // Add empty cells for days before the first day of the year
     const firstDayOfWeek = startDate.getDay();
     for (let i = 0; i < firstDayOfWeek; i++) {
       currentWeek.push({ date: '', count: 0 });
@@ -90,9 +92,8 @@ export function YearlyActivityStats() {
         count: dayData?.count || 0
       });
 
-      // Start a new week when we reach Sunday
-      if (currentWeek.length === 7) {
-        weeks.push(currentWeek);
+      if (d.getDay() === 6) { // Sunday
+        weeks.push([...currentWeek]);
         currentWeek = [];
       }
     }
@@ -102,19 +103,38 @@ export function YearlyActivityStats() {
       while (currentWeek.length < 7) {
         currentWeek.push({ date: '', count: 0 });
       }
-      weeks.push(currentWeek);
+      weeks.push([...currentWeek]);
     }
 
     return weeks;
   };
 
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-48">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
+
+  const calendarData = generateCalendarData();
+  const totalActivities = activityData.reduce((sum, day) => sum + day.count, 0);
+  const averagePerDay = totalActivities / activityData.length;
 
   return (
     <div className="space-y-4">
-      <div className="w-full max-w-xs">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Select a category" />
@@ -127,12 +147,18 @@ export function YearlyActivityStats() {
             ))}
           </SelectContent>
         </Select>
+
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          <span className="font-medium">{totalActivities}</span> total activities
+          {' • '}
+          <span className="font-medium">{averagePerDay.toFixed(1)}</span> per day
+        </div>
       </div>
 
-      <div className="border rounded-lg p-4 bg-white">
-        <div className="mb-1 flex text-xs text-gray-500">
-          <div className="w-8" /> {/* Spacer for alignment */}
-          <div className="flex-1 grid grid-cols-7 gap-1">
+      <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm">
+        <div className="mb-2 flex text-xs text-gray-500 dark:text-gray-400">
+          <div className="w-8" />
+          <div className="flex-1 grid grid-cols-7 gap-1 text-center">
             <div>Mon</div>
             <div>Tue</div>
             <div>Wed</div>
@@ -145,21 +171,23 @@ export function YearlyActivityStats() {
 
         <div className="flex">
           <div className="grid auto-rows-fr gap-1">
-            {generateCalendarData().map((_, weekIndex) => (
-              <div key={weekIndex} className="text-xs text-gray-400 pr-2">
-                Week {weekIndex + 1}
+            {calendarData.map((_, weekIndex) => (
+              <div key={weekIndex} className="text-xs text-gray-400 dark:text-gray-500 pr-2 h-5 flex items-center">
+                {weekIndex + 1}
               </div>
             ))}
           </div>
           
           <div className="flex-1 grid grid-flow-col gap-1">
-            {generateCalendarData().map((week, weekIndex) => (
+            {calendarData.map((week, weekIndex) => (
               <div key={weekIndex} className="grid grid-rows-1 gap-1">
                 {week.map(({ date, count }, dayIndex) => (
                   <div
                     key={`${weekIndex}-${dayIndex}`}
-                    className={`w-5 h-5 rounded-sm ${date ? getColorIntensity(count) : ''}`}
-                    title={date ? `${date}: ${count} activities` : ''}
+                    className={`w-5 h-5 rounded-sm transition-colors duration-200 ${
+                      date ? getColorIntensity(count) : 'bg-transparent'
+                    } hover:ring-2 hover:ring-blue-400 dark:hover:ring-blue-500 cursor-help`}
+                    title={date ? `${formatDate(date)}: ${count} activities` : ''}
                   />
                 ))}
               </div>
@@ -167,7 +195,7 @@ export function YearlyActivityStats() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 mt-4 text-sm text-gray-600">
+        <div className="flex items-center gap-2 mt-4 text-sm text-gray-600 dark:text-gray-400">
           <span>Less</span>
           <div className={`w-5 h-5 rounded-sm ${getColorIntensity(0)}`} />
           <div className={`w-5 h-5 rounded-sm ${getColorIntensity(2)}`} />
