@@ -1066,13 +1066,15 @@ export async function trackLearningActivity(category: string) {
       return false;
     }
 
+    const timestamp = new Date().toISOString();
+
     if (existing) {
       console.log('Updating existing activity:', existing);
       const { error: updateError } = await supabase
         .from('learning_activity')
         .update({ 
           count: existing.count + 1,
-          updated_at: new Date().toISOString()
+          updated_at: timestamp
         })
         .eq('id', existing.id);
 
@@ -1090,8 +1092,8 @@ export async function trackLearningActivity(category: string) {
           category,
           date: dateStr,
           count: 1,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          created_at: timestamp,
+          updated_at: timestamp
         });
 
       if (insertError) {

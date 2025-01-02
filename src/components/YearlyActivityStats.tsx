@@ -104,33 +104,36 @@ export function YearlyActivityStats() {
 
   return (
     <div className="space-y-4 w-full">
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+      <div className="flex flex-col space-y-4">
         <div>
           <h2 className="text-lg font-semibold mb-1">Yearly Learning Activity</h2>
           <p className="text-sm text-gray-400">Track your learning progress throughout the year by category</p>
         </div>
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Select a category" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Select a category" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <div className="text-sm text-gray-400 flex gap-4">
-          <div>
-            <span className="font-medium">{totalActivities}</span> activities
-          </div>
-          <div>
-            <span className="font-medium">{averagePerDay.toFixed(1)}</span> per day
-          </div>
-          <div>
-            <span className="font-medium">{streakPercentage.toFixed(0)}%</span> streak
+          <div className="text-sm text-gray-400 flex gap-4">
+            <div>
+              <span className="font-medium">{totalActivities}</span> activities
+            </div>
+            <div>
+              <span className="font-medium">{averagePerDay.toFixed(1)}</span> per day
+            </div>
+            <div>
+              <span className="font-medium">{streakPercentage.toFixed(0)}%</span> streak
+            </div>
           </div>
         </div>
       </div>
@@ -179,6 +182,7 @@ export function YearlyActivityStats() {
               <div
                 key={count}
                 className={`h-4 w-4 ${getColorIntensity(count)}`}
+                title={`${count} activities`}
               />
             ))}
             <span>More</span>
