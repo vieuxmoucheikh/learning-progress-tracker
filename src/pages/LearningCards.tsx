@@ -16,7 +16,6 @@ import { useToast } from '@/hooks/useToast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { getLearningItems } from '@/lib/database';
-import { YearlyActivityStats } from '@/components/YearlyActivityStats';
 
 interface CardMedia {
   id: string;
@@ -166,8 +165,6 @@ export const LearningCardsPage = () => {
           <h1 className="text-2xl font-bold mb-2">Learning Cards</h1>
           <p className="text-gray-400">Track and manage your learning progress</p>
         </div>
-
-        <YearlyActivityStats />
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
