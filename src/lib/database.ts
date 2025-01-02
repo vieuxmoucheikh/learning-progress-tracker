@@ -1108,10 +1108,15 @@ export async function getYearlyActivity(category: string) {
     if (!user) return [];
 
     const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-    const startDate = new Date(currentDate);
-    startDate.setMonth(0);
-    startDate.setDate(1);
+    const startDate = new Date(currentDate.getFullYear(), 0, 1);
+    startDate.setHours(0, 0, 0, 0);
+    currentDate.setHours(23, 59, 59, 999);
+
+    console.log('Fetching activity for:', {
+      category,
+      startDate: startDate.toISOString(),
+      endDate: currentDate.toISOString()
+    });
 
     const { data, error } = await supabase
       .from('learning_activity')
@@ -1119,15 +1124,36 @@ export async function getYearlyActivity(category: string) {
       .eq('user_id', user.id)
       .eq('category', category)
       .gte('date', startDate.toISOString().split('T')[0])
-      .lte('date', currentDate.toISOString().split('T')[0])
-      .order('date', { ascending: true });
+      .lte('date', currentDate.toISOString().split('T')[0]);
 
     if (error) {
       console.error('Error fetching yearly activity:', error);
       return [];
     }
 
-    return data || [];
+    // Fill in missing dates with zero counts
+    const filledData = [];
+    let currentDatePointer = new Date(startDate);
+
+    while (currentDatePointer <= currentDate) {
+      const dateStr = currentDatePointer.toISOString().split('T')[0];
+      const existingData = data?.find(d => d.date === dateStr);
+      
+      filledData.push({
+        id: existingData?.id || `temp-${dateStr}`,
+        user_id: user.id,
+        category,
+        date: dateStr,
+        count: existingData?.count || 0,
+        created_at: existingData?.created_at || dateStr,
+        updated_at: existingData?.updated_at || dateStr
+      });
+
+      currentDatePointer.setDate(currentDatePointer.getDate() + 1);
+    }
+
+    console.log('Processed activity data:', filledData);
+    return filledData;
   } catch (error) {
     console.error('Error in getYearlyActivity:', error);
     return [];

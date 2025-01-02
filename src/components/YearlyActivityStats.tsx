@@ -61,11 +61,11 @@ export function YearlyActivityStats() {
   }, [selectedCategory]);
 
   const getColorIntensity = (count: number) => {
-    if (count === 0) return 'bg-slate-100 dark:bg-slate-800';
-    if (count <= 2) return 'bg-blue-200/80 dark:bg-blue-900/80';
-    if (count <= 4) return 'bg-blue-300/80 dark:bg-blue-800/80';
-    if (count <= 6) return 'bg-blue-400/80 dark:bg-blue-700/80';
-    return 'bg-blue-500/80 dark:bg-blue-600/80';
+    if (count === 0) return 'bg-gray-100 dark:bg-gray-800';
+    if (count <= 2) return 'bg-blue-300/90 dark:bg-blue-800/90 ring-1 ring-blue-400/50 dark:ring-blue-700/50';
+    if (count <= 4) return 'bg-blue-400/90 dark:bg-blue-700/90 ring-1 ring-blue-500/50 dark:ring-blue-600/50';
+    if (count <= 6) return 'bg-blue-500/90 dark:bg-blue-600/90 ring-1 ring-blue-600/50 dark:ring-blue-500/50';
+    return 'bg-blue-600/90 dark:bg-blue-500/90 ring-1 ring-blue-700/50 dark:ring-blue-400/50';
   };
 
   const generateCalendarData = () => {
@@ -130,7 +130,10 @@ export function YearlyActivityStats() {
 
   const calendarData = generateCalendarData();
   const totalActivities = activityData.reduce((sum, day) => sum + day.count, 0);
-  const averagePerDay = totalActivities / activityData.length;
+  const daysWithActivity = activityData.filter(day => day.count > 0).length;
+  const totalDays = activityData.length;
+  const averagePerDay = totalActivities / totalDays;
+  const streakPercentage = (daysWithActivity / totalDays) * 100;
 
   return (
     <div className="space-y-4">
@@ -148,17 +151,23 @@ export function YearlyActivityStats() {
           </SelectContent>
         </Select>
 
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          <span className="font-medium">{totalActivities}</span> total activities
-          {' • '}
-          <span className="font-medium">{averagePerDay.toFixed(1)}</span> per day
+        <div className="text-sm text-gray-600 dark:text-gray-400 flex gap-4">
+          <div>
+            <span className="font-medium">{totalActivities}</span> activities
+          </div>
+          <div>
+            <span className="font-medium">{averagePerDay.toFixed(1)}</span> per day
+          </div>
+          <div>
+            <span className="font-medium">{streakPercentage.toFixed(0)}%</span> streak
+          </div>
         </div>
       </div>
 
       <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm">
         <div className="mb-2 flex text-xs text-gray-500 dark:text-gray-400">
           <div className="w-8" />
-          <div className="flex-1 grid grid-cols-7 gap-1 text-center">
+          <div className="flex-1 grid grid-cols-7 gap-1 text-center font-medium">
             <div>Mon</div>
             <div>Tue</div>
             <div>Wed</div>
@@ -172,7 +181,7 @@ export function YearlyActivityStats() {
         <div className="flex">
           <div className="grid auto-rows-fr gap-1">
             {calendarData.map((_, weekIndex) => (
-              <div key={weekIndex} className="text-xs text-gray-400 dark:text-gray-500 pr-2 h-5 flex items-center">
+              <div key={weekIndex} className="text-xs text-gray-400 dark:text-gray-500 pr-2 h-5 flex items-center font-medium">
                 {weekIndex + 1}
               </div>
             ))}
@@ -184,9 +193,9 @@ export function YearlyActivityStats() {
                 {week.map(({ date, count }, dayIndex) => (
                   <div
                     key={`${weekIndex}-${dayIndex}`}
-                    className={`w-5 h-5 rounded-sm transition-colors duration-200 ${
+                    className={`w-5 h-5 rounded-sm transition-all duration-200 ${
                       date ? getColorIntensity(count) : 'bg-transparent'
-                    } hover:ring-2 hover:ring-blue-400 dark:hover:ring-blue-500 cursor-help`}
+                    } hover:scale-110 hover:ring-2 hover:ring-blue-400 dark:hover:ring-blue-500 cursor-help shadow-sm`}
                     title={date ? `${formatDate(date)}: ${count} activities` : ''}
                   />
                 ))}
