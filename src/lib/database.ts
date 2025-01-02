@@ -1050,7 +1050,7 @@ export async function trackLearningActivity(category: string) {
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
     const dateStr = currentDate.toISOString().split('T')[0];
-    
+
     // First check if we already have an entry for this date and category
     const { data: existing, error: selectError } = await supabase
       .from('learning_activity')
@@ -1071,7 +1071,7 @@ export async function trackLearningActivity(category: string) {
         .from('learning_activity')
         .update({ 
           count: existing.count + 1,
-          updated_at: currentDate.toISOString()
+          updated_at: new Date().toISOString()
         })
         .eq('id', existing.id);
 
@@ -1088,8 +1088,8 @@ export async function trackLearningActivity(category: string) {
           category,
           date: dateStr,
           count: 1,
-          created_at: currentDate.toISOString(),
-          updated_at: currentDate.toISOString()
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         });
 
       if (insertError) {
@@ -1097,8 +1097,11 @@ export async function trackLearningActivity(category: string) {
         return;
       }
     }
+
+    return true;
   } catch (error) {
     console.error('Error tracking learning activity:', error);
+    return false;
   }
 }
 
@@ -1109,13 +1112,13 @@ export async function getYearlyActivity(category: string) {
 
     const currentDate = new Date();
     const startDate = new Date(currentDate.getFullYear(), 0, 1);
-    startDate.setHours(0, 0, 0, 0);
-    currentDate.setHours(23, 59, 59, 999);
+    const endDate = new Date(currentDate.getFullYear(), 11, 31, 23, 59, 59, 999);
 
     console.log('Fetching activity for:', {
       category,
       startDate: startDate.toISOString(),
-      endDate: currentDate.toISOString()
+      endDate: endDate.toISOString(),
+      userId: user.id
     });
 
     const { data, error } = await supabase
@@ -1124,7 +1127,8 @@ export async function getYearlyActivity(category: string) {
       .eq('user_id', user.id)
       .eq('category', category)
       .gte('date', startDate.toISOString().split('T')[0])
-      .lte('date', currentDate.toISOString().split('T')[0]);
+      .lte('date', endDate.toISOString().split('T')[0])
+      .order('date', { ascending: true });
 
     if (error) {
       console.error('Error fetching yearly activity:', error);
@@ -1135,7 +1139,7 @@ export async function getYearlyActivity(category: string) {
     const filledData = [];
     let currentDatePointer = new Date(startDate);
 
-    while (currentDatePointer <= currentDate) {
+    while (currentDatePointer <= endDate) {
       const dateStr = currentDatePointer.toISOString().split('T')[0];
       const existingData = data?.find(d => d.date === dateStr);
       

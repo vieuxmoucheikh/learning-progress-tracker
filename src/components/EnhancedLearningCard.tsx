@@ -182,18 +182,20 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   };
 
   const toggleMastered = async () => {
-    const newMasteredState = !mastered;
-    const result = await onSave({
-      id,
-      mastered: newMasteredState,
-    });
-
-    if (result) {
-      setMastered(newMasteredState);
-      toast({
-        title: newMasteredState ? "Marked as mastered" : "Marked as not mastered",
-        description: `Successfully ${newMasteredState ? 'mastered' : 'unmastered'} the card`,
+    try {
+      const success = await onSave({
+        mastered: !mastered,
+        category: category
       });
+      if (success) {
+        setMastered(!mastered);
+        // Track the learning activity when marking as mastered
+        if (!mastered) {
+          await trackLearningActivity(category || 'Uncategorized');
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling mastered state:', error);
     }
   };
 

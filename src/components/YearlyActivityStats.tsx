@@ -76,14 +76,18 @@ export function YearlyActivityStats() {
     const weeks: { date: string; count: number }[][] = [];
     let currentWeek: { date: string; count: number }[] = [];
 
-    // Add empty cells for days before the first day of the year
-    const firstDayOfWeek = startDate.getDay();
-    for (let i = 0; i < firstDayOfWeek; i++) {
+    // Calculate total weeks needed for the full year view
+    const totalWeeks = 53; // Maximum weeks in a year plus padding
+    const firstDayOfYear = startDate.getDay();
+
+    // Start with empty cells for days before January 1st
+    for (let i = 0; i < firstDayOfYear; i++) {
       currentWeek.push({ date: '', count: 0 });
     }
 
-    // Generate all dates from start of year to current date
-    for (let d = new Date(startDate); d <= currentDate; d.setDate(d.getDate() + 1)) {
+    // Generate all dates for the entire year
+    const endDate = new Date(currentDate.getFullYear(), 11, 31); // December 31st
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
       const dateStr = d.toISOString().split('T')[0];
       const dayData = activityData.find(a => a.date === dateStr);
 
@@ -92,13 +96,17 @@ export function YearlyActivityStats() {
         count: dayData?.count || 0
       });
 
-      if (d.getDay() === 6) { // Sunday
+      // Start a new week when we reach Sunday
+      if (d.getDay() === 6) {
+        while (currentWeek.length < 7) {
+          currentWeek.push({ date: '', count: 0 });
+        }
         weeks.push([...currentWeek]);
         currentWeek = [];
       }
     }
 
-    // Fill the last week with empty cells if needed
+    // Fill the last week with remaining days
     if (currentWeek.length > 0) {
       while (currentWeek.length < 7) {
         currentWeek.push({ date: '', count: 0 });
@@ -106,7 +114,22 @@ export function YearlyActivityStats() {
       weeks.push([...currentWeek]);
     }
 
+    // Add empty weeks to fill the grid if needed
+    while (weeks.length < totalWeeks) {
+      weeks.push(Array(7).fill({ date: '', count: 0 }));
+    }
+
     return weeks;
+  };
+
+  const getMonthLabels = () => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const currentDate = new Date();
+    return months.map((month, index) => {
+      const date = new Date(currentDate.getFullYear(), index, 1);
+      const weekIndex = Math.floor((date.getDate() - date.getDay() + 5) / 7);
+      return { label: month, weekIndex };
+    });
   };
 
   const formatDate = (dateStr: string) => {
@@ -129,6 +152,7 @@ export function YearlyActivityStats() {
   }
 
   const calendarData = generateCalendarData();
+  const monthLabels = getMonthLabels();
   const totalActivities = activityData.reduce((sum, day) => sum + day.count, 0);
   const daysWithActivity = activityData.filter(day => day.count > 0).length;
   const totalDays = activityData.length;
@@ -165,6 +189,26 @@ export function YearlyActivityStats() {
       </div>
 
       <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm">
+        {/* Month labels */}
+        <div className="mb-2 flex text-xs text-gray-500 dark:text-gray-400">
+          <div className="w-8" />
+          <div className="flex-1 relative">
+            {monthLabels.map(({ label, weekIndex }, index) => (
+              <div
+                key={label}
+                className="absolute text-xs font-medium"
+                style={{
+                  left: `${(weekIndex / 52) * 100}%`,
+                  transform: 'translateX(-50%)'
+                }}
+              >
+                {label}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Weekday labels */}
         <div className="mb-2 flex text-xs text-gray-500 dark:text-gray-400">
           <div className="w-8" />
           <div className="flex-1 grid grid-cols-7 gap-1 text-center font-medium">
@@ -178,7 +222,7 @@ export function YearlyActivityStats() {
           </div>
         </div>
 
-        <div className="flex">
+        <div className="flex mt-6">
           <div className="grid auto-rows-fr gap-1">
             {calendarData.map((_, weekIndex) => (
               <div key={weekIndex} className="text-xs text-gray-400 dark:text-gray-500 pr-2 h-5 flex items-center font-medium">
