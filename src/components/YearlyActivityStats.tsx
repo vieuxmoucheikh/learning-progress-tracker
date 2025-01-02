@@ -35,13 +35,17 @@ export function YearlyActivityStats() {
       setLoading(true);
       try {
         const items = await getLearningItems();
-        const categories = Array.from(new Set(items.map(item => item.category || 'Uncategorized')));
-        setCategories(categories);
+        const uniqueCategories = Array.from(new Set(items.map(item => item.category || 'Uncategorized')));
+        console.log('Fetched categories:', uniqueCategories);
+        setCategories(uniqueCategories);
         
         if (selectedCategory) {
           console.log('Fetching activities for category:', selectedCategory);
           const activities = await getYearlyActivity(selectedCategory);
           console.log('Received activities:', activities);
+          if (activities.some(a => a.count > 0)) {
+            console.log('Found activities with count > 0:', activities.filter(a => a.count > 0));
+          }
           setActivityData(activities);
         }
       } catch (error) {
@@ -68,10 +72,15 @@ export function YearlyActivityStats() {
       date.setDate(startDate.getDate() + i);
       const dateStr = date.toISOString().split('T')[0];
       const dayData = activityData.find(a => a.date === dateStr);
+      const count = dayData?.count ?? 0;
+      
+      if (count > 0) {
+        console.log('Found activity for date:', dateStr, { count, dayData });
+      }
       
       allDates.push({
         date: dateStr,
-        count: dayData?.count || 0,
+        count,
         dayOfWeek: date.getDay()
       });
     }
@@ -91,8 +100,8 @@ export function YearlyActivityStats() {
   const totalActivities = activityData.reduce((sum, day) => sum + day.count, 0);
   const daysWithActivity = activityData.filter(day => day.count > 0).length;
   const totalDays = activityData.length;
-  const averagePerDay = totalActivities / totalDays;
-  const streakPercentage = (daysWithActivity / totalDays) * 100;
+  const averagePerDay = totalDays > 0 ? totalActivities / totalDays : 0;
+  const streakPercentage = totalDays > 0 ? (daysWithActivity / totalDays) * 100 : 0;
 
   const getColorIntensity = (count: number) => {
     if (count === 0) return 'bg-gray-800 dark:bg-gray-800';
