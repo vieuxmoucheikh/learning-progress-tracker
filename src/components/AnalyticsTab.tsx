@@ -374,8 +374,9 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
         <div className="grid gap-4">
           <Card>
             <CardHeader>
-              <CardTitle>Yearly Learning Activity</CardTitle>
+              <CardTitle>Learning Insights</CardTitle>
               <CardDescription>
+                Visualize your learning patterns and progress
                 Track your learning progress throughout the year by category
               </CardDescription>
             </CardHeader>

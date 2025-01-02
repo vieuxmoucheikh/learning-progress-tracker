@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '../lib/utils';
 import { getLearningActivity, LearningActivity } from '../lib/learningActivity';
 import { format, startOfYear, endOfYear, eachDayOfInterval } from 'date-fns';
 
@@ -55,14 +55,14 @@ const YearlyActivityHeatmap: React.FC<YearlyActivityHeatmapProps> = ({ selectedC
 
   return (
     <div className="overflow-x-auto">
-      <div className="inline-flex gap-1">
+      <div className="grid grid-flow-col grid-rows-7 gap-1 p-2">
         {days.map((day) => {
           const count = getActivityCount(day);
           return (
             <div
               key={day.toISOString()}
               className={cn(
-                "w-3 h-3 rounded-sm transition-colors",
+                "w-2 h-2 sm:w-3 sm:h-3 rounded-sm transition-colors",
                 getColorIntensity(count)
               )}
               title={`${format(day, 'MMM d, yyyy')}: ${count} activities`}
