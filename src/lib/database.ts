@@ -1115,12 +1115,14 @@ export async function getYearlyActivity(category: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    const currentDate = new Date();
-    const startDate = new Date(currentDate.getFullYear(), 0, 1);
-    const endDate = new Date(currentDate.getFullYear(), 11, 31);
+    const currentDate = new Date('2025-01-02T23:06:24+01:00'); // Using provided time
+    const year = currentDate.getFullYear();
+    const startDate = new Date(year, 0, 1);
+    const endDate = new Date(year, 11, 31);
 
     console.log('Fetching activity for:', {
       category,
+      year,
       startDate: startDate.toISOString().split('T')[0],
       endDate: endDate.toISOString().split('T')[0],
       userId: user.id
@@ -1145,11 +1147,14 @@ export async function getYearlyActivity(category: string) {
     // Fill in missing dates with zero counts
     const filledData = [];
     let currentDatePointer = new Date(startDate);
-    const timestamp = new Date().toISOString();
-
+    
     while (currentDatePointer <= endDate) {
       const dateStr = currentDatePointer.toISOString().split('T')[0];
       const existingData = data?.find(d => d.date === dateStr);
+      
+      if (existingData) {
+        console.log('Found activity for date:', dateStr, existingData);
+      }
       
       filledData.push({
         id: existingData?.id || `temp-${dateStr}`,
@@ -1157,14 +1162,14 @@ export async function getYearlyActivity(category: string) {
         category,
         date: dateStr,
         count: existingData?.count || 0,
-        created_at: existingData?.created_at || timestamp,
-        updated_at: existingData?.updated_at || timestamp
+        created_at: existingData?.created_at || currentDate.toISOString(),
+        updated_at: existingData?.updated_at || currentDate.toISOString()
       });
 
       currentDatePointer.setDate(currentDatePointer.getDate() + 1);
     }
 
-    console.log('Processed activity data:', filledData);
+    console.log('Processed activity data:', filledData.filter(d => d.count > 0));
     return filledData;
   } catch (error) {
     console.error('Error in getYearlyActivity:', error);
