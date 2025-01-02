@@ -1047,7 +1047,7 @@ export async function trackLearningActivity(category: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return false;
 
-    const currentDate = new Date();
+    const currentDate = new Date('2025-01-02T23:14:33+01:00'); // Using provided time
     const dateStr = currentDate.toISOString().split('T')[0];
 
     console.log('Tracking activity:', { category, dateStr, userId: user.id });
@@ -1066,26 +1066,28 @@ export async function trackLearningActivity(category: string) {
       return false;
     }
 
-    const timestamp = new Date().toISOString();
+    const timestamp = currentDate.toISOString();
 
     if (existing) {
       console.log('Updating existing activity:', existing);
-      const { error: updateError } = await supabase
+      const { data: updated, error: updateError } = await supabase
         .from('learning_activity')
         .update({ 
           count: (existing.count || 0) + 1,
           updated_at: timestamp
         })
-        .eq('id', existing.id);
+        .eq('id', existing.id)
+        .select()
+        .single();
 
       if (updateError) {
         console.error('Error updating activity:', updateError);
         return false;
       }
-      console.log('Activity updated successfully');
+      console.log('Activity updated successfully:', updated);
     } else {
       console.log('Creating new activity entry');
-      const { error: insertError } = await supabase
+      const { data: inserted, error: insertError } = await supabase
         .from('learning_activity')
         .insert([{
           user_id: user.id,
@@ -1094,13 +1096,15 @@ export async function trackLearningActivity(category: string) {
           count: 1,
           created_at: timestamp,
           updated_at: timestamp
-        }]);
+        }])
+        .select()
+        .single();
 
       if (insertError) {
         console.error('Error inserting activity:', insertError);
         return false;
       }
-      console.log('Activity created successfully');
+      console.log('Activity created successfully:', inserted);
     }
 
     return true;

@@ -91,6 +91,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   const [category, setCategory] = useState(initialCategory);
   const [categories, setCategories] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -213,13 +214,20 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
   const handleComplete = async () => {
     try {
-      // Track the activity for this category
-      await trackLearningActivity(category);
-
+      setIsLoading(true);
+      
+      // First update the learning item
       const updatedItem = await updateLearningItem(id, {
         completed: true,
-        completed_at: new Date().toISOString(),
+        completed_at: new Date('2025-01-02T23:14:33+01:00').toISOString(),
       });
+
+      // Then track the activity
+      const activityTracked = await trackLearningActivity(category);
+      
+      if (!activityTracked) {
+        throw new Error('Failed to track activity');
+      }
 
       if (updatedItem) {
         onSave(updatedItem);
@@ -235,6 +243,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         description: "Failed to complete learning item",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 

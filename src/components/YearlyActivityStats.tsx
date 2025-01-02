@@ -25,12 +25,25 @@ interface DayData {
   dayOfWeek?: number;
 }
 
-export function YearlyActivityStats() {
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
+export default function YearlyActivityStats() {
   const [categories, setCategories] = useState<string[]>([]);
-  const [activityData, setActivityData] = useState<ActivityData[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [activityData, setActivityData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Function to fetch activities
+  const fetchActivities = async (category: string) => {
+    try {
+      console.log('Fetching activities for category:', category);
+      const activities = await getYearlyActivity(category);
+      console.log('Received activities:', activities);
+      setActivityData(activities);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+    }
+  };
+
+  // Initial data fetch
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -45,17 +58,7 @@ export function YearlyActivityStats() {
           const defaultCategory = uniqueCategories[0];
           console.log('Setting default category:', defaultCategory);
           setSelectedCategory(defaultCategory);
-          
-          // Fetch activities for the default category
-          const activities = await getYearlyActivity(defaultCategory);
-          console.log('Initial activities:', activities);
-          setActivityData(activities);
-        } else if (selectedCategory) {
-          // Fetch activities for the selected category
-          console.log('Fetching activities for category:', selectedCategory);
-          const activities = await getYearlyActivity(selectedCategory);
-          console.log('Received activities:', activities);
-          setActivityData(activities);
+          await fetchActivities(defaultCategory);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -65,38 +68,34 @@ export function YearlyActivityStats() {
     };
 
     fetchData();
+  }, []);
+
+  // Fetch activities when category changes
+  useEffect(() => {
+    if (selectedCategory) {
+      fetchActivities(selectedCategory);
+    }
   }, [selectedCategory]);
 
-  // Add auto-refresh timer
+  // Refresh activities periodically
   useEffect(() => {
-    const refreshInterval = setInterval(async () => {
+    const refreshInterval = setInterval(() => {
       if (selectedCategory) {
-        try {
-          const activities = await getYearlyActivity(selectedCategory);
-          setActivityData(activities);
-        } catch (error) {
-          console.error('Error refreshing activities:', error);
-        }
+        fetchActivities(selectedCategory);
       }
-    }, 30000); // Refresh every 30 seconds
+    }, 5000); // Refresh every 5 seconds
 
     return () => clearInterval(refreshInterval);
   }, [selectedCategory]);
 
-  const handleCategoryChange = async (newCategory: string) => {
+  const handleCategoryChange = (newCategory: string) => {
     console.log('Category changed to:', newCategory);
     setSelectedCategory(newCategory);
-    setLoading(true);
-    try {
-      const activities = await getYearlyActivity(newCategory);
-      console.log('Activities for new category:', activities);
-      setActivityData(activities);
-    } catch (error) {
-      console.error('Error fetching activities for new category:', error);
-    } finally {
-      setLoading(false);
-    }
   };
+
+  const totalActivities = activityData.reduce((sum, day) => sum + (day.count || 0), 0);
+  const activeDays = activityData.filter(day => day.count > 0).length;
+  const averagePerDay = activeDays > 0 ? (totalActivities / activeDays).toFixed(1) : '0';
 
   const generateCalendarData = () => {
     const currentDate = new Date();
@@ -138,7 +137,7 @@ export function YearlyActivityStats() {
       <div className="flex flex-col gap-4">
         <Select
           value={selectedCategory}
-          onValueChange={(value) => handleCategoryChange(value)}
+          onValueChange={handleCategoryChange}
         >
           <SelectTrigger className="w-full md:w-[200px]">
             <SelectValue placeholder="Select a category" />
@@ -161,21 +160,19 @@ export function YearlyActivityStats() {
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               <div className="bg-blue-500/10 rounded-lg p-4">
                 <h3 className="text-sm font-medium text-blue-600 dark:text-blue-400">Total Activities</h3>
-                <p className="text-2xl font-bold mt-1">{activityData.reduce((sum, day) => sum + day.count, 0)}</p>
+                <p className="text-2xl font-bold mt-1">{totalActivities}</p>
               </div>
               <div className="bg-purple-500/10 rounded-lg p-4">
                 <h3 className="text-sm font-medium text-purple-600 dark:text-purple-400">Active Days</h3>
-                <p className="text-2xl font-bold mt-1">{activityData.filter(day => day.count > 0).length}</p>
+                <p className="text-2xl font-bold mt-1">{activeDays}</p>
               </div>
               <div className="bg-green-500/10 rounded-lg p-4">
                 <h3 className="text-sm font-medium text-green-600 dark:text-green-400">Average Per Day</h3>
-                <p className="text-2xl font-bold mt-1">
-                  {(activityData.reduce((sum, day) => sum + day.count, 0) / activityData.length).toFixed(1)}
-                </p>
+                <p className="text-2xl font-bold mt-1">{averagePerDay}</p>
               </div>
             </div>
             <div className="relative">
-              <YearlyActivityHeatmap data={activityData} />
+              <YearlyActivityHeatmap data={generateCalendarData()} />
             </div>
           </div>
         ) : (
