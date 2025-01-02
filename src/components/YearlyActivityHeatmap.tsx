@@ -14,7 +14,7 @@ interface YearlyActivityHeatmapProps {
 
 export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
   const generateCalendarData = () => {
-    const currentDate = new Date('2025-01-02T23:31:59+01:00');
+    const currentDate = new Date('2025-01-02T23:38:16+01:00');
     const startDate = new Date(currentDate.getFullYear(), 0, 1);
     startDate.setUTCHours(0, 0, 0, 0);
     
@@ -27,32 +27,32 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
       date.setDate(startDate.getDate() + i);
       const dateStr = date.toISOString().split('T')[0];
       const dayData = data.find(a => a.date === dateStr);
-      const count = dayData?.count ?? 0;
       
-      if (count > 0) {
-        console.log('Found activity for date:', dateStr, { count, dayData });
+      if (dayData && dayData.count > 0) {
+        console.log('Found activity in calendar for date:', dateStr, dayData);
       }
       
       allDates.push({
         date: dateStr,
-        count,
+        count: dayData?.count || 0,
         dayOfWeek: date.getDay()
       });
     }
 
-    console.log('Calendar data generated:', allDates.filter(d => d.count > 0));
-    console.log('Has activities:', allDates.some(d => d.count > 0));
+    const activeDates = allDates.filter(d => d.count > 0);
+    console.log('Calendar data generated with activities:', activeDates);
     return allDates;
   };
 
   const calendarData = generateCalendarData();
   const hasActivities = calendarData.some(d => d.count > 0);
+  console.log('Has activities:', hasActivities);
 
   const getColorForCount = (count: number) => {
     if (count === 0) return 'bg-gray-100 dark:bg-gray-800';
-    if (count <= 2) return 'bg-green-200 dark:bg-green-900';
-    if (count <= 5) return 'bg-green-400 dark:bg-green-700';
-    return 'bg-green-600 dark:bg-green-500';
+    if (count === 1) return 'bg-green-200 dark:bg-green-900';
+    if (count <= 3) return 'bg-green-400 dark:bg-green-700';
+    return 'bg-green-600 dark:bg-gray-500';
   };
 
   const weeks = [];
@@ -69,7 +69,7 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
         <div className="flex gap-1">
           {weeks.map((week, weekIndex) => (
             <div key={weekIndex} className="flex flex-col gap-1">
-              {week.map((day, dayIndex) => {
+              {week.map((day) => {
                 const colorClass = getColorForCount(day.count);
                 const dateObj = new Date(day.date);
                 const formattedDate = dateObj.toLocaleDateString('en-US', {

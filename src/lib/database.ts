@@ -101,50 +101,31 @@ export async function addLearningItem(item: LearningItemFormData): Promise<Learn
 
 export async function updateLearningItem(id: string, updates: Partial<LearningItem>) {
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      throw new Error('Authentication required');
-    }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
 
-    // If we're updating progress, ensure it's properly structured
-    if (updates.progress) {
-      const { data: currentItem } = await supabase
-        .from('learning_items')
-        .select('progress')
-        .eq('id', id)
-        .single();
-
-      if (currentItem) {
-        updates.progress = {
-          ...currentItem.progress,
-          ...updates.progress,
-          // Don't concatenate sessions, use the provided sessions array
-          sessions: updates.progress.sessions || currentItem.progress.sessions
-        };
-      }
-    }
+    console.log('Updating learning item:', { id, updates });
 
     const { data, error } = await supabase
       .from('learning_items')
-      .update(updates)
+      .update({
+        ...updates,
+        updated_at: new Date('2025-01-02T23:38:16+01:00').toISOString()
+      })
       .eq('id', id)
-      .eq('user_id', user.id)
       .select()
       .single();
 
     if (error) {
       console.error('Error updating learning item:', error);
-      throw new Error(error.message || 'Failed to update item');
+      return null;
     }
 
-    if (!data) {
-      throw new Error('No data returned from update');
-    }
-
-    return data as LearningItem;
+    console.log('Learning item updated successfully:', data);
+    return data;
   } catch (error) {
     console.error('Error in updateLearningItem:', error);
-    throw error instanceof Error ? error : new Error('Failed to update item');
+    return null;
   }
 }
 
@@ -1045,9 +1026,9 @@ export async function createLearningActivityTable() {
 export async function trackLearningActivity(category: string) {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
+    if (!user) return null;
 
-    const currentDate = new Date('2025-01-02T23:31:59+01:00');
+    const currentDate = new Date('2025-01-02T23:38:16+01:00');
     const dateStr = currentDate.toISOString().split('T')[0];
 
     console.log('Tracking activity:', { category, dateStr, userId: user.id });
@@ -1063,12 +1044,11 @@ export async function trackLearningActivity(category: string) {
 
     if (selectError && selectError.code !== 'PGRST116') {
       console.error('Error checking existing activity:', selectError);
-      return false;
+      return null;
     }
 
     const timestamp = currentDate.toISOString();
 
-    let result;
     if (existing) {
       console.log('Updating existing activity:', existing);
       const { data: updated, error: updateError } = await supabase
@@ -1083,10 +1063,10 @@ export async function trackLearningActivity(category: string) {
 
       if (updateError) {
         console.error('Error updating activity:', updateError);
-        return false;
+        return null;
       }
       console.log('Activity updated successfully:', updated);
-      result = updated;
+      return updated;
     } else {
       console.log('Creating new activity entry');
       const newActivity = {
@@ -1107,16 +1087,14 @@ export async function trackLearningActivity(category: string) {
 
       if (insertError) {
         console.error('Error inserting activity:', insertError);
-        return false;
+        return null;
       }
       console.log('Activity created successfully:', inserted);
-      result = inserted;
+      return inserted;
     }
-
-    return result;
   } catch (error) {
     console.error('Error tracking learning activity:', error);
-    return false;
+    return null;
   }
 }
 
@@ -1125,7 +1103,7 @@ export async function getYearlyActivity(category: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    const currentDate = new Date('2025-01-02T23:31:59+01:00');
+    const currentDate = new Date('2025-01-02T23:38:16+01:00');
     const year = currentDate.getFullYear();
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year, 11, 31);
@@ -1147,12 +1125,11 @@ export async function getYearlyActivity(category: string) {
       .eq('user_id', user.id)
       .eq('category', category)
       .gte('date', startDateStr)
-      .lte('date', endDateStr)
-      .order('date', { ascending: true });
+      .lte('date', endDateStr);
 
     if (error) {
       console.error('Error fetching yearly activity:', error);
-      throw error;
+      return [];
     }
 
     console.log('Raw activity data:', data);
@@ -1169,27 +1146,34 @@ export async function getYearlyActivity(category: string) {
       
       if (existingData) {
         console.log('Found activity for date:', dateStr, existingData);
+        filledData.push({
+          ...existingData,
+          dayOfWeek: currentDatePointer.getDay()
+        });
+      } else {
+        filledData.push({
+          id: `temp-${dateStr}`,
+          user_id: user.id,
+          category,
+          date: dateStr,
+          count: 0,
+          created_at: currentDate.toISOString(),
+          updated_at: currentDate.toISOString(),
+          dayOfWeek: currentDatePointer.getDay()
+        });
       }
-      
-      filledData.push({
-        id: existingData?.id || `temp-${dateStr}`,
-        user_id: user.id,
-        category,
-        date: dateStr,
-        count: existingData?.count || 0,
-        created_at: existingData?.created_at || currentDate.toISOString(),
-        updated_at: existingData?.updated_at || currentDate.toISOString()
-      });
 
       currentDatePointer.setDate(currentDatePointer.getDate() + 1);
     }
 
     const activeDays = filledData.filter(d => d.count > 0);
-    console.log('Active days:', activeDays);
+    console.log('Active days:', activeDays.length);
+    console.log('Sample active days:', activeDays.slice(0, 3));
+    
     return filledData;
   } catch (error) {
     console.error('Error in getYearlyActivity:', error);
-    throw error;
+    return [];
   }
 }
 

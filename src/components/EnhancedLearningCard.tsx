@@ -88,7 +88,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   const [mastered, setMastered] = useState(initialMastered);
   const [isZoomed, setIsZoomed] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [category, setCategory] = useState(initialCategory);
+  const [itemCategory, setItemCategory] = useState(initialCategory);
   const [categories, setCategories] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -120,7 +120,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       content,
       media,
       tags,
-      category,
+      category: itemCategory,
       mastered,
     });
     if (result) {
@@ -129,7 +129,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         title: "Success",
         description: "Card updated successfully",
       });
-      await trackLearningActivity(category);
+      await trackLearningActivity(itemCategory);
     }
   };
 
@@ -187,14 +187,14 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       const success = await onSave({
         id,
         mastered: !mastered,
-        category
+        category: itemCategory
       });
 
       if (success) {
         // Track the learning activity when marking as mastered
         if (!mastered) {
-          console.log('Tracking activity for category:', category);
-          await trackLearningActivity(category || 'Uncategorized');
+          console.log('Tracking activity for category:', itemCategory);
+          await trackLearningActivity(itemCategory || 'Uncategorized');
         }
         setMastered(!mastered);
         toast({
@@ -213,34 +213,42 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   };
 
   const handleComplete = async () => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
     try {
-      setIsLoading(true);
+      console.log('Completing item:', id);
       
-      // First update the learning item
-      const updatedItem = await updateLearningItem(id, {
-        completed: true,
-        completed_at: new Date('2025-01-02T23:14:33+01:00').toISOString(),
-      });
-
-      // Then track the activity
-      const activityTracked = await trackLearningActivity(category);
+      // Track the learning activity first
+      const activityResult = await trackLearningActivity(itemCategory || 'Uncategorized');
+      console.log('Activity tracking result:', activityResult);
       
-      if (!activityTracked) {
+      if (!activityResult) {
         throw new Error('Failed to track activity');
       }
 
-      if (updatedItem) {
-        onSave(updatedItem);
-        toast({
-          title: "Success!",
-          description: "Learning item marked as complete",
-        });
+      // Then update the learning item
+      const updatedItem = await updateLearningItem(id, {
+        completed: true,
+        completed_at: new Date('2025-01-02T23:43:13+01:00').toISOString(),
+      });
+
+      if (!updatedItem) {
+        throw new Error('Failed to update item');
       }
+
+      console.log('Item completed successfully');
+      toast({
+        title: "Success!",
+        description: "Learning item marked as complete",
+      });
+      
+      onSave(updatedItem);
     } catch (error) {
       console.error('Error completing item:', error);
       toast({
         title: "Error",
-        description: "Failed to complete learning item",
+        description: "Failed to complete the learning item. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -298,7 +306,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     aria-expanded={open}
                     className="justify-between"
                   >
-                    {category || "Select category..."}
+                    {itemCategory || "Select category..."}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -306,9 +314,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   <Command>
                     <CommandInput 
                       placeholder="Search category..."
-                      value={category}
+                      value={itemCategory}
                       onValueChange={(value) => {
-                        setCategory(value);
+                        setItemCategory(value);
                       }}
                     />
                     <CommandEmpty>
@@ -318,7 +326,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     </CommandEmpty>
                     <CommandGroup>
                       {categories
-                        .filter(cat => !category || cat.toLowerCase().includes(category.toLowerCase()))
+                        .filter(cat => !itemCategory || cat.toLowerCase().includes(itemCategory.toLowerCase()))
                         .map((cat) => (
                           <CommandItem
                             key={cat}
@@ -332,15 +340,15 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                             <Check
                               className={cn(
                                 "mr-2 h-4 w-4",
-                                category === cat ? "opacity-100" : "opacity-0"
+                                itemCategory === cat ? "opacity-100" : "opacity-0"
                               )}
                             />
                             {cat}
                           </CommandItem>
                         ))}
-                      {category && !categories.includes(category) && (
+                      {itemCategory && !categories.includes(itemCategory) && (
                         <CommandItem
-                          value={category}
+                          value={itemCategory}
                           className="cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
                           onSelect={() => {
                             // Keep the typed category and close
@@ -348,7 +356,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                           }}
                         >
                           <Plus className="mr-2 h-4 w-4" />
-                          Create "{category}"
+                          Create "{itemCategory}"
                         </CommandItem>
                       )}
                     </CommandGroup>
@@ -374,9 +382,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 <h3 className="font-semibold text-lg line-clamp-2 bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
                   {title}
                 </h3>
-                {category && (
+                {itemCategory && (
                   <div className="mt-1 text-sm text-blue-600 dark:text-blue-400">
-                    {category}
+                    {itemCategory}
                   </div>
                 )}
               </div>
