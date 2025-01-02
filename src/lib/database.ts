@@ -1047,7 +1047,7 @@ export async function trackLearningActivity(category: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return false;
 
-    const currentDate = new Date('2025-01-02T23:24:08+01:00');
+    const currentDate = new Date('2025-01-02T23:31:59+01:00');
     const dateStr = currentDate.toISOString().split('T')[0];
 
     console.log('Tracking activity:', { category, dateStr, userId: user.id });
@@ -1089,16 +1089,19 @@ export async function trackLearningActivity(category: string) {
       result = updated;
     } else {
       console.log('Creating new activity entry');
+      const newActivity = {
+        user_id: user.id,
+        category,
+        date: dateStr,
+        count: 1,
+        created_at: timestamp,
+        updated_at: timestamp
+      };
+      console.log('New activity data:', newActivity);
+
       const { data: inserted, error: insertError } = await supabase
         .from('learning_activity')
-        .insert([{
-          user_id: user.id,
-          category,
-          date: dateStr,
-          count: 1,
-          created_at: timestamp,
-          updated_at: timestamp
-        }])
+        .insert([newActivity])
         .select()
         .single();
 
@@ -1122,16 +1125,19 @@ export async function getYearlyActivity(category: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    const currentDate = new Date('2025-01-02T23:24:08+01:00');
+    const currentDate = new Date('2025-01-02T23:31:59+01:00');
     const year = currentDate.getFullYear();
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year, 11, 31);
 
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
+
     console.log('Fetching activity for:', {
       category,
       year,
-      startDate: startDate.toISOString().split('T')[0],
-      endDate: endDate.toISOString().split('T')[0],
+      startDateStr,
+      endDateStr,
       userId: user.id
     });
 
@@ -1140,8 +1146,8 @@ export async function getYearlyActivity(category: string) {
       .select('*')
       .eq('user_id', user.id)
       .eq('category', category)
-      .gte('date', startDate.toISOString().split('T')[0])
-      .lte('date', endDate.toISOString().split('T')[0])
+      .gte('date', startDateStr)
+      .lte('date', endDateStr)
       .order('date', { ascending: true });
 
     if (error) {
@@ -1154,8 +1160,10 @@ export async function getYearlyActivity(category: string) {
     // Fill in missing dates with zero counts
     const filledData = [];
     let currentDatePointer = new Date(startDate);
+    currentDatePointer.setUTCHours(0, 0, 0, 0);
+    const endDateTime = endDate.getTime();
     
-    while (currentDatePointer <= endDate) {
+    while (currentDatePointer.getTime() <= endDateTime) {
       const dateStr = currentDatePointer.toISOString().split('T')[0];
       const existingData = data?.find(d => d.date === dateStr);
       

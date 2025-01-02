@@ -2,116 +2,92 @@ import React from 'react';
 import { cn } from '../lib/utils';
 import { format } from 'date-fns';
 
-interface YearlyActivityHeatmapProps {
-  data: { date: string; count: number }[];
+interface DayData {
+  date: string;
+  count: number;
+  dayOfWeek?: number;
 }
 
-export function YearlyActivityHeatmap({ data }: { data: { date: string; count: number }[] }) {
-  const getColorIntensity = (count: number) => {
-    if (count === 0) return 'bg-gray-900/30';
-    if (count === 1) return 'bg-green-700/90';
-    if (count === 2) return 'bg-green-600/90';
-    if (count === 3) return 'bg-green-500/90';
-    if (count === 4) return 'bg-green-400/90';
-    if (count >= 5) return 'bg-green-300/90';
-    return 'bg-green-200/90';
-  };
+interface YearlyActivityHeatmapProps {
+  data: DayData[];
+}
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-
-  // Generate calendar grid data
+export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
   const generateCalendarData = () => {
-    const currentDate = new Date('2025-01-02T23:06:24+01:00'); // Using provided time
-    const year = currentDate.getFullYear();
-    const startDate = new Date(year, 0, 1);
-    startDate.setHours(0, 0, 0, 0);
+    const currentDate = new Date('2025-01-02T23:31:59+01:00');
+    const startDate = new Date(currentDate.getFullYear(), 0, 1);
+    startDate.setUTCHours(0, 0, 0, 0);
     
-    const daysInYear = 365 + (year % 4 === 0 ? 1 : 0);
-    const allDates = [];
+    // Pre-calculate all dates and their activities
+    const daysInYear = 365 + (currentDate.getFullYear() % 4 === 0 ? 1 : 0);
+    const allDates: DayData[] = [];
     
     for (let i = 0; i < daysInYear; i++) {
       const date = new Date(startDate);
       date.setDate(startDate.getDate() + i);
       const dateStr = date.toISOString().split('T')[0];
-      const dayData = data.find(d => d.date === dateStr);
+      const dayData = data.find(a => a.date === dateStr);
+      const count = dayData?.count ?? 0;
       
-      if (dayData && dayData.count > 0) {
-        console.log('Found activity for date:', dateStr, dayData);
+      if (count > 0) {
+        console.log('Found activity for date:', dateStr, { count, dayData });
       }
       
       allDates.push({
         date: dateStr,
-        count: dayData?.count || 0,
+        count,
         dayOfWeek: date.getDay()
       });
     }
-    
+
+    console.log('Calendar data generated:', allDates.filter(d => d.count > 0));
+    console.log('Has activities:', allDates.some(d => d.count > 0));
     return allDates;
   };
 
   const calendarData = generateCalendarData();
   const hasActivities = calendarData.some(d => d.count > 0);
-  console.log('Calendar data generated:', calendarData.filter(d => d.count > 0));
-  console.log('Has activities:', hasActivities);
+
+  const getColorForCount = (count: number) => {
+    if (count === 0) return 'bg-gray-100 dark:bg-gray-800';
+    if (count <= 2) return 'bg-green-200 dark:bg-green-900';
+    if (count <= 5) return 'bg-green-400 dark:bg-green-700';
+    return 'bg-green-600 dark:bg-green-500';
+  };
+
+  const weeks = [];
+  for (let i = 0; i < 53; i++) {
+    const week = calendarData.slice(i * 7, (i + 1) * 7);
+    if (week.length > 0) {
+      weeks.push(week);
+    }
+  }
 
   return (
-    <div className="border border-gray-800 rounded-lg p-4 bg-black/20 shadow-xl overflow-hidden">
-      <div className="w-full">
-        {/* Month labels */}
-        <div className="flex mb-2">
-          <div className="w-8" /> {/* Spacer for weekday labels */}
-          <div className="flex-1 grid grid-cols-12 gap-0">
-            {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month) => (
-              <div key={month} className="text-xs text-gray-400 font-medium">
-                {month}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Activity grid */}
-        <div className="flex flex-col gap-[2px]">
-          {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, dayIndex) => (
-            <div key={day} className="flex items-center gap-[2px] min-w-0">
-              <div className="w-8 text-xs text-gray-400 font-medium">{day}</div>
-              <div className="flex-1 flex gap-[2px] min-w-0">
-                {calendarData
-                  .filter(date => {
-                    const dayOfWeek = new Date(date.date).getDay();
-                    // Convert Sunday from 0 to 7 for proper display
-                    const adjustedDayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
-                    return adjustedDayOfWeek === dayIndex + 1;
-                  })
-                  .map((date) => (
-                    <div
-                      key={date.date}
-                      className={`h-4 min-w-[1rem] flex-shrink-0 rounded-sm transition-colors duration-200 ${getColorIntensity(date.count)}`}
-                      title={`${formatDate(date.date)}: ${date.count} activities`}
-                    />
-                  ))}
-              </div>
+    <div className="w-full overflow-x-auto">
+      <div className="inline-block min-w-full">
+        <div className="flex gap-1">
+          {weeks.map((week, weekIndex) => (
+            <div key={weekIndex} className="flex flex-col gap-1">
+              {week.map((day, dayIndex) => {
+                const colorClass = getColorForCount(day.count);
+                const dateObj = new Date(day.date);
+                const formattedDate = dateObj.toLocaleDateString('en-US', {
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric'
+                });
+                
+                return (
+                  <div
+                    key={day.date}
+                    className={`w-3 h-3 rounded-sm ${colorClass} transition-colors duration-200`}
+                    title={`${formattedDate}: ${day.count} activities`}
+                  />
+                );
+              })}
             </div>
           ))}
-        </div>
-
-        {/* Legend */}
-        <div className="flex items-center gap-2 mt-4 text-xs text-gray-400">
-          <span className="font-medium">Less</span>
-          {[0, 1, 2, 3, 4, 5].map((count) => (
-            <div
-              key={count}
-              className={`h-4 w-4 flex-shrink-0 rounded-sm ${getColorIntensity(count)}`}
-              title={`${count} activities`}
-            />
-          ))}
-          <span className="font-medium">More</span>
         </div>
       </div>
     </div>
