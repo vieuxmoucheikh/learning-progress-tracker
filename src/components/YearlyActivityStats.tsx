@@ -11,6 +11,7 @@ interface ActivityData {
   count: number;
   created_at: string;
   updated_at: string;
+  dayOfWeek?: number;
 }
 
 interface LearningItem {
@@ -25,10 +26,10 @@ interface DayData {
   dayOfWeek?: number;
 }
 
-export default function YearlyActivityStats() {
+const YearlyActivityStats = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [activityData, setActivityData] = useState<any[]>([]);
+  const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Function to fetch activities
@@ -184,7 +185,7 @@ export default function YearlyActivityStats() {
       </div>
     </div>
   );
-}
+};
 
 const formatDate = (dateStr: string) => {
   if (!dateStr) return '';
@@ -196,3 +197,5 @@ const formatDate = (dateStr: string) => {
     day: 'numeric' 
   });
 };
+
+export default YearlyActivityStats;
