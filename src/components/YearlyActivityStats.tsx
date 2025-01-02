@@ -29,50 +29,28 @@ export function YearlyActivityStats() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const items = await getLearningItems();
-        console.log('Fetched items:', items);
-        const uniqueCategories = [...new Set(items.map(item => item.category).filter(Boolean))] as string[];
-        console.log('Unique categories:', uniqueCategories);
-        setCategories(uniqueCategories);
-        if (uniqueCategories.length > 0) {
-          setSelectedCategory(uniqueCategories[0]);
-        }
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      }
-    };
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    const fetchActivity = async () => {
-      if (!selectedCategory) return;
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const data = await getYearlyActivity(selectedCategory);
-        console.log('Activity data:', data);
-        setActivityData(data);
+        const items = await getLearningItems();
+        const categories = Array.from(new Set(items.map(item => item.category || 'Uncategorized')));
+        setCategories(categories);
+        
+        if (selectedCategory) {
+          console.log('Fetching activities for category:', selectedCategory);
+          const activities = await getYearlyActivity(selectedCategory);
+          console.log('Received activities:', activities);
+          setActivityData(activities);
+        }
       } catch (error) {
-        console.error('Error fetching activity:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    if (selectedCategory) {
-      fetchActivity();
-    }
+    fetchData();
   }, [selectedCategory]);
-
-  const getColorIntensity = (count: number) => {
-    if (count === 0) return 'bg-gray-800 dark:bg-gray-800';
-    if (count <= 2) return 'bg-emerald-800/90 dark:bg-emerald-800/90';
-    if (count <= 4) return 'bg-emerald-600/90 dark:bg-emerald-600/90';
-    if (count <= 6) return 'bg-emerald-500/90 dark:bg-emerald-500/90';
-    return 'bg-emerald-400/90 dark:bg-emerald-400/90';
-  };
 
   const generateCalendarData = () => {
     const currentDate = new Date();
@@ -114,9 +92,21 @@ export function YearlyActivityStats() {
   const averagePerDay = totalActivities / totalDays;
   const streakPercentage = (daysWithActivity / totalDays) * 100;
 
+  const getColorIntensity = (count: number) => {
+    if (count === 0) return 'bg-gray-800 dark:bg-gray-800';
+    if (count <= 2) return 'bg-emerald-800/90 dark:bg-emerald-800/90';
+    if (count <= 4) return 'bg-emerald-600/90 dark:bg-emerald-600/90';
+    if (count <= 6) return 'bg-emerald-500/90 dark:bg-emerald-500/90';
+    return 'bg-emerald-400/90 dark:bg-emerald-400/90';
+  };
+
   return (
     <div className="space-y-4 w-full">
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold mb-1">Yearly Learning Activity</h2>
+          <p className="text-sm text-gray-400">Track your learning progress throughout the year by category</p>
+        </div>
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Select a category" />
@@ -144,11 +134,11 @@ export function YearlyActivityStats() {
       </div>
 
       <div className="border border-gray-800 rounded-lg p-4 bg-black shadow-sm">
-        <div className="min-w-[800px]">
+        <div className="w-full overflow-x-auto">
           {/* Month labels */}
           <div className="flex mb-2">
             <div className="w-8" /> {/* Spacer for weekday labels */}
-            <div className="flex-1 grid grid-cols-12 gap-1">
+            <div className="flex-1 grid grid-cols-12 gap-0">
               {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month) => (
                 <div key={month} className="text-xs text-gray-400">
                   {month}
@@ -158,16 +148,15 @@ export function YearlyActivityStats() {
           </div>
 
           {/* Activity grid */}
-          <div className="flex flex-col gap-2">
-            {['M', 'W', 'F'].map((day, dayIndex) => (
-              <div key={day} className="flex items-center gap-2">
+          <div className="flex flex-col gap-[1px]">
+            {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, dayIndex) => (
+              <div key={day} className="flex items-center gap-[1px]">
                 <div className="w-8 text-xs text-gray-400">{day}</div>
-                <div className="flex-1 flex gap-1">
+                <div className="flex-1 flex gap-[1px]">
                   {calendarData
                     .filter(date => {
                       const dayOfWeek = new Date(date.date).getDay();
-                      // Map dayIndex (0,1,2) to actual days (1,3,5)
-                      return dayOfWeek === (dayIndex * 2 + 1) % 7;
+                      return dayOfWeek === (dayIndex === 0 ? 1 : dayIndex === 6 ? 0 : dayIndex);
                     })
                     .map((date, i) => (
                       <div
