@@ -1132,12 +1132,11 @@ export async function getYearlyActivity(category: string) {
       .eq('user_id', user.id)
       .eq('category', category)
       .gte('date', startDate.toISOString().split('T')[0])
-      .lte('date', endDate.toISOString().split('T')[0])
-      .order('date', { ascending: true });
+      .lte('date', endDate.toISOString().split('T')[0]);
 
     if (error) {
       console.error('Error fetching yearly activity:', error);
-      return [];
+      throw error;
     }
 
     console.log('Raw activity data:', data);
@@ -1145,6 +1144,7 @@ export async function getYearlyActivity(category: string) {
     // Fill in missing dates with zero counts
     const filledData = [];
     let currentDatePointer = new Date(startDate);
+    const timestamp = new Date().toISOString();
 
     while (currentDatePointer <= endDate) {
       const dateStr = currentDatePointer.toISOString().split('T')[0];
@@ -1156,8 +1156,8 @@ export async function getYearlyActivity(category: string) {
         category,
         date: dateStr,
         count: existingData?.count || 0,
-        created_at: existingData?.created_at || dateStr,
-        updated_at: existingData?.updated_at || dateStr
+        created_at: existingData?.created_at || timestamp,
+        updated_at: existingData?.updated_at || timestamp
       });
 
       currentDatePointer.setDate(currentDatePointer.getDate() + 1);
@@ -1167,7 +1167,7 @@ export async function getYearlyActivity(category: string) {
     return filledData;
   } catch (error) {
     console.error('Error in getYearlyActivity:', error);
-    return [];
+    throw error;
   }
 }
 

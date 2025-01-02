@@ -8,6 +8,8 @@ interface ActivityData {
   category: string;
   date: string;
   count: number;
+  created_at: string;
+  updated_at: string;
 }
 
 interface LearningItem {
@@ -24,8 +26,8 @@ interface DayData {
 
 export function YearlyActivityStats() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -104,48 +106,46 @@ export function YearlyActivityStats() {
 
   return (
     <div className="space-y-4 w-full">
-      <div className="flex flex-col space-y-4">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold mb-1">Yearly Learning Activity</h2>
           <p className="text-sm text-gray-400">Track your learning progress throughout the year by category</p>
         </div>
-        
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select a category" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
 
-          <div className="text-sm text-gray-400 flex gap-4">
-            <div>
-              <span className="font-medium">{totalActivities}</span> activities
-            </div>
-            <div>
-              <span className="font-medium">{averagePerDay.toFixed(1)}</span> per day
-            </div>
-            <div>
-              <span className="font-medium">{streakPercentage.toFixed(0)}%</span> streak
-            </div>
-          </div>
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Select a category" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="text-sm text-gray-400 flex flex-wrap gap-4">
+        <div>
+          <span className="font-medium">{totalActivities}</span> activities
+        </div>
+        <div>
+          <span className="font-medium">{averagePerDay.toFixed(1)}</span> per day
+        </div>
+        <div>
+          <span className="font-medium">{streakPercentage.toFixed(0)}%</span> streak
         </div>
       </div>
 
-      <div className="border border-gray-800 rounded-lg p-4 bg-black shadow-sm">
-        <div className="w-full overflow-x-auto">
+      <div className="border border-gray-800 rounded-lg p-4 bg-black shadow-sm overflow-hidden">
+        <div className="w-full">
           {/* Month labels */}
           <div className="flex mb-2">
             <div className="w-8" /> {/* Spacer for weekday labels */}
             <div className="flex-1 grid grid-cols-12 gap-0">
               {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month) => (
-                <div key={month} className="text-xs text-gray-400">
+                <div key={month} className="text-xs text-gray-400 whitespace-nowrap">
                   {month}
                 </div>
               ))}
@@ -155,9 +155,9 @@ export function YearlyActivityStats() {
           {/* Activity grid */}
           <div className="flex flex-col gap-[1px]">
             {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, dayIndex) => (
-              <div key={day} className="flex items-center gap-[1px]">
+              <div key={day} className="flex items-center gap-[1px] min-w-0">
                 <div className="w-8 text-xs text-gray-400">{day}</div>
-                <div className="flex-1 flex gap-[1px]">
+                <div className="flex-1 flex gap-[1px] min-w-0">
                   {calendarData
                     .filter(date => {
                       const dayOfWeek = new Date(date.date).getDay();
@@ -166,7 +166,7 @@ export function YearlyActivityStats() {
                     .map((date, i) => (
                       <div
                         key={date.date}
-                        className={`h-4 w-4 ${getColorIntensity(date.count)}`}
+                        className={`h-4 min-w-[1rem] flex-shrink-0 ${getColorIntensity(date.count)}`}
                         title={`${formatDate(date.date)}: ${date.count} activities`}
                       />
                     ))}
@@ -181,7 +181,7 @@ export function YearlyActivityStats() {
             {[0, 1, 2, 3, 4, 5, 6].map((count) => (
               <div
                 key={count}
-                className={`h-4 w-4 ${getColorIntensity(count)}`}
+                className={`h-4 w-4 flex-shrink-0 ${getColorIntensity(count)}`}
                 title={`${count} activities`}
               />
             ))}
