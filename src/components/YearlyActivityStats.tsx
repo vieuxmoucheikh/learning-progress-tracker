@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getYearlyActivity, getLearningItems } from '@/lib/database';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -14,6 +14,12 @@ interface LearningItem {
   id: string;
   category: string;
   title: string;
+}
+
+interface DayData {
+  date: string;
+  count: number;
+  dayOfWeek?: number;
 }
 
 export function YearlyActivityStats() {
@@ -61,11 +67,11 @@ export function YearlyActivityStats() {
   }, [selectedCategory]);
 
   const getColorIntensity = (count: number) => {
-    if (count === 0) return 'bg-gray-100 dark:bg-gray-800';
-    if (count <= 2) return 'bg-blue-300/90 dark:bg-blue-800/90 ring-1 ring-blue-400/50 dark:ring-blue-700/50';
-    if (count <= 4) return 'bg-blue-400/90 dark:bg-blue-700/90 ring-1 ring-blue-500/50 dark:ring-blue-600/50';
-    if (count <= 6) return 'bg-blue-500/90 dark:bg-blue-600/90 ring-1 ring-blue-600/50 dark:ring-blue-500/50';
-    return 'bg-blue-600/90 dark:bg-blue-500/90 ring-1 ring-blue-700/50 dark:ring-blue-400/50';
+    if (count === 0) return 'bg-gray-800 dark:bg-gray-800';
+    if (count <= 2) return 'bg-emerald-800/90 dark:bg-emerald-800/90';
+    if (count <= 4) return 'bg-emerald-600/90 dark:bg-emerald-600/90';
+    if (count <= 6) return 'bg-emerald-500/90 dark:bg-emerald-500/90';
+    return 'bg-emerald-400/90 dark:bg-emerald-400/90';
   };
 
   const generateCalendarData = () => {
@@ -73,86 +79,65 @@ export function YearlyActivityStats() {
     const startDate = new Date(currentDate.getFullYear(), 0, 1);
     startDate.setHours(0, 0, 0, 0);
     
-    const weeks: { date: string; count: number }[][] = [];
-    let currentWeek: { date: string; count: number }[] = [];
+    // Pre-calculate all dates and their activities
+    const daysInYear = 365 + (currentDate.getFullYear() % 4 === 0 ? 1 : 0);
+    const allDates: DayData[] = [];
+    
+    for (let i = 0; i < daysInYear; i++) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
+      const dateStr = date.toISOString().split('T')[0];
+      const dayData = activityData.find(a => a.date === dateStr);
+      
+      allDates.push({
+        date: dateStr,
+        count: dayData?.count || 0,
+        dayOfWeek: date.getDay()
+      });
+    }
 
-    // Calculate total weeks needed for the full year view
-    const totalWeeks = 53; // Maximum weeks in a year plus padding
-    const firstDayOfYear = startDate.getDay();
-
-    // Start with empty cells for days before January 1st
-    for (let i = 0; i < firstDayOfYear; i++) {
+    // Group by week
+    const weeks: DayData[][] = [];
+    let currentWeek: DayData[] = [];
+    
+    // Add empty days before the first day of the year
+    const firstDayOfWeek = new Date(startDate).getDay();
+    for (let i = 0; i < firstDayOfWeek; i++) {
       currentWeek.push({ date: '', count: 0 });
     }
-
-    // Generate all dates for the entire year
-    const endDate = new Date(currentDate.getFullYear(), 11, 31); // December 31st
-    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-      const dateStr = d.toISOString().split('T')[0];
-      const dayData = activityData.find(a => a.date === dateStr);
-
-      currentWeek.push({
-        date: dateStr,
-        count: dayData?.count || 0
-      });
-
-      // Start a new week when we reach Sunday
-      if (d.getDay() === 6) {
-        while (currentWeek.length < 7) {
-          currentWeek.push({ date: '', count: 0 });
-        }
-        weeks.push([...currentWeek]);
+    
+    // Add all days
+    allDates.forEach((day) => {
+      currentWeek.push(day);
+      if (day.dayOfWeek === 6) {
+        weeks.push(currentWeek);
         currentWeek = [];
       }
-    }
-
-    // Fill the last week with remaining days
+    });
+    
+    // Add remaining days
     if (currentWeek.length > 0) {
       while (currentWeek.length < 7) {
         currentWeek.push({ date: '', count: 0 });
       }
-      weeks.push([...currentWeek]);
-    }
-
-    // Add empty weeks to fill the grid if needed
-    while (weeks.length < totalWeeks) {
-      weeks.push(Array(7).fill({ date: '', count: 0 }));
+      weeks.push(currentWeek);
     }
 
     return weeks;
   };
 
-  const getMonthLabels = () => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const currentDate = new Date();
-    return months.map((month, index) => {
-      const date = new Date(currentDate.getFullYear(), index, 1);
-      const weekIndex = Math.floor((date.getDate() - date.getDay() + 5) / 7);
-      return { label: month, weekIndex };
-    });
-  };
-
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-  };
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const weekDays = ['M', 'W', 'F'];
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-48">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
       </div>
     );
   }
 
   const calendarData = generateCalendarData();
-  const monthLabels = getMonthLabels();
   const totalActivities = activityData.reduce((sum, day) => sum + day.count, 0);
   const daysWithActivity = activityData.filter(day => day.count > 0).length;
   const totalDays = activityData.length;
@@ -175,7 +160,7 @@ export function YearlyActivityStats() {
           </SelectContent>
         </Select>
 
-        <div className="text-sm text-gray-600 dark:text-gray-400 flex gap-4">
+        <div className="text-sm text-gray-400 flex gap-4">
           <div>
             <span className="font-medium">{totalActivities}</span> activities
           </div>
@@ -188,76 +173,47 @@ export function YearlyActivityStats() {
         </div>
       </div>
 
-      <div className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm overflow-x-auto">
+      <div className="border border-gray-800 rounded-lg p-4 bg-black shadow-sm">
         <div className="min-w-[800px]">
           {/* Month labels */}
-          <div className="mb-2 flex text-xs text-gray-500 dark:text-gray-400">
-            <div className="w-8" />
-            <div className="flex-1 relative">
-              {monthLabels.map(({ label, weekIndex }, index) => (
-                <div
-                  key={label}
-                  className="absolute text-xs font-medium"
-                  style={{
-                    left: `${(weekIndex / 52) * 100}%`,
-                    transform: 'translateX(-50%)'
-                  }}
-                >
-                  {label}
+          <div className="grid grid-cols-[2rem_repeat(52,1fr)] mb-2">
+            <div /> {/* Spacer for weekday labels */}
+            <div className="col-span-52 grid grid-cols-12">
+              {months.map((month) => (
+                <div key={month} className="text-xs text-gray-400">
+                  {month}
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Weekday labels */}
-          <div className="mb-2 flex text-xs text-gray-500 dark:text-gray-400">
-            <div className="w-8" />
-            <div className="flex-1 grid grid-cols-53 gap-1">
-              <div className="col-span-1 grid grid-cols-7 gap-1 text-center font-medium">
-                <div>Mon</div>
-                <div>Tue</div>
-                <div>Wed</div>
-                <div>Thu</div>
-                <div>Fri</div>
-                <div>Sat</div>
-                <div>Sun</div>
-              </div>
-            </div>
+          {/* Calendar grid with weekday labels */}
+          <div className="grid grid-cols-[2rem_repeat(52,1fr)] gap-y-1">
+            {weekDays.map((day, i) => (
+              <React.Fragment key={day}>
+                <div className="text-xs text-gray-400 h-4 flex items-center">
+                  {day}
+                </div>
+                {calendarData.map((week, weekIndex) => (
+                  <div
+                    key={`${day}-${weekIndex}`}
+                    className={`h-4 w-4 ${getColorIntensity(week[i * 2]?.count || 0)}`}
+                    title={week[i * 2]?.date ? `${formatDate(week[i * 2].date)}: ${week[i * 2].count} activities` : ''}
+                  />
+                ))}
+              </React.Fragment>
+            ))}
           </div>
 
-          <div className="flex mt-6">
-            <div className="grid auto-rows-fr gap-1">
-              {calendarData.map((_, weekIndex) => (
-                <div key={weekIndex} className="text-xs text-gray-400 dark:text-gray-500 pr-2 h-5 flex items-center font-medium">
-                  {weekIndex + 1}
-                </div>
-              ))}
-            </div>
-            
-            <div className="flex-1 grid grid-cols-53 gap-1">
-              {calendarData.map((week, weekIndex) => (
-                <div key={weekIndex} className="col-span-1 grid grid-rows-7 gap-1">
-                  {week.map(({ date, count }, dayIndex) => (
-                    <div
-                      key={`${weekIndex}-${dayIndex}`}
-                      className={`w-5 h-5 rounded-sm transition-all duration-200 ${
-                        date ? getColorIntensity(count) : 'bg-transparent'
-                      } hover:scale-110 hover:ring-2 hover:ring-blue-400 dark:hover:ring-blue-500 cursor-help shadow-sm`}
-                      title={date ? `${formatDate(date)}: ${count} activities` : ''}
-                    />
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 mt-4 text-sm text-gray-600 dark:text-gray-400">
+          {/* Legend */}
+          <div className="flex items-center gap-1 mt-4 text-xs text-gray-400">
             <span>Less</span>
-            <div className={`w-5 h-5 rounded-sm ${getColorIntensity(0)}`} />
-            <div className={`w-5 h-5 rounded-sm ${getColorIntensity(2)}`} />
-            <div className={`w-5 h-5 rounded-sm ${getColorIntensity(4)}`} />
-            <div className={`w-5 h-5 rounded-sm ${getColorIntensity(6)}`} />
-            <div className={`w-5 h-5 rounded-sm ${getColorIntensity(8)}`} />
+            {[0, 2, 4, 6, 8].map((count) => (
+              <div
+                key={count}
+                className={`h-4 w-4 ${getColorIntensity(count)}`}
+              />
+            ))}
             <span>More</span>
           </div>
         </div>
@@ -265,3 +221,14 @@ export function YearlyActivityStats() {
     </div>
   );
 }
+
+const formatDate = (dateStr: string) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+};
