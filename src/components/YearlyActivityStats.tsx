@@ -96,38 +96,8 @@ export function YearlyActivityStats() {
       });
     }
 
-    // Group by week
-    const weeks: DayData[][] = [];
-    let currentWeek: DayData[] = [];
-    
-    // Add empty days before the first day of the year
-    const firstDayOfWeek = new Date(startDate).getDay();
-    for (let i = 0; i < firstDayOfWeek; i++) {
-      currentWeek.push({ date: '', count: 0 });
-    }
-    
-    // Add all days
-    allDates.forEach((day) => {
-      currentWeek.push(day);
-      if (day.dayOfWeek === 6) {
-        weeks.push(currentWeek);
-        currentWeek = [];
-      }
-    });
-    
-    // Add remaining days
-    if (currentWeek.length > 0) {
-      while (currentWeek.length < 7) {
-        currentWeek.push({ date: '', count: 0 });
-      }
-      weeks.push(currentWeek);
-    }
-
-    return weeks;
+    return allDates;
   };
-
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const weekDays = ['M', 'W', 'F'];
 
   if (loading) {
     return (
@@ -176,10 +146,10 @@ export function YearlyActivityStats() {
       <div className="border border-gray-800 rounded-lg p-4 bg-black shadow-sm">
         <div className="min-w-[800px]">
           {/* Month labels */}
-          <div className="grid grid-cols-[2rem_repeat(52,1fr)] mb-2">
-            <div /> {/* Spacer for weekday labels */}
-            <div className="col-span-52 grid grid-cols-12">
-              {months.map((month) => (
+          <div className="flex mb-2">
+            <div className="w-8" /> {/* Spacer for weekday labels */}
+            <div className="flex-1 grid grid-cols-12 gap-1">
+              {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month) => (
                 <div key={month} className="text-xs text-gray-400">
                   {month}
                 </div>
@@ -187,21 +157,27 @@ export function YearlyActivityStats() {
             </div>
           </div>
 
-          {/* Calendar grid with weekday labels */}
-          <div className="grid grid-cols-[2rem_repeat(52,1fr)] gap-y-1">
-            {weekDays.map((day, i) => (
-              <React.Fragment key={day}>
-                <div className="text-xs text-gray-400 h-4 flex items-center">
-                  {day}
+          {/* Activity grid */}
+          <div className="flex flex-col gap-2">
+            {['M', 'W', 'F'].map((day, dayIndex) => (
+              <div key={day} className="flex items-center gap-2">
+                <div className="w-8 text-xs text-gray-400">{day}</div>
+                <div className="flex-1 flex gap-1">
+                  {calendarData
+                    .filter(date => {
+                      const dayOfWeek = new Date(date.date).getDay();
+                      // Map dayIndex (0,1,2) to actual days (1,3,5)
+                      return dayOfWeek === (dayIndex * 2 + 1) % 7;
+                    })
+                    .map((date, i) => (
+                      <div
+                        key={date.date}
+                        className={`h-4 w-4 ${getColorIntensity(date.count)}`}
+                        title={`${formatDate(date.date)}: ${date.count} activities`}
+                      />
+                    ))}
                 </div>
-                {calendarData.map((week, weekIndex) => (
-                  <div
-                    key={`${day}-${weekIndex}`}
-                    className={`h-4 w-4 ${getColorIntensity(week[i * 2]?.count || 0)}`}
-                    title={week[i * 2]?.date ? `${formatDate(week[i * 2].date)}: ${week[i * 2].count} activities` : ''}
-                  />
-                ))}
-              </React.Fragment>
+              </div>
             ))}
           </div>
 
