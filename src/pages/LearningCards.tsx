@@ -139,6 +139,20 @@ export const LearningCardsPage = () => {
     }
   };
 
+  const handleCompleteCard = async () => {
+    try {
+      return true;
+    } catch (error) {
+      console.error('Error completing card:', error);
+      toast({
+        title: "Error",
+        description: "Failed to complete card",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
   const filteredCards = cards
     .filter((card) => {
       const matchesSearch = card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -198,7 +212,7 @@ export const LearningCardsPage = () => {
             </SelectContent>
           </Select>
 
-          <Select value={sortBy} onValueChange={setSortBy}>
+          <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'updated' | 'created' | 'mastered')}>
             <SelectTrigger>
               <Clock className="w-4 h-4 mr-2" />
               <SelectValue placeholder="Sort by" />
@@ -253,6 +267,7 @@ export const LearningCardsPage = () => {
                     {...card}
                     onSave={handleSaveCard}
                     onDelete={() => handleDeleteCard(card.id)}
+                    onComplete={handleCompleteCard}
                   />
                 </motion.div>
               ))}
