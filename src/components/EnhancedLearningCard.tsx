@@ -190,12 +190,6 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     try {
       const success = await onSave({ ...{ id, title, content, media, tags }, mastered: !mastered });
       if (success) {
-        // Track the learning activity when marking as mastered
-        if (!mastered) {
-          console.log('Tracking activity for category:', itemCategory);
-          const currentDate = new Date('2025-01-03T08:21:21+01:00').toISOString().split('T')[0];
-          await incrementLearningActivity(itemCategory || 'Uncategorized', currentDate);
-        }
         setMastered(!mastered);
         toast({
           title: "Success",

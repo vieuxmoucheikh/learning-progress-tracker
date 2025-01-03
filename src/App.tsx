@@ -7,7 +7,7 @@ import { StreakDisplay } from './components/StreakDisplay';
 import { LearningItem, LearningItemFormData } from './types';
 import { Plus } from 'lucide-react';
 import { Calendar } from './components/Calendar';
-import { getLearningItems, addLearningItem, updateLearningItem, deleteLearningItem } from './lib/database';
+import { getLearningItems, addLearningItem, updateLearningItem, deleteLearningItem, trackLearningActivity } from './lib/database';
 import { useAuth } from './lib/auth';
 import { TabNavigation } from './components/TabNavigation';
 import { DashboardTab } from './components/DashboardTab';
@@ -413,8 +413,13 @@ export default function App() {
 
       // If marking as completed
       if (updates.completed && !item.completed) {
-        updates.completed_at = new Date().toISOString();
+        updates.completed_at = new Date('2025-01-03T11:07:05+01:00').toISOString();
         updates.status = 'completed' as const;
+        
+        // Track learning activity when completing an item
+        const normalizedCategory = (item.category || 'Uncategorized').toUpperCase();
+        console.log('Tracking activity for category:', { category: normalizedCategory });
+        await trackLearningActivity(normalizedCategory);
       }
 
       // Update local state first for immediate feedback
