@@ -164,6 +164,7 @@ export interface EnhancedLearningCard {
   updatedAt: string;
   mastered?: boolean;
   category?: string;
+  lastStudied?: string;
 }
 
 export type NewEnhancedLearningCard = Omit<EnhancedLearningCard, 'id' | 'createdAt' | 'updatedAt'> & {

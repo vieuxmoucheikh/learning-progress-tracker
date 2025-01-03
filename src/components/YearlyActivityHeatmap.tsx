@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { cn } from '../lib/utils';
 import { 
   format, 
@@ -41,7 +41,7 @@ interface Activity {
 }
 
 interface YearlyActivityHeatmapProps {
-  data: Activity[];
+  data: Record<string, number>;
   year?: number;
   onYearChange?: (year: number) => void;
 }
@@ -49,11 +49,11 @@ interface YearlyActivityHeatmapProps {
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function YearlyActivityHeatmap({ 
-  data, 
+  data: activityData, 
   year = new Date().getFullYear(),
   onYearChange 
 }: YearlyActivityHeatmapProps) {
-  const [selectedYear, setSelectedYear] = React.useState(year);
+  const [selectedYear, setSelectedYear] = useState(year);
   
   const handleYearChange = (newYear: number) => {
     setSelectedYear(newYear);
@@ -74,11 +74,11 @@ export function YearlyActivityHeatmap({
     }
 
     // Fill in the activity data
-    data.forEach(activity => {
-      const activityDate = parseISO(activity.date);
+    Object.keys(activityData).forEach(date => {
+      const activityDate = parseISO(date);
       if (activityDate.getFullYear() === selectedYear) {
         const dateKey = format(activityDate, 'yyyy-MM-dd');
-        activityMap[dateKey] = activity.count;
+        activityMap[dateKey] = activityData[date];
       }
     });
 

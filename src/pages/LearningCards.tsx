@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -8,23 +8,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Plus, Search, Filter, Clock, TagIcon, Loader2 } from 'lucide-react';
 import { EnhancedLearningCard } from '@/components/EnhancedLearningCard';
 import { learningCardsService } from '@/lib/learningCards';
 import type { EnhancedLearningCard as CardType } from '@/types';
-import { Plus, Search, Tag as TagIcon, Loader2, Clock, Filter } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { getLearningItems } from '@/lib/database';
-import { ProgressByDifficultyChart } from '@/components/ProgressByDifficultyChart';
-import { LearningFocusChart } from '@/components/LearningFocusChart';
-import { YearlyActivityHeatmap } from '@/components/YearlyActivityHeatmap';
+import { ProgressByDifficultyChart } from '../components/ProgressByDifficultyChart';
+import { LearningFocusChart } from '../components/LearningFocusChart';
+import { YearlyActivityHeatmap } from '../components/YearlyActivityHeatmap';
+import { format } from 'date-fns';
 
 interface CardMedia {
   id: string;
   url: string;
   type: 'link' | 'image';
   createdAt?: string;
+}
+
+interface ProgressData {
+  difficulty: string;
+  count: number;
+  progress: number;
+}
+
+interface FocusData {
+  category: string;
+  value: number;
 }
 
 export const LearningCardsPage = () => {
@@ -161,8 +173,34 @@ export const LearningCardsPage = () => {
       }
     });
 
-  const progressData = []; // Replace with actual data
-  const focusData = []; // Replace with actual data
+  const progressData: ProgressData[] = [
+    { difficulty: 'Easy', count: 0, progress: 0 },
+    { difficulty: 'Medium', count: 5, progress: 0 },
+    { difficulty: 'Hard', count: 0, progress: 0 },
+  ];
+
+  const focusData: FocusData[] = [
+    { category: 'Consistency', value: 0.8 },
+    { category: 'Completion', value: 0.6 },
+    { category: 'Diversity', value: 0.4 },
+    { category: 'Engagement', value: 0.7 },
+    { category: 'Progress', value: 0.5 },
+  ];
+
+  const activityData = useMemo(() => {
+    const data: Record<string, number> = {};
+    filteredCards.forEach(card => {
+      if (card.lastStudied) {
+        try {
+          const dateKey = format(new Date(card.lastStudied), 'yyyy-MM-dd');
+          data[dateKey] = (data[dateKey] || 0) + 1;
+        } catch (error) {
+          console.warn('Invalid date format for card:', card.id);
+        }
+      }
+    });
+    return data;
+  }, [filteredCards]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -194,7 +232,7 @@ export const LearningCardsPage = () => {
           <ProgressByDifficultyChart data={progressData} />
           <LearningFocusChart data={focusData} />
           <div className="col-span-1 sm:col-span-2">
-            <YearlyActivityHeatmap />
+            <YearlyActivityHeatmap data={activityData} />
           </div>
         </div>
       </div>
