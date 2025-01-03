@@ -12,6 +12,8 @@ import {
   parseISO,
   eachDayOfInterval
 } from 'date-fns';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface DayData {
   date: string;
@@ -257,7 +259,7 @@ export function YearlyActivityHeatmap({
                     }
                     
                     const colorClass = getColorForCount(day.count);
-                    const dateObj = new Date(day.date);
+                    const dateObj = parseISO(day.date);
                     const formattedDate = format(dateObj, 'MMMM d, yyyy');
                     
                     return (
