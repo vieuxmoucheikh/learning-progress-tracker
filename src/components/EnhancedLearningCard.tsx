@@ -217,26 +217,29 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     setIsLoading(true);
     try {
       const currentCategory = (itemCategory || 'Uncategorized').toUpperCase();
-      const currentDate = new Date('2025-01-03T09:15:06+01:00').toISOString().split('T')[0];
+      const currentDate = new Date('2025-01-03T09:25:45+01:00').toISOString().split('T')[0];
       
       console.log('Completing item:', { 
         id, 
         category: currentCategory,
+        originalCategory: itemCategory,
         date: currentDate 
       });
       
       // Track the learning activity first
       console.log('Tracking activity:', { 
         category: currentCategory,
+        originalCategory: itemCategory,
         date: currentDate 
       });
-      await incrementLearningActivity(currentCategory, currentDate);
+      const activity = await incrementLearningActivity(currentCategory, currentDate);
+      console.log('Activity tracked:', activity);
 
       // Then update the learning item
       const updatedItem = {
         id,
         mastered: true,
-        updatedAt: new Date('2025-01-03T09:15:06+01:00').toISOString(),
+        updatedAt: new Date('2025-01-03T09:25:45+01:00').toISOString(),
         category: currentCategory
       };
 
@@ -254,8 +257,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       console.log('Item completed successfully:', {
         ...updatedItem,
         localState: {
-          mastered,
-          itemCategory
+          mastered: true,
+          itemCategory: currentCategory
         }
       });
       

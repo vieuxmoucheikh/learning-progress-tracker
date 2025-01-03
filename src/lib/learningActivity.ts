@@ -51,7 +51,8 @@ export async function incrementLearningActivity(category: string, date: string):
 
     const normalizedCategory = category.toUpperCase();
     console.log('Incrementing activity:', { 
-      category: normalizedCategory, 
+      category: normalizedCategory,
+      originalCategory: category,
       date, 
       userId: user.id 
     });
@@ -70,14 +71,15 @@ export async function incrementLearningActivity(category: string, date: string):
       throw selectError;
     }
 
-    const timestamp = new Date('2025-01-03T09:09:22+01:00').toISOString();
+    const timestamp = new Date('2025-01-03T09:25:45+01:00').toISOString();
 
     if (existing) {
       console.log('Found existing activity:', {
         id: existing.id,
         category: existing.category,
         date: existing.date,
-        count: existing.count
+        count: existing.count,
+        raw_category: existing.category
       });
       // Update existing record
       const { data: updated, error: updateError } = await supabase
@@ -99,25 +101,31 @@ export async function incrementLearningActivity(category: string, date: string):
         id: updated.id,
         category: updated.category,
         date: updated.date,
-        count: updated.count
+        count: updated.count,
+        raw_category: updated.category
       });
       return updated;
     } else {
       console.log('Creating new activity for:', { 
-        category: normalizedCategory, 
+        category: normalizedCategory,
+        originalCategory: category,
         date 
       });
+      
+      const newActivity = {
+        user_id: user.id,
+        category: normalizedCategory,
+        date,
+        count: 1,
+        created_at: timestamp,
+        updated_at: timestamp
+      };
+      console.log('New activity data:', newActivity);
+
       // Insert new record
       const { data: inserted, error: insertError } = await supabase
         .from('learning_activity')
-        .insert({
-          user_id: user.id,
-          category: normalizedCategory,
-          date,
-          count: 1,
-          created_at: timestamp,
-          updated_at: timestamp
-        })
+        .insert(newActivity)
         .select()
         .single();
 
@@ -130,7 +138,8 @@ export async function incrementLearningActivity(category: string, date: string):
         id: inserted.id,
         category: inserted.category,
         date: inserted.date,
-        count: inserted.count
+        count: inserted.count,
+        raw_category: inserted.category
       });
       return inserted;
     }
