@@ -153,9 +153,9 @@ export function YearlyActivityHeatmap({
   );
 
   return (
-    <div className="w-full max-w-full space-y-4 overflow-hidden col-span-full">
-      {/* Statistics section - only show once */}
-      <div className="mt-4 flex flex-wrap gap-4">
+    <div className="w-full">
+      {/* Statistics section */}
+      <div className="mt-4 flex flex-wrap gap-4 mb-6">
         <div className="flex items-center gap-2">
           <div className="text-sm font-medium text-gray-500">Total Activities:</div>
           <div className="text-sm font-semibold">{totalActivities}</div>
@@ -170,65 +170,66 @@ export function YearlyActivityHeatmap({
         </div>
       </div>
 
-      <div className="w-full">
-        {/* Year navigation */}
-        <div className="flex items-center justify-between mb-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleYearChange(selectedYear - 1)}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <div className="text-lg font-semibold">{selectedYear}</div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleYearChange(selectedYear + 1)}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+      {/* Year navigation */}
+      <div className="flex items-center justify-between mb-6">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleYearChange(selectedYear - 1)}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <div className="text-lg font-semibold">{selectedYear}</div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleYearChange(selectedYear + 1)}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
 
-        <div className="relative w-full">
-          <div className="w-full">
-            {/* Month labels */}
-            <div className="flex mb-2">
-              <div className="w-8 sm:w-10" /> {/* Offset for day labels */}
-              <div className="flex-1">
-                <div className="grid grid-cols-[repeat(53,1fr)] gap-[1px] sm:gap-1.5">
-                  {monthLabels.map((label, i) => (
-                    <div
-                      key={i}
-                      className="text-[8px] sm:text-xs text-gray-500 text-center"
-                      style={{ 
-                        gridColumnStart: label.index + 1,
-                        gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
-                      }}
-                    >
-                      {window.innerWidth <= 640 ? label.text.slice(0, 1) : label.text}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Main grid */}
-            <div className="flex">
-              {/* Day labels */}
-              <div className="flex flex-col gap-[1px] sm:gap-1.5 pr-2 sm:pr-3">
-                {DAYS.map((day) => (
-                  <div 
-                    key={day} 
-                    className="h-[4px] sm:h-4 text-[8px] sm:text-xs text-gray-500 flex items-center w-8 sm:w-10"
+      {/* Heatmap grid */}
+      <div className="w-full overflow-x-auto">
+        <div className="min-w-full">
+          {/* Month labels */}
+          <div className="flex mb-2">
+            <div className="w-8 sm:w-10" /> {/* Offset for day labels */}
+            <div className="flex-1">
+              <div className="grid grid-cols-[repeat(53,1fr)] gap-[1px] sm:gap-1.5">
+                {monthLabels.map((label, i) => (
+                  <div
+                    key={i}
+                    className="text-[8px] sm:text-xs text-gray-500 text-center"
+                    style={{ 
+                      gridColumnStart: label.index + 1,
+                      gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
+                    }}
                   >
-                    {window.innerWidth <= 640 ? day[0] : day}
+                    {window.innerWidth <= 640 ? label.text.slice(0, 1) : label.text}
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
 
-              {/* Calendar grid */}
-              <div className="flex-1 grid grid-cols-[repeat(53,1fr)] gap-[1px] sm:gap-1.5">
+          {/* Main grid */}
+          <div className="flex w-full">
+            {/* Day labels */}
+            <div className="flex flex-col gap-[1px] sm:gap-1.5 pr-2 sm:pr-3">
+              {DAYS.map((day) => (
+                <div 
+                  key={day} 
+                  className="h-[4px] sm:h-4 text-[8px] sm:text-xs text-gray-500 flex items-center w-8 sm:w-10"
+                >
+                  {window.innerWidth <= 640 ? day[0] : day}
+                </div>
+              ))}
+            </div>
+
+            {/* Calendar grid */}
+            <div className="flex-1">
+              <div className="grid grid-cols-[repeat(53,1fr)] gap-[1px] sm:gap-1.5">
                 {weeks.map((week, weekIndex) => (
                   <div key={weekIndex} className="flex flex-col gap-[1px] sm:gap-1.5">
                     {week.map((day, dayIndex) => (

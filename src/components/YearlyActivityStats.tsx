@@ -151,48 +151,49 @@ export const YearlyActivityStats: React.FC = () => {
   }, [activityData]);
 
   return (
-    <div className="space-y-4">
+    <div className="w-full space-y-8">
       <div className="flex flex-col gap-4">
-        <Select
-          value={selectedCategory}
-          onValueChange={handleCategoryChange}
-        >
-          <SelectTrigger className="w-full md:w-[200px]">
-            <SelectValue placeholder="Select a category" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Learning Activity</h2>
+          <Select value={selectedCategory} onValueChange={handleCategoryChange}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {loading ? (
-          <div>Loading...</div>
+          <div className="flex justify-center items-center h-64">
+            Loading...
+          </div>
         ) : (
-          <div className="space-y-4">
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="bg-blue-500/10 rounded-lg p-4">
-                <h3 className="text-sm font-medium text-blue-600 dark:text-blue-400">Total Activities</h3>
+          <div className="space-y-8">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+                <p className="text-sm text-gray-500">Total Activities</p>
                 <p className="text-2xl font-bold mt-1">{totalActivities}</p>
               </div>
-              <div className="bg-purple-500/10 rounded-lg p-4">
-                <h3 className="text-sm font-medium text-purple-600 dark:text-purple-400">Active Days</h3>
+              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+                <p className="text-sm text-gray-500">Active Days</p>
                 <p className="text-2xl font-bold mt-1">{activeDays}</p>
               </div>
-              <div className="bg-green-500/10 rounded-lg p-4">
-                <h3 className="text-sm font-medium text-green-600 dark:text-green-400">Average Per Day</h3>
+              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+                <p className="text-sm text-gray-500">Average Per Day</p>
                 <p className="text-2xl font-bold mt-1">{averagePerDay}</p>
               </div>
             </div>
-            <div className="w-full">
-              <div className="grid grid-cols-1 gap-4">
-                <div className="w-full">
-                  <YearlyActivityHeatmap data={heatmapData} />
-                </div>
-              </div>
+
+            {/* Heatmap */}
+            <div className="w-full bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
+              <YearlyActivityHeatmap data={heatmapData} />
             </div>
           </div>
         )}
