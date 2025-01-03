@@ -30,7 +30,13 @@ export async function getLearningActivity(startDate: string, endDate: string): P
       throw error;
     }
 
-    console.log('Retrieved activities:', data);
+    console.log('Retrieved activities:', data?.map(a => ({
+      id: a.id,
+      category: a.category,
+      date: a.date,
+      count: a.count,
+      created_at: a.created_at
+    })));
     return data || [];
   } catch (error) {
     console.error('Error getting learning activity:', error);
@@ -43,14 +49,19 @@ export async function incrementLearningActivity(category: string, date: string):
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('No authenticated user');
 
-    console.log('Incrementing activity:', { category, date, userId: user.id });
+    const normalizedCategory = category.toUpperCase();
+    console.log('Incrementing activity:', { 
+      category: normalizedCategory, 
+      date, 
+      userId: user.id 
+    });
 
     // First try to update existing record
     const { data: existing, error: selectError } = await supabase
       .from('learning_activity')
       .select('*')
       .eq('user_id', user.id)
-      .eq('category', category)
+      .eq('category', normalizedCategory)
       .eq('date', date)
       .single();
 
@@ -59,10 +70,15 @@ export async function incrementLearningActivity(category: string, date: string):
       throw selectError;
     }
 
-    const timestamp = new Date('2025-01-03T08:27:26+01:00').toISOString();
+    const timestamp = new Date('2025-01-03T09:09:22+01:00').toISOString();
 
     if (existing) {
-      console.log('Found existing activity:', existing);
+      console.log('Found existing activity:', {
+        id: existing.id,
+        category: existing.category,
+        date: existing.date,
+        count: existing.count
+      });
       // Update existing record
       const { data: updated, error: updateError } = await supabase
         .from('learning_activity')
@@ -79,16 +95,24 @@ export async function incrementLearningActivity(category: string, date: string):
         throw updateError;
       }
 
-      console.log('Activity updated:', updated);
+      console.log('Activity updated:', {
+        id: updated.id,
+        category: updated.category,
+        date: updated.date,
+        count: updated.count
+      });
       return updated;
     } else {
-      console.log('Creating new activity for:', { category, date });
+      console.log('Creating new activity for:', { 
+        category: normalizedCategory, 
+        date 
+      });
       // Insert new record
       const { data: inserted, error: insertError } = await supabase
         .from('learning_activity')
         .insert({
           user_id: user.id,
-          category,
+          category: normalizedCategory,
           date,
           count: 1,
           created_at: timestamp,
@@ -102,7 +126,12 @@ export async function incrementLearningActivity(category: string, date: string):
         throw insertError;
       }
 
-      console.log('Activity created:', inserted);
+      console.log('Activity created:', {
+        id: inserted.id,
+        category: inserted.category,
+        date: inserted.date,
+        count: inserted.count
+      });
       return inserted;
     }
   } catch (error) {
