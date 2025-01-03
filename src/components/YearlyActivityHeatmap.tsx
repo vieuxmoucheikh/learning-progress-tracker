@@ -152,7 +152,7 @@ export function YearlyActivityHeatmap({
   );
 
   return (
-    <div className="w-full max-w-full space-y-4 overflow-hidden">
+    <div className="w-full max-w-full space-y-4 overflow-hidden col-span-1 sm:col-span-2">
       {/* Statistics section - only show once */}
       <div className="mt-4 flex flex-wrap gap-4">
         <div className="flex items-center gap-2">

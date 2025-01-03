@@ -165,108 +165,29 @@ export const LearningCardsPage = () => {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
             Learning Cards
           </h1>
-          <Button onClick={handleCreateCard} className="shrink-0">
-            <Plus className="w-4 h-4 mr-2" />
-            New Card
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleCreateCard}>
+              <Plus className="w-4 h-4 mr-2" />
+              New Card
+            </Button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              type="text"
-              placeholder="Search cards..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredCards.map((card) => (
+            <EnhancedLearningCard
+              key={card.id}
+              {...card}
+              onSave={handleSaveCard}
+              onDelete={() => handleDeleteCard(card.id)}
             />
-          </div>
-
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger>
-              <Filter className="w-4 h-4 mr-2" />
-              <SelectValue placeholder="Filter by category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {categories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'updated' | 'created' | 'mastered')}>
-            <SelectTrigger>
-              <Clock className="w-4 h-4 mr-2" />
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="updated">Last Updated</SelectItem>
-              <SelectItem value="created">Created Date</SelectItem>
-              <SelectItem value="mastered">Mastery Level</SelectItem>
-            </SelectContent>
-          </Select>
+          ))}
         </div>
 
-        {allTags.length > 0 && (
-          <div className="flex flex-wrap gap-2 items-center">
-            <TagIcon className="w-4 h-4 text-gray-400" />
-            {allTags.map((tag) => (
-              <Badge
-                key={tag}
-                variant={selectedTags.includes(tag) ? "default" : "outline"}
-                className="cursor-pointer"
-                onClick={() => {
-                  setSelectedTags((prev) =>
-                    prev.includes(tag)
-                      ? prev.filter((t) => t !== tag)
-                      : [...prev, tag]
-                  );
-                }}
-              >
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        )}
-
-        {loading ? (
-          <div className="flex justify-center items-center min-h-[200px]">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-          </div>
-        ) : (
-          <AnimatePresence mode="popLayout">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-              {filteredCards.map((card) => (
-                <motion.div
-                  key={card.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <EnhancedLearningCard
-                    {...card}
-                    onSave={handleSaveCard}
-                    onDelete={() => handleDeleteCard(card.id)}
-                  />
-                </motion.div>
-              ))}
-            </div>
-          </AnimatePresence>
-        )}
-
-        {!loading && filteredCards.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No cards found. Create one to get started!</p>
-          </div>
-        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+          {/* Add Learning Insights Section components here */}
+        </div>
       </div>
     </div>
   );
-};
- 
+}
