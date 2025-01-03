@@ -192,7 +192,7 @@ export const YearlyActivityStats: React.FC = () => {
             </div>
 
             {/* Heatmap */}
-            <div className="w-full bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
+            <div className="col-span-full w-full">
               <YearlyActivityHeatmap data={heatmapData} />
             </div>
           </div>
