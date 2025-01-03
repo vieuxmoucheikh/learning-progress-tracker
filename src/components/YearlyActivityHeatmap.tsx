@@ -40,11 +40,11 @@ interface YearlyActivityHeatmapProps {
   onYearChange?: (year: number) => void;
 }
 
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function YearlyActivityHeatmap({ 
   data, 
-  year = new Date().getFullYear(),
+  year = new Date('2025-01-03T14:26:56+01:00').getFullYear(),
   onYearChange 
 }: YearlyActivityHeatmapProps) {
   const [selectedYear, setSelectedYear] = React.useState(year);
@@ -91,19 +91,27 @@ export function YearlyActivityHeatmap({
   let currentWeek: WeekData = Array(7).fill(null);
   
   // Get the day of week for January 1st (3 for Wednesday in 2025)
-  const startDayOfWeek = getDay(firstDayOfYear);
+  const startDayOfWeek = getDay(firstDayOfYear); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
   
   // Fill in the first week starting from Wednesday (January 1st, 2025)
   for (let i = 0; i < 7; i++) {
-    if (i >= startDayOfWeek) {
-      // This is a valid day in January 2025
+    if (i === startDayOfWeek) {
+      // This is January 1st (Wednesday)
       currentWeek[i] = {
-        date: format(addDays(firstDayOfYear, i - startDayOfWeek), 'yyyy-MM-dd'),
-        count: calendarData[format(addDays(firstDayOfYear, i - startDayOfWeek), 'yyyy-MM-dd')] || 0,
+        date: format(firstDayOfYear, 'yyyy-MM-dd'),
+        count: calendarData[format(firstDayOfYear, 'yyyy-MM-dd')] || 0,
+        isOutsideMonth: false
+      };
+    } else if (i > startDayOfWeek) {
+      // These are the days after January 1st
+      const dayOffset = i - startDayOfWeek;
+      currentWeek[i] = {
+        date: format(addDays(firstDayOfYear, dayOffset), 'yyyy-MM-dd'),
+        count: calendarData[format(addDays(firstDayOfYear, dayOffset), 'yyyy-MM-dd')] || 0,
         isOutsideMonth: false
       };
     } else {
-      // This is a null space before Wednesday
+      // These are the days before January 1st (should be null)
       currentWeek[i] = null;
     }
   }
@@ -227,7 +235,7 @@ export function YearlyActivityHeatmap({
                       key={day} 
                       className="h-[4px] sm:h-4 text-[8px] sm:text-xs text-gray-500 flex items-center"
                     >
-                      {i % 2 === 0 ? day.slice(0, 1) : ''}
+                      {window.innerWidth <= 640 ? day[0] : day}
                     </div>
                   ))}
                 </div>
