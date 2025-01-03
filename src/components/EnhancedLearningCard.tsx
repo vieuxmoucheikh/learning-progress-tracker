@@ -376,7 +376,14 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             <div className="space-y-4">
               <RichTextEditor
                 content={content}
-                onChange={setContent}
+                onChange={(newContent) => {
+                  setContent(newContent);
+                  // Auto-save after a short delay
+                  const timeoutId = setTimeout(() => {
+                    handleSave();
+                  }, 1000);
+                  return () => clearTimeout(timeoutId);
+                }}
                 className={cn(
                   "min-h-[100px] p-3 rounded-md",
                   "bg-white dark:bg-gray-900",
@@ -384,18 +391,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   "border border-gray-200 dark:border-gray-800",
                   "focus-within:ring-2 focus-within:ring-blue-500",
                   "prose dark:prose-invert max-w-none",
-                  "prose-img:my-0 prose-img:rounded-md"
+                  "prose-img:my-0 prose-img:rounded-md prose-img:max-w-full"
                 )}
               />
-              <div className="flex justify-end space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsEditing(false)}
-                  className="bg-white hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800"
-                >
-                  Cancel
-                </Button>
-              </div>
             </div>
           ) : (
             <div 
@@ -417,12 +415,12 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             Updated {getTimeAgo(updatedAt)}
           </span>
           {category && (
-            <>
-              <span className="text-gray-400">•</span>
-              <span className="text-gray-700 font-medium dark:text-gray-300">
-                {category}
-              </span>
-            </>
+            <span className="text-gray-400">•</span>
+          )}
+          {category && (
+            <span className="text-gray-700 font-medium dark:text-gray-300">
+              {category}
+            </span>
           )}
         </div>
 
@@ -480,15 +478,14 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             onClick={handleMasteredToggle}
           >
             {mastered ? (
-              <>
-                <BookmarkCheck className="w-4 h-4 mr-1" />
-                Mastered
-              </>
+              <BookmarkCheck className="w-4 h-4 mr-1" />
             ) : (
-              <>
-                <Bookmark className="w-4 h-4 mr-1" />
-                Mark as Mastered
-              </>
+              <Bookmark className="w-4 h-4 mr-1" />
+            )}
+            {mastered ? (
+              "Mastered"
+            ) : (
+              "Mark as Mastered"
             )}
           </Button>
         </div>
