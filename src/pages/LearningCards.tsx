@@ -96,6 +96,7 @@ export const LearningCardsPage = () => {
 
   const handleSaveCard = async (card: Partial<CardType>): Promise<boolean> => {
     try {
+      console.log('Saving card:', card);
       await learningCardsService.updateCard(card.id!, {
         title: card.title,
         content: card.content,

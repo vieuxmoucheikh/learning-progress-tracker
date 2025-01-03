@@ -65,6 +65,7 @@ class LearningCardsService {
 
   async updateCard(id: string, updates: Partial<EnhancedLearningCard>): Promise<EnhancedLearningCard> {
     try {
+      console.log('Updating card:', { id, updates });
       const updateData: any = {};
       
       if (updates.title !== undefined) updateData.title = updates.title;
@@ -85,6 +86,7 @@ class LearningCardsService {
         throw new Error('Failed to update card');
       }
 
+      console.log('Card updated:', data);
       return {
         id: data.id,
         title: data.title,
