@@ -1031,7 +1031,7 @@ export async function trackLearningActivity(category: string) {
       return null;
     }
 
-    const currentDate = new Date('2025-01-02T23:46:53+01:00');
+    const currentDate = new Date();
     const dateStr = currentDate.toISOString().split('T')[0];
 
     console.log('Tracking activity:', { 
@@ -1052,18 +1052,16 @@ export async function trackLearningActivity(category: string) {
 
     if (selectError && selectError.code !== 'PGRST116') {
       console.error('Error checking existing activity:', selectError);
-      return null;
+      throw selectError;
     }
 
-    const timestamp = currentDate.toISOString();
-
     if (existing) {
-      console.log('Found existing activity:', existing);
+      // Update existing record
       const { data: updated, error: updateError } = await supabase
         .from('learning_activity')
-        .update({ 
-          count: (existing.count || 0) + 1,
-          updated_at: timestamp
+        .update({
+          count: existing.count + 1,
+          updated_at: currentDate.toISOString()
         })
         .eq('id', existing.id)
         .select()
@@ -1071,33 +1069,31 @@ export async function trackLearningActivity(category: string) {
 
       if (updateError) {
         console.error('Error updating activity:', updateError);
-        return null;
+        throw updateError;
       }
-      console.log('Activity updated successfully:', updated);
+
       return updated;
     } else {
-      const newActivity = {
-        user_id: user.id,
-        category,
-        date: dateStr,
-        count: 1,
-        created_at: timestamp,
-        updated_at: timestamp
-      };
-      console.log('Creating new activity:', newActivity);
-
-      const { data: inserted, error: insertError } = await supabase
+      // Create new record
+      const { data: created, error: insertError } = await supabase
         .from('learning_activity')
-        .insert([newActivity])
+        .insert([{
+          user_id: user.id,
+          category,
+          date: dateStr,
+          count: 1,
+          created_at: currentDate.toISOString(),
+          updated_at: currentDate.toISOString()
+        }])
         .select()
         .single();
 
       if (insertError) {
-        console.error('Error inserting activity:', insertError);
-        return null;
+        console.error('Error creating activity:', insertError);
+        throw insertError;
       }
-      console.log('Activity created successfully:', inserted);
-      return inserted;
+
+      return created;
     }
   } catch (error) {
     console.error('Error tracking learning activity:', error);
@@ -1113,7 +1109,7 @@ export async function getYearlyActivity(category: string) {
       return [];
     }
 
-    const currentDate = new Date('2025-01-02T23:46:53+01:00');
+    const currentDate = new Date();
     const year = currentDate.getFullYear();
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year, 11, 31);
