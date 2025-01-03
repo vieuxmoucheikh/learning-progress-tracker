@@ -181,23 +181,23 @@ export const YearlyActivityStats: React.FC = () => {
               <div className="bg-white/80 dark:bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-gray-100 dark:border-white/10">
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-blue-500" />
-                  <p className="text-sm text-gray-900 dark:text-white font-medium">Total Activities</p>
+                  <p className="text-sm text-black dark:text-black font-medium">Total Activities</p>
                 </div>
-                <p className="text-xl font-semibold mt-1 text-gray-900 dark:text-white">{totalActivities}</p>
+                <p className="text-xl font-semibold mt-1 text-black dark:text-black">{totalActivities}</p>
               </div>
               <div className="bg-white/80 dark:bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-gray-100 dark:border-white/10">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-blue-500" />
-                  <p className="text-sm text-gray-900 dark:text-white font-medium">Active Days</p>
+                  <p className="text-sm text-black dark:text-black font-medium">Active Days</p>
                 </div>
-                <p className="text-xl font-semibold mt-1 text-gray-900 dark:text-white">{activeDays}</p>
+                <p className="text-xl font-semibold mt-1 text-black dark:text-black">{activeDays}</p>
               </div>
               <div className="bg-white/80 dark:bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-gray-100 dark:border-white/10">
                 <div className="flex items-center gap-2">
                   <BarChart2 className="w-4 h-4 text-blue-500" />
-                  <p className="text-sm text-gray-900 dark:text-white font-medium">Average Per Day</p>
+                  <p className="text-sm text-black dark:text-black font-medium">Average Per Day</p>
                 </div>
-                <p className="text-xl font-semibold mt-1 text-gray-900 dark:text-white">{averagePerDay}</p>
+                <p className="text-xl font-semibold mt-1 text-black dark:text-black">{averagePerDay}</p>
               </div>
             </div>
 

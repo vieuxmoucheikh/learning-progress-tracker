@@ -137,7 +137,7 @@ export function YearlyActivityHeatmap({
   }, [weeks]);
 
   const getColorForCount = (count: number) => {
-    if (count === 0) return 'bg-gray-100 dark:bg-white/5';
+    if (count === 0) return 'bg-gray-200 dark:bg-gray-200';
     if (count === 1) return 'bg-emerald-400 hover:bg-emerald-500 dark:bg-emerald-400 dark:hover:bg-emerald-300';
     if (count <= 3) return 'bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-400';
     return 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500';
@@ -153,16 +153,16 @@ export function YearlyActivityHeatmap({
           onClick={() => setSelectedYear(selectedYear - 1)}
           className="hover:bg-white/50 dark:hover:bg-white/10 border-gray-100 dark:border-white/10"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4 text-blue-500" />
         </Button>
-        <div className="text-lg font-semibold text-gray-900 dark:text-white">{selectedYear}</div>
+        <div className="text-lg font-semibold text-black dark:text-black">{selectedYear}</div>
         <Button
           variant="outline"
           size="sm"
           onClick={() => setSelectedYear(selectedYear + 1)}
           className="hover:bg-white/50 dark:hover:bg-white/10 border-gray-100 dark:border-white/10"
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-4 w-4 text-blue-500" />
         </Button>
       </div>
 
@@ -177,7 +177,7 @@ export function YearlyActivityHeatmap({
                 {monthLabels.map((label, i) => (
                   <div
                     key={i}
-                    className="text-gray-900 dark:text-white text-center font-medium"
+                    className="text-black dark:text-black text-center font-medium"
                     style={{ 
                       gridColumnStart: label.index + 1,
                       gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
@@ -197,7 +197,7 @@ export function YearlyActivityHeatmap({
               {DAYS.map((day) => (
                 <div 
                   key={day} 
-                  className="text-gray-900 dark:text-white flex items-center w-5 font-medium"
+                  className="text-black dark:text-black flex items-center w-5 font-medium"
                   style={{ 
                     height: 'min(1.5vw, 14px)',
                     maxHeight: '14px'
@@ -222,7 +222,7 @@ export function YearlyActivityHeatmap({
                                 'rounded-[1px] transition-colors duration-200',
                                 day.isCurrentYear
                                   ? getColorForCount(day.count)
-                                  : 'bg-gray-50 dark:bg-white/5'
+                                  : 'bg-gray-200 dark:bg-gray-200'
                               )}
                               style={{ 
                                 height: 'min(1.5vw, 14px)',
@@ -235,10 +235,10 @@ export function YearlyActivityHeatmap({
                             className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-100 dark:border-white/10"
                           >
                             <div className="text-xs">
-                              <div className="font-medium text-gray-900 dark:text-white">
+                              <div className="font-medium text-black dark:text-black">
                                 {format(parseISO(day.date), 'MMM d, yyyy')}
                               </div>
-                              <div className="text-gray-700 dark:text-gray-100">
+                              <div className="text-black dark:text-black">
                                 {day.count} {day.count === 1 ? 'activity' : 'activities'}
                               </div>
                             </div>
@@ -253,7 +253,7 @@ export function YearlyActivityHeatmap({
           </div>
 
           {/* Legend */}
-          <div className="flex items-center gap-1.5 mt-3 justify-end text-gray-900 dark:text-white">
+          <div className="flex items-center gap-1.5 mt-3 justify-end text-black dark:text-black">
             <span className="text-xs font-medium">Less</span>
             {[0, 1, 2, 4].map((count) => (
               <div
