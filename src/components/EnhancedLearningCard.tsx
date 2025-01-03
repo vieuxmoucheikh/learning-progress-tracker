@@ -85,7 +85,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   const [newTag, setNewTag] = useState('');
   const [category, setCategory] = useState(initialCategory);
   const [mastered, setMastered] = useState(initialMastered);
-  const [showContent, setShowContent] = useState(false);
+  const [showContent, setShowContent] = useState(true);
   const [isZoomed, setIsZoomed] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
@@ -234,58 +234,68 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
   return (
     <Card className={cn(
-      "relative overflow-hidden transition-all duration-200",
+      "relative overflow-hidden transition-all duration-300 border-2",
+      "hover:shadow-lg hover:shadow-blue-100/50 dark:hover:shadow-blue-900/30",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
-      mastered ? "border-green-200 bg-green-50/30" : ""
+      mastered 
+        ? "border-emerald-200 bg-gradient-to-br from-emerald-50/50 to-transparent dark:from-emerald-950/30" 
+        : "border-transparent hover:border-blue-200 dark:hover:border-blue-800",
+      isEditing && "border-blue-300 dark:border-blue-700"
     )}>
-      <CardHeader className="space-y-2">
+      <CardHeader className="space-y-3 pb-3">
         <div className="flex items-center justify-between">
           {isEditing ? (
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="text-lg font-semibold"
+              className="text-lg font-semibold focus-visible:ring-blue-400"
+              placeholder="Enter title..."
             />
           ) : (
-            <h3 className="text-lg font-semibold">{title}</h3>
+            <h3 className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+              {title}
+            </h3>
           )}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1.5">
             {mastered && (
-              <Trophy className="w-4 h-4 text-yellow-500" />
+              <Trophy className="w-4 h-4 text-yellow-500 animate-pulse" />
             )}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setShowContent(!showContent)}
+              className="h-8 w-8 hover:bg-blue-50 dark:hover:bg-blue-950/50"
               title={showContent ? "Hide content" : "Show content"}
             >
               {showContent ? (
-                <EyeOff className="w-4 h-4" />
+                <EyeOff className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               ) : (
-                <Eye className="w-4 h-4" />
+                <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               )}
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsEditing(!isEditing)}
+              className="h-8 w-8 hover:bg-blue-50 dark:hover:bg-blue-950/50"
               title={isEditing ? "Save changes" : "Edit card"}
             >
               {isEditing ? (
-                <Save className="w-4 h-4" />
+                <Save className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               ) : (
-                <Edit className="w-4 h-4" />
+                <Edit className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               )}
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsZoomed(!isZoomed)}
+              className="h-8 w-8 hover:bg-blue-50 dark:hover:bg-blue-950/50"
             >
               {isZoomed ? (
-                <ZoomOut className="w-4 h-4" />
+                <ZoomOut className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               ) : (
-                <ZoomIn className="w-4 h-4" />
+                <ZoomIn className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               )}
             </Button>
           </div>
@@ -298,18 +308,21 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           {category && (
             <>
               <span>•</span>
-              <span>{category}</span>
+              <span className="text-blue-600 dark:text-blue-400">{category}</span>
             </>
           )}
         </div>
 
         {/* Tags */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {tags.map((tag) => (
             <Badge 
               key={tag} 
               variant="secondary"
-              className={isEditing ? "cursor-pointer hover:bg-destructive/20" : ""}
+              className={cn(
+                "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200/50 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800/50",
+                isEditing && "cursor-pointer hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-950/50 dark:hover:text-red-400"
+              )}
               onClick={isEditing ? () => handleRemoveTag(tag) : undefined}
             >
               {tag}
@@ -321,28 +334,36 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
               onKeyDown={handleAddTag}
-              placeholder="Add tag (press Enter)"
-              className="w-32 h-6 text-sm"
+              placeholder="Add tag..."
+              className="w-24 h-6 text-sm bg-blue-50/50 border-blue-200/50 focus-visible:ring-blue-400 dark:bg-blue-950/30 dark:border-blue-800/50"
             />
           )}
         </div>
       </CardHeader>
-      <CardContent>
+
+      <CardContent className={cn(
+        "transition-all duration-300",
+        isEditing ? "bg-white dark:bg-transparent" : "hover:bg-blue-50/50 dark:hover:bg-blue-950/30"
+      )}>
         {isEditing ? (
           <div className="space-y-4">
             <div>
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title" className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                Title
+              </Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="mt-1.5"
+                className="mt-1.5 focus-visible:ring-blue-400"
               />
             </div>
 
             <div>
-              <Label htmlFor="content">Content</Label>
-              <div className="mt-1.5">
+              <Label htmlFor="content" className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                Content
+              </Label>
+              <div className="mt-1.5 rounded-lg border border-input bg-white dark:bg-gray-950">
                 <RichTextEditor
                   content={content}
                   onChange={setContent}
@@ -350,7 +371,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end space-x-2 pt-2">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -360,6 +381,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   setTags(initialTags);
                   setCategory(initialCategory);
                 }}
+                className="border-blue-200 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-800 dark:hover:border-blue-700 dark:hover:bg-blue-950/50"
               >
                 Cancel
               </Button>
@@ -381,6 +403,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     });
                   }
                 }}
+                className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-700 dark:hover:bg-blue-800"
               >
                 Save Changes
               </Button>
@@ -389,24 +412,30 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         ) : (
           <div 
             className={cn(
-              "space-y-3 transition-all duration-200",
+              "space-y-3 transition-all duration-300",
               !showContent && "blur-md select-none"
             )}
           >
             <div 
-              className="prose prose-sm max-w-none dark:prose-invert line-clamp-6 hover:line-clamp-none transition-all cursor-pointer"
+              className="prose prose-sm max-w-none dark:prose-invert hover:prose-a:text-blue-600 prose-headings:text-blue-700 dark:prose-headings:text-blue-400 line-clamp-6 hover:line-clamp-none transition-all cursor-pointer"
               onClick={() => setIsZoomed(true)}
               dangerouslySetInnerHTML={{ __html: content }}
             />
           </div>
         )}
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+
+      <CardFooter className="flex justify-between py-3 bg-gradient-to-b from-transparent to-blue-50/30 dark:to-blue-950/30">
+        <div className="flex items-center space-x-2">
           <Button
             variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:text-foreground"
+            className={cn(
+              "text-sm transition-colors",
+              mastered 
+                ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-950/50" 
+                : "text-muted-foreground hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950/50"
+            )}
             onClick={() => setMastered(!mastered)}
           >
             {mastered ? (
@@ -425,7 +454,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-destructive hover:text-destructive"
+          className="text-sm text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
           onClick={onDelete}
         >
           <Trash2 className="w-4 h-4 mr-1" />
@@ -434,60 +463,15 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       </CardFooter>
 
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="fixed z-50 left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 sm:rounded-lg">
-          <DialogHeader className="mb-6">
-            <DialogTitle className="text-xl sm:text-2xl font-semibold text-center bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
               {title}
             </DialogTitle>
           </DialogHeader>
-          <div className="w-full max-w-[65ch] mx-auto px-2 sm:px-4">
-            <div 
-              className={cn(
-                "prose prose-lg dark:prose-invert",
-                "prose-headings:text-blue-900 dark:prose-headings:text-blue-300",
-                "prose-a:text-blue-700 dark:prose-a:text-blue-400",
-                "prose-strong:text-blue-900 dark:prose-strong:text-blue-300",
-                "[&_ul]:list-disc [&_ol]:list-decimal",
-                "[&_ul>li]:pl-0 [&_ol>li]:pl-0",
-                "[&_ul>li]:my-0 [&_ol>li]:my-0",
-                "[&_ul]:pl-5 [&_ol]:pl-5",
-                "[&_ul]:my-1 [&_ol]:my-1"
-              )}
-            >
-              <div dangerouslySetInnerHTML={{ __html: content }} />
-            </div>
-          </div>
-          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </DialogPrimitive.Close>
+          <div className="prose prose-blue max-w-none dark:prose-invert mt-4" dangerouslySetInnerHTML={{ __html: content }} />
         </DialogContent>
       </Dialog>
-
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent className="fixed z-50 left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-md p-4 sm:p-6 sm:rounded-lg">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl text-center text-red-600 dark:text-red-400">
-              Delete Card
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-center">
-              Are you sure you want to delete this card? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-500 hover:bg-red-600"
-              onClick={() => {
-                onDelete();
-                setIsDeleteDialogOpen(false);
-              }}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Card>
   );
 };

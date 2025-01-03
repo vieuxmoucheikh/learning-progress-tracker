@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -44,54 +44,65 @@ export const LearningCardsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [categories, setCategories] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'updated' | 'created' | 'mastered'>('updated');
-  const [showMastered, setShowMastered] = useState<'all' | 'mastered' | 'not_mastered'>('all');
   const { toast } = useToast();
 
   const allTags = Array.from(
     new Set(cards.flatMap((card) => card.tags))
   ).sort();
 
-  // Filter and sort cards
+  // Memoized search function for better performance
+  const searchCards = useCallback((cards: CardType[], searchTerm: string) => {
+    const terms = searchTerm.toLowerCase().split(' ').filter(Boolean);
+    if (terms.length === 0) return cards;
+
+    return cards.filter(card => {
+      const searchableText = `${card.title} ${card.content} ${card.category} ${card.tags.join(' ')}`.toLowerCase();
+      return terms.every(term => searchableText.includes(term));
+    });
+  }, []);
+
+  // Filter and sort cards with better performance
   const filteredCards = useMemo(() => {
-    return cards
-      .filter(card => {
-        const matchesSearch = card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            card.content.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesTags = selectedTags.length === 0 || 
-                          selectedTags.every(tag => card.tags.includes(tag));
-        const matchesCategory = selectedCategory === 'all' || 
-                              card.category === selectedCategory;
-        const matchesMastered = showMastered === 'all' || 
-                              (showMastered === 'mastered' ? card.mastered : !card.mastered);
-        
-        return matchesSearch && matchesTags && matchesCategory && matchesMastered;
-      })
-      .sort((a, b) => {
-        if (sortBy === 'updated') {
+    let result = [...cards];
+
+    // Apply search filter
+    if (searchTerm) {
+      result = searchCards(result, searchTerm);
+    }
+
+    // Apply category filter
+    if (selectedCategory !== 'all') {
+      result = result.filter(card => card.category === selectedCategory);
+    }
+
+    // Apply tag filter
+    if (selectedTags.length > 0) {
+      result = result.filter(card => 
+        selectedTags.every(tag => card.tags.includes(tag))
+      );
+    }
+
+    // Apply sorting
+    return result.sort((a, b) => {
+      switch (sortBy) {
+        case 'updated':
           return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-        } else if (sortBy === 'created') {
+        case 'created':
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        } else {
-          // Sort by mastered status
-          if (a.mastered === b.mastered) {
-            return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-          }
-          return a.mastered ? -1 : 1;
-        }
-      });
-  }, [cards, searchTerm, selectedTags, selectedCategory, showMastered, sortBy]);
+        case 'mastered':
+          return (b.mastered === a.mastered) 
+            ? new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+            : b.mastered ? -1 : 1;
+        default:
+          return 0;
+      }
+    });
+  }, [cards, searchTerm, selectedCategory, selectedTags, sortBy, searchCards]);
 
   // Handle sort change with type safety
   const handleSortChange = (value: string) => {
     if (value === 'updated' || value === 'created' || value === 'mastered') {
       setSortBy(value);
-    }
-  };
-
-  // Handle mastered filter change with type safety
-  const handleMasteredChange = (value: string) => {
-    if (value === 'all' || value === 'mastered' || value === 'not_mastered') {
-      setShowMastered(value);
     }
   };
 
@@ -209,7 +220,7 @@ export const LearningCardsPage = () => {
         </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -244,19 +255,7 @@ export const LearningCardsPage = () => {
             <SelectContent>
               <SelectItem value="updated">Last Updated</SelectItem>
               <SelectItem value="created">Created Date</SelectItem>
-              <SelectItem value="mastered">Mastered Status</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Mastered Filter */}
-          <Select value={showMastered} onValueChange={handleMasteredChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Mastered status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Cards</SelectItem>
-              <SelectItem value="mastered">Mastered Only</SelectItem>
-              <SelectItem value="not_mastered">Not Mastered</SelectItem>
+              <SelectItem value="mastered">Mastered First</SelectItem>
             </SelectContent>
           </Select>
         </div>
