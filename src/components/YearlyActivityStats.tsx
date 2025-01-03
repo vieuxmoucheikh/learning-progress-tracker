@@ -37,15 +37,17 @@ const YearlyActivityStats = () => {
   const fetchActivities = async (category: string) => {
     try {
       console.log('Fetching activities for category:', category);
-      const currentDate = new Date('2025-01-03T08:16:05+01:00');
+      const currentDate = new Date('2025-01-03T08:27:26+01:00');
       const year = currentDate.getFullYear();
       const startDate = new Date(year, 0, 1).toISOString().split('T')[0];
       const endDate = new Date(year, 11, 31).toISOString().split('T')[0];
       
       const activities = await getLearningActivity(startDate, endDate);
-      const categoryActivities = activities.filter(a => a.category === category);
+      console.log('All activities:', activities);
       
-      console.log('Received activities:', {
+      const categoryActivities = activities.filter(a => a.category.toLowerCase() === category.toLowerCase());
+      console.log('Filtered activities for category:', {
+        category,
         total: categoryActivities.length,
         activities: categoryActivities
       });
