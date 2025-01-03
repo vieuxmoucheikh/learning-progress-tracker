@@ -138,9 +138,9 @@ export function YearlyActivityHeatmap({
 
   const getColorForCount = (count: number) => {
     if (count === 0) return 'bg-gray-100 dark:bg-white/5';
-    if (count === 1) return 'bg-blue-400/80 hover:bg-blue-400 dark:bg-blue-400 dark:hover:bg-blue-300';
-    if (count <= 3) return 'bg-blue-500/90 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-400';
-    return 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500';
+    if (count === 1) return 'bg-emerald-400 hover:bg-emerald-500 dark:bg-emerald-400 dark:hover:bg-emerald-300';
+    if (count <= 3) return 'bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-400';
+    return 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500';
   };
 
   return (
@@ -155,7 +155,7 @@ export function YearlyActivityHeatmap({
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <div className="text-lg font-semibold text-gray-900 dark:text-white">{selectedYear}</div>
+        <div className="text-lg font-semibold text-gray-900 dark:text-white/90">{selectedYear}</div>
         <Button
           variant="outline"
           size="sm"
@@ -177,7 +177,7 @@ export function YearlyActivityHeatmap({
                 {monthLabels.map((label, i) => (
                   <div
                     key={i}
-                    className="text-gray-600 dark:text-gray-300 text-center font-medium"
+                    className="text-gray-700 dark:text-white/80 text-center font-medium"
                     style={{ 
                       gridColumnStart: label.index + 1,
                       gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
@@ -197,7 +197,7 @@ export function YearlyActivityHeatmap({
               {DAYS.map((day) => (
                 <div 
                   key={day} 
-                  className="text-gray-600 dark:text-gray-300 flex items-center w-5 font-medium"
+                  className="text-gray-700 dark:text-white/80 flex items-center w-5 font-medium"
                   style={{ 
                     height: 'min(1.5vw, 14px)',
                     maxHeight: '14px'
@@ -232,13 +232,13 @@ export function YearlyActivityHeatmap({
                           </TooltipTrigger>
                           <TooltipContent 
                             side="top"
-                            className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/50 dark:border-white/10"
+                            className="bg-white/90 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-white/10"
                           >
                             <div className="text-xs">
                               <div className="font-medium text-gray-900 dark:text-white">
                                 {format(parseISO(day.date), 'MMM d, yyyy')}
                               </div>
-                              <div className="text-gray-700 dark:text-gray-200">
+                              <div className="text-gray-700 dark:text-white/80">
                                 {day.count} {day.count === 1 ? 'activity' : 'activities'}
                               </div>
                             </div>
@@ -253,7 +253,7 @@ export function YearlyActivityHeatmap({
           </div>
 
           {/* Legend */}
-          <div className="flex items-center gap-1.5 mt-3 justify-end text-gray-600 dark:text-gray-300">
+          <div className="flex items-center gap-1.5 mt-3 justify-end text-gray-700 dark:text-white/80">
             <span className="text-xs font-medium">Less</span>
             {[0, 1, 2, 4].map((count) => (
               <div
