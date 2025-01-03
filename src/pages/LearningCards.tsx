@@ -42,8 +42,9 @@ export const LearningCardsPage = () => {
     try {
       const items = await getLearningItems();
       const uniqueCategories = Array.from(
-        new Set(items.map(item => item.category).filter(Boolean))
+        new Set(items.map(item => (item.category || 'Uncategorized').toUpperCase()))
       ).sort();
+      console.log('Fetched categories:', uniqueCategories);
       setCategories(uniqueCategories);
     } catch (error) {
       console.error('Error fetching categories:', error);

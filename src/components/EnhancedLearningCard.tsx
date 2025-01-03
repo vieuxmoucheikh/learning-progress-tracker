@@ -89,7 +89,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   const [mastered, setMastered] = useState(initialMastered);
   const [isZoomed, setIsZoomed] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [itemCategory, setItemCategory] = useState(initialCategory);
+  const [itemCategory, setItemCategory] = useState(initialCategory.toUpperCase());
   const [categories, setCategories] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -101,7 +101,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       try {
         const items = await getLearningItems();
         const uniqueCategories = Array.from(
-          new Set(items.map(item => item.category).filter(Boolean))
+          new Set(items.map(item => item.category.toUpperCase()).filter(Boolean))
         ).sort();
         setCategories(uniqueCategories);
       } catch (error) {
@@ -216,9 +216,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     
     setIsLoading(true);
     try {
-      console.log('Completing item:', { id, category: itemCategory });
-      const currentCategory = itemCategory || 'Uncategorized';
-      const currentDate = new Date('2025-01-03T08:56:35+01:00').toISOString().split('T')[0];
+      const currentCategory = (itemCategory || 'Uncategorized').toUpperCase();
+      const currentDate = new Date('2025-01-03T09:04:21+01:00').toISOString().split('T')[0];
       
       console.log('Completing item:', { 
         id, 
@@ -228,17 +227,17 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       
       // Track the learning activity first
       console.log('Tracking activity:', { 
-        category: currentCategory.toUpperCase(), 
+        category: currentCategory,
         date: currentDate 
       });
-      await incrementLearningActivity(currentCategory.toUpperCase(), currentDate);
+      await incrementLearningActivity(currentCategory, currentDate);
 
       // Then update the learning item
       const updatedItem = {
         id,
         mastered: true,
-        updatedAt: new Date('2025-01-03T08:56:35+01:00').toISOString(),
-        category: currentCategory.toUpperCase() 
+        updatedAt: new Date('2025-01-03T09:04:21+01:00').toISOString(),
+        category: currentCategory
       };
 
       console.log('Saving item:', updatedItem);

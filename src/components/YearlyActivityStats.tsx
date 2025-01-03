@@ -82,7 +82,9 @@ const YearlyActivityStats = () => {
       setLoading(true);
       try {
         const items = await getLearningItems();
-        const uniqueCategories = Array.from(new Set(items.map(item => item.category || 'Uncategorized')));
+        const uniqueCategories = Array.from(
+          new Set(items.map(item => (item.category || 'Uncategorized').toUpperCase()))
+        ).sort();
         console.log('Fetched categories:', uniqueCategories);
         setCategories(uniqueCategories);
         
@@ -122,8 +124,12 @@ const YearlyActivityStats = () => {
   }, [selectedCategory]);
 
   const handleCategoryChange = (newCategory: string) => {
-    console.log('Category changed to:', newCategory);
-    setSelectedCategory(newCategory);
+    const normalizedCategory = newCategory.toUpperCase();
+    console.log('Category changed to:', { 
+      original: newCategory, 
+      normalized: normalizedCategory 
+    });
+    setSelectedCategory(normalizedCategory);
   };
 
   const totalActivities = activityData.reduce((sum, day) => sum + (day.count || 0), 0);
