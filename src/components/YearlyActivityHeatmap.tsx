@@ -51,7 +51,7 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
   const calendarData = generateCalendarData();
 
   const getColorForCount = (count: number) => {
-    if (count === 0) return 'bg-gray-100 dark:bg-gray-800';
+    if (count === 0) return 'bg-gray-50 dark:bg-gray-900';
     if (count === 1) return 'bg-emerald-200 hover:bg-emerald-300 dark:bg-emerald-800 dark:hover:bg-emerald-700';
     if (count <= 3) return 'bg-emerald-400 hover:bg-emerald-500 dark:bg-emerald-600 dark:hover:bg-emerald-500';
     return 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-400 dark:hover:bg-emerald-300';
@@ -106,19 +106,19 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
   return (
     <div className="w-full space-y-4">
       {renderLegend()}
-      <div className="overflow-x-auto sm:overflow-x-visible -mx-4 sm:mx-0">
-        <div className="min-w-fit px-4 sm:px-0">
+      <div className="overflow-x-auto sm:overflow-x-visible -mx-6 sm:mx-0">
+        <div className="min-w-fit px-6 sm:px-0">
           <div className="relative">
             {/* Month labels */}
             <div className="flex mb-1 sm:mb-2 relative">
-              <div className="w-4 sm:w-8" /> {/* Offset for day labels */}
+              <div className="w-3 sm:w-8" /> {/* Offset for day labels */}
               <div className="flex flex-1">
                 {monthLabels.map((label, i) => (
                   <div
                     key={i}
                     className="absolute text-[8px] sm:text-xs text-gray-500 origin-left"
                     style={{ 
-                      left: `${label.index * (window.innerWidth <= 640 ? 8 : 16) + 12}px`,
+                      left: `${label.index * (window.innerWidth <= 640 ? 6 : 16) + 10}px`,
                       transform: window.innerWidth <= 640 ? 'rotate(-60deg) translateY(-8px)' : 'none'
                     }}
                   >
@@ -131,11 +131,11 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
             {/* Main grid */}
             <div className="flex">
               {/* Day labels */}
-              <div className="flex flex-col gap-[1px] sm:gap-1 pr-1 sm:pr-2">
+              <div className="flex flex-col gap-[2px] sm:gap-1 pr-1 sm:pr-2">
                 {DAYS.map((day, i) => (
                   <div 
                     key={day} 
-                    className="h-1.5 sm:h-3 text-[8px] sm:text-xs text-gray-500 flex items-center"
+                    className="h-2 sm:h-3 text-[8px] sm:text-xs text-gray-500 flex items-center"
                   >
                     {i % 2 === 0 ? day.slice(0, 1) : ''}
                   </div>
@@ -143,9 +143,9 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
               </div>
 
               {/* Calendar grid */}
-              <div className="flex gap-[1px] sm:gap-1">
+              <div className="flex gap-[2px] sm:gap-1">
                 {weeks.map((week, weekIndex) => (
-                  <div key={weekIndex} className="flex flex-col gap-[1px] sm:gap-1">
+                  <div key={weekIndex} className="flex flex-col gap-[2px] sm:gap-1">
                     {week.map((day) => {
                       const colorClass = getColorForCount(day.count);
                       const dateObj = new Date(day.date);
@@ -157,8 +157,9 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
                             <TooltipTrigger asChild>
                               <div
                                 className={cn(
-                                  'w-1.5 h-1.5 sm:w-3 sm:h-3 rounded-sm transition-colors duration-200',
+                                  'w-[5px] h-2 sm:w-3 sm:h-3 rounded-[1px] sm:rounded-sm transition-colors duration-200',
                                   colorClass,
+                                  'border border-gray-100 dark:border-gray-800',
                                   day.count > 0 ? 'cursor-pointer transform hover:scale-125' : ''
                                 )}
                               />
