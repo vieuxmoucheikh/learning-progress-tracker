@@ -27,25 +27,22 @@ interface DayData {
   dayOfWeek?: number;
 }
 
-const YearlyActivityStats = () => {
+export const YearlyActivityStats: React.FC = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Function to fetch activities
-  const fetchActivities = async () => {
+  const fetchActivities = async (category: string) => {
     try {
-      const currentDate = new Date('2025-01-03T09:32:27+01:00');
+      console.log('Fetching activities for category:', category);
+      const currentDate = new Date('2025-01-03T09:15:06+01:00');
       const year = currentDate.getFullYear();
       const startDate = new Date(year, 0, 1).toISOString().split('T')[0];
       const endDate = new Date(year, 11, 31).toISOString().split('T')[0];
-
-      console.log('Fetching activities for category:', selectedCategory);
+      
       const activities = await getLearningActivity(startDate, endDate);
-      console.log('Retrieved activities:', activities);
-
-      // Log the raw data for debugging
       console.log('Raw activities data:', activities.map(a => ({
         id: a.id,
         category: a.category,
@@ -53,42 +50,38 @@ const YearlyActivityStats = () => {
         count: a.count,
         raw_category: a.category
       })));
-
-      // Filter activities for the selected category
+      
       const categoryActivities = activities.filter(a => {
         const activityCategory = (a.category || '').toUpperCase();
-        const selectedCategoryUpper = selectedCategory.toUpperCase();
-
+        const selectedCategory = (category || '').toUpperCase();
+        const match = activityCategory === selectedCategory;
         console.log('Comparing categories:', {
           activity: activityCategory,
-          selected: selectedCategoryUpper,
-          matches: activityCategory === selectedCategoryUpper,
+          selected: selectedCategory,
+          matches: match,
           raw: {
             activity: a.category,
-            selected: selectedCategory
+            selected: category
           }
         });
-
-        return activityCategory === selectedCategoryUpper;
+        return match;
       });
-
+      
       console.log('Filtered activities for category:', {
-        category: selectedCategory,
-        selectedCategory: selectedCategory.toUpperCase(),
+        category,
+        selectedCategory: category.toUpperCase(),
         total: categoryActivities.length,
-        activities: categoryActivities.map(a => ({
-          id: a.id,
+        activities: categoryActivities.map(a => ({ 
           category: a.category,
           date: a.date,
           count: a.count,
           raw_category: a.category
         }))
       });
-
+      
       setActivityData(categoryActivities);
     } catch (error) {
       console.error('Error fetching activities:', error);
-      setActivityData([]);
     }
   };
 
@@ -109,7 +102,7 @@ const YearlyActivityStats = () => {
           const defaultCategory = uniqueCategories[0];
           console.log('Setting default category:', defaultCategory);
           setSelectedCategory(defaultCategory);
-          await fetchActivities();
+          await fetchActivities(defaultCategory);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -124,7 +117,7 @@ const YearlyActivityStats = () => {
   // Fetch activities when category changes
   useEffect(() => {
     if (selectedCategory) {
-      fetchActivities();
+      fetchActivities(selectedCategory);
     }
   }, [selectedCategory]);
 
@@ -132,7 +125,7 @@ const YearlyActivityStats = () => {
   useEffect(() => {
     const refreshInterval = setInterval(() => {
       if (selectedCategory) {
-        fetchActivities();
+        fetchActivities(selectedCategory);
       }
     }, 3000); // Refresh every 3 seconds
 
@@ -209,5 +202,3 @@ const formatDate = (dateStr: string) => {
     day: 'numeric' 
   });
 };
-
-export default YearlyActivityStats;

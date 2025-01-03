@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { LearningItem } from '../types';
-import { BarChart3, Clock, Calendar as CalendarIcon, Trophy, TrendingUp, Target } from 'lucide-react';
+import { BarChart3, Clock, Calendar, Trophy, TrendingUp, Target } from 'lucide-react';
 import { calculateTimeByCategory } from '../lib/utils';
 import { YearlyActivityStats } from './YearlyActivityStats';
 
@@ -184,7 +184,7 @@ export function Stats({ items }: Props) {
       <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-red-100 transition-all duration-200 hover:shadow-md">
         <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
           <div className="p-2 bg-red-50 rounded-lg">
-            <CalendarIcon className="w-6 h-6 text-red-500" />
+            <Calendar className="w-6 h-6 text-red-500" />
           </div>
           Time by Category
         </h3>

@@ -187,49 +187,15 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
   const toggleMastered = async () => {
     try {
-      const currentCategory = (itemCategory || 'Uncategorized').toUpperCase();
-      const currentDate = new Date('2025-01-03T09:32:27+01:00').toISOString().split('T')[0];
-
-      console.log('Toggling mastered:', {
-        id,
-        category: currentCategory,
-        originalCategory: itemCategory,
-        date: currentDate,
-        mastered: !mastered
-      });
-
-      const updatedItem = {
-        ...{ id, title, content, media, tags },
-        mastered: !mastered,
-        category: currentCategory,
-        updatedAt: new Date('2025-01-03T09:32:27+01:00').toISOString()
-      };
-
-      const success = await onSave(updatedItem);
+      const success = await onSave({ ...{ id, title, content, media, tags }, mastered: !mastered });
       if (success) {
         // Track the learning activity when marking as mastered
         if (!mastered) {
-          console.log('Tracking activity:', {
-            category: currentCategory,
-            originalCategory: itemCategory,
-            date: currentDate
-          });
-          const activity = await incrementLearningActivity(currentCategory, currentDate);
-          console.log('Activity tracked:', activity);
+          console.log('Tracking activity for category:', itemCategory);
+          const currentDate = new Date('2025-01-03T08:21:21+01:00').toISOString().split('T')[0];
+          await incrementLearningActivity(itemCategory || 'Uncategorized', currentDate);
         }
-
-        // Update local state
         setMastered(!mastered);
-        setItemCategory(currentCategory);
-
-        console.log('Item updated successfully:', {
-          ...updatedItem,
-          localState: {
-            mastered: !mastered,
-            itemCategory: currentCategory
-          }
-        });
-
         toast({
           title: "Success",
           description: `Card marked as ${!mastered ? 'mastered' : 'not mastered'}`,
