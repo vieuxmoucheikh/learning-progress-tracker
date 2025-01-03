@@ -98,13 +98,16 @@ export const LearningCardsPage = () => {
   const handleSaveCard = async (card: Partial<CardType>): Promise<boolean> => {
     try {
       console.log('Saving card:', card);
+      const normalizedCategory = (card.category || 'Uncategorized').toUpperCase();
+      console.log('Normalized category:', normalizedCategory);
+      
       await learningCardsService.updateCard(card.id!, {
         title: card.title,
         content: card.content,
         media: card.media,
         tags: card.tags,
         mastered: card.mastered,
-        category: card.category,
+        category: normalizedCategory,
       });
       await fetchCards();
       toast({

@@ -65,14 +65,19 @@ class LearningCardsService {
 
   async updateCard(id: string, updates: Partial<EnhancedLearningCard>): Promise<EnhancedLearningCard> {
     try {
-      console.log('Updating card:', { id, updates });
+      const normalizedCategory = (updates.category || 'Uncategorized').toUpperCase();
+      console.log('Updating card with normalized category:', {
+        id,
+        updates: { ...updates, category: normalizedCategory }
+      });
+
       const updateData: any = {};
       
       if (updates.title !== undefined) updateData.title = updates.title;
       if (updates.content !== undefined) updateData.content = updates.content;
       if (updates.tags !== undefined) updateData.tags = updates.tags;
       if (updates.mastered !== undefined) updateData.mastered = updates.mastered;
-      if (updates.category !== undefined) updateData.category = updates.category;
+      if (updates.category !== undefined) updateData.category = normalizedCategory;
       
       const { data, error } = await supabase
         .from('enhanced_learning_cards')
