@@ -10,7 +10,12 @@ import {
   startOfYear,
   endOfYear,
   isBefore,
-  parseISO
+  parseISO,
+  eachWeekOfInterval,
+  eachMonthOfInterval,
+  differenceInWeeks,
+  getYear,
+  endOfWeek
 } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -19,6 +24,7 @@ interface DayData {
   date: string;
   count: number;
   isOutsideMonth?: boolean;
+  isCurrentYear: boolean;
 }
 
 type WeekData = (DayData | null)[];
@@ -79,59 +85,48 @@ export function YearlyActivityHeatmap({
   };
 
   const calendarData = generateCalendarData();
-  const weeks: WeekData[] = [];
-  
-  // Get the start of the first week of the year
-  let currentDate = startOfWeek(startOfYear(new Date(selectedYear, 0, 1)), { weekStartsOn: 0 });
-  const yearEnd = endOfYear(new Date(selectedYear, 11, 31));
-  
-  // Fill in all weeks of the year
-  while (isBefore(currentDate, addDays(yearEnd, 1))) {
-    const week: WeekData = Array(7).fill(null).map((_, i) => {
-      const date = addDays(currentDate, i);
-      const dateKey = format(date, 'yyyy-MM-dd');
-      if (date.getFullYear() === selectedYear) {
-        return {
-          date: dateKey,
-          count: calendarData[dateKey] || 0,
-          isOutsideMonth: false
-        };
-      }
-      return null;
+
+  // Calculate the start and end dates for the year
+  const startDate = startOfYear(new Date(selectedYear, 0, 1));
+  const endDate = endOfYear(startDate);
+
+  // Calculate the start of the first week and end of the last week
+  const firstWeekStart = startOfWeek(startDate, { weekStartsOn: 1 });
+  const lastWeekEnd = endOfWeek(endDate, { weekStartsOn: 1 });
+
+  // Generate all weeks including partial weeks from previous and next years
+  const weeks = eachWeekOfInterval(
+    { 
+      start: firstWeekStart,
+      end: lastWeekEnd 
+    },
+    { weekStartsOn: 1 }
+  ).map(weekStart => {
+    return DAYS.map((_, dayIndex) => {
+      const date = addDays(weekStart, dayIndex);
+      const formattedDate = format(date, 'yyyy-MM-dd');
+      return {
+        date: formattedDate,
+        count: calendarData[formattedDate] || 0,
+        isCurrentYear: getYear(date) === selectedYear
+      };
     });
-    
-    weeks.push(week);
-    currentDate = addWeeks(currentDate, 1);
-  }
+  });
+
+  // Calculate month labels with correct positioning
+  const monthLabels = eachMonthOfInterval({ start: firstWeekStart, end: lastWeekEnd })
+    .map((date, index, array) => {
+      const weekIndex = differenceInWeeks(date, firstWeekStart);
+      return {
+        text: format(date, 'MMM'),
+        index: weekIndex,
+      };
+    });
 
   // Calculate stats once
   const totalActivities = Object.values(calendarData).reduce((sum, count) => sum + count, 0);
   const activeDays = Object.values(calendarData).filter(count => count > 0).length;
   const averagePerDay = activeDays > 0 ? totalActivities / activeDays : 0;
-
-  const getMonthLabels = () => {
-    const labels: MonthLabel[] = [];
-    let currentMonth = -1;
-
-    weeks.forEach((week, weekIndex) => {
-      week.forEach((day) => {
-        if (!day) return;
-        const date = parseISO(day.date);
-        const month = date.getMonth();
-        if (month !== currentMonth) {
-          labels.push({
-            text: format(date, 'MMMM'),
-            index: weekIndex
-          });
-          currentMonth = month;
-        }
-      });
-    });
-
-    return labels;
-  };
-
-  const monthLabels = getMonthLabels();
 
   const getColorForCount = (count: number) => {
     if (count === 0) return 'bg-gray-50 border-gray-100';
@@ -201,14 +196,14 @@ export function YearlyActivityHeatmap({
           <div className="flex mb-2">
             <div className="w-8 sm:w-10" /> {/* Offset for day labels */}
             <div className="flex-1">
-              <div className="grid grid-cols-[repeat(52,1fr)] gap-[1px] sm:gap-1.5">
+              <div className="grid grid-cols-[repeat(53,1fr)] gap-[1px] sm:gap-1.5">
                 {monthLabels.map((label, i) => (
                   <div
                     key={i}
                     className="text-[8px] sm:text-xs text-gray-500 text-center"
                     style={{ 
                       gridColumnStart: label.index + 1,
-                      gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 53
+                      gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
                     }}
                   >
                     {window.innerWidth <= 640 ? label.text.slice(0, 1) : label.text}
@@ -233,54 +228,31 @@ export function YearlyActivityHeatmap({
             </div>
 
             {/* Calendar grid */}
-            <div className="flex-1 grid grid-cols-[repeat(52,1fr)] gap-[1px] sm:gap-1.5">
+            <div className="flex-1 grid grid-cols-[repeat(53,1fr)] gap-[1px] sm:gap-1.5">
               {weeks.map((week, weekIndex) => (
                 <div key={weekIndex} className="flex flex-col gap-[1px] sm:gap-1.5">
-                  {week.map((day, dayIndex) => {
-                    if (!day) {
-                      return (
-                        <div 
-                          key={dayIndex} 
-                          className="aspect-square w-full"
-                          style={{
-                            minHeight: window.innerWidth <= 640 ? '4px' : '17px'
-                          }}
-                        />
-                      );
-                    }
-                    
-                    const colorClass = getColorForCount(day.count);
-                    const dateObj = parseISO(day.date);
-                    const formattedDate = format(dateObj, 'MMMM d, yyyy');
-                    
-                    return (
-                      <TooltipProvider key={dayIndex}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div
-                              className={cn(
-                                'aspect-square w-full rounded-[1px] sm:rounded-sm transition-colors duration-200',
-                                'border',
-                                colorClass,
-                                day.count > 0 ? 'cursor-pointer transform hover:scale-110' : ''
-                              )}
-                              style={{
-                                minHeight: window.innerWidth <= 640 ? '4px' : '17px'
-                              }}
-                            />
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="text-[10px] sm:text-sm">
-                            <p className="font-medium">{formattedDate}</p>
-                            <p>
-                              {day.count === 0
-                                ? 'No activities'
-                                : `${day.count} ${day.count === 1 ? 'activity' : 'activities'}`}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    );
-                  })}
+                  {week.map((day, dayIndex) => (
+                    <TooltipProvider key={day.date}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            className={cn(
+                              'h-[4px] sm:h-4 rounded-[1px] sm:rounded',
+                              day.isCurrentYear
+                                ? getColorForCount(day.count)
+                                : 'bg-gray-100'
+                            )}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                          <div className="text-xs">
+                            <div>{format(parseISO(day.date), 'MMM d, yyyy')}</div>
+                            <div>{day.count} activities</div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ))}
                 </div>
               ))}
             </div>
