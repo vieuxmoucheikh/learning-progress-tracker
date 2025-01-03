@@ -43,7 +43,7 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function YearlyActivityHeatmap({ 
   data, 
-  year = new Date('2025-01-03T15:37:01+01:00').getFullYear(),
+  year = new Date().getFullYear(),
   onYearChange 
 }: YearlyActivityHeatmapProps) {
   const [selectedYear, setSelectedYear] = React.useState(year);
@@ -158,18 +158,19 @@ export function YearlyActivityHeatmap({
 
   return (
     <div className="w-full max-w-full space-y-4 overflow-hidden">
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <div className="text-blue-600 text-sm mb-1">Total Activities</div>
-          <div className="text-2xl font-semibold">{totalActivities}</div>
+      {/* Statistics section - only show once */}
+      <div className="mt-4 flex flex-wrap gap-4">
+        <div className="flex items-center gap-2">
+          <div className="text-sm font-medium text-gray-500">Total Activities:</div>
+          <div className="text-sm font-semibold">{totalActivities}</div>
         </div>
-        <div className="bg-purple-50 p-4 rounded-lg">
-          <div className="text-purple-600 text-sm mb-1">Active Days</div>
-          <div className="text-2xl font-semibold">{activeDays}</div>
+        <div className="flex items-center gap-2">
+          <div className="text-sm font-medium text-gray-500">Active Days:</div>
+          <div className="text-sm font-semibold">{activeDays}</div>
         </div>
-        <div className="bg-green-50 p-4 rounded-lg">
-          <div className="text-green-600 text-sm mb-1">Average Per Day</div>
-          <div className="text-2xl font-semibold">{averagePerDay.toFixed(1)}</div>
+        <div className="flex items-center gap-2">
+          <div className="text-sm font-medium text-gray-500">Average Per Day:</div>
+          <div className="text-sm font-semibold">{averagePerDay}</div>
         </div>
       </div>
 
@@ -198,17 +199,16 @@ export function YearlyActivityHeatmap({
         <div className="w-full">
           {/* Month labels */}
           <div className="flex mb-2">
-            <div className="w-8" /> {/* Offset for day labels */}
+            <div className="w-8 sm:w-10" /> {/* Offset for day labels */}
             <div className="flex-1">
-              <div className="grid grid-cols-[repeat(52,1fr)]">
+              <div className="grid grid-cols-[repeat(52,1fr)] gap-[1px] sm:gap-1.5">
                 {monthLabels.map((label, i) => (
                   <div
                     key={i}
                     className="text-[8px] sm:text-xs text-gray-500 text-center"
                     style={{ 
                       gridColumnStart: label.index + 1,
-                      gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 53,
-                      marginLeft: i === 0 ? '-8px' : '0'
+                      gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 53
                     }}
                   >
                     {window.innerWidth <= 640 ? label.text.slice(0, 1) : label.text}
@@ -221,13 +221,13 @@ export function YearlyActivityHeatmap({
           {/* Main grid */}
           <div className="flex">
             {/* Day labels */}
-            <div className="flex flex-col gap-[1px] sm:gap-1.5 pr-2">
+            <div className="flex flex-col gap-[1px] sm:gap-1.5 pr-2 sm:pr-3">
               {DAYS.map((day) => (
                 <div 
                   key={day} 
-                  className="h-[4px] sm:h-4 text-[8px] sm:text-xs text-gray-500 flex items-center w-6"
+                  className="h-[4px] sm:h-4 text-[8px] sm:text-xs text-gray-500 flex items-center w-8 sm:w-10"
                 >
-                  {day}
+                  {window.innerWidth <= 640 ? day[0] : day}
                 </div>
               ))}
             </div>
