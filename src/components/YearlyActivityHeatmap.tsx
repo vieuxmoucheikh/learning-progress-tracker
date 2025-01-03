@@ -75,56 +75,59 @@ export function YearlyActivityHeatmap({
     }
 
     // Fill in the activity data
-    Object.keys(activityData).forEach(date => {
+    Object.entries(activityData).forEach(([date, count]) => {
       const activityDate = parseISO(date);
-      if (activityDate.getFullYear() === selectedYear) {
-        const dateKey = format(activityDate, 'yyyy-MM-dd');
-        activityMap[dateKey] = activityData[date];
+      if (getYear(activityDate) === selectedYear) {
+        activityMap[date] = count;
       }
     });
 
     return activityMap;
   };
 
-  const calendarData = generateCalendarData();
+  const calendarData = useMemo(() => generateCalendarData(), [selectedYear, activityData]);
 
   // Calculate the start and end dates for the year
   const startDate = startOfYear(new Date(selectedYear, 0, 1));
   const endDate = endOfYear(startDate);
 
   // Calculate the start of the first week and end of the last week
-  const firstWeekStart = startOfWeek(startDate, { weekStartsOn: 1 });
-  const lastWeekEnd = endOfWeek(endDate, { weekStartsOn: 1 });
+  const firstWeekStart = startOfWeek(startDate);
+  const lastWeekEnd = endOfWeek(endDate);
 
   // Generate all weeks including partial weeks from previous and next years
-  const weeks = eachWeekOfInterval(
-    { 
-      start: firstWeekStart,
-      end: lastWeekEnd 
-    },
-    { weekStartsOn: 1 }
-  ).map(weekStart => {
-    return DAYS.map((_, dayIndex) => {
-      const date = addDays(weekStart, dayIndex);
-      const formattedDate = format(date, 'yyyy-MM-dd');
-      return {
-        date: formattedDate,
-        count: calendarData[formattedDate] || 0,
-        isCurrentYear: getYear(date) === selectedYear
-      };
-    });
-  });
+  const weeks = useMemo(() => {
+    const weekStarts = eachWeekOfInterval(
+      { 
+        start: firstWeekStart,
+        end: lastWeekEnd
+      },
+      { weekStartsOn: 0 }
+    );
 
-  // Generate month labels
+    return weekStarts.map(weekStart => {
+      const days: DayData[] = Array(7).fill(null).map((_, index) => {
+        const date = addDays(weekStart, index);
+        const dateStr = format(date, 'yyyy-MM-dd');
+        return {
+          date: dateStr,
+          count: calendarData[dateStr] || 0,
+          isCurrentYear: getYear(date) === selectedYear
+        };
+      });
+      return days;
+    });
+  }, [selectedYear, calendarData, firstWeekStart, lastWeekEnd]);
+
   const monthLabels = useMemo(() => {
-    const labels: { text: string; index: number }[] = [];
+    const labels: MonthLabel[] = [];
     let currentMonth = -1;
 
     weeks.forEach((week, weekIndex) => {
       const firstDayOfWeek = parseISO(week[0].date);
       const month = getMonth(firstDayOfWeek);
-      
-      if (month !== currentMonth) {
+
+      if (month !== currentMonth && getYear(firstDayOfWeek) === selectedYear) {
         labels.push({
           text: format(firstDayOfWeek, 'MMM'),
           index: weekIndex
@@ -134,7 +137,7 @@ export function YearlyActivityHeatmap({
     });
 
     return labels;
-  }, [weeks]);
+  }, [weeks, selectedYear]);
 
   const getColorForCount = (count: number) => {
     if (count === 0) return 'bg-gray-200 dark:bg-gray-200';

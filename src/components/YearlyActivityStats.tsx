@@ -177,27 +177,27 @@ export const YearlyActivityStats: React.FC = () => {
         ) : (
           <div className="space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-3 gap-3 md:gap-4">
-              <div className="bg-white/80 dark:bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-gray-100 dark:border-white/10">
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-600/10 p-2.5 rounded-lg border border-blue-200/50 dark:border-blue-400/10">
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-blue-500" />
                   <p className="text-sm text-black dark:text-black font-medium">Total Activities</p>
                 </div>
-                <p className="text-xl font-semibold mt-1 text-black dark:text-black">{totalActivities}</p>
+                <p className="text-lg font-semibold mt-0.5 text-black dark:text-black">{totalActivities}</p>
               </div>
-              <div className="bg-white/80 dark:bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-gray-100 dark:border-white/10">
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-500/10 dark:to-emerald-600/10 p-2.5 rounded-lg border border-emerald-200/50 dark:border-emerald-400/10">
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-blue-500" />
+                  <Calendar className="w-4 h-4 text-emerald-500" />
                   <p className="text-sm text-black dark:text-black font-medium">Active Days</p>
                 </div>
-                <p className="text-xl font-semibold mt-1 text-black dark:text-black">{activeDays}</p>
+                <p className="text-lg font-semibold mt-0.5 text-black dark:text-black">{activeDays}</p>
               </div>
-              <div className="bg-white/80 dark:bg-white/10 backdrop-blur-sm p-3 rounded-lg border border-gray-100 dark:border-white/10">
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-500/10 dark:to-purple-600/10 p-2.5 rounded-lg border border-purple-200/50 dark:border-purple-400/10">
                 <div className="flex items-center gap-2">
-                  <BarChart2 className="w-4 h-4 text-blue-500" />
+                  <BarChart2 className="w-4 h-4 text-purple-500" />
                   <p className="text-sm text-black dark:text-black font-medium">Average Per Day</p>
                 </div>
-                <p className="text-xl font-semibold mt-1 text-black dark:text-black">{averagePerDay}</p>
+                <p className="text-lg font-semibold mt-0.5 text-black dark:text-black">{averagePerDay}</p>
               </div>
             </div>
 
