@@ -290,8 +290,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       "hover:shadow-lg hover:shadow-blue-300/50 dark:hover:shadow-blue-900/30",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
       mastered 
-        ? "border-emerald-400 bg-gradient-to-br from-emerald-50 to-transparent dark:from-emerald-950/50" 
-        : "border-blue-400 hover:border-blue-500 dark:border-blue-500 dark:hover:border-blue-400",
+        ? "border-emerald-400 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/50 dark:to-gray-950" 
+        : "border-blue-400 hover:border-blue-500 dark:border-blue-500 dark:hover:border-blue-400 bg-white dark:bg-gray-950",
       isEditing && "border-blue-500 dark:border-blue-400 shadow-lg shadow-blue-300 dark:shadow-blue-900/30"
     )}>
       <CardHeader className="space-y-3 pb-3">
@@ -300,7 +300,14 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="text-lg font-semibold focus-visible:ring-blue-500 bg-white/90 dark:bg-gray-900"
+              className={cn(
+                "text-lg font-semibold",
+                "bg-white dark:bg-gray-900",
+                "text-gray-900 dark:text-gray-100",
+                "border-gray-200 dark:border-gray-800",
+                "focus-visible:ring-blue-500",
+                "placeholder:text-gray-400 dark:placeholder:text-gray-600"
+              )}
               placeholder="Enter title..."
             />
           ) : (
@@ -359,15 +366,62 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             </Button>
           </div>
         </div>
-        
+
+        {/* Content Section */}
+        <div className={cn(
+          "space-y-2 transition-all duration-200",
+          !showContent && "blur-sm pointer-events-none"
+        )}>
+          {isEditing ? (
+            <div className="space-y-4">
+              <RichTextEditor
+                content={content}
+                onChange={setContent}
+                className={cn(
+                  "min-h-[100px] p-3 rounded-md",
+                  "bg-white dark:bg-gray-900",
+                  "text-gray-900 dark:text-gray-100",
+                  "border border-gray-200 dark:border-gray-800",
+                  "focus-within:ring-2 focus-within:ring-blue-500",
+                  "prose dark:prose-invert max-w-none",
+                  "prose-img:my-0 prose-img:rounded-md"
+                )}
+              />
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditing(false)}
+                  className="bg-white hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div 
+              className={cn(
+                "prose dark:prose-invert max-w-none",
+                "prose-img:my-0 prose-img:rounded-md",
+                "prose-p:text-gray-700 dark:prose-p:text-gray-300",
+                "prose-headings:text-gray-900 dark:prose-headings:text-gray-100"
+              )}
+              dangerouslySetInnerHTML={{ __html: content }}
+            />
+          )}
+        </div>
+
         {/* Time and Category Info */}
         <div className="flex items-center text-sm space-x-2">
           <Clock className="w-4 h-4 text-blue-900 dark:text-blue-200" />
-          <span className="text-blue-900 font-medium dark:text-blue-100">Updated {getTimeAgo(updatedAt)}</span>
+          <span className="text-gray-700 font-medium dark:text-gray-300">
+            Updated {getTimeAgo(updatedAt)}
+          </span>
           {category && (
             <>
-              <span>•</span>
-              <span className="text-blue-900 font-medium dark:text-blue-100">{category}</span>
+              <span className="text-gray-400">•</span>
+              <span className="text-gray-700 font-medium dark:text-gray-300">
+                {category}
+              </span>
             </>
           )}
         </div>
@@ -398,80 +452,19 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
                 placeholder="Add tag..."
-                className="h-7 text-sm w-24 focus-visible:ring-blue-500 bg-white/90 dark:bg-gray-900"
+                className={cn(
+                  "h-7 text-sm w-24",
+                  "bg-white dark:bg-gray-900",
+                  "text-gray-900 dark:text-gray-100",
+                  "border-gray-200 dark:border-gray-800",
+                  "focus-visible:ring-blue-500",
+                  "placeholder:text-gray-400 dark:placeholder:text-gray-600"
+                )}
               />
             </form>
           )}
         </div>
       </CardHeader>
-
-      <CardContent className={cn(
-        "transition-all duration-300",
-        isEditing ? "bg-white dark:bg-transparent" : "hover:bg-blue-50/50 dark:hover:bg-blue-950/30"
-      )}>
-        {isEditing ? (
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="title" className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                Title
-              </Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="mt-1.5 focus-visible:ring-blue-400"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="content" className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                Content
-              </Label>
-              <div className="mt-1.5 rounded-lg border border-input bg-white dark:bg-gray-950">
-                <RichTextEditor
-                  content={content}
-                  onChange={setContent}
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end space-x-2 pt-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsEditing(false);
-                  setTitle(initialTitle);
-                  setContent(initialContent);
-                  setTags(initialTags);
-                  setCategory(initialCategory);
-                }}
-                className="border-blue-200 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-800 dark:hover:border-blue-700 dark:hover:bg-blue-950/50"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSave}
-                className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-700 dark:hover:bg-blue-800"
-              >
-                Save Changes
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div 
-            className={cn(
-              "space-y-3 transition-all duration-300",
-              !showContent && "blur-md select-none"
-            )}
-          >
-            <div 
-              className="prose prose-sm max-w-none dark:prose-invert hover:prose-a:text-blue-600 prose-headings:text-blue-700 dark:prose-headings:text-blue-400 line-clamp-6 hover:line-clamp-none transition-all cursor-pointer"
-              onClick={() => setIsZoomed(true)}
-              dangerouslySetInnerHTML={{ __html: content }}
-            />
-          </div>
-        )}
-      </CardContent>
 
       <CardFooter className="flex justify-between py-3 bg-gradient-to-b from-transparent to-blue-50/30 dark:to-blue-950/30">
         <div className="flex items-center space-x-2">
