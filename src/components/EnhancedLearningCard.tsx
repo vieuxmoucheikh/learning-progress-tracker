@@ -120,11 +120,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       tags,
       category,
       mastered,
+      updatedAt: new Date().toISOString(),
     });
 
     if (success) {
-      const newTime = new Date().toISOString();
-      setUpdatedTime(newTime);
+      setUpdatedTime(new Date().toISOString());
       setIsEditing(false);
       toast({
         title: "Success",
@@ -153,11 +153,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     }
   };
 
-  const handleAddTag = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && newTag.trim()) {
-      if (!tags.includes(newTag.trim())) {
-        setTags([...tags, newTag.trim()]);
-      }
+  const handleAddTag = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const trimmedTag = newTag.trim();
+    if (trimmedTag && !tags.includes(trimmedTag)) {
+      setTags([...tags, trimmedTag]);
       setNewTag('');
     }
   };
@@ -191,12 +191,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       tags,
       category,
       mastered: newMasteredState,
+      updatedAt: new Date().toISOString(),
     });
 
     if (success) {
       setMastered(newMasteredState);
-      const newTime = new Date().toISOString();
-      setUpdatedTime(newTime);
       toast({
         title: "Success",
         description: `Card marked as ${newMasteredState ? 'mastered' : 'not mastered'}`,
@@ -260,12 +259,12 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   return (
     <Card className={cn(
       "relative overflow-hidden transition-all duration-300 border-2",
-      "hover:shadow-lg hover:shadow-blue-200/50 dark:hover:shadow-blue-900/30",
+      "hover:shadow-lg hover:shadow-blue-300/50 dark:hover:shadow-blue-900/30",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
       mastered 
-        ? "border-emerald-300 bg-gradient-to-br from-emerald-50 to-transparent dark:from-emerald-950/50" 
-        : "border-blue-200 hover:border-blue-300 dark:border-blue-700 dark:hover:border-blue-600",
-      isEditing && "border-blue-400 dark:border-blue-500 shadow-lg shadow-blue-100 dark:shadow-blue-900/20"
+        ? "border-emerald-400 bg-gradient-to-br from-emerald-50 to-transparent dark:from-emerald-950/50" 
+        : "border-blue-400 hover:border-blue-500 dark:border-blue-500 dark:hover:border-blue-400",
+      isEditing && "border-blue-500 dark:border-blue-400 shadow-lg shadow-blue-300 dark:shadow-blue-900/30"
     )}>
       <CardHeader className="space-y-3 pb-3">
         <div className="flex items-center justify-between">
@@ -273,11 +272,18 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="text-lg font-semibold focus-visible:ring-blue-500 bg-white dark:bg-gray-950"
+              className="text-lg font-semibold focus-visible:ring-blue-500 bg-white/90 dark:bg-gray-900"
               placeholder="Enter title..."
             />
           ) : (
-            <h3 className="text-lg font-semibold bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
+            <h3 className={cn(
+              "text-lg font-semibold",
+              "bg-gradient-to-r from-blue-900 via-blue-700 to-blue-800",
+              "dark:from-blue-400 dark:via-blue-300 dark:to-blue-400",
+              "bg-clip-text text-transparent",
+              "hover:from-blue-800 hover:via-blue-600 hover:to-blue-700",
+              "dark:hover:from-blue-300 dark:hover:via-blue-200 dark:hover:to-blue-300"
+            )}>
               {title}
             </h3>
           )}
@@ -293,9 +299,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               title={showContent ? "Hide content" : "Show content"}
             >
               {showContent ? (
-                <EyeOff className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                <EyeOff className="w-4 h-4 text-blue-900 dark:text-blue-200" />
               ) : (
-                <Eye className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                <Eye className="w-4 h-4 text-blue-900 dark:text-blue-200" />
               )}
             </Button>
             <Button
@@ -306,9 +312,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               title={isEditing ? "Save changes" : "Edit card"}
             >
               {isEditing ? (
-                <Save className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                <Save className="w-4 h-4 text-blue-900 dark:text-blue-200" />
               ) : (
-                <Edit className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                <Edit className="w-4 h-4 text-blue-900 dark:text-blue-200" />
               )}
             </Button>
             <Button
@@ -318,9 +324,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-900/50"
             >
               {isZoomed ? (
-                <ZoomOut className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                <ZoomOut className="w-4 h-4 text-blue-900 dark:text-blue-200" />
               ) : (
-                <ZoomIn className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                <ZoomIn className="w-4 h-4 text-blue-900 dark:text-blue-200" />
               )}
             </Button>
           </div>
@@ -328,40 +334,45 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         
         {/* Time and Category Info */}
         <div className="flex items-center text-sm space-x-2">
-          <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-          <span className="text-blue-700 dark:text-blue-300">Updated {getTimeAgo(updatedTime)}</span>
+          <Clock className="w-4 h-4 text-blue-900 dark:text-blue-200" />
+          <span className="text-blue-900 font-medium dark:text-blue-100">Updated {getTimeAgo(updatedAt)}</span>
           {category && (
             <>
               <span>•</span>
-              <span className="text-blue-700 dark:text-blue-300">{category}</span>
+              <span className="text-blue-900 font-medium dark:text-blue-100">{category}</span>
             </>
           )}
         </div>
 
         {/* Tags */}
-        <div className="flex flex-wrap gap-1.5">
-          {tags.map((tag) => (
-            <Badge 
-              key={tag} 
-              variant="secondary"
+        <div className="flex flex-wrap gap-2">
+          {tags.map((tag, index) => (
+            <Badge
+              key={`${tag}-${index}`}
+              variant={isEditing ? "secondary" : "default"}
               className={cn(
-                "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200/50 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800/50",
-                isEditing && "cursor-pointer hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-950/50 dark:hover:text-red-400"
+                "text-sm px-2 py-0.5 transition-all duration-200",
+                isEditing 
+                  ? "cursor-pointer hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900 dark:hover:text-red-300"
+                  : "bg-blue-100 text-blue-900 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-100 dark:hover:bg-blue-800"
               )}
-              onClick={isEditing ? () => handleRemoveTag(tag) : undefined}
+              onClick={() => isEditing && handleRemoveTag(tag)}
             >
               {tag}
-              {isEditing && <X className="w-3 h-3 ml-1" />}
+              {isEditing && (
+                <X className="w-3 h-3 ml-1 inline-block" />
+              )}
             </Badge>
           ))}
           {isEditing && (
-            <Input
-              value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
-              onKeyDown={handleAddTag}
-              placeholder="Add tag..."
-              className="w-24 h-6 text-sm bg-blue-50/50 border-blue-200/50 focus-visible:ring-blue-400 dark:bg-blue-950/30 dark:border-blue-800/50"
-            />
+            <form onSubmit={handleAddTag} className="inline-flex">
+              <Input
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                placeholder="Add tag..."
+                className="h-7 text-sm w-24 focus-visible:ring-blue-500 bg-white/90 dark:bg-gray-900"
+              />
+            </form>
           )}
         </div>
       </CardHeader>
