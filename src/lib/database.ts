@@ -1026,12 +1026,20 @@ export async function createLearningActivityTable() {
 export async function trackLearningActivity(category: string) {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
+    if (!user) {
+      console.error('No user found for tracking activity');
+      return null;
+    }
 
-    const currentDate = new Date('2025-01-02T23:38:16+01:00');
+    const currentDate = new Date('2025-01-02T23:46:53+01:00');
     const dateStr = currentDate.toISOString().split('T')[0];
 
-    console.log('Tracking activity:', { category, dateStr, userId: user.id });
+    console.log('Tracking activity:', { 
+      category, 
+      dateStr, 
+      userId: user.id,
+      currentDate: currentDate.toISOString()
+    });
 
     // First check if we already have an entry for this date and category
     const { data: existing, error: selectError } = await supabase
@@ -1050,7 +1058,7 @@ export async function trackLearningActivity(category: string) {
     const timestamp = currentDate.toISOString();
 
     if (existing) {
-      console.log('Updating existing activity:', existing);
+      console.log('Found existing activity:', existing);
       const { data: updated, error: updateError } = await supabase
         .from('learning_activity')
         .update({ 
@@ -1068,7 +1076,6 @@ export async function trackLearningActivity(category: string) {
       console.log('Activity updated successfully:', updated);
       return updated;
     } else {
-      console.log('Creating new activity entry');
       const newActivity = {
         user_id: user.id,
         category,
@@ -1077,7 +1084,7 @@ export async function trackLearningActivity(category: string) {
         created_at: timestamp,
         updated_at: timestamp
       };
-      console.log('New activity data:', newActivity);
+      console.log('Creating new activity:', newActivity);
 
       const { data: inserted, error: insertError } = await supabase
         .from('learning_activity')
@@ -1101,9 +1108,12 @@ export async function trackLearningActivity(category: string) {
 export async function getYearlyActivity(category: string) {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    if (!user) {
+      console.error('No user found for getting yearly activity');
+      return [];
+    }
 
-    const currentDate = new Date('2025-01-02T23:38:16+01:00');
+    const currentDate = new Date('2025-01-02T23:46:53+01:00');
     const year = currentDate.getFullYear();
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year, 11, 31);
@@ -1116,10 +1126,12 @@ export async function getYearlyActivity(category: string) {
       year,
       startDateStr,
       endDateStr,
-      userId: user.id
+      userId: user.id,
+      currentDate: currentDate.toISOString()
     });
 
-    const { data, error } = await supabase
+    // First get all activities for this category
+    const { data: activities, error } = await supabase
       .from('learning_activity')
       .select('*')
       .eq('user_id', user.id)
@@ -1132,7 +1144,7 @@ export async function getYearlyActivity(category: string) {
       return [];
     }
 
-    console.log('Raw activity data:', data);
+    console.log('Raw activity data from database:', activities);
 
     // Fill in missing dates with zero counts
     const filledData = [];
@@ -1142,7 +1154,7 @@ export async function getYearlyActivity(category: string) {
     
     while (currentDatePointer.getTime() <= endDateTime) {
       const dateStr = currentDatePointer.toISOString().split('T')[0];
-      const existingData = data?.find(d => d.date === dateStr);
+      const existingData = activities?.find(d => d.date === dateStr);
       
       if (existingData) {
         console.log('Found activity for date:', dateStr, existingData);
@@ -1167,8 +1179,10 @@ export async function getYearlyActivity(category: string) {
     }
 
     const activeDays = filledData.filter(d => d.count > 0);
-    console.log('Active days:', activeDays.length);
-    console.log('Sample active days:', activeDays.slice(0, 3));
+    console.log('Found active days:', {
+      total: activeDays.length,
+      days: activeDays.map(d => ({ date: d.date, count: d.count }))
+    });
     
     return filledData;
   } catch (error) {

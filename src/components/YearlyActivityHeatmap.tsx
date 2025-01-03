@@ -13,8 +13,10 @@ interface YearlyActivityHeatmapProps {
 }
 
 export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
+  console.log('YearlyActivityHeatmap received data:', data);
+  
   const generateCalendarData = () => {
-    const currentDate = new Date('2025-01-02T23:38:16+01:00');
+    const currentDate = new Date('2025-01-02T23:46:53+01:00');
     const startDate = new Date(currentDate.getFullYear(), 0, 1);
     startDate.setUTCHours(0, 0, 0, 0);
     
@@ -29,7 +31,11 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
       const dayData = data.find(a => a.date === dateStr);
       
       if (dayData && dayData.count > 0) {
-        console.log('Found activity in calendar for date:', dateStr, dayData);
+        console.log('Found activity in calendar for date:', {
+          date: dateStr,
+          count: dayData.count,
+          data: dayData
+        });
       }
       
       allDates.push({
@@ -40,19 +46,22 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
     }
 
     const activeDates = allDates.filter(d => d.count > 0);
-    console.log('Calendar data generated with activities:', activeDates);
+    console.log('Calendar data generated:', {
+      total: activeDates.length,
+      dates: activeDates.map(d => ({ date: d.date, count: d.count }))
+    });
     return allDates;
   };
 
   const calendarData = generateCalendarData();
   const hasActivities = calendarData.some(d => d.count > 0);
-  console.log('Has activities:', hasActivities);
+  console.log('Heatmap has activities:', hasActivities);
 
   const getColorForCount = (count: number) => {
     if (count === 0) return 'bg-gray-100 dark:bg-gray-800';
-    if (count === 1) return 'bg-green-200 dark:bg-green-900';
-    if (count <= 3) return 'bg-green-400 dark:bg-green-700';
-    return 'bg-green-600 dark:bg-gray-500';
+    if (count === 1) return 'bg-green-300 dark:bg-green-800';
+    if (count <= 3) return 'bg-green-500 dark:bg-green-600';
+    return 'bg-green-700 dark:bg-green-400';
   };
 
   const weeks = [];
