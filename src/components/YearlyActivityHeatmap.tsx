@@ -38,7 +38,7 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function YearlyActivityHeatmap({ 
   data, 
-  year = new Date('2025-01-03T15:07:00+01:00').getFullYear(),
+  year = new Date('2025-01-03T15:14:15+01:00').getFullYear(),
   onYearChange 
 }: YearlyActivityHeatmapProps) {
   const [selectedYear, setSelectedYear] = React.useState(year);
@@ -64,8 +64,8 @@ export function YearlyActivityHeatmap({
     // Fill in the activity data
     data.forEach(activity => {
       const activityDate = new Date(activity.date);
-      const dateKey = format(activityDate, 'yyyy-MM-dd');
       if (activityDate.getFullYear() === selectedYear) {
+        const dateKey = format(activityDate, 'yyyy-MM-dd');
         activityMap[dateKey] = (activityMap[dateKey] || 0) + 1;
       }
     });
@@ -80,18 +80,19 @@ export function YearlyActivityHeatmap({
   const firstDayOfYear = new Date(selectedYear, 0, 1);
   const lastDayOfYear = new Date(selectedYear, 11, 31);
   
-  // Create weeks array
+  // Get the start of the first week
   let currentDate = startOfWeek(firstDayOfYear);
-  let currentWeek: WeekData = Array(7).fill(null);
   
   // Fill in all weeks of the year
   while (currentDate <= lastDayOfYear) {
-    currentWeek = Array(7).fill(null);
+    const week: WeekData = Array(7).fill(null);
     
     for (let i = 0; i < 7; i++) {
       const date = addDays(currentDate, i);
-      if (date >= firstDayOfYear && date <= lastDayOfYear) {
-        currentWeek[i] = {
+      
+      // Only include dates within the selected year
+      if (date.getFullYear() === selectedYear) {
+        week[i] = {
           date: format(date, 'yyyy-MM-dd'),
           count: calendarData[format(date, 'yyyy-MM-dd')] || 0,
           isOutsideMonth: false
@@ -99,7 +100,7 @@ export function YearlyActivityHeatmap({
       }
     }
     
-    weeks.push([...currentWeek]);
+    weeks.push(week);
     currentDate = addWeeks(currentDate, 1);
   }
 
@@ -157,7 +158,7 @@ export function YearlyActivityHeatmap({
 
   return (
     <div className="w-full max-w-full space-y-4 overflow-hidden">
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-3 gap-4">
         <div className="bg-blue-50 p-4 rounded-lg">
           <div className="text-blue-600 text-sm mb-1">Total Activities</div>
           <div className="text-2xl font-semibold">{totalActivities}</div>
@@ -172,7 +173,7 @@ export function YearlyActivityHeatmap({
         </div>
       </div>
 
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between">
         {renderLegend()}
         <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-md px-2 py-1 shadow-sm">
           <button
