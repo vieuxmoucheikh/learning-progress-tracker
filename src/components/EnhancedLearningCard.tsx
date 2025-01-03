@@ -328,86 +328,109 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div 
-          className={cn(
-            "space-y-3 transition-all duration-200",
-            !showContent && "blur-md select-none"
-          )}
-        >
-          <div 
-            className="prose prose-sm max-w-none dark:prose-invert line-clamp-6 hover:line-clamp-none transition-all cursor-pointer"
-            onClick={() => setIsZoomed(true)}
-            dangerouslySetInnerHTML={{ __html: content }}
-          />
-        </div>
-      </CardContent>
+        {isEditing ? (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="mt-1.5"
+              />
+            </div>
 
-      <CardFooter className="flex justify-between pt-3 pb-4">
-        <div className="flex gap-2">
-          {isEditing ? (
-            <>
-              <Button 
-                onClick={handleSave} 
-                size="sm" 
-                className="bg-blue-700 hover:bg-blue-800 text-white shadow-sm hover:shadow dark:bg-blue-800 dark:hover:bg-blue-900"
-              >
-                <Save className="h-4 w-4 mr-1" />
-                Save
-              </Button>
+            <div>
+              <Label htmlFor="content">Content</Label>
+              <div className="mt-1.5">
+                <RichTextEditor
+                  content={content}
+                  onChange={setContent}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-2">
               <Button
                 variant="outline"
-                onClick={() => setIsEditing(false)}
-                size="sm"
-                className="shadow-sm hover:shadow border-blue-200 hover:border-blue-300 dark:border-blue-800 dark:hover:border-blue-700"
+                onClick={() => {
+                  setIsEditing(false);
+                  setTitle(initialTitle);
+                  setContent(initialContent);
+                  setTags(initialTags);
+                  setCategory(initialCategory);
+                }}
               >
-                <X className="h-4 w-4 mr-1" />
                 Cancel
               </Button>
               <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsDeleteDialogOpen(true)}
-                className="shadow-sm hover:shadow text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
+                onClick={async () => {
+                  const success = await onSave({
+                    id,
+                    title,
+                    content,
+                    tags,
+                    category,
+                    mastered,
+                  });
+                  if (success) {
+                    setIsEditing(false);
+                    toast({
+                      title: "Success",
+                      description: "Card updated successfully",
+                    });
+                  }
+                }}
               >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Delete
+                Save Changes
               </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopyContent}
-                className="hover:bg-blue-100 text-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/50"
-              >
-                <Copy className="h-4 w-4 mr-1" />
-                Copy
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleMastered}
-                className={cn(
-                  "hover:bg-emerald-50 dark:hover:bg-emerald-950/50",
-                  mastered ? "text-emerald-600 dark:text-emerald-400" : "text-gray-500 dark:text-gray-400"
-                )}
-              >
-                <Trophy className="h-4 w-4 mr-1" />
-                {mastered ? "Mastered" : "Mark as Mastered"}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsDeleteDialogOpen(true)}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Delete
-              </Button>
-            </>
-          )}
+            </div>
+          </div>
+        ) : (
+          <div 
+            className={cn(
+              "space-y-3 transition-all duration-200",
+              !showContent && "blur-md select-none"
+            )}
+          >
+            <div 
+              className="prose prose-sm max-w-none dark:prose-invert line-clamp-6 hover:line-clamp-none transition-all cursor-pointer"
+              onClick={() => setIsZoomed(true)}
+              dangerouslySetInnerHTML={{ __html: content }}
+            />
+          </div>
+        )}
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-foreground"
+            onClick={() => setMastered(!mastered)}
+          >
+            {mastered ? (
+              <>
+                <BookmarkCheck className="w-4 h-4 mr-1" />
+                Mastered
+              </>
+            ) : (
+              <>
+                <Bookmark className="w-4 h-4 mr-1" />
+                Mark as Mastered
+              </>
+            )}
+          </Button>
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-destructive hover:text-destructive"
+          onClick={onDelete}
+        >
+          <Trash2 className="w-4 h-4 mr-1" />
+          Delete
+        </Button>
       </CardFooter>
 
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
