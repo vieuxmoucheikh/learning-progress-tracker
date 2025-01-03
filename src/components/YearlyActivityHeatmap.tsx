@@ -41,7 +41,7 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function YearlyActivityHeatmap({ 
   data, 
-  year = new Date('2025-01-03T15:21:59+01:00').getFullYear(),
+  year = new Date('2025-01-03T15:28:08+01:00').getFullYear(),
   onYearChange 
 }: YearlyActivityHeatmapProps) {
   const [selectedYear, setSelectedYear] = React.useState(year);
@@ -67,9 +67,9 @@ export function YearlyActivityHeatmap({
     // Fill in the activity data
     data.forEach(activity => {
       const activityDate = new Date(activity.date);
-      if (isWithinInterval(activityDate, { start: yearStart, end: yearEnd })) {
-        const dateKey = format(activityDate, 'yyyy-MM-dd');
-        activityMap[dateKey] = (activityMap[dateKey] || 0) + 1;
+      const dateKey = format(activityDate, 'yyyy-MM-dd');
+      if (activityDate.getFullYear() === selectedYear) {
+        activityMap[dateKey] = activity.count;
       }
     });
 
@@ -80,7 +80,7 @@ export function YearlyActivityHeatmap({
   const weeks: WeekData[] = [];
   
   // Get the start of the first week of the year
-  let currentDate = startOfWeek(new Date(selectedYear, 0, 1));
+  let currentDate = startOfWeek(new Date(selectedYear, 0, 1), { weekStartsOn: 0 });
   const yearEnd = endOfYear(new Date(selectedYear, 11, 31));
   
   // Fill in all weeks of the year
@@ -108,7 +108,7 @@ export function YearlyActivityHeatmap({
 
     weeks.forEach((week, weekIndex) => {
       week.forEach((day) => {
-        if (!day || day.isOutsideMonth) return;
+        if (!day) return;
         const date = new Date(day.date);
         const month = date.getMonth();
         if (month !== currentMonth) {
@@ -196,7 +196,7 @@ export function YearlyActivityHeatmap({
         <div className="w-full">
           {/* Month labels */}
           <div className="flex mb-2">
-            <div className="w-6" /> {/* Offset for day labels */}
+            <div className="w-8" /> {/* Offset for day labels */}
             <div className="flex-1">
               <div className="grid grid-cols-[repeat(52,1fr)]">
                 {monthLabels.map((label, i) => (
@@ -205,7 +205,8 @@ export function YearlyActivityHeatmap({
                     className="text-[8px] sm:text-xs text-gray-500 text-center"
                     style={{ 
                       gridColumnStart: label.index + 1,
-                      gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 53
+                      gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 53,
+                      marginLeft: i === 0 ? '-8px' : '0'
                     }}
                   >
                     {window.innerWidth <= 640 ? label.text.slice(0, 1) : label.text}
@@ -222,7 +223,7 @@ export function YearlyActivityHeatmap({
               {DAYS.map((day) => (
                 <div 
                   key={day} 
-                  className="h-[4px] sm:h-4 text-[8px] sm:text-xs text-gray-500 flex items-center"
+                  className="h-[4px] sm:h-4 text-[8px] sm:text-xs text-gray-500 flex items-center w-6"
                 >
                   {day}
                 </div>
