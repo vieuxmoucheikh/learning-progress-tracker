@@ -120,7 +120,7 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
                         key={i}
                         className="flex-1 text-[8px] sm:text-xs text-gray-500"
                         style={{ 
-                          minWidth: window.innerWidth <= 640 ? '20px' : '60px',
+                          minWidth: window.innerWidth <= 640 ? '20px' : '80px',
                           textAlign: 'center'
                         }}
                       >
@@ -134,11 +134,11 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
               {/* Main grid */}
               <div className="flex w-full">
                 {/* Day labels */}
-                <div className="flex flex-col gap-[2px] sm:gap-1 pr-2 sm:pr-3">
+                <div className="flex flex-col gap-[2px] sm:gap-2 pr-2 sm:pr-4">
                   {DAYS.map((day, i) => (
                     <div 
                       key={day} 
-                      className="h-[6px] sm:h-3 text-[8px] sm:text-xs text-gray-500 flex items-center"
+                      className="h-[6px] sm:h-4 text-[8px] sm:text-xs text-gray-500 flex items-center"
                     >
                       {i % 2 === 0 ? day.slice(0, 1) : ''}
                     </div>
@@ -146,9 +146,9 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
                 </div>
 
                 {/* Calendar grid */}
-                <div className="flex-1 grid grid-cols-[repeat(52,1fr)] gap-[2px] sm:gap-1">
+                <div className="flex-1 grid grid-cols-[repeat(52,1fr)] gap-[2px] sm:gap-2">
                   {weeks.map((week, weekIndex) => (
-                    <div key={weekIndex} className="flex flex-col gap-[2px] sm:gap-1">
+                    <div key={weekIndex} className="flex flex-col gap-[2px] sm:gap-2">
                       {week.map((day) => {
                         const colorClass = getColorForCount(day.count);
                         const dateObj = new Date(day.date);
@@ -165,6 +165,9 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
                                     colorClass,
                                     day.count > 0 ? 'cursor-pointer transform hover:scale-110' : ''
                                   )}
+                                  style={{
+                                    minHeight: window.innerWidth <= 640 ? '6px' : '24px'
+                                  }}
                                 />
                               </TooltipTrigger>
                               <TooltipContent side="top" className="text-[10px] sm:text-sm">
