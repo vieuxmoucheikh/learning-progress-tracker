@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { cn } from '../lib/utils';
 import { 
   format, 
@@ -15,7 +15,8 @@ import {
   eachMonthOfInterval,
   differenceInWeeks,
   getYear,
-  endOfWeek
+  endOfWeek,
+  getMonth
 } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -114,15 +115,26 @@ export function YearlyActivityHeatmap({
     });
   });
 
-  // Calculate month labels with correct positioning
-  const monthLabels = eachMonthOfInterval({ start: firstWeekStart, end: lastWeekEnd })
-    .map((date, index, array) => {
-      const weekIndex = differenceInWeeks(date, firstWeekStart);
-      return {
-        text: format(date, 'MMM'),
-        index: weekIndex,
-      };
+  // Generate month labels
+  const monthLabels = useMemo(() => {
+    const labels: { text: string; index: number }[] = [];
+    let currentMonth = -1;
+
+    weeks.forEach((week, weekIndex) => {
+      const firstDayOfWeek = parseISO(week[0].date);
+      const month = getMonth(firstDayOfWeek);
+      
+      if (month !== currentMonth) {
+        labels.push({
+          text: format(firstDayOfWeek, 'MMM'),
+          index: weekIndex
+        });
+        currentMonth = month;
+      }
     });
+
+    return labels;
+  }, [weeks]);
 
   // Calculate stats once
   const totalActivities = Object.values(calendarData).reduce((sum, count) => sum + count, 0);
@@ -190,13 +202,13 @@ export function YearlyActivityHeatmap({
       </div>
 
       {/* Heatmap grid */}
-      <div className="w-full overflow-x-auto sm:overflow-x-visible">
-        <div className="min-w-[600px] sm:min-w-0 w-full">
+      <div className="w-full">
+        <div className="w-full">
           {/* Month labels */}
           <div className="flex mb-2">
             <div className="w-8 sm:w-10" /> {/* Offset for day labels */}
             <div className="flex-1">
-              <div className="grid grid-cols-[repeat(53,minmax(10px,1fr))] sm:grid-cols-[repeat(53,minmax(14px,1fr))] gap-[1px] sm:gap-1.5">
+              <div className="grid grid-cols-[repeat(53,minmax(8px,1fr))] sm:grid-cols-[repeat(53,minmax(14px,1fr))] gap-[1px] sm:gap-1.5">
                 {monthLabels.map((label, i) => (
                   <div
                     key={i}
@@ -206,7 +218,7 @@ export function YearlyActivityHeatmap({
                       gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
                     }}
                   >
-                    {window.innerWidth <= 640 ? label.text.slice(0, 1) : label.text}
+                    {label.text}
                   </div>
                 ))}
               </div>
@@ -220,16 +232,16 @@ export function YearlyActivityHeatmap({
               {DAYS.map((day) => (
                 <div 
                   key={day} 
-                  className="h-[10px] sm:h-4 text-[8px] sm:text-xs text-gray-500 flex items-center w-8 sm:w-10"
+                  className="h-[8px] sm:h-4 text-[6px] sm:text-xs text-gray-500 flex items-center w-6 sm:w-10"
                 >
-                  {window.innerWidth <= 640 ? day[0] : day}
+                  {day[0]}
                 </div>
               ))}
             </div>
 
             {/* Calendar grid */}
             <div className="flex-1">
-              <div className="grid grid-cols-[repeat(53,minmax(10px,1fr))] sm:grid-cols-[repeat(53,minmax(14px,1fr))] gap-[1px] sm:gap-1.5">
+              <div className="grid grid-cols-[repeat(53,minmax(8px,1fr))] sm:grid-cols-[repeat(53,minmax(14px,1fr))] gap-[1px] sm:gap-1.5">
                 {weeks.map((week, weekIndex) => (
                   <div key={weekIndex} className="flex flex-col gap-[1px] sm:gap-1.5">
                     {week.map((day, dayIndex) => (
@@ -238,7 +250,7 @@ export function YearlyActivityHeatmap({
                           <TooltipTrigger asChild>
                             <div
                               className={cn(
-                                'h-[10px] sm:h-4 rounded-[1px] sm:rounded',
+                                'h-[8px] sm:h-4 rounded-[1px] sm:rounded',
                                 day.isCurrentYear
                                   ? getColorForCount(day.count)
                                   : 'bg-gray-100'
