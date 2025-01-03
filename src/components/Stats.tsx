@@ -199,8 +199,10 @@ export function Stats({ items }: Props) {
       </div>
 
       {/* Yearly Activity Stats */}
-      <div className="col-span-full">
-        <YearlyActivityStats />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="col-span-full">
+          <YearlyActivityStats />
+        </div>
       </div>
     </div>
   );

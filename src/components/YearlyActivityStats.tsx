@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { getYearlyActivity, getLearningItems } from '@/lib/database';
 import { getLearningActivity } from '@/lib/learningActivity';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -141,6 +141,15 @@ export const YearlyActivityStats: React.FC = () => {
   const activeDays = activityData.filter(day => day.count > 0).length;
   const averagePerDay = activeDays > 0 ? (totalActivities / activeDays).toFixed(1) : '0';
 
+  // Transform ActivityData[] into Record<string, number>
+  const heatmapData = useMemo(() => {
+    const data: Record<string, number> = {};
+    activityData.forEach(activity => {
+      data[activity.date] = activity.count;
+    });
+    return data;
+  }, [activityData]);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4">
@@ -178,8 +187,12 @@ export const YearlyActivityStats: React.FC = () => {
                 <p className="text-2xl font-bold mt-1">{averagePerDay}</p>
               </div>
             </div>
-            <div className="relative">
-              <YearlyActivityHeatmap data={activityData} />
+            <div className="w-full">
+              <div className="grid grid-cols-1 gap-4">
+                <div className="w-full">
+                  <YearlyActivityHeatmap data={heatmapData} />
+                </div>
+              </div>
             </div>
           </div>
         )}

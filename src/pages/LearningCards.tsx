@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -16,9 +16,6 @@ import { useToast } from '@/hooks/useToast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { getLearningItems } from '@/lib/database';
-import { ProgressByDifficultyChart } from '../components/ProgressByDifficultyChart';
-import { LearningFocusChart } from '../components/LearningFocusChart';
-import { YearlyActivityHeatmap } from '../components/YearlyActivityHeatmap';
 import { format } from 'date-fns';
 
 interface CardMedia {
@@ -173,35 +170,6 @@ export const LearningCardsPage = () => {
       }
     });
 
-  const progressData: ProgressData[] = [
-    { difficulty: 'Easy', count: 0, progress: 0 },
-    { difficulty: 'Medium', count: 5, progress: 0 },
-    { difficulty: 'Hard', count: 0, progress: 0 },
-  ];
-
-  const focusData: FocusData[] = [
-    { category: 'Consistency', value: 0.8 },
-    { category: 'Completion', value: 0.6 },
-    { category: 'Diversity', value: 0.4 },
-    { category: 'Engagement', value: 0.7 },
-    { category: 'Progress', value: 0.5 },
-  ];
-
-  const activityData = useMemo(() => {
-    const data: Record<string, number> = {};
-    filteredCards.forEach(card => {
-      if (card.lastStudied) {
-        try {
-          const dateKey = format(new Date(card.lastStudied), 'yyyy-MM-dd');
-          data[dateKey] = (data[dateKey] || 0) + 1;
-        } catch (error) {
-          console.warn('Invalid date format for card:', card.id);
-        }
-      }
-    });
-    return data;
-  }, [filteredCards]);
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col space-y-4">
@@ -227,15 +195,7 @@ export const LearningCardsPage = () => {
             />
           ))}
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
-          <ProgressByDifficultyChart data={progressData} />
-          <LearningFocusChart data={focusData} />
-          <div className="col-span-1 sm:col-span-2">
-            <YearlyActivityHeatmap data={activityData} />
-          </div>
-        </div>
       </div>
     </div>
   );
-}
+};
