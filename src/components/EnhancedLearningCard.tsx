@@ -113,22 +113,25 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   }, [isEditing]);
 
   const handleSave = async () => {
-    const success = await onSave({
-      id,
-      title,
-      content,
-      tags,
-      category,
-      mastered,
-      updatedAt: new Date().toISOString(),
-    });
-
-    if (success) {
-      setIsEditing(false);
-      toast({
-        title: "Success",
-        description: "Card updated successfully",
+    try {
+      await onSave({
+        id,
+        title,
+        content,
+        tags,
+        category,
+        mastered,
+        updatedAt: new Date().toISOString(),
       });
+      return true;
+    } catch (error) {
+      console.error('Error saving card:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save changes',
+        variant: 'destructive',
+      });
+      return false;
     }
   };
 
@@ -288,8 +291,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     <Card className={cn(
       "relative overflow-hidden transition-all duration-300 border-2",
       "hover:shadow-lg hover:shadow-blue-300/50 dark:hover:shadow-blue-900/30",
-      "max-w-3xl mx-auto", // Center card on larger screens
-      "sm:rounded-xl", // Rounded corners on desktop
+      "max-w-3xl mx-auto",
+      "sm:rounded-xl",
       "bg-white dark:bg-gray-950",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
       mastered 
@@ -298,13 +301,13 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       isEditing && "border-blue-500 dark:border-blue-400 shadow-lg shadow-blue-300 dark:shadow-blue-900/30"
     )}>
       <CardHeader className="space-y-4 pb-4 px-4 sm:px-6">
+        {/* Title Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex-1 min-w-0">
             {isEditing ? (
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                onBlur={handleSave}
                 className={cn(
                   "text-lg font-semibold",
                   "bg-white dark:bg-gray-900",
@@ -317,14 +320,18 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 placeholder="Enter title..."
               />
             ) : (
-              <h3 className={cn(
-                "text-xl sm:text-2xl font-semibold line-clamp-2",
-                "bg-gradient-to-r from-blue-900 via-blue-700 to-blue-800",
-                "dark:from-blue-400 dark:via-blue-300 dark:to-blue-400",
-                "bg-clip-text text-transparent",
-                "hover:from-blue-800 hover:via-blue-600 hover:to-blue-700",
-                "dark:hover:from-blue-300 dark:hover:via-blue-200 dark:hover:to-blue-300"
-              )}>
+              <h3 
+                className={cn(
+                  "text-xl sm:text-2xl font-semibold line-clamp-2",
+                  "bg-gradient-to-r from-blue-900 via-blue-700 to-blue-800",
+                  "dark:from-blue-400 dark:via-blue-300 dark:to-blue-400",
+                  "bg-clip-text text-transparent",
+                  "hover:from-blue-800 hover:via-blue-600 hover:to-blue-700",
+                  "dark:hover:from-blue-300 dark:hover:via-blue-200 dark:hover:to-blue-300",
+                  "cursor-pointer"
+                )}
+                onClick={() => setShowContent(!showContent)}
+              >
                 {title}
               </h3>
             )}
@@ -360,33 +367,21 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 <Edit className="w-5 h-5 text-blue-900 dark:text-blue-200" />
               )}
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsZoomed(!isZoomed)}
-              className="h-9 w-9 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg hidden sm:flex"
-            >
-              {isZoomed ? (
-                <ZoomOut className="w-5 h-5 text-blue-900 dark:text-blue-200" />
-              ) : (
-                <ZoomIn className="w-5 h-5 text-blue-900 dark:text-blue-200" />
-              )}
-            </Button>
           </div>
         </div>
 
         {/* Content Section */}
-        <div className={cn(
-          "space-y-4 transition-all duration-200",
-          !showContent && "blur-sm pointer-events-none"
-        )}>
+        <div 
+          className={cn(
+            "transition-all duration-300",
+            !showContent && "hidden"
+          )}
+        >
           {isEditing ? (
             <div className="space-y-4">
               <RichTextEditor
                 content={content}
-                onChange={(newContent) => {
-                  setContent(newContent);
-                }}
+                onChange={setContent}
                 className={cn(
                   "min-h-[150px] p-4 rounded-lg",
                   "bg-white dark:bg-gray-900",
@@ -402,16 +397,33 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   "prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800"
                 )}
               />
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => {
+                    setIsEditing(false);
+                    setContent(initialContent);
+                    setTitle(initialTitle);
+                  }}
                   className="bg-white hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800"
                 >
                   Cancel
                 </Button>
                 <Button
-                  onClick={handleSave}
+                  onClick={async () => {
+                    try {
+                      const saved = await handleSave();
+                      if (saved) {
+                        setIsEditing(false);
+                        toast({
+                          title: "Success",
+                          description: "Card updated successfully",
+                        });
+                      }
+                    } catch (error) {
+                      console.error('Error saving:', error);
+                    }
+                  }}
                   className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   Save Changes
@@ -420,24 +432,150 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             </div>
           ) : (
             <div 
-              className={cn(
-                "prose prose-sm sm:prose-base max-w-none dark:prose-invert",
-                "prose-img:my-4 prose-img:rounded-lg prose-img:max-w-full prose-img:mx-auto prose-img:shadow-md",
-                "prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
-                "prose-p:text-gray-700 dark:prose-p:text-gray-300",
-                "prose-a:text-blue-600 dark:prose-a:text-blue-400",
-                "prose-blockquote:border-l-blue-500",
-                "prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800",
-                !isZoomed && "max-h-[300px] overflow-hidden relative",
+              className="relative"
+              onClick={() => !isZoomed && setIsZoomed(true)}
+            >
+              <div 
+                className={cn(
+                  "prose prose-sm sm:prose-base max-w-none dark:prose-invert",
+                  "prose-img:my-4 prose-img:rounded-lg prose-img:max-w-full prose-img:mx-auto prose-img:shadow-md",
+                  "prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
+                  "prose-p:text-gray-700 dark:prose-p:text-gray-300",
+                  "prose-a:text-blue-600 dark:prose-a:text-blue-400",
+                  "prose-blockquote:border-l-blue-500",
+                  "prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800",
+                  !isZoomed && "max-h-[300px] overflow-hidden cursor-pointer"
+                )}
+                dangerouslySetInnerHTML={{ __html: content }}
+              />
+              {!isZoomed && content.length > 300 && (
+                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white dark:from-gray-950 to-transparent pointer-events-none" />
               )}
-              dangerouslySetInnerHTML={{ __html: content }}
-            />
-          )}
-          {!isZoomed && content.length > 500 && (
-            <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white dark:from-gray-950 to-transparent" />
+            </div>
           )}
         </div>
+
+        {/* Meta Section */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-sm">
+          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <Clock className="w-4 h-4" />
+            <span>Updated {getTimeAgo(updatedAt)}</span>
+            {category && (
+              <>
+                <span>•</span>
+                <span className="font-medium">{category}</span>
+              </>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag, index) => (
+              <Badge
+                key={`${tag}-${index}`}
+                variant={isEditing ? "secondary" : "default"}
+                className={cn(
+                  "text-sm px-2.5 py-0.5 rounded-full transition-all duration-200",
+                  isEditing 
+                    ? "cursor-pointer hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900 dark:hover:text-red-300"
+                    : "bg-blue-100 text-blue-900 hover:bg-blue-200 dark:bg-blue-900/50 dark:text-blue-100 dark:hover:bg-blue-800/50"
+                )}
+                onClick={() => isEditing && handleRemoveTag(tag)}
+              >
+                {tag}
+                {isEditing && (
+                  <X className="w-3 h-3 ml-1.5 inline-block" />
+                )}
+              </Badge>
+            ))}
+            {isEditing && (
+              <form onSubmit={handleAddTag} className="inline-flex">
+                <Input
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  placeholder="Add tag..."
+                  className={cn(
+                    "h-7 text-sm w-24 sm:w-32",
+                    "bg-white dark:bg-gray-900",
+                    "text-gray-900 dark:text-gray-100",
+                    "border-gray-200 dark:border-gray-800",
+                    "focus-visible:ring-2 focus-visible:ring-blue-500",
+                    "placeholder:text-gray-400 dark:placeholder:text-gray-600",
+                    "rounded-full"
+                  )}
+                />
+              </form>
+            )}
+          </div>
+        </div>
       </CardHeader>
+
+      <CardFooter className={cn(
+        "flex justify-between p-4 sm:p-6 gap-4",
+        "bg-gradient-to-b from-transparent via-gray-50/50 to-gray-100/50",
+        "dark:via-gray-900/30 dark:to-gray-900/50"
+      )}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className={cn(
+            "text-sm transition-colors flex-1 sm:flex-none justify-start sm:justify-center",
+            mastered 
+              ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-950/50" 
+              : "text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-950/50"
+          )}
+          onClick={handleMasteredToggle}
+        >
+          {mastered ? (
+            <>
+              <BookmarkCheck className="w-4 h-4 mr-2" />
+              <span>Mastered</span>
+            </>
+          ) : (
+            <>
+              <Bookmark className="w-4 h-4 mr-2" />
+              <span>Mark as Mastered</span>
+            </>
+          )}
+        </Button>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          className={cn(
+            "text-sm transition-colors",
+            "text-red-600 hover:text-red-700 hover:bg-red-50",
+            "dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
+          )}
+          onClick={onDelete}
+        >
+          <Trash2 className="w-4 h-4 mr-2" />
+          <span>Delete</span>
+        </Button>
+      </CardFooter>
+
+      {/* Zoomed View Dialog */}
+      <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto p-6 sm:p-8">
+          <DialogHeader>
+            <DialogTitle className={cn(
+              "text-2xl font-semibold",
+              "bg-gradient-to-r from-blue-600 to-blue-400",
+              "bg-clip-text text-transparent"
+            )}>
+              {title}
+            </DialogTitle>
+          </DialogHeader>
+          <div className={cn(
+            "prose prose-lg max-w-none dark:prose-invert mt-6",
+            "prose-img:rounded-lg prose-img:shadow-lg prose-img:mx-auto",
+            "prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
+            "prose-p:text-gray-700 dark:prose-p:text-gray-300",
+            "prose-a:text-blue-600 dark:prose-a:text-blue-400"
+          )} 
+          dangerouslySetInnerHTML={{ __html: content }} 
+          />
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
