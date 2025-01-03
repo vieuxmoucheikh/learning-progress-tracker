@@ -255,13 +255,25 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setMastered(!mastered)}
-              title={mastered ? "Mark as not mastered" : "Mark as mastered"}
+              onClick={() => setShowContent(!showContent)}
+              title={showContent ? "Hide content" : "Show content"}
             >
-              {mastered ? (
-                <BookmarkCheck className="w-4 h-4" />
+              {showContent ? (
+                <EyeOff className="w-4 h-4" />
               ) : (
-                <Bookmark className="w-4 h-4" />
+                <Eye className="w-4 h-4" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsEditing(!isEditing)}
+              title={isEditing ? "Save changes" : "Edit card"}
+            >
+              {isEditing ? (
+                <Save className="w-4 h-4" />
+              ) : (
+                <Edit className="w-4 h-4" />
               )}
             </Button>
             <Button
