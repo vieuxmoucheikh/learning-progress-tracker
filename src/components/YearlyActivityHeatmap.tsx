@@ -51,10 +51,10 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
   const calendarData = generateCalendarData();
 
   const getColorForCount = (count: number) => {
-    if (count === 0) return 'bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800';
-    if (count === 1) return 'bg-emerald-200 hover:bg-emerald-300 dark:bg-emerald-800 dark:hover:bg-emerald-700 border-emerald-300 dark:border-emerald-700';
-    if (count <= 3) return 'bg-emerald-400 hover:bg-emerald-500 dark:bg-emerald-600 dark:hover:bg-emerald-500 border-emerald-500 dark:border-emerald-500';
-    return 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-400 dark:hover:bg-emerald-300 border-emerald-700 dark:border-emerald-300';
+    if (count === 0) return 'bg-gray-50 border-gray-100';
+    if (count === 1) return 'bg-emerald-200 hover:bg-emerald-300 border-emerald-300';
+    if (count <= 3) return 'bg-emerald-400 hover:bg-emerald-500 border-emerald-500';
+    return 'bg-emerald-600 hover:bg-emerald-700 border-emerald-700';
   };
 
   const weeks: DayData[][] = [];
@@ -88,7 +88,7 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
   const monthLabels = getMonthLabels();
 
   const renderLegend = () => (
-    <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 mb-4 justify-center sm:justify-start">
+    <div className="flex items-center gap-1 text-sm text-gray-600 mb-4 justify-center sm:justify-start">
       <span className="text-[10px] sm:text-xs">Less</span>
       {[0, 1, 2, 4].map(count => (
         <div
@@ -106,33 +106,35 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
   return (
     <div className="w-full space-y-4">
       {renderLegend()}
-      <div className="relative w-full overflow-hidden">
-        <div className="overflow-x-auto sm:overflow-x-visible -mx-4 sm:mx-0 pb-2">
-          <div className="min-w-fit px-4 sm:px-0" style={{ width: window.innerWidth <= 640 ? '200%' : '100%' }}>
-            <div className="relative">
+      <div className="relative w-full">
+        <div className="sm:overflow-x-visible">
+          <div className="w-full">
+            <div className="relative max-w-full">
               {/* Month labels */}
-              <div className="flex mb-1 sm:mb-2 relative">
-                <div className="w-3 sm:w-8" /> {/* Offset for day labels */}
-                <div className="flex flex-1">
-                  {monthLabels.map((label, i) => (
-                    <div
-                      key={i}
-                      className="absolute text-[8px] sm:text-xs text-gray-500 origin-left"
-                      style={{ 
-                        left: `${label.index * (window.innerWidth <= 640 ? 4 : 16) + 8}px`,
-                        transform: window.innerWidth <= 640 ? 'rotate(-60deg) translateY(-8px)' : 'none'
-                      }}
-                    >
-                      {window.innerWidth <= 640 ? label.text.slice(0, 1) : label.text}
-                    </div>
-                  ))}
+              <div className="flex mb-6 sm:mb-8 relative">
+                <div className="w-6 sm:w-8" /> {/* Offset for day labels */}
+                <div className="flex-1 relative">
+                  <div className="flex absolute left-0 right-0">
+                    {monthLabels.map((label, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 text-[8px] sm:text-xs text-gray-500"
+                        style={{ 
+                          minWidth: window.innerWidth <= 640 ? '20px' : '60px',
+                          textAlign: 'center'
+                        }}
+                      >
+                        {window.innerWidth <= 640 ? label.text.slice(0, 3) : label.text}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
               {/* Main grid */}
-              <div className="flex">
+              <div className="flex w-full">
                 {/* Day labels */}
-                <div className="flex flex-col gap-[2px] sm:gap-1 pr-1 sm:pr-2">
+                <div className="flex flex-col gap-[2px] sm:gap-1 pr-2 sm:pr-3">
                   {DAYS.map((day, i) => (
                     <div 
                       key={day} 
@@ -144,7 +146,7 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
                 </div>
 
                 {/* Calendar grid */}
-                <div className="flex gap-[2px] sm:gap-1">
+                <div className="flex-1 grid grid-cols-[repeat(52,1fr)] gap-[2px] sm:gap-1">
                   {weeks.map((week, weekIndex) => (
                     <div key={weekIndex} className="flex flex-col gap-[2px] sm:gap-1">
                       {week.map((day) => {
@@ -158,10 +160,10 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
                               <TooltipTrigger asChild>
                                 <div
                                   className={cn(
-                                    'w-[4px] h-[6px] sm:w-3 sm:h-3 rounded-[1px] sm:rounded-sm transition-colors duration-200',
-                                    'border border-inherit',
+                                    'aspect-square w-full rounded-[1px] sm:rounded-sm transition-colors duration-200',
+                                    'border',
                                     colorClass,
-                                    day.count > 0 ? 'cursor-pointer transform hover:scale-125' : ''
+                                    day.count > 0 ? 'cursor-pointer transform hover:scale-110' : ''
                                   )}
                                 />
                               </TooltipTrigger>
@@ -184,8 +186,6 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
             </div>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 w-full h-6 pointer-events-none bg-gradient-to-l from-background to-transparent sm:hidden" />
-        <div className="absolute bottom-0 right-0 w-full h-6 pointer-events-none bg-gradient-to-r from-background to-transparent sm:hidden" />
       </div>
     </div>
   );
