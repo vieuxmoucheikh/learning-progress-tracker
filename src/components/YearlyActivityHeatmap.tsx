@@ -5,7 +5,10 @@ import {
   addDays, 
   getDay,
   startOfWeek,
-  addWeeks
+  addWeeks,
+  isWithinInterval,
+  startOfYear,
+  endOfYear
 } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -38,7 +41,7 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function YearlyActivityHeatmap({ 
   data, 
-  year = new Date('2025-01-03T15:14:15+01:00').getFullYear(),
+  year = new Date('2025-01-03T15:21:59+01:00').getFullYear(),
   onYearChange 
 }: YearlyActivityHeatmapProps) {
   const [selectedYear, setSelectedYear] = React.useState(year);
@@ -49,8 +52,8 @@ export function YearlyActivityHeatmap({
   };
 
   const generateCalendarData = () => {
-    const yearStart = new Date(selectedYear, 0, 1);
-    const yearEnd = new Date(selectedYear, 11, 31);
+    const yearStart = startOfYear(new Date(selectedYear, 0, 1));
+    const yearEnd = endOfYear(new Date(selectedYear, 11, 31));
     const activityMap: { [key: string]: number } = {};
 
     // Initialize all dates with 0
@@ -64,7 +67,7 @@ export function YearlyActivityHeatmap({
     // Fill in the activity data
     data.forEach(activity => {
       const activityDate = new Date(activity.date);
-      if (activityDate.getFullYear() === selectedYear) {
+      if (isWithinInterval(activityDate, { start: yearStart, end: yearEnd })) {
         const dateKey = format(activityDate, 'yyyy-MM-dd');
         activityMap[dateKey] = (activityMap[dateKey] || 0) + 1;
       }
@@ -76,21 +79,16 @@ export function YearlyActivityHeatmap({
   const calendarData = generateCalendarData();
   const weeks: WeekData[] = [];
   
-  // Find the first day of the year
-  const firstDayOfYear = new Date(selectedYear, 0, 1);
-  const lastDayOfYear = new Date(selectedYear, 11, 31);
-  
-  // Get the start of the first week
-  let currentDate = startOfWeek(firstDayOfYear);
+  // Get the start of the first week of the year
+  let currentDate = startOfWeek(new Date(selectedYear, 0, 1));
+  const yearEnd = endOfYear(new Date(selectedYear, 11, 31));
   
   // Fill in all weeks of the year
-  while (currentDate <= lastDayOfYear) {
+  while (currentDate <= yearEnd) {
     const week: WeekData = Array(7).fill(null);
     
     for (let i = 0; i < 7; i++) {
       const date = addDays(currentDate, i);
-      
-      // Only include dates within the selected year
       if (date.getFullYear() === selectedYear) {
         week[i] = {
           date: format(date, 'yyyy-MM-dd'),
@@ -136,7 +134,7 @@ export function YearlyActivityHeatmap({
   };
 
   const renderLegend = () => (
-    <div className="flex items-center gap-1 text-sm text-gray-600 mb-4 justify-center sm:justify-start">
+    <div className="flex items-center gap-1 text-sm text-gray-600 justify-center sm:justify-start">
       <span className="text-[10px] sm:text-xs">Less</span>
       {[0, 1, 2, 4].map(count => (
         <div
@@ -197,17 +195,17 @@ export function YearlyActivityHeatmap({
       <div className="relative w-full">
         <div className="w-full">
           {/* Month labels */}
-          <div className="flex mb-6 sm:mb-8 relative">
-            <div className="w-4 sm:w-6" /> {/* Offset for day labels */}
-            <div className="flex-1 relative">
-              <div className="flex absolute left-0 right-0">
+          <div className="flex mb-2">
+            <div className="w-6" /> {/* Offset for day labels */}
+            <div className="flex-1">
+              <div className="grid grid-cols-[repeat(52,1fr)]">
                 {monthLabels.map((label, i) => (
                   <div
                     key={i}
-                    className="flex-1 text-[8px] sm:text-xs text-gray-500"
+                    className="text-[8px] sm:text-xs text-gray-500 text-center"
                     style={{ 
-                      minWidth: window.innerWidth <= 640 ? '16px' : '56px',
-                      textAlign: 'center'
+                      gridColumnStart: label.index + 1,
+                      gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 53
                     }}
                   >
                     {window.innerWidth <= 640 ? label.text.slice(0, 1) : label.text}
@@ -218,9 +216,9 @@ export function YearlyActivityHeatmap({
           </div>
 
           {/* Main grid */}
-          <div className="flex w-full">
+          <div className="flex">
             {/* Day labels */}
-            <div className="flex flex-col gap-[1px] sm:gap-1.5 pr-1 sm:pr-3">
+            <div className="flex flex-col gap-[1px] sm:gap-1.5 pr-2">
               {DAYS.map((day) => (
                 <div 
                   key={day} 
