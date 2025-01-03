@@ -288,80 +288,88 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     <Card className={cn(
       "relative overflow-hidden transition-all duration-300 border-2",
       "hover:shadow-lg hover:shadow-blue-300/50 dark:hover:shadow-blue-900/30",
+      "max-w-3xl mx-auto", // Center card on larger screens
+      "sm:rounded-xl", // Rounded corners on desktop
+      "bg-white dark:bg-gray-950",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
       mastered 
         ? "border-emerald-400 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/50 dark:to-gray-950" 
-        : "border-blue-400 hover:border-blue-500 dark:border-blue-500 dark:hover:border-blue-400 bg-white dark:bg-gray-950",
+        : "border-blue-400 hover:border-blue-500 dark:border-blue-500 dark:hover:border-blue-400",
       isEditing && "border-blue-500 dark:border-blue-400 shadow-lg shadow-blue-300 dark:shadow-blue-900/30"
     )}>
-      <CardHeader className="space-y-3 pb-3">
-        <div className="flex items-center justify-between">
-          {isEditing ? (
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className={cn(
-                "text-lg font-semibold",
-                "bg-white dark:bg-gray-900",
-                "text-gray-900 dark:text-gray-100",
-                "border-gray-200 dark:border-gray-800",
-                "focus-visible:ring-blue-500",
-                "placeholder:text-gray-400 dark:placeholder:text-gray-600"
-              )}
-              placeholder="Enter title..."
-            />
-          ) : (
-            <h3 className={cn(
-              "text-lg font-semibold",
-              "bg-gradient-to-r from-blue-900 via-blue-700 to-blue-800",
-              "dark:from-blue-400 dark:via-blue-300 dark:to-blue-400",
-              "bg-clip-text text-transparent",
-              "hover:from-blue-800 hover:via-blue-600 hover:to-blue-700",
-              "dark:hover:from-blue-300 dark:hover:via-blue-200 dark:hover:to-blue-300"
-            )}>
-              {title}
-            </h3>
-          )}
-          <div className="flex items-center space-x-1.5">
+      <CardHeader className="space-y-4 pb-4 px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            {isEditing ? (
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onBlur={handleSave}
+                className={cn(
+                  "text-lg font-semibold",
+                  "bg-white dark:bg-gray-900",
+                  "text-gray-900 dark:text-gray-100",
+                  "border-gray-200 dark:border-gray-800",
+                  "focus-visible:ring-2 focus-visible:ring-blue-500",
+                  "placeholder:text-gray-400 dark:placeholder:text-gray-600",
+                  "w-full sm:text-xl"
+                )}
+                placeholder="Enter title..."
+              />
+            ) : (
+              <h3 className={cn(
+                "text-xl sm:text-2xl font-semibold line-clamp-2",
+                "bg-gradient-to-r from-blue-900 via-blue-700 to-blue-800",
+                "dark:from-blue-400 dark:via-blue-300 dark:to-blue-400",
+                "bg-clip-text text-transparent",
+                "hover:from-blue-800 hover:via-blue-600 hover:to-blue-700",
+                "dark:hover:from-blue-300 dark:hover:via-blue-200 dark:hover:to-blue-300"
+              )}>
+                {title}
+              </h3>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2 sm:gap-3">
             {mastered && (
-              <Trophy className="w-4 h-4 text-yellow-500 animate-pulse" />
+              <Trophy className="w-5 h-5 text-yellow-500 animate-pulse" />
             )}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setShowContent(!showContent)}
-              className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-900/50"
+              className="h-9 w-9 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg"
               title={showContent ? "Hide content" : "Show content"}
             >
               {showContent ? (
-                <EyeOff className="w-4 h-4 text-blue-900 dark:text-blue-200" />
+                <EyeOff className="w-5 h-5 text-blue-900 dark:text-blue-200" />
               ) : (
-                <Eye className="w-4 h-4 text-blue-900 dark:text-blue-200" />
+                <Eye className="w-5 h-5 text-blue-900 dark:text-blue-200" />
               )}
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsEditing(!isEditing)}
-              className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-900/50"
+              className="h-9 w-9 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg"
               title={isEditing ? "Save changes" : "Edit card"}
             >
               {isEditing ? (
-                <Save className="w-4 h-4 text-blue-900 dark:text-blue-200" />
+                <Save className="w-5 h-5 text-blue-900 dark:text-blue-200" />
               ) : (
-                <Edit className="w-4 h-4 text-blue-900 dark:text-blue-200" />
+                <Edit className="w-5 h-5 text-blue-900 dark:text-blue-200" />
               )}
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsZoomed(!isZoomed)}
-              className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-900/50"
+              className="h-9 w-9 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg hidden sm:flex"
             >
               {isZoomed ? (
-                <ZoomOut className="w-4 h-4 text-blue-900 dark:text-blue-200" />
+                <ZoomOut className="w-5 h-5 text-blue-900 dark:text-blue-200" />
               ) : (
-                <ZoomIn className="w-4 h-4 text-blue-900 dark:text-blue-200" />
+                <ZoomIn className="w-5 h-5 text-blue-900 dark:text-blue-200" />
               )}
             </Button>
           </div>
@@ -369,7 +377,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
         {/* Content Section */}
         <div className={cn(
-          "space-y-2 transition-all duration-200",
+          "space-y-4 transition-all duration-200",
           !showContent && "blur-sm pointer-events-none"
         )}>
           {isEditing ? (
@@ -381,133 +389,160 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   // Auto-save after a short delay
                   const timeoutId = setTimeout(() => {
                     handleSave();
-                  }, 1000);
+                  }, 800);
                   return () => clearTimeout(timeoutId);
                 }}
                 className={cn(
-                  "min-h-[100px] p-3 rounded-md",
+                  "min-h-[150px] p-4 rounded-lg",
                   "bg-white dark:bg-gray-900",
                   "text-gray-900 dark:text-gray-100",
                   "border border-gray-200 dark:border-gray-800",
                   "focus-within:ring-2 focus-within:ring-blue-500",
-                  "prose dark:prose-invert max-w-none",
-                  "prose-img:my-0 prose-img:rounded-md prose-img:max-w-full"
+                  "prose dark:prose-invert prose-sm sm:prose-base max-w-none",
+                  "prose-img:my-4 prose-img:rounded-lg prose-img:max-w-full prose-img:mx-auto",
+                  "prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
+                  "prose-p:text-gray-700 dark:prose-p:text-gray-300",
+                  "prose-a:text-blue-600 dark:prose-a:text-blue-400",
+                  "prose-blockquote:border-l-blue-500",
+                  "prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800"
                 )}
               />
             </div>
           ) : (
             <div 
               className={cn(
-                "prose dark:prose-invert max-w-none",
-                "prose-img:my-0 prose-img:rounded-md",
+                "prose prose-sm sm:prose-base max-w-none dark:prose-invert",
+                "prose-img:my-4 prose-img:rounded-lg prose-img:max-w-full prose-img:mx-auto prose-img:shadow-md",
+                "prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
                 "prose-p:text-gray-700 dark:prose-p:text-gray-300",
-                "prose-headings:text-gray-900 dark:prose-headings:text-gray-100"
+                "prose-a:text-blue-600 dark:prose-a:text-blue-400",
+                "prose-blockquote:border-l-blue-500",
+                "prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800"
               )}
               dangerouslySetInnerHTML={{ __html: content }}
             />
           )}
         </div>
 
-        {/* Time and Category Info */}
-        <div className="flex items-center text-sm space-x-2">
-          <Clock className="w-4 h-4 text-blue-900 dark:text-blue-200" />
-          <span className="text-gray-700 font-medium dark:text-gray-300">
-            Updated {getTimeAgo(updatedAt)}
-          </span>
-          {category && (
-            <span className="text-gray-400">•</span>
-          )}
-          {category && (
-            <span className="text-gray-700 font-medium dark:text-gray-300">
-              {category}
-            </span>
-          )}
-        </div>
+        {/* Meta Section */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-sm">
+          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <Clock className="w-4 h-4" />
+            <span>Updated {getTimeAgo(updatedAt)}</span>
+            {category && (
+              <>
+                <span>•</span>
+                <span className="font-medium">{category}</span>
+              </>
+            )}
+          </div>
 
-        {/* Tags */}
-        <div className="flex flex-wrap gap-2">
-          {tags.map((tag, index) => (
-            <Badge
-              key={`${tag}-${index}`}
-              variant={isEditing ? "secondary" : "default"}
-              className={cn(
-                "text-sm px-2 py-0.5 transition-all duration-200",
-                isEditing 
-                  ? "cursor-pointer hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900 dark:hover:text-red-300"
-                  : "bg-blue-100 text-blue-900 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-100 dark:hover:bg-blue-800"
-              )}
-              onClick={() => isEditing && handleRemoveTag(tag)}
-            >
-              {tag}
-              {isEditing && (
-                <X className="w-3 h-3 ml-1 inline-block" />
-              )}
-            </Badge>
-          ))}
-          {isEditing && (
-            <form onSubmit={handleAddTag} className="inline-flex">
-              <Input
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                placeholder="Add tag..."
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag, index) => (
+              <Badge
+                key={`${tag}-${index}`}
+                variant={isEditing ? "secondary" : "default"}
                 className={cn(
-                  "h-7 text-sm w-24",
-                  "bg-white dark:bg-gray-900",
-                  "text-gray-900 dark:text-gray-100",
-                  "border-gray-200 dark:border-gray-800",
-                  "focus-visible:ring-blue-500",
-                  "placeholder:text-gray-400 dark:placeholder:text-gray-600"
+                  "text-sm px-2.5 py-0.5 rounded-full transition-all duration-200",
+                  isEditing 
+                    ? "cursor-pointer hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900 dark:hover:text-red-300"
+                    : "bg-blue-100 text-blue-900 hover:bg-blue-200 dark:bg-blue-900/50 dark:text-blue-100 dark:hover:bg-blue-800/50"
                 )}
-              />
-            </form>
-          )}
+                onClick={() => isEditing && handleRemoveTag(tag)}
+              >
+                {tag}
+                {isEditing && (
+                  <X className="w-3 h-3 ml-1.5 inline-block" />
+                )}
+              </Badge>
+            ))}
+            {isEditing && (
+              <form onSubmit={handleAddTag} className="inline-flex">
+                <Input
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  placeholder="Add tag..."
+                  className={cn(
+                    "h-7 text-sm w-24 sm:w-32",
+                    "bg-white dark:bg-gray-900",
+                    "text-gray-900 dark:text-gray-100",
+                    "border-gray-200 dark:border-gray-800",
+                    "focus-visible:ring-2 focus-visible:ring-blue-500",
+                    "placeholder:text-gray-400 dark:placeholder:text-gray-600",
+                    "rounded-full"
+                  )}
+                />
+              </form>
+            )}
+          </div>
         </div>
       </CardHeader>
 
-      <CardFooter className="flex justify-between py-3 bg-gradient-to-b from-transparent to-blue-50/30 dark:to-blue-950/30">
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              "text-sm transition-colors",
-              mastered 
-                ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-950/50" 
-                : "text-muted-foreground hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950/50"
-            )}
-            onClick={handleMasteredToggle}
-          >
-            {mastered ? (
-              <BookmarkCheck className="w-4 h-4 mr-1" />
-            ) : (
-              <Bookmark className="w-4 h-4 mr-1" />
-            )}
-            {mastered ? (
-              "Mastered"
-            ) : (
-              "Mark as Mastered"
-            )}
-          </Button>
-        </div>
+      <CardFooter className={cn(
+        "flex justify-between p-4 sm:p-6 gap-4",
+        "bg-gradient-to-b from-transparent via-gray-50/50 to-gray-100/50",
+        "dark:via-gray-900/30 dark:to-gray-900/50"
+      )}>
         <Button
           variant="ghost"
           size="sm"
-          className="text-sm text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
+          className={cn(
+            "text-sm transition-colors flex-1 sm:flex-none justify-start sm:justify-center",
+            mastered 
+              ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-950/50" 
+              : "text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-950/50"
+          )}
+          onClick={handleMasteredToggle}
+        >
+          {mastered ? (
+            <>
+              <BookmarkCheck className="w-4 h-4 mr-2" />
+              <span>Mastered</span>
+            </>
+          ) : (
+            <>
+              <Bookmark className="w-4 h-4 mr-2" />
+              <span>Mark as Mastered</span>
+            </>
+          )}
+        </Button>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          className={cn(
+            "text-sm transition-colors",
+            "text-red-600 hover:text-red-700 hover:bg-red-50",
+            "dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
+          )}
           onClick={onDelete}
         >
-          <Trash2 className="w-4 h-4 mr-1" />
-          Delete
+          <Trash2 className="w-4 h-4 mr-2" />
+          <span>Delete</span>
         </Button>
       </CardFooter>
 
+      {/* Zoomed View Dialog */}
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto p-6 sm:p-8">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+            <DialogTitle className={cn(
+              "text-2xl font-semibold",
+              "bg-gradient-to-r from-blue-600 to-blue-400",
+              "bg-clip-text text-transparent"
+            )}>
               {title}
             </DialogTitle>
           </DialogHeader>
-          <div className="prose prose-blue max-w-none dark:prose-invert mt-4" dangerouslySetInnerHTML={{ __html: content }} />
+          <div className={cn(
+            "prose prose-lg max-w-none dark:prose-invert mt-6",
+            "prose-img:rounded-lg prose-img:shadow-lg prose-img:mx-auto",
+            "prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
+            "prose-p:text-gray-700 dark:prose-p:text-gray-300",
+            "prose-a:text-blue-600 dark:prose-a:text-blue-400"
+          )} 
+          dangerouslySetInnerHTML={{ __html: content }} 
+          />
         </DialogContent>
       </Dialog>
     </Card>
