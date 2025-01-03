@@ -58,7 +58,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { getLearningItems, trackLearningActivity, updateLearningItem } from '@/lib/database';
+import { getLearningItems, updateLearningItem } from '@/lib/database';
+import { incrementLearningActivity } from '@/lib/learningActivity';
 
 interface EnhancedLearningCardProps extends CardType {
   onSave: (data: Partial<CardType>) => Promise<boolean>;
@@ -114,22 +115,23 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   }, [isEditing]);
 
   const handleSave = async () => {
-    const result = await onSave({
-      id,
-      title,
-      content,
-      media,
-      tags,
-      category: itemCategory,
-      mastered,
-    });
-    if (result) {
-      setIsEditing(false);
+    try {
+      const success = await onSave({ id, title, content, media, tags });
+      if (success) {
+        const currentDate = new Date('2025-01-03T08:21:21+01:00').toISOString().split('T')[0];
+        await incrementLearningActivity(itemCategory || 'Uncategorized', currentDate);
+        toast({
+          title: "Success",
+          description: "Card updated successfully",
+        });
+      }
+    } catch (error) {
+      console.error('Error saving card:', error);
       toast({
-        title: "Success",
-        description: "Card updated successfully",
+        title: "Error",
+        description: "Failed to save card",
+        variant: "destructive",
       });
-      await trackLearningActivity(itemCategory);
     }
   };
 
@@ -137,17 +139,18 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     try {
       const success = await onSave({ ...{ id, title, content, media, tags, mastered }, category });
       if (success) {
-        await trackLearningActivity(category);
+        const currentDate = new Date('2025-01-03T08:21:21+01:00').toISOString().split('T')[0];
+        await incrementLearningActivity(category, currentDate);
         toast({
           title: "Success",
           description: "Card updated successfully",
         });
       }
     } catch (error) {
-      console.error('Error updating card:', error);
+      console.error('Error updating category:', error);
       toast({
         title: "Error",
-        description: "Failed to update card",
+        description: "Failed to update category",
         variant: "destructive",
       });
     }
@@ -184,29 +187,25 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
   const toggleMastered = async () => {
     try {
-      const success = await onSave({
-        id,
-        mastered: !mastered,
-        category: itemCategory
-      });
-
+      const success = await onSave({ ...{ id, title, content, media, tags }, mastered: !mastered });
       if (success) {
         // Track the learning activity when marking as mastered
         if (!mastered) {
           console.log('Tracking activity for category:', itemCategory);
-          await trackLearningActivity(itemCategory || 'Uncategorized');
+          const currentDate = new Date('2025-01-03T08:21:21+01:00').toISOString().split('T')[0];
+          await incrementLearningActivity(itemCategory || 'Uncategorized', currentDate);
         }
         setMastered(!mastered);
         toast({
-          title: !mastered ? "Marked as mastered" : "Marked as not mastered",
-          description: `Successfully ${!mastered ? 'mastered' : 'unmastered'} the card`,
+          title: "Success",
+          description: `Card marked as ${!mastered ? 'mastered' : 'not mastered'}`,
         });
       }
     } catch (error) {
-      console.error('Error toggling mastered state:', error);
+      console.error('Error toggling mastered:', error);
       toast({
         title: "Error",
-        description: "Failed to update mastered state",
+        description: "Failed to update mastered status",
         variant: "destructive",
       });
     }
@@ -218,19 +217,17 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     setIsLoading(true);
     try {
       console.log('Completing item:', id);
+      const currentCategory = itemCategory || 'Uncategorized';
+      const currentDate = new Date('2025-01-03T08:21:21+01:00').toISOString().split('T')[0];
       
       // Track the learning activity first
-      const activityResult = await trackLearningActivity(itemCategory || 'Uncategorized');
-      console.log('Activity tracking result:', activityResult);
+      console.log('Tracking activity:', { category: currentCategory, date: currentDate });
+      await incrementLearningActivity(currentCategory, currentDate);
       
-      if (!activityResult) {
-        throw new Error('Failed to track activity');
-      }
-
       // Then update the learning item
       const updatedItem = await updateLearningItem(id, {
         completed: true,
-        completed_at: new Date('2025-01-02T23:43:13+01:00').toISOString(),
+        completed_at: new Date('2025-01-03T08:21:21+01:00').toISOString(),
       });
 
       if (!updatedItem) {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getYearlyActivity, getLearningItems } from '@/lib/database';
+import { getLearningActivity } from '@/lib/learningActivity';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { YearlyActivityHeatmap } from './YearlyActivityHeatmap';
 
@@ -36,10 +37,20 @@ const YearlyActivityStats = () => {
   const fetchActivities = async (category: string) => {
     try {
       console.log('Fetching activities for category:', category);
-      const activities = await getYearlyActivity(category);
-      const activeDays = activities.filter(d => d.count > 0);
-      console.log('Active days for category:', category, activeDays);
-      setActivityData(activities);
+      const currentDate = new Date('2025-01-03T08:16:05+01:00');
+      const year = currentDate.getFullYear();
+      const startDate = new Date(year, 0, 1).toISOString().split('T')[0];
+      const endDate = new Date(year, 11, 31).toISOString().split('T')[0];
+      
+      const activities = await getLearningActivity(startDate, endDate);
+      const categoryActivities = activities.filter(a => a.category === category);
+      
+      console.log('Received activities:', {
+        total: categoryActivities.length,
+        activities: categoryActivities
+      });
+      
+      setActivityData(categoryActivities);
     } catch (error) {
       console.error('Error fetching activities:', error);
     }
