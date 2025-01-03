@@ -137,21 +137,21 @@ export function YearlyActivityHeatmap({
   }, [weeks]);
 
   const getColorForCount = (count: number) => {
-    if (count === 0) return 'bg-gray-100 dark:bg-gray-800';
-    if (count === 1) return 'bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800';
-    if (count <= 3) return 'bg-blue-300 hover:bg-blue-400 dark:bg-blue-700 dark:hover:bg-blue-600';
-    return 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400';
+    if (count === 0) return 'bg-gray-100 dark:bg-gray-100/5';
+    if (count === 1) return 'bg-blue-300 hover:bg-blue-400 dark:bg-blue-400 dark:hover:bg-blue-300';
+    if (count <= 3) return 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-400';
+    return 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500';
   };
 
   return (
-    <div className="w-full bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
+    <div className="w-full bg-white dark:bg-transparent rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
       {/* Year navigation */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
         <Button
           variant="outline"
           size="sm"
           onClick={() => setSelectedYear(selectedYear - 1)}
-          className="hover:bg-gray-50 dark:hover:bg-gray-800"
+          className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -160,7 +160,7 @@ export function YearlyActivityHeatmap({
           variant="outline"
           size="sm"
           onClick={() => setSelectedYear(selectedYear + 1)}
-          className="hover:bg-gray-50 dark:hover:bg-gray-800"
+          className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
@@ -177,7 +177,7 @@ export function YearlyActivityHeatmap({
                 {monthLabels.map((label, i) => (
                   <div
                     key={i}
-                    className="text-gray-400 dark:text-gray-500 text-center font-medium"
+                    className="text-gray-500 dark:text-gray-400 text-center font-medium"
                     style={{ 
                       gridColumnStart: label.index + 1,
                       gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
@@ -197,7 +197,7 @@ export function YearlyActivityHeatmap({
               {DAYS.map((day) => (
                 <div 
                   key={day} 
-                  className="text-gray-400 dark:text-gray-500 flex items-center w-6 font-medium"
+                  className="text-gray-500 dark:text-gray-400 flex items-center w-6 font-medium"
                   style={{ 
                     height: 'min(1.5vw, 16px)',
                     maxHeight: '16px'
@@ -222,7 +222,7 @@ export function YearlyActivityHeatmap({
                                 'rounded-sm transition-colors duration-200',
                                 day.isCurrentYear
                                   ? getColorForCount(day.count)
-                                  : 'bg-gray-50 dark:bg-gray-800'
+                                  : 'bg-gray-50 dark:bg-gray-800/20'
                               )}
                               style={{ 
                                 height: 'min(1.5vw, 16px)',
@@ -232,11 +232,15 @@ export function YearlyActivityHeatmap({
                           </TooltipTrigger>
                           <TooltipContent 
                             side="top"
-                            className="bg-gray-900 dark:bg-gray-800 text-white border-gray-800"
+                            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                           >
                             <div className="text-xs">
-                              <div className="font-medium">{format(parseISO(day.date), 'MMM d, yyyy')}</div>
-                              <div className="text-gray-300">{day.count} activities</div>
+                              <div className="font-medium text-gray-900 dark:text-gray-100">
+                                {format(parseISO(day.date), 'MMM d, yyyy')}
+                              </div>
+                              <div className="text-gray-600 dark:text-gray-300">
+                                {day.count} {day.count === 1 ? 'activity' : 'activities'}
+                              </div>
                             </div>
                           </TooltipContent>
                         </Tooltip>
@@ -246,6 +250,21 @@ export function YearlyActivityHeatmap({
                 ))}
               </div>
             </div>
+          </div>
+
+          {/* Legend */}
+          <div className="flex items-center gap-2 mt-4 justify-end text-sm text-gray-600 dark:text-gray-400">
+            <span className="text-xs">Less</span>
+            {[0, 1, 2, 4].map((count) => (
+              <div
+                key={count}
+                className={cn(
+                  'w-3 h-3 rounded-sm',
+                  getColorForCount(count)
+                )}
+              />
+            ))}
+            <span className="text-xs">More</span>
           </div>
         </div>
       </div>
