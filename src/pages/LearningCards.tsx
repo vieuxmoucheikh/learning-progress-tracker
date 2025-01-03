@@ -115,25 +115,24 @@ export const LearningCardsPage = () => {
     }
   };
 
-  const handleSaveCard = async (card: Partial<CardType>) => {
+  const handleSaveCard = async (card: Partial<CardType>): Promise<boolean> => {
     try {
-      const normalizedCategory = (card.category || 'Uncategorized').toUpperCase();
-      const currentDate = new Date('2025-01-03T10:12:27+01:00').toISOString().split('T')[0];
+      const normalizedCategory = (card.category || '').toUpperCase();
+      const currentDate = new Date('2025-01-03T10:51:53+01:00').toISOString().split('T')[0];
 
       console.log('Saving card with normalized category:', {
-        ...card,
-        category: normalizedCategory
+        category: normalizedCategory,
+        date: currentDate,
+        card
       });
 
-      // Track activity when a new card is created
-      if (!card.id) {
-        console.log('New card created, tracking activity:', {
-          category: normalizedCategory,
-          date: currentDate
-        });
-        const activity = await incrementLearningActivity(normalizedCategory, currentDate);
-        console.log('Activity tracked:', activity);
-      }
+      // Track activity for the card
+      console.log('Tracking activity for card:', {
+        category: normalizedCategory,
+        date: currentDate
+      });
+      const activity = await incrementLearningActivity(normalizedCategory, currentDate);
+      console.log('Activity tracked:', activity);
 
       // Save the card with normalized category
       if (card.id) {
@@ -156,18 +155,23 @@ export const LearningCardsPage = () => {
         });
       }
 
+      // Update the cards list
+      setCards((prevCards) =>
+        prevCards.map((c) => (c.id === card.id ? { ...c, category: normalizedCategory } : c))
+      );
+
       toast({
-        title: "Success!",
-        description: card.id ? "Card updated successfully" : "New card created successfully",
+        title: 'Success',
+        description: 'Card saved successfully',
       });
 
       return true;
     } catch (error) {
       console.error('Error saving card:', error);
       toast({
-        title: "Error",
-        description: "Failed to save the card. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to save card. Please try again.',
+        variant: 'destructive',
       });
       return false;
     }
