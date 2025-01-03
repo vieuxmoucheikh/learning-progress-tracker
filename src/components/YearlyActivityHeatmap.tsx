@@ -19,6 +19,7 @@ import {
 } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from './ui/button';
 
 interface DayData {
   date: string;
@@ -152,7 +153,7 @@ export function YearlyActivityHeatmap({
   );
 
   return (
-    <div className="w-full max-w-full space-y-4 overflow-hidden col-span-1 sm:col-span-2">
+    <div className="w-full max-w-full space-y-4 overflow-hidden col-span-full">
       {/* Statistics section - only show once */}
       <div className="mt-4 flex flex-wrap gap-4">
         <div className="flex items-center gap-2">
@@ -169,92 +170,92 @@ export function YearlyActivityHeatmap({
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        {renderLegend()}
-        <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-md px-2 py-1 shadow-sm">
-          <button
+      <div className="w-full">
+        {/* Year navigation */}
+        <div className="flex items-center justify-between mb-4">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => handleYearChange(selectedYear - 1)}
-            className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            aria-label="Previous year"
           >
             <ChevronLeft className="h-4 w-4" />
-          </button>
-          <span className="text-sm font-medium min-w-[4rem] text-center">{selectedYear}</span>
-          <button
+          </Button>
+          <div className="text-lg font-semibold">{selectedYear}</div>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => handleYearChange(selectedYear + 1)}
-            className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            aria-label="Next year"
           >
             <ChevronRight className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
-      </div>
 
-      <div className="relative w-full">
-        <div className="w-full">
-          {/* Month labels */}
-          <div className="flex mb-2">
-            <div className="w-8 sm:w-10" /> {/* Offset for day labels */}
-            <div className="flex-1">
-              <div className="grid grid-cols-[repeat(53,1fr)] gap-[1px] sm:gap-1.5">
-                {monthLabels.map((label, i) => (
-                  <div
-                    key={i}
-                    className="text-[8px] sm:text-xs text-gray-500 text-center"
-                    style={{ 
-                      gridColumnStart: label.index + 1,
-                      gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
-                    }}
+        <div className="relative w-full">
+          <div className="w-full">
+            {/* Month labels */}
+            <div className="flex mb-2">
+              <div className="w-8 sm:w-10" /> {/* Offset for day labels */}
+              <div className="flex-1">
+                <div className="grid grid-cols-[repeat(53,1fr)] gap-[1px] sm:gap-1.5">
+                  {monthLabels.map((label, i) => (
+                    <div
+                      key={i}
+                      className="text-[8px] sm:text-xs text-gray-500 text-center"
+                      style={{ 
+                        gridColumnStart: label.index + 1,
+                        gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
+                      }}
+                    >
+                      {window.innerWidth <= 640 ? label.text.slice(0, 1) : label.text}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Main grid */}
+            <div className="flex">
+              {/* Day labels */}
+              <div className="flex flex-col gap-[1px] sm:gap-1.5 pr-2 sm:pr-3">
+                {DAYS.map((day) => (
+                  <div 
+                    key={day} 
+                    className="h-[4px] sm:h-4 text-[8px] sm:text-xs text-gray-500 flex items-center w-8 sm:w-10"
                   >
-                    {window.innerWidth <= 640 ? label.text.slice(0, 1) : label.text}
+                    {window.innerWidth <= 640 ? day[0] : day}
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
 
-          {/* Main grid */}
-          <div className="flex">
-            {/* Day labels */}
-            <div className="flex flex-col gap-[1px] sm:gap-1.5 pr-2 sm:pr-3">
-              {DAYS.map((day) => (
-                <div 
-                  key={day} 
-                  className="h-[4px] sm:h-4 text-[8px] sm:text-xs text-gray-500 flex items-center w-8 sm:w-10"
-                >
-                  {window.innerWidth <= 640 ? day[0] : day}
-                </div>
-              ))}
-            </div>
-
-            {/* Calendar grid */}
-            <div className="flex-1 grid grid-cols-[repeat(53,1fr)] gap-[1px] sm:gap-1.5">
-              {weeks.map((week, weekIndex) => (
-                <div key={weekIndex} className="flex flex-col gap-[1px] sm:gap-1.5">
-                  {week.map((day, dayIndex) => (
-                    <TooltipProvider key={day.date}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div
-                            className={cn(
-                              'h-[4px] sm:h-4 rounded-[1px] sm:rounded',
-                              day.isCurrentYear
-                                ? getColorForCount(day.count)
-                                : 'bg-gray-100'
-                            )}
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent side="top">
-                          <div className="text-xs">
-                            <div>{format(parseISO(day.date), 'MMM d, yyyy')}</div>
-                            <div>{day.count} activities</div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  ))}
-                </div>
-              ))}
+              {/* Calendar grid */}
+              <div className="flex-1 grid grid-cols-[repeat(53,1fr)] gap-[1px] sm:gap-1.5">
+                {weeks.map((week, weekIndex) => (
+                  <div key={weekIndex} className="flex flex-col gap-[1px] sm:gap-1.5">
+                    {week.map((day, dayIndex) => (
+                      <TooltipProvider key={day.date}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div
+                              className={cn(
+                                'h-[4px] sm:h-4 rounded-[1px] sm:rounded',
+                                day.isCurrentYear
+                                  ? getColorForCount(day.count)
+                                  : 'bg-gray-100'
+                              )}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            <div className="text-xs">
+                              <div>{format(parseISO(day.date), 'MMM d, yyyy')}</div>
+                              <div>{day.count} activities</div>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

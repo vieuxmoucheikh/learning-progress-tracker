@@ -16,6 +16,9 @@ import { useToast } from '@/hooks/useToast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { getLearningItems } from '@/lib/database';
+import { ProgressByDifficultyChart } from '@/components/ProgressByDifficultyChart';
+import { LearningFocusChart } from '@/components/LearningFocusChart';
+import { YearlyActivityHeatmap } from '@/components/YearlyActivityHeatmap';
 
 interface CardMedia {
   id: string;
@@ -158,6 +161,9 @@ export const LearningCardsPage = () => {
       }
     });
 
+  const progressData = []; // Replace with actual data
+  const focusData = []; // Replace with actual data
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col space-y-4">
@@ -185,7 +191,11 @@ export const LearningCardsPage = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
-          {/* Add Learning Insights Section components here */}
+          <ProgressByDifficultyChart data={progressData} />
+          <LearningFocusChart data={focusData} />
+          <div className="col-span-1 sm:col-span-2">
+            <YearlyActivityHeatmap />
+          </div>
         </div>
       </div>
     </div>
