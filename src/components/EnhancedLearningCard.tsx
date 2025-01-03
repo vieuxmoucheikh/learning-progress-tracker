@@ -216,25 +216,25 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     
     setIsLoading(true);
     try {
-      console.log('Completing item:', id);
+      console.log('Completing item:', { id, category: itemCategory });
       const currentCategory = itemCategory || 'Uncategorized';
-      const currentDate = new Date('2025-01-03T08:21:21+01:00').toISOString().split('T')[0];
+      const currentDate = new Date('2025-01-03T08:35:58+01:00').toISOString().split('T')[0];
       
       // Track the learning activity first
       console.log('Tracking activity:', { category: currentCategory, date: currentDate });
       await incrementLearningActivity(currentCategory, currentDate);
-      
+
       // Then update the learning item
       const updatedItem = await updateLearningItem(id, {
         completed: true,
-        completed_at: new Date('2025-01-03T08:21:21+01:00').toISOString(),
+        completed_at: new Date('2025-01-03T08:35:58+01:00').toISOString(),
       });
 
       if (!updatedItem) {
         throw new Error('Failed to update item');
       }
 
-      console.log('Item completed successfully');
+      console.log('Item completed successfully:', updatedItem);
       toast({
         title: "Success!",
         description: "Learning item marked as complete",
