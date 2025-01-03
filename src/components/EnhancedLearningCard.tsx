@@ -218,18 +218,27 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     try {
       console.log('Completing item:', { id, category: itemCategory });
       const currentCategory = itemCategory || 'Uncategorized';
-      const currentDate = new Date('2025-01-03T08:50:22+01:00').toISOString().split('T')[0];
+      const currentDate = new Date('2025-01-03T08:56:35+01:00').toISOString().split('T')[0];
+      
+      console.log('Completing item:', { 
+        id, 
+        category: currentCategory,
+        date: currentDate 
+      });
       
       // Track the learning activity first
-      console.log('Tracking activity:', { category: currentCategory, date: currentDate });
-      await incrementLearningActivity(currentCategory, currentDate);
+      console.log('Tracking activity:', { 
+        category: currentCategory.toUpperCase(), 
+        date: currentDate 
+      });
+      await incrementLearningActivity(currentCategory.toUpperCase(), currentDate);
 
       // Then update the learning item
       const updatedItem = {
         id,
-        mastered: true, // Use mastered instead of completed
-        updatedAt: new Date('2025-01-03T08:50:22+01:00').toISOString(),
-        category: currentCategory
+        mastered: true,
+        updatedAt: new Date('2025-01-03T08:56:35+01:00').toISOString(),
+        category: currentCategory.toUpperCase() 
       };
 
       console.log('Saving item:', updatedItem);
