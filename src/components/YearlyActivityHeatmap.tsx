@@ -1,12 +1,24 @@
 import React from 'react';
 import { cn } from '../lib/utils';
-import { format, startOfWeek, addWeeks, addDays } from 'date-fns';
+import { 
+  format, 
+  startOfWeek, 
+  addWeeks, 
+  addDays, 
+  startOfYear, 
+  endOfYear, 
+  isSameYear, 
+  getDay, 
+  getMonth, 
+  isSameDay, 
+  subDays 
+} from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 interface DayData {
   date: string;
   count: number;
-  dayOfWeek?: number;
+  isOutsideMonth?: boolean;
 }
 
 interface MonthLabel {
@@ -25,30 +37,96 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
   console.log('YearlyActivityHeatmap received data:', data);
   
   const generateCalendarData = () => {
-    const currentDate = new Date('2025-01-03T12:02:16+01:00');
-    const startDate = new Date(currentDate.getFullYear(), 0, 1);
-    startDate.setUTCHours(0, 0, 0, 0);
-    
-    const daysInYear = 365 + (currentDate.getFullYear() % 4 === 0 ? 1 : 0);
-    const allDates: DayData[] = [];
-    
-    for (let i = 0; i < daysInYear; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
-      const dateStr = date.toISOString().split('T')[0];
-      const dayData = data.find(a => a.date === dateStr);
-      
-      allDates.push({
-        date: dateStr,
-        count: dayData?.count || 0,
-        dayOfWeek: date.getDay()
-      });
+    const currentDate = new Date('2025-01-03T12:27:59+01:00');
+    const yearStart = startOfYear(currentDate);
+    const yearEnd = endOfYear(currentDate);
+    const data: { [key: string]: number } = {};
+
+    let currentDay = yearStart;
+    while (isSameYear(currentDay, yearStart)) {
+      const dateKey = format(currentDay, 'yyyy-MM-dd');
+      data[dateKey] = 0;
+      currentDay = addDays(currentDay, 1);
     }
 
-    return allDates;
+    return data;
   };
 
   const calendarData = generateCalendarData();
+
+  const weeks: DayData[][] = [];
+  
+  // Find the first day of the first week of 2025
+  const firstDayOfYear = new Date('2025-01-01');
+  const yearEnd = endOfYear(firstDayOfYear);
+  const dayOfWeek = getDay(firstDayOfYear); // 0 for Sunday, 1 for Monday, etc.
+  
+  // Create weeks array
+  let currentDate = firstDayOfYear;
+  let currentWeek: DayData[] = Array(7).fill(null);
+  
+  // Fill in any days before January 1st with null
+  for (let i = 0; i < dayOfWeek; i++) {
+    currentWeek[i] = {
+      date: format(subDays(firstDayOfYear, dayOfWeek - i), 'yyyy-MM-dd'),
+      count: 0,
+      isOutsideMonth: true
+    };
+  }
+  
+  // Fill in the rest of the year
+  while (isSameYear(currentDate, firstDayOfYear)) {
+    const weekDay = getDay(currentDate);
+    if (weekDay === 0 && currentWeek.some(day => day !== null)) {
+      weeks.push(currentWeek);
+      currentWeek = Array(7).fill(null);
+    }
+    
+    currentWeek[weekDay] = {
+      date: format(currentDate, 'yyyy-MM-dd'),
+      count: calendarData[format(currentDate, 'yyyy-MM-dd')] || 0,
+      isOutsideMonth: false
+    };
+    
+    if (isSameDay(currentDate, yearEnd)) {
+      // Fill in any remaining days in the last week
+      for (let i = weekDay + 1; i < 7; i++) {
+        currentWeek[i] = {
+          date: format(addDays(currentDate, i - weekDay), 'yyyy-MM-dd'),
+          count: 0,
+          isOutsideMonth: true
+        };
+      }
+      weeks.push(currentWeek);
+    }
+    
+    currentDate = addDays(currentDate, 1);
+  }
+
+  const getMonthLabels = () => {
+    const labels: MonthLabel[] = [];
+    let currentDate = firstDayOfYear;
+    let currentMonth = -1;
+
+    weeks.forEach((week, weekIndex) => {
+      week.forEach((day) => {
+        if (!day || day.isOutsideMonth) return;
+        const date = new Date(day.date);
+        const month = getMonth(date);
+        if (month !== currentMonth) {
+          labels.push({
+            text: format(date, 'MMMM'),
+            index: weekIndex
+          });
+          currentMonth = month;
+        }
+      });
+    });
+
+    return labels;
+  };
+
+  const monthLabels = getMonthLabels();
 
   const getColorForCount = (count: number) => {
     if (count === 0) return 'bg-gray-50 border-gray-100';
@@ -56,36 +134,6 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
     if (count <= 3) return 'bg-emerald-400 hover:bg-emerald-500 border-emerald-500';
     return 'bg-emerald-600 hover:bg-emerald-700 border-emerald-700';
   };
-
-  const weeks: DayData[][] = [];
-  for (let i = 0; i < 53; i++) {
-    const week = calendarData.slice(i * 7, (i + 1) * 7);
-    if (week.length > 0) {
-      weeks.push(week);
-    }
-  }
-
-  const getMonthLabels = () => {
-    const labels: MonthLabel[] = [];
-    let currentMonth = -1;
-    
-    weeks.forEach((week, weekIndex) => {
-      const firstDayOfWeek = new Date(week[0].date);
-      const month = firstDayOfWeek.getMonth();
-      
-      if (month !== currentMonth) {
-        labels.push({
-          text: MONTHS[month],
-          index: weekIndex
-        });
-        currentMonth = month;
-      }
-    });
-    
-    return labels;
-  };
-
-  const monthLabels = getMonthLabels();
 
   const renderLegend = () => (
     <div className="flex items-center gap-1 text-sm text-gray-600 mb-4 justify-center sm:justify-start">
