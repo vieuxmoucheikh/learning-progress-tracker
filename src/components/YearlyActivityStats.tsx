@@ -3,6 +3,7 @@ import { getYearlyActivity, getLearningItems } from '@/lib/database';
 import { getLearningActivity } from '@/lib/learningActivity';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { YearlyActivityHeatmap } from './YearlyActivityHeatmap';
+import { Activity, Calendar, BarChart2 } from 'lucide-react';
 
 interface ActivityData {
   id: string;
@@ -174,20 +175,29 @@ export const YearlyActivityStats: React.FC = () => {
             Loading...
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-                <p className="text-sm text-gray-500">Total Activities</p>
-                <p className="text-2xl font-bold mt-1">{totalActivities}</p>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-white/50 dark:bg-white/5 backdrop-blur-sm p-3 rounded-lg border border-gray-200/50 dark:border-white/10">
+                <div className="flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-blue-500" />
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Total Activities</p>
+                </div>
+                <p className="text-xl font-semibold mt-1 text-gray-900 dark:text-white">{totalActivities}</p>
               </div>
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-                <p className="text-sm text-gray-500">Active Days</p>
-                <p className="text-2xl font-bold mt-1">{activeDays}</p>
+              <div className="bg-white/50 dark:bg-white/5 backdrop-blur-sm p-3 rounded-lg border border-gray-200/50 dark:border-white/10">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-blue-500" />
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Active Days</p>
+                </div>
+                <p className="text-xl font-semibold mt-1 text-gray-900 dark:text-white">{activeDays}</p>
               </div>
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-                <p className="text-sm text-gray-500">Average Per Day</p>
-                <p className="text-2xl font-bold mt-1">{averagePerDay}</p>
+              <div className="bg-white/50 dark:bg-white/5 backdrop-blur-sm p-3 rounded-lg border border-gray-200/50 dark:border-white/10">
+                <div className="flex items-center gap-2">
+                  <BarChart2 className="w-4 h-4 text-blue-500" />
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Average Per Day</p>
+                </div>
+                <p className="text-xl font-semibold mt-1 text-gray-900 dark:text-white">{averagePerDay}</p>
               </div>
             </div>
 

@@ -137,47 +137,47 @@ export function YearlyActivityHeatmap({
   }, [weeks]);
 
   const getColorForCount = (count: number) => {
-    if (count === 0) return 'bg-gray-100 dark:bg-gray-100/5';
-    if (count === 1) return 'bg-blue-300 hover:bg-blue-400 dark:bg-blue-400 dark:hover:bg-blue-300';
-    if (count <= 3) return 'bg-blue-400 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-400';
-    return 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500';
+    if (count === 0) return 'bg-gray-100 dark:bg-white/5';
+    if (count === 1) return 'bg-blue-400/80 hover:bg-blue-400 dark:bg-blue-400 dark:hover:bg-blue-300';
+    if (count <= 3) return 'bg-blue-500/90 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-400';
+    return 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500';
   };
 
   return (
-    <div className="w-full bg-white dark:bg-transparent rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
+    <div className="w-full bg-white/50 dark:bg-white/5 backdrop-blur-sm rounded-xl shadow-sm border border-gray-200/50 dark:border-white/10">
       {/* Year navigation */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex items-center justify-between p-3 border-b border-gray-200/50 dark:border-white/10">
         <Button
           variant="outline"
           size="sm"
           onClick={() => setSelectedYear(selectedYear - 1)}
-          className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
+          className="hover:bg-white/50 dark:hover:bg-white/10 border-gray-200/50 dark:border-white/10"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">{selectedYear}</div>
+        <div className="text-lg font-semibold text-gray-900 dark:text-white">{selectedYear}</div>
         <Button
           variant="outline"
           size="sm"
           onClick={() => setSelectedYear(selectedYear + 1)}
-          className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
+          className="hover:bg-white/50 dark:hover:bg-white/10 border-gray-200/50 dark:border-white/10"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
 
       {/* Heatmap grid */}
-      <div className="w-full p-4">
-        <div className="w-full" style={{ fontSize: 'min(1.5vw, 12px)' }}>
+      <div className="w-full p-3">
+        <div className="w-full" style={{ fontSize: 'min(1.5vw, 11px)' }}>
           {/* Month labels */}
-          <div className="flex mb-2">
-            <div className="w-6" /> {/* Offset for day labels */}
+          <div className="flex mb-1.5">
+            <div className="w-5" /> {/* Offset for day labels */}
             <div className="flex-1">
               <div className="grid grid-cols-[repeat(53,1fr)] gap-[2px]">
                 {monthLabels.map((label, i) => (
                   <div
                     key={i}
-                    className="text-gray-500 dark:text-gray-400 text-center font-medium"
+                    className="text-gray-600 dark:text-gray-300 text-center font-medium"
                     style={{ 
                       gridColumnStart: label.index + 1,
                       gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
@@ -193,14 +193,14 @@ export function YearlyActivityHeatmap({
           {/* Main grid */}
           <div className="flex w-full">
             {/* Day labels */}
-            <div className="flex flex-col gap-[2px] pr-2">
+            <div className="flex flex-col gap-[2px] pr-1.5">
               {DAYS.map((day) => (
                 <div 
                   key={day} 
-                  className="text-gray-500 dark:text-gray-400 flex items-center w-6 font-medium"
+                  className="text-gray-600 dark:text-gray-300 flex items-center w-5 font-medium"
                   style={{ 
-                    height: 'min(1.5vw, 16px)',
-                    maxHeight: '16px'
+                    height: 'min(1.5vw, 14px)',
+                    maxHeight: '14px'
                   }}
                 >
                   {day[0]}
@@ -219,26 +219,26 @@ export function YearlyActivityHeatmap({
                           <TooltipTrigger asChild>
                             <div
                               className={cn(
-                                'rounded-sm transition-colors duration-200',
+                                'rounded-[1px] transition-colors duration-200',
                                 day.isCurrentYear
                                   ? getColorForCount(day.count)
-                                  : 'bg-gray-50 dark:bg-gray-800/20'
+                                  : 'bg-gray-50 dark:bg-white/5'
                               )}
                               style={{ 
-                                height: 'min(1.5vw, 16px)',
-                                minHeight: '8px'
+                                height: 'min(1.5vw, 14px)',
+                                minHeight: '6px'
                               }}
                             />
                           </TooltipTrigger>
                           <TooltipContent 
                             side="top"
-                            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                            className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/50 dark:border-white/10"
                           >
                             <div className="text-xs">
-                              <div className="font-medium text-gray-900 dark:text-gray-100">
+                              <div className="font-medium text-gray-900 dark:text-white">
                                 {format(parseISO(day.date), 'MMM d, yyyy')}
                               </div>
-                              <div className="text-gray-600 dark:text-gray-300">
+                              <div className="text-gray-700 dark:text-gray-200">
                                 {day.count} {day.count === 1 ? 'activity' : 'activities'}
                               </div>
                             </div>
@@ -253,18 +253,18 @@ export function YearlyActivityHeatmap({
           </div>
 
           {/* Legend */}
-          <div className="flex items-center gap-2 mt-4 justify-end text-sm text-gray-600 dark:text-gray-400">
-            <span className="text-xs">Less</span>
+          <div className="flex items-center gap-1.5 mt-3 justify-end text-gray-600 dark:text-gray-300">
+            <span className="text-xs font-medium">Less</span>
             {[0, 1, 2, 4].map((count) => (
               <div
                 key={count}
                 className={cn(
-                  'w-3 h-3 rounded-sm',
+                  'w-2.5 h-2.5 rounded-[1px]',
                   getColorForCount(count)
                 )}
               />
             ))}
-            <span className="text-xs">More</span>
+            <span className="text-xs font-medium">More</span>
           </div>
         </div>
       </div>
