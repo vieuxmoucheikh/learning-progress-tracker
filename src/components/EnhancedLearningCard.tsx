@@ -82,6 +82,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
   const [tags, setTags] = useState(initialTags);
+  const [newTag, setNewTag] = useState('');
   const [category, setCategory] = useState(initialCategory);
   const [mastered, setMastered] = useState(initialMastered);
   const [showContent, setShowContent] = useState(false);
@@ -305,10 +306,25 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         {/* Tags */}
         <div className="flex flex-wrap gap-2">
           {tags.map((tag) => (
-            <Badge key={tag} variant="secondary">
+            <Badge 
+              key={tag} 
+              variant="secondary"
+              className={isEditing ? "cursor-pointer hover:bg-destructive/20" : ""}
+              onClick={isEditing ? () => handleRemoveTag(tag) : undefined}
+            >
               {tag}
+              {isEditing && <X className="w-3 h-3 ml-1" />}
             </Badge>
           ))}
+          {isEditing && (
+            <Input
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              onKeyDown={handleAddTag}
+              placeholder="Add tag (press Enter)"
+              className="w-32 h-6 text-sm"
+            />
+          )}
         </div>
       </CardHeader>
       <CardContent>
