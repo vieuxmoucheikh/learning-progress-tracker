@@ -84,18 +84,17 @@ export const LearningCardsPage = () => {
 
     // Apply sorting with proper date comparison
     return result.sort((a, b) => {
-      const dateA = new Date(sortBy === 'updated' ? a.updatedAt : a.createdAt);
-      const dateB = new Date(sortBy === 'updated' ? b.updatedAt : b.createdAt);
-      
       switch (sortBy) {
         case 'updated':
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
         case 'created':
-          return dateB.getTime() - dateA.getTime();
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         case 'mastered':
+          // First sort by mastered status
           if (a.mastered !== b.mastered) {
             return a.mastered ? -1 : 1;
           }
-          // If mastered status is the same, sort by updated date
+          // Then by update date
           return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
         default:
           return 0;
@@ -103,45 +102,59 @@ export const LearningCardsPage = () => {
     });
   }, [cards, searchTerm, selectedCategory, selectedTags, sortBy, searchCards]);
 
-  // Handle sort change with type safety
-  const handleSortChange = (value: string) => {
-    if (value === 'updated' || value === 'created' || value === 'mastered') {
-      setSortBy(value);
-    }
-  };
-
-  const fetchCategories = async () => {
+  // Fetch cards and update state
+  const fetchCards = useCallback(async () => {
     try {
-      const items = await getLearningItems();
+      setLoading(true);
+      const items = await learningCardsService.getCards();
+      setCards(items);
+      
+      // Extract unique categories and filter out undefined/null values
       const uniqueCategories = Array.from(
-        new Set(items.map(item => item.category).filter(Boolean))
+        new Set(
+          items
+            .map(item => item.category)
+            .filter((category): category is string => 
+              category !== undefined && 
+              category !== null && 
+              category !== ''
+            )
+        )
       ).sort();
+      
       setCategories(uniqueCategories);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  };
-
-  const fetchCards = async () => {
-    try {
-      const fetchedCards = await learningCardsService.getCards();
-      setCards(fetchedCards as CardType[]);
     } catch (error) {
       console.error('Error fetching cards:', error);
       toast({
         title: 'Error',
-        description: 'Failed to fetch cards. Please try again.',
+        description: 'Failed to fetch cards',
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  useEffect(() => {
-    fetchCards();
-    fetchCategories();
-  }, []);
+  // Handle card update
+  const handleCardUpdate = async (cardId: string, updates: Partial<CardType>) => {
+    try {
+      const updatedCard = await learningCardsService.updateCard(cardId, updates);
+      setCards(prevCards => 
+        prevCards.map(card => 
+          card.id === cardId ? updatedCard : card
+        )
+      );
+      return true;
+    } catch (error) {
+      console.error('Error updating card:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update card',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
 
   const handleCreateCard = async () => {
     try {
@@ -166,33 +179,6 @@ export const LearningCardsPage = () => {
     }
   };
 
-  const handleSaveCard = async (card: Partial<CardType>): Promise<boolean> => {
-    try {
-      await learningCardsService.updateCard(card.id!, {
-        title: card.title,
-        content: card.content,
-        media: card.media,
-        tags: card.tags,
-        mastered: card.mastered,
-        category: card.category,
-      });
-      await fetchCards();
-      toast({
-        title: "Success",
-        description: "Card updated successfully",
-      });
-      return true;
-    } catch (error) {
-      console.error('Error updating card:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update card. Please try again.",
-        variant: "destructive",
-      });
-      return false;
-    }
-  };
-
   const handleDeleteCard = async (id: string) => {
     try {
       await learningCardsService.deleteCard(id);
@@ -208,6 +194,16 @@ export const LearningCardsPage = () => {
         description: "Failed to delete card. Please try again.",
         variant: "destructive",
       });
+    }
+  };
+
+  useEffect(() => {
+    fetchCards();
+  }, []);
+
+  const handleSortChange = (value: string) => {
+    if (value === 'updated' || value === 'created' || value === 'mastered') {
+      setSortBy(value);
     }
   };
 
@@ -308,36 +304,10 @@ export const LearningCardsPage = () => {
                   <EnhancedLearningCard
                     {...card}
                     onSave={async (updates) => {
-                      try {
-                        await learningCardsService.updateCard(card.id, updates);
-                        fetchCards(); // Refresh the cards
-                        return true;
-                      } catch (error) {
-                        console.error('Error updating card:', error);
-                        toast({
-                          title: 'Error',
-                          description: 'Failed to update card',
-                          variant: 'destructive',
-                        });
-                        return false;
-                      }
+                      return handleCardUpdate(card.id, updates);
                     }}
                     onDelete={async () => {
-                      try {
-                        await learningCardsService.deleteCard(card.id);
-                        setCards((prevCards) => prevCards.filter((c) => c.id !== card.id));
-                        toast({
-                          title: 'Success',
-                          description: 'Card deleted successfully',
-                        });
-                      } catch (error) {
-                        console.error('Error deleting card:', error);
-                        toast({
-                          title: 'Error',
-                          description: 'Failed to delete card',
-                          variant: 'destructive',
-                        });
-                      }
+                      handleDeleteCard(card.id);
                     }}
                   />
                 </motion.div>

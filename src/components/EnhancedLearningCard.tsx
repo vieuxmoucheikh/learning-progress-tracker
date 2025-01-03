@@ -124,7 +124,6 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     });
 
     if (success) {
-      setUpdatedTime(new Date().toISOString());
       setIsEditing(false);
       toast({
         title: "Success",
@@ -155,15 +154,39 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
   const handleAddTag = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const trimmedTag = newTag.trim();
+    const trimmedTag = newTag.trim().toLowerCase(); // Normalize tags to lowercase
     if (trimmedTag && !tags.includes(trimmedTag)) {
-      setTags([...tags, trimmedTag]);
+      const updatedTags = [...tags, trimmedTag];
+      setTags(updatedTags);
       setNewTag('');
+      
+      // Save the updated tags
+      onSave({
+        id,
+        title,
+        content,
+        tags: updatedTags,
+        category,
+        mastered,
+        updatedAt: new Date().toISOString(),
+      });
     }
   };
 
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
+  const handleRemoveTag = async (tagToRemove: string) => {
+    const updatedTags = tags.filter(tag => tag !== tagToRemove);
+    setTags(updatedTags);
+    
+    // Save the updated tags
+    await onSave({
+      id,
+      title,
+      content,
+      tags: updatedTags,
+      category,
+      mastered,
+      updatedAt: new Date().toISOString(),
+    });
   };
 
   const handleCopyContent = async () => {
@@ -238,7 +261,12 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   };
 
   const getTimeAgo = (date: string) => {
-    return formatDistanceToNow(new Date(date), { addSuffix: true });
+    try {
+      return formatDistanceToNow(new Date(date), { addSuffix: true });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'some time ago';
+    }
   };
 
   // Fix for mobile input focus

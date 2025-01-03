@@ -66,12 +66,11 @@ class LearningCardsService {
   async updateCard(id: string, updates: Partial<EnhancedLearningCard>): Promise<EnhancedLearningCard> {
     try {
       const normalizedCategory = (updates.category || 'Uncategorized').toUpperCase();
-      console.log('Updating card with normalized category:', {
-        id,
-        updates: { ...updates, category: normalizedCategory }
-      });
+      const now = new Date().toISOString();
 
-      const updateData: any = {};
+      const updateData: any = {
+        updated_at: now // Always update the timestamp
+      };
       
       if (updates.title !== undefined) updateData.title = updates.title;
       if (updates.content !== undefined) updateData.content = updates.content;
@@ -91,7 +90,6 @@ class LearningCardsService {
         throw new Error('Failed to update card');
       }
 
-      console.log('Card updated:', data);
       return {
         id: data.id,
         title: data.title,
@@ -104,8 +102,8 @@ class LearningCardsService {
         mastered: data.mastered || false
       };
     } catch (error) {
-      console.error('Error updating card:', error);
-      throw new Error('Failed to update card');
+      console.error('Error in updateCard:', error);
+      throw error;
     }
   }
 
