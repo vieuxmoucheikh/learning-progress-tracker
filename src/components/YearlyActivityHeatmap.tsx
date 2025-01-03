@@ -8,7 +8,9 @@ import {
   addWeeks,
   isWithinInterval,
   startOfYear,
-  endOfYear
+  endOfYear,
+  isBefore,
+  parseISO
 } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -41,7 +43,7 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function YearlyActivityHeatmap({ 
   data, 
-  year = new Date('2025-01-03T15:28:08+01:00').getFullYear(),
+  year = new Date('2025-01-03T15:37:01+01:00').getFullYear(),
   onYearChange 
 }: YearlyActivityHeatmapProps) {
   const [selectedYear, setSelectedYear] = React.useState(year);
@@ -53,12 +55,12 @@ export function YearlyActivityHeatmap({
 
   const generateCalendarData = () => {
     const yearStart = startOfYear(new Date(selectedYear, 0, 1));
-    const yearEnd = endOfYear(new Date(selectedYear, 11, 31));
+    const yearEnd = endOfYear(yearStart);
     const activityMap: { [key: string]: number } = {};
 
     // Initialize all dates with 0
     let currentDay = yearStart;
-    while (currentDay <= yearEnd) {
+    while (isBefore(currentDay, addDays(yearEnd, 1))) {
       const dateKey = format(currentDay, 'yyyy-MM-dd');
       activityMap[dateKey] = 0;
       currentDay = addDays(currentDay, 1);
@@ -66,9 +68,9 @@ export function YearlyActivityHeatmap({
 
     // Fill in the activity data
     data.forEach(activity => {
-      const activityDate = new Date(activity.date);
-      const dateKey = format(activityDate, 'yyyy-MM-dd');
+      const activityDate = parseISO(activity.date);
       if (activityDate.getFullYear() === selectedYear) {
+        const dateKey = format(activityDate, 'yyyy-MM-dd');
         activityMap[dateKey] = activity.count;
       }
     });
@@ -80,27 +82,32 @@ export function YearlyActivityHeatmap({
   const weeks: WeekData[] = [];
   
   // Get the start of the first week of the year
-  let currentDate = startOfWeek(new Date(selectedYear, 0, 1), { weekStartsOn: 0 });
+  let currentDate = startOfWeek(startOfYear(new Date(selectedYear, 0, 1)), { weekStartsOn: 0 });
   const yearEnd = endOfYear(new Date(selectedYear, 11, 31));
   
   // Fill in all weeks of the year
-  while (currentDate <= yearEnd) {
-    const week: WeekData = Array(7).fill(null);
-    
-    for (let i = 0; i < 7; i++) {
+  while (isBefore(currentDate, addDays(yearEnd, 1))) {
+    const week: WeekData = Array(7).fill(null).map((_, i) => {
       const date = addDays(currentDate, i);
+      const dateKey = format(date, 'yyyy-MM-dd');
       if (date.getFullYear() === selectedYear) {
-        week[i] = {
-          date: format(date, 'yyyy-MM-dd'),
-          count: calendarData[format(date, 'yyyy-MM-dd')] || 0,
+        return {
+          date: dateKey,
+          count: calendarData[dateKey] || 0,
           isOutsideMonth: false
         };
       }
-    }
+      return null;
+    });
     
     weeks.push(week);
     currentDate = addWeeks(currentDate, 1);
   }
+
+  // Calculate stats once
+  const totalActivities = Object.values(calendarData).reduce((sum, count) => sum + count, 0);
+  const activeDays = Object.values(calendarData).filter(count => count > 0).length;
+  const averagePerDay = activeDays > 0 ? totalActivities / activeDays : 0;
 
   const getMonthLabels = () => {
     const labels: MonthLabel[] = [];
@@ -109,7 +116,7 @@ export function YearlyActivityHeatmap({
     weeks.forEach((week, weekIndex) => {
       week.forEach((day) => {
         if (!day) return;
-        const date = new Date(day.date);
+        const date = parseISO(day.date);
         const month = date.getMonth();
         if (month !== currentMonth) {
           labels.push({
@@ -148,11 +155,6 @@ export function YearlyActivityHeatmap({
       <span className="text-[10px] sm:text-xs">More</span>
     </div>
   );
-
-  // Calculate stats
-  const totalActivities = Object.values(calendarData).reduce((sum, count) => sum + count, 0);
-  const activeDays = Object.values(calendarData).filter(count => count > 0).length;
-  const averagePerDay = activeDays > 0 ? totalActivities / activeDays : 0;
 
   return (
     <div className="w-full max-w-full space-y-4 overflow-hidden">
@@ -248,7 +250,7 @@ export function YearlyActivityHeatmap({
                     }
                     
                     const colorClass = getColorForCount(day.count);
-                    const dateObj = new Date(day.date);
+                    const dateObj = parseISO(day.date);
                     const formattedDate = format(dateObj, 'MMMM d, yyyy');
                     
                     return (
