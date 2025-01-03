@@ -144,10 +144,19 @@ export const YearlyActivityStats: React.FC = () => {
 
   // Transform ActivityData[] into Record<string, number>
   const heatmapData = useMemo(() => {
+    console.log('Transforming activity data:', activityData);
     const data: Record<string, number> = {};
+    
     activityData.forEach(activity => {
-      data[activity.date] = activity.count;
+      if (activity.date && activity.count) {
+        // Ensure date is in YYYY-MM-DD format
+        const formattedDate = activity.date.split('T')[0];
+        data[formattedDate] = (data[formattedDate] || 0) + activity.count;
+        console.log('Added activity:', { date: formattedDate, count: activity.count });
+      }
     });
+    
+    console.log('Transformed heatmap data:', data);
     return data;
   }, [activityData]);
 
@@ -202,8 +211,11 @@ export const YearlyActivityStats: React.FC = () => {
             </div>
 
             {/* Heatmap */}
-            <div className="col-span-full w-full max-w-[1200px] mx-auto">
-              <YearlyActivityHeatmap data={heatmapData} />
+            <div className="w-full">
+              <YearlyActivityHeatmap 
+                data={heatmapData} 
+                year={new Date().getFullYear()}
+              />
             </div>
           </div>
         )}

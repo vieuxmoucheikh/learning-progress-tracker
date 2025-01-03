@@ -75,10 +75,13 @@ export function YearlyActivityHeatmap({
     }
 
     // Fill in the activity data
-    Object.entries(activityData).forEach(([date, count]) => {
-      const activityDate = parseISO(date);
+    Object.entries(activityData).forEach(([dateStr, count]) => {
+      // Ensure the date is in the correct year
+      const activityDate = parseISO(dateStr);
       if (getYear(activityDate) === selectedYear) {
-        activityMap[date] = count;
+        const dateKey = format(activityDate, 'yyyy-MM-dd');
+        activityMap[dateKey] = count;
+        console.log('Added activity to heatmap:', { date: dateKey, count });
       }
     });
 
@@ -95,7 +98,7 @@ export function YearlyActivityHeatmap({
   const firstWeekStart = startOfWeek(startDate);
   const lastWeekEnd = endOfWeek(endDate);
 
-  // Generate all weeks including partial weeks from previous and next years
+  // Generate weeks
   const weeks = useMemo(() => {
     const weekStarts = eachWeekOfInterval(
       { 
@@ -109,9 +112,17 @@ export function YearlyActivityHeatmap({
       const days: DayData[] = Array(7).fill(null).map((_, index) => {
         const date = addDays(weekStart, index);
         const dateStr = format(date, 'yyyy-MM-dd');
+        const count = calendarData[dateStr] || 0;
+        
+        console.log('Processing day:', { 
+          date: dateStr, 
+          count,
+          isCurrentYear: getYear(date) === selectedYear 
+        });
+        
         return {
           date: dateStr,
-          count: calendarData[dateStr] || 0,
+          count,
           isCurrentYear: getYear(date) === selectedYear
         };
       });
