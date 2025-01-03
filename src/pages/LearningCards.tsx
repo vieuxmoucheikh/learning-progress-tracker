@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Search, Filter, Clock, TagIcon, Loader2 } from 'lucide-react';
+import { Plus, Search, Filter, Clock, TagIcon, Loader2, X } from 'lucide-react';
 import { EnhancedLearningCard } from '@/components/EnhancedLearningCard';
 import { learningCardsService } from '@/lib/learningCards';
 import type { EnhancedLearningCard as CardType } from '@/types';
@@ -44,11 +44,56 @@ export const LearningCardsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [categories, setCategories] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'updated' | 'created' | 'mastered'>('updated');
+  const [showMastered, setShowMastered] = useState<'all' | 'mastered' | 'not_mastered'>('all');
   const { toast } = useToast();
 
   const allTags = Array.from(
     new Set(cards.flatMap((card) => card.tags))
   ).sort();
+
+  // Filter and sort cards
+  const filteredCards = useMemo(() => {
+    return cards
+      .filter(card => {
+        const matchesSearch = card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            card.content.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesTags = selectedTags.length === 0 || 
+                          selectedTags.every(tag => card.tags.includes(tag));
+        const matchesCategory = selectedCategory === 'all' || 
+                              card.category === selectedCategory;
+        const matchesMastered = showMastered === 'all' || 
+                              (showMastered === 'mastered' ? card.mastered : !card.mastered);
+        
+        return matchesSearch && matchesTags && matchesCategory && matchesMastered;
+      })
+      .sort((a, b) => {
+        if (sortBy === 'updated') {
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        } else if (sortBy === 'created') {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        } else {
+          // Sort by mastered status
+          if (a.mastered === b.mastered) {
+            return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+          }
+          return a.mastered ? -1 : 1;
+        }
+      });
+  }, [cards, searchTerm, selectedTags, selectedCategory, showMastered, sortBy]);
+
+  // Handle sort change with type safety
+  const handleSortChange = (value: string) => {
+    if (value === 'updated' || value === 'created' || value === 'mastered') {
+      setSortBy(value);
+    }
+  };
+
+  // Handle mastered filter change with type safety
+  const handleMasteredChange = (value: string) => {
+    if (value === 'all' || value === 'mastered' || value === 'not_mastered') {
+      setShowMastered(value);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -151,50 +196,152 @@ export const LearningCardsPage = () => {
     }
   };
 
-  const filteredCards = cards
-    .filter((card) => {
-      const matchesSearch = card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        card.content.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesTags = selectedTags.length === 0 || selectedTags.every(tag => card.tags.includes(tag));
-      const matchesCategory = selectedCategory === 'all' || card.category === selectedCategory;
-      return matchesSearch && matchesTags && matchesCategory;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'created':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        case 'mastered':
-          return (b.mastered ? 1 : 0) - (a.mastered ? 1 : 0);
-        default:
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-      }
-    });
-
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto p-4 max-w-7xl">
       <div className="flex flex-col space-y-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
-            Learning Cards
-          </h1>
-          <div className="flex gap-2">
-            <Button onClick={handleCreateCard}>
-              <Plus className="w-4 h-4 mr-2" />
-              New Card
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Learning Cards</h1>
+          <Button onClick={handleCreateCard}>
+            <Plus className="w-4 h-4 mr-2" />
+            New Card
+          </Button>
+        </div>
+
+        {/* Filters */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Search cards..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* Category Filter */}
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Sort By */}
+          <Select value={sortBy} onValueChange={handleSortChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="updated">Last Updated</SelectItem>
+              <SelectItem value="created">Created Date</SelectItem>
+              <SelectItem value="mastered">Mastered Status</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Mastered Filter */}
+          <Select value={showMastered} onValueChange={handleMasteredChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Mastered status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Cards</SelectItem>
+              <SelectItem value="mastered">Mastered Only</SelectItem>
+              <SelectItem value="not_mastered">Not Mastered</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Selected Tags */}
+        {selectedTags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {selectedTags.map((tag) => (
+              <Badge
+                key={tag}
+                variant="secondary"
+                className="cursor-pointer"
+                onClick={() => setSelectedTags(selectedTags.filter((t) => t !== tag))}
+              >
+                {tag}
+                <X className="w-3 h-3 ml-1" />
+              </Badge>
+            ))}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedTags([])}
+              className="text-sm"
+            >
+              Clear all
             </Button>
           </div>
-        </div>
+        )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredCards.map((card) => (
-            <EnhancedLearningCard
-              key={card.id}
-              {...card}
-              onSave={handleSaveCard}
-              onDelete={() => handleDeleteCard(card.id)}
-            />
-          ))}
-        </div>
+        {/* Cards Grid */}
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="w-8 h-8 animate-spin" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+            <AnimatePresence>
+              {filteredCards.map((card) => (
+                <motion.div
+                  key={card.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <EnhancedLearningCard
+                    {...card}
+                    onSave={async (updates) => {
+                      try {
+                        await learningCardsService.updateCard(card.id, updates);
+                        fetchCards(); // Refresh the cards
+                        return true;
+                      } catch (error) {
+                        console.error('Error updating card:', error);
+                        toast({
+                          title: 'Error',
+                          description: 'Failed to update card',
+                          variant: 'destructive',
+                        });
+                        return false;
+                      }
+                    }}
+                    onDelete={async () => {
+                      try {
+                        await learningCardsService.deleteCard(card.id);
+                        setCards((prevCards) => prevCards.filter((c) => c.id !== card.id));
+                        toast({
+                          title: 'Success',
+                          description: 'Card deleted successfully',
+                        });
+                      } catch (error) {
+                        console.error('Error deleting card:', error);
+                        toast({
+                          title: 'Error',
+                          description: 'Failed to delete card',
+                          variant: 'destructive',
+                        });
+                      }
+                    }}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
       </div>
     </div>
   );

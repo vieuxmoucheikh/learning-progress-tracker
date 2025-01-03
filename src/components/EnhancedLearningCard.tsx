@@ -81,14 +81,12 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
-  const [media, setMedia] = useState<CardType['media']>(initialMedia);
-  const [tags, setTags] = useState<string[]>(initialTags);
-  const [newTag, setNewTag] = useState('');
-  const [isContentHidden, setIsContentHidden] = useState(false);
+  const [tags, setTags] = useState(initialTags);
+  const [category, setCategory] = useState(initialCategory);
   const [mastered, setMastered] = useState(initialMastered);
+  const [showContent, setShowContent] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [category, setCategory] = useState(initialCategory);
   const [categories, setCategories] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -117,7 +115,6 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       id,
       title,
       content,
-      media,
       tags,
       category,
       mastered,
@@ -134,7 +131,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
   const handleUpdateCategory = async (category: string) => {
     try {
-      const success = await onSave({ ...{ id, title, content, media, tags, mastered }, category });
+      const success = await onSave({ ...{ id, title, content, tags, mastered }, category });
       if (success) {
         await trackLearningActivity(category);
         toast({
@@ -212,7 +209,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   };
 
   const toggleContentVisibility = () => {
-    setIsContentHidden(!isContentHidden);
+    setShowContent(!showContent);
+  };
+
+  const getTimeAgo = (date: string) => {
+    return formatDistanceToNow(new Date(date), { addSuffix: true });
   };
 
   // Fix for mobile input focus
@@ -232,174 +233,84 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
   return (
     <Card className={cn(
-      "relative w-full h-full transition-all duration-200 ease-in-out",
-      "bg-card border-2 shadow-sm hover:shadow-md",
-      mastered ? "border-emerald-500/50 hover:border-emerald-500 hover:shadow-emerald-100" : 
-                "border-transparent hover:border-blue-600/50 hover:shadow-blue-100",
-      isEditing && "border-blue-600 shadow-blue-100"
+      "relative overflow-hidden transition-all duration-200",
+      isZoomed ? "transform scale-105 shadow-xl z-10" : "",
+      mastered ? "border-green-200 bg-green-50/30" : ""
     )}>
-      <CardHeader className="relative pb-3 space-y-2">
-        {isEditing ? (
-          <div className="flex flex-col gap-4">
-            <div>
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="mt-1.5"
-              />
-            </div>
-
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="category">Category</Label>
-              <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="justify-between"
-                  >
-                    {category || "Select category..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                  <Command>
-                    <CommandInput 
-                      placeholder="Search category..."
-                      value={category}
-                      onValueChange={(value) => {
-                        setCategory(value);
-                      }}
-                    />
-                    <CommandEmpty>
-                      <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                        No category found. Type to create new.
-                      </div>
-                    </CommandEmpty>
-                    <CommandGroup>
-                      {categories
-                        .filter(cat => !category || cat.toLowerCase().includes(category.toLowerCase()))
-                        .map((cat) => (
-                          <CommandItem
-                            key={cat}
-                            value={cat}
-                            className="cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
-                            onSelect={() => {
-                              handleUpdateCategory(cat);
-                              setOpen(false);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                category === cat ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            {cat}
-                          </CommandItem>
-                        ))}
-                      {category && !categories.includes(category) && (
-                        <CommandItem
-                          value={category}
-                          className="cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
-                          onSelect={() => {
-                            // Keep the typed category and close
-                            setOpen(false);
-                          }}
-                        >
-                          <Plus className="mr-2 h-4 w-4" />
-                          Create "{category}"
-                        </CommandItem>
-                      )}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div>
-              <Label htmlFor="content">Content</Label>
-              <div className="mt-1.5">
-                <RichTextEditor
-                  content={content}
-                  onChange={setContent}
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg line-clamp-2 bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
-                  {title}
-                </h3>
-                {category && (
-                  <div className="mt-1 text-sm text-blue-600 dark:text-blue-400">
-                    {category}
-                  </div>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsZoomed(true)}
-                  className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
-                >
-                  <ZoomIn className="h-4 w-4 text-blue-700 dark:text-blue-400" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleContentVisibility}
-                  className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
-                >
-                  {isContentHidden ? (
-                    <Eye className="h-4 w-4 text-blue-700 dark:text-blue-400" />
-                  ) : (
-                    <EyeOff className="h-4 w-4 text-blue-700 dark:text-blue-400" />
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsEditing(true)}
-                  className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
-                >
-                  <Edit className="h-4 w-4 text-blue-700 dark:text-blue-400" />
-                </Button>
-              </div>
-            </div>
-            <div 
-              className={cn(
-                "space-y-3 transition-all duration-200",
-                isContentHidden && "blur-md select-none"
-              )}
+      <CardHeader className="space-y-2">
+        <div className="flex items-center justify-between">
+          {isEditing ? (
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="text-lg font-semibold"
+            />
+          ) : (
+            <h3 className="text-lg font-semibold">{title}</h3>
+          )}
+          <div className="flex items-center space-x-2">
+            {mastered && (
+              <Trophy className="w-4 h-4 text-yellow-500" />
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMastered(!mastered)}
+              title={mastered ? "Mark as not mastered" : "Mark as mastered"}
             >
-              <div 
-                className="prose prose-sm max-w-none dark:prose-invert line-clamp-6 hover:line-clamp-none transition-all cursor-pointer"
-                onClick={() => setIsZoomed(true)}
-                dangerouslySetInnerHTML={{ __html: content }}
-              />
-              
-              <div className="flex flex-wrap gap-1.5 pt-2">
-                {tags.map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </div>
+              {mastered ? (
+                <BookmarkCheck className="w-4 h-4" />
+              ) : (
+                <Bookmark className="w-4 h-4" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsZoomed(!isZoomed)}
+            >
+              {isZoomed ? (
+                <ZoomOut className="w-4 h-4" />
+              ) : (
+                <ZoomIn className="w-4 h-4" />
+              )}
+            </Button>
           </div>
-        )}
+        </div>
+        
+        {/* Time and Category Info */}
+        <div className="flex items-center text-sm text-muted-foreground space-x-2">
+          <Clock className="w-4 h-4" />
+          <span>Updated {getTimeAgo(updatedAt)}</span>
+          {category && (
+            <>
+              <span>•</span>
+              <span>{category}</span>
+            </>
+          )}
+        </div>
+
+        {/* Tags */}
+        <div className="flex flex-wrap gap-2">
+          {tags.map((tag) => (
+            <Badge key={tag} variant="secondary">
+              {tag}
+            </Badge>
+          ))}
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="text-xs text-muted-foreground">
-          Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}
+        <div 
+          className={cn(
+            "space-y-3 transition-all duration-200",
+            !showContent && "blur-md select-none"
+          )}
+        >
+          <div 
+            className="prose prose-sm max-w-none dark:prose-invert line-clamp-6 hover:line-clamp-none transition-all cursor-pointer"
+            onClick={() => setIsZoomed(true)}
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
         </div>
       </CardContent>
 
