@@ -44,7 +44,7 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function YearlyActivityHeatmap({ 
   data, 
-  year = new Date('2025-01-03T14:26:56+01:00').getFullYear(),
+  year = new Date('2025-01-03T14:37:16+01:00').getFullYear(),
   onYearChange 
 }: YearlyActivityHeatmapProps) {
   const [selectedYear, setSelectedYear] = React.useState(year);
@@ -70,8 +70,8 @@ export function YearlyActivityHeatmap({
     // Fill in the activity data
     data.forEach(activity => {
       const activityDate = new Date(activity.date);
+      const dateKey = format(activityDate, 'yyyy-MM-dd');
       if (activityDate.getFullYear() === selectedYear) {
-        const dateKey = format(activityDate, 'yyyy-MM-dd');
         activityMap[dateKey] = (activityMap[dateKey] || 0) + 1;
       }
     });
@@ -116,19 +116,26 @@ export function YearlyActivityHeatmap({
     }
   }
   weeks.push([...currentWeek]);
+  
+  // Move to the start of the next week
   currentDate = addDays(firstDayOfYear, 7 - startDayOfWeek);
   
   // Fill in the rest of the calendar
   while (currentDate <= lastDayOfYear) {
     currentWeek = Array(7).fill(null);
-    for (let i = 0; i < 7 && currentDate <= lastDayOfYear; i++) {
-      currentWeek[i] = {
-        date: format(currentDate, 'yyyy-MM-dd'),
-        count: calendarData[format(currentDate, 'yyyy-MM-dd')] || 0,
-        isOutsideMonth: false
-      };
-      currentDate = addDays(currentDate, 1);
+    const weekStartDay = getDay(currentDate);
+    
+    for (let i = 0; i < 7; i++) {
+      if (currentDate <= lastDayOfYear) {
+        currentWeek[i] = {
+          date: format(currentDate, 'yyyy-MM-dd'),
+          count: calendarData[format(currentDate, 'yyyy-MM-dd')] || 0,
+          isOutsideMonth: false
+        };
+        currentDate = addDays(currentDate, 1);
+      }
     }
+    
     weeks.push([...currentWeek]);
   }
 
