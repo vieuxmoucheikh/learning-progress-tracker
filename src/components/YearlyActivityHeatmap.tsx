@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { cn } from '../lib/utils';
 import { 
   format, 
@@ -9,16 +9,13 @@ import {
   isWithinInterval,
   startOfYear,
   endOfYear,
-  isBefore,
-  parseISO
+  parseISO,
+  eachDayOfInterval
 } from 'date-fns';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface DayData {
   date: string;
   count: number;
-  isOutsideMonth?: boolean;
 }
 
 type WeekData = (DayData | null)[];
@@ -39,75 +36,81 @@ interface YearlyActivityHeatmapProps {
   onYearChange?: (year: number) => void;
 }
 
+const CURRENT_TIME = '2025-01-03T15:53:32+01:00';
+
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function YearlyActivityHeatmap({ 
   data, 
-  year = new Date('2025-01-03T15:45:51+01:00').getFullYear(),
+  year = parseISO(CURRENT_TIME).getFullYear(),
   onYearChange 
 }: YearlyActivityHeatmapProps) {
-  const [selectedYear, setSelectedYear] = React.useState(year);
-  
+  const [selectedYear, setSelectedYear] = useState(year);
+
   const handleYearChange = (newYear: number) => {
     setSelectedYear(newYear);
     onYearChange?.(newYear);
   };
 
-  const generateCalendarData = () => {
+  // Generate calendar data with proper date handling
+  const calendarData = useMemo(() => {
     const yearStart = startOfYear(new Date(selectedYear, 0, 1));
     const yearEnd = endOfYear(yearStart);
     const activityMap: { [key: string]: number } = {};
 
-    // Initialize all dates with 0
-    let currentDay = yearStart;
-    while (currentDay <= yearEnd) {
-      const dateKey = format(currentDay, 'yyyy-MM-dd');
-      activityMap[dateKey] = 0;
-      currentDay = addDays(currentDay, 1);
-    }
-
-    // Fill in the activity data
+    // Process activities
     data.forEach(activity => {
-      const activityDate = new Date(activity.date);
-      if (activityDate.getFullYear() === selectedYear) {
+      const activityDate = parseISO(activity.date);
+      if (isWithinInterval(activityDate, { start: yearStart, end: yearEnd })) {
         const dateKey = format(activityDate, 'yyyy-MM-dd');
-        activityMap[dateKey] = activity.count;
+        activityMap[dateKey] = (activityMap[dateKey] || 0) + activity.count;
       }
     });
 
     return activityMap;
-  };
+  }, [selectedYear, data]);
 
-  const calendarData = generateCalendarData();
-  const weeks: WeekData[] = [];
-  
-  // Get the start of the first week of the year
-  let currentDate = startOfWeek(new Date(selectedYear, 0, 1), { weekStartsOn: 0 });
-  const yearEnd = endOfYear(new Date(selectedYear, 0, 1));
-  
-  // Fill in all weeks of the year
-  while (currentDate <= yearEnd) {
-    const week: WeekData = Array(7).fill(null);
+  // Generate weeks data
+  const weeks = useMemo(() => {
+    const weeks: WeekData[] = [];
+    const yearStart = startOfYear(new Date(selectedYear, 0, 1));
+    const yearEnd = endOfYear(yearStart);
     
-    for (let i = 0; i < 7; i++) {
-      const date = addDays(currentDate, i);
-      if (date.getFullYear() === selectedYear) {
-        week[i] = {
-          date: format(date, 'yyyy-MM-dd'),
-          count: calendarData[format(date, 'yyyy-MM-dd')] || 0,
-          isOutsideMonth: false
-        };
+    // Start from the first day of the first week of the year
+    let currentDate = startOfWeek(yearStart, { weekStartsOn: 0 });
+    
+    while (currentDate <= yearEnd) {
+      const week: WeekData = Array(7).fill(null);
+      
+      for (let i = 0; i < 7; i++) {
+        const date = addDays(currentDate, i);
+        const dateKey = format(date, 'yyyy-MM-dd');
+        
+        if (isWithinInterval(date, { start: yearStart, end: yearEnd })) {
+          week[i] = {
+            date: dateKey,
+            count: calendarData[dateKey] || 0
+          };
+        }
       }
+      
+      weeks.push(week);
+      currentDate = addWeeks(currentDate, 1);
     }
     
-    weeks.push(week);
-    currentDate = addWeeks(currentDate, 1);
-  }
+    return weeks;
+  }, [selectedYear, calendarData]);
 
-  // Calculate stats once
-  const totalActivities = Object.values(calendarData).reduce((sum, count) => sum + count, 0);
-  const activeDays = Object.values(calendarData).filter(count => count > 0).length;
-  const averagePerDay = activeDays > 0 ? totalActivities / activeDays : 0;
+  // Calculate stats
+  const stats = useMemo(() => {
+    const totalActivities = Object.values(calendarData).reduce((sum, count) => sum + count, 0);
+    const activeDays = Object.values(calendarData).filter(count => count > 0).length;
+    const averagePerDay = activeDays > 0 ? totalActivities / activeDays : 0;
+    
+    return { totalActivities, activeDays, averagePerDay };
+  }, [calendarData]);
+
+  const { totalActivities, activeDays, averagePerDay } = stats;
 
   const getMonthLabels = () => {
     const labels: MonthLabel[] = [];
