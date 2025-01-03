@@ -33,6 +33,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -82,7 +83,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
-  const [media, setMedia] = useState<CardType['media']>(initialMedia);
+  const [media, setMedia] = useState<CardType['media']>(initialMedia || []);
   const [tags, setTags] = useState<string[]>(initialTags);
   const [newTag, setNewTag] = useState('');
   const [isContentHidden, setIsContentHidden] = useState(false);
@@ -211,73 +212,6 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     }
   };
 
-  const handleComplete = async () => {
-    if (isLoading) return;
-    
-    setIsLoading(true);
-    try {
-      const currentCategory = (itemCategory || 'Uncategorized').toUpperCase();
-      const currentDate = new Date('2025-01-03T09:25:45+01:00').toISOString().split('T')[0];
-      
-      console.log('Completing item:', { 
-        id, 
-        category: currentCategory,
-        originalCategory: itemCategory,
-        date: currentDate 
-      });
-      
-      // Track the learning activity first
-      console.log('Tracking activity:', { 
-        category: currentCategory,
-        originalCategory: itemCategory,
-        date: currentDate 
-      });
-      const activity = await incrementLearningActivity(currentCategory, currentDate);
-      console.log('Activity tracked:', activity);
-
-      // Then update the learning item
-      const updatedItem = {
-        id,
-        mastered: true,
-        updatedAt: new Date('2025-01-03T09:25:45+01:00').toISOString(),
-        category: currentCategory
-      };
-
-      console.log('Saving item:', updatedItem);
-      const success = await onSave(updatedItem);
-
-      if (!success) {
-        throw new Error('Failed to update item');
-      }
-
-      // Update local state
-      setMastered(true);
-      setItemCategory(currentCategory);
-
-      console.log('Item completed successfully:', {
-        ...updatedItem,
-        localState: {
-          mastered: true,
-          itemCategory: currentCategory
-        }
-      });
-      
-      toast({
-        title: "Success!",
-        description: "Learning item marked as complete",
-      });
-    } catch (error) {
-      console.error('Error completing item:', error);
-      toast({
-        title: "Error",
-        description: "Failed to complete the learning item. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const toggleContentVisibility = () => {
     setIsContentHidden(!isContentHidden);
   };
@@ -314,73 +248,62 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="mt-1.5"
+                className="mt-1"
               />
             </div>
 
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="category">Category</Label>
+              <Label>Category</Label>
               <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="justify-between"
+                    className="w-full justify-between mt-1"
                   >
                     {itemCategory || "Select category..."}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
+                <PopoverContent className="w-full p-0">
                   <Command>
-                    <CommandInput 
-                      placeholder="Search category..."
-                      value={itemCategory}
-                      onValueChange={(value) => {
-                        setItemCategory(value);
-                      }}
-                    />
-                    <CommandEmpty>
-                      <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                        No category found. Type to create new.
-                      </div>
-                    </CommandEmpty>
+                    <CommandInput placeholder="Search category..." />
+                    <CommandEmpty>No category found.</CommandEmpty>
                     <CommandGroup>
-                      {categories
-                        .filter(cat => !itemCategory || cat.toLowerCase().includes(itemCategory.toLowerCase()))
-                        .map((cat) => (
-                          <CommandItem
-                            key={cat}
-                            value={cat}
-                            className="cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
-                            onSelect={() => {
-                              handleUpdateCategory(cat);
-                              setOpen(false);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                itemCategory === cat ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            {cat}
-                          </CommandItem>
-                        ))}
-                      {itemCategory && !categories.includes(itemCategory) && (
+                      {categories.map((category) => (
                         <CommandItem
-                          value={itemCategory}
-                          className="cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
+                          key={category}
                           onSelect={() => {
-                            // Keep the typed category and close
+                            setItemCategory(category);
                             setOpen(false);
+                            handleUpdateCategory(category);
                           }}
                         >
-                          <Plus className="mr-2 h-4 w-4" />
-                          Create "{itemCategory}"
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              itemCategory === category ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {category}
                         </CommandItem>
-                      )}
+                      ))}
+                      <CommandItem
+                        onSelect={() => {
+                          setOpen(false);
+                          setItemCategory('');
+                          handleUpdateCategory('');
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            !itemCategory ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        No Category
+                      </CommandItem>
                     </CommandGroup>
                   </Command>
                 </PopoverContent>
@@ -388,7 +311,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="content">Content</Label>
+              <Label>Content</Label>
               <div className="mt-1.5">
                 <RichTextEditor
                   content={content}
@@ -398,210 +321,203 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg line-clamp-2 bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
-                  {title}
-                </h3>
-                {itemCategory && (
-                  <div className="mt-1 text-sm text-blue-600 dark:text-blue-400">
-                    {itemCategory}
-                  </div>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsZoomed(true)}
-                  className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
-                >
-                  <ZoomIn className="h-4 w-4 text-blue-700 dark:text-blue-400" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleContentVisibility}
-                  className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
-                >
-                  {isContentHidden ? (
-                    <Eye className="h-4 w-4 text-blue-700 dark:text-blue-400" />
-                  ) : (
-                    <EyeOff className="h-4 w-4 text-blue-700 dark:text-blue-400" />
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsEditing(true)}
-                  className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
-                >
-                  <Edit className="h-4 w-4 text-blue-700 dark:text-blue-400" />
-                </Button>
-              </div>
-            </div>
-            <div 
-              className={cn(
-                "space-y-3 transition-all duration-200",
-                isContentHidden && "blur-md select-none"
+          <div className="flex justify-between items-start gap-4">
+            <div className="space-y-1 flex-1">
+              <h3 className="font-semibold leading-none tracking-tight">
+                {title}
+              </h3>
+              {itemCategory && (
+                <Badge variant="outline" className="text-xs">
+                  <Tag className="w-3 h-3 mr-1" />
+                  {itemCategory}
+                </Badge>
               )}
-            >
-              <div 
-                className="prose prose-sm max-w-none dark:prose-invert line-clamp-6 hover:line-clamp-none transition-all cursor-pointer"
-                onClick={() => setIsZoomed(true)}
-                dangerouslySetInnerHTML={{ __html: content }}
-              />
-              
-              <div className="flex flex-wrap gap-1.5 pt-2">
-                {tags.map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
+            </div>
+            <div className="flex gap-1">
+              {mastered && (
+                <Trophy className="w-4 h-4 text-emerald-500" />
+              )}
             </div>
           </div>
         )}
       </CardHeader>
-      <CardContent>
-        <div className="text-xs text-muted-foreground">
-          Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}
-        </div>
+
+      <CardContent className={cn(
+        "relative transition-all duration-200",
+        isContentHidden && "blur-sm"
+      )}>
+        {isEditing ? (
+          <RichTextEditor
+            content={content}
+            onChange={setContent}
+          />
+        ) : (
+          <div
+            ref={contentRef}
+            className={cn(
+              "prose prose-sm max-w-none",
+              isZoomed && "prose-lg"
+            )}
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
+        )}
+
+        {media && media.length > 0 && (
+          <div className="mt-4 space-y-2">
+            {media.map((item, index) => (
+              <div key={item.id} className="flex items-center gap-2">
+                {item.type === 'link' ? (
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline flex items-center gap-2"
+                  >
+                    {item.url}
+                  </a>
+                ) : (
+                  <img
+                    src={item.url}
+                    alt={`Media ${index + 1}`}
+                    className="max-w-full h-auto rounded"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-4">
+            {tags.map((tag) => (
+              <Badge key={tag} variant="secondary" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
       </CardContent>
 
-      <CardFooter className="flex justify-between pt-3 pb-4">
-        <div className="flex gap-2">
+      <CardFooter className="flex justify-between items-center pt-3">
+        <div className="flex items-center gap-2">
           {isEditing ? (
             <>
-              <Button 
-                onClick={handleSave} 
-                size="sm" 
-                className="bg-blue-700 hover:bg-blue-800 text-white shadow-sm hover:shadow dark:bg-blue-800 dark:hover:bg-blue-900"
-              >
-                <Save className="h-4 w-4 mr-1" />
-                Save
-              </Button>
               <Button
-                variant="outline"
+                variant="ghost"
+                size="icon"
                 onClick={() => setIsEditing(false)}
-                size="sm"
-                className="shadow-sm hover:shadow border-blue-200 hover:border-blue-300 dark:border-blue-800 dark:hover:border-blue-700"
               >
-                <X className="h-4 w-4 mr-1" />
-                Cancel
+                <X className="w-4 h-4" />
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
-                onClick={() => setIsDeleteDialogOpen(true)}
-                className="shadow-sm hover:shadow text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
+                size="icon"
+                onClick={handleSave}
               >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Delete
+                <Save className="w-4 h-4" />
               </Button>
             </>
           ) : (
             <>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
+                onClick={() => setIsEditing(true)}
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={handleCopyContent}
-                className="hover:bg-blue-100 text-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/50"
               >
-                <Copy className="h-4 w-4 mr-1" />
-                Copy
+                <Copy className="w-4 h-4" />
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
-                onClick={toggleMastered}
-                className={cn(
-                  "hover:bg-emerald-50 dark:hover:bg-emerald-950/50",
-                  mastered ? "text-emerald-600 dark:text-emerald-400" : "text-gray-500 dark:text-gray-400"
+                size="icon"
+                onClick={toggleContentVisibility}
+              >
+                {isContentHidden ? (
+                  <Eye className="w-4 h-4" />
+                ) : (
+                  <EyeOff className="w-4 h-4" />
                 )}
-              >
-                <Trophy className="h-4 w-4 mr-1" />
-                {mastered ? "Mastered" : "Mark as Mastered"}
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
-                onClick={handleComplete}
-                className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-950/50"
+                size="icon"
+                onClick={() => setIsZoomed(!isZoomed)}
               >
-                <Check className="h-4 w-4 mr-1" />
-                Complete
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsDeleteDialogOpen(true)}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Delete
+                {isZoomed ? (
+                  <ZoomOut className="w-4 h-4" />
+                ) : (
+                  <ZoomIn className="w-4 h-4" />
+                )}
               </Button>
             </>
           )}
         </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleMastered}
+            disabled={isEditing}
+          >
+            {mastered ? (
+              <BookmarkCheck className="w-4 h-4" />
+            ) : (
+              <Bookmark className="w-4 h-4" />
+            )}
+          </Button>
+          {!isEditing && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the card.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
       </CardFooter>
 
-      <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="fixed z-50 left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 sm:rounded-lg">
-          <DialogHeader className="mb-6">
-            <DialogTitle className="text-xl sm:text-2xl font-semibold text-center bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
-              {title}
-            </DialogTitle>
+      <Dialog>
+        <DialogTrigger asChild>
+          <button className="absolute top-2 right-2">
+            <Clock className="w-4 h-4 text-gray-400" />
+          </button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Card History</DialogTitle>
           </DialogHeader>
-          <div className="w-full max-w-[65ch] mx-auto px-2 sm:px-4">
-            <div 
-              className={cn(
-                "prose prose-lg dark:prose-invert",
-                "prose-headings:text-blue-900 dark:prose-headings:text-blue-300",
-                "prose-a:text-blue-700 dark:prose-a:text-blue-400",
-                "prose-strong:text-blue-900 dark:prose-strong:text-blue-300",
-                "[&_ul]:list-disc [&_ol]:list-decimal",
-                "[&_ul>li]:pl-0 [&_ol>li]:pl-0",
-                "[&_ul>li]:my-0 [&_ol>li]:my-0",
-                "[&_ul]:pl-5 [&_ol]:pl-5",
-                "[&_ul]:my-1 [&_ol]:my-1"
-              )}
-            >
-              <div dangerouslySetInnerHTML={{ __html: content }} />
+          <div className="space-y-4">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-500">Created:</span>
+              <span>{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-500">Last updated:</span>
+              <span>{formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</span>
             </div>
           </div>
-          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </DialogPrimitive.Close>
         </DialogContent>
       </Dialog>
-
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent className="fixed z-50 left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-md p-4 sm:p-6 sm:rounded-lg">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl text-center text-red-600 dark:text-red-400">
-              Delete Card
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-center">
-              Are you sure you want to delete this card? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-500 hover:bg-red-600"
-              onClick={() => {
-                onDelete();
-                setIsDeleteDialogOpen(false);
-              }}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Card>
   );
 };

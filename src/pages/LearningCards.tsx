@@ -95,31 +95,50 @@ export const LearningCardsPage = () => {
     }
   };
 
-  const handleSaveCard = async (card: Partial<CardType>): Promise<boolean> => {
+  const handleSaveCard = async (card: Partial<CardType>) => {
     try {
-      console.log('Saving card:', card);
       const normalizedCategory = (card.category || 'Uncategorized').toUpperCase();
-      console.log('Normalized category:', normalizedCategory);
-      
-      await learningCardsService.updateCard(card.id!, {
-        title: card.title,
-        content: card.content,
-        media: card.media,
-        tags: card.tags,
-        mastered: card.mastered,
-        category: normalizedCategory,
+      const currentDate = new Date('2025-01-03T10:12:27+01:00').toISOString().split('T')[0];
+
+      console.log('Saving card with normalized category:', {
+        ...card,
+        category: normalizedCategory
       });
-      await fetchCards();
+
+      // Track activity when a new card is created
+      if (!card.id) {
+        console.log('New card created, tracking activity:', {
+          category: normalizedCategory,
+          date: currentDate
+        });
+        const activity = await incrementLearningActivity(normalizedCategory, currentDate);
+        console.log('Activity tracked:', activity);
+      }
+
+      // Save the card with normalized category
+      if (card.id) {
+        await learningCardsService.updateCard(card.id, {
+          ...card,
+          category: normalizedCategory
+        });
+      } else {
+        await learningCardsService.createCard({
+          ...card,
+          category: normalizedCategory
+        });
+      }
+
       toast({
-        title: "Success",
-        description: "Card updated successfully",
+        title: "Success!",
+        description: card.id ? "Card updated successfully" : "New card created successfully",
       });
+
       return true;
     } catch (error) {
-      console.error('Error updating card:', error);
+      console.error('Error saving card:', error);
       toast({
         title: "Error",
-        description: "Failed to update card. Please try again.",
+        description: "Failed to save the card. Please try again.",
         variant: "destructive",
       });
       return false;
