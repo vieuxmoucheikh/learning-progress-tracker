@@ -437,13 +437,15 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             >
               <div 
                 className={cn(
-                  "prose prose-sm sm:prose-base max-w-none dark:prose-invert",
-                  "prose-img:my-4 prose-img:rounded-lg prose-img:max-w-full prose-img:mx-auto prose-img:shadow-md",
+                  "prose prose-sm sm:prose-base max-w-none",
                   "prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
                   "prose-p:text-gray-700 dark:prose-p:text-gray-300",
                   "prose-a:text-blue-600 dark:prose-a:text-blue-400",
-                  "prose-blockquote:border-l-blue-500",
-                  "prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800",
+                  "prose-strong:text-gray-900 dark:prose-strong:text-gray-100",
+                  "prose-code:text-gray-900 dark:prose-code:text-gray-100",
+                  "prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800/50",
+                  "prose-blockquote:text-gray-700 dark:prose-blockquote:text-gray-300",
+                  "prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto",
                   !isZoomed && "max-h-[300px] overflow-hidden cursor-pointer"
                 )}
                 dangerouslySetInnerHTML={{ __html: content }}
@@ -555,10 +557,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
       {/* Zoomed View Dialog */}
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto p-6 sm:p-8">
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto p-6 sm:p-8 bg-white dark:bg-gray-950">
           <DialogHeader>
             <DialogTitle className={cn(
               "text-2xl font-semibold",
+              "text-gray-900 dark:text-gray-100",
               "bg-gradient-to-r from-blue-600 to-blue-400",
               "bg-clip-text text-transparent"
             )}>
@@ -567,10 +570,14 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           </DialogHeader>
           <div className={cn(
             "prose prose-lg max-w-none dark:prose-invert mt-6",
-            "prose-img:rounded-lg prose-img:shadow-lg prose-img:mx-auto",
             "prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
             "prose-p:text-gray-700 dark:prose-p:text-gray-300",
-            "prose-a:text-blue-600 dark:prose-a:text-blue-400"
+            "prose-a:text-blue-600 dark:prose-a:text-blue-400",
+            "prose-strong:text-gray-900 dark:prose-strong:text-gray-100",
+            "prose-code:text-gray-900 dark:prose-code:text-gray-100",
+            "prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800/50",
+            "prose-blockquote:text-gray-700 dark:prose-blockquote:text-gray-300",
+            "prose-img:rounded-lg prose-img:shadow-lg prose-img:mx-auto"
           )} 
           dangerouslySetInnerHTML={{ __html: content }} 
           />

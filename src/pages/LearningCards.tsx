@@ -39,10 +39,10 @@ interface FocusData {
 export const LearningCardsPage = () => {
   const [cards, setCards] = useState<CardType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<string[]>(['All']);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [categories, setCategories] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'updated' | 'created' | 'mastered'>('updated');
   const { toast } = useToast();
 
@@ -61,7 +61,38 @@ export const LearningCardsPage = () => {
     });
   }, []);
 
-  // Filter and sort cards with better performance
+  // Fetch cards and update state
+  const fetchCards = useCallback(async () => {
+    try {
+      setLoading(true);
+      const items = await learningCardsService.getCards();
+      setCards(items);
+      
+      // Extract unique categories and sort them
+      const uniqueCategories = ['All', ...new Set(
+        items
+          .map(item => item.category)
+          .filter((category): category is string => 
+            typeof category === 'string' && 
+            category.trim().length > 0
+          )
+          .map(category => category.trim())
+      )].sort((a, b) => a === 'All' ? -1 : b === 'All' ? 1 : a.localeCompare(b));
+      
+      setCategories(uniqueCategories);
+    } catch (error) {
+      console.error('Error fetching cards:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch cards',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  // Filter cards based on selected category
   const filteredCards = useMemo(() => {
     let result = [...cards];
 
@@ -71,7 +102,7 @@ export const LearningCardsPage = () => {
     }
 
     // Apply category filter
-    if (selectedCategory !== 'all') {
+    if (selectedCategory !== 'All') {
       result = result.filter(card => card.category === selectedCategory);
     }
 
@@ -102,53 +133,10 @@ export const LearningCardsPage = () => {
     });
   }, [cards, searchTerm, selectedCategory, selectedTags, sortBy, searchCards]);
 
-  // Fetch cards and update state
-  const fetchCards = useCallback(async () => {
-    try {
-      setLoading(true);
-      const items = await learningCardsService.getCards();
-      setCards(items);
-      
-      // Extract unique categories, filter out empty ones, and sort
-      const uniqueCategories = Array.from(
-        new Set(
-          items
-            .map(item => item.category)
-            .filter((category): category is string => 
-              typeof category === 'string' && 
-              category.trim().length > 0
-            )
-            .map(category => category.trim())
-        )
-      ).sort((a, b) => a.localeCompare(b));
-      
-      setCategories(uniqueCategories);
-      
-      // If we have categories but no filter is set, set the first category as default
-      if (uniqueCategories.length > 0 && !selectedCategory) {
-        setSelectedCategory('All');
-      }
-    } catch (error) {
-      console.error('Error fetching cards:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch cards',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [toast, selectedCategory]);
-
-  // Handle card update
   const handleCardUpdate = async (cardId: string, updates: Partial<CardType>) => {
     try {
-      const updatedCard = await learningCardsService.updateCard(cardId, updates);
-      setCards(prevCards => 
-        prevCards.map(card => 
-          card.id === cardId ? updatedCard : card
-        )
-      );
+      await learningCardsService.updateCard(cardId, updates);
+      fetchCards(); // Refresh the cards after update
       return true;
     } catch (error) {
       console.error('Error updating card:', error);
@@ -161,50 +149,27 @@ export const LearningCardsPage = () => {
     }
   };
 
-  const handleCreateCard = async () => {
+  const handleCardDelete = async (cardId: string) => {
     try {
-      const newCard = await learningCardsService.createCard({
-        title: 'New Card',
-        content: '',
-        tags: [],
-        category: selectedCategory !== 'all' ? selectedCategory : '',
-      });
-      setCards((prevCards) => [newCard, ...prevCards]);
+      await learningCardsService.deleteCard(cardId);
+      fetchCards(); // Refresh the cards after deletion
       toast({
         title: 'Success',
-        description: 'Card created successfully',
-      });
-    } catch (error) {
-      console.error('Error creating card:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to create card. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleDeleteCard = async (id: string) => {
-    try {
-      await learningCardsService.deleteCard(id);
-      setCards((prevCards) => prevCards.filter((card) => card.id !== id));
-      toast({
-        title: "Success",
-        description: "Card deleted successfully",
+        description: 'Card deleted successfully',
       });
     } catch (error) {
       console.error('Error deleting card:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete card. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to delete card',
+        variant: 'destructive',
       });
     }
   };
 
   useEffect(() => {
     fetchCards();
-  }, []);
+  }, [fetchCards]);
 
   const handleSortChange = (value: string) => {
     if (value === 'updated' || value === 'created' || value === 'mastered') {
@@ -218,9 +183,25 @@ export const LearningCardsPage = () => {
         {/* Header */}
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Learning Cards</h1>
-          <Button onClick={handleCreateCard}>
+          <Button
+            onClick={() => {
+              const now = new Date().toISOString();
+              const newCard: CardType = {
+                id: crypto.randomUUID(),
+                title: 'New Card',
+                content: '',
+                tags: [],
+                category: '',
+                mastered: false,
+                createdAt: now,
+                updatedAt: now,
+              };
+              setCards(prev => [newCard, ...prev]);
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
             <Plus className="w-4 h-4 mr-2" />
-            New Card
+            Add Card
           </Button>
         </div>
 
@@ -240,10 +221,9 @@ export const LearningCardsPage = () => {
           {/* Category Filter */}
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by category" />
+              <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category} value={category}>
                   {category}
@@ -312,12 +292,20 @@ export const LearningCardsPage = () => {
                       return handleCardUpdate(card.id, updates);
                     }}
                     onDelete={async () => {
-                      handleDeleteCard(card.id);
+                      handleCardDelete(card.id);
                     }}
                   />
                 </motion.div>
               ))}
             </AnimatePresence>
+            {filteredCards.length === 0 && (
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                {selectedCategory === 'All' 
+                  ? 'No cards found. Create your first card!'
+                  : `No cards found in category "${selectedCategory}"`
+                }
+              </div>
+            )}
           </div>
         )}
       </div>
