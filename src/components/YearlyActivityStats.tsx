@@ -37,36 +37,45 @@ const YearlyActivityStats = () => {
   const fetchActivities = async (category: string) => {
     try {
       console.log('Fetching activities for category:', category);
-      const currentDate = new Date('2025-01-03T08:56:35+01:00');
+      const currentDate = new Date('2025-01-03T09:15:06+01:00');
       const year = currentDate.getFullYear();
       const startDate = new Date(year, 0, 1).toISOString().split('T')[0];
       const endDate = new Date(year, 11, 31).toISOString().split('T')[0];
       
       const activities = await getLearningActivity(startDate, endDate);
-      console.log('Retrieved activities:', activities);
-      console.log('All activities:', activities.map(a => ({ 
+      console.log('Raw activities data:', activities.map(a => ({
+        id: a.id,
         category: a.category,
         date: a.date,
-        count: a.count 
+        count: a.count,
+        raw_category: a.category
       })));
       
       const categoryActivities = activities.filter(a => {
-        const match = a.category.toUpperCase() === category.toUpperCase();
+        const activityCategory = (a.category || '').toUpperCase();
+        const selectedCategory = (category || '').toUpperCase();
+        const match = activityCategory === selectedCategory;
         console.log('Comparing categories:', {
-          activity: a.category.toUpperCase(),
-          selected: category.toUpperCase(),
-          matches: match
+          activity: activityCategory,
+          selected: selectedCategory,
+          matches: match,
+          raw: {
+            activity: a.category,
+            selected: category
+          }
         });
         return match;
       });
       
       console.log('Filtered activities for category:', {
         category,
+        selectedCategory: category.toUpperCase(),
         total: categoryActivities.length,
         activities: categoryActivities.map(a => ({ 
           category: a.category,
           date: a.date,
-          count: a.count 
+          count: a.count,
+          raw_category: a.category
         }))
       });
       
