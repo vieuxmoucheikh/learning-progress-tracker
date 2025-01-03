@@ -25,11 +25,10 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
   console.log('YearlyActivityHeatmap received data:', data);
   
   const generateCalendarData = () => {
-    const currentDate = new Date('2025-01-03T11:53:47+01:00');
+    const currentDate = new Date('2025-01-03T12:02:16+01:00');
     const startDate = new Date(currentDate.getFullYear(), 0, 1);
     startDate.setUTCHours(0, 0, 0, 0);
     
-    // Pre-calculate all dates and their activities
     const daysInYear = 365 + (currentDate.getFullYear() % 4 === 0 ? 1 : 0);
     const allDates: DayData[] = [];
     
@@ -50,7 +49,6 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
   };
 
   const calendarData = generateCalendarData();
-  const hasActivities = calendarData.some(d => d.count > 0);
 
   const getColorForCount = (count: number) => {
     if (count === 0) return 'bg-gray-100 dark:bg-gray-800';
@@ -59,7 +57,6 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
     return 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-400 dark:hover:bg-emerald-300';
   };
 
-  // Calculate weeks with proper typing
   const weeks: DayData[][] = [];
   for (let i = 0; i < 53; i++) {
     const week = calendarData.slice(i * 7, (i + 1) * 7);
@@ -91,41 +88,41 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
   const monthLabels = getMonthLabels();
 
   const renderLegend = () => (
-    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
-      <span className="text-xs sm:text-sm">Less</span>
+    <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 mb-4 justify-center sm:justify-start">
+      <span className="text-[10px] sm:text-xs">Less</span>
       {[0, 1, 2, 4].map(count => (
         <div
           key={count}
           className={cn(
-            'w-2 h-2 sm:w-3 sm:h-3 rounded-sm',
+            'w-1.5 h-1.5 sm:w-3 sm:h-3 rounded-sm',
             getColorForCount(count)
           )}
         />
       ))}
-      <span className="text-xs sm:text-sm">More</span>
+      <span className="text-[10px] sm:text-xs">More</span>
     </div>
   );
 
   return (
     <div className="w-full space-y-4">
       {renderLegend()}
-      <div className="overflow-x-auto sm:overflow-x-visible">
-        <div className="inline-block min-w-full">
+      <div className="overflow-x-auto sm:overflow-x-visible -mx-4 sm:mx-0">
+        <div className="min-w-fit px-4 sm:px-0">
           <div className="relative">
             {/* Month labels */}
-            <div className="flex mb-2 relative">
-              <div className="w-6 sm:w-8" /> {/* Offset for day labels */}
+            <div className="flex mb-1 sm:mb-2 relative">
+              <div className="w-4 sm:w-8" /> {/* Offset for day labels */}
               <div className="flex flex-1">
                 {monthLabels.map((label, i) => (
                   <div
                     key={i}
-                    className="absolute text-[10px] sm:text-xs text-gray-500"
+                    className="absolute text-[8px] sm:text-xs text-gray-500 origin-left"
                     style={{ 
-                      left: `${label.index * (window.innerWidth <= 640 ? 12 : 16) + 16}px`,
-                      transform: window.innerWidth <= 640 ? 'rotate(-60deg)' : 'none'
+                      left: `${label.index * (window.innerWidth <= 640 ? 8 : 16) + 12}px`,
+                      transform: window.innerWidth <= 640 ? 'rotate(-60deg) translateY(-8px)' : 'none'
                     }}
                   >
-                    {label.text}
+                    {window.innerWidth <= 640 ? label.text.slice(0, 1) : label.text}
                   </div>
                 ))}
               </div>
@@ -134,11 +131,11 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
             {/* Main grid */}
             <div className="flex">
               {/* Day labels */}
-              <div className="flex flex-col gap-[2px] sm:gap-1 pr-2">
+              <div className="flex flex-col gap-[1px] sm:gap-1 pr-1 sm:pr-2">
                 {DAYS.map((day, i) => (
                   <div 
                     key={day} 
-                    className="h-2 sm:h-3 text-[10px] sm:text-xs text-gray-500 flex items-center"
+                    className="h-1.5 sm:h-3 text-[8px] sm:text-xs text-gray-500 flex items-center"
                   >
                     {i % 2 === 0 ? day.slice(0, 1) : ''}
                   </div>
@@ -146,9 +143,9 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
               </div>
 
               {/* Calendar grid */}
-              <div className="flex gap-[2px] sm:gap-1">
+              <div className="flex gap-[1px] sm:gap-1">
                 {weeks.map((week, weekIndex) => (
-                  <div key={weekIndex} className="flex flex-col gap-[2px] sm:gap-1">
+                  <div key={weekIndex} className="flex flex-col gap-[1px] sm:gap-1">
                     {week.map((day) => {
                       const colorClass = getColorForCount(day.count);
                       const dateObj = new Date(day.date);
@@ -160,13 +157,13 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
                             <TooltipTrigger asChild>
                               <div
                                 className={cn(
-                                  'w-2 h-2 sm:w-3 sm:h-3 rounded-sm transition-colors duration-200',
+                                  'w-1.5 h-1.5 sm:w-3 sm:h-3 rounded-sm transition-colors duration-200',
                                   colorClass,
                                   day.count > 0 ? 'cursor-pointer transform hover:scale-125' : ''
                                 )}
                               />
                             </TooltipTrigger>
-                            <TooltipContent side="top" className="text-xs sm:text-sm">
+                            <TooltipContent side="top" className="text-[10px] sm:text-sm">
                               <p className="font-medium">{formattedDate}</p>
                               <p>
                                 {day.count === 0
