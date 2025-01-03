@@ -386,11 +386,6 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 content={content}
                 onChange={(newContent) => {
                   setContent(newContent);
-                  // Auto-save after a short delay
-                  const timeoutId = setTimeout(() => {
-                    handleSave();
-                  }, 800);
-                  return () => clearTimeout(timeoutId);
                 }}
                 className={cn(
                   "min-h-[150px] p-4 rounded-lg",
@@ -407,6 +402,21 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   "prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800"
                 )}
               />
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditing(false)}
+                  className="bg-white hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Save Changes
+                </Button>
+              </div>
             </div>
           ) : (
             <div 
@@ -417,134 +427,17 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 "prose-p:text-gray-700 dark:prose-p:text-gray-300",
                 "prose-a:text-blue-600 dark:prose-a:text-blue-400",
                 "prose-blockquote:border-l-blue-500",
-                "prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800"
+                "prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800",
+                !isZoomed && "max-h-[300px] overflow-hidden relative",
               )}
               dangerouslySetInnerHTML={{ __html: content }}
             />
           )}
-        </div>
-
-        {/* Meta Section */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-sm">
-          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-            <Clock className="w-4 h-4" />
-            <span>Updated {getTimeAgo(updatedAt)}</span>
-            {category && (
-              <>
-                <span>•</span>
-                <span className="font-medium">{category}</span>
-              </>
-            )}
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag, index) => (
-              <Badge
-                key={`${tag}-${index}`}
-                variant={isEditing ? "secondary" : "default"}
-                className={cn(
-                  "text-sm px-2.5 py-0.5 rounded-full transition-all duration-200",
-                  isEditing 
-                    ? "cursor-pointer hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900 dark:hover:text-red-300"
-                    : "bg-blue-100 text-blue-900 hover:bg-blue-200 dark:bg-blue-900/50 dark:text-blue-100 dark:hover:bg-blue-800/50"
-                )}
-                onClick={() => isEditing && handleRemoveTag(tag)}
-              >
-                {tag}
-                {isEditing && (
-                  <X className="w-3 h-3 ml-1.5 inline-block" />
-                )}
-              </Badge>
-            ))}
-            {isEditing && (
-              <form onSubmit={handleAddTag} className="inline-flex">
-                <Input
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  placeholder="Add tag..."
-                  className={cn(
-                    "h-7 text-sm w-24 sm:w-32",
-                    "bg-white dark:bg-gray-900",
-                    "text-gray-900 dark:text-gray-100",
-                    "border-gray-200 dark:border-gray-800",
-                    "focus-visible:ring-2 focus-visible:ring-blue-500",
-                    "placeholder:text-gray-400 dark:placeholder:text-gray-600",
-                    "rounded-full"
-                  )}
-                />
-              </form>
-            )}
-          </div>
+          {!isZoomed && content.length > 500 && (
+            <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white dark:from-gray-950 to-transparent" />
+          )}
         </div>
       </CardHeader>
-
-      <CardFooter className={cn(
-        "flex justify-between p-4 sm:p-6 gap-4",
-        "bg-gradient-to-b from-transparent via-gray-50/50 to-gray-100/50",
-        "dark:via-gray-900/30 dark:to-gray-900/50"
-      )}>
-        <Button
-          variant="ghost"
-          size="sm"
-          className={cn(
-            "text-sm transition-colors flex-1 sm:flex-none justify-start sm:justify-center",
-            mastered 
-              ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-950/50" 
-              : "text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-950/50"
-          )}
-          onClick={handleMasteredToggle}
-        >
-          {mastered ? (
-            <>
-              <BookmarkCheck className="w-4 h-4 mr-2" />
-              <span>Mastered</span>
-            </>
-          ) : (
-            <>
-              <Bookmark className="w-4 h-4 mr-2" />
-              <span>Mark as Mastered</span>
-            </>
-          )}
-        </Button>
-        
-        <Button
-          variant="ghost"
-          size="sm"
-          className={cn(
-            "text-sm transition-colors",
-            "text-red-600 hover:text-red-700 hover:bg-red-50",
-            "dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
-          )}
-          onClick={onDelete}
-        >
-          <Trash2 className="w-4 h-4 mr-2" />
-          <span>Delete</span>
-        </Button>
-      </CardFooter>
-
-      {/* Zoomed View Dialog */}
-      <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto p-6 sm:p-8">
-          <DialogHeader>
-            <DialogTitle className={cn(
-              "text-2xl font-semibold",
-              "bg-gradient-to-r from-blue-600 to-blue-400",
-              "bg-clip-text text-transparent"
-            )}>
-              {title}
-            </DialogTitle>
-          </DialogHeader>
-          <div className={cn(
-            "prose prose-lg max-w-none dark:prose-invert mt-6",
-            "prose-img:rounded-lg prose-img:shadow-lg prose-img:mx-auto",
-            "prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
-            "prose-p:text-gray-700 dark:prose-p:text-gray-300",
-            "prose-a:text-blue-600 dark:prose-a:text-blue-400"
-          )} 
-          dangerouslySetInnerHTML={{ __html: content }} 
-          />
-        </DialogContent>
-      </Dialog>
     </Card>
   );
 };

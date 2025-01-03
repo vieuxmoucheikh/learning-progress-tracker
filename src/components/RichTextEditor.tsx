@@ -72,6 +72,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         },
       }),
       Image.configure({
+        inline: true,
+        allowBase64: true,
         HTMLAttributes: {
           class: 'rounded-lg max-w-full h-auto my-4 shadow-md hover:shadow-lg transition-shadow',
         },
@@ -93,7 +95,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     content,
     editable,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const html = editor.getHTML();
+      onChange(html);
     },
     editorProps: {
       attributes: {

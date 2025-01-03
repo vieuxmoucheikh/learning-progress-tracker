@@ -109,20 +109,25 @@ export const LearningCardsPage = () => {
       const items = await learningCardsService.getCards();
       setCards(items);
       
-      // Extract unique categories and filter out undefined/null values
+      // Extract unique categories, filter out empty ones, and sort
       const uniqueCategories = Array.from(
         new Set(
           items
             .map(item => item.category)
             .filter((category): category is string => 
-              category !== undefined && 
-              category !== null && 
-              category !== ''
+              typeof category === 'string' && 
+              category.trim().length > 0
             )
+            .map(category => category.trim())
         )
-      ).sort();
+      ).sort((a, b) => a.localeCompare(b));
       
       setCategories(uniqueCategories);
+      
+      // If we have categories but no filter is set, set the first category as default
+      if (uniqueCategories.length > 0 && !selectedCategory) {
+        setSelectedCategory('All');
+      }
     } catch (error) {
       console.error('Error fetching cards:', error);
       toast({
@@ -133,7 +138,7 @@ export const LearningCardsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, selectedCategory]);
 
   // Handle card update
   const handleCardUpdate = async (cardId: string, updates: Partial<CardType>) => {
