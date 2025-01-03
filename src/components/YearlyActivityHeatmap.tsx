@@ -26,59 +26,64 @@ interface MonthLabel {
   index: number;
 }
 
-interface YearlyActivityHeatmapProps {
-  data: DayData[];
+interface Activity {
+  date: string;
+  count: number;
 }
 
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+interface YearlyActivityHeatmapProps {
+  data: Activity[];
+  year?: number;
+}
 
-export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+export function YearlyActivityHeatmap({ data, year = new Date().getFullYear() }: YearlyActivityHeatmapProps) {
   console.log('YearlyActivityHeatmap received data:', data);
   
   const generateCalendarData = () => {
-    const currentDate = new Date('2025-01-03T12:27:59+01:00');
-    const yearStart = startOfYear(currentDate);
-    const yearEnd = endOfYear(currentDate);
-    const data: { [key: string]: number } = {};
+    const yearStart = new Date(year, 0, 1); // January 1st of the selected year
+    const yearEnd = new Date(year, 11, 31); // December 31st of the selected year
+    const activityMap: { [key: string]: number } = {};
 
+    // Initialize all dates with 0
     let currentDay = yearStart;
-    while (isSameYear(currentDay, yearStart)) {
+    while (currentDay <= yearEnd) {
       const dateKey = format(currentDay, 'yyyy-MM-dd');
-      data[dateKey] = 0;
+      activityMap[dateKey] = 0;
       currentDay = addDays(currentDay, 1);
     }
 
-    return data;
+    // Fill in the activity data
+    data.forEach(activity => {
+      const activityDate = new Date(activity.date);
+      if (activityDate.getFullYear() === year) {
+        const dateKey = format(activityDate, 'yyyy-MM-dd');
+        activityMap[dateKey] = activity.count;
+      }
+    });
+
+    return activityMap;
   };
 
   const calendarData = generateCalendarData();
-
   const weeks: DayData[][] = [];
   
-  // Find the first day of the first week of 2025
-  const firstDayOfYear = new Date('2025-01-01');
-  const yearEnd = endOfYear(firstDayOfYear);
-  const dayOfWeek = getDay(firstDayOfYear); // 0 for Sunday, 1 for Monday, etc.
+  // Find the first day of the year
+  const firstDayOfYear = new Date(year, 0, 1);
+  const lastDayOfYear = new Date(year, 11, 31);
   
   // Create weeks array
   let currentDate = firstDayOfYear;
   let currentWeek: DayData[] = Array(7).fill(null);
   
-  // Fill in any days before January 1st with null
-  for (let i = 0; i < dayOfWeek; i++) {
-    currentWeek[i] = {
-      date: format(subDays(firstDayOfYear, dayOfWeek - i), 'yyyy-MM-dd'),
-      count: 0,
-      isOutsideMonth: true
-    };
-  }
-  
-  // Fill in the rest of the year
-  while (isSameYear(currentDate, firstDayOfYear)) {
+  // Fill in the calendar
+  while (currentDate <= lastDayOfYear) {
     const weekDay = getDay(currentDate);
+    
+    // Start a new week if it's Sunday and we have data in the current week
     if (weekDay === 0 && currentWeek.some(day => day !== null)) {
-      weeks.push(currentWeek);
+      weeks.push([...currentWeek]);
       currentWeek = Array(7).fill(null);
     }
     
@@ -88,16 +93,9 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
       isOutsideMonth: false
     };
     
-    if (isSameDay(currentDate, yearEnd)) {
-      // Fill in any remaining days in the last week
-      for (let i = weekDay + 1; i < 7; i++) {
-        currentWeek[i] = {
-          date: format(addDays(currentDate, i - weekDay), 'yyyy-MM-dd'),
-          count: 0,
-          isOutsideMonth: true
-        };
-      }
-      weeks.push(currentWeek);
+    // Push the last week if we're at the end of the year
+    if (isSameDay(currentDate, lastDayOfYear)) {
+      weeks.push([...currentWeek]);
     }
     
     currentDate = addDays(currentDate, 1);
@@ -105,7 +103,6 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
 
   const getMonthLabels = () => {
     const labels: MonthLabel[] = [];
-    let currentDate = firstDayOfYear;
     let currentMonth = -1;
 
     weeks.forEach((week, weekIndex) => {
@@ -142,7 +139,7 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
         <div
           key={count}
           className={cn(
-            'w-1.5 h-1.5 sm:w-3 sm:h-3 rounded-sm',
+            'w-3 h-3 rounded-sm border',
             getColorForCount(count)
           )}
         />
@@ -197,13 +194,15 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
                 <div className="flex-1 grid grid-cols-[repeat(52,1fr)] gap-[1px] sm:gap-1.5">
                   {weeks.map((week, weekIndex) => (
                     <div key={weekIndex} className="flex flex-col gap-[1px] sm:gap-1.5">
-                      {week.map((day) => {
+                      {week.map((day, dayIndex) => {
+                        if (!day) return <div key={dayIndex} className="aspect-square w-full" />;
+                        
                         const colorClass = getColorForCount(day.count);
                         const dateObj = new Date(day.date);
                         const formattedDate = format(dateObj, 'MMMM d, yyyy');
                         
                         return (
-                          <TooltipProvider key={day.date}>
+                          <TooltipProvider key={dayIndex}>
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <div
