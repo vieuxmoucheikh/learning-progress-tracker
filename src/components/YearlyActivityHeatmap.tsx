@@ -14,6 +14,7 @@ import {
   subDays 
 } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface DayData {
   date: string;
@@ -34,16 +35,26 @@ interface Activity {
 interface YearlyActivityHeatmapProps {
   data: Activity[];
   year?: number;
+  onYearChange?: (year: number) => void;
 }
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-export function YearlyActivityHeatmap({ data, year = new Date().getFullYear() }: YearlyActivityHeatmapProps) {
-  console.log('YearlyActivityHeatmap received data:', data);
+export function YearlyActivityHeatmap({ 
+  data, 
+  year = new Date('2025-01-03T13:58:08+01:00').getFullYear(),
+  onYearChange 
+}: YearlyActivityHeatmapProps) {
+  const [selectedYear, setSelectedYear] = React.useState(year);
   
+  const handleYearChange = (newYear: number) => {
+    setSelectedYear(newYear);
+    onYearChange?.(newYear);
+  };
+
   const generateCalendarData = () => {
-    const yearStart = new Date(year, 0, 1); // January 1st of the selected year
-    const yearEnd = new Date(year, 11, 31); // December 31st of the selected year
+    const yearStart = new Date(selectedYear, 0, 1);
+    const yearEnd = new Date(selectedYear, 11, 31);
     const activityMap: { [key: string]: number } = {};
 
     // Initialize all dates with 0
@@ -57,7 +68,7 @@ export function YearlyActivityHeatmap({ data, year = new Date().getFullYear() }:
     // Fill in the activity data
     data.forEach(activity => {
       const activityDate = new Date(activity.date);
-      if (activityDate.getFullYear() === year) {
+      if (activityDate.getFullYear() === selectedYear) {
         const dateKey = format(activityDate, 'yyyy-MM-dd');
         activityMap[dateKey] = activity.count;
       }
@@ -69,19 +80,31 @@ export function YearlyActivityHeatmap({ data, year = new Date().getFullYear() }:
   const calendarData = generateCalendarData();
   const weeks: DayData[][] = [];
   
-  // Find the first day of the year
-  const firstDayOfYear = new Date(year, 0, 1);
-  const lastDayOfYear = new Date(year, 11, 31);
+  // Find the first day of the year and adjust for Monday start
+  const firstDayOfYear = new Date(selectedYear, 0, 1);
+  const lastDayOfYear = new Date(selectedYear, 11, 31);
   
-  // Create weeks array
+  // Create weeks array starting with empty days if needed
   let currentDate = firstDayOfYear;
   let currentWeek: DayData[] = Array(7).fill(null);
   
+  // Calculate the day offset (0 = Monday, 6 = Sunday)
+  const firstDayOffset = (getDay(firstDayOfYear) + 6) % 7;
+  
+  // Fill in empty days before the first day of the year
+  for (let i = 0; i < firstDayOffset; i++) {
+    currentWeek[i] = {
+      date: format(subDays(firstDayOfYear, firstDayOffset - i), 'yyyy-MM-dd'),
+      count: 0,
+      isOutsideMonth: true
+    };
+  }
+  
   // Fill in the calendar
   while (currentDate <= lastDayOfYear) {
-    const weekDay = getDay(currentDate);
+    const weekDay = (getDay(currentDate) + 6) % 7; // Convert to Monday-based index
     
-    // Start a new week if it's Sunday and we have data in the current week
+    // Start a new week if it's Monday and we have data in the current week
     if (weekDay === 0 && currentWeek.some(day => day !== null)) {
       weeks.push([...currentWeek]);
       currentWeek = Array(7).fill(null);
@@ -95,6 +118,14 @@ export function YearlyActivityHeatmap({ data, year = new Date().getFullYear() }:
     
     // Push the last week if we're at the end of the year
     if (isSameDay(currentDate, lastDayOfYear)) {
+      // Fill remaining days in the last week
+      for (let i = weekDay + 1; i < 7; i++) {
+        currentWeek[i] = {
+          date: format(addDays(currentDate, i - weekDay), 'yyyy-MM-dd'),
+          count: 0,
+          isOutsideMonth: true
+        };
+      }
       weeks.push([...currentWeek]);
     }
     
@@ -150,7 +181,26 @@ export function YearlyActivityHeatmap({ data, year = new Date().getFullYear() }:
 
   return (
     <div className="w-full max-w-full space-y-4 overflow-hidden">
-      {renderLegend()}
+      <div className="flex items-center justify-between mb-4">
+        {renderLegend()}
+        <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-md px-2 py-1 shadow-sm">
+          <button
+            onClick={() => handleYearChange(selectedYear - 1)}
+            className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            aria-label="Previous year"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <span className="text-sm font-medium min-w-[4rem] text-center">{selectedYear}</span>
+          <button
+            onClick={() => handleYearChange(selectedYear + 1)}
+            className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            aria-label="Next year"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
       <div className="relative w-full">
         <div className="w-full">
           <div className="w-full">
