@@ -9,10 +9,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { EnhancedLearningCard } from '@/components/EnhancedLearningCard';
+import { useToast } from '@/components/ui/use-toast';
 import { learningCardsService } from '@/lib/learningCards';
+import { incrementLearningActivity } from '@/lib/learningActivity';
 import type { EnhancedLearningCard as CardType } from '@/types';
 import { Plus, Search, Tag as TagIcon, Loader2, Clock, Filter } from 'lucide-react';
-import { useToast } from '@/hooks/useToast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { getLearningItems } from '@/lib/database';
@@ -74,12 +75,31 @@ export const LearningCardsPage = () => {
 
   const handleCreateCard = async () => {
     try {
+      const category = selectedCategory !== 'all' ? selectedCategory : '';
+      const normalizedCategory = category.toUpperCase();
+      const currentDate = new Date('2025-01-03T10:29:08+01:00').toISOString().split('T')[0];
+
+      console.log('Creating new card with category:', {
+        category: normalizedCategory,
+        date: currentDate
+      });
+
+      // Create the card first
       const newCard = await learningCardsService.createCard({
         title: 'New Card',
         content: '',
         tags: [],
-        category: selectedCategory !== 'all' ? selectedCategory : '',
+        category: normalizedCategory,
       });
+
+      // Track the activity
+      console.log('Tracking activity for new card:', {
+        category: normalizedCategory,
+        date: currentDate
+      });
+      const activity = await incrementLearningActivity(normalizedCategory, currentDate);
+      console.log('Activity tracked:', activity);
+
       setCards((prevCards) => [newCard, ...prevCards]);
       toast({
         title: 'Success',
@@ -118,13 +138,21 @@ export const LearningCardsPage = () => {
       // Save the card with normalized category
       if (card.id) {
         await learningCardsService.updateCard(card.id, {
-          ...card,
-          category: normalizedCategory
+          title: card.title || '',  // Ensure title is never undefined
+          content: card.content || '',  // Ensure content is never undefined
+          category: normalizedCategory,  // Category is already handled
+          tags: card.tags || [],  // Ensure tags is never undefined
+          media: card.media || [],  // Ensure media is never undefined
+          mastered: card.mastered || false  // Ensure mastered is never undefined
         });
       } else {
         await learningCardsService.createCard({
-          ...card,
-          category: normalizedCategory
+          title: card.title || '',  // Ensure title is never undefined
+          content: card.content || '',  // Ensure content is never undefined
+          category: normalizedCategory,  // Category is already handled
+          tags: card.tags || [],  // Ensure tags is never undefined
+          media: card.media || [],  // Ensure media is never undefined
+          mastered: card.mastered || false  // Ensure mastered is never undefined
         });
       }
 

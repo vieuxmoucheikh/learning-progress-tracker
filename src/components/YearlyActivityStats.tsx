@@ -37,7 +37,7 @@ export const YearlyActivityStats: React.FC = () => {
   const fetchActivities = async (category: string) => {
     try {
       console.log('Fetching activities for category:', category);
-      const currentDate = new Date('2025-01-03T09:15:06+01:00');
+      const currentDate = new Date('2025-01-03T10:29:08+01:00');
       const year = currentDate.getFullYear();
       const startDate = new Date(year, 0, 1).toISOString().split('T')[0];
       const endDate = new Date(year, 11, 31).toISOString().split('T')[0];
@@ -50,38 +50,34 @@ export const YearlyActivityStats: React.FC = () => {
         count: a.count,
         raw_category: a.category
       })));
-      
-      const categoryActivities = activities.filter(a => {
-        const activityCategory = (a.category || '').toUpperCase();
-        const selectedCategory = (category || '').toUpperCase();
-        const match = activityCategory === selectedCategory;
+
+      // Filter activities for the selected category
+      const filteredActivities = activities.filter(activity => {
+        const activityCategory = (activity.category || '').toUpperCase();
+        const selectedCategoryUpper = category.toUpperCase();
+        
         console.log('Comparing categories:', {
           activity: activityCategory,
-          selected: selectedCategory,
-          matches: match,
-          raw: {
-            activity: a.category,
-            selected: category
-          }
+          selected: selectedCategoryUpper,
+          matches: activityCategory === selectedCategoryUpper,
+          raw: activity
         });
-        return match;
+        
+        return activityCategory === selectedCategoryUpper;
       });
-      
+
       console.log('Filtered activities for category:', {
         category,
-        selectedCategory: category.toUpperCase(),
-        total: categoryActivities.length,
-        activities: categoryActivities.map(a => ({ 
-          category: a.category,
-          date: a.date,
-          count: a.count,
-          raw_category: a.category
-        }))
+        selectedCategory: category,
+        total: filteredActivities.length,
+        activities: filteredActivities
       });
-      
-      setActivityData(categoryActivities);
+
+      setActivityData(filteredActivities);
     } catch (error) {
       console.error('Error fetching activities:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
