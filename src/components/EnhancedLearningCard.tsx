@@ -292,11 +292,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       "relative overflow-hidden transition-all duration-300 border-2",
       "hover:shadow-lg hover:shadow-blue-300/50 dark:hover:shadow-blue-900/30",
       "max-w-3xl mx-auto",
+      "bg-white dark:bg-gray-900",
       "sm:rounded-xl",
-      "bg-white dark:bg-gray-950",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
       mastered 
-        ? "border-emerald-400 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/50 dark:to-gray-950" 
+        ? "border-emerald-400 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/50 dark:to-gray-900" 
         : "border-blue-400 hover:border-blue-500 dark:border-blue-500 dark:hover:border-blue-400",
       isEditing && "border-blue-500 dark:border-blue-400 shadow-lg shadow-blue-300 dark:shadow-blue-900/30"
     )}>
@@ -310,11 +310,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 onChange={(e) => setTitle(e.target.value)}
                 className={cn(
                   "text-lg font-semibold",
-                  "bg-white dark:bg-gray-900",
+                  "bg-white dark:bg-gray-800",
                   "text-gray-900 dark:text-gray-100",
-                  "border-gray-200 dark:border-gray-800",
+                  "border-gray-200 dark:border-gray-700",
                   "focus-visible:ring-2 focus-visible:ring-blue-500",
-                  "placeholder:text-gray-400 dark:placeholder:text-gray-600",
+                  "placeholder:text-gray-400 dark:placeholder:text-gray-500",
                   "w-full sm:text-xl"
                 )}
                 placeholder="Enter title..."
@@ -384,9 +384,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 onChange={setContent}
                 className={cn(
                   "min-h-[150px] p-4 rounded-lg",
-                  "bg-white dark:bg-gray-900",
+                  "bg-white dark:bg-gray-800",
                   "text-gray-900 dark:text-gray-100",
-                  "border border-gray-200 dark:border-gray-800",
+                  "border border-gray-200 dark:border-gray-700",
                   "focus-within:ring-2 focus-within:ring-blue-500",
                   "prose dark:prose-invert prose-sm sm:prose-base max-w-none",
                   "prose-img:my-4 prose-img:rounded-lg prose-img:max-w-full prose-img:mx-auto",
@@ -437,21 +437,19 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             >
               <div 
                 className={cn(
-                  "prose prose-sm sm:prose-base max-w-none",
+                  "prose prose-sm sm:prose-base max-w-none dark:prose-invert",
+                  "prose-img:my-4 prose-img:rounded-lg prose-img:max-w-full prose-img:mx-auto prose-img:shadow-md",
                   "prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
                   "prose-p:text-gray-700 dark:prose-p:text-gray-300",
                   "prose-a:text-blue-600 dark:prose-a:text-blue-400",
-                  "prose-strong:text-gray-900 dark:prose-strong:text-gray-100",
-                  "prose-code:text-gray-900 dark:prose-code:text-gray-100",
-                  "prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800/50",
-                  "prose-blockquote:text-gray-700 dark:prose-blockquote:text-gray-300",
-                  "prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto",
+                  "prose-blockquote:border-l-blue-500",
+                  "prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800",
                   !isZoomed && "max-h-[300px] overflow-hidden cursor-pointer"
                 )}
                 dangerouslySetInnerHTML={{ __html: content }}
               />
               {!isZoomed && content.length > 300 && (
-                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white dark:from-gray-950 to-transparent pointer-events-none" />
+                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none" />
               )}
             </div>
           )}
@@ -497,11 +495,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   placeholder="Add tag..."
                   className={cn(
                     "h-7 text-sm w-24 sm:w-32",
-                    "bg-white dark:bg-gray-900",
+                    "bg-white dark:bg-gray-800",
                     "text-gray-900 dark:text-gray-100",
-                    "border-gray-200 dark:border-gray-800",
+                    "border-gray-200 dark:border-gray-700",
                     "focus-visible:ring-2 focus-visible:ring-blue-500",
-                    "placeholder:text-gray-400 dark:placeholder:text-gray-600",
+                    "placeholder:text-gray-400 dark:placeholder:text-gray-500",
                     "rounded-full"
                   )}
                 />
@@ -557,11 +555,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
       {/* Zoomed View Dialog */}
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto p-6 sm:p-8 bg-white dark:bg-gray-950">
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto p-6 sm:p-8 bg-white dark:bg-gray-900">
           <DialogHeader>
             <DialogTitle className={cn(
               "text-2xl font-semibold",
-              "text-gray-900 dark:text-gray-100",
               "bg-gradient-to-r from-blue-600 to-blue-400",
               "bg-clip-text text-transparent"
             )}>
@@ -570,14 +567,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           </DialogHeader>
           <div className={cn(
             "prose prose-lg max-w-none dark:prose-invert mt-6",
+            "prose-img:rounded-lg prose-img:shadow-lg prose-img:mx-auto",
             "prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
             "prose-p:text-gray-700 dark:prose-p:text-gray-300",
-            "prose-a:text-blue-600 dark:prose-a:text-blue-400",
-            "prose-strong:text-gray-900 dark:prose-strong:text-gray-100",
-            "prose-code:text-gray-900 dark:prose-code:text-gray-100",
-            "prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800/50",
-            "prose-blockquote:text-gray-700 dark:prose-blockquote:text-gray-300",
-            "prose-img:rounded-lg prose-img:shadow-lg prose-img:mx-auto"
+            "prose-a:text-blue-600 dark:prose-a:text-blue-400"
           )} 
           dangerouslySetInnerHTML={{ __html: content }} 
           />
