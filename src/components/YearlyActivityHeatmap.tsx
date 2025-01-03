@@ -190,13 +190,13 @@ export function YearlyActivityHeatmap({
       </div>
 
       {/* Heatmap grid */}
-      <div className="w-full overflow-x-auto">
-        <div className="min-w-max w-full">
+      <div className="w-full overflow-x-auto sm:overflow-x-visible">
+        <div className="min-w-[600px] sm:min-w-0 w-full">
           {/* Month labels */}
           <div className="flex mb-2">
             <div className="w-8 sm:w-10" /> {/* Offset for day labels */}
             <div className="flex-1">
-              <div className="grid grid-cols-[repeat(53,minmax(14px,1fr))] gap-[1px] sm:gap-1.5">
+              <div className="grid grid-cols-[repeat(53,minmax(10px,1fr))] sm:grid-cols-[repeat(53,minmax(14px,1fr))] gap-[1px] sm:gap-1.5">
                 {monthLabels.map((label, i) => (
                   <div
                     key={i}
@@ -220,7 +220,7 @@ export function YearlyActivityHeatmap({
               {DAYS.map((day) => (
                 <div 
                   key={day} 
-                  className="h-[14px] sm:h-4 text-[8px] sm:text-xs text-gray-500 flex items-center w-8 sm:w-10"
+                  className="h-[10px] sm:h-4 text-[8px] sm:text-xs text-gray-500 flex items-center w-8 sm:w-10"
                 >
                   {window.innerWidth <= 640 ? day[0] : day}
                 </div>
@@ -229,7 +229,7 @@ export function YearlyActivityHeatmap({
 
             {/* Calendar grid */}
             <div className="flex-1">
-              <div className="grid grid-cols-[repeat(53,minmax(14px,1fr))] gap-[1px] sm:gap-1.5">
+              <div className="grid grid-cols-[repeat(53,minmax(10px,1fr))] sm:grid-cols-[repeat(53,minmax(14px,1fr))] gap-[1px] sm:gap-1.5">
                 {weeks.map((week, weekIndex) => (
                   <div key={weekIndex} className="flex flex-col gap-[1px] sm:gap-1.5">
                     {week.map((day, dayIndex) => (
@@ -238,7 +238,7 @@ export function YearlyActivityHeatmap({
                           <TooltipTrigger asChild>
                             <div
                               className={cn(
-                                'h-[14px] sm:h-4 rounded-[1px] sm:rounded',
+                                'h-[10px] sm:h-4 rounded-[1px] sm:rounded',
                                 day.isCurrentYear
                                   ? getColorForCount(day.count)
                                   : 'bg-gray-100'
