@@ -90,6 +90,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
+  const [updatedTime, setUpdatedTime] = useState(updatedAt);
   const contentRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -112,7 +113,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   }, [isEditing]);
 
   const handleSave = async () => {
-    const result = await onSave({
+    const success = await onSave({
       id,
       title,
       content,
@@ -120,13 +121,15 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       category,
       mastered,
     });
-    if (result) {
+
+    if (success) {
+      const newTime = new Date().toISOString();
+      setUpdatedTime(newTime);
       setIsEditing(false);
       toast({
         title: "Success",
         description: "Card updated successfully",
       });
-      await trackLearningActivity(category);
     }
   };
 
@@ -175,6 +178,28 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         title: "Error",
         description: "Failed to copy content",
         variant: "destructive",
+      });
+    }
+  };
+
+  const handleMasteredToggle = async () => {
+    const newMasteredState = !mastered;
+    const success = await onSave({
+      id,
+      title,
+      content,
+      tags,
+      category,
+      mastered: newMasteredState,
+    });
+
+    if (success) {
+      setMastered(newMasteredState);
+      const newTime = new Date().toISOString();
+      setUpdatedTime(newTime);
+      toast({
+        title: "Success",
+        description: `Card marked as ${newMasteredState ? 'mastered' : 'not mastered'}`,
       });
     }
   };
@@ -235,12 +260,12 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   return (
     <Card className={cn(
       "relative overflow-hidden transition-all duration-300 border-2",
-      "hover:shadow-lg hover:shadow-blue-100/50 dark:hover:shadow-blue-900/30",
+      "hover:shadow-lg hover:shadow-blue-200/50 dark:hover:shadow-blue-900/30",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
       mastered 
-        ? "border-emerald-200 bg-gradient-to-br from-emerald-50/50 to-transparent dark:from-emerald-950/30" 
-        : "border-transparent hover:border-blue-200 dark:hover:border-blue-800",
-      isEditing && "border-blue-300 dark:border-blue-700"
+        ? "border-emerald-300 bg-gradient-to-br from-emerald-50 to-transparent dark:from-emerald-950/50" 
+        : "border-blue-200 hover:border-blue-300 dark:border-blue-700 dark:hover:border-blue-600",
+      isEditing && "border-blue-400 dark:border-blue-500 shadow-lg shadow-blue-100 dark:shadow-blue-900/20"
     )}>
       <CardHeader className="space-y-3 pb-3">
         <div className="flex items-center justify-between">
@@ -248,11 +273,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="text-lg font-semibold focus-visible:ring-blue-400"
+              className="text-lg font-semibold focus-visible:ring-blue-500 bg-white dark:bg-gray-950"
               placeholder="Enter title..."
             />
           ) : (
-            <h3 className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+            <h3 className="text-lg font-semibold bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
               {title}
             </h3>
           )}
@@ -264,51 +289,51 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               variant="ghost"
               size="icon"
               onClick={() => setShowContent(!showContent)}
-              className="h-8 w-8 hover:bg-blue-50 dark:hover:bg-blue-950/50"
+              className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-900/50"
               title={showContent ? "Hide content" : "Show content"}
             >
               {showContent ? (
-                <EyeOff className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <EyeOff className="w-4 h-4 text-blue-700 dark:text-blue-400" />
               ) : (
-                <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <Eye className="w-4 h-4 text-blue-700 dark:text-blue-400" />
               )}
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsEditing(!isEditing)}
-              className="h-8 w-8 hover:bg-blue-50 dark:hover:bg-blue-950/50"
+              className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-900/50"
               title={isEditing ? "Save changes" : "Edit card"}
             >
               {isEditing ? (
-                <Save className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <Save className="w-4 h-4 text-blue-700 dark:text-blue-400" />
               ) : (
-                <Edit className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <Edit className="w-4 h-4 text-blue-700 dark:text-blue-400" />
               )}
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsZoomed(!isZoomed)}
-              className="h-8 w-8 hover:bg-blue-50 dark:hover:bg-blue-950/50"
+              className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-900/50"
             >
               {isZoomed ? (
-                <ZoomOut className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <ZoomOut className="w-4 h-4 text-blue-700 dark:text-blue-400" />
               ) : (
-                <ZoomIn className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <ZoomIn className="w-4 h-4 text-blue-700 dark:text-blue-400" />
               )}
             </Button>
           </div>
         </div>
         
         {/* Time and Category Info */}
-        <div className="flex items-center text-sm text-muted-foreground space-x-2">
-          <Clock className="w-4 h-4" />
-          <span>Updated {getTimeAgo(updatedAt)}</span>
+        <div className="flex items-center text-sm space-x-2">
+          <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          <span className="text-blue-700 dark:text-blue-300">Updated {getTimeAgo(updatedTime)}</span>
           {category && (
             <>
               <span>•</span>
-              <span className="text-blue-600 dark:text-blue-400">{category}</span>
+              <span className="text-blue-700 dark:text-blue-300">{category}</span>
             </>
           )}
         </div>
@@ -386,23 +411,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 Cancel
               </Button>
               <Button
-                onClick={async () => {
-                  const success = await onSave({
-                    id,
-                    title,
-                    content,
-                    tags,
-                    category,
-                    mastered,
-                  });
-                  if (success) {
-                    setIsEditing(false);
-                    toast({
-                      title: "Success",
-                      description: "Card updated successfully",
-                    });
-                  }
-                }}
+                onClick={handleSave}
                 className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-700 dark:hover:bg-blue-800"
               >
                 Save Changes
@@ -436,7 +445,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-950/50" 
                 : "text-muted-foreground hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950/50"
             )}
-            onClick={() => setMastered(!mastered)}
+            onClick={handleMasteredToggle}
           >
             {mastered ? (
               <>

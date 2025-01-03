@@ -82,17 +82,21 @@ export const LearningCardsPage = () => {
       );
     }
 
-    // Apply sorting
+    // Apply sorting with proper date comparison
     return result.sort((a, b) => {
+      const dateA = new Date(sortBy === 'updated' ? a.updatedAt : a.createdAt);
+      const dateB = new Date(sortBy === 'updated' ? b.updatedAt : b.createdAt);
+      
       switch (sortBy) {
         case 'updated':
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
         case 'created':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return dateB.getTime() - dateA.getTime();
         case 'mastered':
-          return (b.mastered === a.mastered) 
-            ? new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-            : b.mastered ? -1 : 1;
+          if (a.mastered !== b.mastered) {
+            return a.mastered ? -1 : 1;
+          }
+          // If mastered status is the same, sort by updated date
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
         default:
           return 0;
       }
