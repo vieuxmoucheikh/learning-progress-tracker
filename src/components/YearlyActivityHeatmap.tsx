@@ -51,10 +51,10 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
   const calendarData = generateCalendarData();
 
   const getColorForCount = (count: number) => {
-    if (count === 0) return 'bg-gray-50 dark:bg-gray-900';
-    if (count === 1) return 'bg-emerald-200 hover:bg-emerald-300 dark:bg-emerald-800 dark:hover:bg-emerald-700';
-    if (count <= 3) return 'bg-emerald-400 hover:bg-emerald-500 dark:bg-emerald-600 dark:hover:bg-emerald-500';
-    return 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-400 dark:hover:bg-emerald-300';
+    if (count === 0) return 'bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800';
+    if (count === 1) return 'bg-emerald-200 hover:bg-emerald-300 dark:bg-emerald-800 dark:hover:bg-emerald-700 border-emerald-300 dark:border-emerald-700';
+    if (count <= 3) return 'bg-emerald-400 hover:bg-emerald-500 dark:bg-emerald-600 dark:hover:bg-emerald-500 border-emerald-500 dark:border-emerald-500';
+    return 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-400 dark:hover:bg-emerald-300 border-emerald-700 dark:border-emerald-300';
   };
 
   const weeks: DayData[][] = [];
@@ -106,82 +106,86 @@ export function YearlyActivityHeatmap({ data }: YearlyActivityHeatmapProps) {
   return (
     <div className="w-full space-y-4">
       {renderLegend()}
-      <div className="overflow-x-auto sm:overflow-x-visible -mx-6 sm:mx-0">
-        <div className="min-w-fit px-6 sm:px-0">
-          <div className="relative">
-            {/* Month labels */}
-            <div className="flex mb-1 sm:mb-2 relative">
-              <div className="w-3 sm:w-8" /> {/* Offset for day labels */}
-              <div className="flex flex-1">
-                {monthLabels.map((label, i) => (
-                  <div
-                    key={i}
-                    className="absolute text-[8px] sm:text-xs text-gray-500 origin-left"
-                    style={{ 
-                      left: `${label.index * (window.innerWidth <= 640 ? 6 : 16) + 10}px`,
-                      transform: window.innerWidth <= 640 ? 'rotate(-60deg) translateY(-8px)' : 'none'
-                    }}
-                  >
-                    {window.innerWidth <= 640 ? label.text.slice(0, 1) : label.text}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Main grid */}
-            <div className="flex">
-              {/* Day labels */}
-              <div className="flex flex-col gap-[2px] sm:gap-1 pr-1 sm:pr-2">
-                {DAYS.map((day, i) => (
-                  <div 
-                    key={day} 
-                    className="h-2 sm:h-3 text-[8px] sm:text-xs text-gray-500 flex items-center"
-                  >
-                    {i % 2 === 0 ? day.slice(0, 1) : ''}
-                  </div>
-                ))}
+      <div className="relative w-full overflow-hidden">
+        <div className="overflow-x-auto sm:overflow-x-visible -mx-4 sm:mx-0 pb-2">
+          <div className="min-w-fit px-4 sm:px-0" style={{ width: window.innerWidth <= 640 ? '200%' : '100%' }}>
+            <div className="relative">
+              {/* Month labels */}
+              <div className="flex mb-1 sm:mb-2 relative">
+                <div className="w-3 sm:w-8" /> {/* Offset for day labels */}
+                <div className="flex flex-1">
+                  {monthLabels.map((label, i) => (
+                    <div
+                      key={i}
+                      className="absolute text-[8px] sm:text-xs text-gray-500 origin-left"
+                      style={{ 
+                        left: `${label.index * (window.innerWidth <= 640 ? 4 : 16) + 8}px`,
+                        transform: window.innerWidth <= 640 ? 'rotate(-60deg) translateY(-8px)' : 'none'
+                      }}
+                    >
+                      {window.innerWidth <= 640 ? label.text.slice(0, 1) : label.text}
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Calendar grid */}
-              <div className="flex gap-[2px] sm:gap-1">
-                {weeks.map((week, weekIndex) => (
-                  <div key={weekIndex} className="flex flex-col gap-[2px] sm:gap-1">
-                    {week.map((day) => {
-                      const colorClass = getColorForCount(day.count);
-                      const dateObj = new Date(day.date);
-                      const formattedDate = format(dateObj, 'MMMM d, yyyy');
-                      
-                      return (
-                        <TooltipProvider key={day.date}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div
-                                className={cn(
-                                  'w-[5px] h-2 sm:w-3 sm:h-3 rounded-[1px] sm:rounded-sm transition-colors duration-200',
-                                  colorClass,
-                                  'border border-gray-100 dark:border-gray-800',
-                                  day.count > 0 ? 'cursor-pointer transform hover:scale-125' : ''
-                                )}
-                              />
-                            </TooltipTrigger>
-                            <TooltipContent side="top" className="text-[10px] sm:text-sm">
-                              <p className="font-medium">{formattedDate}</p>
-                              <p>
-                                {day.count === 0
-                                  ? 'No activities'
-                                  : `${day.count} ${day.count === 1 ? 'activity' : 'activities'}`}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      );
-                    })}
-                  </div>
-                ))}
+              {/* Main grid */}
+              <div className="flex">
+                {/* Day labels */}
+                <div className="flex flex-col gap-[2px] sm:gap-1 pr-1 sm:pr-2">
+                  {DAYS.map((day, i) => (
+                    <div 
+                      key={day} 
+                      className="h-[6px] sm:h-3 text-[8px] sm:text-xs text-gray-500 flex items-center"
+                    >
+                      {i % 2 === 0 ? day.slice(0, 1) : ''}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Calendar grid */}
+                <div className="flex gap-[2px] sm:gap-1">
+                  {weeks.map((week, weekIndex) => (
+                    <div key={weekIndex} className="flex flex-col gap-[2px] sm:gap-1">
+                      {week.map((day) => {
+                        const colorClass = getColorForCount(day.count);
+                        const dateObj = new Date(day.date);
+                        const formattedDate = format(dateObj, 'MMMM d, yyyy');
+                        
+                        return (
+                          <TooltipProvider key={day.date}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div
+                                  className={cn(
+                                    'w-[4px] h-[6px] sm:w-3 sm:h-3 rounded-[1px] sm:rounded-sm transition-colors duration-200',
+                                    'border border-inherit',
+                                    colorClass,
+                                    day.count > 0 ? 'cursor-pointer transform hover:scale-125' : ''
+                                  )}
+                                />
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="text-[10px] sm:text-sm">
+                                <p className="font-medium">{formattedDate}</p>
+                                <p>
+                                  {day.count === 0
+                                    ? 'No activities'
+                                    : `${day.count} ${day.count === 1 ? 'activity' : 'activities'}`}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
+        <div className="absolute bottom-0 left-0 w-full h-6 pointer-events-none bg-gradient-to-l from-background to-transparent sm:hidden" />
+        <div className="absolute bottom-0 right-0 w-full h-6 pointer-events-none bg-gradient-to-r from-background to-transparent sm:hidden" />
       </div>
     </div>
   );
