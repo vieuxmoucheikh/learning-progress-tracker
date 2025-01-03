@@ -38,7 +38,7 @@ export const YearlyActivityStats: React.FC = () => {
   const fetchActivities = async (category: string) => {
     try {
       console.log('Fetching activities for category:', category);
-      const currentDate = new Date('2025-01-03T10:29:08+01:00');
+      const currentDate = new Date('2025-01-03T21:09:29+01:00');
       const year = currentDate.getFullYear();
       const startDate = new Date(year, 0, 1).toISOString().split('T')[0];
       const endDate = new Date(year, 11, 31).toISOString().split('T')[0];
@@ -149,10 +149,17 @@ export const YearlyActivityStats: React.FC = () => {
     
     activityData.forEach(activity => {
       if (activity.date && activity.count) {
-        // Ensure date is in YYYY-MM-DD format
-        const formattedDate = activity.date.split('T')[0];
+        // Convert to local date to handle timezone correctly
+        const date = new Date(activity.date);
+        const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+        const formattedDate = localDate.toISOString().split('T')[0];
+        
         data[formattedDate] = (data[formattedDate] || 0) + activity.count;
-        console.log('Added activity:', { date: formattedDate, count: activity.count });
+        console.log('Added activity:', { 
+          originalDate: activity.date,
+          localDate: formattedDate,
+          count: activity.count 
+        });
       }
     });
     

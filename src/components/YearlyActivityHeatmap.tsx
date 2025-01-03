@@ -76,12 +76,18 @@ export function YearlyActivityHeatmap({
 
     // Fill in the activity data
     Object.entries(activityData).forEach(([dateStr, count]) => {
-      // Ensure the date is in the correct year
-      const activityDate = parseISO(dateStr);
-      if (getYear(activityDate) === selectedYear) {
-        const dateKey = format(activityDate, 'yyyy-MM-dd');
+      // Handle timezone offset for consistent date display
+      const date = new Date(dateStr);
+      const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      const dateKey = format(localDate, 'yyyy-MM-dd');
+      
+      if (getYear(localDate) === selectedYear) {
         activityMap[dateKey] = count;
-        console.log('Added activity to heatmap:', { date: dateKey, count });
+        console.log('Added activity to heatmap:', { 
+          originalDate: dateStr,
+          localDate: dateKey,
+          count 
+        });
       }
     });
 
@@ -117,7 +123,8 @@ export function YearlyActivityHeatmap({
         console.log('Processing day:', { 
           date: dateStr, 
           count,
-          isCurrentYear: getYear(date) === selectedYear 
+          isCurrentYear: getYear(date) === selectedYear,
+          hasActivity: count > 0
         });
         
         return {
