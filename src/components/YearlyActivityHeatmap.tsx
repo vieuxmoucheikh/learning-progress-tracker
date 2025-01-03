@@ -22,6 +22,8 @@ interface DayData {
   isOutsideMonth?: boolean;
 }
 
+type WeekData = (DayData | null)[];
+
 interface MonthLabel {
   text: string;
   index: number;
@@ -42,7 +44,7 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export function YearlyActivityHeatmap({ 
   data, 
-  year = new Date('2025-01-03T13:58:08+01:00').getFullYear(),
+  year = new Date().getFullYear(),
   onYearChange 
 }: YearlyActivityHeatmapProps) {
   const [selectedYear, setSelectedYear] = React.useState(year);
@@ -70,7 +72,7 @@ export function YearlyActivityHeatmap({
       const activityDate = new Date(activity.date);
       if (activityDate.getFullYear() === selectedYear) {
         const dateKey = format(activityDate, 'yyyy-MM-dd');
-        activityMap[dateKey] = activity.count;
+        activityMap[dateKey] = (activityMap[dateKey] || 0) + 1;
       }
     });
 
@@ -78,58 +80,48 @@ export function YearlyActivityHeatmap({
   };
 
   const calendarData = generateCalendarData();
-  const weeks: DayData[][] = [];
+  const weeks: WeekData[] = [];
   
-  // Find the first day of the year and adjust for Monday start
+  // Find the first day of the year
   const firstDayOfYear = new Date(selectedYear, 0, 1);
   const lastDayOfYear = new Date(selectedYear, 11, 31);
   
-  // Create weeks array starting with empty days if needed
+  // Create weeks array
   let currentDate = firstDayOfYear;
-  let currentWeek: DayData[] = Array(7).fill(null);
+  let currentWeek: WeekData = Array(7).fill(null);
   
-  // Calculate the day offset (0 = Monday, 6 = Sunday)
-  const firstDayOffset = (getDay(firstDayOfYear) + 6) % 7;
+  // Get the day of week for January 1st (3 for Wednesday in 2025)
+  const startDayOfWeek = getDay(firstDayOfYear);
   
-  // Fill in empty days before the first day of the year
-  for (let i = 0; i < firstDayOffset; i++) {
-    currentWeek[i] = {
-      date: format(subDays(firstDayOfYear, firstDayOffset - i), 'yyyy-MM-dd'),
-      count: 0,
-      isOutsideMonth: true
-    };
+  // Fill in the first week starting from Wednesday (January 1st, 2025)
+  for (let i = 0; i < 7; i++) {
+    if (i >= startDayOfWeek) {
+      // This is a valid day in January 2025
+      currentWeek[i] = {
+        date: format(addDays(firstDayOfYear, i - startDayOfWeek), 'yyyy-MM-dd'),
+        count: calendarData[format(addDays(firstDayOfYear, i - startDayOfWeek), 'yyyy-MM-dd')] || 0,
+        isOutsideMonth: false
+      };
+    } else {
+      // This is a null space before Wednesday
+      currentWeek[i] = null;
+    }
   }
+  weeks.push([...currentWeek]);
+  currentDate = addDays(firstDayOfYear, 7 - startDayOfWeek);
   
-  // Fill in the calendar
+  // Fill in the rest of the calendar
   while (currentDate <= lastDayOfYear) {
-    const weekDay = (getDay(currentDate) + 6) % 7; // Convert to Monday-based index
-    
-    // Start a new week if it's Monday and we have data in the current week
-    if (weekDay === 0 && currentWeek.some(day => day !== null)) {
-      weeks.push([...currentWeek]);
-      currentWeek = Array(7).fill(null);
+    currentWeek = Array(7).fill(null);
+    for (let i = 0; i < 7 && currentDate <= lastDayOfYear; i++) {
+      currentWeek[i] = {
+        date: format(currentDate, 'yyyy-MM-dd'),
+        count: calendarData[format(currentDate, 'yyyy-MM-dd')] || 0,
+        isOutsideMonth: false
+      };
+      currentDate = addDays(currentDate, 1);
     }
-    
-    currentWeek[weekDay] = {
-      date: format(currentDate, 'yyyy-MM-dd'),
-      count: calendarData[format(currentDate, 'yyyy-MM-dd')] || 0,
-      isOutsideMonth: false
-    };
-    
-    // Push the last week if we're at the end of the year
-    if (isSameDay(currentDate, lastDayOfYear)) {
-      // Fill remaining days in the last week
-      for (let i = weekDay + 1; i < 7; i++) {
-        currentWeek[i] = {
-          date: format(addDays(currentDate, i - weekDay), 'yyyy-MM-dd'),
-          count: 0,
-          isOutsideMonth: true
-        };
-      }
-      weeks.push([...currentWeek]);
-    }
-    
-    currentDate = addDays(currentDate, 1);
+    weeks.push([...currentWeek]);
   }
 
   const getMonthLabels = () => {
