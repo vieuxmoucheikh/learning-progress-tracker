@@ -44,7 +44,7 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function YearlyActivityHeatmap({ 
   data, 
-  year = new Date('2025-01-03T14:37:16+01:00').getFullYear(),
+  year = new Date('2025-01-03T14:43:48+01:00').getFullYear(),
   onYearChange 
 }: YearlyActivityHeatmapProps) {
   const [selectedYear, setSelectedYear] = React.useState(year);
@@ -69,6 +69,7 @@ export function YearlyActivityHeatmap({
 
     // Fill in the activity data
     data.forEach(activity => {
+      // Ensure we're using the correct timezone
       const activityDate = new Date(activity.date);
       const dateKey = format(activityDate, 'yyyy-MM-dd');
       if (activityDate.getFullYear() === selectedYear) {
@@ -91,27 +92,28 @@ export function YearlyActivityHeatmap({
   let currentWeek: WeekData = Array(7).fill(null);
   
   // Get the day of week for January 1st (3 for Wednesday in 2025)
-  const startDayOfWeek = getDay(firstDayOfYear); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  const startDayOfWeek = getDay(firstDayOfYear);
   
-  // Fill in the first week starting from Wednesday (January 1st, 2025)
+  // Fill in the first week
   for (let i = 0; i < 7; i++) {
     if (i === startDayOfWeek) {
-      // This is January 1st (Wednesday)
+      // This is January 1st
       currentWeek[i] = {
         date: format(firstDayOfYear, 'yyyy-MM-dd'),
         count: calendarData[format(firstDayOfYear, 'yyyy-MM-dd')] || 0,
         isOutsideMonth: false
       };
     } else if (i > startDayOfWeek) {
-      // These are the days after January 1st
+      // Days after January 1st
       const dayOffset = i - startDayOfWeek;
+      const date = addDays(firstDayOfYear, dayOffset);
       currentWeek[i] = {
-        date: format(addDays(firstDayOfYear, dayOffset), 'yyyy-MM-dd'),
-        count: calendarData[format(addDays(firstDayOfYear, dayOffset), 'yyyy-MM-dd')] || 0,
+        date: format(date, 'yyyy-MM-dd'),
+        count: calendarData[format(date, 'yyyy-MM-dd')] || 0,
         isOutsideMonth: false
       };
     } else {
-      // These are the days before January 1st (should be null)
+      // Days before January 1st
       currentWeek[i] = null;
     }
   }
@@ -123,7 +125,6 @@ export function YearlyActivityHeatmap({
   // Fill in the rest of the calendar
   while (currentDate <= lastDayOfYear) {
     currentWeek = Array(7).fill(null);
-    const weekStartDay = getDay(currentDate);
     
     for (let i = 0; i < 7; i++) {
       if (currentDate <= lastDayOfYear) {
@@ -132,12 +133,17 @@ export function YearlyActivityHeatmap({
           count: calendarData[format(currentDate, 'yyyy-MM-dd')] || 0,
           isOutsideMonth: false
         };
-        currentDate = addDays(currentDate, 1);
       }
+      currentDate = addDays(currentDate, 1);
     }
     
     weeks.push([...currentWeek]);
   }
+
+  // Add stats at the top
+  const totalActivities = Object.values(calendarData).reduce((sum, count) => sum + count, 0);
+  const activeDays = Object.values(calendarData).filter(count => count > 0).length;
+  const averagePerDay = activeDays > 0 ? totalActivities / activeDays : 0;
 
   const getMonthLabels = () => {
     const labels: MonthLabel[] = [];
@@ -188,6 +194,21 @@ export function YearlyActivityHeatmap({
 
   return (
     <div className="w-full max-w-full space-y-4 overflow-hidden">
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="bg-blue-50 p-4 rounded-lg">
+          <div className="text-blue-600 text-sm mb-1">Total Activities</div>
+          <div className="text-2xl font-semibold">{totalActivities}</div>
+        </div>
+        <div className="bg-purple-50 p-4 rounded-lg">
+          <div className="text-purple-600 text-sm mb-1">Active Days</div>
+          <div className="text-2xl font-semibold">{activeDays}</div>
+        </div>
+        <div className="bg-green-50 p-4 rounded-lg">
+          <div className="text-green-600 text-sm mb-1">Average Per Day</div>
+          <div className="text-2xl font-semibold">{averagePerDay.toFixed(1)}</div>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between mb-4">
         {renderLegend()}
         <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-md px-2 py-1 shadow-sm">
@@ -237,12 +258,12 @@ export function YearlyActivityHeatmap({
               <div className="flex w-full">
                 {/* Day labels */}
                 <div className="flex flex-col gap-[1px] sm:gap-1.5 pr-1 sm:pr-3">
-                  {DAYS.map((day, i) => (
+                  {DAYS.map((day) => (
                     <div 
                       key={day} 
                       className="h-[4px] sm:h-4 text-[8px] sm:text-xs text-gray-500 flex items-center"
                     >
-                      {window.innerWidth <= 640 ? day[0] : day}
+                      {day}
                     </div>
                   ))}
                 </div>
@@ -252,7 +273,17 @@ export function YearlyActivityHeatmap({
                   {weeks.map((week, weekIndex) => (
                     <div key={weekIndex} className="flex flex-col gap-[1px] sm:gap-1.5">
                       {week.map((day, dayIndex) => {
-                        if (!day) return <div key={dayIndex} className="aspect-square w-full" />;
+                        if (!day) {
+                          return (
+                            <div 
+                              key={dayIndex} 
+                              className="aspect-square w-full"
+                              style={{
+                                minHeight: window.innerWidth <= 640 ? '4px' : '17px'
+                              }}
+                            />
+                          );
+                        }
                         
                         const colorClass = getColorForCount(day.count);
                         const dateObj = new Date(day.date);
