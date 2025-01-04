@@ -526,29 +526,34 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {tags.map((tag, index) => (
+            {tags.map((tag) => (
               <Badge
-                key={`${tag}-${index}`}
-                variant={isEditing ? "secondary" : "default"}
+                key={tag}
+                variant="secondary"
                 className={cn(
-                  "text-sm px-2.5 py-0.5 rounded-full transition-all duration-200",
-                  isEditing 
-                    ? "cursor-pointer hover:bg-red-100 hover:text-red-700"
-                    : "bg-blue-100 text-blue-900 hover:bg-blue-200"
+                  "px-2 py-0.5",
+                  "bg-gray-50 hover:bg-gray-100",
+                  "text-gray-700",
+                  "border border-gray-200",
+                  "rounded-full"
                 )}
-                onClick={() => isEditing && handleRemoveTag(tag)}
               >
                 {tag}
                 {isEditing && (
-                  <X className="w-3 h-3 ml-1.5 inline-block" />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-4 w-4 ml-1 hover:bg-gray-200 rounded-full"
+                    onClick={() => handleRemoveTag(tag)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
                 )}
               </Badge>
             ))}
             {isEditing && (
-              <form 
-                onSubmit={handleAddTag}
-                className="inline-flex"
-              >
+              <form onSubmit={handleAddTag} className="flex items-center">
                 <Input
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
@@ -559,7 +564,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     "text-gray-900",
                     "border-gray-200",
                     "focus-visible:ring-2 focus-visible:ring-blue-500",
-                    "placeholder:text-gray-400",
+                    "placeholder:text-gray-500",
                     "rounded-full"
                   )}
                 />

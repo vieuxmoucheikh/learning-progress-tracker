@@ -59,7 +59,7 @@ export function ItemsTab({
       <div className="bg-gray-50 p-4 rounded-xl shadow-sm border border-gray-200">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div className="flex-1 w-full sm:w-auto relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
             <Input
               placeholder="Search items..."
               value={searchQuery}
@@ -70,7 +70,7 @@ export function ItemsTab({
                 "text-gray-900",
                 "border-gray-200",
                 "focus-visible:ring-2 focus-visible:ring-blue-500",
-                "placeholder:text-gray-400"
+                "placeholder:text-gray-500"
               )}
             />
           </div>
@@ -78,7 +78,11 @@ export function ItemsTab({
             <CustomSelect
               value={selectedStatus}
               onValueChange={setSelectedStatus}
-              className="w-full sm:w-[180px]"
+              className={cn(
+                "w-full sm:w-[180px]",
+                "bg-gray-50",
+                "text-gray-900"
+              )}
               items={[
                 { value: 'all', label: 'All Items' },
                 { value: 'not_started', label: 'Not Started' },
@@ -91,7 +95,11 @@ export function ItemsTab({
             <CustomSelect
               value={selectedCategory}
               onValueChange={setSelectedCategory}
-              className="w-full sm:w-[180px]"
+              className={cn(
+                "w-full sm:w-[180px]",
+                "bg-gray-50",
+                "text-gray-900"
+              )}
               items={[
                 { value: 'all', label: 'All Categories' },
                 ...Array.from(new Set(items.map(item => item.category?.toLowerCase() || '').filter(Boolean)))

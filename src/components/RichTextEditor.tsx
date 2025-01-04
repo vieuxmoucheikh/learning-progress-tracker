@@ -2,14 +2,15 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
+import Code from '@tiptap/extension-code';
 import { common, createLowlight } from 'lowlight';
 import React, { useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import {
   Bold,
   Italic,
-  Code,
+  Code as CodeIcon,
   List,
   ListOrdered,
   Quote,
@@ -29,7 +30,7 @@ interface RichTextEditorProps {
   className?: string;
 }
 
-const lowlight = createLowlight(common);
+const lowlightInstance = createLowlight(common);
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   content,
@@ -59,16 +60,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             class: 'border-l-4 border-blue-500 pl-4 italic my-4',
           },
         },
-        code: {
-          HTMLAttributes: {
-            class: 'bg-gray-100 dark:bg-gray-800 rounded px-1.5 py-1 font-mono text-sm',
-          },
-        },
-        codeBlock: {
-          HTMLAttributes: {
-            class: 'bg-gray-100 dark:bg-gray-800 rounded-lg p-4 font-mono text-sm my-4',
-          },
-        },
         heading: {
           levels: [1, 2, 3],
           HTMLAttributes: {
@@ -94,6 +85,32 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           target: '_blank',
         },
       }),
+      CodeBlockLowlight.configure({
+        lowlight: lowlightInstance,
+        HTMLAttributes: {
+          class: cn(
+            "rounded-md",
+            "bg-gray-50",
+            "p-4",
+            "text-gray-900",
+            "border border-gray-200",
+            "font-mono text-sm",
+            "leading-relaxed"
+          ),
+        },
+      }),
+      Code.configure({
+        HTMLAttributes: {
+          class: cn(
+            "rounded-sm",
+            "bg-gray-50",
+            "px-1.5 py-0.5",
+            "text-gray-900",
+            "font-mono text-sm",
+            "border border-gray-200"
+          ),
+        },
+      }),
     ],
     content,
     editable,
@@ -103,7 +120,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose-base dark:prose-invert focus:outline-none max-w-none',
+        class: cn(
+          "prose prose-sm sm:prose-base dark:prose-invert focus:outline-none max-w-full",
+          "prose-pre:bg-gray-50 prose-pre:text-gray-900",
+          "prose-code:bg-gray-50 prose-code:text-gray-900",
+          "min-h-[150px] px-4 py-3",
+          className
+        ),
       },
       handleDrop: (view, event, slice, moved) => {
         if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
@@ -219,7 +242,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             )}
             title="Code"
           >
-            <Code className="h-4 w-4" />
+            <CodeIcon className="h-4 w-4" />
           </Button>
         </div>
 
