@@ -4,6 +4,7 @@ import LearningItemCard from "./LearningItemCard";
 import { Input } from "./ui/input";
 import { CustomSelect } from "./ui/select";
 import { Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ItemsTabProps {
   items: LearningItem[];
@@ -55,7 +56,7 @@ export function ItemsTab({
   return (
     <div className="space-y-6">
       {/* Controls Section */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+      <div className="bg-gray-50 p-4 rounded-xl shadow-sm border border-gray-200">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div className="flex-1 w-full sm:w-auto relative">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
@@ -63,7 +64,14 @@ export function ItemsTab({
               placeholder="Search items..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 max-w-md"
+              className={cn(
+                "pl-9 max-w-md",
+                "bg-gray-50",
+                "text-gray-900",
+                "border-gray-200",
+                "focus-visible:ring-2 focus-visible:ring-blue-500",
+                "placeholder:text-gray-400"
+              )}
             />
           </div>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">

@@ -141,20 +141,24 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   };
 
   const handleUpdateCategory = async (category: string) => {
+    setItemCategory(category);
     try {
-      const success = await onSave({ ...{ id, title, content, media, tags, mastered }, category });
-      if (success) {
-        await trackLearningActivity(category);
-        toast({
-          title: "Success",
-          description: "Card updated successfully",
-        });
-      }
+      await onSave({
+        category,
+        title,
+        content,
+        tags,
+        mastered,
+      });
+      toast({
+        title: "Success",
+        description: "Category updated successfully",
+      });
     } catch (error) {
-      console.error('Error updating card:', error);
+      console.error('Error updating category:', error);
       toast({
         title: "Error",
-        description: "Failed to update card",
+        description: "Failed to update category",
         variant: "destructive",
       });
     }
@@ -298,70 +302,122 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     )}>
       <CardHeader className="space-y-4 pb-4 px-4 sm:px-6">
         {/* Title Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            {isEditing ? (
-              <Input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className={cn(
-                  "text-lg font-semibold",
-                  "bg-gray-50",
-                  "text-gray-900",
-                  "border-gray-200",
-                  "focus-visible:ring-2 focus-visible:ring-blue-500",
-                  "placeholder:text-gray-400",
-                  "w-full sm:text-xl"
-                )}
-                placeholder="Enter title..."
-              />
-            ) : (
-              <h3 
-                className={cn(
-                  "text-xl sm:text-2xl font-semibold line-clamp-2",
-                  "bg-gradient-to-r from-blue-900 via-blue-700 to-blue-800",
-                  "bg-clip-text text-transparent",
-                  "hover:from-blue-800 hover:via-blue-600 hover:to-blue-700",
-                  "cursor-pointer"
-                )}
-                onClick={() => setShowContent(!showContent)}
-              >
-                {title}
-              </h3>
-            )}
-          </div>
-          
-          <div className="flex items-center gap-2 sm:gap-3">
-            {mastered && (
-              <Trophy className="w-5 h-5 text-yellow-500 animate-pulse" />
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowContent(!showContent)}
-              className="h-9 w-9 hover:bg-blue-100 rounded-lg"
-              title={showContent ? "Hide content" : "Show content"}
-            >
-              {showContent ? (
-                <EyeOff className="w-5 h-5 text-blue-900" />
-              ) : (
-                <Eye className="w-5 h-5 text-blue-900" />
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsEditing(!isEditing)}
-              className="h-9 w-9 hover:bg-blue-100 rounded-lg"
-              title={isEditing ? "Save changes" : "Edit card"}
-            >
+        <div className="space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex-1 min-w-0">
               {isEditing ? (
-                <Save className="w-5 h-5 text-blue-900" />
+                <Input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className={cn(
+                    "text-lg font-semibold",
+                    "bg-gray-50",
+                    "text-gray-900",
+                    "border-gray-200",
+                    "focus-visible:ring-2 focus-visible:ring-blue-500",
+                    "placeholder:text-gray-400",
+                    "w-full sm:text-xl"
+                  )}
+                  placeholder="Enter title..."
+                />
               ) : (
-                <Edit className="w-5 h-5 text-blue-900" />
+                <h3 
+                  className={cn(
+                    "text-xl sm:text-2xl font-semibold line-clamp-2",
+                    "bg-gradient-to-r from-blue-900 via-blue-700 to-blue-800",
+                    "bg-clip-text text-transparent",
+                    "hover:from-blue-800 hover:via-blue-600 hover:to-blue-700",
+                    "cursor-pointer"
+                  )}
+                  onClick={() => setShowContent(!showContent)}
+                >
+                  {title}
+                </h3>
               )}
-            </Button>
+            </div>
+            
+            <div className="flex items-center gap-2 sm:gap-3">
+              {mastered && (
+                <Trophy className="w-5 h-5 text-yellow-500 animate-pulse" />
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowContent(!showContent)}
+                className="h-9 w-9 hover:bg-blue-100 rounded-lg"
+                title={showContent ? "Hide content" : "Show content"}
+              >
+                {showContent ? (
+                  <EyeOff className="w-5 h-5 text-blue-900" />
+                ) : (
+                  <Eye className="w-5 h-5 text-blue-900" />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsEditing(!isEditing)}
+                className="h-9 w-9 hover:bg-blue-100 rounded-lg"
+                title={isEditing ? "Save changes" : "Edit card"}
+              >
+                {isEditing ? (
+                  <Save className="w-5 h-5 text-blue-900" />
+                ) : (
+                  <Edit className="w-5 h-5 text-blue-900" />
+                )}
+              </Button>
+            </div>
           </div>
+
+          {/* Category Section */}
+          {isEditing ? (
+            <div className="flex items-center gap-2">
+              <Select
+                value={itemCategory}
+                onValueChange={handleUpdateCategory}
+              >
+                <SelectTrigger className={cn(
+                  "w-full max-w-xs",
+                  "bg-gray-50",
+                  "border-gray-200",
+                  "text-gray-900",
+                  "focus:ring-2 focus:ring-blue-500",
+                  "h-9"
+                )}>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <div className="px-2 py-1.5 text-sm font-medium text-gray-500">
+                      Categories
+                    </div>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                    {itemCategory && !categories.includes(itemCategory) && (
+                      <SelectItem value={itemCategory}>
+                        {itemCategory} (New)
+                      </SelectItem>
+                    )}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          ) : itemCategory ? (
+            <Badge 
+              variant="secondary" 
+              className={cn(
+                "font-medium px-2 py-0.5",
+                "bg-blue-50 text-blue-700 hover:bg-blue-100",
+                "border border-blue-200",
+                "rounded-full"
+              )}
+            >
+              {itemCategory}
+            </Badge>
+          ) : null}
         </div>
 
         {/* Content Section */}
@@ -374,68 +430,35 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           {isEditing ? (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">Category</Label>
-                <Select
-                  value={itemCategory}
-                  onValueChange={handleUpdateCategory}
-                >
-                  <SelectTrigger className={cn(
-                    "w-full",
+                <RichTextEditor
+                  content={content}
+                  onChange={setContent}
+                  className={cn(
+                    "min-h-[200px] rounded-lg",
                     "bg-gray-50",
-                    "border-gray-200",
                     "text-gray-900",
-                    "focus:ring-2 focus:ring-blue-500",
-                    "h-9"
-                  )}>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <div className="px-2 py-1.5 text-sm font-medium text-gray-500">
-                        Categories
-                      </div>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat} value={cat}>
-                          {cat}
-                        </SelectItem>
-                      ))}
-                      {itemCategory && !categories.includes(itemCategory) && (
-                        <SelectItem value={itemCategory}>
-                          {itemCategory} (New)
-                        </SelectItem>
-                      )}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                    "border border-gray-200",
+                    "focus-within:ring-2 focus-within:ring-blue-500",
+                    "prose prose-sm sm:prose-base max-w-none",
+                    "prose-headings:font-semibold prose-headings:text-gray-900",
+                    "prose-p:text-gray-700 prose-p:leading-relaxed",
+                    "prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline",
+                    "prose-strong:font-semibold prose-strong:text-gray-900",
+                    "prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:rounded",
+                    "prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200",
+                    "prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto",
+                    "prose-ul:list-disc prose-ol:list-decimal",
+                    "prose-li:marker:text-gray-400",
+                    "[&_.tiptap]:min-h-[150px] [&_.tiptap]:p-4",
+                    "[&_.tiptap.ProseMirror-focused]:outline-none",
+                    "[&_.tiptap]:prose-sm [&_.tiptap]:sm:prose-base",
+                    "[&_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_p.is-editor-empty:first-child]:before:text-gray-400",
+                    "[&_.tiptap_p]:my-3 [&_.tiptap_h1]:my-4 [&_.tiptap_h2]:my-4 [&_.tiptap_h3]:my-3",
+                    "[&_.tiptap_ul]:my-3 [&_.tiptap_ol]:my-3 [&_.tiptap_blockquote]:my-3",
+                    "[&_.tiptap_pre]:my-3 [&_.tiptap_hr]:my-4"
+                  )}
+                />
               </div>
-              <RichTextEditor
-                content={content}
-                onChange={setContent}
-                className={cn(
-                  "min-h-[200px] rounded-lg",
-                  "bg-gray-50",
-                  "text-gray-900",
-                  "border border-gray-200",
-                  "focus-within:ring-2 focus-within:ring-blue-500",
-                  "prose prose-sm sm:prose-base max-w-none",
-                  "prose-headings:font-semibold prose-headings:text-gray-900",
-                  "prose-p:text-gray-700 prose-p:leading-relaxed",
-                  "prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline",
-                  "prose-strong:font-semibold prose-strong:text-gray-900",
-                  "prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:rounded",
-                  "prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200",
-                  "prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto",
-                  "prose-ul:list-disc prose-ol:list-decimal",
-                  "prose-li:marker:text-gray-400",
-                  "[&_.tiptap]:min-h-[150px] [&_.tiptap]:p-4",
-                  "[&_.tiptap.ProseMirror-focused]:outline-none",
-                  "[&_.tiptap]:prose-sm [&_.tiptap]:sm:prose-base",
-                  "[&_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_p.is-editor-empty:first-child]:before:text-gray-400",
-                  "[&_.tiptap_p]:my-3 [&_.tiptap_h1]:my-4 [&_.tiptap_h2]:my-4 [&_.tiptap_h3]:my-3",
-                  "[&_.tiptap_ul]:my-3 [&_.tiptap_ol]:my-3 [&_.tiptap_blockquote]:my-3",
-                  "[&_.tiptap_pre]:my-3 [&_.tiptap_hr]:my-4"
-                )}
-              />
               <div className="flex justify-end gap-2">
                 <Button
                   variant="outline"
@@ -500,22 +523,6 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           <div className="flex items-center gap-2 text-gray-600">
             <Clock className="w-4 h-4" />
             <span>Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</span>
-            {itemCategory && (
-              <>
-                <span>•</span>
-                <Badge 
-                  variant="secondary" 
-                  className={cn(
-                    "font-medium px-2 py-0.5",
-                    "bg-blue-50 text-blue-700 hover:bg-blue-100",
-                    "border border-blue-200",
-                    "rounded-full"
-                  )}
-                >
-                  {itemCategory}
-                </Badge>
-              </>
-            )}
           </div>
 
           <div className="flex flex-wrap gap-2">
