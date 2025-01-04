@@ -11,18 +11,11 @@ import {
 import { EnhancedLearningCard } from '@/components/EnhancedLearningCard';
 import { learningCardsService } from '@/lib/learningCards';
 import type { EnhancedLearningCard as CardType } from '@/types';
-import { Plus, Search, Tag as TagIcon, Loader2, Clock, Filter } from 'lucide-react';
+import { Plus, Search, Tag as TagIcon, Loader2, Clock, Filter, X } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { getLearningItems } from '@/lib/database';
-
-interface CardMedia {
-  id: string;
-  url: string;
-  type: 'link' | 'image';
-  createdAt?: string;
-}
 
 export const LearningCardsPage = () => {
   const [cards, setCards] = useState<CardType[]>([]);
@@ -159,21 +152,23 @@ export const LearningCardsPage = () => {
     });
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold mb-2">Learning Cards</h1>
-          <p className="text-gray-400">Track and manage your learning progress</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">Learning Cards</h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">Organize and manage your learning notes</p>
+          </div>
+          <Button 
+            onClick={handleCreateCard} 
+            className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 transition-all duration-200"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            New Card
+          </Button>
         </div>
 
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <Button onClick={handleCreateCard} className="shrink-0">
-              <Plus className="w-4 h-4 mr-2" />
-              New Card
-            </Button>
-          </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -182,13 +177,13 @@ export const LearningCardsPage = () => {
                 placeholder="Search cards..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
+                className="pl-9 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus-visible:ring-2 focus-visible:ring-blue-500"
               />
             </div>
 
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger>
-                <Filter className="w-4 h-4 mr-2" />
+              <SelectTrigger className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+                <Filter className="w-4 h-4 mr-2 text-gray-400" />
                 <SelectValue placeholder="Filter by category" />
               </SelectTrigger>
               <SelectContent>
@@ -202,8 +197,8 @@ export const LearningCardsPage = () => {
             </Select>
 
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'updated' | 'created' | 'mastered')}>
-              <SelectTrigger>
-                <Clock className="w-4 h-4 mr-2" />
+              <SelectTrigger className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+                <Clock className="w-4 h-4 mr-2 text-gray-400" />
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
@@ -215,13 +210,17 @@ export const LearningCardsPage = () => {
           </div>
 
           {allTags.length > 0 && (
-            <div className="flex flex-wrap gap-2 items-center">
+            <div className="flex flex-wrap gap-2 items-center p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
               <TagIcon className="w-4 h-4 text-gray-400" />
               {allTags.map((tag) => (
                 <Badge
                   key={tag}
                   variant={selectedTags.includes(tag) ? "default" : "outline"}
-                  className="cursor-pointer"
+                  className={`cursor-pointer transition-all duration-200 ${
+                    selectedTags.includes(tag) 
+                      ? "bg-blue-100 text-blue-900 hover:bg-blue-200 dark:bg-blue-900/50 dark:text-blue-100" 
+                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
                   onClick={() => {
                     setSelectedTags((prev) =>
                       prev.includes(tag)
@@ -231,18 +230,34 @@ export const LearningCardsPage = () => {
                   }}
                 >
                   {tag}
+                  {selectedTags.includes(tag) && (
+                    <X className="w-3 h-3 ml-1 inline-block" />
+                  )}
                 </Badge>
               ))}
+              {selectedTags.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedTags([])}
+                  className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                  Clear all
+                </Button>
+              )}
             </div>
           )}
 
           {loading ? (
-            <div className="flex justify-center items-center min-h-[200px]">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+            <div className="flex justify-center items-center min-h-[400px]">
+              <div className="flex flex-col items-center gap-4">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                <p className="text-gray-500 dark:text-gray-400">Loading your cards...</p>
+              </div>
             </div>
           ) : (
             <AnimatePresence mode="popLayout">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredCards.map((card) => (
                   <motion.div
                     key={card.id}
@@ -264,8 +279,20 @@ export const LearningCardsPage = () => {
           )}
 
           {!loading && filteredCards.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No cards found. Create one to get started!</p>
+            <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+              <div className="text-gray-500 dark:text-gray-400 mb-4">
+                {searchTerm || selectedTags.length > 0 || selectedCategory !== 'all'
+                  ? 'No cards match your filters. Try adjusting your search criteria.'
+                  : 'No cards yet. Create your first card to get started!'}
+              </div>
+              <Button
+                onClick={handleCreateCard}
+                variant="outline"
+                className="bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Card
+              </Button>
             </div>
           )}
         </div>

@@ -93,6 +93,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+  const [showContent, setShowContent] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -123,14 +124,12 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       category: itemCategory,
       mastered,
     });
-    if (result) {
-      setIsEditing(false);
-      toast({
-        title: "Success",
-        description: "Card updated successfully",
-      });
-      await trackLearningActivity(itemCategory);
-    }
+    setIsEditing(false);
+    toast({
+      title: "Success",
+      description: "Card updated successfully",
+    });
+    await trackLearningActivity(itemCategory);
   };
 
   const handleUpdateCategory = async (category: string) => {
@@ -153,9 +152,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     }
   };
 
-  const handleAddTag = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && newTag.trim()) {
-      if (!tags.includes(newTag.trim())) {
+  const handleAddTag = (e: React.KeyboardEvent | React.FormEvent) => {
+    if (e.type === 'submit' || (e as React.KeyboardEvent).key === 'Enter') {
+      e.preventDefault();
+      if (newTag.trim() && !tags.includes(newTag.trim())) {
         setTags([...tags, newTag.trim()]);
       }
       setNewTag('');
@@ -277,309 +277,289 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
   return (
     <Card className={cn(
-      "relative w-full h-full transition-all duration-200 ease-in-out",
-      "bg-card border-2 shadow-sm hover:shadow-md",
-      mastered ? "border-emerald-500/50 hover:border-emerald-500 hover:shadow-emerald-100" : 
-                "border-transparent hover:border-blue-600/50 hover:shadow-blue-100",
-      isEditing && "border-blue-600 shadow-blue-100"
+      "relative overflow-hidden transition-all duration-300 border-2 h-full",
+      "hover:shadow-lg hover:shadow-blue-300/50 dark:hover:shadow-blue-900/30",
+      "max-w-3xl mx-auto",
+      "bg-white dark:bg-gray-900",
+      "sm:rounded-xl",
+      isZoomed ? "transform scale-105 shadow-xl z-10" : "",
+      mastered 
+        ? "border-emerald-400 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-900/30 dark:to-gray-900" 
+        : "border-blue-400 hover:border-blue-500 dark:border-blue-500 dark:hover:border-blue-400",
+      isEditing && "border-blue-500 dark:border-blue-400 shadow-lg shadow-blue-300/50 dark:shadow-blue-900/30"
     )}>
-      <CardHeader className="relative pb-3 space-y-2">
-        {isEditing ? (
-          <div className="flex flex-col gap-4">
-            <div>
-              <Label htmlFor="title">Title</Label>
+      <CardHeader className="space-y-4 pb-4 px-4 sm:px-6">
+        {/* Title Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            {isEditing ? (
               <Input
-                id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="mt-1.5"
-              />
-            </div>
-
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="category">Category</Label>
-              <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="justify-between"
-                  >
-                    {itemCategory || "Select category..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                  <Command>
-                    <CommandInput 
-                      placeholder="Search category..."
-                      value={itemCategory}
-                      onValueChange={(value) => {
-                        setItemCategory(value);
-                      }}
-                    />
-                    <CommandEmpty>
-                      <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                        No category found. Type to create new.
-                      </div>
-                    </CommandEmpty>
-                    <CommandGroup>
-                      {categories
-                        .filter(cat => !itemCategory || cat.toLowerCase().includes(itemCategory.toLowerCase()))
-                        .map((cat) => (
-                          <CommandItem
-                            key={cat}
-                            value={cat}
-                            className="cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
-                            onSelect={() => {
-                              handleUpdateCategory(cat);
-                              setOpen(false);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                itemCategory === cat ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            {cat}
-                          </CommandItem>
-                        ))}
-                      {itemCategory && !categories.includes(itemCategory) && (
-                        <CommandItem
-                          value={itemCategory}
-                          className="cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
-                          onSelect={() => {
-                            // Keep the typed category and close
-                            setOpen(false);
-                          }}
-                        >
-                          <Plus className="mr-2 h-4 w-4" />
-                          Create "{itemCategory}"
-                        </CommandItem>
-                      )}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div>
-              <Label htmlFor="content">Content</Label>
-              <div className="mt-1.5">
-                <RichTextEditor
-                  content={content}
-                  onChange={setContent}
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg line-clamp-2 bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
-                  {title}
-                </h3>
-                {itemCategory && (
-                  <div className="mt-1 text-sm text-blue-600 dark:text-blue-400">
-                    {itemCategory}
-                  </div>
+                className={cn(
+                  "text-lg font-semibold",
+                  "bg-white dark:bg-gray-800",
+                  "text-gray-900 dark:text-gray-100",
+                  "border-gray-200 dark:border-gray-700",
+                  "focus-visible:ring-2 focus-visible:ring-blue-500",
+                  "placeholder:text-gray-400 dark:placeholder:text-gray-500",
+                  "w-full sm:text-xl"
                 )}
-              </div>
-              <div className="flex items-center gap-2">
+                placeholder="Enter title..."
+              />
+            ) : (
+              <h3 
+                className={cn(
+                  "text-xl sm:text-2xl font-semibold line-clamp-2",
+                  "bg-gradient-to-r from-blue-900 via-blue-700 to-blue-800",
+                  "dark:from-blue-400 dark:via-blue-300 dark:to-blue-400",
+                  "bg-clip-text text-transparent",
+                  "hover:from-blue-800 hover:via-blue-600 hover:to-blue-700",
+                  "dark:hover:from-blue-300 dark:hover:via-blue-200 dark:hover:to-blue-300",
+                  "cursor-pointer"
+                )}
+                onClick={() => setShowContent(!showContent)}
+              >
+                {title}
+              </h3>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2 sm:gap-3">
+            {mastered && (
+              <Trophy className="w-5 h-5 text-yellow-500 animate-pulse" />
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowContent(!showContent)}
+              className="h-9 w-9 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg"
+              title={showContent ? "Hide content" : "Show content"}
+            >
+              {showContent ? (
+                <EyeOff className="w-5 h-5 text-blue-900 dark:text-blue-200" />
+              ) : (
+                <Eye className="w-5 h-5 text-blue-900 dark:text-blue-200" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsEditing(!isEditing)}
+              className="h-9 w-9 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg"
+              title={isEditing ? "Save changes" : "Edit card"}
+            >
+              {isEditing ? (
+                <Save className="w-5 h-5 text-blue-900 dark:text-blue-200" />
+              ) : (
+                <Edit className="w-5 h-5 text-blue-900 dark:text-blue-200" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Content Section */}
+        <div 
+          className={cn(
+            "transition-all duration-300",
+            !showContent && "hidden"
+          )}
+        >
+          {isEditing ? (
+            <div className="space-y-4">
+              <RichTextEditor
+                content={content}
+                onChange={setContent}
+                className={cn(
+                  "min-h-[150px] p-4 rounded-lg",
+                  "bg-white dark:bg-gray-800/50",
+                  "text-gray-900 dark:text-gray-100",
+                  "border border-gray-200 dark:border-gray-700/50",
+                  "focus-within:ring-2 focus-within:ring-blue-500",
+                  "prose dark:prose-invert prose-sm sm:prose-base max-w-none",
+                  "prose-img:my-4 prose-img:rounded-lg prose-img:max-w-full prose-img:mx-auto",
+                  "prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
+                  "prose-p:text-gray-700 dark:prose-p:text-gray-300",
+                  "prose-a:text-blue-600 dark:prose-a:text-blue-400",
+                  "prose-blockquote:border-l-blue-500",
+                  "prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800"
+                )}
+              />
+              <div className="flex justify-end gap-2">
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsZoomed(true)}
-                  className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
+                  variant="outline"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setContent(initialContent);
+                    setTitle(initialTitle);
+                  }}
+                  className="bg-white hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800"
                 >
-                  <ZoomIn className="h-4 w-4 text-blue-700 dark:text-blue-400" />
+                  Cancel
                 </Button>
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleContentVisibility}
-                  className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
+                  onClick={async () => {
+                    try {
+                      await handleSave();
+                      setIsEditing(false);
+                      toast({
+                        title: "Success",
+                        description: "Card updated successfully",
+                      });
+                    } catch (error) {
+                      console.error('Error saving:', error);
+                    }
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
-                  {isContentHidden ? (
-                    <Eye className="h-4 w-4 text-blue-700 dark:text-blue-400" />
-                  ) : (
-                    <EyeOff className="h-4 w-4 text-blue-700 dark:text-blue-400" />
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsEditing(true)}
-                  className="h-8 w-8 hover:bg-blue-100 dark:hover:bg-blue-950/50"
-                >
-                  <Edit className="h-4 w-4 text-blue-700 dark:text-blue-400" />
+                  Save Changes
                 </Button>
               </div>
             </div>
+          ) : (
             <div 
-              className={cn(
-                "space-y-3 transition-all duration-200",
-                isContentHidden && "blur-md select-none"
-              )}
+              className="relative"
+              onClick={() => !isZoomed && setIsZoomed(true)}
             >
               <div 
-                className="prose prose-sm max-w-none dark:prose-invert line-clamp-6 hover:line-clamp-none transition-all cursor-pointer"
-                onClick={() => setIsZoomed(true)}
+                className={cn(
+                  "prose prose-sm sm:prose-base max-w-none dark:prose-invert",
+                  "prose-img:my-4 prose-img:rounded-lg prose-img:max-w-full prose-img:mx-auto prose-img:shadow-md",
+                  "prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
+                  "prose-p:text-gray-700 dark:prose-p:text-gray-300",
+                  "prose-a:text-blue-600 dark:prose-a:text-blue-400",
+                  "prose-blockquote:border-l-blue-500",
+                  "prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800",
+                  !isZoomed && "max-h-[300px] overflow-hidden cursor-pointer"
+                )}
                 dangerouslySetInnerHTML={{ __html: content }}
               />
-              
-              <div className="flex flex-wrap gap-1.5 pt-2">
-                {tags.map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
+              {!isZoomed && content.length > 300 && (
+                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none" />
+              )}
             </div>
-          </div>
-        )}
-      </CardHeader>
-      <CardContent>
-        <div className="text-xs text-muted-foreground">
-          Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}
-        </div>
-      </CardContent>
-
-      <CardFooter className="flex justify-between pt-3 pb-4">
-        <div className="flex gap-2">
-          {isEditing ? (
-            <>
-              <Button 
-                onClick={handleSave} 
-                size="sm" 
-                className="bg-blue-700 hover:bg-blue-800 text-white shadow-sm hover:shadow dark:bg-blue-800 dark:hover:bg-blue-900"
-              >
-                <Save className="h-4 w-4 mr-1" />
-                Save
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setIsEditing(false)}
-                size="sm"
-                className="shadow-sm hover:shadow border-blue-200 hover:border-blue-300 dark:border-blue-800 dark:hover:border-blue-700"
-              >
-                <X className="h-4 w-4 mr-1" />
-                Cancel
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsDeleteDialogOpen(true)}
-                className="shadow-sm hover:shadow text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Delete
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopyContent}
-                className="hover:bg-blue-100 text-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/50"
-              >
-                <Copy className="h-4 w-4 mr-1" />
-                Copy
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleMastered}
-                className={cn(
-                  "hover:bg-emerald-50 dark:hover:bg-emerald-950/50",
-                  mastered ? "text-emerald-600 dark:text-emerald-400" : "text-gray-500 dark:text-gray-400"
-                )}
-              >
-                <Trophy className="h-4 w-4 mr-1" />
-                {mastered ? "Mastered" : "Mark as Mastered"}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleComplete}
-                className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-950/50"
-              >
-                <Check className="h-4 w-4 mr-1" />
-                Complete
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsDeleteDialogOpen(true)}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Delete
-              </Button>
-            </>
           )}
         </div>
+
+        {/* Meta Section */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-sm">
+          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <Clock className="w-4 h-4" />
+            <span>Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</span>
+            {itemCategory && (
+              <span>•</span>
+            )}
+            {itemCategory && (
+              <span className="font-medium">{itemCategory}</span>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag, index) => (
+              <Badge
+                key={`${tag}-${index}`}
+                variant={isEditing ? "secondary" : "default"}
+                className={cn(
+                  "text-sm px-2.5 py-0.5 rounded-full transition-all duration-200",
+                  isEditing 
+                    ? "cursor-pointer hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900 dark:hover:text-red-300"
+                    : "bg-blue-100 text-blue-900 hover:bg-blue-200 dark:bg-blue-900/50 dark:text-blue-100 dark:hover:bg-blue-800/50"
+                )}
+                onClick={() => isEditing && handleRemoveTag(tag)}
+              >
+                {tag}
+                {isEditing && (
+                  <X className="w-3 h-3 ml-1.5 inline-block" />
+                )}
+              </Badge>
+            ))}
+            {isEditing && (
+              <form 
+                onSubmit={handleAddTag} 
+                className="inline-flex"
+              >
+                <Input
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  placeholder="Add tag..."
+                  className={cn(
+                    "h-7 text-sm w-24 sm:w-32",
+                    "bg-white dark:bg-gray-800",
+                    "text-gray-900 dark:text-gray-100",
+                    "border-gray-200 dark:border-gray-700",
+                    "focus-visible:ring-2 focus-visible:ring-blue-500",
+                    "placeholder:text-gray-400 dark:placeholder:text-gray-500",
+                    "rounded-full"
+                  )}
+                />
+              </form>
+            )}
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardFooter className={cn(
+        "flex justify-between p-4 sm:p-6 gap-4",
+        "bg-gradient-to-b from-transparent via-gray-50/50 to-gray-100/50",
+        "dark:from-transparent dark:via-gray-800/30 dark:to-gray-800/50"
+      )}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className={cn(
+            "text-sm transition-colors flex-1 sm:flex-none justify-start sm:justify-center",
+            mastered 
+              ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-950/50" 
+              : "text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-950/50"
+          )}
+          onClick={toggleMastered}
+        >
+          {mastered ? (
+            <BookmarkCheck className="w-4 h-4 mr-2" />
+          ) : (
+            <Bookmark className="w-4 h-4 mr-2" />
+          )}
+          <span>{mastered ? 'Mastered' : 'Mark as Mastered'}</span>
+        </Button>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          className={cn(
+            "text-sm transition-colors",
+            "text-red-600 hover:text-red-700 hover:bg-red-50",
+            "dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/50"
+          )}
+          onClick={onDelete}
+        >
+          <Trash2 className="w-4 h-4 mr-2" />
+          <span>Delete</span>
+        </Button>
       </CardFooter>
 
+      {/* Zoomed View Dialog */}
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="fixed z-50 left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 sm:rounded-lg">
-          <DialogHeader className="mb-6">
-            <DialogTitle className="text-xl sm:text-2xl font-semibold text-center bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto p-6 sm:p-8 bg-white dark:bg-gray-900">
+          <DialogHeader>
+            <DialogTitle className={cn(
+              "text-2xl font-semibold",
+              "bg-gradient-to-r from-blue-600 to-blue-400",
+              "bg-clip-text text-transparent"
+            )}>
               {title}
             </DialogTitle>
           </DialogHeader>
-          <div className="w-full max-w-[65ch] mx-auto px-2 sm:px-4">
-            <div 
-              className={cn(
-                "prose prose-lg dark:prose-invert",
-                "prose-headings:text-blue-900 dark:prose-headings:text-blue-300",
-                "prose-a:text-blue-700 dark:prose-a:text-blue-400",
-                "prose-strong:text-blue-900 dark:prose-strong:text-blue-300",
-                "[&_ul]:list-disc [&_ol]:list-decimal",
-                "[&_ul>li]:pl-0 [&_ol>li]:pl-0",
-                "[&_ul>li]:my-0 [&_ol>li]:my-0",
-                "[&_ul]:pl-5 [&_ol]:pl-5",
-                "[&_ul]:my-1 [&_ol]:my-1"
-              )}
-            >
-              <div dangerouslySetInnerHTML={{ __html: content }} />
-            </div>
-          </div>
-          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </DialogPrimitive.Close>
+          <div className={cn(
+            "prose prose-lg max-w-none dark:prose-invert mt-6",
+            "prose-img:rounded-lg prose-img:shadow-lg prose-img:mx-auto",
+            "prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
+            "prose-p:text-gray-700 dark:prose-p:text-gray-300",
+            "prose-a:text-blue-600 dark:prose-a:text-blue-400"
+          )} 
+          dangerouslySetInnerHTML={{ __html: content }} 
+          />
         </DialogContent>
       </Dialog>
-
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent className="fixed z-50 left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[95vw] sm:w-[90vw] max-w-md p-4 sm:p-6 sm:rounded-lg">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl text-center text-red-600 dark:text-red-400">
-              Delete Card
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-center">
-              Are you sure you want to delete this card? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-500 hover:bg-red-600"
-              onClick={() => {
-                onDelete();
-                setIsDeleteDialogOpen(false);
-              }}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Card>
   );
 };
