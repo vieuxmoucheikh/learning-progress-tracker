@@ -39,6 +39,7 @@ interface FocusData {
 export const LearningCardsPage = () => {
   const [cards, setCards] = useState<CardType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>(['All']);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchTerm, setSearchTerm] = useState('');
@@ -65,7 +66,9 @@ export const LearningCardsPage = () => {
   const fetchCards = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
       const items = await learningCardsService.getCards();
+      console.log('Fetched cards:', items);
       setCards(items);
       
       // Extract unique categories and sort them
@@ -82,9 +85,10 @@ export const LearningCardsPage = () => {
       setCategories(uniqueCategories);
     } catch (error) {
       console.error('Error fetching cards:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch cards');
       toast({
         title: 'Error',
-        description: 'Failed to fetch cards',
+        description: 'Failed to fetch cards. Please check your connection and try again.',
         variant: 'destructive',
       });
     } finally {
@@ -92,8 +96,13 @@ export const LearningCardsPage = () => {
     }
   }, [toast]);
 
+  useEffect(() => {
+    fetchCards();
+  }, [fetchCards]);
+
   // Filter cards based on selected category
   const filteredCards = useMemo(() => {
+    console.log('Filtering cards:', { cards, searchTerm, selectedCategory, selectedTags }); // Debug log
     let result = [...cards];
 
     // Apply search filter
@@ -113,6 +122,7 @@ export const LearningCardsPage = () => {
       );
     }
 
+    console.log('Filtered result:', result); // Debug log
     // Apply sorting with proper date comparison
     return result.sort((a, b) => {
       switch (sortBy) {
@@ -167,15 +177,53 @@ export const LearningCardsPage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchCards();
-  }, [fetchCards]);
-
   const handleSortChange = (value: string) => {
     if (value === 'updated' || value === 'created' || value === 'mastered') {
       setSortBy(value);
     }
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="container mx-auto p-4 max-w-7xl">
+        <div className="flex flex-col space-y-4">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">Learning Cards</h1>
+          </div>
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="container mx-auto p-4 max-w-7xl">
+        <div className="flex flex-col space-y-4">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">Learning Cards</h1>
+          </div>
+          <div className="flex flex-col items-center justify-center h-64 text-center">
+            <div className="text-red-500 mb-4">⚠️ {error}</div>
+            <Button 
+              onClick={() => fetchCards()}
+              variant="outline"
+              className="gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Retry
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-4 max-w-7xl">
@@ -271,67 +319,61 @@ export const LearningCardsPage = () => {
         )}
 
         {/* Cards Grid */}
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="w-8 h-8 animate-spin" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mt-4">
-            <AnimatePresence>
-              {filteredCards.map((card) => (
-                <motion.div
-                  key={card.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.2 }}
-                  className="h-full"
-                >
-                  <EnhancedLearningCard
-                    {...card}
-                    onSave={async (updates) => {
-                      return handleCardUpdate(card.id, updates);
-                    }}
-                    onDelete={async () => {
-                      handleCardDelete(card.id);
-                    }}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-            {filteredCards.length === 0 && (
-              <div className="col-span-full flex flex-col items-center justify-center py-12 px-4 text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                <div className="text-gray-500 dark:text-gray-400 mb-2">
-                  {selectedCategory === 'All' 
-                    ? 'No cards found. Create your first card!'
-                    : `No cards found in category "${selectedCategory}"`
-                  }
-                </div>
-                <Button
-                  onClick={() => {
-                    const now = new Date().toISOString();
-                    const newCard: CardType = {
-                      id: crypto.randomUUID(),
-                      title: 'New Card',
-                      content: '',
-                      tags: [],
-                      category: selectedCategory !== 'All' ? selectedCategory : '',
-                      mastered: false,
-                      createdAt: now,
-                      updatedAt: now,
-                    };
-                    setCards(prev => [newCard, ...prev]);
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mt-4">
+          <AnimatePresence>
+            {filteredCards.map((card) => (
+              <motion.div
+                key={card.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.2 }}
+                className="h-full"
+              >
+                <EnhancedLearningCard
+                  {...card}
+                  onSave={async (updates) => {
+                    return handleCardUpdate(card.id, updates);
                   }}
-                  className="mt-4"
-                  variant="outline"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Card
-                </Button>
+                  onDelete={async () => {
+                    handleCardDelete(card.id);
+                  }}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          {filteredCards.length === 0 && (
+            <div className="col-span-full flex flex-col items-center justify-center py-12 px-4 text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+              <div className="text-gray-500 dark:text-gray-400 mb-2">
+                {selectedCategory === 'All' 
+                  ? 'No cards found. Create your first card!'
+                  : `No cards found in category "${selectedCategory}"`
+                }
               </div>
-            )}
-          </div>
-        )}
+              <Button
+                onClick={() => {
+                  const now = new Date().toISOString();
+                  const newCard: CardType = {
+                    id: crypto.randomUUID(),
+                    title: 'New Card',
+                    content: '',
+                    tags: [],
+                    category: selectedCategory !== 'All' ? selectedCategory : '',
+                    mastered: false,
+                    createdAt: now,
+                    updatedAt: now,
+                  };
+                  setCards(prev => [newCard, ...prev]);
+                }}
+                className="mt-4"
+                variant="outline"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Card
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
