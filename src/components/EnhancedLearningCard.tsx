@@ -289,16 +289,16 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
   return (
     <Card className={cn(
-      "relative overflow-hidden transition-all duration-300 border-2",
+      "relative overflow-hidden transition-all duration-300 border-2 h-full",
       "hover:shadow-lg hover:shadow-blue-300/50 dark:hover:shadow-blue-900/30",
       "max-w-3xl mx-auto",
       "bg-white dark:bg-gray-900",
       "sm:rounded-xl",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
       mastered 
-        ? "border-emerald-400 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/50 dark:to-gray-900" 
+        ? "border-emerald-400 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-900/30 dark:to-gray-900" 
         : "border-blue-400 hover:border-blue-500 dark:border-blue-500 dark:hover:border-blue-400",
-      isEditing && "border-blue-500 dark:border-blue-400 shadow-lg shadow-blue-300 dark:shadow-blue-900/30"
+      isEditing && "border-blue-500 dark:border-blue-400 shadow-lg shadow-blue-300/50 dark:shadow-blue-900/30"
     )}>
       <CardHeader className="space-y-4 pb-4 px-4 sm:px-6">
         {/* Title Section */}
@@ -384,9 +384,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 onChange={setContent}
                 className={cn(
                   "min-h-[150px] p-4 rounded-lg",
-                  "bg-white dark:bg-gray-800",
+                  "bg-white dark:bg-gray-800/50",
                   "text-gray-900 dark:text-gray-100",
-                  "border border-gray-200 dark:border-gray-700",
+                  "border border-gray-200 dark:border-gray-700/50",
                   "focus-within:ring-2 focus-within:ring-blue-500",
                   "prose dark:prose-invert prose-sm sm:prose-base max-w-none",
                   "prose-img:my-4 prose-img:rounded-lg prose-img:max-w-full prose-img:mx-auto",
@@ -461,10 +461,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             <Clock className="w-4 h-4" />
             <span>Updated {getTimeAgo(updatedAt)}</span>
             {category && (
-              <>
-                <span>•</span>
-                <span className="font-medium">{category}</span>
-              </>
+              <span>•</span>
+            )}
+            {category && (
+              <span className="font-medium">{category}</span>
             )}
           </div>
 
@@ -512,7 +512,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       <CardFooter className={cn(
         "flex justify-between p-4 sm:p-6 gap-4",
         "bg-gradient-to-b from-transparent via-gray-50/50 to-gray-100/50",
-        "dark:via-gray-900/30 dark:to-gray-900/50"
+        "dark:from-transparent dark:via-gray-800/30 dark:to-gray-800/50"
       )}>
         <Button
           variant="ghost"
@@ -526,16 +526,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           onClick={handleMasteredToggle}
         >
           {mastered ? (
-            <>
-              <BookmarkCheck className="w-4 h-4 mr-2" />
-              <span>Mastered</span>
-            </>
+            <BookmarkCheck className="w-4 h-4 mr-2" />
           ) : (
-            <>
-              <Bookmark className="w-4 h-4 mr-2" />
-              <span>Mark as Mastered</span>
-            </>
+            <Bookmark className="w-4 h-4 mr-2" />
           )}
+          <span>{mastered ? 'Mastered' : 'Mark as Mastered'}</span>
         </Button>
         
         <Button

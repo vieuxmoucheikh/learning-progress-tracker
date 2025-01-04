@@ -276,7 +276,7 @@ export const LearningCardsPage = () => {
             <Loader2 className="w-8 h-8 animate-spin" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mt-4">
             <AnimatePresence>
               {filteredCards.map((card) => (
                 <motion.div
@@ -285,6 +285,7 @@ export const LearningCardsPage = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.2 }}
+                  className="h-full"
                 >
                   <EnhancedLearningCard
                     {...card}
@@ -299,11 +300,34 @@ export const LearningCardsPage = () => {
               ))}
             </AnimatePresence>
             {filteredCards.length === 0 && (
-              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                {selectedCategory === 'All' 
-                  ? 'No cards found. Create your first card!'
-                  : `No cards found in category "${selectedCategory}"`
-                }
+              <div className="col-span-full flex flex-col items-center justify-center py-12 px-4 text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                <div className="text-gray-500 dark:text-gray-400 mb-2">
+                  {selectedCategory === 'All' 
+                    ? 'No cards found. Create your first card!'
+                    : `No cards found in category "${selectedCategory}"`
+                  }
+                </div>
+                <Button
+                  onClick={() => {
+                    const now = new Date().toISOString();
+                    const newCard: CardType = {
+                      id: crypto.randomUUID(),
+                      title: 'New Card',
+                      content: '',
+                      tags: [],
+                      category: selectedCategory !== 'All' ? selectedCategory : '',
+                      mastered: false,
+                      createdAt: now,
+                      updatedAt: now,
+                    };
+                    setCards(prev => [newCard, ...prev]);
+                  }}
+                  className="mt-4"
+                  variant="outline"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Card
+                </Button>
               </div>
             )}
           </div>
