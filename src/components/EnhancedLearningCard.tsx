@@ -58,6 +58,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { getLearningItems, trackLearningActivity, updateLearningItem } from '@/lib/database';
 
 interface EnhancedLearningCardProps extends CardType {
@@ -298,7 +306,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 onChange={(e) => setTitle(e.target.value)}
                 className={cn(
                   "text-lg font-semibold",
-                  "bg-white",
+                  "bg-gray-50",
                   "text-gray-900",
                   "border-gray-200",
                   "focus-visible:ring-2 focus-visible:ring-blue-500",
@@ -365,12 +373,47 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         >
           {isEditing ? (
             <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Category</Label>
+                <Select
+                  value={itemCategory}
+                  onValueChange={handleUpdateCategory}
+                >
+                  <SelectTrigger className={cn(
+                    "w-full",
+                    "bg-gray-50",
+                    "border-gray-200",
+                    "text-gray-900",
+                    "focus:ring-2 focus:ring-blue-500",
+                    "h-9"
+                  )}>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <div className="px-2 py-1.5 text-sm font-medium text-gray-500">
+                        Categories
+                      </div>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))}
+                      {itemCategory && !categories.includes(itemCategory) && (
+                        <SelectItem value={itemCategory}>
+                          {itemCategory} (New)
+                        </SelectItem>
+                      )}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
               <RichTextEditor
                 content={content}
                 onChange={setContent}
                 className={cn(
                   "min-h-[200px] rounded-lg",
-                  "bg-white",
+                  "bg-gray-50",
                   "text-gray-900",
                   "border border-gray-200",
                   "focus-within:ring-2 focus-within:ring-blue-500",
@@ -458,10 +501,20 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             <Clock className="w-4 h-4" />
             <span>Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</span>
             {itemCategory && (
-              <span>•</span>
-            )}
-            {itemCategory && (
-              <span className="font-medium">{itemCategory}</span>
+              <>
+                <span>•</span>
+                <Badge 
+                  variant="secondary" 
+                  className={cn(
+                    "font-medium px-2 py-0.5",
+                    "bg-blue-50 text-blue-700 hover:bg-blue-100",
+                    "border border-blue-200",
+                    "rounded-full"
+                  )}
+                >
+                  {itemCategory}
+                </Badge>
+              </>
             )}
           </div>
 
@@ -495,7 +548,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   placeholder="Add tag..."
                   className={cn(
                     "h-7 text-sm w-24 sm:w-32",
-                    "bg-white",
+                    "bg-gray-50",
                     "text-gray-900",
                     "border-gray-200",
                     "focus-visible:ring-2 focus-visible:ring-blue-500",
