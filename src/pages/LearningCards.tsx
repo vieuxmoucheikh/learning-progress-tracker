@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -8,15 +8,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Search, Filter, Clock, TagIcon, Loader2, X } from 'lucide-react';
 import { EnhancedLearningCard } from '@/components/EnhancedLearningCard';
 import { learningCardsService } from '@/lib/learningCards';
 import type { EnhancedLearningCard as CardType } from '@/types';
+import { Plus, Search, Tag as TagIcon, Loader2, Clock, Filter } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { getLearningItems } from '@/lib/database';
-import { format } from 'date-fns';
 
 interface CardMedia {
   id: string;
@@ -25,25 +24,13 @@ interface CardMedia {
   createdAt?: string;
 }
 
-interface ProgressData {
-  difficulty: string;
-  count: number;
-  progress: number;
-}
-
-interface FocusData {
-  category: string;
-  value: number;
-}
-
 export const LearningCardsPage = () => {
   const [cards, setCards] = useState<CardType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [categories, setCategories] = useState<string[]>(['All']);
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [categories, setCategories] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'updated' | 'created' | 'mastered'>('updated');
   const { toast } = useToast();
 
@@ -51,326 +38,234 @@ export const LearningCardsPage = () => {
     new Set(cards.flatMap((card) => card.tags))
   ).sort();
 
-  // Memoized search function for better performance
-  const searchCards = useCallback((cards: CardType[], searchTerm: string) => {
-    const terms = searchTerm.toLowerCase().split(' ').filter(Boolean);
-    if (terms.length === 0) return cards;
-
-    return cards.filter(card => {
-      const searchableText = `${card.title} ${card.content} ${card.category} ${card.tags.join(' ')}`.toLowerCase();
-      return terms.every(term => searchableText.includes(term));
-    });
-  }, []);
-
-  // Fetch cards and update state
-  const fetchCards = useCallback(async () => {
+  const fetchCategories = async () => {
     try {
-      setLoading(true);
-      setError(null);
-      const items = await learningCardsService.getCards();
-      console.log('Fetched cards:', items);
-      setCards(items);
-      
-      // Extract unique categories and sort them
-      const uniqueCategories = ['All', ...new Set(
-        items
-          .map(item => item.category)
-          .filter((category): category is string => 
-            typeof category === 'string' && 
-            category.trim().length > 0
-          )
-          .map(category => category.trim())
-      )].sort((a, b) => a === 'All' ? -1 : b === 'All' ? 1 : a.localeCompare(b));
-      
+      const items = await getLearningItems();
+      const uniqueCategories = Array.from(
+        new Set(items.map(item => item.category).filter(Boolean))
+      ).sort();
       setCategories(uniqueCategories);
     } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  const fetchCards = async () => {
+    try {
+      const fetchedCards = await learningCardsService.getCards();
+      setCards(fetchedCards as CardType[]);
+    } catch (error) {
       console.error('Error fetching cards:', error);
-      setError(error instanceof Error ? error.message : 'Failed to fetch cards');
       toast({
         title: 'Error',
-        description: 'Failed to fetch cards. Please check your connection and try again.',
+        description: 'Failed to fetch cards. Please try again.',
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  };
 
   useEffect(() => {
     fetchCards();
-  }, [fetchCards]);
+    fetchCategories();
+  }, []);
 
-  // Filter cards based on selected category
-  const filteredCards = useMemo(() => {
-    console.log('Filtering cards:', { cards, searchTerm, selectedCategory, selectedTags }); // Debug log
-    let result = [...cards];
-
-    // Apply search filter
-    if (searchTerm) {
-      result = searchCards(result, searchTerm);
-    }
-
-    // Apply category filter
-    if (selectedCategory !== 'All') {
-      result = result.filter(card => card.category === selectedCategory);
-    }
-
-    // Apply tag filter
-    if (selectedTags.length > 0) {
-      result = result.filter(card => 
-        selectedTags.every(tag => card.tags.includes(tag))
-      );
-    }
-
-    console.log('Filtered result:', result); // Debug log
-    // Apply sorting with proper date comparison
-    return result.sort((a, b) => {
-      switch (sortBy) {
-        case 'updated':
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-        case 'created':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        case 'mastered':
-          // First sort by mastered status
-          if (a.mastered !== b.mastered) {
-            return a.mastered ? -1 : 1;
-          }
-          // Then by update date
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-        default:
-          return 0;
-      }
-    });
-  }, [cards, searchTerm, selectedCategory, selectedTags, sortBy, searchCards]);
-
-  const handleCardUpdate = async (cardId: string, updates: Partial<CardType>) => {
+  const handleCreateCard = async () => {
     try {
-      await learningCardsService.updateCard(cardId, updates);
-      fetchCards(); // Refresh the cards after update
+      const newCard = await learningCardsService.createCard({
+        title: 'New Card',
+        content: '',
+        tags: [],
+        category: selectedCategory !== 'all' ? selectedCategory : '',
+      });
+      setCards((prevCards) => [newCard, ...prevCards]);
+      toast({
+        title: 'Success',
+        description: 'Card created successfully',
+      });
+    } catch (error) {
+      console.error('Error creating card:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create card. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleSaveCard = async (card: Partial<CardType>): Promise<boolean> => {
+    try {
+      await learningCardsService.updateCard(card.id!, {
+        title: card.title,
+        content: card.content,
+        media: card.media,
+        tags: card.tags,
+        mastered: card.mastered,
+        category: card.category,
+      });
+      await fetchCards();
+      toast({
+        title: "Success",
+        description: "Card updated successfully",
+      });
       return true;
     } catch (error) {
       console.error('Error updating card:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to update card',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to update card. Please try again.",
+        variant: "destructive",
       });
       return false;
     }
   };
 
-  const handleCardDelete = async (cardId: string) => {
+  const handleDeleteCard = async (id: string) => {
     try {
-      await learningCardsService.deleteCard(cardId);
-      fetchCards(); // Refresh the cards after deletion
+      await learningCardsService.deleteCard(id);
+      setCards((prevCards) => prevCards.filter((card) => card.id !== id));
       toast({
-        title: 'Success',
-        description: 'Card deleted successfully',
+        title: "Success",
+        description: "Card deleted successfully",
       });
     } catch (error) {
       console.error('Error deleting card:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to delete card',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to delete card. Please try again.",
+        variant: "destructive",
       });
     }
   };
 
-  const handleSortChange = (value: string) => {
-    if (value === 'updated' || value === 'created' || value === 'mastered') {
-      setSortBy(value);
-    }
-  };
-
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="container mx-auto p-4 max-w-7xl">
-        <div className="flex flex-col space-y-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">Learning Cards</h1>
-          </div>
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state
-  if (error) {
-    return (
-      <div className="container mx-auto p-4 max-w-7xl">
-        <div className="flex flex-col space-y-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">Learning Cards</h1>
-          </div>
-          <div className="flex flex-col items-center justify-center h-64 text-center">
-            <div className="text-red-500 mb-4">⚠️ {error}</div>
-            <Button 
-              onClick={() => fetchCards()}
-              variant="outline"
-              className="gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Retry
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const filteredCards = cards
+    .filter((card) => {
+      const matchesSearch = card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        card.content.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesTags = selectedTags.length === 0 || selectedTags.every(tag => card.tags.includes(tag));
+      const matchesCategory = selectedCategory === 'all' || card.category === selectedCategory;
+      return matchesSearch && matchesTags && matchesCategory;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'created':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'mastered':
+          return (b.mastered ? 1 : 0) - (a.mastered ? 1 : 0);
+        default:
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      }
+    });
 
   return (
-    <div className="container mx-auto p-4 max-w-7xl">
-      <div className="flex flex-col space-y-4">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Learning Cards</h1>
-          <Button
-            onClick={() => {
-              const now = new Date().toISOString();
-              const newCard: CardType = {
-                id: crypto.randomUUID(),
-                title: 'New Card',
-                content: '',
-                tags: [],
-                category: '',
-                mastered: false,
-                createdAt: now,
-                updatedAt: now,
-              };
-              setCards(prev => [newCard, ...prev]);
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Card
-          </Button>
+    <div className="container mx-auto px-4 py-8">
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Learning Cards</h1>
+          <p className="text-gray-400">Track and manage your learning progress</p>
         </div>
 
-        {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Search cards..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-
-          {/* Category Filter */}
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Sort By */}
-          <Select value={sortBy} onValueChange={handleSortChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="updated">Last Updated</SelectItem>
-              <SelectItem value="created">Created Date</SelectItem>
-              <SelectItem value="mastered">Mastered First</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Selected Tags */}
-        {selectedTags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {selectedTags.map((tag) => (
-              <Badge
-                key={tag}
-                variant="secondary"
-                className="cursor-pointer"
-                onClick={() => setSelectedTags(selectedTags.filter((t) => t !== tag))}
-              >
-                {tag}
-                <X className="w-3 h-3 ml-1" />
-              </Badge>
-            ))}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedTags([])}
-              className="text-sm"
-            >
-              Clear all
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <Button onClick={handleCreateCard} className="shrink-0">
+              <Plus className="w-4 h-4 mr-2" />
+              New Card
             </Button>
           </div>
-        )}
 
-        {/* Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mt-4">
-          <AnimatePresence>
-            {filteredCards.map((card) => (
-              <motion.div
-                key={card.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.2 }}
-                className="h-full"
-              >
-                <EnhancedLearningCard
-                  {...card}
-                  onSave={async (updates) => {
-                    return handleCardUpdate(card.id, updates);
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="Search cards..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger>
+                <Filter className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Filter by category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'updated' | 'created' | 'mastered')}>
+              <SelectTrigger>
+                <Clock className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="updated">Last Updated</SelectItem>
+                <SelectItem value="created">Created Date</SelectItem>
+                <SelectItem value="mastered">Mastery Level</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {allTags.length > 0 && (
+            <div className="flex flex-wrap gap-2 items-center">
+              <TagIcon className="w-4 h-4 text-gray-400" />
+              {allTags.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant={selectedTags.includes(tag) ? "default" : "outline"}
+                  className="cursor-pointer"
+                  onClick={() => {
+                    setSelectedTags((prev) =>
+                      prev.includes(tag)
+                        ? prev.filter((t) => t !== tag)
+                        : [...prev, tag]
+                    );
                   }}
-                  onDelete={async () => {
-                    handleCardDelete(card.id);
-                  }}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-          {filteredCards.length === 0 && (
-            <div className="col-span-full flex flex-col items-center justify-center py-12 px-4 text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-              <div className="text-gray-500 dark:text-gray-400 mb-2">
-                {selectedCategory === 'All' 
-                  ? 'No cards found. Create your first card!'
-                  : `No cards found in category "${selectedCategory}"`
-                }
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          {loading ? (
+            <div className="flex justify-center items-center min-h-[200px]">
+              <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+            </div>
+          ) : (
+            <AnimatePresence mode="popLayout">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                {filteredCards.map((card) => (
+                  <motion.div
+                    key={card.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <EnhancedLearningCard
+                      {...card}
+                      onSave={handleSaveCard}
+                      onDelete={() => handleDeleteCard(card.id)}
+                    />
+                  </motion.div>
+                ))}
               </div>
-              <Button
-                onClick={() => {
-                  const now = new Date().toISOString();
-                  const newCard: CardType = {
-                    id: crypto.randomUUID(),
-                    title: 'New Card',
-                    content: '',
-                    tags: [],
-                    category: selectedCategory !== 'All' ? selectedCategory : '',
-                    mastered: false,
-                    createdAt: now,
-                    updatedAt: now,
-                  };
-                  setCards(prev => [newCard, ...prev]);
-                }}
-                className="mt-4"
-                variant="outline"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create Card
-              </Button>
+            </AnimatePresence>
+          )}
+
+          {!loading && filteredCards.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No cards found. Create one to get started!</p>
             </div>
           )}
         </div>
