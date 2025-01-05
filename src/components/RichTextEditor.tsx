@@ -18,8 +18,9 @@ import {
   Redo,
   Link as LinkIcon,
   Image as ImageIcon,
+  Heading1,
   Heading2,
-  Link2,
+  Heading3,
 } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -40,152 +41,38 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        bulletList: {
-          keepMarks: true,
-          keepAttributes: false,
-          HTMLAttributes: {
-            class: 'list-disc ml-4',
-          },
-        },
-        orderedList: {
-          keepMarks: true,
-          keepAttributes: false,
-          HTMLAttributes: {
-            class: 'list-decimal ml-4',
-          },
-        },
-        blockquote: {
-          HTMLAttributes: {
-            class: 'border-l-4 border-blue-500 pl-4 italic my-4',
-          },
-        },
-        heading: {
-          levels: [1, 2, 3],
-          HTMLAttributes: {
-            class: 'font-bold my-4',
-            1: { class: 'text-2xl' },
-            2: { class: 'text-xl' },
-            3: { class: 'text-lg' },
-          },
-        },
-      }),
-      Image.configure({
-        inline: true,
-        allowBase64: true,
-        HTMLAttributes: {
-          class: 'rounded-lg max-w-full h-auto shadow-md hover:shadow-lg transition-shadow my-4',
-        },
-      }),
+      StarterKit,
+      Image,
       Link.configure({
         openOnClick: false,
-        HTMLAttributes: {
-          class: 'text-blue-600 dark:text-blue-400 hover:underline',
-          rel: 'noopener noreferrer',
-          target: '_blank',
-        },
       }),
       CodeBlockLowlight.configure({
         lowlight: lowlightInstance,
-        HTMLAttributes: {
-          class: cn(
-            "rounded-md",
-            "bg-gray-50",
-            "p-4",
-            "text-gray-900",
-            "border border-gray-200",
-            "font-mono text-sm",
-            "leading-relaxed"
-          ),
-        },
       }),
-      Code.configure({
-        HTMLAttributes: {
-          class: cn(
-            "rounded-sm",
-            "bg-gray-50",
-            "px-1.5 py-0.5",
-            "text-gray-900",
-            "font-mono text-sm",
-            "border border-gray-200"
-          ),
-        },
-      }),
+      Code,
     ],
     content,
     editable,
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      onChange(html);
-    },
-    editorProps: {
-      attributes: {
-        class: cn(
-          "prose prose-sm sm:prose-base dark:prose-invert focus:outline-none max-w-full",
-          "prose-pre:bg-gray-50 prose-pre:text-gray-900",
-          "prose-code:bg-gray-50 prose-code:text-gray-900",
-          "min-h-[150px] px-4 py-3",
-          className
-        ),
-      },
-      handleDrop: (view, event, slice, moved) => {
-        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
-          const file = event.dataTransfer.files[0];
-          if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              const base64 = e.target?.result as string;
-              editor?.chain().focus().setImage({ src: base64 }).run();
-            };
-            reader.readAsDataURL(file);
-            return true;
-          }
-        }
-        return false;
-      },
-      handlePaste: (view, event) => {
-        if (event.clipboardData && event.clipboardData.files && event.clipboardData.files[0]) {
-          const file = event.clipboardData.files[0];
-          if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              const base64 = e.target?.result as string;
-              editor?.chain().focus().setImage({ src: base64 }).run();
-            };
-            reader.readAsDataURL(file);
-            return true;
-          }
-        }
-        return false;
-      },
+      onChange(editor.getHTML());
     },
   });
 
-  const addImage = useCallback(async () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    
-    input.onchange = async (event) => {
-      const file = (event.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const base64 = e.target?.result as string;
-          editor?.chain().focus().setImage({ src: base64 }).run();
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-    
-    input.click();
-  }, [editor]);
+  const toggleLink = useCallback(() => {
+    if (!editor) return;
+    const previousUrl = editor.getAttributes('link').href;
+    const url = window.prompt('URL', previousUrl);
 
-  const addLink = useCallback(() => {
-    const url = window.prompt('Enter URL');
-    if (url) {
-      editor?.chain().focus().setLink({ href: url }).run();
+    if (url === null) {
+      return;
     }
+
+    if (url === '') {
+      editor.chain().focus().extendMarkRange('link').unsetLink().run();
+      return;
+    }
+
+    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
   }, [editor]);
 
   if (!editor) {
@@ -193,155 +80,155 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   }
 
   return (
-    <div className={cn("relative rounded-lg border border-gray-200 dark:border-gray-800", className)}>
-      <div className="sticky top-0 z-10 flex flex-wrap gap-1 p-2 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-        <div className="flex gap-1">
+    <div className={cn(
+      "rounded-lg border border-gray-200",
+      "bg-white",
+      className
+    )}>
+      {editable && (
+        <div className="flex flex-wrap gap-1 p-2 border-b border-gray-200 bg-white">
           <Button
+            size="icon"
             variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            className={cn(
-              "p-1.5 h-8 w-8",
-              editor.isActive('heading', { level: 2 }) && "bg-blue-100 text-blue-900 dark:bg-blue-900/50 dark:text-blue-100"
-            )}
-            title="Heading"
-          >
-            <Heading2 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
             onClick={() => editor.chain().focus().toggleBold().run()}
             className={cn(
-              "p-1.5 h-8 w-8",
-              editor.isActive('bold') && "bg-blue-100 text-blue-900 dark:bg-blue-900/50 dark:text-blue-100"
+              "hover:bg-gray-100",
+              editor.isActive('bold') && "bg-gray-100 text-gray-900"
             )}
-            title="Bold"
           >
             <Bold className="h-4 w-4" />
           </Button>
           <Button
+            size="icon"
             variant="ghost"
-            size="sm"
             onClick={() => editor.chain().focus().toggleItalic().run()}
             className={cn(
-              "p-1.5 h-8 w-8",
-              editor.isActive('italic') && "bg-blue-100 text-blue-900 dark:bg-blue-900/50 dark:text-blue-100"
+              "hover:bg-gray-100",
+              editor.isActive('italic') && "bg-gray-100 text-gray-900"
             )}
-            title="Italic"
           >
             <Italic className="h-4 w-4" />
           </Button>
           <Button
+            size="icon"
             variant="ghost"
-            size="sm"
             onClick={() => editor.chain().focus().toggleCode().run()}
             className={cn(
-              "p-1.5 h-8 w-8",
-              editor.isActive('code') && "bg-blue-100 text-blue-900 dark:bg-blue-900/50 dark:text-blue-100"
+              "hover:bg-gray-100",
+              editor.isActive('code') && "bg-gray-100 text-gray-900"
             )}
-            title="Code"
           >
             <CodeIcon className="h-4 w-4" />
           </Button>
-        </div>
-
-        <div className="w-px h-8 bg-gray-200 dark:bg-gray-800 mx-1" />
-
-        <div className="flex gap-1">
           <Button
+            size="icon"
             variant="ghost"
-            size="sm"
             onClick={() => editor.chain().focus().toggleBulletList().run()}
             className={cn(
-              "p-1.5 h-8 w-8",
-              editor.isActive('bulletList') && "bg-blue-100 text-blue-900 dark:bg-blue-900/50 dark:text-blue-100"
+              "hover:bg-gray-100",
+              editor.isActive('bulletList') && "bg-gray-100 text-gray-900"
             )}
-            title="Bullet List"
           >
             <List className="h-4 w-4" />
           </Button>
           <Button
+            size="icon"
             variant="ghost"
-            size="sm"
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
             className={cn(
-              "p-1.5 h-8 w-8",
-              editor.isActive('orderedList') && "bg-blue-100 text-blue-900 dark:bg-blue-900/50 dark:text-blue-100"
+              "hover:bg-gray-100",
+              editor.isActive('orderedList') && "bg-gray-100 text-gray-900"
             )}
-            title="Numbered List"
           >
             <ListOrdered className="h-4 w-4" />
           </Button>
           <Button
+            size="icon"
             variant="ghost"
-            size="sm"
             onClick={() => editor.chain().focus().toggleBlockquote().run()}
             className={cn(
-              "p-1.5 h-8 w-8",
-              editor.isActive('blockquote') && "bg-blue-100 text-blue-900 dark:bg-blue-900/50 dark:text-blue-100"
+              "hover:bg-gray-100",
+              editor.isActive('blockquote') && "bg-gray-100 text-gray-900"
             )}
-            title="Quote"
           >
             <Quote className="h-4 w-4" />
           </Button>
-        </div>
-
-        <div className="w-px h-8 bg-gray-200 dark:bg-gray-800 mx-1" />
-
-        <div className="flex gap-1">
           <Button
+            size="icon"
             variant="ghost"
-            size="sm"
-            onClick={addImage}
-            className="p-1.5 h-8 w-8"
-            title="Add Image"
+            onClick={toggleLink}
+            className={cn(
+              "hover:bg-gray-100",
+              editor.isActive('link') && "bg-gray-100 text-gray-900"
+            )}
+          >
+            <LinkIcon className="h-4 w-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => {
+              const url = window.prompt('Image URL');
+              if (url) {
+                editor.chain().focus().setImage({ src: url }).run();
+              }
+            }}
+            className="hover:bg-gray-100"
           >
             <ImageIcon className="h-4 w-4" />
           </Button>
           <Button
+            size="icon"
             variant="ghost"
-            size="sm"
-            onClick={addLink}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
             className={cn(
-              "p-1.5 h-8 w-8",
-              editor.isActive('link') && "bg-blue-100 text-blue-900 dark:bg-blue-900/50 dark:text-blue-100"
+              "hover:bg-gray-100",
+              editor.isActive('heading', { level: 1 }) && "bg-gray-100 text-gray-900"
             )}
-            title="Add Link"
           >
-            <Link2 className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div className="w-px h-8 bg-gray-200 dark:bg-gray-800 mx-1" />
-
-        <div className="flex gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().undo().run()}
-            disabled={!editor.can().undo()}
-            className="p-1.5 h-8 w-8"
-            title="Undo"
-          >
-            <Undo className="h-4 w-4" />
+            <Heading1 className="h-4 w-4" />
           </Button>
           <Button
+            size="icon"
             variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().redo().run()}
-            disabled={!editor.can().redo()}
-            className="p-1.5 h-8 w-8"
-            title="Redo"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            className={cn(
+              "hover:bg-gray-100",
+              editor.isActive('heading', { level: 2 }) && "bg-gray-100 text-gray-900"
+            )}
           >
-            <Redo className="h-4 w-4" />
+            <Heading2 className="h-4 w-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            className={cn(
+              "hover:bg-gray-100",
+              editor.isActive('heading', { level: 3 }) && "bg-gray-100 text-gray-900"
+            )}
+          >
+            <Heading3 className="h-4 w-4" />
           </Button>
         </div>
-      </div>
-
-      <div className="p-4">
-        <EditorContent editor={editor} className="min-h-[200px]" />
-      </div>
+      )}
+      <EditorContent 
+        editor={editor} 
+        className={cn(
+          "prose prose-sm max-w-none",
+          "bg-white text-gray-900",
+          "p-4",
+          "[&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:outline-none",
+          "[&_pre]:bg-gray-50 [&_pre]:text-gray-900 [&_pre]:border [&_pre]:border-gray-200",
+          "[&_code]:bg-gray-50 [&_code]:text-gray-900 [&_code]:px-1 [&_code]:rounded",
+          "[&_blockquote]:border-l-4 [&_blockquote]:border-gray-200 [&_blockquote]:pl-4 [&_blockquote]:italic",
+          "[&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-2",
+          "[&_ul]:list-disc [&_ol]:list-decimal",
+          "[&_h1]:text-2xl [&_h2]:text-xl [&_h3]:text-lg",
+          "[&_p]:my-2",
+          "[&_img]:max-w-full [&_img]:rounded-lg"
+        )}
+      />
     </div>
   );
 };
