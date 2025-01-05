@@ -41,8 +41,20 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
   const editor = useEditor({
     extensions: [
-      StarterKit,
-      Image,
+      StarterKit.configure({
+        blockquote: {
+          HTMLAttributes: {
+            class: 'border-l-4 border-blue-500 pl-4 my-4 italic text-gray-700',
+          },
+        },
+      }),
+      Image.configure({
+        inline: true,
+        allowBase64: true,
+        HTMLAttributes: {
+          class: 'rounded-lg max-w-full h-auto my-4',
+        },
+      }),
       Link.configure({
         openOnClick: false,
       }),
@@ -55,6 +67,38 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     editable,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
+    },
+    editorProps: {
+      handleDrop: (view, event, slice, moved) => {
+        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+          const file = event.dataTransfer.files[0];
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const base64 = e.target?.result as string;
+              editor?.chain().focus().setImage({ src: base64 }).run();
+            };
+            reader.readAsDataURL(file);
+            return true;
+          }
+        }
+        return false;
+      },
+      handlePaste: (view, event) => {
+        if (event.clipboardData && event.clipboardData.files && event.clipboardData.files[0]) {
+          const file = event.clipboardData.files[0];
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const base64 = e.target?.result as string;
+              editor?.chain().focus().setImage({ src: base64 }).run();
+            };
+            reader.readAsDataURL(file);
+            return true;
+          }
+        }
+        return false;
+      },
     },
   });
 
@@ -73,6 +117,26 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
 
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+  }, [editor]);
+
+  const addImage = useCallback(() => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    
+    input.onchange = (event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const base64 = e.target?.result as string;
+          editor?.chain().focus().setImage({ src: base64 }).run();
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    
+    input.click();
   }, [editor]);
 
   if (!editor) {
@@ -167,12 +231,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           <Button
             size="icon"
             variant="ghost"
-            onClick={() => {
-              const url = window.prompt('Image URL');
-              if (url) {
-                editor.chain().focus().setImage({ src: url }).run();
-              }
-            }}
+            onClick={addImage}
             className="hover:bg-gray-100"
           >
             <ImageIcon className="h-4 w-4" />
@@ -221,12 +280,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           "[&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:outline-none",
           "[&_pre]:bg-gray-50 [&_pre]:text-gray-900 [&_pre]:border [&_pre]:border-gray-200",
           "[&_code]:bg-gray-50 [&_code]:text-gray-900 [&_code]:px-1 [&_code]:rounded",
-          "[&_blockquote]:border-l-4 [&_blockquote]:border-gray-200 [&_blockquote]:pl-4 [&_blockquote]:italic",
+          "[&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-700 [&_blockquote]:bg-blue-50/50",
           "[&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-2",
           "[&_ul]:list-disc [&_ol]:list-decimal",
           "[&_h1]:text-2xl [&_h2]:text-xl [&_h3]:text-lg",
           "[&_p]:my-2",
-          "[&_img]:max-w-full [&_img]:rounded-lg"
+          "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4"
         )}
       />
     </div>
