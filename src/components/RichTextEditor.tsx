@@ -47,6 +47,20 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             class: 'border-l-4 border-blue-500 pl-4 my-4 italic text-gray-700',
           },
         },
+        heading: {
+          levels: [1, 2, 3],
+          HTMLAttributes: {
+            1: {
+              class: 'text-2xl font-bold text-gray-900 mt-6 mb-4',
+            },
+            2: {
+              class: 'text-xl font-bold text-gray-900 mt-5 mb-3',
+            },
+            3: {
+              class: 'text-lg font-bold text-gray-900 mt-4 mb-2',
+            },
+          },
+        },
       }),
       Image.configure({
         inline: true,
@@ -282,9 +296,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           "[&_code]:bg-gray-50 [&_code]:text-gray-900 [&_code]:px-1 [&_code]:rounded",
           "[&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-700 [&_blockquote]:bg-blue-50/50",
           "[&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-2",
-          "[&_ul]:list-disc [&_ol]:list-decimal",
-          "[&_h1]:text-2xl [&_h2]:text-xl [&_h3]:text-lg",
-          "[&_p]:my-2",
+          "[&_ul]:list-disc [&_ol]:list-decimal [&_ul]:ml-4 [&_ol]:ml-4",
+          "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:mt-6 [&_h1]:mb-4",
+          "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:mt-5 [&_h2]:mb-3",
+          "[&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-gray-900 [&_h3]:mt-4 [&_h3]:mb-2",
+          "[&_p]:my-2 [&_p]:text-gray-900",
           "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4"
         )}
       />
