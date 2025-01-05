@@ -532,8 +532,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 variant="secondary"
                 className={cn(
                   "px-2 py-0.5",
-                  "bg-gray-50 hover:bg-gray-100",
-                  "text-gray-700",
+                  "bg-white dark:bg-white",
+                  "text-gray-700 dark:text-gray-700",
                   "border border-gray-200",
                   "rounded-full"
                 )}
@@ -544,7 +544,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-4 w-4 ml-1 hover:bg-gray-200 rounded-full"
+                    className="h-4 w-4 ml-1 hover:bg-gray-100 rounded-full"
                     onClick={() => handleRemoveTag(tag)}
                   >
                     <X className="h-3 w-3" />
@@ -560,8 +560,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   placeholder="Add tag..."
                   className={cn(
                     "h-7 text-sm w-24 sm:w-32",
-                    "bg-gray-50",
-                    "text-gray-900",
+                    "bg-white dark:bg-white",
+                    "text-gray-900 dark:text-gray-900",
                     "border-gray-200",
                     "focus-visible:ring-2 focus-visible:ring-blue-500",
                     "placeholder:text-gray-500",

@@ -56,8 +56,9 @@ export function ItemsTab({
   return (
     <div className="space-y-6">
       {/* Controls Section */}
-      <div className="bg-gray-50 p-4 rounded-xl shadow-sm border border-gray-200">
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          {/* Search Input */}
           <div className="flex-1 w-full sm:w-auto relative">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
             <Input
@@ -66,22 +67,23 @@ export function ItemsTab({
               onChange={(e) => setSearchQuery(e.target.value)}
               className={cn(
                 "pl-9 max-w-md",
-                "bg-gray-50",
-                "text-gray-900",
+                "bg-white dark:bg-white",
+                "text-gray-900 dark:text-gray-900",
                 "border-gray-200",
                 "focus-visible:ring-2 focus-visible:ring-blue-500",
                 "placeholder:text-gray-500"
               )}
             />
           </div>
+          {/* Filter Selects */}
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <CustomSelect
               value={selectedStatus}
               onValueChange={setSelectedStatus}
               className={cn(
                 "w-full sm:w-[180px]",
-                "bg-gray-50",
-                "text-gray-900"
+                "bg-white dark:bg-white",
+                "text-gray-900 dark:text-gray-900"
               )}
               items={[
                 { value: 'all', label: 'All Items' },
@@ -97,8 +99,8 @@ export function ItemsTab({
               onValueChange={setSelectedCategory}
               className={cn(
                 "w-full sm:w-[180px]",
-                "bg-gray-50",
-                "text-gray-900"
+                "bg-white dark:bg-white",
+                "text-gray-900 dark:text-gray-900"
               )}
               items={[
                 { value: 'all', label: 'All Categories' },
