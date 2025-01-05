@@ -42,23 +42,31 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        blockquote: {
-          HTMLAttributes: {
-            class: 'border-l-4 border-blue-500 pl-4 my-4 italic text-gray-700',
-          },
-        },
         heading: {
           levels: [1, 2, 3],
+        },
+        bulletList: {
+          keepMarks: true,
+          keepAttributes: false,
           HTMLAttributes: {
-            1: {
-              class: 'text-2xl font-bold text-gray-900 my-4',
-            },
-            2: {
-              class: 'text-xl font-bold text-gray-900 my-3',
-            },
-            3: {
-              class: 'text-lg font-bold text-gray-900 my-2',
-            },
+            class: 'list-disc ml-4',
+          },
+        },
+        orderedList: {
+          keepMarks: true,
+          keepAttributes: false,
+          HTMLAttributes: {
+            class: 'list-decimal ml-4',
+          },
+        },
+        blockquote: {
+          HTMLAttributes: {
+            class: 'border-l-4 border-blue-500 pl-4 my-4 italic text-gray-700 bg-blue-50/50',
+          },
+        },
+        code: {
+          HTMLAttributes: {
+            class: 'bg-gray-50 text-gray-900 px-1 rounded font-mono text-sm',
           },
         },
       }),
@@ -71,11 +79,21 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       }),
       Link.configure({
         openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-blue-600 underline underline-offset-2',
+        },
       }),
       CodeBlockLowlight.configure({
         lowlight: lowlightInstance,
+        HTMLAttributes: {
+          class: 'bg-gray-50 text-gray-900 p-4 rounded-md border border-gray-200 font-mono text-sm my-4',
+        },
       }),
-      Code,
+      Code.configure({
+        HTMLAttributes: {
+          class: 'bg-gray-50 text-gray-900 px-1 rounded font-mono text-sm',
+        },
+      }),
     ],
     content,
     editable,
@@ -83,6 +101,18 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       onChange(editor.getHTML());
     },
     editorProps: {
+      attributes: {
+        class: cn(
+          "prose prose-sm max-w-none",
+          "min-h-[100px] outline-none",
+          "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:my-4",
+          "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:my-3",
+          "[&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-gray-900 [&_h3]:my-2",
+          "[&_p]:text-gray-900 [&_p]:my-2",
+          "[&_ul]:list-disc [&_ul]:ml-4",
+          "[&_ol]:list-decimal [&_ol]:ml-4",
+        ),
+      },
       handleDrop: (view, event, slice, moved) => {
         if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
           const file = event.dataTransfer.files[0];
@@ -292,15 +322,15 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           "bg-white text-gray-900",
           "p-4",
           "[&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:outline-none",
-          "[&_pre]:bg-gray-50 [&_pre]:text-gray-900 [&_pre]:border [&_pre]:border-gray-200",
-          "[&_code]:bg-gray-50 [&_code]:text-gray-900 [&_code]:px-1 [&_code]:rounded",
-          "[&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-700 [&_blockquote]:bg-blue-50/50",
+          "[&_pre]:bg-gray-50 [&_pre]:text-gray-900 [&_pre]:border [&_pre]:border-gray-200 [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:my-4",
+          "[&_code]:bg-gray-50 [&_code]:text-gray-900 [&_code]:px-1 [&_code]:rounded [&_code]:font-mono [&_code]:text-sm",
+          "[&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:pl-4 [&_blockquote]:my-4 [&_blockquote]:italic [&_blockquote]:text-gray-700 [&_blockquote]:bg-blue-50/50",
           "[&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-2",
-          "[&_ul]:list-disc [&_ol]:list-decimal",
+          "[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4",
           "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:my-4",
           "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:my-3",
           "[&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-gray-900 [&_h3]:my-2",
-          "[&_p]:my-2",
+          "[&_p]:my-2 [&_p]:text-gray-900",
           "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4"
         )}
       />
