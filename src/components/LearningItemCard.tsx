@@ -526,9 +526,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     }
 
     // Sort sessions chronologically (newest first)
-    const sessions = [...item.progress.sessions].sort((a, b) => 
-      new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
-    );
+    const sessions = [...item.progress.sessions].sort((a, b) => {
+      try {
+        return new Date(b.startTime).getTime() - new Date(a.startTime).getTime();
+      } catch (err) {
+        console.error('Error sorting sessions:', err);
+        return 0;
+      }
+    });
     
     const activeSession = sessions.find(s => !s.endTime);
     const displaySessions = showAllSessions 
@@ -538,8 +543,29 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     return (
       <div className="space-y-4 overflow-hidden">
         {displaySessions.map((session, sessionIndex) => {
-          const startDate = new Date(session.startTime);
-          const endDate = session.endTime ? new Date(session.endTime) : null;
+          let startDate: Date | null = null;
+          let endDate: Date | null = null;
+          let startDateStr = '';
+          let endDateStr = '';
+
+          try {
+            startDate = new Date(session.startTime);
+            startDateStr = startDate.toLocaleString();
+          } catch (err) {
+            console.error('Error parsing start date:', session.startTime, err);
+            startDateStr = 'Invalid date';
+          }
+
+          try {
+            if (session.endTime) {
+              endDate = new Date(session.endTime);
+              endDateStr = endDate.toLocaleString();
+            }
+          } catch (err) {
+            console.error('Error parsing end date:', session.endTime, err);
+            endDateStr = 'Invalid date';
+          }
+
           const duration = session.duration || { hours: 0, minutes: 0 };
           const formattedDuration = `${duration.hours}h ${duration.minutes}m`;
           const totalSessions = item.progress!.sessions!.length;
@@ -600,7 +626,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     <Clock className="h-4 w-4 text-blue-500" />
                     Started
                   </div>
-                  <div className="font-medium text-gray-700">{startDate.toLocaleString()}</div>
+                  <div className="font-medium text-gray-700">{startDateStr}</div>
                 </div>
                 {endDate && (
                   <div className="space-y-1.5 bg-white/50 rounded-lg p-3 border border-gray-100">
@@ -608,7 +634,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                       <CheckCircle2 className="h-4 w-4 text-green-500" />
                       Ended
                     </div>
-                    <div className="font-medium text-gray-700">{endDate.toLocaleString()}</div>
+                    <div className="font-medium text-gray-700">{endDateStr}</div>
                   </div>
                 )}
               </div>
