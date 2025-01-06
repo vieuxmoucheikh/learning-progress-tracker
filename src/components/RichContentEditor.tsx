@@ -63,29 +63,35 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
     <div className="flex flex-wrap gap-2 p-2 border-b">
       <div className="flex flex-wrap gap-2">
         <Button
+          size="icon"
           variant="ghost"
-          size="sm"
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          className={cn(editor.isActive('heading', { level: 1 }) && 'bg-muted')}
-          title="Heading 1"
+          className={cn(
+            "hover:bg-gray-100",
+            editor.isActive('heading', { level: 1 }) && "bg-gray-100 text-gray-900"
+          )}
         >
           <Heading1 className="h-4 w-4" />
         </Button>
         <Button
+          size="icon"
           variant="ghost"
-          size="sm"
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={cn(editor.isActive('heading', { level: 2 }) && 'bg-muted')}
-          title="Heading 2"
+          className={cn(
+            "hover:bg-gray-100",
+            editor.isActive('heading', { level: 2 }) && "bg-gray-100 text-gray-900"
+          )}
         >
           <Heading2 className="h-4 w-4" />
         </Button>
         <Button
+          size="icon"
           variant="ghost"
-          size="sm"
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          className={cn(editor.isActive('heading', { level: 3 }) && 'bg-muted')}
-          title="Heading 3"
+          className={cn(
+            "hover:bg-gray-100",
+            editor.isActive('heading', { level: 3 }) && "bg-gray-100 text-gray-900"
+          )}
         >
           <Heading3 className="h-4 w-4" />
         </Button>
@@ -147,27 +153,8 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     extensions: [
       StarterKit.configure({
         heading: {
-          levels: [1, 2, 3],
-          HTMLAttributes: {
-            class: 'font-bold text-gray-900',
-          },
+          levels: [1, 2, 3]
         },
-        bulletList: {
-          keepMarks: true,
-          keepAttributes: false,
-          HTMLAttributes: {
-            class: 'list-disc ml-4',
-          },
-        },
-        orderedList: {
-          keepMarks: true,
-          keepAttributes: false,
-          HTMLAttributes: {
-            class: 'list-decimal ml-4',
-          },
-        },
-        code: false,
-        codeBlock: false,
       }),
       Highlight,
       TaskList,
