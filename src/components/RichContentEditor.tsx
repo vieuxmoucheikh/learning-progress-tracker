@@ -105,6 +105,33 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
       <Button
         variant="ghost"
         size="sm"
+        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+        className={cn(editor.isActive('heading', { level: 1 }) && 'bg-muted')}
+        title="Heading 1"
+      >
+        H1
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+        className={cn(editor.isActive('heading', { level: 2 }) && 'bg-muted')}
+        title="Heading 2"
+      >
+        H2
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+        className={cn(editor.isActive('heading', { level: 3 }) && 'bg-muted')}
+        title="Heading 3"
+      >
+        H3
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         className={cn(editor.isActive('bulletList') && 'bg-muted')}
         title="Bullet List"
@@ -154,8 +181,10 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: false,
-        code: false, // Disable code in StarterKit
+        heading: {
+          levels: [1, 2, 3]
+        },
+        codeBlock: false, // Disable code block in StarterKit
       }),
       Highlight,
       TaskList,
