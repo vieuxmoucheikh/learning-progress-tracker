@@ -56,15 +56,15 @@
   margin-bottom: 0.5em;
 }
 
-.heading[data-level="1"] {
+.heading-1 {
   font-size: 2em;
 }
 
-.heading[data-level="2"] {
+.heading-2 {
   font-size: 1.5em;
 }
 
-.heading[data-level="3"] {
+.heading-3 {
   font-size: 1.25em;
 }
 
