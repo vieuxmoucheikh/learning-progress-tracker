@@ -23,6 +23,11 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import Image from '@tiptap/extension-image';
+import Link from '@tiptap/extension-link';
+import { lowlight } from 'lowlight';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import Code from '@tiptap/extension-code';
 
 type TextSizeOptions = 'large' | 'medium' | 'normal';
 
@@ -153,15 +158,36 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     extensions: [
       StarterKit.configure({
         heading: {
-          levels: [1, 2, 3]
+          levels: [1, 2, 3],
+          HTMLAttributes: {
+            class: 'font-bold text-gray-900',
+          },
+        },
+        code: false,
+        codeBlock: false,
+      }),
+      Image.configure({
+        inline: true,
+        allowBase64: true,
+        HTMLAttributes: {
+          class: 'rounded-lg max-w-full h-auto my-4',
         },
       }),
-      Highlight,
-      TaskList,
-      TaskItem.configure({
-        nested: true,
+      Link.configure({
+        openOnClick: false,
         HTMLAttributes: {
-          class: 'flex items-start gap-2',
+          class: 'text-blue-600 underline underline-offset-2',
+        },
+      }),
+      CodeBlockLowlight.configure({
+        lowlight: lowlight,
+        HTMLAttributes: {
+          class: 'bg-gray-50 text-gray-900 p-4 rounded-md border border-gray-200 font-mono text-sm my-4',
+        },
+      }),
+      Code.configure({
+        HTMLAttributes: {
+          class: 'bg-gray-50 text-gray-900 px-1 rounded font-mono text-sm',
         },
       }),
       TextStyle,
