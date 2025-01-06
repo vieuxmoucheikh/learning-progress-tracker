@@ -135,9 +135,12 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     extensions: [
       StarterKit.configure({
         heading: {
-          levels: [1, 2, 3]
+          levels: [1, 2, 3],
+          HTMLAttributes: {
+            class: 'font-bold text-gray-900',
+          },
         },
-        codeBlock: false,  // Disable codeBlock to resolve duplicate extension warning
+        codeBlock: false,
       }),
       Highlight,
       TaskList,
@@ -168,7 +171,10 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
           editor={editor}
           className={cn(
             'prose max-w-none p-4',
-            isEditing && 'min-h-[150px] cursor-text'
+            isEditing && 'min-h-[150px] cursor-text',
+            '[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:my-4',
+            '[&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:my-3',
+            '[&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-gray-900 [&_h3]:my-2'
           )}
         />
         <div className="flex justify-end mt-2">
