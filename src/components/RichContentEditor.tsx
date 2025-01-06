@@ -137,7 +137,9 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
         heading: {
           levels: [1, 2, 3],
           HTMLAttributes: {
-            class: 'prose-heading',
+            1: { class: 'text-4xl font-bold' },
+            2: { class: 'text-3xl font-bold' },
+            3: { class: 'text-2xl font-bold' },
           },
         },
         codeBlock: false,
@@ -170,7 +172,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
         <EditorContent
           editor={editor}
           className={cn(
-            'prose max-w-none p-4',
+            'max-w-none p-4',
             isEditing && 'min-h-[150px] cursor-text'
           )}
         />
