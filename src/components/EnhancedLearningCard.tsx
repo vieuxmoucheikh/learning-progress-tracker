@@ -68,23 +68,29 @@ import {
 } from "@/components/ui/select";
 import { getLearningItems, trackLearningActivity, updateLearningItem } from '@/lib/database';
 
-interface EnhancedLearningCardProps extends CardType {
-  onSave: (data: Partial<CardType>) => Promise<boolean>;
+interface EnhancedLearningCardProps {
+  card: CardType;
+  onSave: (data: Partial<CardType> & { id: string }) => Promise<boolean>;
   onDelete: () => void;
+  categories: string[];
 }
 
 export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
-  id,
-  title: initialTitle,
-  content: initialContent,
-  media: initialMedia = [],
-  tags: initialTags = [],
-  category: initialCategory = '',
-  mastered: initialMastered = false,
-  createdAt,
-  updatedAt,
+  card: {
+    id,
+    title: initialTitle,
+    content: initialContent,
+    media: initialMedia = [],
+    tags: initialTags = [],
+    category: initialCategory = '',
+    mastered: initialMastered = false,
+    createdAt,
+    updatedAt,
+    backgroundColor = 'bg-white'
+  },
   onSave,
   onDelete,
+  categories: availableCategories,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(initialTitle);
@@ -97,7 +103,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   const [isZoomed, setIsZoomed] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [itemCategory, setItemCategory] = useState(initialCategory);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [bgColor, setBgColor] = useState(backgroundColor);
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -111,7 +117,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         const uniqueCategories = Array.from(
           new Set(items.map(item => item.category).filter(Boolean))
         ).sort();
-        setCategories(uniqueCategories);
+        availableCategories = uniqueCategories;
       } catch (error) {
         console.error('Error fetching categories:', error);
       }
@@ -292,7 +298,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       "relative overflow-hidden transition-all duration-300 border-2 h-full",
       "hover:shadow-lg hover:shadow-blue-300/50",
       "max-w-3xl mx-auto",
-      "bg-white",
+      bgColor,
       "sm:rounded-xl",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
       mastered 
@@ -391,12 +397,12 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     <div className="px-2 py-1.5 text-sm font-medium text-gray-500">
                       Categories
                     </div>
-                    {categories.map((cat) => (
+                    {availableCategories.map((cat) => (
                       <SelectItem key={cat} value={cat}>
                         {cat}
                       </SelectItem>
                     ))}
-                    {itemCategory && !categories.includes(itemCategory) && (
+                    {itemCategory && !availableCategories.includes(itemCategory) && (
                       <SelectItem value={itemCategory}>
                         {itemCategory} (New)
                       </SelectItem>

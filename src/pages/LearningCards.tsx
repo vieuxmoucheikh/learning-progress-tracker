@@ -8,46 +8,48 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { EnhancedLearningCard } from '@/components/EnhancedLearningCard';
+import { EnhancedLearningCard as LearningCardComponent } from '@/components/EnhancedLearningCard';
 import { learningCardsService } from '@/lib/learningCards';
-import type { EnhancedLearningCard as CardType } from '@/types';
+import type { EnhancedLearningCard, NewEnhancedLearningCard } from '@/types';
 import { Plus, Search, Tag as TagIcon, Loader2, Clock, Filter, X } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
-import { getLearningItems } from '@/lib/database';
 import { cn } from '@/lib/utils';
+import { useUser } from '@/hooks/useUser';
+
+type SortType = 'updated' | 'created' | 'mastered';
 
 export const LearningCardsPage = () => {
-  const [cards, setCards] = useState<CardType[]>([]);
+  const [cards, setCards] = useState<EnhancedLearningCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [categories, setCategories] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<'updated' | 'created' | 'mastered'>('updated');
+  const [sortBy, setSortBy] = useState<SortType>('updated');
   const { toast } = useToast();
+  const { user } = useUser();
 
   const allTags = Array.from(
     new Set(cards.flatMap((card) => card.tags))
   ).sort();
 
   const fetchCategories = async () => {
+    if (!user) return;
     try {
-      const items = await getLearningItems();
-      const uniqueCategories = Array.from(
-        new Set(items.map(item => item.category).filter(Boolean))
-      ).sort();
-      setCategories(uniqueCategories);
+      const fetchedCategories = await learningCardsService.getCategories(user);
+      setCategories(fetchedCategories);
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
   };
 
   const fetchCards = async () => {
+    if (!user) return;
     try {
-      const fetchedCards = await learningCardsService.getCards();
-      setCards(fetchedCards as CardType[]);
+      const fetchedCards = await learningCardsService.getCards(user);
+      setCards(fetchedCards);
     } catch (error) {
       console.error('Error fetching cards:', error);
       toast({
@@ -61,19 +63,25 @@ export const LearningCardsPage = () => {
   };
 
   useEffect(() => {
-    fetchCards();
-    fetchCategories();
-  }, []);
+    if (user) {
+      fetchCards();
+      fetchCategories();
+    }
+  }, [user]);
 
   const handleCreateCard = async () => {
+    if (!user) return;
     try {
-      const newCard = await learningCardsService.createCard({
+      const newCard: NewEnhancedLearningCard = {
         title: 'New Card',
         content: '',
         tags: [],
         category: selectedCategory !== 'all' ? selectedCategory : '',
-      });
-      setCards((prevCards) => [newCard, ...prevCards]);
+        mastered: false,
+        backgroundColor: 'bg-white',
+      };
+      const createdCard = await learningCardsService.createCard(user, newCard);
+      setCards((prevCards) => [createdCard, ...prevCards]);
       toast({
         title: 'Success',
         description: 'Card created successfully',
@@ -88,15 +96,16 @@ export const LearningCardsPage = () => {
     }
   };
 
-  const handleSaveCard = async (card: Partial<CardType>): Promise<boolean> => {
+  const handleSaveCard = async (card: Partial<EnhancedLearningCard> & { id: string }): Promise<boolean> => {
+    if (!user) return false;
     try {
-      await learningCardsService.updateCard(card.id!, {
+      await learningCardsService.updateCard(user, card.id, {
         title: card.title,
         content: card.content,
-        media: card.media,
         tags: card.tags,
         mastered: card.mastered,
         category: card.category,
+        backgroundColor: card.backgroundColor,
       });
       await fetchCards();
       toast({
@@ -116,8 +125,9 @@ export const LearningCardsPage = () => {
   };
 
   const handleDeleteCard = async (id: string) => {
+    if (!user) return;
     try {
-      await learningCardsService.deleteCard(id);
+      await learningCardsService.deleteCard(user, id);
       setCards((prevCards) => prevCards.filter((card) => card.id !== id));
       toast({
         title: "Success",
@@ -152,6 +162,10 @@ export const LearningCardsPage = () => {
       }
     });
 
+  const handleSortChange = (value: string) => {
+    setSortBy(value as SortType);
+  };
+
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
       prev.includes(tag)
@@ -159,6 +173,16 @@ export const LearningCardsPage = () => {
         : [...prev, tag]
     );
   };
+
+  if (!user) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900">Please sign in to view your learning cards</h1>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -202,12 +226,14 @@ export const LearningCardsPage = () => {
                 "bg-white",
                 "text-gray-900",
                 "border-gray-200",
-                "focus:ring-2 focus:ring-blue-500"
+                "focus:ring-2 focus:ring-blue-500",
               )}>
-                <Filter className="w-4 h-4 mr-2 text-gray-500" />
-                <SelectValue placeholder="Filter by category" />
+                <div className="flex items-center">
+                  <Filter className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Filter by category" />
+                </div>
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category} value={category}>
@@ -217,20 +243,22 @@ export const LearningCardsPage = () => {
               </SelectContent>
             </Select>
 
-            <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'updated' | 'created' | 'mastered')}>
+            <Select value={sortBy} onValueChange={handleSortChange}>
               <SelectTrigger className={cn(
                 "bg-white",
                 "text-gray-900",
                 "border-gray-200",
-                "focus:ring-2 focus:ring-blue-500"
+                "focus:ring-2 focus:ring-blue-500",
               )}>
-                <Clock className="w-4 h-4 mr-2 text-gray-500" />
-                <SelectValue placeholder="Sort by" />
+                <div className="flex items-center">
+                  <Clock className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Sort by" />
+                </div>
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent>
                 <SelectItem value="updated">Last Updated</SelectItem>
                 <SelectItem value="created">Created Date</SelectItem>
-                <SelectItem value="mastered">Mastered First</SelectItem>
+                <SelectItem value="mastered">Mastery Status</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -241,73 +269,58 @@ export const LearningCardsPage = () => {
               {allTags.map((tag) => (
                 <Badge
                   key={tag}
-                  variant={selectedTags.includes(tag) ? "default" : "secondary"}
+                  variant={selectedTags.includes(tag) ? "default" : "outline"}
                   className={cn(
                     "cursor-pointer transition-colors",
                     selectedTags.includes(tag)
-                      ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                      : "bg-white text-gray-700 hover:bg-gray-100",
-                    "border border-gray-200"
+                      ? "bg-blue-500 hover:bg-blue-600"
+                      : "hover:border-blue-500 hover:text-blue-500"
                   )}
                   onClick={() => toggleTag(tag)}
                 >
                   {tag}
                   {selectedTags.includes(tag) && (
-                    <X className="w-3 h-3 ml-1 text-current" />
+                    <X className="w-3 h-3 ml-1" />
                   )}
                 </Badge>
               ))}
             </div>
           )}
-
-          {loading ? (
-            <div className="flex justify-center items-center min-h-[400px]">
-              <div className="flex flex-col items-center gap-4">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-                <p className="text-gray-500">Loading your cards...</p>
-              </div>
-            </div>
-          ) : (
-            <AnimatePresence mode="popLayout">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredCards.map((card) => (
-                  <motion.div
-                    key={card.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <EnhancedLearningCard
-                      {...card}
-                      onSave={handleSaveCard}
-                      onDelete={() => handleDeleteCard(card.id)}
-                    />
-                  </motion.div>
-                ))}
-              </div>
-            </AnimatePresence>
-          )}
-
-          {!loading && filteredCards.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-gray-50 rounded-lg">
-              <div className="text-gray-500 mb-4">
-                {searchTerm || selectedTags.length > 0 || selectedCategory !== 'all'
-                  ? 'No cards match your filters. Try adjusting your search criteria.'
-                  : 'No cards yet. Create your first card to get started!'}
-              </div>
-              <Button
-                onClick={handleCreateCard}
-                variant="outline"
-                className="bg-white hover:bg-gray-50"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create Card
-              </Button>
-            </div>
-          )}
         </div>
+
+        <AnimatePresence mode="popLayout">
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+            </div>
+          ) : filteredCards.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="text-center py-12"
+            >
+              <p className="text-gray-500">No cards found. Create one to get started!</p>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+            >
+              {filteredCards.map((card) => (
+                <LearningCardComponent
+                  key={card.id}
+                  card={card}
+                  onSave={handleSaveCard}
+                  onDelete={() => handleDeleteCard(card.id)}
+                  categories={categories}
+                />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

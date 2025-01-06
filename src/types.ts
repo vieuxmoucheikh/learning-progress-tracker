@@ -165,11 +165,17 @@ export interface EnhancedLearningCard {
   mastered?: boolean;
   category?: string;
   lastStudied?: string;
+  backgroundColor?: string;
 }
 
-export type NewEnhancedLearningCard = Omit<EnhancedLearningCard, 'id' | 'createdAt' | 'updatedAt'> & {
+export type NewEnhancedLearningCard = {
+  title: string;
+  content: string;
+  media?: CardMedia[];
+  tags: string[];
   mastered?: boolean;
   category?: string;
+  backgroundColor?: string;
 }
 
 export interface EnhancedLearningContent {
