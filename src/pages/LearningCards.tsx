@@ -160,10 +160,20 @@ export const LearningCardsPage = () => {
     })
     .sort((a, b) => {
       try {
-        const aCreated = a.created_at ? new Date(a.created_at).getTime() : 0;
-        const bCreated = b.created_at ? new Date(b.created_at).getTime() : 0;
-        const aUpdated = a.updated_at ? new Date(a.updated_at).getTime() : 0;
-        const bUpdated = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+        // Parse dates and handle invalid dates
+        const parseDate = (dateStr: string) => {
+          try {
+            const date = new Date(dateStr);
+            return isNaN(date.getTime()) ? 0 : date.getTime();
+          } catch {
+            return 0;
+          }
+        };
+
+        const aCreated = parseDate(a.created_at);
+        const bCreated = parseDate(b.created_at);
+        const aUpdated = parseDate(a.updated_at);
+        const bUpdated = parseDate(b.updated_at);
 
         switch (sortBy) {
           case 'created':

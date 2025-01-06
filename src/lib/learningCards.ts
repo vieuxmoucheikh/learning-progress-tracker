@@ -1,12 +1,20 @@
 import { supabase } from './supabase';
 import type { CardMedia, EnhancedLearningCard, NewEnhancedLearningCard } from '@/types';
 
-const validateDate = (date: any): string => {
-  if (!date) return new Date().toISOString();
+const normalizeDate = (dateString: any): string => {
+  if (!dateString) return new Date().toISOString();
+  
   try {
-    return new Date(date).toISOString();
+    // Handle PostgreSQL timestamp with timezone
+    // Remove timezone offset and convert to UTC
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      console.error('Invalid date:', dateString);
+      return new Date().toISOString();
+    }
+    return date.toISOString();
   } catch (e) {
-    console.error('Invalid date:', date);
+    console.error('Error parsing date:', dateString, e);
     return new Date().toISOString();
   }
 };
@@ -31,8 +39,8 @@ class LearningCardsService {
         id: card.id,
         title: card.title || '',
         content: card.content || '',
-        created_at: validateDate(card.created_at),
-        updated_at: validateDate(card.updated_at),
+        created_at: normalizeDate(card.created_at),
+        updated_at: normalizeDate(card.updated_at),
         tags: Array.isArray(card.tags) ? card.tags : [],
         media: Array.isArray(card.media) ? card.media : [],
         mastered: Boolean(card.mastered),
@@ -81,8 +89,8 @@ class LearningCardsService {
       id: data.id,
       title: data.title || '',
       content: data.content || '',
-      created_at: validateDate(data.created_at),
-      updated_at: validateDate(data.updated_at),
+      created_at: normalizeDate(data.created_at),
+      updated_at: normalizeDate(data.updated_at),
       tags: Array.isArray(data.tags) ? data.tags : [],
       media: Array.isArray(data.media) ? data.media : [],
       mastered: Boolean(data.mastered),
@@ -124,8 +132,8 @@ class LearningCardsService {
       id: data.id,
       title: data.title || '',
       content: data.content || '',
-      created_at: validateDate(data.created_at),
-      updated_at: validateDate(data.updated_at),
+      created_at: normalizeDate(data.created_at),
+      updated_at: normalizeDate(data.updated_at),
       tags: Array.isArray(data.tags) ? data.tags : [],
       media: Array.isArray(data.media) ? data.media : [],
       mastered: Boolean(data.mastered),
