@@ -5,15 +5,16 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 60% 10%; /* Darker blue for better visibility */
+    --foreground: 222.2 95% 4.9%; /* Noir plus intense */
+
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 222.2 95% 4.9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 30% 10%; /* Darker black for card text */
+    --card-foreground: 0 0% 0%; /* Darker text for better visibility */
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
@@ -22,7 +23,7 @@
     --primary-foreground: 222.2 90% 11.2%;
 
     --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 90% 98%; /* Ensure secondary text is white */
+    --secondary-foreground: 222.2 47.4% 11.2%;
 
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
@@ -86,7 +87,7 @@
   ul,
   ol {
     padding: 0 1rem;
-    color: #ffffff; /* Change listicle color to white */
+    color: 0 0% 0%; /* Change list color to black */
   }
 
   code {
