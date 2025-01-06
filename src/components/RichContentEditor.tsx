@@ -137,7 +137,9 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
         heading: {
           levels: [1, 2, 3],
           HTMLAttributes: {
-            class: 'font-bold text-gray-900',
+            1: { class: 'text-4xl font-bold' },
+            2: { class: 'text-3xl font-bold' },
+            3: { class: 'text-2xl font-bold' },
           },
         },
         codeBlock: false,
@@ -171,10 +173,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
           editor={editor}
           className={cn(
             'prose max-w-none p-4',
-            isEditing && 'min-h-[150px] cursor-text',
-            '[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:my-4',
-            '[&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:my-3',
-            '[&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-gray-900 [&_h3]:my-2'
+            isEditing && 'min-h-[150px] cursor-text'
           )}
         />
         <div className="flex justify-end mt-2">
