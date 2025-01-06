@@ -5,7 +5,6 @@ import Highlight from '@tiptap/extension-highlight';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import TextStyle from '@tiptap/extension-text-style';
-import { Extension } from '@tiptap/core';
 import {
   Bold as BoldIcon,
   Italic as ItalicIcon,
@@ -43,11 +42,8 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
       normal: 'text-base'
     };
     
-    // First clear any existing text size
-    editor.commands.unsetMark('textStyle');
-    
-    // Set the new text size
-    editor.commands.setMark('textStyle', { class: classes[size] });
+    editor.chain().focus().unsetMark('textStyle').run();
+    editor.chain().focus().setMark('textStyle', { class: classes[size] }).run();
   };
 
   const isTextSize = (size: TextSizeOptions): boolean => {
@@ -61,7 +57,8 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
 
   return (
     <div className="flex flex-wrap gap-2 p-2 border-b">
-      <div className="flex flex-wrap gap-2">
+      {/* Headings Group */}
+      <div className="flex items-center gap-1 border-r pr-2">
         <Button
           size="icon"
           variant="ghost"
@@ -97,45 +94,105 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         </Button>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      {/* Text Formatting Group */}
+      <div className="flex items-center gap-1 border-r pr-2">
         <Button
+          size="icon"
           variant="ghost"
-          size="sm"
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={cn(
+            "hover:bg-gray-100",
+            editor.isActive('bold') && "bg-gray-100 text-gray-900"
+          )}
+        >
+          <BoldIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={cn(
+            "hover:bg-gray-100",
+            editor.isActive('italic') && "bg-gray-100 text-gray-900"
+          )}
+        >
+          <ItalicIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => editor.chain().focus().toggleCode().run()}
+          className={cn(
+            "hover:bg-gray-100",
+            editor.isActive('code') && "bg-gray-100 text-gray-900"
+          )}
+        >
+          <CodeIcon className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* Text Size Group */}
+      <div className="flex items-center gap-1 border-r pr-2">
+        <Button
+          size="icon"
+          variant="ghost"
           onClick={() => setTextSize('large')}
-          className={cn(isTextSize('large') && 'bg-muted')}
-          title="Large Text"
+          className={cn(
+            "hover:bg-gray-100",
+            isTextSize('large') && "bg-gray-100 text-gray-900"
+          )}
         >
           <TypeIcon className="h-5 w-5" />
         </Button>
         <Button
+          size="icon"
           variant="ghost"
-          size="sm"
           onClick={() => setTextSize('medium')}
-          className={cn(isTextSize('medium') && 'bg-muted')}
-          title="Medium Text"
+          className={cn(
+            "hover:bg-gray-100",
+            isTextSize('medium') && "bg-gray-100 text-gray-900"
+          )}
         >
           <TypeIcon className="h-4 w-4" />
         </Button>
         <Button
+          size="icon"
           variant="ghost"
-          size="sm"
           onClick={() => setTextSize('normal')}
-          className={cn(isTextSize('normal') && 'bg-muted')}
-          title="Normal Text"
+          className={cn(
+            "hover:bg-gray-100",
+            isTextSize('normal') && "bg-gray-100 text-gray-900"
+          )}
         >
           <TypeIcon className="h-3.5 w-3.5" />
         </Button>
       </div>
 
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={cn(editor.isActive('bulletList') && 'bg-muted')}
-        title="Bullet List"
-      >
-        <List className="h-4 w-4" />
-      </Button>
+      {/* Lists Group */}
+      <div className="flex items-center gap-1">
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          className={cn(
+            "hover:bg-gray-100",
+            editor.isActive('bulletList') && "bg-gray-100 text-gray-900"
+          )}
+        >
+          <List className="h-4 w-4" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          className={cn(
+            "hover:bg-gray-100",
+            editor.isActive('orderedList') && "bg-gray-100 text-gray-900"
+          )}
+        >
+          <ListOrdered className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 };
@@ -152,9 +209,8 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: {
-          levels: [1, 2, 3]
-        },
+        heading: {},
+        codeBlock: false, // Disable codeBlock to avoid conflicts
       }),
       Highlight,
       TaskList,
@@ -189,7 +245,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     },
   });
 
-  // Update editor content when prop changes
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
       editor.commands.setContent(content);
@@ -197,7 +252,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     }
   }, [editor, content]);
 
-  // Update editor editable state
   useEffect(() => {
     if (editor) {
       editor.setEditable(isEditing);
@@ -215,29 +269,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     setIsEditing(false);
     setLocalContent(content);
     editor?.commands.setContent(content);
-  };
-
-  const setTextSize = (size: TextSizeOptions) => {
-    const classes = {
-      large: 'text-xl',
-      medium: 'text-lg',
-      normal: 'text-base'
-    };
-    
-    // First clear any existing text size
-    editor?.commands.unsetMark('textStyle');
-    
-    // Set the new text size
-    editor?.commands.setMark('textStyle', { class: classes[size] });
-  };
-
-  const isTextSize = (size: TextSizeOptions): boolean => {
-    const classes = {
-      large: 'text-xl',
-      medium: 'text-lg',
-      normal: 'text-base'
-    };
-    return editor?.isActive('textStyle', { class: classes[size] }) ?? false;
   };
 
   return (
