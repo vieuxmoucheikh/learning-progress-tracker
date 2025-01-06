@@ -1,31 +1,34 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from './RichTextEditor';
 import { Badge } from '@/components/ui/badge';
 import { 
   Edit, 
   Save, 
-  X, 
-  Tag, 
-  Clock, 
-  Copy, 
-  Eye, 
-  EyeOff, 
-  Bookmark, 
-  BookmarkCheck, 
-  ZoomIn, 
-  ZoomOut, 
   Trash2, 
+  X, 
+  Tag as TagIcon, 
+  Image as ImageIcon, 
+  Link as LinkIcon,
   Check, 
   Plus, 
   ChevronsUpDown,
-  Trophy
+  Trophy,
+  Download,
+  Eye,
+  EyeOff,
+  Clock,
+  Bookmark,
+  BookmarkCheck
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import type { EnhancedLearningCard as CardType, NewEnhancedLearningCard } from '@/types';
-import { RichTextEditor } from './RichTextEditor';
+import type { Options as Html2PdfOptions } from 'html2pdf.js';
+// @ts-ignore
+import html2pdf from 'html2pdf.js';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/useToast';
 import {
@@ -272,6 +275,105 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     setIsContentHidden(!isContentHidden);
   };
 
+  const exportToPdf = useCallback(() => {
+    const element = document.createElement('div');
+    element.className = 'pdf-container p-8';
+    
+    // Add title
+    const titleElement = document.createElement('h1');
+    titleElement.textContent = title;
+    titleElement.className = 'text-4xl font-bold mb-6';
+    element.appendChild(titleElement);
+    
+    // Add content
+    const contentElement = document.createElement('div');
+    contentElement.className = 'prose max-w-none mb-6';
+    contentElement.innerHTML = content;
+    element.appendChild(contentElement);
+    
+    // Add metadata
+    const metadata = document.createElement('div');
+    metadata.className = 'text-sm text-gray-600 mb-6';
+    
+    if (itemCategory) {
+      const categoryElement = document.createElement('div');
+      categoryElement.className = 'mb-2';
+      categoryElement.innerHTML = `<strong>Category:</strong> ${itemCategory}`;
+      metadata.appendChild(categoryElement);
+    }
+    
+    if (updatedAt) {
+      const lastStudiedElement = document.createElement('div');
+      lastStudiedElement.className = 'mb-2';
+      lastStudiedElement.innerHTML = `<strong>Last Studied:</strong> ${new Date(updatedAt).toLocaleDateString()}`;
+      metadata.appendChild(lastStudiedElement);
+    }
+    
+    if (tags && tags.length > 0) {
+      const tagsElement = document.createElement('div');
+      tagsElement.className = 'mb-2';
+      tagsElement.innerHTML = `<strong>Tags:</strong> ${tags.join(', ')}`;
+      metadata.appendChild(tagsElement);
+    }
+    
+    element.appendChild(metadata);
+    
+    // Add media if present
+    if (media && media.length > 0) {
+      const mediaSection = document.createElement('div');
+      mediaSection.className = 'mb-6';
+      mediaSection.innerHTML = '<h2 class="text-2xl font-bold mb-4">Media</h2>';
+      
+      media.forEach(item => {
+        const mediaItem = document.createElement('div');
+        mediaItem.className = 'mb-4';
+        if (item.type === 'image') {
+          mediaItem.innerHTML = `
+            <img src="${item.url}" alt="${item.description || ''}" class="max-w-full rounded-lg" />
+            ${item.description ? `<p class="mt-2 text-sm text-gray-600">${item.description}</p>` : ''}
+          `;
+        } else {
+          mediaItem.innerHTML = `
+            <div class="text-blue-500">${item.url}</div>
+            ${item.description ? `<p class="mt-1 text-sm text-gray-600">${item.description}</p>` : ''}
+          `;
+        }
+        mediaSection.appendChild(mediaItem);
+      });
+      
+      element.appendChild(mediaSection);
+    }
+    
+    // Configure PDF options
+    const opt: Html2PdfOptions = {
+      margin: [15, 15],
+      filename: `${title.toLowerCase().replace(/\s+/g, '-')}.pdf`,
+      image: { 
+        type: 'jpeg', 
+        quality: 0.98 
+      },
+      html2canvas: { 
+        scale: 2,
+        useCORS: true,
+        letterRendering: true
+      },
+      jsPDF: { 
+        unit: 'mm', 
+        format: 'a4', 
+        orientation: 'portrait'
+      }
+    };
+    
+    // Generate PDF
+    html2pdf()
+      .set(opt)
+      .from(element)
+      .save()
+      .catch(error => {
+        console.error('Error generating PDF:', error);
+      });
+  }, [title, content, itemCategory, updatedAt, tags, media]);
+
   // Fix for mobile input focus
   useEffect(() => {
     if (isEditing) {
@@ -365,6 +467,15 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 ) : (
                   <Edit className="w-5 h-5 text-blue-900" />
                 )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={exportToPdf}
+                className="h-9 w-9 hover:bg-blue-100 rounded-lg"
+                title="Export to PDF"
+              >
+                <Download className="w-5 h-5 text-blue-900" />
               </Button>
             </div>
           </div>

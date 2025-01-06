@@ -1,13 +1,16 @@
-import { useState, useMemo, useCallback } from "react";
-import { LearningItem } from "@/types";
+import React, { useState, useMemo, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Search, Download } from 'lucide-react';
 import LearningItemCard from "./LearningItemCard";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { Search, Download } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { CustomSelect } from "./ui/select";
+import type { Options as Html2PdfOptions } from 'html2pdf.js';
+import type { LearningItem } from '@/types';
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
-import { CustomSelect } from "./ui/select";
+import { cn } from "@/lib/utils";
 
 interface ItemsTabProps {
   items: LearningItem[];
@@ -98,10 +101,13 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
     });
     
     // Configure PDF options
-    const opt = {
-      margin: [10, 10],
+    const opt: Html2PdfOptions = {
+      margin: [15, 15],
       filename: 'learning-cards.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
+      image: { 
+        type: 'jpeg', 
+        quality: 0.98 
+      },
       html2canvas: { 
         scale: 2,
         useCORS: true,
@@ -110,12 +116,18 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
       jsPDF: { 
         unit: 'mm', 
         format: 'a4', 
-        orientation: 'portrait' 
+        orientation: 'portrait'
       }
     };
     
     // Generate PDF
-    html2pdf().set(opt).from(element).save();
+    html2pdf()
+      .set(opt)
+      .from(element)
+      .save()
+      .catch(error => {
+        console.error('Error generating PDF:', error);
+      });
   }, [filteredItems]);
 
   return (

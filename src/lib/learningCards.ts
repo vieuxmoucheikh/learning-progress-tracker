@@ -1,5 +1,8 @@
 import { supabase } from './supabase';
 import type { CardMedia, EnhancedLearningCard, NewEnhancedLearningCard } from '@/types';
+import type { Options as Html2PdfOptions } from 'html2pdf.js';
+// @ts-ignore
+import html2pdf from 'html2pdf.js';
 
 class LearningCardsService {
   async getCards(): Promise<EnhancedLearningCard[]> {
@@ -119,6 +122,37 @@ class LearningCardsService {
     }
   }
 
+  async exportToPdf(title: string, element: HTMLElement): Promise<void> {
+    const opt: Html2PdfOptions = {
+      margin: [15, 15] as [number, number],
+      filename: `${title.toLowerCase().replace(/\s+/g, '-')}.pdf`,
+      image: { 
+        type: 'jpeg', 
+        quality: 0.98 
+      },
+      html2canvas: { 
+        scale: 2,
+        useCORS: true,
+        letterRendering: true
+      },
+      jsPDF: { 
+        unit: 'mm', 
+        format: 'a4', 
+        orientation: 'portrait'
+      }
+    };
+
+    try {
+      await html2pdf()
+        .set(opt)
+        .from(element)
+        .save();
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      throw new Error('Failed to generate PDF');
+    }
+  }
+
   private parseMedia(media: any): CardMedia[] {
     if (!media) return [];
     if (Array.isArray(media)) {
@@ -136,6 +170,27 @@ class LearningCardsService {
     } catch {
       return [];
     }
+  }
+
+  private getHtml2PdfOptions(title: string): Html2PdfOptions {
+    return {
+      margin: [15, 15] as [number, number],
+      filename: `${title.toLowerCase().replace(/\s+/g, '-')}.pdf`,
+      image: { 
+        type: 'jpeg', 
+        quality: 0.98 
+      },
+      html2canvas: { 
+        scale: 2,
+        useCORS: true,
+        letterRendering: true
+      },
+      jsPDF: { 
+        unit: 'mm', 
+        format: 'a4', 
+        orientation: 'portrait'
+      }
+    };
   }
 }
 

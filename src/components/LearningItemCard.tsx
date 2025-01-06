@@ -28,7 +28,7 @@ import {
   Pencil
 } from 'lucide-react';
 // @ts-ignore
-import html2pdf from 'html2pdf.js';
+import html2pdf, { Html2PdfOptions, ImageType, JsPdfUnit, JsPdfFormat, JsPdfOrientation } from 'html2pdf.js';
 import type { LearningItem, Session } from '../types';
 import { formatTime, calculateProgress, formatDuration, getTotalMinutes, calculateDuration } from '../lib/utils';
 import clsx from 'clsx';
@@ -847,19 +847,22 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     }
     
     // Configure PDF options
-    const opt = {
-      margin: [15, 15],
+    const opt: Html2PdfOptions = {
+      margin: [15, 15] as const,
       filename: `${item.title.toLowerCase().replace(/\s+/g, '-')}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
+      image: { 
+        type: 'jpeg' as ImageType, 
+        quality: 0.98 
+      },
       html2canvas: { 
         scale: 2,
         useCORS: true,
         letterRendering: true
       },
       jsPDF: { 
-        unit: 'mm', 
-        format: 'a4', 
-        orientation: 'portrait' 
+        unit: 'mm' as JsPdfUnit, 
+        format: 'a4' as JsPdfFormat, 
+        orientation: 'portrait' as JsPdfOrientation
       }
     };
     
