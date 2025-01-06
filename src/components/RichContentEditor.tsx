@@ -17,9 +17,6 @@ import {
   Edit,
   Save,
   X,
-  Heading1,
-  Heading2,
-  Heading3,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -189,6 +186,12 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
         heading: false,
         code: false,
         codeBlock: false,
+        typography: false,
+      }),
+      TextStyle.configure({
+        HTMLAttributes: {
+          class: 'text-base',
+        },
       }),
       Image.configure({
         inline: true,
@@ -214,7 +217,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
           class: 'bg-gray-50 text-gray-900 px-1 rounded font-mono text-sm',
         },
       }),
-      TextStyle,
     ],
     content,
     editable: isEditing,
