@@ -141,8 +141,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
       Heading.configure({
         levels: [1, 2, 3],
         HTMLAttributes: {
-          class: 'heading',
-          level: (attrs: { level: number }) => attrs.level?.toString(),
+          class: (attrs: { level: number }) => `heading heading-${attrs.level}`,
         },
       }),
       BulletList,
