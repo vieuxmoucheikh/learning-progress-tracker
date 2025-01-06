@@ -1,6 +1,5 @@
 /** @type {import('tailwindcss').Config} */
 import animate from "tailwindcss-animate"
-import typography from '@tailwindcss/typography';
 
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
@@ -72,5 +71,5 @@ export default {
       },
     },
   },
-  plugins: [animate, typography],
+  plugins: [animate, require('@tailwindcss/typography')],
 };
