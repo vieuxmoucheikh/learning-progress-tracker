@@ -71,7 +71,6 @@ export const LearningCardsPage = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      const now = new Date().toISOString();
       const newCard = await learningCardsService.createCard({
         title: 'New Card',
         content: '',
@@ -81,8 +80,6 @@ export const LearningCardsPage = () => {
         status: 'in-progress',
         difficulty: 'medium',
         mastered: false,
-        created_at: now,
-        updated_at: now,
       });
       
       setCards((prevCards) => [newCard, ...prevCards]);
@@ -162,19 +159,23 @@ export const LearningCardsPage = () => {
       return matchesSearch && matchesTags && matchesCategory;
     })
     .sort((a, b) => {
-      // Ensure we have valid dates before comparison
-      const aCreated = a.created_at ? new Date(a.created_at).getTime() : 0;
-      const bCreated = b.created_at ? new Date(b.created_at).getTime() : 0;
-      const aUpdated = a.updated_at ? new Date(a.updated_at).getTime() : 0;
-      const bUpdated = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+      try {
+        const aCreated = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const bCreated = b.created_at ? new Date(b.created_at).getTime() : 0;
+        const aUpdated = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+        const bUpdated = b.updated_at ? new Date(b.updated_at).getTime() : 0;
 
-      switch (sortBy) {
-        case 'created':
-          return bCreated - aCreated;
-        case 'mastered':
-          return (b.mastered ? 1 : 0) - (a.mastered ? 1 : 0);
-        default:
-          return bUpdated - aUpdated;
+        switch (sortBy) {
+          case 'created':
+            return bCreated - aCreated;
+          case 'mastered':
+            return (b.mastered ? 1 : 0) - (a.mastered ? 1 : 0);
+          default:
+            return bUpdated - aUpdated;
+        }
+      } catch (err) {
+        console.error('Error sorting cards:', err);
+        return 0;
       }
     });
 

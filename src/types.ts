@@ -4,10 +4,10 @@ export interface Time {
 }
 
 export interface GoalSession {
-  date: string;
+  date: string; // ISO string from database
   duration?: Time;
-  startTime: string;
-  endTime?: string;
+  startTime: string; // ISO string from database
+  endTime?: string; // ISO string from database
   status?: 'in_progress' | 'completed' | 'on_hold';
   notes?: (string | { content: string; timestamp: string })[];
 }
@@ -16,20 +16,20 @@ export interface Session {
   id: string;
   goal_id: string;
   user_id: string;
-  date: string;
+  date: string; // ISO string from database
   duration: {
     hours: number;
     minutes: number;
   };
   notes?: string;
-  created_at: string;
-  updated_at: string;
+  created_at: string; // ISO string from database
+  updated_at: string; // ISO string from database
 }
 
 export interface Progress {
   current: Time;
   total?: Time;
-  lastAccessed?: string;
+  lastAccessed?: string; // ISO string from database
   sessions: GoalSession[];
   isActive?: boolean;
 }
@@ -42,13 +42,13 @@ export interface LearningItem {
   url?: string;
   notes?: string;
   completed: boolean;
-  completed_at?: string | null;
-  archived_at?: string | null;
+  completed_at?: string | null; // ISO string from database
+  archived_at?: string | null; // ISO string from database
   category: string;
   priority: 'low' | 'medium' | 'high';
-  due_date?: string;
+  due_date?: string; // ISO string from database
   tags: string[];
-  date: string;
+  date: string; // ISO string from database
   difficulty: 'easy' | 'medium' | 'hard';
   status: 'not_started' | 'in_progress' | 'completed' | 'on_hold' | 'archived';
   rating?: 1 | 2 | 3 | 4 | 5;
@@ -69,9 +69,9 @@ export interface StreakData {
   user_id: string;
   current_streak: number;
   longest_streak: number;
-  last_activity_date?: string;
+  last_activity_date?: string; // ISO string from database
   history: {
-    date: string;
+    date: string; // ISO string from database
     minutesSpent: number;
     itemsCompleted: number;
   }[];
@@ -82,8 +82,8 @@ export interface TimeStats {
   averageDaily: { hours: number; minutes: number };
   byCategory: Record<string, { hours: number; minutes: number }>;
   byType: Record<string, { hours: number; minutes: number }>;
-  mostProductiveDay: string;
-  mostProductiveTime: string;
+  mostProductiveDay: string; // ISO string from database
+  mostProductiveTime: string; // ISO string from database
 }
 
 export type Priority = 'low' | 'medium' | 'high';
@@ -95,13 +95,13 @@ export interface LearningGoal {
   title: string;
   category: string;
   targetHours: number;
-  targetDate: string;
+  targetDate: string; // ISO string from database
   priority: Priority;
   status: GoalStatus;
-  createdAt: string;
+  createdAt: string; // ISO string from database
   progress?: {
     sessions: Array<{
-      date: string;
+      date: string; // ISO string from database
       duration: { hours: number; minutes: number };
     }>;
   };
@@ -110,13 +110,13 @@ export interface LearningGoal {
 export interface Pomodoro {
   id: string;
   user_id: string;
-  start_time: string;
-  end_time?: string;
+  start_time: string; // ISO string from database
+  end_time?: string; // ISO string from database
   type: 'work' | 'break';
   completed: boolean;
   label?: string;
-  created_at: string;
-  updated_at: string;
+  created_at: string; // ISO string from database
+  updated_at: string; // ISO string from database
 }
 
 export interface PomodoroSettings {
@@ -139,7 +139,7 @@ export interface PomodoroStats {
     totalWorkMinutes: number;
     totalBreakMinutes: number;
     dailyAverage: number;
-    mostProductiveTime: string;
+    mostProductiveTime: string; // ISO string from database
     currentStreak: number;
     longestStreak: number;
     focusLabels?: string[];
@@ -165,8 +165,6 @@ export interface NewEnhancedLearningCard {
   user_id: string;
   mastered?: boolean;
   background_color?: string;
-  created_at?: string;
-  updated_at?: string;
 }
 
 export interface EnhancedLearningCard {
@@ -181,8 +179,8 @@ export interface EnhancedLearningCard {
   user_id: string;
   mastered: boolean;
   background_color: string;
-  created_at: string;
-  updated_at: string;
+  created_at: string;  // ISO string from database
+  updated_at: string;  // ISO string from database
 }
 
 export interface EnhancedLearningContent {
@@ -190,8 +188,8 @@ export interface EnhancedLearningContent {
   title: string;
   content: string;
   tags: string[];
-  created_at: string;
-  updated_at: string;
+  created_at: string; // ISO string from database
+  updated_at: string; // ISO string from database
   user_id: string;
 }
 
@@ -202,8 +200,8 @@ export interface LearningCard {
   difficulty: string;
   category: string;
   status: string;
-  created_at: string;
-  updated_at: string;
+  created_at: string; // ISO string from database
+  updated_at: string; // ISO string from database
   user_id: string;
   mastered: boolean;
   background_color?: string;
