@@ -1,7 +1,8 @@
-/** @type {import('tailwindcss').Config} */
-import animate from "tailwindcss-animate"
+import animate from 'tailwindcss-animate';
+import typography from '@tailwindcss/typography';
 
-export default {
+/** @type {import('tailwindcss').Config} */
+const config = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
@@ -71,5 +72,7 @@ export default {
       },
     },
   },
-  plugins: [animate, require('@tailwindcss/typography')],
+  plugins: [animate, typography],
 };
+
+export default config;
