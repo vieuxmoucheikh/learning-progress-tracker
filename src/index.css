@@ -49,6 +49,25 @@
   }
 }
 
+/* Heading styles */
+.heading {
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.heading[data-level="1"] {
+  font-size: 2em;
+}
+
+.heading[data-level="2"] {
+  font-size: 1.5em;
+}
+
+.heading[data-level="3"] {
+  font-size: 1.25em;
+}
+
 .pomodoro-settings {
     color: #ffffff; /* Ensure text is visible */
 }
