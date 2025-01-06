@@ -17,12 +17,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { getLearningItems } from '@/lib/database';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/lib/supabase';
 
 export const LearningCardsPage = () => {
   const [cards, setCards] = useState<CardType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -36,17 +34,13 @@ export const LearningCardsPage = () => {
 
   const fetchCategories = async () => {
     try {
-      const { data, error } = await supabase
-        .from('enhanced_learning_cards')
-        .select('category')
-        .not('category', 'is', null);
-
-      if (error) throw error;
-
-      const uniqueCategories = [...new Set(data.map(item => item.category).filter(Boolean))];
+      const items = await getLearningItems();
+      const uniqueCategories = Array.from(
+        new Set(items.map(item => item.category).filter(Boolean))
+      ).sort();
       setCategories(uniqueCategories);
-    } catch (err) {
-      console.error('Error fetching categories:', err);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
     }
   };
 
@@ -54,8 +48,8 @@ export const LearningCardsPage = () => {
     try {
       const fetchedCards = await learningCardsService.getCards();
       setCards(fetchedCards as CardType[]);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch cards');
+    } catch (error) {
+      console.error('Error fetching cards:', error);
       toast({
         title: 'Error',
         description: 'Failed to fetch cards. Please try again.',
@@ -66,29 +60,26 @@ export const LearningCardsPage = () => {
     }
   };
 
+  useEffect(() => {
+    fetchCards();
+    fetchCategories();
+  }, []);
+
   const handleCreateCard = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
-
       const newCard = await learningCardsService.createCard({
         title: 'New Card',
         content: '',
         tags: [],
         category: selectedCategory !== 'all' ? selectedCategory : '',
-        user_id: user.id,
-        status: 'in-progress',
-        difficulty: 'medium',
-        mastered: false,
       });
-      
       setCards((prevCards) => [newCard, ...prevCards]);
       toast({
         title: 'Success',
         description: 'Card created successfully',
       });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create card');
+    } catch (error) {
+      console.error('Error creating card:', error);
       toast({
         title: 'Error',
         description: 'Failed to create card. Please try again.',
@@ -99,21 +90,22 @@ export const LearningCardsPage = () => {
 
   const handleSaveCard = async (card: Partial<CardType>): Promise<boolean> => {
     try {
-      const updatedCard = await learningCardsService.updateCard(card.id!, {
-        ...card,
-        updated_at: new Date().toISOString(),
+      await learningCardsService.updateCard(card.id!, {
+        title: card.title,
+        content: card.content,
+        media: card.media,
+        tags: card.tags,
+        mastered: card.mastered,
+        category: card.category,
       });
-      
-      setCards((prevCards) =>
-        prevCards.map((prevCard) => (prevCard.id === card.id ? updatedCard : prevCard))
-      );
+      await fetchCards();
       toast({
         title: "Success",
         description: "Card updated successfully",
       });
       return true;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update card');
+    } catch (error) {
+      console.error('Error updating card:', error);
       toast({
         title: "Error",
         description: "Failed to update card. Please try again.",
@@ -125,18 +117,14 @@ export const LearningCardsPage = () => {
 
   const handleDeleteCard = async (id: string) => {
     try {
-      await supabase
-        .from('enhanced_learning_cards')
-        .delete()
-        .eq('id', id);
-      
+      await learningCardsService.deleteCard(id);
       setCards((prevCards) => prevCards.filter((card) => card.id !== id));
       toast({
         title: "Success",
         description: "Card deleted successfully",
       });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete card');
+    } catch (error) {
+      console.error('Error deleting card:', error);
       toast({
         title: "Error",
         description: "Failed to delete card. Please try again.",
@@ -145,47 +133,22 @@ export const LearningCardsPage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchCards();
-    fetchCategories();
-  }, []);
-
   const filteredCards = cards
     .filter((card) => {
-      const matchesSearch = (card.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (card.content || '').toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesTags = selectedTags.length === 0 || selectedTags.some(tag => card.tags?.includes(tag));
+      const matchesSearch = card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        card.content.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesTags = selectedTags.length === 0 || selectedTags.every(tag => card.tags.includes(tag));
       const matchesCategory = selectedCategory === 'all' || card.category === selectedCategory;
       return matchesSearch && matchesTags && matchesCategory;
     })
     .sort((a, b) => {
-      try {
-        // Parse dates and handle invalid dates
-        const parseDate = (dateStr: string) => {
-          try {
-            const date = new Date(dateStr);
-            return isNaN(date.getTime()) ? 0 : date.getTime();
-          } catch {
-            return 0;
-          }
-        };
-
-        const aCreated = parseDate(a.created_at);
-        const bCreated = parseDate(b.created_at);
-        const aUpdated = parseDate(a.updated_at);
-        const bUpdated = parseDate(b.updated_at);
-
-        switch (sortBy) {
-          case 'created':
-            return bCreated - aCreated;
-          case 'mastered':
-            return (b.mastered ? 1 : 0) - (a.mastered ? 1 : 0);
-          default:
-            return bUpdated - aUpdated;
-        }
-      } catch (err) {
-        console.error('Error sorting cards:', err);
-        return 0;
+      switch (sortBy) {
+        case 'created':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'mastered':
+          return (b.mastered ? 1 : 0) - (a.mastered ? 1 : 0);
+        default:
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
       }
     });
 
@@ -196,9 +159,6 @@ export const LearningCardsPage = () => {
         : [...prev, tag]
     );
   };
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">

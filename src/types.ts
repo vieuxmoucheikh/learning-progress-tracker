@@ -4,10 +4,10 @@ export interface Time {
 }
 
 export interface GoalSession {
-  date: string; // ISO string from database
+  date: string;
   duration?: Time;
-  startTime: string; // ISO string from database
-  endTime?: string; // ISO string from database
+  startTime: string;
+  endTime?: string;
   status?: 'in_progress' | 'completed' | 'on_hold';
   notes?: (string | { content: string; timestamp: string })[];
 }
@@ -16,20 +16,20 @@ export interface Session {
   id: string;
   goal_id: string;
   user_id: string;
-  date: string; // ISO string from database
+  date: string;
   duration: {
     hours: number;
     minutes: number;
   };
   notes?: string;
-  created_at: string; // ISO string from database
-  updated_at: string; // ISO string from database
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Progress {
   current: Time;
   total?: Time;
-  lastAccessed?: string; // ISO string from database
+  lastAccessed?: string;
   sessions: GoalSession[];
   isActive?: boolean;
 }
@@ -42,19 +42,18 @@ export interface LearningItem {
   url?: string;
   notes?: string;
   completed: boolean;
-  completed_at?: string | null; // ISO string from database
-  archived_at?: string | null; // ISO string from database
+  completed_at?: string | null;
+  archived_at?: string | null;
   category: string;
   priority: 'low' | 'medium' | 'high';
-  due_date?: string; // ISO string from database
+  due_date?: string;
   tags: string[];
-  date: string; // ISO string from database
+  date: string;
   difficulty: 'easy' | 'medium' | 'hard';
   status: 'not_started' | 'in_progress' | 'completed' | 'on_hold' | 'archived';
   rating?: 1 | 2 | 3 | 4 | 5;
   user_id?: string;
   lastTimestamp?: number | null;
-  background_color?: string;
 }
 
 export type LearningItemFormData = Omit<LearningItem, 'id' | 'progress'> & {
@@ -69,9 +68,9 @@ export interface StreakData {
   user_id: string;
   current_streak: number;
   longest_streak: number;
-  last_activity_date?: string; // ISO string from database
+  last_activity_date?: string;
   history: {
-    date: string; // ISO string from database
+    date: string;
     minutesSpent: number;
     itemsCompleted: number;
   }[];
@@ -82,8 +81,8 @@ export interface TimeStats {
   averageDaily: { hours: number; minutes: number };
   byCategory: Record<string, { hours: number; minutes: number }>;
   byType: Record<string, { hours: number; minutes: number }>;
-  mostProductiveDay: string; // ISO string from database
-  mostProductiveTime: string; // ISO string from database
+  mostProductiveDay: string;
+  mostProductiveTime: string;
 }
 
 export type Priority = 'low' | 'medium' | 'high';
@@ -95,13 +94,13 @@ export interface LearningGoal {
   title: string;
   category: string;
   targetHours: number;
-  targetDate: string; // ISO string from database
+  targetDate: string;
   priority: Priority;
   status: GoalStatus;
-  createdAt: string; // ISO string from database
+  createdAt: string;
   progress?: {
     sessions: Array<{
-      date: string; // ISO string from database
+      date: string;
       duration: { hours: number; minutes: number };
     }>;
   };
@@ -110,13 +109,13 @@ export interface LearningGoal {
 export interface Pomodoro {
   id: string;
   user_id: string;
-  start_time: string; // ISO string from database
-  end_time?: string; // ISO string from database
+  start_time: string;
+  end_time?: string;
   type: 'work' | 'break';
   completed: boolean;
   label?: string;
-  created_at: string; // ISO string from database
-  updated_at: string; // ISO string from database
+  created_at: string;
+  updated_at: string;
 }
 
 export interface PomodoroSettings {
@@ -139,7 +138,7 @@ export interface PomodoroStats {
     totalWorkMinutes: number;
     totalBreakMinutes: number;
     dailyAverage: number;
-    mostProductiveTime: string; // ISO string from database
+    mostProductiveTime: string;
     currentStreak: number;
     longestStreak: number;
     focusLabels?: string[];
@@ -149,38 +148,28 @@ export interface PomodoroStats {
 }
 
 export interface CardMedia {
-  url: string;
   type: 'image' | 'link';
-  name: string;
-}
-
-export interface NewEnhancedLearningCard {
-  title: string;
-  content: string;
-  difficulty?: string;
-  status?: string;
-  media?: CardMedia[];
-  tags?: string[];
-  category?: string;
-  user_id: string;
-  mastered?: boolean;
-  background_color?: string;
+  url: string;
+  id: string;
+  description?: string;
 }
 
 export interface EnhancedLearningCard {
   id: string;
   title: string;
   content: string;
-  difficulty: string;
-  status: string;
-  media: CardMedia[];
+  media?: CardMedia[];
   tags: string[];
-  category: string;
-  user_id: string;
-  mastered: boolean;
-  background_color: string;
-  created_at: string;  // ISO string from database
-  updated_at: string;  // ISO string from database
+  createdAt: string;
+  updatedAt: string;
+  mastered?: boolean;
+  category?: string;
+  lastStudied?: string;
+}
+
+export type NewEnhancedLearningCard = Omit<EnhancedLearningCard, 'id' | 'createdAt' | 'updatedAt'> & {
+  mastered?: boolean;
+  category?: string;
 }
 
 export interface EnhancedLearningContent {
@@ -188,21 +177,7 @@ export interface EnhancedLearningContent {
   title: string;
   content: string;
   tags: string[];
-  created_at: string; // ISO string from database
-  updated_at: string; // ISO string from database
+  created_at: string;
+  updated_at: string;
   user_id: string;
-}
-
-export interface LearningCard {
-  id: string;
-  title: string;
-  content: string;
-  difficulty: string;
-  category: string;
-  status: string;
-  created_at: string; // ISO string from database
-  updated_at: string; // ISO string from database
-  user_id: string;
-  mastered: boolean;
-  background_color?: string;
 }

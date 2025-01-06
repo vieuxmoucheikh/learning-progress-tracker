@@ -37,7 +37,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ColorPicker } from "@/components/ui/color-picker";
 
 interface Props {
   item: LearningItem;
@@ -95,7 +94,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [showEditNoteDialog, setShowEditNoteDialog] = useState(false);
   const [isTimeEditing, setIsTimeEditing] = useState(false);
   const [editedMinutes, setEditedMinutes] = useState(calculateTotalTimeSpent(item));
-  const [backgroundColor, setBackgroundColor] = useState(item.background_color || 'transparent');
 
   const activeSession = item.progress?.sessions?.find(session => !session.endTime);
   const { elapsedTime, formatElapsedTime, lastUpdateTime, isValidSession } = useSessionTimer({
@@ -526,14 +524,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     }
 
     // Sort sessions chronologically (newest first)
-    const sessions = [...item.progress.sessions].sort((a, b) => {
-      try {
-        return new Date(b.startTime).getTime() - new Date(a.startTime).getTime();
-      } catch (err) {
-        console.error('Error sorting sessions:', err);
-        return 0;
-      }
-    });
+    const sessions = [...item.progress.sessions].sort((a, b) => 
+      new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+    );
     
     const activeSession = sessions.find(s => !s.endTime);
     const displaySessions = showAllSessions 
@@ -543,29 +536,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     return (
       <div className="space-y-4 overflow-hidden">
         {displaySessions.map((session, sessionIndex) => {
-          let startDate: Date | null = null;
-          let endDate: Date | null = null;
-          let startDateStr = '';
-          let endDateStr = '';
-
-          try {
-            startDate = new Date(session.startTime);
-            startDateStr = startDate.toLocaleString();
-          } catch (err) {
-            console.error('Error parsing start date:', session.startTime, err);
-            startDateStr = 'Invalid date';
-          }
-
-          try {
-            if (session.endTime) {
-              endDate = new Date(session.endTime);
-              endDateStr = endDate.toLocaleString();
-            }
-          } catch (err) {
-            console.error('Error parsing end date:', session.endTime, err);
-            endDateStr = 'Invalid date';
-          }
-
+          const startDate = new Date(session.startTime);
+          const endDate = session.endTime ? new Date(session.endTime) : null;
           const duration = session.duration || { hours: 0, minutes: 0 };
           const formattedDuration = `${duration.hours}h ${duration.minutes}m`;
           const totalSessions = item.progress!.sessions!.length;
@@ -626,7 +598,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     <Clock className="h-4 w-4 text-blue-500" />
                     Started
                   </div>
-                  <div className="font-medium text-gray-700">{startDateStr}</div>
+                  <div className="font-medium text-gray-700">{startDate.toLocaleString()}</div>
                 </div>
                 {endDate && (
                   <div className="space-y-1.5 bg-white/50 rounded-lg p-3 border border-gray-100">
@@ -634,7 +606,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                       <CheckCircle2 className="h-4 w-4 text-green-500" />
                       Ended
                     </div>
-                    <div className="font-medium text-gray-700">{endDateStr}</div>
+                    <div className="font-medium text-gray-700">{endDate.toLocaleString()}</div>
                   </div>
                 )}
               </div>
@@ -808,32 +780,120 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
   return (
     <div className="w-full">
-      <Card 
-        className={clsx(
-          "relative overflow-hidden transition-all duration-200",
-          "hover:shadow-lg border-l-4",
-          getBorderColorClass()
-        )}
-        style={{
-          backgroundColor: item.background_color || 'transparent',
-        }}
-      >
+      <Card className={clsx(
+        "relative overflow-hidden transition-all duration-200",
+        "hover:shadow-lg border-l-4",
+        getBorderColorClass()
+      )}>
         {/* Card Header with gradient background */}
         <div className="bg-gradient-to-r from-gray-50 via-white to-gray-50 border-b border-gray-200/80">
           <div className="p-6">
-            {/* Title and Actions */}
-            <div className="flex items-center justify-between gap-4 mb-4">
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
+            {/* Title Section */}
+            <div className="flex justify-between items-start gap-4 mb-4">
+              <div className="flex-1 space-y-3">
+                {/* Title */}
+                <div>
+                  {isEditing ? (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={editedTitle}
+                        onChange={(e) => setEditedTitle(e.target.value)}
+                        className="text-xl font-semibold border-blue-200 focus:ring-blue-500"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleTitleSave}
+                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                      >
+                        <Save className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setIsEditing(false);
+                          setEditedTitle(item.title);
+                        }}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 group">
+                      <h3 className="text-2xl font-bold text-gray-800">{item.title}</h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsEditing(true)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Category and Type */}
+                <div className="flex items-center gap-3">
+                  {item.category && (
+                    <div className="flex items-center">
+                      <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100 shadow-sm">
+                        {item.category}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <Badge 
+                      variant={getStatusBadgeClass().includes('bg-gray-100') ? 'destructive' : getStatusBadgeClass().includes('bg-blue-100') ? 'secondary' : getStatusBadgeClass().includes('bg-green-100') ? 'default' : 'outline'} 
+                      className={clsx(
+                        getStatusBadgeClass(),
+                        "capitalize font-medium",
+                        "shadow-sm"
+                      )}
+                    >
+                      {getStatusText()}
+                    </Badge>
+                    <span className="text-sm font-medium text-gray-600">{item.type}</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                {/* Existing buttons */}
-                <ColorPicker
-                  value={item.background_color || 'transparent'}
-                  onChange={(color: string) => {
-                    onUpdate(item.id, { background_color: color });
-                  }}
-                />
+
+              {/* Action Buttons */}
+              <div className="flex flex-col items-center gap-2 p-2 rounded-lg bg-gray-50/50">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleMarkComplete()}
+                  className={clsx(
+                    "hover:bg-white transition-colors rounded-lg shadow-sm",
+                    {
+                      'text-green-500 hover:text-green-700': item.status !== 'completed',
+                      'text-gray-400 hover:text-gray-600': item.status === 'completed'
+                    }
+                  )}
+                >
+                  <CheckCircle2 className="h-5 w-5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleDeleteClick}
+                  className="text-red-400 hover:text-red-600 hover:bg-white transition-colors rounded-lg shadow-sm"
+                >
+                  <Trash2 className="h-5 w-5" />
+                </Button>
+                {item.url && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => window.open(item.url, '_blank')}
+                    className="text-blue-500 hover:text-blue-700 hover:bg-white transition-colors rounded-lg shadow-sm"
+                  >
+                    <ExternalLink className="h-5 w-5" />
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -955,17 +1015,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 Add Session Note
               </DialogTitle>
               <DialogDescription className="mt-2 text-gray-600">
-                <div className="space-y-3">
-                  <p>
-                    Are you sure you want to delete <span className="font-medium text-gray-900">"{item.title}"</span>?
-                  </p>
-                  <div className="flex items-center gap-2 p-3 bg-amber-50 text-amber-800 rounded-lg border border-amber-200">
-                    <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0" />
-                    <p className="text-sm">
-                      This action cannot be undone. All sessions and progress will be permanently deleted.
-                    </p>
-                  </div>
-                </div>
+                Record your thoughts, progress, or any important points about this learning session.
               </DialogDescription>
             </DialogHeader>
             <div className="mt-4 space-y-4">

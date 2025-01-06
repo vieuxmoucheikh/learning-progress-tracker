@@ -1,24 +1,6 @@
 import { supabase } from './supabase';
 import type { CardMedia, EnhancedLearningCard, NewEnhancedLearningCard } from '@/types';
 
-const normalizeDate = (dateString: any): string => {
-  if (!dateString) return new Date().toISOString();
-  
-  try {
-    // Handle PostgreSQL timestamp with timezone
-    // Remove timezone offset and convert to UTC
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      console.error('Invalid date:', dateString);
-      return new Date().toISOString();
-    }
-    return date.toISOString();
-  } catch (e) {
-    console.error('Error parsing date:', dateString, e);
-    return new Date().toISOString();
-  }
-};
-
 class LearningCardsService {
   async getCards(): Promise<EnhancedLearningCard[]> {
     const { data, error } = await supabase
@@ -31,50 +13,35 @@ class LearningCardsService {
       throw new Error('Failed to fetch cards');
     }
 
-    console.log('Raw data from Supabase:', data);
-
-    return (data || []).map(card => {
-      console.log('Processing card:', card);
-      const processed = {
-        id: card.id,
-        title: card.title || '',
-        content: card.content || '',
-        created_at: normalizeDate(card.created_at),
-        updated_at: normalizeDate(card.updated_at),
-        tags: Array.isArray(card.tags) ? card.tags : [],
-        media: Array.isArray(card.media) ? card.media : [],
-        mastered: Boolean(card.mastered),
-        difficulty: card.difficulty || 'medium',
-        status: card.status || 'in-progress',
-        category: card.category || '',
-        background_color: card.background_color || '',
-        user_id: card.user_id
-      };
-      console.log('Processed card:', processed);
-      return processed;
-    });
+    return data.map(card => ({
+      id: card.id,
+      title: card.title,
+      content: card.content || '',
+      media: this.parseMedia(card.media),
+      tags: Array.isArray(card.tags) ? card.tags : [],
+      category: card.category || '',
+      createdAt: card.created_at,
+      updatedAt: card.updated_at,
+      mastered: card.mastered || false
+    }));
   }
 
   async createCard(card: NewEnhancedLearningCard): Promise<EnhancedLearningCard> {
-    const now = new Date().toISOString();
-    const newCard = {
-      ...card,
-      created_at: now,
-      updated_at: now,
-      tags: card.tags || [],
-      media: card.media || [],
-      mastered: Boolean(card.mastered),
-      difficulty: card.difficulty || 'medium',
-      status: card.status || 'in-progress',
-      category: card.category || '',
-      background_color: card.background_color || ''
-    };
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
 
-    console.log('Creating card with data:', newCard);
+    const cardData = {
+      title: card.title,
+      content: card.content,
+      tags: card.tags || [],
+      category: card.category || '',
+      user_id: user.id,
+      mastered: card.mastered || false
+    };
 
     const { data, error } = await supabase
       .from('enhanced_learning_cards')
-      .insert(newCard)
+      .insert(cardData)
       .select()
       .single();
 
@@ -83,69 +50,61 @@ class LearningCardsService {
       throw new Error('Failed to create card');
     }
 
-    console.log('Created card data:', data);
-
-    const processed = {
+    return {
       id: data.id,
-      title: data.title || '',
+      title: data.title,
       content: data.content || '',
-      created_at: normalizeDate(data.created_at),
-      updated_at: normalizeDate(data.updated_at),
+      media: this.parseMedia(data.media),
       tags: Array.isArray(data.tags) ? data.tags : [],
-      media: Array.isArray(data.media) ? data.media : [],
-      mastered: Boolean(data.mastered),
-      difficulty: data.difficulty || 'medium',
-      status: data.status || 'in-progress',
       category: data.category || '',
-      background_color: data.background_color || '',
-      user_id: data.user_id
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+      mastered: data.mastered || false
     };
-
-    console.log('Processed created card:', processed);
-    return processed;
   }
 
   async updateCard(id: string, updates: Partial<EnhancedLearningCard>): Promise<EnhancedLearningCard> {
-    const now = new Date().toISOString();
-    const updateData = {
-      ...updates,
-      updated_at: now
-    };
+    try {
+      const normalizedCategory = (updates.category || 'Uncategorized').toUpperCase();
+      const now = new Date().toISOString();
 
-    console.log('Updating card with data:', updateData);
+      const updateData: any = {
+        updated_at: now // Always update the timestamp
+      };
+      
+      if (updates.title !== undefined) updateData.title = updates.title;
+      if (updates.content !== undefined) updateData.content = updates.content;
+      if (updates.tags !== undefined) updateData.tags = updates.tags;
+      if (updates.mastered !== undefined) updateData.mastered = updates.mastered;
+      if (updates.category !== undefined) updateData.category = normalizedCategory;
+      
+      const { data, error } = await supabase
+        .from('enhanced_learning_cards')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
 
-    const { data, error } = await supabase
-      .from('enhanced_learning_cards')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single();
+      if (error) {
+        console.error('Error updating card:', error);
+        throw new Error('Failed to update card');
+      }
 
-    if (error) {
-      console.error('Error updating card:', error);
-      throw new Error('Failed to update card');
+      return {
+        id: data.id,
+        title: data.title,
+        content: data.content || '',
+        media: this.parseMedia(data.media),
+        tags: Array.isArray(data.tags) ? data.tags : [],
+        category: data.category || '',
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        mastered: data.mastered || false
+      };
+    } catch (error) {
+      console.error('Error in updateCard:', error);
+      throw error;
     }
-
-    console.log('Updated card data:', data);
-
-    const processed = {
-      id: data.id,
-      title: data.title || '',
-      content: data.content || '',
-      created_at: normalizeDate(data.created_at),
-      updated_at: normalizeDate(data.updated_at),
-      tags: Array.isArray(data.tags) ? data.tags : [],
-      media: Array.isArray(data.media) ? data.media : [],
-      mastered: Boolean(data.mastered),
-      difficulty: data.difficulty || 'medium',
-      status: data.status || 'in-progress',
-      category: data.category || '',
-      background_color: data.background_color || '',
-      user_id: data.user_id
-    };
-
-    console.log('Processed updated card:', processed);
-    return processed;
   }
 
   async deleteCard(id: string): Promise<void> {
@@ -161,18 +120,22 @@ class LearningCardsService {
   }
 
   private parseMedia(media: any): CardMedia[] {
+    if (!media) return [];
     if (Array.isArray(media)) {
-      return media;
+      return media.map(item => ({
+        ...item,
+        type: item.type === 'link' || item.type === 'image' ? item.type : 'image'
+      }));
     }
-    if (typeof media === 'string') {
-      try {
-        const parsed = JSON.parse(media);
-        return Array.isArray(parsed) ? parsed : [];
-      } catch {
-        return [];
-      }
+    try {
+      const parsed = JSON.parse(media);
+      return Array.isArray(parsed) ? parsed.map(item => ({
+        ...item,
+        type: item.type === 'link' || item.type === 'image' ? item.type : 'image'
+      })) : [];
+    } catch {
+      return [];
     }
-    return [];
   }
 }
 
