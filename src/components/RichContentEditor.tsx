@@ -54,6 +54,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
         size="sm"
         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
         className={cn(editor.isActive('heading', { level: 1 }) && 'bg-muted')}
+        title="Heading 1"
       >
         <Heading1 className="h-4 w-4" />
       </Button>
@@ -62,8 +63,18 @@ const MenuBar = ({ editor }: { editor: any }) => {
         size="sm"
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         className={cn(editor.isActive('heading', { level: 2 }) && 'bg-muted')}
+        title="Heading 2"
       >
         <Heading2 className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+        className={cn(editor.isActive('heading', { level: 3 }) && 'bg-muted')}
+        title="Heading 3"
+      >
+        <Heading2 className="h-4 w-4 scale-75" />
       </Button>
       <Button
         variant="ghost"
@@ -120,7 +131,11 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        heading: {
+          levels: [1, 2, 3]
+        }
+      }),
       Highlight,
       TaskList,
       TaskItem.configure({
