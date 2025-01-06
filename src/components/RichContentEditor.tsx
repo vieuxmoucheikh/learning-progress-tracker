@@ -37,6 +37,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         size="sm"
         onClick={() => editor.chain().focus().toggleBold().run()}
         className={cn(editor.isActive('bold') && 'bg-muted')}
+        title="Bold"
       >
         <BoldIcon className="h-4 w-4" />
       </Button>
@@ -45,6 +46,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         size="sm"
         onClick={() => editor.chain().focus().toggleItalic().run()}
         className={cn(editor.isActive('italic') && 'bg-muted')}
+        title="Italic"
       >
         <ItalicIcon className="h-4 w-4" />
       </Button>
@@ -80,6 +82,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         size="sm"
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         className={cn(editor.isActive('bulletList') && 'bg-muted')}
+        title="Bullet List"
       >
         <List className="h-4 w-4" />
       </Button>
@@ -88,6 +91,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         size="sm"
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         className={cn(editor.isActive('orderedList') && 'bg-muted')}
+        title="Numbered List"
       >
         <ListOrdered className="h-4 w-4" />
       </Button>
@@ -96,6 +100,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         size="sm"
         onClick={() => editor.chain().focus().toggleTaskList().run()}
         className={cn(editor.isActive('taskList') && 'bg-muted')}
+        title="Task List"
       >
         <CheckSquare className="h-4 w-4" />
       </Button>
@@ -104,6 +109,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         size="sm"
         onClick={() => editor.chain().focus().toggleCode().run()}
         className={cn(editor.isActive('code') && 'bg-muted')}
+        title="Code"
       >
         <CodeIcon className="h-4 w-4" />
       </Button>
@@ -126,9 +132,12 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
         heading: {
           levels: [1, 2, 3],
           HTMLAttributes: {
-            1: { class: 'text-4xl font-bold' },
-            2: { class: 'text-3xl font-bold' },
-            3: { class: 'text-2xl font-bold' },
+            class: (attrs: { level: number }) => `heading heading-${attrs.level}`,
+          },
+        },
+        code: {
+          HTMLAttributes: {
+            class: 'rounded-md bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold',
           },
         },
         codeBlock: false,
@@ -137,6 +146,9 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
       TaskList,
       TaskItem.configure({
         nested: true,
+        HTMLAttributes: {
+          class: 'flex items-start gap-2',
+        },
       }),
     ],
     content,
@@ -184,20 +196,26 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
           className={cn(
             'prose prose-sm max-w-none p-4',
             isEditing && 'min-h-[150px] cursor-text',
-            'prose-headings:font-bold prose-headings:my-2',
-            'prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl'
+            'prose-headings:my-4',
+            'prose-h1:text-2xl prose-h1:font-bold',
+            'prose-h2:text-xl prose-h2:font-bold',
+            'prose-h3:text-lg prose-h3:font-bold',
+            'prose-p:my-2',
+            'prose-ul:my-2 prose-ul:list-disc prose-ul:pl-6',
+            'prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-6'
           )}
         />
-        <div className="flex justify-end mt-2">
+        <div className="flex justify-end p-2 border-t">
           <div className="flex gap-2">
             {!isEditing && !initialReadOnly && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsEditing(true)}
+                title="Edit content"
               >
                 <Edit className="h-4 w-4 mr-1" />
-                Edit Content
+                Edit
               </Button>
             )}
             {isEditing && (
@@ -206,6 +224,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleSave}
+                  title="Save changes"
                 >
                   <Save className="h-4 w-4 mr-1" />
                   Save
@@ -214,6 +233,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleCancel}
+                  title="Cancel editing"
                 >
                   <X className="h-4 w-4 mr-1" />
                   Cancel
