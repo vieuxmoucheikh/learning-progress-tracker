@@ -8,86 +8,80 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { EnhancedLearningCard as LearningCardComponent } from '@/components/EnhancedLearningCard';
+import { EnhancedLearningCard } from '@/components/EnhancedLearningCard';
 import { learningCardsService } from '@/lib/learningCards';
-import type { EnhancedLearningCard, NewEnhancedLearningCard } from '@/types';
+import type { EnhancedLearningCard as CardType } from '@/types';
 import { Plus, Search, Tag as TagIcon, Loader2, Clock, Filter, X } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
+import { getLearningItems } from '@/lib/database';
 import { cn } from '@/lib/utils';
-import { useUser } from '@/hooks/useUser';
-
-type SortType = 'updated' | 'created' | 'mastered';
+import { supabase } from '@/lib/supabase';
 
 export const LearningCardsPage = () => {
-  const [cards, setCards] = useState<EnhancedLearningCard[]>([]);
+  const [cards, setCards] = useState<CardType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [categories, setCategories] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<SortType>('updated');
+  const [sortBy, setSortBy] = useState<'updated' | 'created' | 'mastered'>('updated');
   const { toast } = useToast();
-  const { user } = useUser();
 
   const allTags = Array.from(
     new Set(cards.flatMap((card) => card.tags))
   ).sort();
 
   const fetchCategories = async () => {
-    if (!user) return;
     try {
-      const fetchedCategories = await learningCardsService.getCategories(user);
-      setCategories(fetchedCategories);
+      const items = await getLearningItems();
+      const uniqueCategories = Array.from(
+        new Set(items.map(item => item.category).filter(Boolean))
+      ).sort();
+      setCategories(uniqueCategories);
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
   };
 
   const fetchCards = async () => {
-    if (!user) return;
     try {
-      const fetchedCards = await learningCardsService.getCards(user);
-      setCards(fetchedCards);
-    } catch (error) {
-      console.error('Error fetching cards:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch cards. Please try again.',
-        variant: 'destructive',
-      });
+      const fetchedCards = await learningCardsService.getCards();
+      setCards(fetchedCards as CardType[]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch cards');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (user) {
-      fetchCards();
-      fetchCategories();
-    }
-  }, [user]);
-
   const handleCreateCard = async () => {
-    if (!user) return;
     try {
-      const newCard: NewEnhancedLearningCard = {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const newCard = await learningCardsService.createCard({
         title: 'New Card',
         content: '',
         tags: [],
         category: selectedCategory !== 'all' ? selectedCategory : '',
+        user_id: user.id,
+        status: 'in-progress',
+        difficulty: 'medium',
         mastered: false,
-        backgroundColor: 'bg-white',
-      };
-      const createdCard = await learningCardsService.createCard(user, newCard);
-      setCards((prevCards) => [createdCard, ...prevCards]);
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+      
+      setCards((prevCards) => [newCard, ...prevCards]);
       toast({
         title: 'Success',
         description: 'Card created successfully',
       });
-    } catch (error) {
-      console.error('Error creating card:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create card');
       toast({
         title: 'Error',
         description: 'Failed to create card. Please try again.',
@@ -96,25 +90,23 @@ export const LearningCardsPage = () => {
     }
   };
 
-  const handleSaveCard = async (card: Partial<EnhancedLearningCard> & { id: string }): Promise<boolean> => {
-    if (!user) return false;
+  const handleSaveCard = async (card: Partial<CardType>): Promise<boolean> => {
     try {
-      await learningCardsService.updateCard(user, card.id, {
-        title: card.title,
-        content: card.content,
-        tags: card.tags,
-        mastered: card.mastered,
-        category: card.category,
-        backgroundColor: card.backgroundColor,
+      const updatedCard = await learningCardsService.updateCard(card.id!, {
+        ...card,
+        updated_at: new Date().toISOString(),
       });
-      await fetchCards();
+      
+      setCards((prevCards) =>
+        prevCards.map((prevCard) => (prevCard.id === card.id ? updatedCard : prevCard))
+      );
       toast({
         title: "Success",
         description: "Card updated successfully",
       });
       return true;
-    } catch (error) {
-      console.error('Error updating card:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update card');
       toast({
         title: "Error",
         description: "Failed to update card. Please try again.",
@@ -125,16 +117,19 @@ export const LearningCardsPage = () => {
   };
 
   const handleDeleteCard = async (id: string) => {
-    if (!user) return;
     try {
-      await learningCardsService.deleteCard(user, id);
+      await supabase
+        .from('enhanced_learning_cards')
+        .delete()
+        .eq('id', id);
+      
       setCards((prevCards) => prevCards.filter((card) => card.id !== id));
       toast({
         title: "Success",
         description: "Card deleted successfully",
       });
-    } catch (error) {
-      console.error('Error deleting card:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete card');
       toast({
         title: "Error",
         description: "Failed to delete card. Please try again.",
@@ -142,6 +137,11 @@ export const LearningCardsPage = () => {
       });
     }
   };
+
+  useEffect(() => {
+    fetchCards();
+    fetchCategories();
+  }, []);
 
   const filteredCards = cards
     .filter((card) => {
@@ -154,17 +154,13 @@ export const LearningCardsPage = () => {
     .sort((a, b) => {
       switch (sortBy) {
         case 'created':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         case 'mastered':
           return (b.mastered ? 1 : 0) - (a.mastered ? 1 : 0);
         default:
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
       }
     });
-
-  const handleSortChange = (value: string) => {
-    setSortBy(value as SortType);
-  };
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
@@ -174,15 +170,8 @@ export const LearningCardsPage = () => {
     );
   };
 
-  if (!user) {
-    return (
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Please sign in to view your learning cards</h1>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -226,14 +215,12 @@ export const LearningCardsPage = () => {
                 "bg-white",
                 "text-gray-900",
                 "border-gray-200",
-                "focus:ring-2 focus:ring-blue-500",
+                "focus:ring-2 focus:ring-blue-500"
               )}>
-                <div className="flex items-center">
-                  <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Filter by category" />
-                </div>
+                <Filter className="w-4 h-4 mr-2 text-gray-500" />
+                <SelectValue placeholder="Filter by category" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectItem value="all">All Categories</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category} value={category}>
@@ -243,22 +230,20 @@ export const LearningCardsPage = () => {
               </SelectContent>
             </Select>
 
-            <Select value={sortBy} onValueChange={handleSortChange}>
+            <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'updated' | 'created' | 'mastered')}>
               <SelectTrigger className={cn(
                 "bg-white",
                 "text-gray-900",
                 "border-gray-200",
-                "focus:ring-2 focus:ring-blue-500",
+                "focus:ring-2 focus:ring-blue-500"
               )}>
-                <div className="flex items-center">
-                  <Clock className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Sort by" />
-                </div>
+                <Clock className="w-4 h-4 mr-2 text-gray-500" />
+                <SelectValue placeholder="Sort by" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectItem value="updated">Last Updated</SelectItem>
                 <SelectItem value="created">Created Date</SelectItem>
-                <SelectItem value="mastered">Mastery Status</SelectItem>
+                <SelectItem value="mastered">Mastered First</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -269,58 +254,73 @@ export const LearningCardsPage = () => {
               {allTags.map((tag) => (
                 <Badge
                   key={tag}
-                  variant={selectedTags.includes(tag) ? "default" : "outline"}
+                  variant={selectedTags.includes(tag) ? "default" : "secondary"}
                   className={cn(
                     "cursor-pointer transition-colors",
                     selectedTags.includes(tag)
-                      ? "bg-blue-500 hover:bg-blue-600"
-                      : "hover:border-blue-500 hover:text-blue-500"
+                      ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                      : "bg-white text-gray-700 hover:bg-gray-100",
+                    "border border-gray-200"
                   )}
                   onClick={() => toggleTag(tag)}
                 >
                   {tag}
                   {selectedTags.includes(tag) && (
-                    <X className="w-3 h-3 ml-1" />
+                    <X className="w-3 h-3 ml-1 text-current" />
                   )}
                 </Badge>
               ))}
             </div>
           )}
-        </div>
 
-        <AnimatePresence mode="popLayout">
           {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+            <div className="flex justify-center items-center min-h-[400px]">
+              <div className="flex flex-col items-center gap-4">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                <p className="text-gray-500">Loading your cards...</p>
+              </div>
             </div>
-          ) : filteredCards.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="text-center py-12"
-            >
-              <p className="text-gray-500">No cards found. Create one to get started!</p>
-            </motion.div>
           ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-            >
-              {filteredCards.map((card) => (
-                <LearningCardComponent
-                  key={card.id}
-                  card={card}
-                  onSave={handleSaveCard}
-                  onDelete={() => handleDeleteCard(card.id)}
-                  categories={categories}
-                />
-              ))}
-            </motion.div>
+            <AnimatePresence mode="popLayout">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredCards.map((card) => (
+                  <motion.div
+                    key={card.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <EnhancedLearningCard
+                      {...card}
+                      onSave={handleSaveCard}
+                      onDelete={() => handleDeleteCard(card.id)}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </AnimatePresence>
           )}
-        </AnimatePresence>
+
+          {!loading && filteredCards.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-gray-50 rounded-lg">
+              <div className="text-gray-500 mb-4">
+                {searchTerm || selectedTags.length > 0 || selectedCategory !== 'all'
+                  ? 'No cards match your filters. Try adjusting your search criteria.'
+                  : 'No cards yet. Create your first card to get started!'}
+              </div>
+              <Button
+                onClick={handleCreateCard}
+                variant="outline"
+                className="bg-white hover:bg-gray-50"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Card
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

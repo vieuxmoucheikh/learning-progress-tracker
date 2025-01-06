@@ -54,6 +54,7 @@ export interface LearningItem {
   rating?: 1 | 2 | 3 | 4 | 5;
   user_id?: string;
   lastTimestamp?: number | null;
+  background_color?: string;
 }
 
 export type LearningItemFormData = Omit<LearningItem, 'id' | 'progress'> & {
@@ -148,34 +149,40 @@ export interface PomodoroStats {
 }
 
 export interface CardMedia {
-  type: 'image' | 'link';
   url: string;
-  id: string;
-  description?: string;
+  type: 'image' | 'link';
+  name: string;
+}
+
+export interface NewEnhancedLearningCard {
+  title: string;
+  content: string;
+  difficulty?: string;
+  status?: string;
+  media?: CardMedia[];
+  tags?: string[];
+  category?: string;
+  user_id: string;
+  mastered?: boolean;
+  background_color?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface EnhancedLearningCard {
   id: string;
   title: string;
   content: string;
-  media?: CardMedia[];
+  difficulty: string;
+  status: string;
+  media: CardMedia[];
   tags: string[];
-  createdAt: string;
-  updatedAt: string;
-  mastered?: boolean;
-  category?: string;
-  lastStudied?: string;
-  backgroundColor?: string;
-}
-
-export type NewEnhancedLearningCard = {
-  title: string;
-  content: string;
-  media?: CardMedia[];
-  tags: string[];
-  mastered?: boolean;
-  category?: string;
-  backgroundColor?: string;
+  category: string;
+  user_id: string;
+  mastered: boolean;
+  background_color: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface EnhancedLearningContent {
@@ -186,4 +193,18 @@ export interface EnhancedLearningContent {
   created_at: string;
   updated_at: string;
   user_id: string;
+}
+
+export interface LearningCard {
+  id: string;
+  title: string;
+  content: string;
+  difficulty: string;
+  category: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+  mastered: boolean;
+  background_color?: string;
 }

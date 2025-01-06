@@ -1,143 +1,84 @@
 import { supabase } from './supabase';
-import type { User } from '@supabase/supabase-js';
-import type { EnhancedLearningCard, NewEnhancedLearningCard } from '@/types';
+import type { CardMedia, EnhancedLearningCard, NewEnhancedLearningCard } from '@/types';
 
-export type LearningCard = EnhancedLearningCard;
-export type NewLearningCard = NewEnhancedLearningCard;
-
-export const defaultBackgroundColors = [
-  { name: 'Default', value: 'bg-white' },
-  { name: 'Soft Blue', value: 'bg-blue-50' },
-  { name: 'Soft Green', value: 'bg-green-50' },
-  { name: 'Soft Yellow', value: 'bg-yellow-50' },
-  { name: 'Soft Purple', value: 'bg-purple-50' },
-  { name: 'Soft Pink', value: 'bg-pink-50' },
-  { name: 'Soft Orange', value: 'bg-orange-50' },
-] as const;
-
-export class LearningCardsService {
-  async getCards(user: User): Promise<EnhancedLearningCard[]> {
+class LearningCardsService {
+  async getCards(): Promise<EnhancedLearningCard[]> {
     const { data, error } = await supabase
       .from('enhanced_learning_cards')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+      .select('*');
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching cards:', error);
+      throw new Error('Failed to fetch cards');
+    }
 
-    return (data || []).map((card) => ({
-      id: card.id,
-      title: card.title,
-      content: card.content,
-      category: card.category || '',
-      backgroundColor: card.backgroundColor || 'bg-white',
-      tags: Array.isArray(card.tags) ? card.tags : [],
-      createdAt: card.created_at,
-      updatedAt: card.updated_at,
-      mastered: card.mastered || false,
-      media: [],
-    }));
+    return data;
   }
 
-  async createCard(user: User, card: NewEnhancedLearningCard): Promise<EnhancedLearningCard> {
-    const normalizedCategory = card.category?.toLowerCase().trim() || '';
-    
-    const cardData = {
-      title: card.title,
-      content: card.content,
-      category: normalizedCategory,
-      backgroundColor: card.backgroundColor || 'bg-white',
-      tags: card.tags || [],
-      user_id: user.id,
-      mastered: card.mastered || false,
-      media: card.media || [],
-    };
-
+  async createCard(card: NewEnhancedLearningCard): Promise<EnhancedLearningCard> {
     const { data, error } = await supabase
       .from('enhanced_learning_cards')
-      .insert([cardData])
+      .insert(card)
       .select()
       .single();
 
-    if (error) throw error;
-    if (!data) throw new Error('No data returned from insert');
+    if (error) {
+      console.error('Error creating card:', error);
+      throw new Error('Failed to create card');
+    }
 
-    return {
-      id: data.id,
-      title: data.title,
-      content: data.content,
-      category: data.category || '',
-      backgroundColor: data.backgroundColor || 'bg-white',
-      tags: Array.isArray(data.tags) ? data.tags : [],
-      createdAt: data.created_at,
-      updatedAt: data.updated_at,
-      mastered: data.mastered || false,
-      media: [],
-    };
+    return data;
   }
 
-  async updateCard(user: User, id: string, updates: Partial<EnhancedLearningCard>): Promise<EnhancedLearningCard> {
+  async updateCard(id: string, updates: Partial<EnhancedLearningCard>): Promise<EnhancedLearningCard> {
     try {
-      const normalizedCategory = updates.category?.toLowerCase().trim();
-      const updateData: any = {};
-      
-      if (updates.title !== undefined) updateData.title = updates.title;
-      if (updates.content !== undefined) updateData.content = updates.content;
-      if (updates.mastered !== undefined) updateData.mastered = updates.mastered;
-      if (updates.category !== undefined) updateData.category = normalizedCategory;
-      if (updates.backgroundColor !== undefined) updateData.backgroundColor = updates.backgroundColor;
-      if (updates.tags !== undefined) updateData.tags = updates.tags;
-      if (updates.media !== undefined) updateData.media = updates.media;
-      
       const { data, error } = await supabase
         .from('enhanced_learning_cards')
-        .update(updateData)
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
         .eq('id', id)
-        .eq('user_id', user.id)
         .select()
         .single();
 
-      if (error) throw error;
-      if (!data) throw new Error('Card not found');
+      if (error) {
+        console.error('Error updating card:', error);
+        throw new Error('Failed to update card');
+      }
 
-      return {
-        id: data.id,
-        title: data.title,
-        content: data.content,
-        category: data.category || '',
-        backgroundColor: data.backgroundColor || 'bg-white',
-        tags: Array.isArray(data.tags) ? data.tags : [],
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
-        mastered: data.mastered || false,
-        media: data.media || [],
-      };
+      return data;
     } catch (error) {
       console.error('Error in updateCard:', error);
       throw error;
     }
   }
 
-  async deleteCard(user: User, id: string): Promise<void> {
+  async deleteCard(id: string): Promise<void> {
     const { error } = await supabase
       .from('enhanced_learning_cards')
       .delete()
-      .eq('id', id)
-      .eq('user_id', user.id);
+      .eq('id', id);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error deleting card:', error);
+      throw new Error('Failed to delete card');
+    }
   }
 
-  async getCategories(user: User): Promise<string[]> {
-    const { data, error } = await supabase
-      .from('enhanced_learning_cards')
-      .select('category')
-      .eq('user_id', user.id);
-
-    if (error) throw error;
-
-    const categories = new Set(data.map(item => item.category?.toLowerCase().trim()).filter(Boolean));
-    return Array.from(categories).sort();
+  private parseMedia(media: any): CardMedia[] {
+    if (Array.isArray(media)) {
+      return media;
+    }
+    if (typeof media === 'string') {
+      try {
+        const parsed = JSON.parse(media);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
   }
 }
 

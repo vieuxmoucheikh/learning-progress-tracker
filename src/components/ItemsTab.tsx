@@ -5,22 +5,11 @@ import { Input } from "./ui/input";
 import { CustomSelect } from "./ui/select";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { RichTextEditor } from "./RichTextEditor";
-import { EnhancedLearningCard, defaultBackgroundColors } from "@/lib/learningCards";
 
 interface ItemsTabProps {
-  items: EnhancedLearningCard[];
+  items: LearningItem[];
   onAddItem: (selectedDate?: Date) => void;
-  onUpdate: (id: string, updates: Partial<EnhancedLearningCard>) => void;
+  onUpdate: (id: string, updates: Partial<LearningItem>) => void;
   onDelete: (id: string) => void;
   onStartTracking: (id: string) => void;
   onStopTracking: (id: string) => void;
@@ -43,7 +32,6 @@ export function ItemsTab({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [editingId, setEditingId] = useState<string | null>(null);
 
   // Helper function to get date string in YYYY-MM-DD format
   const getDateStr = (date: Date) => {
@@ -64,18 +52,6 @@ export function ItemsTab({
       return matchesSearch && matchesStatus && matchesCategory;
     });
   }, [items, searchQuery, selectedStatus, selectedCategory]);
-
-  const handleEdit = (id: string) => {
-    setEditingId(id);
-  };
-
-  const handleSave = async (id: string) => {
-    setEditingId(null);
-  };
-
-  const handleCancel = () => {
-    setEditingId(null);
-  };
 
   return (
     <div className="space-y-6">
@@ -175,101 +151,17 @@ export function ItemsTab({
         ) : (
           <div className="grid gap-4">
             {filteredItems.map((item) => (
-              <div
+              <LearningItemCard
                 key={item.id}
-                className={cn(
-                  "rounded-lg border p-4",
-                  item.backgroundColor || "bg-white",
-                  editingId === item.id ? "ring-2 ring-blue-500" : ""
-                )}
-              >
-                {editingId === item.id ? (
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Title</Label>
-                      <Input
-                        value={item.title}
-                        onChange={(e) =>
-                          onUpdate(item.id, { title: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div>
-                      <Label>Content</Label>
-                      <RichTextEditor
-                        content={item.content}
-                        onChange={(content) =>
-                          onUpdate(item.id, { content })
-                        }
-                      />
-                    </div>
-                    <div>
-                      <Label>Category</Label>
-                      <Select
-                        value={item.category}
-                        onValueChange={(category) =>
-                          onUpdate(item.id, { category })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Array.from(new Set(items.map(item => item.category?.toLowerCase() || '').filter(Boolean)))
-                            .sort()
-                            .map(category => (
-                              <SelectItem key={category} value={category}>
-                                {category}
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>Background Color</Label>
-                      <Select
-                        value={item.backgroundColor || "bg-white"}
-                        onValueChange={(color) =>
-                          onUpdate(item.id, { backgroundColor: color })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {defaultBackgroundColors.map((color) => (
-                            <SelectItem 
-                              key={color.value} 
-                              value={color.value}
-                              className={cn("flex items-center gap-2", color.value)}
-                            >
-                              <div className={cn("w-4 h-4 rounded border", color.value)} />
-                              {color.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={handleCancel}>
-                        Cancel
-                      </Button>
-                      <Button onClick={() => handleSave(item.id)}>Save</Button>
-                    </div>
-                  </div>
-                ) : (
-                  <LearningItemCard
-                    item={item}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                    onStartTracking={onStartTracking}
-                    onStopTracking={onStopTracking}
-                    onNotesUpdate={onNotesUpdate}
-                    onSetActiveItem={onSetActiveItem}
-                    onSessionNoteAdd={onSessionNoteAdd}
-                  />
-                )}
-              </div>
+                item={item}
+                onUpdate={onUpdate}
+                onDelete={onDelete}
+                onStartTracking={onStartTracking}
+                onStopTracking={onStopTracking}
+                onNotesUpdate={onNotesUpdate}
+                onSetActiveItem={onSetActiveItem}
+                onSessionNoteAdd={onSessionNoteAdd}
+              />
             ))}
           </div>
         )}
