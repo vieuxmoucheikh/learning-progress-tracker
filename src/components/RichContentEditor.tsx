@@ -17,34 +17,14 @@ import {
   Edit,
   Save,
   X,
+  Heading1,
+  Heading2,
+  Heading3,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import Image from '@tiptap/extension-image';
-import Link from '@tiptap/extension-link';
-import { common, createLowlight } from 'lowlight';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import Code from '@tiptap/extension-code';
 
-const TEXT_SIZES = {
-  large: {
-    label: 'Large',
-    class: 'text-xl font-medium leading-relaxed',
-    icon: <TypeIcon className="h-5 w-5" />,
-  },
-  medium: {
-    label: 'Medium',
-    class: 'text-base font-normal leading-relaxed',
-    icon: <TypeIcon className="h-4 w-4" />,
-  },
-  small: {
-    label: 'Small',
-    class: 'text-sm font-normal leading-relaxed',
-    icon: <TypeIcon className="h-3.5 w-3.5" />,
-  },
-} as const;
-
-type TextSizeKey = keyof typeof TEXT_SIZES;
+type TextSizeOptions = 'large' | 'medium' | 'normal';
 
 interface RichContentEditorProps {
   content: string;
@@ -56,140 +36,109 @@ interface RichContentEditorProps {
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) return null;
 
-  const setTextSize = (size: TextSizeKey) => {
-    if (!editor) return;
+  const setTextSize = (size: TextSizeOptions) => {
+    const classes = {
+      large: 'text-xl',
+      medium: 'text-lg',
+      normal: 'text-base'
+    };
     
-    editor.chain()
-      .focus()
-      .setMark('textStyle', { fontSize: size })
-      .run();
+    // First clear any existing text size
+    editor.commands.unsetMark('textStyle');
+    
+    // Set the new text size
+    editor.commands.setMark('textStyle', { class: classes[size] });
   };
 
-  const isTextSize = (size: TextSizeKey): boolean => {
-    if (!editor) return false;
-    return editor.isActive('textStyle', { fontSize: size });
+  const isTextSize = (size: TextSizeOptions): boolean => {
+    const classes = {
+      large: 'text-xl',
+      medium: 'text-lg',
+      normal: 'text-base'
+    };
+    return editor.isActive('textStyle', { class: classes[size] });
   };
 
   return (
-    <div className="flex flex-wrap gap-2 p-2 border-b bg-white shadow-sm">
-      <div className="flex items-center gap-2 border-r pr-2">
-        {(Object.keys(TEXT_SIZES) as TextSizeKey[]).map((size) => (
-          <Button
-            key={size}
-            variant={isTextSize(size) ? "secondary" : "ghost"}
-            size="sm"
-            onClick={() => setTextSize(size)}
-            className={cn(
-              "hover:bg-gray-100 flex items-center gap-2 px-3 py-1 rounded",
-              isTextSize(size) && "bg-gray-100 text-gray-900"
-            )}
-          >
-            {TEXT_SIZES[size].icon}
-            <span className={TEXT_SIZES[size].class}>{TEXT_SIZES[size].label}</span>
-          </Button>
-        ))}
+    <div className="flex flex-wrap gap-2 p-2 border-b">
+      <div className="flex flex-wrap gap-2">
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          className={cn(
+            "hover:bg-gray-100",
+            editor.isActive('heading', { level: 1 }) && "bg-gray-100 text-gray-900"
+          )}
+        >
+          <Heading1 className="h-4 w-4" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          className={cn(
+            "hover:bg-gray-100",
+            editor.isActive('heading', { level: 2 }) && "bg-gray-100 text-gray-900"
+          )}
+        >
+          <Heading2 className="h-4 w-4" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          className={cn(
+            "hover:bg-gray-100",
+            editor.isActive('heading', { level: 3 }) && "bg-gray-100 text-gray-900"
+          )}
+        >
+          <Heading3 className="h-4 w-4" />
+        </Button>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button
-          variant={editor.isActive('bold') ? "secondary" : "ghost"}
+          variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className="px-2"
-          title="Bold"
+          onClick={() => setTextSize('large')}
+          className={cn(isTextSize('large') && 'bg-muted')}
+          title="Large Text"
         >
-          <BoldIcon className="h-4 w-4" />
+          <TypeIcon className="h-5 w-5" />
         </Button>
         <Button
-          variant={editor.isActive('italic') ? "secondary" : "ghost"}
+          variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className="px-2"
-          title="Italic"
+          onClick={() => setTextSize('medium')}
+          className={cn(isTextSize('medium') && 'bg-muted')}
+          title="Medium Text"
         >
-          <ItalicIcon className="h-4 w-4" />
+          <TypeIcon className="h-4 w-4" />
         </Button>
         <Button
-          variant={editor.isActive('strike') ? "secondary" : "ghost"}
+          variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          className="px-2"
-          title="Strike"
+          onClick={() => setTextSize('normal')}
+          className={cn(isTextSize('normal') && 'bg-muted')}
+          title="Normal Text"
         >
-          <CodeIcon className="h-4 w-4" />
+          <TypeIcon className="h-3.5 w-3.5" />
         </Button>
-        <Button
-          variant={editor.isActive('code') ? "secondary" : "ghost"}
-          size="sm"
-          onClick={() => editor.chain().focus().toggleCode().run()}
-          className="px-2"
-          title="Code"
-        >
-          <CodeIcon className="h-4 w-4" />
-        </Button>
-        <div className="border-l pl-2 flex items-center gap-2">
-          <Button
-            variant={editor.isActive('bulletList') ? "secondary" : "ghost"}
-            size="sm"
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            className="px-2"
-            title="Bullet List"
-          >
-            <List className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={editor.isActive('orderedList') ? "secondary" : "ghost"}
-            size="sm"
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            className="px-2"
-            title="Ordered List"
-          >
-            <ListOrdered className="h-4 w-4" />
-          </Button>
-        </div>
-        <div className="border-l pl-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().unsetAllMarks().run()}
-            className="px-2 hover:bg-red-50 hover:text-red-500"
-            title="Clear Format"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        className={cn(editor.isActive('bulletList') && 'bg-muted')}
+        title="Bullet List"
+      >
+        <List className="h-4 w-4" />
+      </Button>
     </div>
   );
 };
-
-const TextSize = Extension.create({
-  name: 'textSize',
-
-  addOptions() {
-    return {
-      types: ['textStyle'],
-    };
-  },
-
-  addGlobalAttributes() {
-    return [
-      {
-        types: this.options.types,
-        attributes: {
-          fontSize: {
-            default: 'medium',
-            parseHTML: element => element.style.fontSize || 'medium',
-            renderHTML: attributes => {
-              const size = TEXT_SIZES[attributes.fontSize as TextSizeKey];
-              return { class: size ? size.class : TEXT_SIZES.medium.class };
-            },
-          },
-        },
-      },
-    ];
-  },
-});
 
 export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   content,
@@ -203,38 +152,19 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: false,
-        code: false,
-        codeBlock: false,
+        heading: {
+          levels: [1, 2, 3]
+        },
+      }),
+      Highlight,
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+        HTMLAttributes: {
+          class: 'flex items-start gap-2',
+        },
       }),
       TextStyle,
-      TextSize.configure({
-        types: ['textStyle'],
-      }),
-      Image.configure({
-        inline: true,
-        allowBase64: true,
-        HTMLAttributes: {
-          class: 'rounded-lg max-w-full h-auto my-4',
-        },
-      }),
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          class: 'text-blue-600 underline underline-offset-2',
-        },
-      }),
-      CodeBlockLowlight.configure({
-        lowlight: createLowlight(common),
-        HTMLAttributes: {
-          class: 'bg-gray-50 text-gray-900 p-4 rounded-md border border-gray-200 font-mono text-sm my-4',
-        },
-      }),
-      Code.configure({
-        HTMLAttributes: {
-          class: 'bg-gray-50 text-gray-900 px-1 rounded font-mono text-sm',
-        },
-      }),
     ],
     content,
     editable: isEditing,
@@ -285,6 +215,29 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     setIsEditing(false);
     setLocalContent(content);
     editor?.commands.setContent(content);
+  };
+
+  const setTextSize = (size: TextSizeOptions) => {
+    const classes = {
+      large: 'text-xl',
+      medium: 'text-lg',
+      normal: 'text-base'
+    };
+    
+    // First clear any existing text size
+    editor?.commands.unsetMark('textStyle');
+    
+    // Set the new text size
+    editor?.commands.setMark('textStyle', { class: classes[size] });
+  };
+
+  const isTextSize = (size: TextSizeOptions): boolean => {
+    const classes = {
+      large: 'text-xl',
+      medium: 'text-lg',
+      normal: 'text-base'
+    };
+    return editor?.isActive('textStyle', { class: classes[size] }) ?? false;
   };
 
   return (
