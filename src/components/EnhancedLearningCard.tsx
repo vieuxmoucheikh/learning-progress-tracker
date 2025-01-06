@@ -70,6 +70,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getLearningItems, trackLearningActivity, updateLearningItem } from '@/lib/database';
+import hljs from 'highlight.js';
+import 'highlight.js/styles/github.css';
 
 interface EnhancedLearningCardProps extends CardType {
   onSave: (data: Partial<CardType>) => Promise<boolean>;
@@ -124,6 +126,12 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       fetchCategories();
     }
   }, [isEditing]);
+
+  useEffect(() => {
+    if (contentRef.current) {
+      hljs.highlightBlock(contentRef.current);
+    }
+  }, [content]);
 
   const handleSave = async () => {
     const result = await onSave({
@@ -607,6 +615,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               onClick={() => !isZoomed && setIsZoomed(true)}
             >
               <div 
+                ref={contentRef} 
                 className={cn(
                   "prose prose-sm sm:prose-base max-w-none",
                   "prose-headings:font-semibold prose-headings:text-gray-900",
@@ -620,7 +629,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   "prose-li:marker:text-gray-400",
                   !isZoomed && "max-h-[300px] overflow-hidden cursor-pointer"
                 )}
-                dangerouslySetInnerHTML={{ __html: content }}
+                dangerouslySetInnerHTML={{ __html: content }} 
               />
               {!isZoomed && content.length > 300 && (
                 <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none" />

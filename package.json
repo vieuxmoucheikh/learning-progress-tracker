@@ -44,6 +44,7 @@
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "framer-motion": "^11.11.17",
+    "highlight.js": "^11.11.1",
     "html2pdf.js": "^0.10.2",
     "lowlight": "^3.3.0",
     "next-auth": "^4.24.11",
