@@ -331,6 +331,11 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
       const newContent = editor.getHTML();
       setLocalContent(newContent);
       onChange(newContent);
+      // Force re-render of syntax highlighting
+      editor.commands.setContent(newContent);
+    },
+    parseOptions: {
+      preserveWhitespace: 'full',
     },
     editorProps: {
       attributes: {
