@@ -68,37 +68,40 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
     <div className="flex flex-wrap gap-2 p-2 border-b">
       <div className="flex flex-wrap gap-2">
         <Button
-          size="icon"
           variant="ghost"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          size="sm"
+          onClick={() => setTextSize('large')}
           className={cn(
             "hover:bg-gray-100",
-            editor.isActive('heading', { level: 1 }) && "bg-gray-100 text-gray-900"
+            isTextSize('large') && "bg-gray-100 text-gray-900"
           )}
         >
-          <Heading1 className="h-4 w-4" />
+          <TypeIcon className="h-5 w-5" />
+          <span className="ml-2">Large</span>
         </Button>
         <Button
-          size="icon"
           variant="ghost"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          size="sm"
+          onClick={() => setTextSize('medium')}
           className={cn(
             "hover:bg-gray-100",
-            editor.isActive('heading', { level: 2 }) && "bg-gray-100 text-gray-900"
+            isTextSize('medium') && "bg-gray-100 text-gray-900"
           )}
         >
-          <Heading2 className="h-4 w-4" />
+          <TypeIcon className="h-4 w-4" />
+          <span className="ml-2">Medium</span>
         </Button>
         <Button
-          size="icon"
           variant="ghost"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          size="sm"
+          onClick={() => setTextSize('normal')}
           className={cn(
             "hover:bg-gray-100",
-            editor.isActive('heading', { level: 3 }) && "bg-gray-100 text-gray-900"
+            isTextSize('normal') && "bg-gray-100 text-gray-900"
           )}
         >
-          <Heading3 className="h-4 w-4" />
+          <TypeIcon className="h-3.5 w-3.5" />
+          <span className="ml-2">Normal</span>
         </Button>
       </div>
 
@@ -106,41 +109,67 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setTextSize('large')}
-          className={cn(isTextSize('large') && 'bg-muted')}
-          title="Large Text"
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={cn(editor.isActive('bold') && 'bg-muted')}
+          title="Bold"
         >
-          <TypeIcon className="h-5 w-5" />
+          <BoldIcon className="h-4 w-4" />
         </Button>
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setTextSize('medium')}
-          className={cn(isTextSize('medium') && 'bg-muted')}
-          title="Medium Text"
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={cn(editor.isActive('italic') && 'bg-muted')}
+          title="Italic"
         >
-          <TypeIcon className="h-4 w-4" />
+          <ItalicIcon className="h-4 w-4" />
         </Button>
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setTextSize('normal')}
-          className={cn(isTextSize('normal') && 'bg-muted')}
-          title="Normal Text"
+          onClick={() => editor.chain().focus().toggleStrike().run()}
+          className={cn(editor.isActive('strike') && 'bg-muted')}
+          title="Strike"
         >
-          <TypeIcon className="h-3.5 w-3.5" />
+          <CodeIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleCode().run()}
+          className={cn(editor.isActive('code') && 'bg-muted')}
+          title="Code"
+        >
+          <CodeIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          className={cn(editor.isActive('bulletList') && 'bg-muted')}
+          title="Bullet List"
+        >
+          <List className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          className={cn(editor.isActive('orderedList') && 'bg-muted')}
+          title="Ordered List"
+        >
+          <ListOrdered className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().unsetAllMarks().run()}
+          className="hover:bg-gray-100"
+          title="Clear Format"
+        >
+          <X className="h-4 w-4" />
         </Button>
       </div>
-
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={cn(editor.isActive('bulletList') && 'bg-muted')}
-        title="Bullet List"
-      >
-        <List className="h-4 w-4" />
-      </Button>
     </div>
   );
 };
@@ -157,9 +186,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: {
-          levels: [1, 2, 3]
-        },
+        heading: false,
         code: false,
         codeBlock: false,
       }),
