@@ -155,25 +155,26 @@ export const LearningCardsPage = () => {
 
   const filteredCards = cards
     .filter((card) => {
-      const matchesSearch = card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        card.content.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = (card.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (card.content || '').toLowerCase().includes(searchTerm.toLowerCase());
       const matchesTags = selectedTags.length === 0 || selectedTags.some(tag => card.tags?.includes(tag));
       const matchesCategory = selectedCategory === 'all' || card.category === selectedCategory;
       return matchesSearch && matchesTags && matchesCategory;
     })
     .sort((a, b) => {
-      const aDate = new Date(a.created_at || 0).getTime();
-      const bDate = new Date(b.created_at || 0).getTime();
-      const aUpdateDate = new Date(a.updated_at || 0).getTime();
-      const bUpdateDate = new Date(b.updated_at || 0).getTime();
+      // Ensure we have valid dates before comparison
+      const aCreated = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const bCreated = b.created_at ? new Date(b.created_at).getTime() : 0;
+      const aUpdated = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+      const bUpdated = b.updated_at ? new Date(b.updated_at).getTime() : 0;
 
       switch (sortBy) {
         case 'created':
-          return bDate - aDate;
+          return bCreated - aCreated;
         case 'mastered':
           return (b.mastered ? 1 : 0) - (a.mastered ? 1 : 0);
         default:
-          return bUpdateDate - aUpdateDate;
+          return bUpdated - aUpdated;
       }
     });
 
