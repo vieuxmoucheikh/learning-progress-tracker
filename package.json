@@ -27,7 +27,6 @@
     "@tailwindcss/typography": "^0.5.15",
     "@tiptap/extension-code-block-lowlight": "^2.11.0",
     "@tiptap/extension-color": "^2.11.0",
-    "@tiptap/extension-font-size": "^3.0.0-next.3",
     "@tiptap/extension-highlight": "^2.11.0",
     "@tiptap/extension-image": "^2.1.13",
     "@tiptap/extension-link": "^2.1.13",
