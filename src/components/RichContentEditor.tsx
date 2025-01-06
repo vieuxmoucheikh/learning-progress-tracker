@@ -4,7 +4,8 @@ import StarterKit from '@tiptap/starter-kit';
 import Highlight from '@tiptap/extension-highlight';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
-import { Extension, type Editor as CoreEditor, type Command } from '@tiptap/core';
+import TextStyle from '@tiptap/extension-text-style';
+import { Extension } from '@tiptap/core';
 import {
   Bold as BoldIcon,
   Italic as ItalicIcon,
@@ -22,29 +23,6 @@ import { cn } from '@/lib/utils';
 
 type TextSizeOptions = 'large' | 'medium' | 'normal';
 
-// Custom extension for text size
-const TextSize = Extension.create({
-  name: 'textSize',
-
-  addGlobalAttributes() {
-    return [
-      {
-        types: ['paragraph'],
-        attributes: {
-          textSize: {
-            default: 'normal' as TextSizeOptions,
-            parseHTML: element => element.getAttribute('data-text-size') || 'normal',
-            renderHTML: attributes => ({
-              'data-text-size': attributes.textSize,
-              class: `text-size-${attributes.textSize}`,
-            }),
-          },
-        },
-      },
-    ];
-  },
-});
-
 interface RichContentEditorProps {
   content: string;
   onChange: (content: string) => void;
@@ -56,16 +34,22 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) return null;
 
   const setTextSize = (size: TextSizeOptions) => {
-    editor
-      .chain()
-      .focus()
-      .setParagraph()
-      .updateAttributes('paragraph', { textSize: size })
-      .run();
+    const sizes = {
+      large: '1.5rem',
+      medium: '1.25rem',
+      normal: '1rem'
+    };
+    
+    editor.chain().focus().setMark('textStyle', { fontSize: sizes[size] }).run();
   };
 
   const isTextSize = (size: TextSizeOptions): boolean => {
-    return editor.isActive('paragraph', { textSize: size });
+    const sizes = {
+      large: '1.5rem',
+      medium: '1.25rem',
+      normal: '1rem'
+    };
+    return editor.isActive('textStyle', { fontSize: sizes[size] });
   };
 
   return (
@@ -170,12 +154,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     extensions: [
       StarterKit.configure({
         heading: false,
-        code: {
-          HTMLAttributes: {
-            class: 'rounded-md bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold',
-          },
-        },
-        codeBlock: false,
+        code: false, // Disable code in StarterKit
       }),
       Highlight,
       TaskList,
@@ -185,7 +164,11 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
           class: 'flex items-start gap-2',
         },
       }),
-      TextSize,
+      TextStyle.configure({
+        HTMLAttributes: {
+          class: 'text-style',
+        },
+      }),
     ],
     content,
     editable: isEditing,
