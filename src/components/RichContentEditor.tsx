@@ -5,6 +5,7 @@ import Highlight from '@tiptap/extension-highlight';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import TextStyle from '@tiptap/extension-text-style';
+import FontSize from '@tiptap/extension-font-size';
 import { Extension } from '@tiptap/core';
 import {
   Bold as BoldIcon,
@@ -35,21 +36,21 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
 
   const setTextSize = (size: TextSizeOptions) => {
     const sizes = {
-      large: '1.5rem',
-      medium: '1.25rem',
-      normal: '1rem'
+      large: '24px',
+      medium: '18px',
+      normal: '16px'
     };
     
-    editor.chain().focus().setMark('textStyle', { fontSize: sizes[size] }).run();
+    editor.chain().focus().setFontSize(sizes[size]).run();
   };
 
   const isTextSize = (size: TextSizeOptions): boolean => {
     const sizes = {
-      large: '1.5rem',
-      medium: '1.25rem',
-      normal: '1rem'
+      large: '24px',
+      medium: '18px',
+      normal: '16px'
     };
-    return editor.isActive('textStyle', { fontSize: sizes[size] });
+    return editor.isActive('fontSize', sizes[size]);
   };
 
   return (
@@ -168,6 +169,9 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
         HTMLAttributes: {
           class: 'text-style',
         },
+      }),
+      FontSize.configure({
+        types: ['textStyle'],
       }),
     ],
     content,
