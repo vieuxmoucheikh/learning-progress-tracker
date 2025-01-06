@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useEditor, EditorContent, Editor } from '@tiptap/react';
-import Document from '@tiptap/extension-document';
-import Paragraph from '@tiptap/extension-paragraph';
-import Text from '@tiptap/extension-text';
-import Bold from '@tiptap/extension-bold';
-import Italic from '@tiptap/extension-italic';
-import Heading from '@tiptap/extension-heading';
-import BulletList from '@tiptap/extension-bullet-list';
-import OrderedList from '@tiptap/extension-ordered-list';
-import ListItem from '@tiptap/extension-list-item';
-import Code from '@tiptap/extension-code';
+import StarterKit from '@tiptap/starter-kit';
 import Highlight from '@tiptap/extension-highlight';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
@@ -35,46 +26,6 @@ interface RichContentEditorProps {
   readOnly?: boolean;
   className?: string;
 }
-
-const getHeadingTag = (level: number) => {
-  switch (level) {
-    case 1: return 'heading-one';
-    case 2: return 'heading-two';
-    case 3: return 'heading-three';
-    default: return 'heading-one';
-  }
-};
-
-const CustomHeading = Heading.extend({
-  addAttributes() {
-    return {
-      level: {
-        default: 1,
-        rendered: false
-      },
-      'data-level': {
-        default: '1',
-        renderHTML: (attributes) => ({
-          'data-level': attributes.level?.toString() || '1'
-        })
-      }
-    };
-  },
-  renderHTML({ node }) {
-    const tag = getHeadingTag(node.attrs.level || 1);
-    return [tag, { 
-      class: `heading ${tag}`,
-      'data-level': node.attrs.level?.toString() || '1'
-    }, 0];
-  },
-  parseHTML() {
-    return [
-      { tag: 'heading-one', class: 'heading heading-one' },
-      { tag: 'heading-two', class: 'heading heading-two' },
-      { tag: 'heading-three', class: 'heading heading-three' }
-    ];
-  }
-});
 
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) return null;
@@ -182,18 +133,11 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
 
   const editor = useEditor({
     extensions: [
-      Document,
-      Paragraph,
-      Text,
-      Bold,
-      Italic,
-      CustomHeading.configure({
-        levels: [1, 2, 3],
+      StarterKit.configure({
+        heading: {
+          levels: [1, 2, 3]
+        }
       }),
-      BulletList,
-      OrderedList,
-      ListItem,
-      Code,
       Highlight,
       TaskList,
       TaskItem.configure({

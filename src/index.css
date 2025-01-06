@@ -50,22 +50,25 @@
 }
 
 /* Heading styles */
-.heading {
+.ProseMirror h1 {
+  font-size: 2em;
   font-weight: bold;
   margin-top: 1em;
   margin-bottom: 0.5em;
 }
 
-.heading-one {
-  font-size: 2em;
-}
-
-.heading-two {
+.ProseMirror h2 {
   font-size: 1.5em;
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
 }
 
-.heading-three {
+.ProseMirror h3 {
   font-size: 1.25em;
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
 }
 
 .pomodoro-settings {
