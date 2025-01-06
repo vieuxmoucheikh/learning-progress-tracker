@@ -36,21 +36,44 @@ interface RichContentEditorProps {
   className?: string;
 }
 
+const getHeadingTag = (level: number) => {
+  switch (level) {
+    case 1: return 'heading-one';
+    case 2: return 'heading-two';
+    case 3: return 'heading-three';
+    default: return 'heading-one';
+  }
+};
+
 const CustomHeading = Heading.extend({
   addAttributes() {
-    return {};
+    return {
+      level: {
+        default: 1,
+        rendered: false
+      },
+      'data-level': {
+        default: '1',
+        renderHTML: (attributes) => ({
+          'data-level': attributes.level?.toString() || '1'
+        })
+      }
+    };
+  },
+  renderHTML({ node }) {
+    const tag = getHeadingTag(node.attrs.level || 1);
+    return [tag, { 
+      class: `heading ${tag}`,
+      'data-level': node.attrs.level?.toString() || '1'
+    }, 0];
   },
   parseHTML() {
     return [
-      { tag: 'h1', class: 'heading heading-1' },
-      { tag: 'h2', class: 'heading heading-2' },
-      { tag: 'h3', class: 'heading heading-3' },
+      { tag: 'heading-one', class: 'heading heading-one' },
+      { tag: 'heading-two', class: 'heading heading-two' },
+      { tag: 'heading-three', class: 'heading heading-three' }
     ];
-  },
-  renderHTML({ node }) {
-    const tag = `h${node.attrs.level || 1}`;
-    return [tag, { class: `heading heading-${node.attrs.level || 1}` }, 0];
-  },
+  }
 });
 
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
