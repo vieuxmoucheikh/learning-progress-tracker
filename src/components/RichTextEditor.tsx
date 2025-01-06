@@ -65,10 +65,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       StarterKit.configure({
         heading: {
           levels: [1, 2, 3],
-          HTMLAttributes: {
-            1: { class: 'text-4xl font-bold' },
-            2: { class: 'text-3xl font-bold' },
-            3: { class: 'text-2xl font-bold' },
+          HTMLAttributes: {            1: {
+            class: 'text-2xl font-bold text-gray-900 my-4',
+          },
+          2: {
+            class: 'text-xl font-bold text-gray-900 my-3',
+          },
+          3: {
+            class: 'text-lg font-bold text-gray-900 my-2',
+          },
+          class: 'font-bold text-gray-900',
           },
         },
         bulletList: {
