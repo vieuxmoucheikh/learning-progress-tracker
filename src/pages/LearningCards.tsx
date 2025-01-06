@@ -92,6 +92,7 @@ export const LearningCardsPage = () => {
     try {
       console.log('Saving card content:', card.content);
       const formattedContent = card.content ? card.content.replace(/<p>/g, '<p class="text-gray-900">') : '';
+      console.log('Formatted content before saving:', formattedContent); // Log the formatted content
       await learningCardsService.updateCard(card.id!, {
         title: card.title,
         content: formattedContent,
