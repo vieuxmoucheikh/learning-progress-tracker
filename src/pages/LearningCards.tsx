@@ -166,7 +166,7 @@ export const LearningCardsPage = () => {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">Learning Cards</h1>
-            <p className="text-gray-500 mt-1">Organize and manage your learning notes</p>
+            <p className="text-gray-800 mt-1">Organize and manage your learning notes</p>
           </div>
           <Button 
             onClick={handleCreateCard} 
