@@ -1,16 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
+import { useEditor, EditorContent, Editor } from '@tiptap/react';
+import Document from '@tiptap/extension-document';
+import Paragraph from '@tiptap/extension-paragraph';
+import Text from '@tiptap/extension-text';
+import Bold from '@tiptap/extension-bold';
+import Italic from '@tiptap/extension-italic';
 import Heading from '@tiptap/extension-heading';
+import BulletList from '@tiptap/extension-bullet-list';
+import OrderedList from '@tiptap/extension-ordered-list';
+import ListItem from '@tiptap/extension-list-item';
+import Code from '@tiptap/extension-code';
+import CodeBlock from '@tiptap/extension-code-block';
 import Highlight from '@tiptap/extension-highlight';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import {
-  Bold,
-  Italic,
+  Bold as BoldIcon,
+  Italic as ItalicIcon,
   List,
   ListOrdered,
-  Code,
+  Code as CodeIcon,
   Quote,
   Heading1,
   Heading2,
@@ -29,7 +38,7 @@ interface RichContentEditorProps {
   className?: string;
 }
 
-const MenuBar = ({ editor }: { editor: any }) => {
+const MenuBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) return null;
 
   return (
@@ -40,7 +49,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
         onClick={() => editor.chain().focus().toggleBold().run()}
         className={cn(editor.isActive('bold') && 'bg-muted')}
       >
-        <Bold className="h-4 w-4" />
+        <BoldIcon className="h-4 w-4" />
       </Button>
       <Button
         variant="ghost"
@@ -48,7 +57,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
         onClick={() => editor.chain().focus().toggleItalic().run()}
         className={cn(editor.isActive('italic') && 'bg-muted')}
       >
-        <Italic className="h-4 w-4" />
+        <ItalicIcon className="h-4 w-4" />
       </Button>
       <Button
         variant="ghost"
@@ -104,18 +113,10 @@ const MenuBar = ({ editor }: { editor: any }) => {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-        className={cn(editor.isActive('codeBlock') && 'bg-muted')}
+        onClick={() => editor.chain().focus().toggleCode().run()}
+        className={cn(editor.isActive('code') && 'bg-muted')}
       >
-        <Code className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        className={cn(editor.isActive('blockquote') && 'bg-muted')}
-      >
-        <Quote className="h-4 w-4" />
+        <CodeIcon className="h-4 w-4" />
       </Button>
     </div>
   );
@@ -132,15 +133,23 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        heading: false,
-      }),
+      Document,
+      Paragraph,
+      Text,
+      Bold,
+      Italic,
       Heading.configure({
+        levels: [1, 2, 3],
         HTMLAttributes: {
           class: 'heading',
+          level: (attrs: { level: number }) => attrs.level?.toString(),
         },
-        levels: [1, 2, 3],
       }),
+      BulletList,
+      OrderedList,
+      ListItem,
+      Code,
+      CodeBlock,
       Highlight,
       TaskList,
       TaskItem.configure({
