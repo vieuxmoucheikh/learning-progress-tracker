@@ -21,9 +21,6 @@ import {
   Redo,
   Link as LinkIcon,
   Image as ImageIcon,
-  Heading1,
-  Heading2,
-  Heading3,
   Type,
   Palette,
 } from 'lucide-react';
@@ -47,6 +44,8 @@ const bgColors = [
   '#ffebee', '#fce4ec', '#f3e5f5', '#ede7f6', '#e8eaf6', '#e3f2fd', '#e1f5fe', '#e0f7fa', '#e0f2f1', '#e8f5e9',
 ];
 
+type TextSizeOptions = 'large' | 'medium' | 'normal';
+
 interface RichTextEditorProps {
   content: string;
   onChange: (content: string) => void;
@@ -54,7 +53,7 @@ interface RichTextEditorProps {
   className?: string;
 }
 
-export const RichTextEditor: React.FC<RichTextEditorProps> = ({
+const RichTextEditor: React.FC<RichTextEditorProps> = ({
   content,
   onChange,
   editable = true,
@@ -63,37 +62,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: {
-          levels: [1, 2, 3],
-          HTMLAttributes: {
-            1: { class: 'text-4xl font-bold' },
-            2: { class: 'text-3xl font-bold' },
-            3: { class: 'text-2xl font-bold' },
-          },
-        },
-        bulletList: {
-          keepMarks: true,
-          keepAttributes: false,
-          HTMLAttributes: {
-            class: 'list-disc ml-4',
-          },
-        },
-        orderedList: {
-          keepMarks: true,
-          keepAttributes: false,
-          HTMLAttributes: {
-            class: 'list-decimal ml-4',
-          },
-        },
-        blockquote: {
-          HTMLAttributes: {
-            class: 'border-l-4 border-blue-500 pl-4 my-4 italic text-gray-700 bg-blue-50/50',
-          },
-        },
-        code: {
-          HTMLAttributes: {
-            class: 'bg-gray-50 text-gray-900 px-1 rounded font-mono text-sm',
-          },
+        heading: false,
+        code: false,
+        codeBlock: false,
+      }),
+      TextStyle.configure({
+        HTMLAttributes: {
+          class: 'text-base',
         },
       }),
       Image.configure({
@@ -117,304 +92,171 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       }),
       Code.configure({
         HTMLAttributes: {
-          class: 'rounded bg-gray-200 px-1.5 py-0.5 font-mono text-sm',
+          class: 'bg-gray-50 text-gray-900 px-1 rounded font-mono text-sm',
         },
       }),
-      TextStyle,
       ColorExtension,
-      Highlight.configure({
-        multicolor: true,
-      }),
+      Highlight,
     ],
     content,
     editable,
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      onChange(html);
-    },
-    editorProps: {
-      attributes: {
-        class: cn(
-          "prose prose-sm max-w-none",
-          "min-h-[100px] outline-none",
-          "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:my-4",
-          "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:my-3",
-          "[&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-gray-900 [&_h3]:my-2",
-          "[&_p]:text-gray-900 [&_p]:my-2",
-          "[&_ul]:list-disc [&_ul]:ml-4",
-          "[&_ol]:list-decimal [&_ol]:ml-4",
-        ),
-      },
-      handleDrop: (view, event, slice, moved) => {
-        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
-          const file = event.dataTransfer.files[0];
-          if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              const base64 = e.target?.result as string;
-              editor?.chain().focus().setImage({ src: base64 }).run();
-            };
-            reader.readAsDataURL(file);
-            return true;
-          }
-        }
-        return false;
-      },
-      handlePaste: (view, event) => {
-        if (event.clipboardData && event.clipboardData.files && event.clipboardData.files[0]) {
-          const file = event.clipboardData.files[0];
-          if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              const base64 = e.target?.result as string;
-              editor?.chain().focus().setImage({ src: base64 }).run();
-            };
-            reader.readAsDataURL(file);
-            return true;
-          }
-        }
-        return false;
-      },
+      onChange(editor.getHTML());
     },
   });
 
-  const toggleLink = useCallback(() => {
+  const setTextSize = (size: TextSizeOptions) => {
     if (!editor) return;
-    const previousUrl = editor.getAttributes('link').href;
-    const url = window.prompt('URL', previousUrl);
-
-    if (url === null) {
-      return;
-    }
-
-    if (url === '') {
-      editor.chain().focus().extendMarkRange('link').unsetLink().run();
-      return;
-    }
-
-    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
-  }, [editor]);
-
-  const addImage = useCallback(() => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
     
-    input.onchange = (event) => {
-      const file = (event.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const base64 = e.target?.result as string;
-          editor?.chain().focus().setImage({ src: base64 }).run();
-        };
-        reader.readAsDataURL(file);
-      }
+    const classes = {
+      large: 'text-xl',
+      medium: 'text-lg',
+      normal: 'text-base'
     };
     
-    input.click();
-  }, [editor]);
+    // First clear any existing text size
+    editor.commands.unsetMark('textStyle');
+    
+    // Set the new text size
+    editor.commands.setMark('textStyle', { class: classes[size] });
+  };
+
+  const isTextSize = (size: TextSizeOptions): boolean => {
+    if (!editor) return false;
+    
+    const classes = {
+      large: 'text-xl',
+      medium: 'text-lg',
+      normal: 'text-base'
+    };
+    return editor.isActive('textStyle', { class: classes[size] });
+  };
 
   if (!editor) {
     return null;
   }
 
   return (
-    <div className={cn(
-      "rounded-lg border border-gray-200",
-      "bg-white",
-      className
-    )}>
-      {editable && (
-        <div className="flex flex-wrap gap-1 p-2 border-b border-gray-200 bg-white">
+    <div className={cn('border rounded-lg', className)}>
+      <div className="flex flex-wrap gap-2 p-2 border-b">
+        <div className="flex flex-wrap gap-2">
           <Button
-            size="icon"
             variant="ghost"
-            onClick={() => editor.chain().focus().toggleBold().run()}
+            size="sm"
+            onClick={() => setTextSize('large')}
             className={cn(
               "hover:bg-gray-100",
-              editor.isActive('bold') && "bg-gray-100 text-gray-900"
+              isTextSize('large') && "bg-gray-100 text-gray-900"
             )}
+          >
+            <Type className="h-5 w-5" />
+            <span className="ml-2">Large</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setTextSize('medium')}
+            className={cn(
+              "hover:bg-gray-100",
+              isTextSize('medium') && "bg-gray-100 text-gray-900"
+            )}
+          >
+            <Type className="h-4 w-4" />
+            <span className="ml-2">Medium</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setTextSize('normal')}
+            className={cn(
+              "hover:bg-gray-100",
+              isTextSize('normal') && "bg-gray-100 text-gray-900"
+            )}
+          >
+            <Type className="h-3.5 w-3.5" />
+            <span className="ml-2">Normal</span>
+          </Button>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={cn(editor.isActive('bold') && 'bg-muted')}
+            title="Bold"
           >
             <Bold className="h-4 w-4" />
           </Button>
           <Button
-            size="icon"
             variant="ghost"
+            size="sm"
             onClick={() => editor.chain().focus().toggleItalic().run()}
-            className={cn(
-              "hover:bg-gray-100",
-              editor.isActive('italic') && "bg-gray-100 text-gray-900"
-            )}
+            className={cn(editor.isActive('italic') && 'bg-muted')}
+            title="Italic"
           >
             <Italic className="h-4 w-4" />
           </Button>
           <Button
-            size="icon"
             variant="ghost"
-            onClick={() => editor.chain().focus().toggleCode().run()}
-            className={cn(
-              "hover:bg-gray-100",
-              editor.isActive('code') && "bg-gray-100 text-gray-900"
-            )}
+            size="sm"
+            onClick={() => editor.chain().focus().toggleStrike().run()}
+            className={cn(editor.isActive('strike') && 'bg-muted')}
+            title="Strike"
           >
             <CodeIcon className="h-4 w-4" />
           </Button>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="hover:bg-gray-100"
-              >
-                <Type className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-64 p-2">
-              <div className="grid grid-cols-10 gap-1">
-                {colors.map((color) => (
-                  <button
-                    key={color}
-                    className="w-5 h-5 rounded border border-gray-200"
-                    style={{ backgroundColor: color }}
-                    onClick={() => editor.chain().focus().setColor(color).run()}
-                  />
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="hover:bg-gray-100"
-              >
-                <Palette className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-64 p-2">
-              <div className="grid grid-cols-10 gap-1">
-                {bgColors.map((color) => (
-                  <button
-                    key={color}
-                    className="w-5 h-5 rounded border border-gray-200"
-                    style={{ backgroundColor: color }}
-                    onClick={() => editor.chain().focus().setHighlight({ color }).run()}
-                  />
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-
           <Button
-            size="icon"
             variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleCode().run()}
+            className={cn(editor.isActive('code') && 'bg-muted')}
+            title="Code"
+          >
+            <CodeIcon className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => editor.chain().focus().toggleBulletList().run()}
-            className={cn(
-              "hover:bg-gray-100",
-              editor.isActive('bulletList') && "bg-gray-100 text-gray-900"
-            )}
+            className={cn(editor.isActive('bulletList') && 'bg-muted')}
+            title="Bullet List"
           >
             <List className="h-4 w-4" />
           </Button>
           <Button
-            size="icon"
             variant="ghost"
+            size="sm"
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            className={cn(
-              "hover:bg-gray-100",
-              editor.isActive('orderedList') && "bg-gray-100 text-gray-900"
-            )}
+            className={cn(editor.isActive('orderedList') && 'bg-muted')}
+            title="Ordered List"
           >
             <ListOrdered className="h-4 w-4" />
           </Button>
           <Button
-            size="icon"
             variant="ghost"
-            onClick={() => editor.chain().focus().toggleBlockquote().run()}
-            className={cn(
-              "hover:bg-gray-100",
-              editor.isActive('blockquote') && "bg-gray-100 text-gray-900"
-            )}
-          >
-            <Quote className="h-4 w-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={toggleLink}
-            className={cn(
-              "hover:bg-gray-100",
-              editor.isActive('link') && "bg-gray-100 text-gray-900"
-            )}
-          >
-            <LinkIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={addImage}
+            size="sm"
+            onClick={() => editor.chain().focus().unsetAllMarks().run()}
             className="hover:bg-gray-100"
+            title="Clear Format"
           >
-            <ImageIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-            className={cn(
-              "hover:bg-gray-100",
-              editor.isActive('heading', { level: 1 }) && "bg-gray-100 text-gray-900"
-            )}
-          >
-            <Heading1 className="h-4 w-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            className={cn(
-              "hover:bg-gray-100",
-              editor.isActive('heading', { level: 2 }) && "bg-gray-100 text-gray-900"
-            )}
-          >
-            <Heading2 className="h-4 w-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-            className={cn(
-              "hover:bg-gray-100",
-              editor.isActive('heading', { level: 3 }) && "bg-gray-100 text-gray-900"
-            )}
-          >
-            <Heading3 className="h-4 w-4" />
+            <Type className="h-4 w-4" />
           </Button>
         </div>
-      )}
+      </div>
       <EditorContent 
         editor={editor} 
         className={cn(
-          "prose prose-sm max-w-none",
-          "bg-white text-gray-900",
-          "p-4",
-          "[&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:outline-none",
-          "[&_pre]:bg-gray-50 [&_pre]:text-gray-900 [&_pre]:border [&_pre]:border-gray-200 [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:my-4",
-          "[&_code]:bg-gray-50 [&_code]:text-gray-900 [&_code]:px-1 [&_code]:rounded [&_code]:font-mono [&_code]:text-sm",
-          "[&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:pl-4 [&_blockquote]:my-4 [&_blockquote]:italic [&_blockquote]:text-gray-700 [&_blockquote]:bg-blue-50/50",
-          "[&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-2",
-          "[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4",
-          "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:my-4",
-          "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:my-3",
-          "[&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-gray-900 [&_h3]:my-2",
-          "[&_p]:my-2 [&_p]:text-gray-900",
-          "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4"
+          'prose max-w-none w-full focus:outline-none p-4',
+          'prose-img:my-0',
+          'prose-p:my-0 prose-p:leading-normal',
+          'prose-headings:my-3 prose-headings:first:mt-0',
+          'prose-li:my-0',
+          'prose-code:px-1 prose-code:py-0.5 prose-code:bg-gray-100 prose-code:rounded prose-code:before:content-none prose-code:after:content-none',
         )}
       />
     </div>
   );
 };
+
+export default RichTextEditor;

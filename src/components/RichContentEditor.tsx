@@ -186,7 +186,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
         heading: false,
         code: false,
         codeBlock: false,
-        typography: false,
       }),
       TextStyle.configure({
         HTMLAttributes: {
