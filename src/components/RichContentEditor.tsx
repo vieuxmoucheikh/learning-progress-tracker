@@ -4,14 +4,15 @@ import StarterKit from '@tiptap/starter-kit';
 import Highlight from '@tiptap/extension-highlight';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
+import TextStyle from '@tiptap/extension-text-style';
+import { Extension } from '@tiptap/core';
 import {
   Bold as BoldIcon,
   Italic as ItalicIcon,
   List,
   ListOrdered,
   Code as CodeIcon,
-  Heading1,
-  Heading2,
+  Type as TypeIcon,
   CheckSquare,
   Edit,
   Save,
@@ -19,6 +20,25 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+// Custom extension for font size
+const FontSize = Extension.create({
+  name: 'fontSize',
+  addAttributes() {
+    return {
+      size: {
+        default: null,
+        parseHTML: (element: HTMLElement) => element.style.fontSize,
+        renderHTML: (attributes: { size: string | null }) => {
+          if (!attributes.size) return {};
+          return {
+            style: `font-size: ${attributes.size}`,
+          };
+        },
+      },
+    };
+  },
+});
 
 interface RichContentEditorProps {
   content: string;
@@ -29,6 +49,10 @@ interface RichContentEditorProps {
 
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) return null;
+
+  const toggleTextSize = (size: string) => {
+    editor.chain().focus().setMark('fontSize', { size }).run();
+  };
 
   return (
     <div className="flex flex-wrap gap-2 p-2 border-b">
@@ -50,33 +74,35 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
       >
         <ItalicIcon className="h-4 w-4" />
       </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-        className={cn(editor.isActive('heading', { level: 1 }) && 'bg-muted')}
-        title="Heading 1"
-      >
-        <Heading1 className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        className={cn(editor.isActive('heading', { level: 2 }) && 'bg-muted')}
-        title="Heading 2"
-      >
-        <Heading2 className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        className={cn(editor.isActive('heading', { level: 3 }) && 'bg-muted')}
-        title="Heading 3"
-      >
-        <Heading2 className="h-4 w-4 scale-75" />
-      </Button>
+      <div className="flex gap-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => toggleTextSize('1.5rem')}
+          className={cn(editor.isActive('fontSize', { size: '1.5rem' }) && 'bg-muted')}
+          title="Large Text"
+        >
+          <TypeIcon className="h-5 w-5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => toggleTextSize('1.25rem')}
+          className={cn(editor.isActive('fontSize', { size: '1.25rem' }) && 'bg-muted')}
+          title="Medium Text"
+        >
+          <TypeIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => toggleTextSize('1rem')}
+          className={cn(editor.isActive('fontSize', { size: '1rem' }) && 'bg-muted')}
+          title="Normal Text"
+        >
+          <TypeIcon className="h-3.5 w-3.5" />
+        </Button>
+      </div>
       <Button
         variant="ghost"
         size="sm"
@@ -129,17 +155,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: {
-          levels: [1, 2, 3],
-          HTMLAttributes: {
-            class: (attrs: { level: number }) => `heading heading-${attrs.level}`,
-          },
-        },
-        code: {
-          HTMLAttributes: {
-            class: 'rounded-md bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold',
-          },
-        },
+        heading: false,
         codeBlock: false,
       }),
       Highlight,
@@ -150,6 +166,8 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
           class: 'flex items-start gap-2',
         },
       }),
+      TextStyle,
+      FontSize,
     ],
     content,
     editable: isEditing,
@@ -196,10 +214,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
           className={cn(
             'prose prose-sm max-w-none p-4',
             isEditing && 'min-h-[150px] cursor-text',
-            'prose-headings:my-4',
-            'prose-h1:text-2xl prose-h1:font-bold',
-            'prose-h2:text-xl prose-h2:font-bold',
-            'prose-h3:text-lg prose-h3:font-bold',
             'prose-p:my-2',
             'prose-ul:my-2 prose-ul:list-disc prose-ul:pl-6',
             'prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-6'
