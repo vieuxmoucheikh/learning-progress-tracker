@@ -101,33 +101,35 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
           <TypeIcon className="h-3.5 w-3.5" />
         </Button>
       </div>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-        className={cn(editor.isActive('heading', { level: 1 }) && 'bg-muted')}
-        title="Heading 1"
-      >
-        H1
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        className={cn(editor.isActive('heading', { level: 2 }) && 'bg-muted')}
-        title="Heading 2"
-      >
-        H2
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        className={cn(editor.isActive('heading', { level: 3 }) && 'bg-muted')}
-        title="Heading 3"
-      >
-        H3
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          className={cn(editor.isActive('heading', { level: 1 }) && 'bg-muted')}
+          title="Heading 1"
+        >
+          H1
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          className={cn(editor.isActive('heading', { level: 2 }) && 'bg-muted')}
+          title="Heading 2"
+        >
+          H2
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          className={cn(editor.isActive('heading', { level: 3 }) && 'bg-muted')}
+          title="Heading 3"
+        >
+          H3
+        </Button>
+      </div>
       <Button
         variant="ghost"
         size="sm"
@@ -181,9 +183,14 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     extensions: [
       StarterKit.configure({
         heading: {
-          levels: [1, 2, 3]
+          levels: [1, 2, 3],
+          HTMLAttributes: {
+            class: 'heading',
+            spellcheck: 'false'
+          }
         },
-        codeBlock: false, // Disable code block in StarterKit
+        code: false,
+        codeBlock: false
       }),
       Highlight,
       TaskList,
