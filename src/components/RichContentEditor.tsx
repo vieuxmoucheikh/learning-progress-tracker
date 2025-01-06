@@ -29,17 +29,17 @@ import Code from '@tiptap/extension-code';
 const TEXT_SIZES = {
   large: {
     label: 'Large',
-    class: 'text-2xl leading-relaxed',
+    class: 'text-xl font-medium leading-relaxed',
     icon: <TypeIcon className="h-5 w-5" />,
   },
   medium: {
     label: 'Medium',
-    class: 'text-lg leading-relaxed',
+    class: 'text-base font-normal leading-relaxed',
     icon: <TypeIcon className="h-4 w-4" />,
   },
-  normal: {
-    label: 'Normal',
-    class: 'text-base leading-relaxed',
+  small: {
+    label: 'Small',
+    class: 'text-sm font-normal leading-relaxed',
     icon: <TypeIcon className="h-3.5 w-3.5" />,
   },
 } as const;
@@ -59,11 +59,10 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   const setTextSize = (size: TextSizeKey) => {
     if (!editor) return;
     
-    // Clear any existing text styles first
-    editor.chain().focus().unsetMark('textStyle').run();
-    
-    // Apply the new text size
-    editor.chain().focus().setMark('textStyle', { fontSize: size }).run();
+    editor.chain()
+      .focus()
+      .setMark('textStyle', { fontSize: size })
+      .run();
   };
 
   const isTextSize = (size: TextSizeKey): boolean => {
@@ -72,89 +71,93 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   };
 
   return (
-    <div className="flex flex-wrap gap-2 p-2 border-b">
-      <div className="flex flex-wrap gap-2 border-r pr-2">
+    <div className="flex flex-wrap gap-2 p-2 border-b bg-white shadow-sm">
+      <div className="flex items-center gap-2 border-r pr-2">
         {(Object.keys(TEXT_SIZES) as TextSizeKey[]).map((size) => (
           <Button
             key={size}
-            variant="ghost"
+            variant={isTextSize(size) ? "secondary" : "ghost"}
             size="sm"
             onClick={() => setTextSize(size)}
             className={cn(
-              "hover:bg-gray-100 min-w-[80px]",
+              "hover:bg-gray-100 flex items-center gap-2 px-3 py-1 rounded",
               isTextSize(size) && "bg-gray-100 text-gray-900"
             )}
           >
             {TEXT_SIZES[size].icon}
-            <span className="ml-2">{TEXT_SIZES[size].label}</span>
+            <span className={TEXT_SIZES[size].class}>{TEXT_SIZES[size].label}</span>
           </Button>
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex items-center gap-2">
         <Button
-          variant="ghost"
+          variant={editor.isActive('bold') ? "secondary" : "ghost"}
           size="sm"
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className={cn(editor.isActive('bold') && 'bg-muted')}
+          className="px-2"
           title="Bold"
         >
           <BoldIcon className="h-4 w-4" />
         </Button>
         <Button
-          variant="ghost"
+          variant={editor.isActive('italic') ? "secondary" : "ghost"}
           size="sm"
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={cn(editor.isActive('italic') && 'bg-muted')}
+          className="px-2"
           title="Italic"
         >
           <ItalicIcon className="h-4 w-4" />
         </Button>
         <Button
-          variant="ghost"
+          variant={editor.isActive('strike') ? "secondary" : "ghost"}
           size="sm"
           onClick={() => editor.chain().focus().toggleStrike().run()}
-          className={cn(editor.isActive('strike') && 'bg-muted')}
+          className="px-2"
           title="Strike"
         >
           <CodeIcon className="h-4 w-4" />
         </Button>
         <Button
-          variant="ghost"
+          variant={editor.isActive('code') ? "secondary" : "ghost"}
           size="sm"
           onClick={() => editor.chain().focus().toggleCode().run()}
-          className={cn(editor.isActive('code') && 'bg-muted')}
+          className="px-2"
           title="Code"
         >
           <CodeIcon className="h-4 w-4" />
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={cn(editor.isActive('bulletList') && 'bg-muted')}
-          title="Bullet List"
-        >
-          <List className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={cn(editor.isActive('orderedList') && 'bg-muted')}
-          title="Ordered List"
-        >
-          <ListOrdered className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().unsetAllMarks().run()}
-          className="hover:bg-gray-100"
-          title="Clear Format"
-        >
-          <X className="h-4 w-4" />
-        </Button>
+        <div className="border-l pl-2 flex items-center gap-2">
+          <Button
+            variant={editor.isActive('bulletList') ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            className="px-2"
+            title="Bullet List"
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={editor.isActive('orderedList') ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            className="px-2"
+            title="Ordered List"
+          >
+            <ListOrdered className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="border-l pl-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().unsetAllMarks().run()}
+            className="px-2 hover:bg-red-50 hover:text-red-500"
+            title="Clear Format"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -175,11 +178,11 @@ const TextSize = Extension.create({
         types: this.options.types,
         attributes: {
           fontSize: {
-            default: 'normal',
-            parseHTML: element => element.style.fontSize || 'normal',
+            default: 'medium',
+            parseHTML: element => element.style.fontSize || 'medium',
             renderHTML: attributes => {
               const size = TEXT_SIZES[attributes.fontSize as TextSizeKey];
-              return { class: size ? size.class : TEXT_SIZES.normal.class };
+              return { class: size ? size.class : TEXT_SIZES.medium.class };
             },
           },
         },
