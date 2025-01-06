@@ -36,6 +36,18 @@ interface RichContentEditorProps {
   className?: string;
 }
 
+const CustomHeading = Heading.extend({
+  renderHTML({ node, HTMLAttributes }) {
+    const level = node.attrs.level;
+    const hasLevel = level && typeof level === 'number';
+    return [
+      `h${hasLevel ? level : '1'}`,
+      { ...HTMLAttributes, class: `heading heading-${hasLevel ? level : '1'}` },
+      0,
+    ];
+  },
+});
+
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) return null;
 
@@ -147,13 +159,8 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
       Text,
       Bold,
       Italic,
-      Heading.configure({
+      CustomHeading.configure({
         levels: [1, 2, 3],
-        HTMLAttributes: {
-          1: { class: 'heading heading-1' },
-          2: { class: 'heading heading-2' },
-          3: { class: 'heading heading-3' },
-        },
       }),
       BulletList,
       OrderedList,
@@ -174,18 +181,9 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     },
   });
 
-  // Update editor state when content prop changes
   useEffect(() => {
-    setLocalContent(content);
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content);
-    }
-  }, [content, editor]);
-
-  // Update editor editable state
-  useEffect(() => {
-    if (editor) {
-      editor.setEditable(isEditing);
+    if (editor && !isEditing) {
+      editor.setEditable(false);
     }
   }, [isEditing, editor]);
 
@@ -193,10 +191,10 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     <div className={cn('border rounded-lg', className)}>
       {isEditing && editor && <MenuBar editor={editor} />}
       <div className="relative">
-        <EditorContent 
-          editor={editor} 
+        <EditorContent
+          editor={editor}
           className={cn(
-            'prose prose-sm max-w-none p-4',
+            'prose max-w-none p-4',
             isEditing && 'min-h-[150px] cursor-text'
           )}
         />
