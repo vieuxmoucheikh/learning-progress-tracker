@@ -25,7 +25,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
-import { lowlight } from 'lowlight';
+import { common, createLowlight } from 'lowlight';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Code from '@tiptap/extension-code';
 
@@ -158,10 +158,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     extensions: [
       StarterKit.configure({
         heading: {
-          levels: [1, 2, 3],
-          HTMLAttributes: {
-            class: 'font-bold text-gray-900',
-          },
+          levels: [1, 2, 3]
         },
         code: false,
         codeBlock: false,
@@ -180,7 +177,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
         },
       }),
       CodeBlockLowlight.configure({
-        lowlight: lowlight,
+        lowlight: createLowlight(common),
         HTMLAttributes: {
           class: 'bg-gray-50 text-gray-900 p-4 rounded-md border border-gray-200 font-mono text-sm my-4',
         },
