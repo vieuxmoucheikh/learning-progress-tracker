@@ -393,7 +393,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
             'prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-6',
             'prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:my-4 prose-blockquote:italic prose-blockquote:text-gray-700 prose-blockquote:bg-blue-50/50',
             'prose-code:bg-gray-50 prose-code:text-gray-900 prose-code:px-1 prose-code:rounded prose-code:font-mono prose-code:text-sm',
-          '[&_.hljs]:bg-gray-900 [&_.hljs]:text-gray-100 [&_.hljs]:rounded-md [&_.hljs]:p-4 [&_.hljs]:my-2',
+          '[&_.hljs]:bg-gray-900 [&_.hljs]:text-gray-100 [&_.hljs]:rounded-md [&_.hljs]:p-4 [&_.hljs]:my-2 [&_.hljs]:whitespace-pre-wrap [&_.hljs]:font-mono',
           )}
         />
         <div className="flex justify-end p-2 border-t">
