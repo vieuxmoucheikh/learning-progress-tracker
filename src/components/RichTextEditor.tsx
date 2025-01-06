@@ -53,7 +53,7 @@ interface RichTextEditorProps {
   className?: string;
 }
 
-const RichTextEditor: React.FC<RichTextEditorProps> = ({
+export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   content,
   onChange,
   editable = true,
@@ -258,5 +258,3 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     </div>
   );
 };
-
-export default RichTextEditor;
