@@ -14,7 +14,7 @@
     --popover-foreground: 222.2 95% 4.9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%; /* Darker text for better visibility */
+    --card-foreground: 222.2 100% 0%; /* Darker text for better visibility */
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
@@ -87,7 +87,7 @@
   ul,
   ol {
     padding: 0 1rem;
-    color: 0 0% 0%; /* Change list color to black */
+    color: black; /* Change list color to black */
   }
 
   code {
