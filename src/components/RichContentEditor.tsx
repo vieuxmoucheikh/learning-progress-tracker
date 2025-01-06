@@ -129,10 +129,10 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
       }),
       Heading.configure({
         levels: [1, 2, 3],
-        HTMLAttributes: {
-          headingLevel: (attrs: { level: number }) => attrs.level?.toString(),
-          class: 'heading',
-        },
+        HTMLAttributes: (attrs: { level: number }) => ({
+          'class': 'heading',
+          'data-level': attrs.level?.toString(),
+        }),
       }),
       Highlight,
       TaskList,

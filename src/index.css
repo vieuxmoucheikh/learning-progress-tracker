@@ -56,15 +56,15 @@
   margin-bottom: 0.5em;
 }
 
-.heading[headingLevel="1"] {
+.heading[data-level="1"] {
   font-size: 2em;
 }
 
-.heading[headingLevel="2"] {
+.heading[data-level="2"] {
   font-size: 1.5em;
 }
 
-.heading[headingLevel="3"] {
+.heading[data-level="3"] {
   font-size: 1.25em;
 }
 
