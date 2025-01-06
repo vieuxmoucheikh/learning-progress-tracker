@@ -140,7 +140,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   readOnly: initialReadOnly = false,
   className,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(!initialReadOnly);
   const [localContent, setLocalContent] = useState(content);
 
   const editor = useEditor({
@@ -230,6 +230,29 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     editor?.commands.setContent(content);
   };
 
+  const setTextSize = (size: TextSizeOptions) => {
+    const classes = {
+      large: 'text-xl',
+      medium: 'text-lg',
+      normal: 'text-base'
+    };
+    
+    // First clear any existing text size
+    editor?.commands.unsetMark('textStyle');
+    
+    // Set the new text size
+    editor?.commands.setMark('textStyle', { class: classes[size] });
+  };
+
+  const isTextSize = (size: TextSizeOptions): boolean => {
+    const classes = {
+      large: 'text-xl',
+      medium: 'text-lg',
+      normal: 'text-base'
+    };
+    return editor?.isActive('textStyle', { class: classes[size] }) ?? false;
+  };
+
   return (
     <div className={cn('border rounded-lg', className)}>
       {isEditing && editor && <MenuBar editor={editor} />}
@@ -237,7 +260,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
         <EditorContent
           editor={editor}
           className={cn(
-            'prose prose-sm max-w-none p-4',
+            "prose prose-sm max-w-none p-4",
             isEditing && 'min-h-[150px] cursor-text',
             'prose-p:my-2',
             'prose-ul:my-2 prose-ul:list-disc prose-ul:pl-6',
