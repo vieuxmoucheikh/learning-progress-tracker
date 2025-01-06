@@ -136,7 +136,8 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
       StarterKit.configure({
         heading: {
           levels: [1, 2, 3]
-        }
+        },
+        codeBlock: false,  // Disable codeBlock to resolve duplicate extension warning
       }),
       Highlight,
       TaskList,
