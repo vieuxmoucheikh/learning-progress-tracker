@@ -137,9 +137,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
         heading: {
           levels: [1, 2, 3],
           HTMLAttributes: {
-            1: { class: 'text-4xl font-bold' },
-            2: { class: 'text-3xl font-bold' },
-            3: { class: 'text-2xl font-bold' },
+            class: 'prose-heading',
           },
         },
         codeBlock: false,
