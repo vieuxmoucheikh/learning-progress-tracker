@@ -50,21 +50,23 @@
 }
 
 /* Heading styles */
-.heading {
+h1.heading,
+h2.heading,
+h3.heading {
   font-weight: bold;
   margin-top: 1em;
   margin-bottom: 0.5em;
 }
 
-.heading-1 {
+h1.heading {
   font-size: 2em;
 }
 
-.heading-2 {
+h2.heading {
   font-size: 1.5em;
 }
 
-.heading-3 {
+h3.heading {
   font-size: 1.25em;
 }
 

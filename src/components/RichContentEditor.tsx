@@ -37,14 +37,19 @@ interface RichContentEditorProps {
 }
 
 const CustomHeading = Heading.extend({
-  renderHTML({ node, HTMLAttributes }) {
-    const level = node.attrs.level;
-    const hasLevel = level && typeof level === 'number';
+  addAttributes() {
+    return {};
+  },
+  parseHTML() {
     return [
-      `h${hasLevel ? level : '1'}`,
-      { ...HTMLAttributes, class: `heading heading-${hasLevel ? level : '1'}` },
-      0,
+      { tag: 'h1', class: 'heading heading-1' },
+      { tag: 'h2', class: 'heading heading-2' },
+      { tag: 'h3', class: 'heading heading-3' },
     ];
+  },
+  renderHTML({ node }) {
+    const tag = `h${node.attrs.level || 1}`;
+    return [tag, { class: `heading heading-${node.attrs.level || 1}` }, 0];
   },
 });
 
