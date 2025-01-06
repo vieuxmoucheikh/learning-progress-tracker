@@ -17,6 +17,9 @@ import {
   Edit,
   Save,
   X,
+  Heading1,
+  Heading2,
+  Heading3,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -58,25 +61,37 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
 
   return (
     <div className="flex flex-wrap gap-2 p-2 border-b">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        className={cn(editor.isActive('bold') && 'bg-muted')}
-        title="Bold"
-      >
-        <BoldIcon className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={cn(editor.isActive('italic') && 'bg-muted')}
-        title="Italic"
-      >
-        <ItalicIcon className="h-4 w-4" />
-      </Button>
-      <div className="flex gap-1">
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          className={cn(editor.isActive('heading', { level: 1 }) && 'bg-muted')}
+          title="Heading 1"
+        >
+          <Heading1 className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          className={cn(editor.isActive('heading', { level: 2 }) && 'bg-muted')}
+          title="Heading 2"
+        >
+          <Heading2 className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          className={cn(editor.isActive('heading', { level: 3 }) && 'bg-muted')}
+          title="Heading 3"
+        >
+          <Heading3 className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
         <Button
           variant="ghost"
           size="sm"
@@ -105,35 +120,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
           <TypeIcon className="h-3.5 w-3.5" />
         </Button>
       </div>
-      <div className="flex flex-wrap gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          className={cn(editor.isActive('heading', { level: 1 }) && 'bg-muted')}
-          title="Heading 1"
-        >
-          H1
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={cn(editor.isActive('heading', { level: 2 }) && 'bg-muted')}
-          title="Heading 2"
-        >
-          H2
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          className={cn(editor.isActive('heading', { level: 3 }) && 'bg-muted')}
-          title="Heading 3"
-        >
-          H3
-        </Button>
-      </div>
+
       <Button
         variant="ghost"
         size="sm"
@@ -142,33 +129,6 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         title="Bullet List"
       >
         <List className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={cn(editor.isActive('orderedList') && 'bg-muted')}
-        title="Numbered List"
-      >
-        <ListOrdered className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleTaskList().run()}
-        className={cn(editor.isActive('taskList') && 'bg-muted')}
-        title="Task List"
-      >
-        <CheckSquare className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleCode().run()}
-        className={cn(editor.isActive('code') && 'bg-muted')}
-        title="Code"
-      >
-        <CodeIcon className="h-4 w-4" />
       </Button>
     </div>
   );
@@ -186,8 +146,28 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
+        heading: {
+          levels: [1, 2, 3],
+          HTMLAttributes: {
+            class: 'font-bold text-gray-900',
+          },
+        },
+        bulletList: {
+          keepMarks: true,
+          keepAttributes: false,
+          HTMLAttributes: {
+            class: 'list-disc ml-4',
+          },
+        },
+        orderedList: {
+          keepMarks: true,
+          keepAttributes: false,
+          HTMLAttributes: {
+            class: 'list-decimal ml-4',
+          },
+        },
         code: false,
-        codeBlock: false
+        codeBlock: false,
       }),
       Highlight,
       TaskList,
@@ -204,6 +184,21 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     onUpdate: ({ editor }) => {
       const newContent = editor.getHTML();
       setLocalContent(newContent);
+      onChange(newContent);
+    },
+    editorProps: {
+      attributes: {
+        class: cn(
+          "prose prose-sm max-w-none",
+          "min-h-[100px] outline-none",
+          "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:my-4",
+          "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:my-3",
+          "[&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-gray-900 [&_h3]:my-2",
+          "[&_p]:text-gray-900 [&_p]:my-2",
+          "[&_ul]:list-disc [&_ul]:ml-4",
+          "[&_ol]:list-decimal [&_ol]:ml-4",
+        ),
+      },
     },
   });
 

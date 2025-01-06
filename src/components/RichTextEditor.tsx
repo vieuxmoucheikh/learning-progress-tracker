@@ -4,6 +4,9 @@ import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
 import Code from '@tiptap/extension-code';
+import TextStyle from '@tiptap/extension-text-style';
+import { Color as ColorExtension } from '@tiptap/extension-color';
+import Highlight from '@tiptap/extension-highlight';
 import { common, createLowlight } from 'lowlight';
 import React, { useCallback } from 'react';
 import { cn } from '@/lib/utils';
@@ -21,8 +24,28 @@ import {
   Heading1,
   Heading2,
   Heading3,
+  Type,
+  Palette,
 } from 'lucide-react';
 import { Button } from './ui/button';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+const lowlightInstance = createLowlight(common);
+
+const colors = [
+  '#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3', '#ffffff',
+  '#980000', '#ff0000', '#ff9900', '#ffff00', '#00ff00', '#00ffff', '#4a86e8', '#0000ff', '#9900ff', '#ff00ff',
+  '#e6b8af', '#f4cccc', '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#c9daf8', '#cfe2f3', '#d9d2e9', '#ead1dc',
+];
+
+const bgColors = [
+  '#ffffff', '#f3f3f3', '#efefef', '#d9d9d9', '#cccccc', '#b7b7b7', '#999999', '#666666', '#434343', '#000000',
+  '#ffebee', '#fce4ec', '#f3e5f5', '#ede7f6', '#e8eaf6', '#e3f2fd', '#e1f5fe', '#e0f7fa', '#e0f2f1', '#e8f5e9',
+];
 
 interface RichTextEditorProps {
   content: string;
@@ -30,8 +53,6 @@ interface RichTextEditorProps {
   editable?: boolean;
   className?: string;
 }
-
-const lowlightInstance = createLowlight(common);
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   content,
@@ -45,7 +66,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         heading: {
           levels: [1, 2, 3],
           HTMLAttributes: {
-            class: 'font-bold text-gray-900',
+            1: { class: 'text-4xl font-bold' },
+            2: { class: 'text-3xl font-bold' },
+            3: { class: 'text-2xl font-bold' },
           },
         },
         bulletList: {
@@ -94,14 +117,20 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       }),
       Code.configure({
         HTMLAttributes: {
-          class: 'bg-gray-50 text-gray-900 px-1 rounded font-mono text-sm',
+          class: 'rounded bg-gray-200 px-1.5 py-0.5 font-mono text-sm',
         },
+      }),
+      TextStyle,
+      ColorExtension,
+      Highlight.configure({
+        multicolor: true,
       }),
     ],
     content,
     editable,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const html = editor.getHTML();
+      onChange(html);
     },
     editorProps: {
       attributes: {
@@ -231,6 +260,55 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           >
             <CodeIcon className="h-4 w-4" />
           </Button>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="hover:bg-gray-100"
+              >
+                <Type className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-2">
+              <div className="grid grid-cols-10 gap-1">
+                {colors.map((color) => (
+                  <button
+                    key={color}
+                    className="w-5 h-5 rounded border border-gray-200"
+                    style={{ backgroundColor: color }}
+                    onClick={() => editor.chain().focus().setColor(color).run()}
+                  />
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="hover:bg-gray-100"
+              >
+                <Palette className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-2">
+              <div className="grid grid-cols-10 gap-1">
+                {bgColors.map((color) => (
+                  <button
+                    key={color}
+                    className="w-5 h-5 rounded border border-gray-200"
+                    style={{ backgroundColor: color }}
+                    onClick={() => editor.chain().focus().setHighlight({ color }).run()}
+                  />
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+
           <Button
             size="icon"
             variant="ghost"
