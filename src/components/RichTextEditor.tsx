@@ -66,7 +66,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         heading: {
           levels: [1, 2, 3],
           HTMLAttributes: {
-            class: 'font-bold text-gray-900',
+            1: { class: 'text-3xl font-bold text-gray-900' },
+            2: { class: 'text-2xl font-bold text-gray-900' },
+            3: { class: 'text-xl font-bold text-gray-900' },
           },
         },
         bulletList: {
@@ -127,7 +129,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     content,
     editable,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const html = editor.getHTML();
+      onChange(html);
     },
     editorProps: {
       attributes: {
