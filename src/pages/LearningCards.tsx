@@ -90,9 +90,11 @@ export const LearningCardsPage = () => {
 
   const handleSaveCard = async (card: Partial<CardType>): Promise<boolean> => {
     try {
+      console.log('Saving card content:', card.content);
+      const formattedContent = card.content ? card.content.replace(/<p>/g, '<p class="text-gray-900">') : '';
       await learningCardsService.updateCard(card.id!, {
         title: card.title,
-        content: card.content,
+        content: formattedContent,
         media: card.media,
         tags: card.tags,
         mastered: card.mastered,
