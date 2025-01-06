@@ -311,6 +311,9 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
       CodeBlockLowlight.configure({
         lowlight,
         defaultLanguage: 'plaintext',
+        HTMLAttributes: {
+          class: 'hljs',
+        },
       }),
       Highlight,
       TaskList,
