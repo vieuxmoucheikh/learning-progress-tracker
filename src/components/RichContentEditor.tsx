@@ -120,24 +120,15 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [localContent, setLocalContent] = useState(content);
 
-  const handleSave = () => {
-    setIsEditing(false);
-    onChange(localContent);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setLocalContent(content);
-    editor?.commands.setContent(content);
-  };
-
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         heading: {
           levels: [1, 2, 3],
           HTMLAttributes: {
-            class: 'font-bold text-gray-900',
+            1: { class: 'text-4xl font-bold' },
+            2: { class: 'text-3xl font-bold' },
+            3: { class: 'text-2xl font-bold' },
           },
         },
         codeBlock: false,
@@ -148,20 +139,41 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
         nested: true,
       }),
     ],
-    content: localContent,
+    content,
     editable: isEditing,
     onUpdate: ({ editor }) => {
       const newContent = editor.getHTML();
       setLocalContent(newContent);
-      onChange(newContent);
     },
   });
 
+  // Update editor content when prop changes
   useEffect(() => {
-    if (editor && !isEditing) {
-      editor.setEditable(false);
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+      setLocalContent(content);
     }
-  }, [isEditing, editor]);
+  }, [editor, content]);
+
+  // Update editor editable state
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(isEditing);
+    }
+  }, [editor, isEditing]);
+
+  const handleSave = () => {
+    if (localContent !== content) {
+      onChange(localContent);
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setLocalContent(content);
+    editor?.commands.setContent(content);
+  };
 
   return (
     <div className={cn('border rounded-lg', className)}>
@@ -170,11 +182,10 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
         <EditorContent
           editor={editor}
           className={cn(
-            'prose max-w-none p-4',
+            'prose prose-sm max-w-none p-4',
             isEditing && 'min-h-[150px] cursor-text',
-            '[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:my-4',
-            '[&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:my-3',
-            '[&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-gray-900 [&_h3]:my-2'
+            'prose-headings:font-bold prose-headings:my-2',
+            'prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl'
           )}
         />
         <div className="flex justify-end mt-2">
