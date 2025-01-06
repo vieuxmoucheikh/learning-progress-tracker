@@ -172,8 +172,10 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
         <EditorContent
           editor={editor}
           className={cn(
-            'max-w-none p-4',
-            isEditing && 'min-h-[150px] cursor-text'
+            'prose prose-sm max-w-none p-4',
+            isEditing && 'min-h-[150px] cursor-text',
+            'prose-headings:font-bold prose-headings:my-2',
+            'prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl'
           )}
         />
         <div className="flex justify-end mt-2">
