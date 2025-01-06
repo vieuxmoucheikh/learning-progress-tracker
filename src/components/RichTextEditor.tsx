@@ -143,14 +143,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         class: cn(
           "prose prose-sm max-w-none",
           "min-h-[100px] outline-none",
-          "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:my-4",
-          "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:my-3",
-          "[&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-gray-900 [&_h3]:my-2",
           "[&_p]:text-gray-900 [&_p]:my-2",
           "[&_ul]:list-disc [&_ul]:ml-4",
-          "[&_ol]:list-decimal [&_ol]:ml-4",
+          "[&_ol]:list-decimal [&_ol]:ml-4"
         ),
-      },
+      }
+      ,
       handleDrop: (view, event, slice, moved) => {
         if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
           const file = event.dataTransfer.files[0];
@@ -405,21 +403,19 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       <EditorContent 
         editor={editor} 
         className={cn(
-          "prose prose-sm max-w-none",
-          "bg-white text-gray-900",
-          "p-4",
-          "[&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:outline-none",
-          "[&_pre]:bg-gray-50 [&_pre]:text-gray-900 [&_pre]:border [&_pre]:border-gray-200 [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:my-4",
-          "[&_code]:bg-gray-50 [&_code]:text-gray-900 [&_code]:px-1 [&_code]:rounded [&_code]:font-mono [&_code]:text-sm",
-          "[&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:pl-4 [&_blockquote]:my-4 [&_blockquote]:italic [&_blockquote]:text-gray-700 [&_blockquote]:bg-blue-50/50",
-          "[&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-2",
-          "[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4",
-          "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:my-4",
-          "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:my-3",
-          "[&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-gray-900 [&_h3]:my-2",
-          "[&_p]:my-2 [&_p]:text-gray-900",
-          "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4"
-        )}
+                "prose prose-sm max-w-none",
+                "bg-white text-gray-900",
+                "p-4",
+                "[&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:outline-none",
+                "[&_pre]:bg-gray-50 [&_pre]:text-gray-900 [&_pre]:border [&_pre]:border-gray-200 [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:my-4",
+                "[&_code]:bg-gray-50 [&_code]:text-gray-900 [&_code]:px-1 [&_code]:rounded [&_code]:font-mono [&_code]:text-sm",
+                "[&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:pl-4 [&_blockquote]:my-4 [&_blockquote]:italic [&_blockquote]:text-gray-700 [&_blockquote]:bg-blue-50/50",
+                "[&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-2",
+                "[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4",
+                "[&_p]:my-2 [&_p]:text-gray-900",
+                "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4"
+              )}
+        
       />
     </div>
   );
