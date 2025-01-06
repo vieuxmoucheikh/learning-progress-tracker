@@ -26,7 +26,25 @@ import { common, createLowlight } from 'lowlight';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Code from '@tiptap/extension-code';
 
-type TextSizeOptions = 'large' | 'medium' | 'normal';
+const TEXT_SIZES = {
+  large: {
+    label: 'Large',
+    class: 'text-2xl leading-relaxed',
+    icon: <TypeIcon className="h-5 w-5" />,
+  },
+  medium: {
+    label: 'Medium',
+    class: 'text-lg leading-relaxed',
+    icon: <TypeIcon className="h-4 w-4" />,
+  },
+  normal: {
+    label: 'Normal',
+    class: 'text-base leading-relaxed',
+    icon: <TypeIcon className="h-3.5 w-3.5" />,
+  },
+} as const;
+
+type TextSizeKey = keyof typeof TEXT_SIZES;
 
 interface RichContentEditorProps {
   content: string;
@@ -38,68 +56,39 @@ interface RichContentEditorProps {
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) return null;
 
-  const setTextSize = (size: TextSizeOptions) => {
-    const classes = {
-      large: 'text-xl',
-      medium: 'text-lg',
-      normal: 'text-base'
-    };
+  const setTextSize = (size: TextSizeKey) => {
+    if (!editor) return;
     
-    // First clear any existing text size
-    editor.commands.unsetMark('textStyle');
+    // Clear any existing text styles first
+    editor.chain().focus().unsetMark('textStyle').run();
     
-    // Set the new text size
-    editor.commands.setMark('textStyle', { class: classes[size] });
+    // Apply the new text size
+    editor.chain().focus().setMark('textStyle', { class: TEXT_SIZES[size].class }).run();
   };
 
-  const isTextSize = (size: TextSizeOptions): boolean => {
-    const classes = {
-      large: 'text-xl',
-      medium: 'text-lg',
-      normal: 'text-base'
-    };
-    return editor.isActive('textStyle', { class: classes[size] });
+  const isTextSize = (size: TextSizeKey): boolean => {
+    if (!editor) return false;
+    return editor.isActive('textStyle', { class: TEXT_SIZES[size].class });
   };
 
   return (
     <div className="flex flex-wrap gap-2 p-2 border-b">
-      <div className="flex flex-wrap gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setTextSize('large')}
-          className={cn(
-            "hover:bg-gray-100",
-            isTextSize('large') && "bg-gray-100 text-gray-900"
-          )}
-        >
-          <TypeIcon className="h-5 w-5" />
-          <span className="ml-2">Large</span>
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setTextSize('medium')}
-          className={cn(
-            "hover:bg-gray-100",
-            isTextSize('medium') && "bg-gray-100 text-gray-900"
-          )}
-        >
-          <TypeIcon className="h-4 w-4" />
-          <span className="ml-2">Medium</span>
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setTextSize('normal')}
-          className={cn(
-            "hover:bg-gray-100",
-            isTextSize('normal') && "bg-gray-100 text-gray-900"
-          )}
-        >
-          <TypeIcon className="h-3.5 w-3.5" />
-          <span className="ml-2">Normal</span>
-        </Button>
+      <div className="flex flex-wrap gap-2 border-r pr-2">
+        {(Object.keys(TEXT_SIZES) as TextSizeKey[]).map((size) => (
+          <Button
+            key={size}
+            variant="ghost"
+            size="sm"
+            onClick={() => setTextSize(size)}
+            className={cn(
+              "hover:bg-gray-100 min-w-[80px]",
+              isTextSize(size) && "bg-gray-100 text-gray-900"
+            )}
+          >
+            {TEXT_SIZES[size].icon}
+            <span className="ml-2">{TEXT_SIZES[size].label}</span>
+          </Button>
+        ))}
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -188,9 +177,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
         codeBlock: false,
       }),
       TextStyle.configure({
-        HTMLAttributes: {
-          class: 'text-base',
-        },
       }),
       Image.configure({
         inline: true,
@@ -266,29 +252,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     setIsEditing(false);
     setLocalContent(content);
     editor?.commands.setContent(content);
-  };
-
-  const setTextSize = (size: TextSizeOptions) => {
-    const classes = {
-      large: 'text-xl',
-      medium: 'text-lg',
-      normal: 'text-base'
-    };
-    
-    // First clear any existing text size
-    editor?.commands.unsetMark('textStyle');
-    
-    // Set the new text size
-    editor?.commands.setMark('textStyle', { class: classes[size] });
-  };
-
-  const isTextSize = (size: TextSizeOptions): boolean => {
-    const classes = {
-      large: 'text-xl',
-      medium: 'text-lg',
-      normal: 'text-base'
-    };
-    return editor?.isActive('textStyle', { class: classes[size] }) ?? false;
   };
 
   return (

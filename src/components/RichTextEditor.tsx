@@ -25,26 +25,8 @@ import {
   Palette,
 } from 'lucide-react';
 import { Button } from './ui/button';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 const lowlightInstance = createLowlight(common);
-
-const colors = [
-  '#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3', '#ffffff',
-  '#980000', '#ff0000', '#ff9900', '#ffff00', '#00ff00', '#00ffff', '#4a86e8', '#0000ff', '#9900ff', '#ff00ff',
-  '#e6b8af', '#f4cccc', '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#c9daf8', '#cfe2f3', '#d9d2e9', '#ead1dc',
-];
-
-const bgColors = [
-  '#ffffff', '#f3f3f3', '#efefef', '#d9d9d9', '#cccccc', '#b7b7b7', '#999999', '#666666', '#434343', '#000000',
-  '#ffebee', '#fce4ec', '#f3e5f5', '#ede7f6', '#e8eaf6', '#e3f2fd', '#e1f5fe', '#e0f7fa', '#e0f2f1', '#e8f5e9',
-];
-
-type TextSizeOptions = 'large' | 'medium' | 'normal';
 
 interface RichTextEditorProps {
   content: string;
@@ -52,6 +34,26 @@ interface RichTextEditorProps {
   editable?: boolean;
   className?: string;
 }
+
+const TEXT_SIZES = {
+  large: {
+    label: 'Large',
+    class: 'text-2xl leading-relaxed',
+    icon: <Type className="h-5 w-5" />,
+  },
+  medium: {
+    label: 'Medium',
+    class: 'text-lg leading-relaxed',
+    icon: <Type className="h-4 w-4" />,
+  },
+  normal: {
+    label: 'Normal',
+    class: 'text-base leading-relaxed',
+    icon: <Type className="h-3.5 w-3.5" />,
+  },
+} as const;
+
+type TextSizeKey = keyof typeof TEXT_SIZES;
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   content,
@@ -66,11 +68,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         code: false,
         codeBlock: false,
       }),
-      TextStyle.configure({
-        HTMLAttributes: {
-          class: 'text-base',
-        },
-      }),
+      TextStyle.configure({}),
       Image.configure({
         inline: true,
         allowBase64: true,
@@ -105,31 +103,19 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     },
   });
 
-  const setTextSize = (size: TextSizeOptions) => {
+  const setTextSize = (size: TextSizeKey) => {
     if (!editor) return;
     
-    const classes = {
-      large: 'text-xl',
-      medium: 'text-lg',
-      normal: 'text-base'
-    };
+    // Clear any existing text styles first
+    editor.chain().focus().unsetMark('textStyle').run();
     
-    // First clear any existing text size
-    editor.commands.unsetMark('textStyle');
-    
-    // Set the new text size
-    editor.commands.setMark('textStyle', { class: classes[size] });
+    // Apply the new text size
+    editor.chain().focus().setMark('textStyle', { class: TEXT_SIZES[size].class }).run();
   };
 
-  const isTextSize = (size: TextSizeOptions): boolean => {
+  const isTextSize = (size: TextSizeKey): boolean => {
     if (!editor) return false;
-    
-    const classes = {
-      large: 'text-xl',
-      medium: 'text-lg',
-      normal: 'text-base'
-    };
-    return editor.isActive('textStyle', { class: classes[size] });
+    return editor.isActive('textStyle', { class: TEXT_SIZES[size].class });
   };
 
   if (!editor) {
@@ -139,43 +125,22 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   return (
     <div className={cn('border rounded-lg', className)}>
       <div className="flex flex-wrap gap-2 p-2 border-b">
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setTextSize('large')}
-            className={cn(
-              "hover:bg-gray-100",
-              isTextSize('large') && "bg-gray-100 text-gray-900"
-            )}
-          >
-            <Type className="h-5 w-5" />
-            <span className="ml-2">Large</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setTextSize('medium')}
-            className={cn(
-              "hover:bg-gray-100",
-              isTextSize('medium') && "bg-gray-100 text-gray-900"
-            )}
-          >
-            <Type className="h-4 w-4" />
-            <span className="ml-2">Medium</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setTextSize('normal')}
-            className={cn(
-              "hover:bg-gray-100",
-              isTextSize('normal') && "bg-gray-100 text-gray-900"
-            )}
-          >
-            <Type className="h-3.5 w-3.5" />
-            <span className="ml-2">Normal</span>
-          </Button>
+        <div className="flex flex-wrap gap-2 border-r pr-2">
+          {(Object.keys(TEXT_SIZES) as TextSizeKey[]).map((size) => (
+            <Button
+              key={size}
+              variant="ghost"
+              size="sm"
+              onClick={() => setTextSize(size)}
+              className={cn(
+                "hover:bg-gray-100 min-w-[80px]",
+                isTextSize(size) && "bg-gray-100 text-gray-900"
+              )}
+            >
+              {TEXT_SIZES[size].icon}
+              <span className="ml-2">{TEXT_SIZES[size].label}</span>
+            </Button>
+          ))}
         </div>
 
         <div className="flex flex-wrap gap-2">
