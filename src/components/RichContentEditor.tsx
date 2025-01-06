@@ -63,12 +63,12 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
     editor.chain().focus().unsetMark('textStyle').run();
     
     // Apply the new text size
-    editor.chain().focus().setMark('textStyle', { class: TEXT_SIZES[size].class }).run();
+    editor.chain().focus().setMark('textStyle', { fontSize: size }).run();
   };
 
   const isTextSize = (size: TextSizeKey): boolean => {
     if (!editor) return false;
-    return editor.isActive('textStyle', { class: TEXT_SIZES[size].class });
+    return editor.isActive('textStyle', { fontSize: size });
   };
 
   return (
@@ -160,6 +160,34 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   );
 };
 
+const TextSize = Extension.create({
+  name: 'textSize',
+
+  addOptions() {
+    return {
+      types: ['textStyle'],
+    };
+  },
+
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          fontSize: {
+            default: 'normal',
+            parseHTML: element => element.style.fontSize || 'normal',
+            renderHTML: attributes => {
+              const size = TEXT_SIZES[attributes.fontSize as TextSizeKey];
+              return { class: size ? size.class : TEXT_SIZES.normal.class };
+            },
+          },
+        },
+      },
+    ];
+  },
+});
+
 export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   content,
   onChange,
@@ -176,7 +204,9 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
         code: false,
         codeBlock: false,
       }),
-      TextStyle.configure({
+      TextStyle,
+      TextSize.configure({
+        types: ['textStyle'],
       }),
       Image.configure({
         inline: true,
