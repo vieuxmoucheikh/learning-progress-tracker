@@ -34,22 +34,26 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) return null;
 
   const setTextSize = (size: TextSizeOptions) => {
-    const sizes = {
-      large: '24px',
-      medium: '18px',
-      normal: '16px'
+    const classes = {
+      large: 'text-xl',
+      medium: 'text-lg',
+      normal: 'text-base'
     };
     
-    editor.chain().focus().setMark('textStyle', { fontSize: sizes[size] }).run();
+    // First clear any existing text size
+    editor.commands.unsetMark('textStyle');
+    
+    // Set the new text size
+    editor.commands.setMark('textStyle', { class: classes[size] });
   };
 
   const isTextSize = (size: TextSizeOptions): boolean => {
-    const sizes = {
-      large: '24px',
-      medium: '18px',
-      normal: '16px'
+    const classes = {
+      large: 'text-xl',
+      medium: 'text-lg',
+      normal: 'text-base'
     };
-    return editor.isActive('textStyle', { fontSize: sizes[size] });
+    return editor.isActive('textStyle', { class: classes[size] });
   };
 
   return (
@@ -182,13 +186,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: {
-          levels: [1, 2, 3],
-          HTMLAttributes: {
-            class: 'heading',
-            spellcheck: 'false'
-          }
-        },
         code: false,
         codeBlock: false
       }),
@@ -200,11 +197,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
           class: 'flex items-start gap-2',
         },
       }),
-      TextStyle.configure({
-        HTMLAttributes: {
-          class: 'text-style',
-        },
-      }),
+      TextStyle,
     ],
     content,
     editable: isEditing,
