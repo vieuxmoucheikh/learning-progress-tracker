@@ -4,6 +4,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Highlight from '@tiptap/extension-highlight';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
+import Heading from '@tiptap/extension-heading';
 import {
   Bold,
   Italic,
@@ -124,9 +125,14 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: {
-          levels: [1, 2, 3]
-        }
+        heading: false,  // Disable default heading to use our own config
+      }),
+      Heading.configure({
+        levels: [1, 2, 3],
+        HTMLAttributes: {
+          headingLevel: (attrs: { level: number }) => attrs.level?.toString(),
+          class: 'heading',
+        },
       }),
       Highlight,
       TaskList,

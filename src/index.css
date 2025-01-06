@@ -50,25 +50,22 @@
 }
 
 /* Heading styles */
-h1 {
+.heading {
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.heading[headingLevel="1"] {
   font-size: 2em;
-  font-weight: bold;
-  margin-top: 1em;
-  margin-bottom: 0.5em;
 }
 
-h2 {
+.heading[headingLevel="2"] {
   font-size: 1.5em;
-  font-weight: bold;
-  margin-top: 1em;
-  margin-bottom: 0.5em;
 }
 
-h3 {
+.heading[headingLevel="3"] {
   font-size: 1.25em;
-  font-weight: bold;
-  margin-top: 1em;
-  margin-bottom: 0.5em;
 }
 
 .pomodoro-settings {
