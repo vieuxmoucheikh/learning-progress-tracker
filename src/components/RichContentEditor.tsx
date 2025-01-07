@@ -6,15 +6,23 @@ import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import TextStyle from '@tiptap/extension-text-style';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import { Table } from '@tiptap/extension-table';
-import { TableRow } from '@tiptap/extension-table-row';
-import { TableCell } from '@tiptap/extension-table-cell';
-import { TableHeader } from '@tiptap/extension-table-header';
+// Syntax highlighting imports
 import { createLowlight } from 'lowlight';
 import css from 'highlight.js/lib/languages/css';
 import js from 'highlight.js/lib/languages/javascript';
 import ts from 'highlight.js/lib/languages/typescript';
 import html from 'highlight.js/lib/languages/xml';
+
+// Create lowlight instance
+const lowlight = createLowlight();
+
+// Register languages
+if (lowlight) {
+  lowlight.register('html', html);
+  lowlight.register('css', css);
+  lowlight.register('javascript', js);
+  lowlight.register('typescript', ts);
+}
 import {
   Bold as BoldIcon,
   Italic as ItalicIcon,
@@ -32,12 +40,10 @@ import {
   Undo2,
   Redo2,
   Quote,
-  Table as TableIcon,
 } from 'lucide-react';
-import './RichContentEditor.css';
-import { Button } from '../ui/button';
-import { cn } from '../lib/utils';
-import { Separator } from '../ui/separator';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
 
 type TextSizeOptions = 'large' | 'medium' | 'normal';
 
@@ -47,14 +53,6 @@ interface RichContentEditorProps {
   readOnly?: boolean;
   className?: string;
 }
-
-const lowlight = createLowlight();
-
-// Register languages
-lowlight.register('html', html);
-lowlight.register('css', css);
-lowlight.register('javascript', js);
-lowlight.register('typescript', ts);
 
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) return null;
@@ -257,17 +255,6 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         >
           <Quote className="h-4 w-4" />
         </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
-          className={cn(
-            "h-8 w-8 hover:bg-gray-100",
-            editor.isActive('table') && "bg-gray-100 text-gray-900"
-          )}
-        >
-          <TableIcon className="h-4 w-4" />
-        </Button>
       </div>
     </div>
   );
@@ -284,15 +271,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
 
   const editor = useEditor({
     extensions: [
-      Table.configure({
-        resizable: true,
-        HTMLAttributes: {
-          class: 'w-full',
-        },
-      }),
-      TableRow,
-      TableHeader,
-      TableCell,
       StarterKit.configure({
         heading: {
           levels: [1, 2, 3],
@@ -333,9 +311,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
       CodeBlockLowlight.configure({
         lowlight,
         defaultLanguage: 'plaintext',
-        HTMLAttributes: {
-          class: 'hljs',
-        },
       }),
       Highlight,
       TaskList,
@@ -353,16 +328,11 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
       const newContent = editor.getHTML();
       setLocalContent(newContent);
       onChange(newContent);
-      // Force re-render of syntax highlighting
-      editor.commands.setContent(newContent);
-    },
-    parseOptions: {
-      preserveWhitespace: 'full',
     },
     editorProps: {
       attributes: {
         class: cn(
-          "prose prose-sm max-w-none rich-content-editor",
+          "prose prose-sm max-w-none",
           "min-h-[100px] outline-none",
           "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:my-4",
           "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:my-3",
@@ -370,9 +340,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
           "[&_p]:text-gray-900 [&_p]:my-2",
           "[&_ul]:list-disc [&_ul]:ml-4",
           "[&_ol]:list-decimal [&_ol]:ml-4",
-          "[&_table]:w-full [&_table]:border-collapse [&_table]:my-4",
-          "[&_th]:bg-gray-100 [&_th]:font-semibold [&_th]:text-left [&_th]:p-2 [&_th]:border [&_th]:border-gray-300",
-          "[&_td]:p-2 [&_td]:border [&_td]:border-gray-300 [&_td]:min-w-[100px]",
         ),
       },
     },
@@ -418,15 +385,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
             'prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-6',
             'prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:my-4 prose-blockquote:italic prose-blockquote:text-gray-700 prose-blockquote:bg-blue-50/50',
             'prose-code:bg-gray-50 prose-code:text-gray-900 prose-code:px-1 prose-code:rounded prose-code:font-mono prose-code:text-sm',
-          '[&_.hljs]:bg-gray-50 [&_.hljs]:text-gray-900 [&_.hljs]:rounded-lg [&_.hljs]:p-4 [&_.hljs]:my-4 [&_.hljs]:whitespace-pre-wrap [&_.hljs]:font-mono [&_.hljs]:text-sm [&_.hljs]:border [&_.hljs]:border-gray-200',
-          '[&_.hljs-keyword]:text-purple-600',
-          '[&_.hljs-built_in]:text-blue-600',
-          '[&_.hljs-string]:text-green-600',
-          '[&_.hljs-number]:text-yellow-600',
-          '[&_.hljs-comment]:text-gray-500',
-          '[&_.hljs-attr]:text-pink-600',
-          '[&_.hljs-title]:text-blue-800',
-          '[&_.hljs-params]:text-gray-700',
+          '[&_.hljs]:bg-gray-900 [&_.hljs]:text-gray-100 [&_.hljs]:rounded-md [&_.hljs]:p-4 [&_.hljs]:my-2',
           )}
         />
         <div className="flex justify-end p-2 border-t">
@@ -470,3 +429,4 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     </div>
   );
 };
+ 
