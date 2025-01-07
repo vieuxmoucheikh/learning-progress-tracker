@@ -5,24 +5,6 @@ import Highlight from '@tiptap/extension-highlight';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import TextStyle from '@tiptap/extension-text-style';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-// Syntax highlighting imports
-import { createLowlight } from 'lowlight';
-import css from 'highlight.js/lib/languages/css';
-import js from 'highlight.js/lib/languages/javascript';
-import ts from 'highlight.js/lib/languages/typescript';
-import html from 'highlight.js/lib/languages/xml';
-
-// Create lowlight instance
-const lowlight = createLowlight();
-
-// Register languages
-if (lowlight) {
-  lowlight.register('html', html);
-  lowlight.register('css', css);
-  lowlight.register('javascript', js);
-  lowlight.register('typescript', ts);
-}
 import {
   Bold as BoldIcon,
   Italic as ItalicIcon,
@@ -302,15 +284,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
             class: 'bg-gray-50 text-gray-900 px-1 rounded font-mono text-sm',
           },
         },
-        codeBlock: {
-          HTMLAttributes: {
-            class: 'bg-gray-900 text-gray-100 rounded-md p-4 my-2',
-          },
-        },
-      }),
-      CodeBlockLowlight.configure({
-        lowlight,
-        defaultLanguage: 'plaintext',
+        codeBlock: false,
       }),
       Highlight,
       TaskList,
@@ -385,7 +359,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
             'prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-6',
             'prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:my-4 prose-blockquote:italic prose-blockquote:text-gray-700 prose-blockquote:bg-blue-50/50',
             'prose-code:bg-gray-50 prose-code:text-gray-900 prose-code:px-1 prose-code:rounded prose-code:font-mono prose-code:text-sm',
-          '[&_.hljs]:bg-gray-900 [&_.hljs]:text-gray-100 [&_.hljs]:rounded-md [&_.hljs]:p-4 [&_.hljs]:my-2',
           )}
         />
         <div className="flex justify-end p-2 border-t">
@@ -429,4 +402,3 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     </div>
   );
 };
- 
