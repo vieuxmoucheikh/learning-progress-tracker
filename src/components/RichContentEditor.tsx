@@ -10,23 +10,11 @@ import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
-// Syntax highlighting imports
 import { createLowlight } from 'lowlight';
 import css from 'highlight.js/lib/languages/css';
 import js from 'highlight.js/lib/languages/javascript';
 import ts from 'highlight.js/lib/languages/typescript';
 import html from 'highlight.js/lib/languages/xml';
-
-// Create lowlight instance
-const lowlight = createLowlight();
-
-// Register languages
-if (lowlight) {
-  lowlight.register('html', html);
-  lowlight.register('css', css);
-  lowlight.register('javascript', js);
-  lowlight.register('typescript', ts);
-}
 import {
   Bold as BoldIcon,
   Italic as ItalicIcon,
@@ -59,6 +47,14 @@ interface RichContentEditorProps {
   readOnly?: boolean;
   className?: string;
 }
+
+const lowlight = createLowlight();
+
+// Register languages
+lowlight.register('html', html);
+lowlight.register('css', css);
+lowlight.register('javascript', js);
+lowlight.register('typescript', ts);
 
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) return null;
@@ -288,6 +284,15 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
 
   const editor = useEditor({
     extensions: [
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: 'w-full',
+        },
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
       StarterKit.configure({
         heading: {
           levels: [1, 2, 3],
@@ -367,7 +372,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
           "[&_ol]:list-decimal [&_ol]:ml-4",
           "[&_table]:w-full [&_table]:border-collapse [&_table]:my-4",
           "[&_th]:bg-gray-100 [&_th]:font-semibold [&_th]:text-left [&_th]:p-2 [&_th]:border [&_th]:border-gray-300",
-          "[&_td]:p-2 [&_td]:border [&_td]:border-gray-300",
+          "[&_td]:p-2 [&_td]:border [&_td]:border-gray-300 [&_td]:min-w-[100px]",
         ),
       },
     },
