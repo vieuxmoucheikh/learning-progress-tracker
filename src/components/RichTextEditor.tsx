@@ -8,7 +8,7 @@ import TextStyle from '@tiptap/extension-text-style';
 import { Color as ColorExtension } from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
 import { common, createLowlight } from 'lowlight';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import {
   Bold,
@@ -182,6 +182,26 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       },
     },
   });
+
+  const handleClipboardEvent = (event: Event) => {
+    const clipboardEvent = event as ClipboardEvent; // Corrected usage
+    event.preventDefault();
+    const text = clipboardEvent.clipboardData?.getData('text/plain');
+    const sanitizedContent = text ? text.replace(/<[^>]+>/g, '') : ''; // Remove any HTML tags
+    editor?.chain().focus().insertContent(sanitizedContent).run();
+  };
+
+  useEffect(() => {
+    const editorElement = document.querySelector('.editor');
+    if (editorElement) {
+      editorElement.addEventListener('paste', handleClipboardEvent);
+    }
+    return () => {
+      if (editorElement) {
+        editorElement.removeEventListener('paste', handleClipboardEvent);
+      }
+    };
+  }, [editor]);
 
   const toggleLink = useCallback(() => {
     if (!editor) return;
