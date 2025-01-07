@@ -23,9 +23,9 @@ import {
   Redo2,
   Quote,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { Separator } from '@/components/ui/separator';
+import { Button } from './ui/button';
+import { cn } from '../lib/utils';
+import { Separator } from './ui/separator';
 
 type TextSizeOptions = 'large' | 'medium' | 'normal';
 
@@ -60,7 +60,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   };
 
   return (
-    <div className="flex items-center flex-wrap gap-1 p-2 border-b bg-white/95 sticky top-0 z-10">
+    <div className={cn("flex items-center flex-wrap gap-1 p-2 border-b bg-white/95 z-10", editor?.isEditable ? "sticky top-0" : "")}>
       {/* History Controls */}
       <div className="flex items-center gap-0.5 mr-2">
         <Button
@@ -346,7 +346,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   };
 
   return (
-    <div className={cn('border rounded-lg shadow-sm relative sticky top-0', className)}>
+    <div className={cn('border rounded-lg shadow-sm relative', className)}>
       {isEditing && editor && <MenuBar editor={editor} />}
       <div className="relative">
         <EditorContent
