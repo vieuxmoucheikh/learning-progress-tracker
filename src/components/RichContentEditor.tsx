@@ -346,7 +346,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   };
 
   return (
-    <div className={cn('border rounded-lg shadow-sm', className)}>
+    <div className={cn('border rounded-lg shadow-sm relative', className)}>
       {isEditing && editor && <MenuBar editor={editor} />}
       <div className="relative">
         <EditorContent
