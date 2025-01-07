@@ -46,6 +46,7 @@ import {
   Quote,
   Table as TableIcon,
 } from 'lucide-react';
+import './RichContentEditor.css';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
@@ -356,7 +357,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     editorProps: {
       attributes: {
         class: cn(
-          "prose prose-sm max-w-none",
+          "prose prose-sm max-w-none rich-content-editor",
           "min-h-[100px] outline-none",
           "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:my-4",
           "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:my-3",
@@ -364,6 +365,9 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
           "[&_p]:text-gray-900 [&_p]:my-2",
           "[&_ul]:list-disc [&_ul]:ml-4",
           "[&_ol]:list-decimal [&_ol]:ml-4",
+          "[&_table]:w-full [&_table]:border-collapse [&_table]:my-4",
+          "[&_th]:bg-gray-100 [&_th]:font-semibold [&_th]:text-left [&_th]:p-2 [&_th]:border [&_th]:border-gray-300",
+          "[&_td]:p-2 [&_td]:border [&_td]:border-gray-300",
         ),
       },
     },

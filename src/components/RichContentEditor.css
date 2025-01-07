@@ -1,0 +1,26 @@
+.rich-content-editor table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.rich-content-editor th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+}
+
+.rich-content-editor td {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+}
+
+.rich-content-editor .ProseMirror {
+  min-height: 150px;
+}
+
+.rich-content-editor .ProseMirror:focus {
+  outline: none;
+}
