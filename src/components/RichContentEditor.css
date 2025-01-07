@@ -24,3 +24,9 @@
 .rich-content-editor .ProseMirror:focus {
   outline: none;
 }
+
+.sticky-menu-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
