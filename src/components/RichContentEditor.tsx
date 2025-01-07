@@ -260,6 +260,17 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         >
           <Quote className="h-4 w-4" />
         </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+          className={cn(
+            "h-8 w-8 hover:bg-gray-100",
+            editor.isActive('table') && "bg-gray-100 text-gray-900"
+          )}
+        >
+          <TableIcon className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
