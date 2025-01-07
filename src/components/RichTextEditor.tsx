@@ -252,7 +252,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       className
     )}>
       {editable && (
-        <div className="flex flex-wrap gap-1 p-2 border-b border-gray-200 bg-white sticky-menu-bar">
+        <div className="flex flex-wrap gap-1 p-2 border-b border-gray-200 bg-white">
           <Button
             size="icon"
             variant="ghost"
