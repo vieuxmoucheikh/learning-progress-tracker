@@ -47,9 +47,9 @@ import {
   Table as TableIcon,
 } from 'lucide-react';
 import './RichContentEditor.css';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { Separator } from '@/components/ui/separator';
+import { Button } from '../ui/button';
+import { cn } from '../lib/utils';
+import { Separator } from '../ui/separator';
 
 type TextSizeOptions = 'large' | 'medium' | 'normal';
 
