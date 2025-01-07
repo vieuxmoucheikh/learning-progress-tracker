@@ -6,6 +6,10 @@ import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import TextStyle from '@tiptap/extension-text-style';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
 // Syntax highlighting imports
 import { createLowlight } from 'lowlight';
 import css from 'highlight.js/lib/languages/css';
@@ -40,6 +44,7 @@ import {
   Undo2,
   Redo2,
   Quote,
+  Table as TableIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
