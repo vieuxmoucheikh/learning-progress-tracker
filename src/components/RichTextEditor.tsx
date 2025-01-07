@@ -33,6 +33,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import DOMPurify from 'dompurify';
 
 const lowlightInstance = createLowlight(common);
 
@@ -184,10 +185,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   });
 
   const handleClipboardEvent = (event: Event) => {
-    const clipboardEvent = event as ClipboardEvent; // Corrected usage
+    const clipboardEvent = event as ClipboardEvent;
     event.preventDefault();
     const text = clipboardEvent.clipboardData?.getData('text/plain');
-    const sanitizedContent = text ? text.replace(/<[^>]+>/g, '') : ''; // Remove any HTML tags
+    const sanitizedContent = text ? DOMPurify.sanitize(text) : ''; // Sanitize the clipboard content
     editor?.chain().focus().insertContent(sanitizedContent).run();
   };
 
