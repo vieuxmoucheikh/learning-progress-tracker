@@ -347,7 +347,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
 
   return (
     <div className={cn('border rounded-lg shadow-sm relative', className)}>
-      {isEditing && editor && <MenuBar editor={editor} />}
       <div className="relative">
         <EditorContent
           editor={editor}
@@ -361,6 +360,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
             'prose-code:bg-gray-50 prose-code:text-gray-900 prose-code:px-1 prose-code:rounded prose-code:font-mono prose-code:text-sm',
           )}
         />
+        {isEditing && editor && <MenuBar editor={editor} />}
         <div className="flex justify-end p-2 border-t">
           <div className="flex gap-2">
             {!isEditing && !initialReadOnly && (
