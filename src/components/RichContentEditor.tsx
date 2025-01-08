@@ -352,7 +352,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
         <EditorContent
           editor={editor}
           className={cn(
-            "prose prose-sm max-w-none p-4",
+            "prose prose-sm max-w-none p-4 relative",
             isEditing && 'min-h-[150px] cursor-text',
             'prose-p:my-2',
             'prose-ul:my-2 prose-ul:list-disc prose-ul:pl-6',
