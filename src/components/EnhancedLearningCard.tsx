@@ -540,7 +540,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         >
           {isEditing ? (
             <div className="space-y-4">
-              <div className="space-y-2">
+              <div className="space-y-2 relative">
                 <RichTextEditor
                   content={content}
                   onChange={setContent}
@@ -551,6 +551,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     "border border-gray-200",
                     "focus-within:ring-2 focus-within:ring-blue-500",
                     "prose prose-sm sm:prose-base max-w-none",
+                    "overflow-y-auto max-h-[60vh]",
                     "prose-headings:font-semibold prose-headings:text-gray-900",
                     "prose-p:text-gray-700 prose-p:leading-relaxed",
                     "prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline",

@@ -249,11 +249,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     <div className={cn(
       "rounded-lg border border-gray-200",
       "bg-white",
-      "relative",
+      "relative flex flex-col",
       className
     )}>
       {editable && (
-        <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
           <div className="flex flex-wrap gap-1 p-2">
             <Button
               size="icon"
@@ -430,7 +430,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         className={cn(
                 "prose prose-sm max-w-none",
                 "bg-white text-gray-900",
-                "p-4",
+                "p-4 overflow-y-auto",
                 "[&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:outline-none",
                 "[&_pre]:bg-gray-50 [&_pre]:text-gray-900 [&_pre]:border [&_pre]:border-gray-200 [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:my-4",
                 "[&_code]:bg-gray-50 [&_code]:text-gray-900 [&_code]:px-1 [&_code]:rounded [&_code]:font-mono [&_code]:text-sm",
