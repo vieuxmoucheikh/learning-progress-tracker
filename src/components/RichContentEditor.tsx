@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEditor, EditorContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Highlight from '@tiptap/extension-highlight';
@@ -45,7 +45,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
       medium: 'text-lg',
       normal: 'text-base'
     };
-    
+   
     editor.chain().focus().unsetMark('textStyle').run();
     editor.chain().focus().setMark('textStyle', { class: classes[size] }).run();
   };
@@ -60,7 +60,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   };
 
   return (
-    <div className={cn("flex items-center flex-wrap gap-1 p-2 border-b bg-white/95 sticky-menu-bar")}>
+    <div className="flex items-center flex-wrap gap-1 p-2 border-b bg-white/95 sticky top-0 z-10">
       {/* History Controls */}
       <div className="flex items-center gap-0.5 mr-2">
         <Button
@@ -250,8 +250,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(!initialReadOnly);
   const [localContent, setLocalContent] = useState(content);
-  const [isSticky, setIsSticky] = useState(false);
-  const editorWrapperRef = useRef<HTMLDivElement>(null);
 
   const editor = useEditor({
     extensions: [
@@ -347,42 +345,27 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     editor?.commands.setContent(content);
   };
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (editorWrapperRef.current) {
-        const rect = editorWrapperRef.current.getBoundingClientRect();
-        setIsSticky(rect.top <= 0);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   return (
-    <div className={cn('border rounded-lg shadow-sm flex flex-col rich-content-editor', className)} style={{ height: '500px' }}>
-      <div ref={editorWrapperRef} className={cn("editor-wrapper", isSticky && "sticky-menu")}>
+    <div className={cn('border rounded-lg shadow-sm flex flex-col overflow-hidden', className)} style={{ height: '500px' }}>
+      <div className="flex-1 overflow-auto">
         {isEditing && editor && (
           <MenuBar editor={editor} />
         )}
-        <div className="flex-1 overflow-auto">
-          <EditorContent
-            editor={editor}
-            className={cn(
-              "prose prose-sm max-w-none p-4",
-              isEditing && 'min-h-[150px] cursor-text',
-              'prose-p:my-2',
-              'prose-ul:my-2 prose-ul:list-disc prose-ul:pl-6',
-              'prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-6',
-              'prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:my-4 prose-blockquote:italic prose-blockquote:text-gray-700 prose-blockquote:bg-blue-50/50',
-              'prose-code:bg-gray-50 prose-code:text-gray-900 prose-code:px-1 prose-code:rounded prose-code:font-mono prose-code:text-sm',
-            )}
-          />
-        </div>
+        <EditorContent
+          editor={editor}
+          className={cn(
+            "prose prose-sm max-w-none p-4",
+            isEditing && 'min-h-[150px] cursor-text',
+            'prose-p:my-2',
+            'prose-ul:my-2 prose-ul:list-disc prose-ul:pl-6',
+            'prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-6',
+            'prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:my-4 prose-blockquote:italic prose-blockquote:text-gray-700 prose-blockquote:bg-blue-50/50',
+            'prose-code:bg-gray-50 prose-code:text-gray-900 prose-code:px-1 prose-code:rounded prose-code:font-mono prose-code:text-sm',
+          )}
+        />
       </div>
-      <div className={cn("flex justify-end p-2 border-t")}>
+      <div className={cn("flex justify-end p-2 border-t mt-auto")}>
         <div className="flex gap-2">
-          
           {!isEditing && !initialReadOnly && (
             <Button
               variant="ghost"
@@ -395,7 +378,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
             </Button>
           )}
           {isEditing && (
-            < >
+            <>
               <Button
                 variant="ghost"
                 size="sm"
@@ -414,10 +397,10 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
                 <X className="h-4 w-4 mr-1" />
                 Cancel
               </Button>
-            </ >
+            </>
           )}
         </div>
       </div>
     </div>
   );
-}; 
+};
