@@ -781,6 +781,95 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     }
   };
 
+  const exportToPdf = useCallback((item: LearningItem) => {
+    const element = document.createElement('div');
+    element.className = 'pdf-container p-8';
+    
+    // Add title
+    const title = document.createElement('h1');
+    title.textContent = item.title;
+    title.className = 'text-3xl font-bold mb-4';
+    element.appendChild(title);
+    
+    // Add metadata
+    const metadata = document.createElement('div');
+    metadata.className = 'mb-6 text-sm text-gray-600';
+    metadata.innerHTML = `
+      <div class="mb-2"><strong>Type:</strong> ${item.type}</div>
+      <div class="mb-2"><strong>Status:</strong> ${item.completed ? 'Completed' : item.progress?.current ? 'In Progress' : 'Not Started'}</div>
+      ${item.completed_at ? `<div class="mb-2"><strong>Completed:</strong> ${new Date(item.completed_at).toLocaleDateString()}</div>` : ''}
+      ${item.url ? `<div class="mb-2"><strong>URL:</strong> <a href="${item.url}" class="text-blue-600">${item.url}</a></div>` : ''}
+    `;
+    element.appendChild(metadata);
+    
+    // Add progress section if available
+    if (item.progress) {
+      const progress = document.createElement('div');
+      progress.className = 'mb-6';
+      progress.innerHTML = `
+        <h2 class="text-xl font-bold mb-2">Progress</h2>
+        <div class="pl-4">
+          <div>Current: ${item.progress.current.hours}h ${item.progress.current.minutes}m</div>
+          ${item.progress.total ? `<div>Total: ${item.progress.total.hours}h ${item.progress.total.minutes}m</div>` : ''}
+          ${item.progress.lastAccessed ? `<div>Last Accessed: ${new Date(item.progress.lastAccessed).toLocaleDateString()}</div>` : ''}
+        </div>
+      `;
+      element.appendChild(progress);
+    }
+    
+    // Add notes if available
+    if (item.notes) {
+      const notes = document.createElement('div');
+      notes.className = 'mb-6';
+      notes.innerHTML = `
+        <h2 class="text-xl font-bold mb-2">Notes</h2>
+        <div class="pl-4 prose">${item.notes}</div>
+      `;
+      element.appendChild(notes);
+    }
+    
+    // Add sessions if available
+    if (item.progress?.sessions?.length) {
+      const sessions = document.createElement('div');
+      sessions.className = 'mb-6';
+      sessions.innerHTML = `
+        <h2 class="text-xl font-bold mb-2">Sessions</h2>
+        <div class="pl-4">
+          ${item.progress.sessions.map(session => `
+            <div class="mb-2">
+              <div><strong>Date:</strong> ${new Date(session.date).toLocaleDateString()}</div>
+              <div><strong>Duration:</strong> ${session.duration?.hours}h ${session.duration?.minutes}m</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      element.appendChild(sessions);
+    }
+    
+    // Configure PDF options
+    const opt: Html2PdfOptions = {
+      margin: [15, 15] as const,
+      filename: `${item.title.toLowerCase().replace(/\s+/g, '-')}.pdf`,
+      image: { 
+        type: 'jpeg' as ImageType, 
+        quality: 0.98 
+      },
+      html2canvas: { 
+        scale: 2,
+        useCORS: true,
+        letterRendering: true
+      },
+      jsPDF: { 
+        unit: 'mm' as JsPdfUnit, 
+        format: 'a4' as JsPdfFormat, 
+        orientation: 'portrait' as JsPdfOrientation
+      }
+    };
+    
+    // Generate PDF
+    html2pdf().set(opt).from(element).save();
+  }, []);
+
   return (
     <div className="w-full">
       <Card className={clsx(
@@ -1143,6 +1232,13 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               onClick={() => onSetActiveItem(item.id)}
             >
               <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => exportToPdf(item)}
+            >
+              <Download className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
