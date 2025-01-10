@@ -346,12 +346,15 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   };
 
   return (
-    <div className={cn('border rounded-lg shadow-sm relative', className)}>
-      <div className="relative">
+    <div className={cn('border rounded-lg shadow-sm flex flex-col', className)} style={{ height: '500px' }}>
+      {isEditing && editor && (
+        <MenuBar editor={editor} />
+      )}
+      <div className="flex-1 overflow-auto">
         <EditorContent
           editor={editor}
           className={cn(
-            "prose prose-sm max-w-none p-4 relative",
+            "prose prose-sm max-w-none p-4",
             isEditing && 'min-h-[150px] cursor-text',
             'prose-p:my-2',
             'prose-ul:my-2 prose-ul:list-disc prose-ul:pl-6',
@@ -360,9 +363,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
             'prose-code:bg-gray-50 prose-code:text-gray-900 prose-code:px-1 prose-code:rounded prose-code:font-mono prose-code:text-sm',
           )}
         />
-        {isEditing && editor && (
-          <MenuBar editor={editor} />
-        )}
         <div className={cn("flex justify-end p-2 border-t")}>
           <div className="flex gap-2">
            
