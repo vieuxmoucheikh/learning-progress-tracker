@@ -1124,27 +1124,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           </DialogContent>
         </Dialog>
       </Card>
-      <div className="flex items-center gap-2">
-        {!isEditing && (
-          <>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onSetActiveItem(item.id)}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onDelete(item.id)}
-              className="text-red-500 hover:text-red-700"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </>
-        )}
-      </div>
     </div>
   );
 };
