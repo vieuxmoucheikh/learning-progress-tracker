@@ -349,7 +349,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     <div className={cn('border rounded-lg shadow-sm flex flex-col relative', className)} style={{ height: '500px' }}>
       <div className="flex-1 overflow-y-auto relative">
         {isEditing && editor && (
-          <div className="sticky top-0 z-50 bg-white border-b">
+          <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b shadow-sm">
             <MenuBar editor={editor} />
           </div>
         )}
