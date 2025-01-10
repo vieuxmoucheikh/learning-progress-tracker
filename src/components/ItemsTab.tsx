@@ -172,6 +172,7 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
           <Button
             variant="default"
             size="default"
+            className="bg-blue-500 hover:bg-blue-600"
             onClick={onAddItem}
           >
             Add Item
