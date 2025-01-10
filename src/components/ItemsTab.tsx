@@ -135,10 +135,10 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1 flex items-center gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
             <Input
               placeholder="Search items..."
-              className="pl-8"
+              className="pl-10 h-12 text-base rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500 w-full"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
