@@ -168,15 +168,7 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
           />
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="default"
-            onClick={exportToPdf}
-            className="gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Export PDF
-          </Button>
+          
           <Button
             variant="default"
             size="default"
