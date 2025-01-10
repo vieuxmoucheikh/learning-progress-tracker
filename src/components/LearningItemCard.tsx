@@ -826,7 +826,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                   ) : (
                     <div className="flex items-center gap-2 group">
                       <h3 className="text-2xl font-bold text-gray-800">{item.title}</h3>
-                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsEditing(true)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -872,7 +879,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 >
                   <CheckCircle2 className="h-5 w-5" />
                 </Button>
-                
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleDeleteClick}
+                  className="text-red-400 hover:text-red-600 hover:bg-white transition-colors rounded-lg shadow-sm"
+                >
+                  <Trash2 className="h-5 w-5" />
+                </Button>
               </div>
             </div>
 
