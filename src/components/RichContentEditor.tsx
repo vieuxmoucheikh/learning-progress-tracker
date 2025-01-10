@@ -60,7 +60,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   };
 
   return (
-    <div className="flex items-center flex-wrap gap-1 p-2 border-b bg-white/95 sticky top-0 z-10">
+    <div className="flex items-center flex-wrap gap-1 p-2 bg-white/95">
       {/* History Controls */}
       <div className="flex items-center gap-0.5 mr-2">
         <Button
@@ -346,25 +346,29 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   };
 
   return (
-    <div className={cn('border rounded-lg shadow-sm flex flex-col overflow-hidden', className)} style={{ height: '500px' }}>
-      <div className="flex-1 overflow-auto">
+    <div className={cn('border rounded-lg shadow-sm flex flex-col relative', className)} style={{ height: '500px' }}>
+      <div className="flex-1 overflow-y-auto relative">
         {isEditing && editor && (
-          <MenuBar editor={editor} />
+          <div className="sticky top-0 z-50 bg-white border-b">
+            <MenuBar editor={editor} />
+          </div>
         )}
-        <EditorContent
-          editor={editor}
-          className={cn(
-            "prose prose-sm max-w-none p-4",
-            isEditing && 'min-h-[150px] cursor-text',
-            'prose-p:my-2',
-            'prose-ul:my-2 prose-ul:list-disc prose-ul:pl-6',
-            'prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-6',
-            'prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:my-4 prose-blockquote:italic prose-blockquote:text-gray-700 prose-blockquote:bg-blue-50/50',
-            'prose-code:bg-gray-50 prose-code:text-gray-900 prose-code:px-1 prose-code:rounded prose-code:font-mono prose-code:text-sm',
-          )}
-        />
+        <div className="relative">
+          <EditorContent
+            editor={editor}
+            className={cn(
+              "prose prose-sm max-w-none p-4",
+              isEditing && 'min-h-[150px] cursor-text',
+              'prose-p:my-2',
+              'prose-ul:my-2 prose-ul:list-disc prose-ul:pl-6',
+              'prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-6',
+              'prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:my-4 prose-blockquote:italic prose-blockquote:text-gray-700 prose-blockquote:bg-blue-50/50',
+              'prose-code:bg-gray-50 prose-code:text-gray-900 prose-code:px-1 prose-code:rounded prose-code:font-mono prose-code:text-sm',
+            )}
+          />
+        </div>
       </div>
-      <div className={cn("flex justify-end p-2 border-t mt-auto")}>
+      <div className={cn("flex justify-end p-2 border-t mt-auto bg-white")}>
         <div className="flex gap-2">
           {!isEditing && !initialReadOnly && (
             <Button
