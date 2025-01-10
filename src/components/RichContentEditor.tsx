@@ -60,7 +60,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   };
 
   return (
-    <div className={cn("flex items-center flex-wrap gap-1 p-2 border-b bg-white/95 z-10", editor?.isEditable ? "sticky top-0" : "")}>
+    <div className={cn("flex items-center flex-wrap gap-1 p-2 border-b bg-white/95 z-10", "sticky top-0")}>
       {/* History Controls */}
       <div className="flex items-center gap-0.5 mr-2">
         <Button
@@ -375,7 +375,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
               </Button>
             )}
             {isEditing && (
-              <>
+              < >
                 <Button
                   variant="ghost"
                   size="sm"
@@ -394,7 +394,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
                   <X className="h-4 w-4 mr-1" />
                   Cancel
                 </Button>
-              </>
+              </ >
             )}
           </div>
         </div>
