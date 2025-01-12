@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
@@ -465,8 +465,8 @@ export default function LearningGoals({ items }: Props) {
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Target Date</label>
-              <Popover>
-                <PopoverTrigger asChild>
+              <Dialog>
+                <DialogTrigger asChild>
                   <Button
                     variant="outline"
                     className={clsx(
@@ -481,12 +481,12 @@ export default function LearningGoals({ items }: Props) {
                       <span>Select target date</span>
                     )}
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                </DialogTrigger>
+                <DialogContent className="p-0">
                   <Calendar
                     mode="single"
                     selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
-                    onSelect={(date: Date | undefined) => {
+                    onSelect={(date) => {
                       if (date) {
                         const formattedDate = format(date, 'yyyy-MM-dd');
                         setNewGoal(prev => ({ 
@@ -495,16 +495,11 @@ export default function LearningGoals({ items }: Props) {
                         }));
                       }
                     }}
-                    disabled={(date: Date) => {
-                      const today = new Date();
-                      today.setHours(0, 0, 0, 0);
-                      return date < today;
-                    }}
                     initialFocus
-                    fromDate={new Date()}
+                    disabled={(date) => date < new Date()}
                   />
-                </PopoverContent>
-              </Popover>
+                </DialogContent>
+              </Dialog>
             </div>
 
             <div className="space-y-2">
