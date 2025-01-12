@@ -465,9 +465,19 @@ export default function LearningGoals({ items }: Props) {
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Target Date</label>
-              <Dialog>
+              <Dialog onOpenChange={(open) => {
+                if (!open) {
+                  document.removeEventListener('close-dialog', () => {});
+                }
+              }}>
                 <DialogTrigger asChild>
                   <Button
+                    onClick={() => {
+                      document.addEventListener('close-dialog', () => {
+                        const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
+                        if (closeButton) closeButton.click();
+                      }, { once: true });
+                    }}
                     variant="outline"
                     className={clsx(
                       "w-full pl-3 text-left font-normal border-input bg-background text-foreground",
@@ -482,22 +492,49 @@ export default function LearningGoals({ items }: Props) {
                     )}
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="p-0">
-                  <Calendar
-                    mode="single"
-                    selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
-                    onSelect={(date) => {
-                      if (date) {
-                        const formattedDate = format(date, 'yyyy-MM-dd');
-                        setNewGoal(prev => ({ 
-                          ...prev, 
-                          targetDate: formattedDate
-                        }));
-                      }
-                    }}
-                    initialFocus
-                    disabled={(date) => date < new Date()}
-                  />
+                <DialogContent className="p-0 bg-background">
+                  <div className="p-4">
+                    <Calendar
+                      mode="single"
+                      selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
+                      onSelect={(date) => {
+                        if (date) {
+                          const formattedDate = format(date, 'yyyy-MM-dd');
+                          setNewGoal(prev => ({ 
+                            ...prev, 
+                            targetDate: formattedDate
+                          }));
+                          const closeEvent = new Event('close-dialog');
+                          document.dispatchEvent(closeEvent);
+                        }
+                      }}
+                      initialFocus
+                      disabled={(date) => date < new Date()}
+                      className="mx-auto"
+                      classNames={{
+                        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                        month: "space-y-4",
+                        caption: "flex justify-center pt-1 relative items-center px-8",
+                        caption_label: "text-sm font-medium",
+                        nav: "space-x-1 flex items-center",
+                        nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+                        nav_button_previous: "absolute left-1",
+                        nav_button_next: "absolute right-1",
+                        table: "w-full border-collapse space-y-1",
+                        head_row: "flex w-full",
+                        head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem] h-9 flex items-center justify-center",
+                        row: "flex w-full mt-2",
+                        cell: "text-center text-sm relative p-0 [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                        day: "h-9 w-9 p-0 font-normal",
+                        day_range_end: "day-range-end",
+                        day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                        day_today: "bg-accent text-accent-foreground",
+                        day_outside: "day-outside opacity-50",
+                        day_disabled: "text-muted-foreground opacity-50",
+                        day_hidden: "invisible",
+                      }}
+                    />
+                  </div>
                 </DialogContent>
               </Dialog>
             </div>
