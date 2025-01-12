@@ -342,7 +342,7 @@ export default function LearningGoals({ items }: Props) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold tracking-tight">Learning Goals</h2>
-        <Button onClick={() => setIsAddingGoal(true)}>Add Goal</Button>
+        <Button onClick={() => setIsAddingGoal(true)} className="bg-blue-500 hover:bg-blue-600 text-white">Add Goal</Button>
       </div>
 
       {activeSession && (
