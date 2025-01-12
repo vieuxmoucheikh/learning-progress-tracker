@@ -489,10 +489,10 @@ export default function LearningGoals({ items }: Props) {
                       selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
                       onSelect={(date: Date | undefined) => {
                         if (date) {
-                          const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                          const formattedDate = format(date, 'yyyy-MM-dd');
                           setNewGoal(prev => ({ 
                             ...prev, 
-                            targetDate: localDate.toISOString().split('T')[0] 
+                            targetDate: formattedDate
                           }));
                         }
                       }}
