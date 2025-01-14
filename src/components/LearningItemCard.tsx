@@ -1085,15 +1085,15 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
         {/* Delete Confirmation Dialog */}
         <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md bg-background">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold text-gray-900">
+              <DialogTitle className="text-xl font-semibold text-foreground">
                 Delete Learning Item
               </DialogTitle>
-              <DialogDescription className="mt-3 text-gray-600">
+              <DialogDescription className="mt-3 text-muted-foreground">
                 <div className="space-y-3">
                   <p>
-                    Are you sure you want to delete <span className="font-medium text-gray-900">"{item.title}"</span>?
+                    Are you sure you want to delete <span className="font-medium text-foreground">"{item.title}"</span>?
                   </p>
                   <div className="flex items-center gap-2 p-3 bg-amber-50 text-amber-800 rounded-lg border border-amber-200">
                     <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0" />
@@ -1108,14 +1108,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               <Button
                 variant="outline"
                 onClick={handleCancelDelete}
-                className="px-4 hover:bg-gray-50"
+                className="px-4"
               >
                 Cancel
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleConfirmDelete}
-                className="px-4 bg-red-600 hover:bg-red-700 focus:ring-red-500"
+                className="px-4"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete Item
