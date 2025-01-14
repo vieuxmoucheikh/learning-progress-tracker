@@ -39,6 +39,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 
 interface Props {
@@ -1104,23 +1105,23 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 </div>
               </DialogDescription>
             </DialogHeader>
-            <div className="flex justify-end gap-3 mt-6">
-              <Button
-                variant="outline"
-                onClick={handleCancelDelete}
-                className="px-4"
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleConfirmDelete}
-                className="px-4"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete Item
-              </Button>
-            </div>
+            <DialogFooter className="mt-6">
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="outline"
+                  onClick={handleCancelDelete}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleConfirmDelete}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Item
+                </Button>
+              </div>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </Card>
