@@ -22,7 +22,8 @@ import {
   EyeOff,
   Clock,
   Bookmark,
-  BookmarkCheck
+  BookmarkCheck,
+  AlertCircle
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import type { EnhancedLearningCard as CardType, NewEnhancedLearningCard } from '@/types';
@@ -98,7 +99,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   const [isContentHidden, setIsContentHidden] = useState(false);
   const [mastered, setMastered] = useState(initialMastered);
   const [isZoomed, setIsZoomed] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [itemCategory, setItemCategory] = useState(initialCategory);
   const [categories, setCategories] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
@@ -716,12 +717,46 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             "text-sm transition-colors",
             "text-red-600 hover:text-red-700 hover:bg-red-50"
           )}
-          onClick={onDelete}
+          onClick={() => setShowDeleteDialog(true)}
         >
           <Trash2 className="w-4 h-4 mr-2" />
           <span>Delete</span>
         </Button>
       </CardFooter>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="bg-background">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-semibold text-foreground">
+              Delete Card
+            </AlertDialogTitle>
+            <AlertDialogDescription className="mt-3 text-muted-foreground">
+              <div className="space-y-3">
+                <p>
+                  Are you sure you want to delete <span className="font-medium text-foreground">"{title}"</span>?
+                </p>
+                <div className="flex items-center gap-2 p-3 bg-amber-50 text-amber-800 rounded-lg border border-amber-200">
+                  <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0" />
+                  <p className="text-sm">
+                    This action cannot be undone. The card will be permanently deleted.
+                  </p>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={onDelete}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Card
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Zoomed View Dialog */}
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
