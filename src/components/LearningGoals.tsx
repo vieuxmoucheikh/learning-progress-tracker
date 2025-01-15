@@ -482,7 +482,12 @@ export default function LearningGoals({ items }: Props) {
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent align="start" className="w-auto p-0 bg-background border rounded-md shadow-md">
+                <PopoverContent 
+                  align="start" 
+                  className="w-auto p-0 bg-background border rounded-md shadow-md" 
+                  side="bottom"
+                  onInteractOutside={(e) => e.preventDefault()}
+                >
                   <Calendar
                     mode="single"
                     selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
@@ -493,11 +498,11 @@ export default function LearningGoals({ items }: Props) {
                           ...prev, 
                           targetDate: formattedDate
                         }));
-                      } else {
-                        setNewGoal(prev => ({
-                          ...prev,
-                          targetDate: ''
-                        }));
+                        // Close the popover after selecting a date
+                        const popoverTrigger = document.querySelector('[role="combobox"]');
+                        if (popoverTrigger) {
+                          (popoverTrigger as HTMLElement).click();
+                        }
                       }
                     }}
                     initialFocus
@@ -509,6 +514,7 @@ export default function LearningGoals({ items }: Props) {
                     fromDate={new Date()}
                     fixedWeeks
                     showOutsideDays={false}
+                    className="rounded-md border"
                   />
                 </PopoverContent>
               </Popover>
