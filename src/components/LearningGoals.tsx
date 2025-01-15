@@ -477,7 +477,7 @@ export default function LearningGoals({ items }: Props) {
                   >
                     <LucideCalendar className="mr-3 h-4 w-4 opacity-50" />
                     {newGoal.targetDate ? (
-                      format(new Date(newGoal.targetDate), "MMMM d, yyyy")
+                      format(new Date(newGoal.targetDate + 'T00:00:00Z'), "MMMM d, yyyy")
                     ) : (
                       <span>Select target date</span>
                     )}
