@@ -87,7 +87,11 @@ const GoalManager: React.FC = () => {
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={setDate}
+                onSelect={(date) => {
+                  if (date) {
+                    setDate(date);
+                  }
+                }}
                 className="rounded-md border"
                 required
               />

@@ -493,6 +493,11 @@ export default function LearningGoals({ items }: Props) {
                           ...prev, 
                           targetDate: formattedDate
                         }));
+                      } else {
+                        setNewGoal(prev => ({
+                          ...prev,
+                          targetDate: ''
+                        }));
                       }
                     }}
                     initialFocus
