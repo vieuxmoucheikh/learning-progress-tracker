@@ -68,6 +68,7 @@ export default function LearningGoals({ items }: Props) {
     category: '',
     priority: 'medium',
   });
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   // Fetch goals from Supabase
   const fetchGoals = async () => {
@@ -465,7 +466,7 @@ export default function LearningGoals({ items }: Props) {
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Target Date</label>
-              <Popover>
+              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -486,7 +487,6 @@ export default function LearningGoals({ items }: Props) {
                   align="start" 
                   className="w-auto p-0 bg-background border rounded-md shadow-md" 
                   side="bottom"
-                  onInteractOutside={(e) => e.preventDefault()}
                 >
                   <Calendar
                     mode="single"
@@ -498,11 +498,7 @@ export default function LearningGoals({ items }: Props) {
                           ...prev, 
                           targetDate: formattedDate
                         }));
-                        // Close the popover after selecting a date
-                        const popoverTrigger = document.querySelector('[role="combobox"]');
-                        if (popoverTrigger) {
-                          (popoverTrigger as HTMLElement).click();
-                        }
+                        setIsCalendarOpen(false);
                       }
                     }}
                     initialFocus
