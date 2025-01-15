@@ -14,12 +14,20 @@ import { addGoal } from '@/lib/database';
 import { LearningGoal } from '@/types';
 
 const GoalManager: React.FC = () => {
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date>(new Date());
   const [title, setTitle] = useState('');
   const [targetHours, setTargetHours] = useState(0);
 
   const handleAddGoal = async () => {
-    if (!date || !title || targetHours <= 0) return;
+    if (!title || targetHours <= 0) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    
+    if (!date) {
+      alert('Please select a valid target date');
+      return;
+    }
     
     const newGoal: LearningGoal = {
       id: crypto.randomUUID(),
@@ -81,6 +89,7 @@ const GoalManager: React.FC = () => {
                 selected={date}
                 onSelect={setDate}
                 className="rounded-md border"
+                required
               />
             </div>
           </div>
