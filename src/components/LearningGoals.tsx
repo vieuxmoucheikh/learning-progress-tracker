@@ -500,19 +500,25 @@ export default function LearningGoals({ items }: Props) {
                         const day = String(localDate.getDate()).padStart(2, '0');
                         const formattedDate = `${year}-${month}-${day}`;
                         
-                        console.log('Selected date (local):', formattedDate);
+                        console.log('Calendar onSelect triggered');
+                        console.log('Date selected:', date);
+                        console.log('Formatted date:', formattedDate);
                         
-                        setNewGoal(prev => ({
-                          ...prev,
-                          targetDate: formattedDate
-                        }));
+                        setNewGoal(prev => {
+                          console.log('Previous state:', prev);
+                          const updated = {
+                            ...prev,
+                            targetDate: formattedDate
+                          };
+                          console.log('Updated state:', updated);
+                          return updated;
+                        });
                         
-                        setTimeout(() => {
-                          setIsCalendarOpen(false);
-                        }, 100);
+                        // Remove the timeout and directly close the popover
+                        setIsCalendarOpen(false);
                       }
                     }}
-                    initialFocus
+                    initialFocus={false}
                     disabled={(date) => {
                       const today = new Date();
                       today.setHours(0, 0, 0, 0);
