@@ -17,7 +17,7 @@ import { PomodoroTimer } from './pomodoro/PomodoroTimer';
 import type { Session } from '../types';
 
 type GoalStatus = 'active' | 'completed' | 'overdue';
- 
+
 interface LearningGoal {
   id: string;
   userId: string;
@@ -57,13 +57,13 @@ export default function LearningGoals({ items }: Props) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [newGoal, setNewGoal] = useState<{
     title: string;
-    targetDate: string;
+    targetDate: Date | undefined;
     targetHours: number;
     category: string;
     priority: Priority;
   }>({
     title: '',
-    targetDate: '',
+    targetDate: undefined,
     targetHours: 0,
     category: '',
     priority: 'medium',
@@ -129,8 +129,8 @@ export default function LearningGoals({ items }: Props) {
         });
         return;
       }
-
-      const addedGoal = await addGoal(newGoal);
+      const formattedTargetDate = format(newGoal.targetDate, 'yyyy-MM-dd');
+      const addedGoal = await addGoal({ ...newGoal, targetDate: formattedTargetDate });
       // Update local state immediately
       setGoals(prevGoals => {
         // Explicitly cast to LearningGoal[]
@@ -139,7 +139,7 @@ export default function LearningGoals({ items }: Props) {
       setIsAddingGoal(false);
       setNewGoal({
         title: '',
-        targetDate: '',
+        targetDate: undefined,
         targetHours: 0,
         category: '',
         priority: 'medium',
@@ -296,7 +296,7 @@ export default function LearningGoals({ items }: Props) {
   const resetForm = () => {
     setNewGoal({
       title: '',
-      targetDate: '',
+      targetDate: undefined,
       targetHours: 0,
       category: '',
       priority: 'medium',
@@ -477,7 +477,7 @@ export default function LearningGoals({ items }: Props) {
                   >
                     <LucideCalendar className="mr-3 h-4 w-4 opacity-50" />
                     {newGoal.targetDate ? (
-                      format(new Date(newGoal.targetDate), "MMMM d, yyyy")
+                      format(newGoal.targetDate, "MMMM d, yyyy")
                     ) : (
                       <span>Select target date</span>
                     )}
@@ -490,17 +490,12 @@ export default function LearningGoals({ items }: Props) {
                 >
                   <Calendar
                     mode="single"
-                    selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
+                    selected={newGoal.targetDate}
                     onSelect={(date) => {
-                      if (date) {
-                        const localDate = new Date(date);
-                        const formattedDate = localDate.toISOString().split('T')[0];
-                        
-                        setNewGoal(prev => ({
-                          ...prev,
-                          targetDate: formattedDate
-                        }));
-                      }
+                       setNewGoal(prev => ({
+                        ...prev,
+                        targetDate: date
+                       }))
                     }}
                     disabled={(date) => {
                       const today = new Date();
