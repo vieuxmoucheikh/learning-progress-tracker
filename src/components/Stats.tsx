@@ -1,9 +1,14 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { LearningItem } from '../types';
 import { BarChart3, Clock, Calendar as CalendarIcon, Trophy, Target } from 'lucide-react';
 import { calculateTimeByCategory } from '../lib/utils';
 import { YearlyActivityStats } from './YearlyActivityStats';
-import GoalManager from './pomodoro/GoalManager';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { LucideCalendar } from 'lucide-react';
 
 interface Props {
   items: LearningItem[];
@@ -90,7 +95,35 @@ export function Stats({ items }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end mb-4">
-        <GoalManager />
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="bg-blue-500 hover:bg-blue-600 text-white">Add Goal</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Set Goal Date</DialogTitle>
+            </DialogHeader>
+            <div className="p-4">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                  >
+                    <LucideCalendar className="mr-2 h-4 w-4" />
+                    Select a date
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
