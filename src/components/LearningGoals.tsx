@@ -493,15 +493,16 @@ export default function LearningGoals({ items }: Props) {
                     selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
                     onSelect={(date) => {
                       if (date) {
-                        const selectedDate = new Date(Date.UTC(
-                          date.getFullYear(),
-                          date.getMonth(),
-                          date.getDate()
-                        ));
+                        // Create a new date object in local timezone
+                        const localDate = new Date(date);
                         
-                        const formattedDate = selectedDate.toISOString().split('T')[0];
+                        // Format the date as YYYY-MM-DD
+                        const year = localDate.getFullYear();
+                        const month = String(localDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(localDate.getDate()).padStart(2, '0');
+                        const formattedDate = `${year}-${month}-${day}`;
                         
-                        console.log('Selected date:', formattedDate);
+                        console.log('Selected date (local):', formattedDate);
                         
                         setNewGoal(prev => ({
                           ...prev,
