@@ -14,7 +14,7 @@ import { addGoal } from '@/lib/database';
 import { LearningGoal } from '@/types';
 
 const GoalManager: React.FC = () => {
-  const [date, setDate] = useState<Date>(new Date());
+  const [date, setDate] = useState<Date | undefined>(new Date());
   const [title, setTitle] = useState('');
   const [targetHours, setTargetHours] = useState(0);
 
