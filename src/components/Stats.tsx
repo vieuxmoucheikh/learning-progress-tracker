@@ -1,10 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { LearningItem } from '../types';
-import { BarChart3, Clock, Calendar as CalendarIcon, Trophy, TrendingUp, Target } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
+import { BarChart3, Clock, Calendar as CalendarIcon, Trophy, Target } from 'lucide-react';
 import { calculateTimeByCategory } from '../lib/utils';
 import { YearlyActivityStats } from './YearlyActivityStats';
 import GoalManager from './pomodoro/GoalManager';
@@ -14,8 +10,6 @@ interface Props {
 }
 
 export function Stats({ items }: Props) {
-  const [targetDate, setTargetDate] = useState<Date | undefined>(undefined);
-
   const stats = useMemo(() => {
     // Calculate status distribution
     const statusCounts = items.reduce((acc, item) => {
@@ -95,37 +89,8 @@ export function Stats({ items }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="default" className="mb-4">
-              Add Goal
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 bg-background border rounded-md shadow-md">
-            <div className="p-4 space-y-4">
-              <h3 className="text-lg font-semibold">Set Target Date</h3>
-              <Calendar
-                mode="single"
-                selected={targetDate}
-                onSelect={setTargetDate}
-                disabled={(date: Date) => {
-                  const today = new Date();
-                  today.setHours(0, 0, 0, 0);
-                  return date < today;
-                }}
-                fromDate={new Date()}
-                className="rounded-md border"
-              />
-              <div className="flex items-center gap-2 text-sm">
-                <CalendarIcon className="h-4 w-4" />
-                <span className="text-sm text-muted-foreground">
-                  {targetDate ? format(targetDate, "MMMM d, yyyy") : "No date selected"}
-                </span>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+      <div className="flex justify-end mb-4">
+        <GoalManager />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -225,7 +190,7 @@ export function Stats({ items }: Props) {
       <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-red-100 transition-all duration-200 hover:shadow-md">
         <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
           <div className="p-2 bg-red-50 rounded-lg">
-            <Calendar className="w-6 h-6 text-red-500" />
+            <CalendarIcon className="w-6 h-6 text-red-500" />
           </div>
           Time by Category
         </h3>
