@@ -477,7 +477,7 @@ export default function LearningGoals({ items }: Props) {
                   >
                     <LucideCalendar className="mr-3 h-4 w-4 opacity-50" />
                     {newGoal.targetDate ? (
-                      format(new Date(newGoal.targetDate + 'T00:00:00Z'), "MMMM d, yyyy")
+                      format(new Date(newGoal.targetDate), "MMMM d, yyyy")
                     ) : (
                       <span>Select target date</span>
                     )}
@@ -493,9 +493,15 @@ export default function LearningGoals({ items }: Props) {
                     selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
                     onSelect={(date) => {
                       if (date) {
-                        const formattedDate = format(date, 'yyyy-MM-dd');
-                        setNewGoal(prev => ({ 
-                          ...prev, 
+                        // Create a new date object and set it to midnight
+                        const selectedDate = new Date(date);
+                        selectedDate.setHours(0, 0, 0, 0);
+                        
+                        // Format the date as YYYY-MM-DD
+                        const formattedDate = selectedDate.toISOString().split('T')[0];
+                        
+                        setNewGoal(prev => ({
+                          ...prev,
                           targetDate: formattedDate
                         }));
                         setIsCalendarOpen(false);
@@ -508,8 +514,6 @@ export default function LearningGoals({ items }: Props) {
                       return date < today;
                     }}
                     fromDate={new Date()}
-                    fixedWeeks
-                    showOutsideDays={false}
                     className="rounded-md border"
                   />
                 </PopoverContent>
