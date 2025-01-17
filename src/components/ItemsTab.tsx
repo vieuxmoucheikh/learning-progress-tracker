@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Search, Download } from 'lucide-react';
+import { Search, Download, LucideCalendar } from 'lucide-react';
 import LearningItemCard from "./LearningItemCard";
 import { CustomSelect } from "./ui/select";
 import type { Options as Html2PdfOptions } from 'html2pdf.js';
@@ -11,6 +11,10 @@ import type { LearningItem } from '@/types';
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
 import { cn } from "@/lib/utils";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { clsx } from "clsx";
 
 interface ItemsTabProps {
   items: LearningItem[];
@@ -38,6 +42,13 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [newGoal, setNewGoal] = useState({
+    title: '',
+    targetDate: '',
+    targetHours: 0,
+    category: '',
+    priority: 'medium' as const,
+  });
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
@@ -191,6 +202,15 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
           </div>
         )}
       </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-semibold text-foreground">Target Date</label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              className={clsx(
     </div>
   );
 };
