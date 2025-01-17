@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Search, Download, LucideCalendar } from 'lucide-react';
+import { Search, Download, LucideCalendar, CalendarIcon } from 'lucide-react';
 import LearningItemCard from "./LearningItemCard";
 import { CustomSelect } from "./ui/select";
 import type { Options as Html2PdfOptions } from 'html2pdf.js';
@@ -210,22 +210,22 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
             <Button
               type="button"
               variant="outline"
-              className={clsx(
+              className={cn(
                 "w-full pl-3 text-left font-normal border-input bg-background text-foreground",
                 !newGoal.targetDate && "text-muted-foreground"
               )}
             >
-              <LucideCalendar className="mr-3 h-4 w-4 opacity-50" />
+              <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
               {newGoal.targetDate ? (
                 format(new Date(newGoal.targetDate), "MMMM d, yyyy")
               ) : (
-                <span>Select target date</span>
+                <span>Pick a date</span>
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent 
-            align="start" 
-            className="w-auto p-0 bg-background border rounded-md shadow-md" 
+          <PopoverContent
+            align="start"
+            className="w-auto p-0 bg-background border rounded-md shadow-md"
             side="bottom"
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
