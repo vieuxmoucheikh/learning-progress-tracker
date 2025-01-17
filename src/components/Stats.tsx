@@ -1,15 +1,27 @@
-import { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { LearningItem } from '../types';
-import { BarChart3, Clock, Calendar, Trophy, TrendingUp, Target } from 'lucide-react';
+import { BarChart3, Clock, Calendar as CalendarIcon, Trophy, TrendingUp, Target } from 'lucide-react';
 import { calculateTimeByCategory } from '../lib/utils';
 import { YearlyActivityStats } from './YearlyActivityStats';
 import GoalManager from './pomodoro/GoalManager';
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { clsx } from "clsx";
 
 interface Props {
   items: LearningItem[];
 }
 
 export function Stats({ items }: Props) {
+  const [isGoalPopoverOpen, setIsGoalPopoverOpen] = useState(false);
+  const [newGoal, setNewGoal] = useState({
+    targetDate: '',
+  });
+
   const stats = useMemo(() => {
     // Calculate status distribution
     const statusCounts = items.reduce((acc, item) => {
@@ -89,7 +101,80 @@ export function Stats({ items }: Props) {
 
   return (
     <div className="space-y-4">
-      <GoalManager />
+      <div className="flex justify-between items-center">
+        <GoalManager />
+        <Popover open={isGoalPopoverOpen} onOpenChange={setIsGoalPopoverOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline">Add Goal</Button>
+          </PopoverTrigger>
+          <PopoverContent
+            align="start"
+            className="w-auto p-0 bg-background border rounded-md shadow-md"
+            side="bottom"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
+            <div className="p-4">
+              <div className="space-y-2">
+                <Label htmlFor="targetDate" className="text-sm font-semibold">
+                  Target Date
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className={cn(
+                        "w-full pl-3 text-left font-normal border-input bg-background text-foreground",
+                        !newGoal.targetDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
+                      {newGoal.targetDate ? (
+                        format(new Date(newGoal.targetDate), "MMMM d, yyyy")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    className="w-auto p-0 bg-background border rounded-md shadow-md"
+                    side="bottom"
+                    onOpenAutoFocus={(e) => e.preventDefault()}
+                  >
+                    <Calendar
+                      mode="single"
+                      selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
+                      onSelect={(date) => {
+                        if (date) {
+                          const localDate = new Date(date);
+                          const year = localDate.getFullYear();
+                          const month = String(localDate.getMonth() + 1).padStart(2, '0');
+                          const day = String(localDate.getDate()).padStart(2, '0');
+                          const formattedDate = `${year}-${month}-${day}`;
+
+                          setNewGoal(prev => ({
+                            ...prev,
+                            targetDate: formattedDate
+                          }));
+                        }
+                      }}
+                      disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return date < today;
+                      }}
+                      fromDate={new Date()}
+                      className="rounded-md border"
+                      initialFocus={false}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {/* Overall Progress */}
       <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-blue-100 transition-all duration-200 hover:shadow-md">
