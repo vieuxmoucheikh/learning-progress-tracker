@@ -502,7 +502,7 @@ export default function LearningGoals({ items }: Props) {
                         
                         setNewGoal(prev => ({
                           ...prev,
-                          targetDate: formattedDate,
+                          targetDate: formattedDate
                         }));
                       }
                     }}

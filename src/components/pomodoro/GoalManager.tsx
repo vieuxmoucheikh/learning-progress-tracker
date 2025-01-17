@@ -2,10 +2,12 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from '@/components/ui/popover';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { addGoal } from '@/lib/database';
@@ -49,11 +51,14 @@ const GoalManager: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <Popover>
-        <PopoverTrigger asChild>
+      <Dialog>
+        <DialogTrigger asChild>
           <Button variant="default">Add New Goal</Button>
-        </PopoverTrigger>
-        <PopoverContent className="sm:max-w-[425px]">
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add New Goal</DialogTitle>
+          </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="title" className="text-right">
@@ -96,8 +101,8 @@ const GoalManager: React.FC = () => {
             </div>
           </div>
           <Button onClick={handleAddGoal}>Add Goal</Button>
-        </PopoverContent>
-      </Popover>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

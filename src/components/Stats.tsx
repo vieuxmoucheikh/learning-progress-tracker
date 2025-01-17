@@ -1,14 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { LearningItem } from '../types';
-import { BarChart3, Clock, Calendar as CalendarIcon, Trophy, Target } from 'lucide-react';
+import { BarChart3, Clock, Calendar, Trophy, TrendingUp, Target } from 'lucide-react';
 import { calculateTimeByCategory } from '../lib/utils';
 import { YearlyActivityStats } from './YearlyActivityStats';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
-import { LucideCalendar } from 'lucide-react';
+import GoalManager from './pomodoro/GoalManager';
 
 interface Props {
   items: LearningItem[];
@@ -94,38 +89,7 @@ export function Stats({ items }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end mb-4">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="bg-blue-500 hover:bg-blue-600 text-white">Add Goal</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Set Goal Date</DialogTitle>
-            </DialogHeader>
-            <div className="p-4">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <LucideCalendar className="mr-2 h-4 w-4" />
-                    Select a date
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
+      <GoalManager />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {/* Overall Progress */}
       <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-blue-100 transition-all duration-200 hover:shadow-md">
@@ -223,7 +187,7 @@ export function Stats({ items }: Props) {
       <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-red-100 transition-all duration-200 hover:shadow-md">
         <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
           <div className="p-2 bg-red-50 rounded-lg">
-            <CalendarIcon className="w-6 h-6 text-red-500" />
+            <Calendar className="w-6 h-6 text-red-500" />
           </div>
           Time by Category
         </h3>
