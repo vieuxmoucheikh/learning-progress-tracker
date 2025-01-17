@@ -493,12 +493,11 @@ export default function LearningGoals({ items }: Props) {
                     selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
                     onSelect={(date) => {
                       if (date) {
-                        // Create a new date object and set it to midnight
                         const selectedDate = new Date(date);
-                        selectedDate.setHours(0, 0, 0, 0);
-                        
-                        // Format the date as YYYY-MM-DD
-                        const formattedDate = selectedDate.toISOString().split('T')[0];
+                        const year = selectedDate.getFullYear();
+                        const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(selectedDate.getDate()).padStart(2, '0');
+                        const formattedDate = `${year}-${month}-${day}`;
                         
                         setNewGoal(prev => ({
                           ...prev,
