@@ -3,8 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
@@ -49,7 +48,6 @@ interface Props {
 export default function LearningGoals({ items }: Props) {
   const { toast } = useToast();
   const [goals, setGoals] = useState<LearningGoal[]>([]);
-  const [selectedGoal, setSelectedGoal] = useState<LearningGoal | null>(null);
   const [isAddingGoal, setIsAddingGoal] = useState(false);
   const [activeSession, setActiveSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -68,9 +66,7 @@ export default function LearningGoals({ items }: Props) {
     category: '',
     priority: 'medium',
   });
-
-  // State to control the popover's open/close state
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   // Fetch goals from Supabase
   const fetchGoals = async () => {
@@ -187,7 +183,7 @@ export default function LearningGoals({ items }: Props) {
   const handleDeleteGoal = async (goalId: string): Promise<void> => {
     try {
       await deleteGoal(goalId);
-      setGoals((prevGoals: LearningGoal[]): LearningGoal[] => 
+      setGoals((prevGoals: LearningGoal[]): LearningGoal[] =>
         prevGoals.filter((goal: LearningGoal): boolean => goal.id !== goalId)
       );
       setShowDeleteConfirm(false);
@@ -212,12 +208,12 @@ export default function LearningGoals({ items }: Props) {
       console.log('Adding session:', { goalId, date, duration });
       const session = await addSession(goalId, { date, duration });
       console.log('Session added:', session);
-      
+
       // Update the local state
       const updatedGoals = await getGoals();
       console.log('Updated goals:', updatedGoals);
       setGoals(updatedGoals);
-      
+
       return session;
     } catch (error) {
       console.error('Error adding session:', error);
@@ -286,7 +282,7 @@ export default function LearningGoals({ items }: Props) {
     const now = new Date();
     const diffTime = target.getTime() - now.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays < 0) {
       return `${Math.abs(diffDays)} days overdue`;
     } else if (diffDays === 0) {
@@ -296,23 +292,13 @@ export default function LearningGoals({ items }: Props) {
     }
   };
 
-  const resetForm = () => {
-    setNewGoal({
-      title: '',
-      targetDate: undefined,
-      targetHours: 0,
-      category: '',
-      priority: 'medium',
-    });
-  };
-
   const CategorySelect = () => {
     // Only use categories from existing items
     const existingCategories = Array.from(new Set(items.map(item => item.category))).filter(Boolean);
 
     return (
-      <Select 
-        value={newGoal.category} 
+      <Select
+        value={newGoal.category}
         onValueChange={(value: string) => setNewGoal(prev => ({ ...prev, category: value }))}>
         <SelectTrigger className="w-full bg-background text-foreground border-input">
           <SelectValue placeholder="Select category" />
@@ -428,108 +414,90 @@ export default function LearningGoals({ items }: Props) {
       </div>
 
       <Dialog open={isAddingGoal} onOpenChange={setIsAddingGoal}>
-        <DialogContent className="sm:max-w-[500px] bg-background text-foreground border-border p-0 sm:p-6 sm:pt-4">
-          <DialogHeader className="space-y-3 pb-4 border-b border-border px-4 sm:px-0">
-            <DialogTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Add New Goal
-            </DialogTitle>
-            <DialogDescription className="text-base text-muted-foreground">
-              Set a new learning goal to track your progress
-            </DialogDescription>
-          </DialogHeader>
+          <DialogContent className="sm:max-w-[500px] bg-background text-foreground border-border p-0 sm:p-6 sm:pt-4">
+            <DialogHeader className="space-y-3 pb-4 border-b border-border px-4 sm:px-0">
+              <DialogTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Add New Goal
+              </DialogTitle>
+              <DialogDescription className="text-base text-muted-foreground">
+                Set a new learning goal to track your progress
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="p-4 sm:p-0 space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Title</label>
-              <Input
-                value={newGoal.title}
-                onChange={e => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Enter goal title"
-                className="border-input bg-background text-foreground"
-              />
-            </div>
+            <div className="p-4 sm:p-0 space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Title</label>
+                <Input
+                  value={newGoal.title}
+                  onChange={e => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Enter goal title"
+                  className="border-input bg-background text-foreground"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Category</label>
-              <CategorySelect />
-            </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Category</label>
+                <CategorySelect />
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Target Hours</label>
-              <Input
-                type="number"
-                value={newGoal.targetHours}
-                onChange={e => setNewGoal(prev => ({ ...prev, targetHours: Number(e.target.value) }))}
-                min={1}
-                placeholder="Enter target hours"
-                className="border-input bg-background text-foreground"
-              />
-            </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Target Hours</label>
+                <Input
+                  type="number"
+                  value={newGoal.targetHours}
+                  onChange={e => setNewGoal(prev => ({ ...prev, targetHours: Number(e.target.value) }))}
+                  min={1}
+                  placeholder="Enter target hours"
+                  className="border-input bg-background text-foreground"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Target Date</label>
-              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className={clsx(
-                      "w-full pl-3 text-left font-normal border-input bg-background text-foreground",
-                      !newGoal.targetDate && "text-muted-foreground"
-                    )}
-                  >
-                    <LucideCalendar className="mr-3 h-4 w-4 opacity-50" />
-                    {newGoal.targetDate ? (
-                      format(newGoal.targetDate, "MMMM d,")
-                    ) : (
-                      <span>Select target date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent 
-                  align="start" 
-                  className="w-auto p-0 bg-background border rounded-md shadow-md" 
-                  side="bottom"
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Target Date</label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowCalendar(!showCalendar)}
+                  className={clsx(
+                    "w-full pl-3 text-left font-normal border-input bg-background text-foreground",
+                    !newGoal.targetDate && "text-muted-foreground"
+                  )}
                 >
-                  <Calendar
-                    mode="single"
-                    selected={newGoal.targetDate}
-                    onSelect={(date) => {
-                       setNewGoal(prev => ({
-                        ...prev,
-                        targetDate: date
-                       }));
-                       setIsPopoverOpen(false); // Close the popover after selection
-                    }}
-                    disabled={(date) => {
-                      const today = new Date();
-                      today.setHours(0, 0, 0, 0);
-                      return date < today;
-                    }}
-                    fromDate={new Date()}
-                    className="rounded-md border"
-                  />
-                </PopoverContent>
-              </Popover>
+                  <LucideCalendar className="mr-2 h-4 w-4" />
+                  {newGoal.targetDate ? format(newGoal.targetDate, "PPP") : <span>Pick a date</span>}
+                </Button>
+                {showCalendar && (
+                  <div className="pt-2">
+                    <Calendar
+                      mode="single"
+                      selected={newGoal.targetDate}
+                      onSelect={(date) => {
+                        setNewGoal(prev => ({ ...prev, targetDate: date }));
+                        setShowCalendar(false);
+                      }}
+                      fromDate={new Date()}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Priority</label>
+                <PrioritySelect />
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Priority</label>
-              <PrioritySelect />
-            </div>
-          </div>
-
-          <DialogFooter className="px-4 sm:px-0">
-            <Button
-              type="submit"
-              onClick={handleAddGoal}
-              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700"
-            >
-              Add Goal
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter className="px-4 sm:px-0">
+              <Button
+                type="submit"
+                onClick={handleAddGoal}
+                className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700"
+              >
+                Add Goal
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
