@@ -469,6 +469,7 @@ export default function LearningGoals({ items }: Props) {
               <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                 <PopoverTrigger asChild>
                   <Button
+                    type="button"
                     variant="outline"
                     className={clsx(
                       "w-full pl-3 text-left font-normal border-input bg-background text-foreground",
@@ -477,7 +478,7 @@ export default function LearningGoals({ items }: Props) {
                   >
                     <LucideCalendar className="mr-3 h-4 w-4 opacity-50" />
                     {newGoal.targetDate ? (
-                      format(new Date(newGoal.targetDate), "MMMM d, yyyy")
+                      format(new Date(newGoal.targetDate + 'T00:00:00'), "MMMM d, yyyy")
                     ) : (
                       <span>Select target date</span>
                     )}
@@ -493,10 +494,7 @@ export default function LearningGoals({ items }: Props) {
                     selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
                     onSelect={(date) => {
                       if (date) {
-                        // Create a new date object in local timezone
                         const localDate = new Date(date);
-                        
-                        // Format the date as YYYY-MM-DD
                         const year = localDate.getFullYear();
                         const month = String(localDate.getMonth() + 1).padStart(2, '0');
                         const day = String(localDate.getDate()).padStart(2, '0');
@@ -508,7 +506,10 @@ export default function LearningGoals({ items }: Props) {
                           ...prev,
                           targetDate: formattedDate
                         }));
-                        setIsCalendarOpen(false);
+                        
+                        setTimeout(() => {
+                          setIsCalendarOpen(false);
+                        }, 100);
                       }
                     }}
                     initialFocus
