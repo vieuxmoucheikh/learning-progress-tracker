@@ -68,7 +68,6 @@ export default function LearningGoals({ items }: Props) {
     category: '',
     priority: 'medium',
   });
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   // Fetch goals from Supabase
   const fetchGoals = async () => {
@@ -466,7 +465,7 @@ export default function LearningGoals({ items }: Props) {
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Target Date</label>
-              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+              <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     type="button"
@@ -478,7 +477,7 @@ export default function LearningGoals({ items }: Props) {
                   >
                     <LucideCalendar className="mr-3 h-4 w-4 opacity-50" />
                     {newGoal.targetDate ? (
-                      format(new Date(newGoal.targetDate + 'T00:00:00'), "MMMM d, yyyy")
+                      format(new Date(newGoal.targetDate), "MMMM d, yyyy")
                     ) : (
                       <span>Select target date</span>
                     )}
@@ -495,30 +494,18 @@ export default function LearningGoals({ items }: Props) {
                     onSelect={(date) => {
                       if (date) {
                         const localDate = new Date(date);
-                        const year = localDate.getFullYear();
-                        const month = String(localDate.getMonth() + 1).padStart(2, '0');
-                        const day = String(localDate.getDate()).padStart(2, '0');
-                        const formattedDate = `${year}-${month}-${day}`;
+                        const formattedDate = localDate.toISOString().split('T')[0];
                         
                         console.log('Calendar onSelect triggered');
                         console.log('Date selected:', date);
                         console.log('Formatted date:', formattedDate);
                         
-                        setNewGoal(prev => {
-                          console.log('Previous state:', prev);
-                          const updated = {
-                            ...prev,
-                            targetDate: formattedDate
-                          };
-                          console.log('Updated state:', updated);
-                          return updated;
-                        });
-                        
-                        // Remove the timeout and directly close the popover
-                        setIsCalendarOpen(false);
+                        setNewGoal(prev => ({
+                          ...prev,
+                          targetDate: formattedDate
+                        }));
                       }
                     }}
-                    initialFocus={false}
                     disabled={(date) => {
                       const today = new Date();
                       today.setHours(0, 0, 0, 0);
