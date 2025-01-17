@@ -69,6 +69,9 @@ export default function LearningGoals({ items }: Props) {
     priority: 'medium',
   });
 
+  // State to control the popover's open/close state
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   // Fetch goals from Supabase
   const fetchGoals = async () => {
     try {
@@ -465,7 +468,7 @@ export default function LearningGoals({ items }: Props) {
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Target Date</label>
-              <Popover>
+              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     type="button"
@@ -477,7 +480,7 @@ export default function LearningGoals({ items }: Props) {
                   >
                     <LucideCalendar className="mr-3 h-4 w-4 opacity-50" />
                     {newGoal.targetDate ? (
-                      format(newGoal.targetDate, "MMMM d, yyyy")
+                      format(newGoal.targetDate, "MMMM d,")
                     ) : (
                       <span>Select target date</span>
                     )}
@@ -495,7 +498,8 @@ export default function LearningGoals({ items }: Props) {
                        setNewGoal(prev => ({
                         ...prev,
                         targetDate: date
-                       }))
+                       }));
+                       setIsPopoverOpen(false); // Close the popover after selection
                     }}
                     disabled={(date) => {
                       const today = new Date();
