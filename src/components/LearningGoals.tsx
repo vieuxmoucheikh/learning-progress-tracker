@@ -496,10 +496,6 @@ export default function LearningGoals({ items }: Props) {
                         const localDate = new Date(date);
                         const formattedDate = localDate.toISOString().split('T')[0];
                         
-                        console.log('Calendar onSelect triggered');
-                        console.log('Date selected:', date);
-                        console.log('Formatted date:', formattedDate);
-                        
                         setNewGoal(prev => ({
                           ...prev,
                           targetDate: formattedDate

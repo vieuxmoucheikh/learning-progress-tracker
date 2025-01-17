@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { clsx } from "clsx";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { LucideCalendar } from 'lucide-react';
 
 interface Props {
   items: LearningItem[];
@@ -25,6 +27,7 @@ export function Stats({ items }: Props) {
     category: '',
     priority: 'medium' as const,
   });
+  const [isAddingGoal, setIsAddingGoal] = useState(false);
 
   const stats = useMemo(() => {
     // Calculate status distribution
@@ -103,6 +106,10 @@ export function Stats({ items }: Props) {
     }
   };
 
+  const handleAddGoal = () => {
+    // Implementation for adding a new goal
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -127,16 +134,16 @@ export function Stats({ items }: Props) {
                     <Button
                       type="button"
                       variant="outline"
-                      className={cn(
+                      className={clsx(
                         "w-full pl-3 text-left font-normal border-input bg-background text-foreground",
                         !newGoal.targetDate && "text-muted-foreground"
                       )}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
+                      <LucideCalendar className="mr-3 h-4 w-4 opacity-50" />
                       {newGoal.targetDate ? (
                         format(new Date(newGoal.targetDate), "MMMM d, yyyy")
                       ) : (
-                        <span>Pick a date</span>
+                        <span>Select target date</span>
                       )}
                     </Button>
                   </PopoverTrigger>
@@ -144,36 +151,29 @@ export function Stats({ items }: Props) {
                     align="start" 
                     className="w-auto p-0 bg-background border rounded-md shadow-md" 
                     side="bottom"
-                    onOpenAutoFocus={(e) => e.preventDefault()}
                   >
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <Calendar
-                        mode="single"
-                        selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
-                        onSelect={(date) => {
-                          if (date) {
-                            const localDate = new Date(date);
-                            const year = localDate.getFullYear();
-                            const month = String(localDate.getMonth() + 1).padStart(2, '0');
-                            const day = String(localDate.getDate()).padStart(2, '0');
-                            const formattedDate = `${year}-${month}-${day}`;
-                            
-                            setNewGoal(prev => ({
-                              ...prev,
-                              targetDate: formattedDate
-                            }));
-                          }
-                        }}
-                        disabled={(date) => {
-                          const today = new Date();
-                          today.setHours(0, 0, 0, 0);
-                          return date < today;
-                        }}
-                        fromDate={new Date()}
-                        className="rounded-md border"
-                        initialFocus={false}
-                      />
-                    </div>
+                    <Calendar
+                      mode="single"
+                      selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
+                      onSelect={(date) => {
+                        if (date) {
+                          const localDate = new Date(date);
+                          const formattedDate = localDate.toISOString().split('T')[0];
+                          
+                          setNewGoal(prev => ({
+                            ...prev,
+                            targetDate: formattedDate
+                          }));
+                        }
+                      }}
+                      disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return date < today;
+                      }}
+                      fromDate={new Date()}
+                      className="rounded-md border"
+                    />
                   </PopoverContent>
                 </Popover>
               </div>
