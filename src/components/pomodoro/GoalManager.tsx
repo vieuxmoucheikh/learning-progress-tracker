@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -84,17 +84,20 @@ const GoalManager: React.FC = () => {
               />
             </div>
             <div className="flex justify-center">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={(date) => {
-                  if (date) {
-                    setDate(date);
-                  }
-                }}
-                className="rounded-md border"
-                required
-              />
+              <div className="relative">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(date) => {
+                    if (date) {
+                      setDate(date);
+                    }
+                  }}
+                  className="rounded-md border"
+                  required
+                  initialFocus
+                />
+              </div>
             </div>
           </div>
           <Button onClick={handleAddGoal}>Add Goal</Button>
