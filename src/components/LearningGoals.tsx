@@ -477,7 +477,7 @@ export default function LearningGoals({ items }: Props) {
                   >
                     <LucideCalendar className="mr-3 h-4 w-4 opacity-50" />
                     {newGoal.targetDate ? (
-                      format(new Date(newGoal.targetDate), "MMMM d, yyyy")
+                      format(new Date(`${newGoal.targetDate}T00:00:00`), "MMMM d, yyyy")
                     ) : (
                       <span>Select target date</span>
                     )}
@@ -493,11 +493,15 @@ export default function LearningGoals({ items }: Props) {
                     selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
                     onSelect={(date) => {
                       if (date) {
-                        const selectedDate = new Date(date);
-                        const year = selectedDate.getFullYear();
-                        const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-                        const day = String(selectedDate.getDate()).padStart(2, '0');
-                        const formattedDate = `${year}-${month}-${day}`;
+                        const selectedDate = new Date(Date.UTC(
+                          date.getFullYear(),
+                          date.getMonth(),
+                          date.getDate()
+                        ));
+                        
+                        const formattedDate = selectedDate.toISOString().split('T')[0];
+                        
+                        console.log('Selected date:', formattedDate);
                         
                         setNewGoal(prev => ({
                           ...prev,
