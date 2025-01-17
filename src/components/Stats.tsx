@@ -118,58 +118,49 @@ export function Stats({ items }: Props) {
                 <Label htmlFor="targetDate" className="text-sm font-semibold">
                   Target Date
                 </Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className={cn(
-                        "w-full pl-3 text-left font-normal border-input bg-background text-foreground",
-                        !newGoal.targetDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
-                      {newGoal.targetDate ? (
-                        format(new Date(newGoal.targetDate), "MMMM d, yyyy")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    align="start"
-                    className="w-auto p-0 bg-background border rounded-md shadow-md"
-                    side="bottom"
-                    onOpenAutoFocus={(e) => e.preventDefault()}
-                  >
-                    <Calendar
-                      mode="single"
-                      selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
-                      onSelect={(date) => {
-                        if (date) {
-                          const localDate = new Date(date);
-                          const year = localDate.getFullYear();
-                          const month = String(localDate.getMonth() + 1).padStart(2, '0');
-                          const day = String(localDate.getDate()).padStart(2, '0');
-                          const formattedDate = `${year}-${month}-${day}`;
-
-                          setNewGoal(prev => ({
-                            ...prev,
-                            targetDate: formattedDate
-                          }));
-                        }
-                      }}
-                      disabled={(date) => {
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        return date < today;
-                      }}
-                      fromDate={new Date()}
-                      className="rounded-md border"
-                      initialFocus={false}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={cn(
+                    "w-full pl-3 text-left font-normal border-input bg-background text-foreground",
+                    !newGoal.targetDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
+                  {newGoal.targetDate ? (
+                    format(new Date(newGoal.targetDate), "MMMM d, yyyy")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                </Button>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Calendar
+                    mode="single"
+                    selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
+                    onSelect={(date) => {
+                      if (date) {
+                        const localDate = new Date(date);
+                        const year = localDate.getFullYear();
+                        const month = String(localDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(localDate.getDate()).padStart(2, '0');
+                        const formattedDate = `${year}-${month}-${day}`;
+                        
+                        setNewGoal(prev => ({
+                          ...prev,
+                          targetDate: formattedDate
+                        }));
+                      }
+                    }}
+                    disabled={(date) => {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      return date < today;
+                    }}
+                    fromDate={new Date()}
+                    className="rounded-md border"
+                    initialFocus={false}
+                  />
+                </div>
               </div>
             </div>
           </PopoverContent>
