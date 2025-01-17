@@ -455,29 +455,33 @@ export default function LearningGoals({ items }: Props) {
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-foreground">Target Date</label>
                 <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowCalendar(!showCalendar)}
-                  className={clsx(
-                    "w-full pl-3 text-left font-normal border-input bg-background text-foreground",
-                    !newGoal.targetDate && "text-muted-foreground"
-                  )}
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowCalendar(!showCalendar)}
+                    className={clsx(
+                        "w-full pl-3 text-left font-normal border-input bg-background text-foreground",
+                        !newGoal.targetDate && "text-muted-foreground"
+                    )}
                 >
-                  <LucideCalendar className="mr-2 h-4 w-4" />
-                  {newGoal.targetDate ? format(newGoal.targetDate, "PPP") : <span>Pick a date</span>}
+                    <LucideCalendar className="mr-2 h-4 w-4" />
+                    {newGoal.targetDate ? format(newGoal.targetDate, "PPP") : <span>Pick a date</span>}
                 </Button>
                 {showCalendar && (
-                  <div className="pt-2">
-                    <Calendar
-                      mode="single"
-                      selected={newGoal.targetDate}
-                      onSelect={(date) => {
-                        setNewGoal(prev => ({ ...prev, targetDate: date }));
-                        setShowCalendar(false);
-                      }}
-                      fromDate={new Date()}
-                    />
-                  </div>
+                    <div className="pt-2 relative">
+                        <Calendar
+                            mode="single"
+                            selected={newGoal.targetDate}
+                            onSelect={(date) => {
+                                setNewGoal(prev => ({ ...prev, targetDate: date }));
+                                setShowCalendar(false);
+                            }}
+                            fromDate={new Date()}
+                            className="rounded-md border shadow-md p-3 bg-white text-gray-900"
+                            style={{
+                                fontFamily: 'Arial, sans-serif',
+                            }}
+                        />
+                    </div>
                 )}
               </div>
 
