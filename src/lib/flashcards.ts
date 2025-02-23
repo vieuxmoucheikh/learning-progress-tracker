@@ -3,9 +3,19 @@ import type { Flashcard, FlashcardDeck, FlashcardReview } from '../types';
 
 // Deck operations
 export const createDeck = async (name: string, description?: string, tags: string[] = []) => {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData?.user) {
+    throw new Error('User not authenticated');
+  }
+
   const { data, error } = await supabase
     .from('flashcard_decks')
-    .insert({ name, description, tags })
+    .insert({
+      name,
+      description,
+      tags,
+      user_id: userData.user.id
+    })
     .select()
     .single();
   
@@ -14,9 +24,15 @@ export const createDeck = async (name: string, description?: string, tags: strin
 };
 
 export const getDecks = async () => {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData?.user) {
+    throw new Error('User not authenticated');
+  }
+
   const { data, error } = await supabase
     .from('flashcard_decks')
     .select('*, flashcards(count)')
+    .eq('user_id', userData.user.id)
     .order('created_at', { ascending: false });
 
   if (error) throw error;

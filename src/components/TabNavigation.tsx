@@ -55,26 +55,32 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
 }) => {
   return (
     <div className="flex flex-col h-full">
-      <nav className="flex space-x-4 p-4 border-b">
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.id;
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={cn(
-                "flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors",
-                isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-muted"
-              )}
-            >
-              <Icon className="w-4 h-4" />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
+      <nav className="flex justify-center mb-8 border-b overflow-x-auto w-full bg-gradient-to-r from-blue-600 to-blue-500 p-0.5 sm:p-1">
+        <div className="flex -mb-px max-w-2xl w-full min-w-max px-0.5 sm:px-1">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange(tab.id)}
+                className={cn(
+                  "flex-shrink-0 text-sm font-medium py-3 px-2.5 sm:px-4 border-b-2 flex items-center justify-center gap-1.5 sm:gap-2 transition-all min-w-[72px] sm:min-w-[90px]",
+                  "hover:bg-white/10",
+                  isActive
+                    ? "border-white text-white"
+                    : "border-transparent text-white/80 hover:text-white hover:border-white/30"
+                )}
+              >
+                <Icon className={cn(
+                  "w-4 h-4 flex-shrink-0",
+                  isActive ? "text-white" : "text-white/80"
+                )} />
+                <span className="whitespace-nowrap">{tab.shortLabel}</span>
+              </button>
+            );
+          })}
+        </div>
       </nav>
       <div className="flex-1 overflow-auto">
         {activeTab === 'flashcards' && <FlashcardsTab />}
