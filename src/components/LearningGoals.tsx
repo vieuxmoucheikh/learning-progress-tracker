@@ -45,6 +45,13 @@ interface Props {
   items: LearningItem[];
 }
 
+interface SuggestedAdjustment {
+  type: 'deadline' | 'hours';
+  currentValue: number;
+  suggestedValue: number;
+  reason: string;
+}
+
 export default function LearningGoals({ items }: Props) {
   const { toast } = useToast();
   const [goals, setGoals] = useState<LearningGoal[]>([]);
@@ -67,6 +74,9 @@ export default function LearningGoals({ items }: Props) {
     priority: 'medium',
   });
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showAdjustmentDialog, setShowAdjustmentDialog] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState<LearningGoal | null>(null);
+  const [suggestedAdjustment, setSuggestedAdjustment] = useState<SuggestedAdjustment | null>(null);
 
   // Fetch goals from Supabase
   const fetchGoals = async () => {
@@ -316,6 +326,83 @@ export default function LearningGoals({ items }: Props) {
     return 'challenging';
   };
 
+  const calculateSuggestedAdjustment = (goal: LearningGoal): SuggestedAdjustment | null => {
+    const progress = calculateProgress(goal.category);
+    const remainingHours = Math.max(0, goal.targetHours - progress);
+    const targetDate = new Date(goal.targetDate);
+    const now = new Date();
+    const diffDays = Math.ceil((targetDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const hoursPerDay = calculateMinHoursPerDay(goal);
+
+    // If the goal requires more than 4 hours per day
+    if (hoursPerDay > 4 && diffDays > 0) {
+      // Suggest extending deadline if possible
+      const suggestedDays = Math.ceil(remainingHours / 4); // Use 4 hours/day as maximum
+      if (suggestedDays > diffDays) {
+        return {
+          type: 'deadline',
+          currentValue: diffDays,
+          suggestedValue: suggestedDays,
+          reason: 'Current pace requires too many hours per day'
+        };
+      }
+      
+      // If deadline can't be extended much, suggest reducing hours
+      const suggestedHours = Math.ceil(diffDays * 4); // 4 hours/day maximum
+      return {
+        type: 'hours',
+        currentValue: goal.targetHours,
+        suggestedValue: Math.max(progress + suggestedHours, progress + 1),
+        reason: 'Target hours might be too ambitious for the timeline'
+      };
+    }
+    
+    return null;
+  };
+
+  const handleAdjustmentSuggestion = (goal: LearningGoal) => {
+    const adjustment = calculateSuggestedAdjustment(goal);
+    if (adjustment) {
+      setSelectedGoal(goal);
+      setSuggestedAdjustment(adjustment);
+      setShowAdjustmentDialog(true);
+    }
+  };
+
+  const applyAdjustment = async () => {
+    if (!selectedGoal || !suggestedAdjustment) return;
+
+    try {
+      if (suggestedAdjustment.type === 'deadline') {
+        const newDate = new Date();
+        newDate.setDate(newDate.getDate() + suggestedAdjustment.suggestedValue);
+        await handleUpdateGoal(selectedGoal.id, {
+          targetDate: format(newDate, 'yyyy-MM-dd')
+        });
+      } else {
+        await handleUpdateGoal(selectedGoal.id, {
+          targetHours: suggestedAdjustment.suggestedValue
+        });
+      }
+      
+      setShowAdjustmentDialog(false);
+      setSelectedGoal(null);
+      setSuggestedAdjustment(null);
+      
+      toast({
+        title: "Goal Adjusted",
+        description: "Your learning goal has been updated to be more achievable.",
+      });
+    } catch (error) {
+      console.error('Error adjusting goal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to adjust the goal. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const CategorySelect = () => {
     // Only use categories from existing items
     const existingCategories = Array.from(new Set(items.map(item => item.category))).filter(Boolean);
@@ -424,6 +511,16 @@ export default function LearningGoals({ items }: Props) {
                     <span className="text-xs text-gray-500">
                       ({getDailyHoursLabel(calculateMinHoursPerDay(goal))})
                     </span>
+                    {calculateMinHoursPerDay(goal) > 4 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="ml-2 h-6 px-2 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                        onClick={() => handleAdjustmentSuggestion(goal)}
+                      >
+                        Suggest Adjustment
+                      </Button>
+                    )}
                   </span>
                 </div>
 
@@ -564,6 +661,47 @@ export default function LearningGoals({ items }: Props) {
               onClick={() => goalToDelete && handleDeleteGoal(goalToDelete.id)}
             >
               Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Adjustment Dialog */}
+      <Dialog open={showAdjustmentDialog} onOpenChange={setShowAdjustmentDialog}>
+        <DialogContent className="sm:max-w-[425px] bg-background text-foreground">
+          <DialogHeader>
+            <DialogTitle>Goal Adjustment Suggestion</DialogTitle>
+            <DialogDescription>
+              {suggestedAdjustment?.reason}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            {suggestedAdjustment?.type === 'deadline' ? (
+              <p>
+                Extend the deadline from {suggestedAdjustment.currentValue} to {suggestedAdjustment.suggestedValue} days 
+                to achieve a more manageable pace of 4 hours per day.
+              </p>
+            ) : (
+              <p>
+                Adjust the target from {suggestedAdjustment?.currentValue} to {suggestedAdjustment?.suggestedValue} hours 
+                to maintain a reasonable daily commitment.
+              </p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowAdjustmentDialog(false)}
+            >
+              Keep Current Goal
+            </Button>
+            <Button
+              onClick={applyAdjustment}
+              className="bg-blue-500 hover:bg-blue-600 text-white"
+            >
+              Apply Adjustment
             </Button>
           </DialogFooter>
         </DialogContent>
