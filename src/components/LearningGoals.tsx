@@ -238,6 +238,18 @@ export default function LearningGoals({ items }: Props) {
     return Math.round(totalMinutes / 60 * 100) / 100;
   };
 
+  const calculateMinHoursPerDay = (goal: LearningGoal) => {
+    const progress = calculateProgress(goal.category);
+    const remainingHours = Math.max(0, goal.targetHours - progress);
+    const targetDate = new Date(goal.targetDate);
+    const now = new Date();
+    const diffTime = targetDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays <= 0) return remainingHours; // If overdue, show total remaining hours
+    return Math.round((remainingHours / diffDays) * 10) / 10; // Round to 1 decimal place
+  };
+
   const getGoalStatus = (goal: LearningGoal): 'active' | 'completed' | 'overdue' => {
     const hoursSpent = calculateProgress(goal.category);
     const targetDate = new Date(goal.targetDate);
@@ -388,6 +400,11 @@ export default function LearningGoals({ items }: Props) {
                 <div className="flex items-center gap-2 text-sm">
                   <LucideCalendar className="h-4 w-4 text-gray-500" />
                   <span>{getRemainingTime(goal.targetDate)}</span>
+                </div>
+
+                <div className="flex items-center gap-2 text-sm">
+                  <Clock className="h-4 w-4 text-blue-500" />
+                  <span>{calculateMinHoursPerDay(goal)}h/day needed</span>
                 </div>
 
                 <div className="relative pt-1">
