@@ -304,6 +304,18 @@ export default function LearningGoals({ items }: Props) {
     }
   };
 
+  const getDailyHoursColor = (hoursPerDay: number) => {
+    if (hoursPerDay <= 2) return 'text-green-600'; // Easy to achieve
+    if (hoursPerDay <= 4) return 'text-amber-600'; // Moderate
+    return 'text-red-600'; // Challenging
+  };
+
+  const getDailyHoursLabel = (hoursPerDay: number) => {
+    if (hoursPerDay <= 2) return 'achievable';
+    if (hoursPerDay <= 4) return 'moderate';
+    return 'challenging';
+  };
+
   const CategorySelect = () => {
     // Only use categories from existing items
     const existingCategories = Array.from(new Set(items.map(item => item.category))).filter(Boolean);
@@ -403,8 +415,16 @@ export default function LearningGoals({ items }: Props) {
                 </div>
 
                 <div className="flex items-center gap-2 text-sm">
-                  <Clock className="h-4 w-4 text-blue-500" />
-                  <span>{calculateMinHoursPerDay(goal)}h/day needed</span>
+                  <Clock className={clsx('h-4 w-4', getDailyHoursColor(calculateMinHoursPerDay(goal)))} />
+                  <span>
+                    <span className={getDailyHoursColor(calculateMinHoursPerDay(goal))}>
+                      {calculateMinHoursPerDay(goal)}h/day needed
+                    </span>
+                    {' '}
+                    <span className="text-xs text-gray-500">
+                      ({getDailyHoursLabel(calculateMinHoursPerDay(goal))})
+                    </span>
+                  </span>
                 </div>
 
                 <div className="relative pt-1">
