@@ -20,19 +20,25 @@ const tabs: Tab[] = [
   {
     id: "dashboard",
     label: "Dashboard",
-    shortLabel: "Dashboard",
+    shortLabel: "Home",
     icon: LayoutDashboard
   },
   {
     id: "items",
-    label: "Items",
+    label: "Learning Items",
     shortLabel: "Items",
     icon: BookOpen
   },
   {
+    id: "learning-cards",
+    label: "Learning Cards",
+    shortLabel: "Cards",
+    icon: Notebook
+  },
+  {
     id: "analytics",
     label: "Analytics",
-    shortLabel: "Analytics",
+    shortLabel: "Stats",
     icon: BarChart3
   },
   {

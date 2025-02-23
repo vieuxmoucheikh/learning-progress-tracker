@@ -7,9 +7,10 @@ import type { Flashcard } from '../types';
 
 interface FlashcardStudyProps {
   deckId?: string;
+  onFinish: () => void;
 }
 
-export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId }) => {
+export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish }) => {
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -73,11 +74,22 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId }) => {
     }
   };
 
+  const handleFinishSession = () => {
+    onFinish();
+  };
+
+  if (!deckId) {
+    return null;
+  }
+
   if (cards.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-6">
+      <div className="flex flex-col items-center justify-center h-full p-6">
         <h2 className="text-2xl font-bold mb-4">No cards due for review!</h2>
-        <p className="text-gray-600">Come back later when you have cards to review.</p>
+        <p className="text-gray-600 mb-6">Come back later when you have cards to review.</p>
+        <Button onClick={handleFinishSession}>
+          Back to Deck
+        </Button>
       </div>
     );
   }
@@ -85,63 +97,59 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId }) => {
   const currentCard = cards[currentCardIndex];
 
   return (
-    <div className="flex flex-col items-center space-y-6 p-6">
-      <div className="w-full max-w-2xl">
-        <Progress value={progress} className="mb-4" />
-        <p className="text-sm text-gray-600 mb-4">
-          Card {currentCardIndex + 1} of {cards.length}
-        </p>
-        
-        <Card 
-          className={`w-full h-64 cursor-pointer transition-transform duration-500 transform perspective-1000 ${
-            isFlipped ? 'rotate-y-180' : ''
+    <div className="flex flex-col h-full p-6">
+      <div className="mb-6">
+        <Progress value={progress} className="mb-2" />
+        <div className="text-sm text-gray-600 text-center">
+          {currentCardIndex + 1} of {cards.length} cards
+        </div>
+      </div>
+
+      <div className="flex-1 flex flex-col items-center justify-center">
+        <Card
+          className={`w-full max-w-2xl p-8 cursor-pointer transition-transform duration-500 ${
+            isFlipped ? 'scale-[0.98]' : ''
           }`}
-          onClick={handleFlip}
+          onClick={() => setIsFlipped(!isFlipped)}
         >
-          <div className="absolute w-full h-full backface-hidden">
-            <div className="p-6 flex items-center justify-center h-full">
-              <div className="prose max-w-none">
-                {currentCard.front_content}
-              </div>
-            </div>
-          </div>
-          
-          <div className="absolute w-full h-full backface-hidden rotate-y-180">
-            <div className="p-6 flex items-center justify-center h-full">
-              <div className="prose max-w-none">
-                {currentCard.back_content}
-              </div>
-            </div>
+          <div className="text-center">
+            <h3 className="text-lg font-medium mb-2">
+              {isFlipped ? 'Back' : 'Front'}
+            </h3>
+            <p className="text-gray-800 text-xl">
+              {isFlipped ? currentCard.back_content : currentCard.front_content}
+            </p>
           </div>
         </Card>
 
-        {isFlipped && (
-          <div className="flex flex-col space-y-4 mt-6">
-            <p className="text-center text-sm text-gray-600 mb-2">
-              How well did you know this?
-            </p>
-            <div className="grid grid-cols-3 gap-4">
+        <div className="mt-8 flex flex-col items-center gap-4">
+          {isFlipped ? (
+            <div className="flex gap-4">
               <Button
-                variant="destructive"
+                variant="outline"
+                className="w-24"
                 onClick={() => handleQualityResponse(1)}
               >
                 Again
               </Button>
               <Button
                 variant="outline"
+                className="w-24"
                 onClick={() => handleQualityResponse(3)}
+              >
+                Hard
+              </Button>
+              <Button
+                className="w-24"
+                onClick={() => handleQualityResponse(5)}
               >
                 Good
               </Button>
-              <Button
-                variant="default"
-                onClick={() => handleQualityResponse(5)}
-              >
-                Easy
-              </Button>
             </div>
-          </div>
-        )}
+          ) : (
+            <p className="text-gray-600">Click the card to reveal the answer</p>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -24,28 +24,42 @@ export const FlashcardsTab: React.FC = () => {
     setSelectedDeckId(undefined);
   };
 
+  const handleBackToManager = () => {
+    setCurrentView('manage');
+  };
+
   return (
     <div className="h-full">
       {currentView !== 'decks' && (
         <div className="p-4 border-b">
           <div className="flex items-center space-x-4">
-            <Button
-              variant="outline"
-              onClick={handleBackToDecks}
-            >
-              ← Back to Decks
-            </Button>
-            {currentView === 'manage' && (
-              <Button onClick={handleStartStudying}>
-                Start Studying
-              </Button>
-            )}
-            {currentView === 'study' && (
-              <Button
-                onClick={() => setCurrentView('manage')}
-              >
-                Manage Cards
-              </Button>
+            {currentView === 'manage' ? (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={handleBackToDecks}
+                >
+                  ← Back to Decks
+                </Button>
+                <Button onClick={handleStartStudying}>
+                  Start Studying
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={handleBackToManager}
+                >
+                  ← Back to Deck
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleBackToDecks}
+                >
+                  Back to All Decks
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -56,10 +70,16 @@ export const FlashcardsTab: React.FC = () => {
           <FlashcardDecks onSelectDeck={handleDeckSelect} />
         )}
         {currentView === 'manage' && selectedDeckId && (
-          <FlashcardManager deckId={selectedDeckId} />
+          <FlashcardManager
+            deckId={selectedDeckId}
+            onStartStudying={handleStartStudying}
+          />
         )}
-        {currentView === 'study' && (
-          <FlashcardStudy deckId={selectedDeckId} />
+        {currentView === 'study' && selectedDeckId && (
+          <FlashcardStudy
+            deckId={selectedDeckId}
+            onFinish={handleBackToManager}
+          />
         )}
       </div>
     </div>

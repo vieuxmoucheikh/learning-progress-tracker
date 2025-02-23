@@ -8,9 +8,10 @@ import type { Flashcard } from '../types';
 
 interface FlashcardManagerProps {
   deckId: string;
+  onStartStudying: () => void;
 }
 
-export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId }) => {
+export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onStartStudying }) => {
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newCard, setNewCard] = useState({
@@ -100,31 +101,40 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId }) =>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {cards.map(card => (
-          <Card key={card.id} className="p-6">
-            <div className="mb-4">
-              <h3 className="font-semibold mb-2">Front</h3>
-              <p className="text-gray-600">{card.front_content}</p>
-            </div>
-            <div className="mb-4">
-              <h3 className="font-semibold mb-2">Back</h3>
-              <p className="text-gray-600">{card.back_content}</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {card.tags.map(tag => (
-                <span
-                  key={tag}
-                  className="px-2 py-1 bg-gray-100 rounded-full text-xs"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-            <div className="mt-4 text-sm text-gray-500">
-              Next review: {new Date(card.next_review).toLocaleDateString()}
-            </div>
-          </Card>
-        ))}
+        {cards.length === 0 ? (
+          <div className="col-span-full text-center py-8">
+            <p className="text-gray-600 mb-4">No flashcards in this deck yet. Create your first card to get started!</p>
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
+              Create First Card
+            </Button>
+          </div>
+        ) : (
+          cards.map(card => (
+            <Card key={card.id} className="p-6">
+              <div className="mb-4">
+                <h3 className="font-semibold mb-2">Front</h3>
+                <p className="text-gray-600">{card.front_content}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold mb-2">Back</h3>
+                <p className="text-gray-600">{card.back_content}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {card.tags.map(tag => (
+                  <span
+                    key={tag}
+                    className="px-2 py-1 bg-gray-100 rounded-full text-xs"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-4 text-sm text-gray-500">
+                Next review: {new Date(card.next_review).toLocaleDateString()}
+              </div>
+            </Card>
+          ))
+        )}
       </div>
     </div>
   );
