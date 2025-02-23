@@ -1,6 +1,7 @@
-import { BarChart3, BookOpen, LayoutDashboard, Timer, Notebook } from "lucide-react";
+import { BarChart3, BookOpen, LayoutDashboard, Timer, Notebook, Library } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCallback } from "react";
+import { FlashcardsTab } from './FlashcardsTab';
 
 interface TabNavigationProps {
   activeTab: string;
@@ -37,6 +38,12 @@ const tabs = [
     label: "Pomodoro",
     shortLabel: "Timer",
     icon: Timer
+  },
+  {
+    id: "flashcards",
+    label: "Flashcards",
+    shortLabel: "Flashcards",
+    icon: Library
   }
 ];
 
@@ -77,6 +84,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
           );
         })}
       </nav>
+      {activeTab === 'flashcards' && <FlashcardsTab />}
     </div>
   );
 }
