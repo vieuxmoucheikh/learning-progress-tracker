@@ -184,7 +184,7 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredItems.map((item) => (
-          <LearningItemCard
+          <LearningItemCard 
             key={item.id}
             item={item}
             onUpdate={onUpdate}
