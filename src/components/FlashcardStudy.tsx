@@ -3,6 +3,7 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import Progress from './ui/progress';
 import { getCards, calculateNextReview, submitReview } from '../lib/flashcards';
+import { useToast } from './ui/use-toast';
 import type { Flashcard } from '../types';
 
 interface FlashcardStudyProps {
@@ -17,6 +18,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
   const [progress, setProgress] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     loadCards();
@@ -33,6 +35,11 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
       setIsFlipped(false);
     } catch (error) {
       console.error('Error loading cards:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load cards. Please try again.',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -63,9 +70,11 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
 
       // Update the card in the local state
       if (updatedCard) {
-        const updatedCards = [...cards];
-        updatedCards[currentCardIndex] = updatedCard;
-        setCards(updatedCards);
+        setCards(prevCards => {
+          const newCards = [...prevCards];
+          newCards[currentCardIndex] = updatedCard;
+          return newCards;
+        });
       }
 
       // Update review count and progress
@@ -83,6 +92,11 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
       }
     } catch (error) {
       console.error('Error submitting review:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to submit review. Please try again.',
+        variant: 'destructive'
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -126,10 +140,10 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
   }
 
   const currentCard = cards[currentCardIndex];
-  const nextReviewDate = currentCard.next_review 
+  const nextReviewDate = currentCard?.next_review 
     ? new Date(currentCard.next_review).toLocaleDateString()
     : 'Not reviewed yet';
-  const reviewStreak = currentCard.repetitions || 0;
+  const reviewStreak = currentCard?.repetitions || 0;
 
   return (
     <div className="flex flex-col h-full p-6">

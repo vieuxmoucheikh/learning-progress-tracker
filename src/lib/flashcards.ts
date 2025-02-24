@@ -170,13 +170,25 @@ export const submitReview = async (
   const nextReviewDate = new Date();
   nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
 
-  // First update the flashcard
+  // First get the current card to get the current repetitions
+  const { data: currentCard, error: getError } = await supabase
+    .from('flashcards')
+    .select('repetitions')
+    .eq('id', flashcardId)
+    .single();
+
+  if (getError) {
+    console.error('Error getting flashcard:', getError);
+    throw getError;
+  }
+
+  // Then update the flashcard with all metrics
   const { data: updatedCard, error: cardError } = await supabase
     .from('flashcards')
     .update({
       review_interval: newInterval,
       ease_factor: newEaseFactor,
-      repetitions: supabase.rpc('increment_repetitions', { flashcard_id: flashcardId }),
+      repetitions: (currentCard?.repetitions || 0) + 1,
       last_reviewed: new Date().toISOString(),
       next_review: nextReviewDate.toISOString()
     })
