@@ -112,29 +112,42 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onSt
           <p className="text-gray-600">No flashcards yet. Create your first card to get started!</p>
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid grid-cols-1 gap-4">
           {cards.map((card) => (
-            <div
-              key={card.id}
-              className="bg-white rounded-lg shadow-sm border p-4 relative"
-            >
+            <Card key={card.id} className="p-4">
               <div className="flex justify-between items-start">
-                <div className="flex-1 pr-8">
-                  <p className="font-medium mb-2">{card.front_content}</p>
-                  <p className="text-gray-600">{card.back_content}</p>
-                  {card.mastered && (
-                    <span className="text-sm text-green-600 font-medium mt-2 inline-block">
-                      Mastered
-                    </span>
+                <div className="space-y-2 flex-grow">
+                  <div className="font-medium">Front:</div>
+                  <div className="text-gray-600 whitespace-pre-wrap">{card.front_content}</div>
+                  <div className="font-medium mt-4">Back:</div>
+                  <div className="text-gray-600 whitespace-pre-wrap">{card.back_content}</div>
+                  <div className="mt-4 text-sm">
+                    {card.mastered ? (
+                      <span className="text-green-600 font-medium">Mastered</span>
+                    ) : card.next_review ? (
+                      <div className="text-blue-600">
+                        Next review: {new Date(card.next_review).toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </div>
+                    ) : (
+                      <span className="text-gray-500">Not reviewed yet</span>
+                    )}
+                  </div>
+                  {!card.mastered && card.last_reviewed && (
+                    <div className="text-sm text-gray-500">
+                      Last reviewed: {new Date(card.last_reviewed).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </div>
                   )}
                 </div>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50 absolute top-4 right-4"
-                    >
+                    <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </AlertDialogTrigger>
@@ -147,9 +160,9 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onSt
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        className="bg-red-600 text-white hover:bg-red-700"
+                      <AlertDialogAction 
                         onClick={() => handleDeleteCard(card.id)}
+                        className="bg-red-600 text-white hover:bg-red-700"
                       >
                         Delete
                       </AlertDialogAction>
@@ -157,7 +170,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onSt
                   </AlertDialogContent>
                 </AlertDialog>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}

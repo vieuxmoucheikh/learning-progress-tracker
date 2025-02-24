@@ -182,31 +182,27 @@ export interface EnhancedLearningContent {
   user_id: string;
 }
 
+export interface FlashcardDeck {
+  id: string;
+  name: string;
+  description?: string;
+  created_at: string;
+  user_id: string;
+}
+
 export interface Flashcard {
   id: string;
   deck_id: string;
   front_content: string;
   back_content: string;
-  tags: string[];
   created_at: string;
-  interval: number;
-  ease_factor: number;
-  repetitions: number;
   last_reviewed?: string;
-  next_review: string | null;
-  review_count: number;
+  next_review?: string;
+  interval?: number;
+  ease_factor?: number;
+  repetitions?: number;
   mastered: boolean;
-  user_id: string;
-}
-
-export interface FlashcardDeck {
-  id: string;
-  name: string;
-  description?: string;
-  tags: string[];
-  created_at: string;
-  user_id: string;
-  cardCount?: number;
+  review_count?: number;
 }
 
 export interface FlashcardReview {
@@ -219,4 +215,9 @@ export interface FlashcardReview {
   new_ease_factor: number;
   reviewed_at: string;
   user_id: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
 }
