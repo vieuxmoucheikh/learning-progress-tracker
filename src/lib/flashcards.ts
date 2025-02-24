@@ -78,6 +78,11 @@ export const createFlashcard = async (
 };
 
 export const getDueCards = async (deckId?: string) => {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData?.user) {
+    throw new Error('User not authenticated');
+  }
+
   let query = supabase
     .from('flashcards')
     .select('*')
@@ -87,10 +92,15 @@ export const getDueCards = async (deckId?: string) => {
     query = query.eq('deck_id', deckId);
   }
 
-  const { data, error } = await query.order('next_review');
+  const { data, error } = await query
+    .order('next_review', { ascending: true, nullsFirst: true });
 
-  if (error) throw error;
-  return data;
+  if (error) {
+    console.error('Error getting due cards:', error);
+    throw error;
+  }
+
+  return data || [];
 };
 
 export const getCardsByDeck = async (deckId: string) => {
@@ -118,6 +128,24 @@ export const submitReview = async (
     throw new Error('User not authenticated');
   }
 
+  // First update the flashcard
+  const { error: cardError } = await supabase
+    .from('flashcards')
+    .update({
+      review_interval: newInterval,
+      ease_factor: newEaseFactor,
+      repetitions: supabase.rpc('increment_repetitions', { flashcard_id: flashcardId }),
+      last_reviewed: new Date().toISOString(),
+      next_review: new Date(Date.now() + newInterval * 24 * 60 * 60 * 1000).toISOString()
+    })
+    .eq('id', flashcardId);
+
+  if (cardError) {
+    console.error('Error updating flashcard:', cardError);
+    throw cardError;
+  }
+
+  // Then create the review record
   const { error: reviewError } = await supabase
     .from('flashcard_reviews')
     .insert({
@@ -130,20 +158,10 @@ export const submitReview = async (
       user_id: userData.user.id
     });
 
-  if (reviewError) throw reviewError;
-
-  const { error: cardError } = await supabase
-    .from('flashcards')
-    .update({
-      review_interval: newInterval,
-      ease_factor: newEaseFactor,
-      repetitions: supabase.rpc('increment_repetitions', { flashcard_id: flashcardId }),
-      last_reviewed: new Date().toISOString(),
-      next_review: new Date(Date.now() + newInterval * 24 * 60 * 60 * 1000).toISOString()
-    })
-    .eq('id', flashcardId);
-
-  if (cardError) throw cardError;
+  if (reviewError) {
+    console.error('Error creating review:', reviewError);
+    throw reviewError;
+  }
 };
 
 // SuperMemo-2 Algorithm implementation
@@ -154,22 +172,18 @@ export const calculateNextReview = (
   repetitions: number
 ): { interval: number; easeFactor: number } => {
   // Quality should be between 0 and 5
-  if (quality < 0 || quality > 5) {
-    throw new Error('Quality should be between 0 and 5');
-  }
-
+  quality = Math.max(0, Math.min(5, quality));
+  
   let interval: number;
   let easeFactor = previousEaseFactor;
 
   // Update ease factor
-  easeFactor = previousEaseFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
-  if (easeFactor < 1.3) easeFactor = 1.3;
+  easeFactor = Math.max(1.3, previousEaseFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
 
   // Calculate interval
   if (quality < 3) {
     // If response quality is less than 3, start over
     interval = 1;
-    repetitions = 0;
   } else {
     if (repetitions === 0) {
       interval = 1;

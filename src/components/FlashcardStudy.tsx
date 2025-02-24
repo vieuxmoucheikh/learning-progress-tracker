@@ -55,6 +55,17 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
         newEaseFactor
       );
 
+      // Update the card in the local state
+      const updatedCards = [...cards];
+      updatedCards[currentCardIndex] = {
+        ...currentCard,
+        review_interval: newInterval,
+        ease_factor: newEaseFactor,
+        repetitions: (currentCard.repetitions || 0) + 1,
+        last_reviewed: new Date().toISOString(),
+        next_review: new Date(Date.now() + newInterval * 24 * 60 * 60 * 1000).toISOString()
+      };
+      setCards(updatedCards);
       setReviewCount(prev => prev + 1);
 
       // Move to next card or finish session
