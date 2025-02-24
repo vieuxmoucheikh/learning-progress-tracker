@@ -184,25 +184,28 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
               </div>
               <div className="flex gap-4">
                 <Button
-                  className="w-24 bg-blue-600 text-white hover:bg-blue-700"
+                  className="w-24 bg-red-500 text-white hover:bg-red-600"
                   onClick={() => handleGrade(1)}
                   disabled={isSubmitting}
                 >
-                  Again
+                  Hard
+                  <span className="block text-xs opacity-75">Review tomorrow</span>
                 </Button>
                 <Button
-                  className="w-24 bg-blue-600 text-white hover:bg-blue-700"
+                  className="w-24 bg-yellow-500 text-white hover:bg-yellow-600"
                   onClick={() => handleGrade(3)}
                   disabled={isSubmitting}
                 >
-                  Hard
+                  Medium
+                  <span className="block text-xs opacity-75">Review in 2 days</span>
                 </Button>
                 <Button
-                  className="w-24 bg-blue-600 text-white hover:bg-blue-700"
+                  className="w-24 bg-green-500 text-white hover:bg-green-600"
                   onClick={() => handleGrade(5)}
                   disabled={isSubmitting}
                 >
-                  Good
+                  Easy
+                  <span className="block text-xs opacity-75">Review in 1 month</span>
                 </Button>
               </div>
             </>

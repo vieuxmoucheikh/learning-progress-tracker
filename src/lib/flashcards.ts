@@ -231,23 +231,23 @@ export const calculateNextReview = (
   let interval: number;
   let easeFactor = previousEaseFactor;
 
-  // Update ease factor
-  easeFactor = previousEaseFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
-  if (easeFactor < 1.3) easeFactor = 1.3;
-
-  // Calculate interval
-  if (quality < 3) {
-    // If rating is less than 3, reset repetitions and start over
-    interval = 1;
-  } else {
-    if (repetitions === 0) {
-      interval = 1;
-    } else if (repetitions === 1) {
-      interval = 6;
-    } else {
-      interval = Math.round(previousInterval * easeFactor);
-    }
+  // Set intervals based on rating
+  switch (quality) {
+    case 1: // Hard
+      interval = 1; // Review tomorrow
+      break;
+    case 3: // Medium
+      interval = 2; // Review in 2 days
+      break;
+    case 5: // Easy
+      interval = 30; // Review in a month
+      break;
+    default:
+      interval = 1; // Default to tomorrow for any other rating
   }
+
+  // Keep ease factor between 1.3 and 2.5
+  easeFactor = Math.max(1.3, Math.min(2.5, easeFactor));
 
   return { interval, easeFactor };
 };
