@@ -5,6 +5,7 @@ import { Card } from './ui/card';
 import { useToast } from './ui/use-toast';
 import type { Flashcard } from '../types';
 import { getCards, calculateNextReview, submitReview } from '../lib/flashcards';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription } from './ui/alert-dialog';
 
 interface FlashcardStudyProps {
   deckId?: string;
@@ -18,14 +19,23 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
   const [showAnswer, setShowAnswer] = useState(false);
   const [reviewStreak, setReviewStreak] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showRatingDialog, setShowRatingDialog] = useState(false);
+  const [lastRating, setLastRating] = useState<{ quality: number; nextReview: Date | null }>(); 
   const { toast } = useToast();
 
   useEffect(() => {
-    loadCards();
+    if (!deckId) {
+      toast({
+        title: "Error",
+        description: "No deck selected",
+        variant: "destructive"
+      });
+      return;
+    }
+    loadCards(deckId);
   }, [deckId]);
 
-  const loadCards = async () => {
-    if (!deckId) return;
+  const loadCards = async (deckId: string) => {
     try {
       const allCards = await getCards(deckId);
       setCards(allCards);
@@ -35,21 +45,19 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
     } catch (error) {
       console.error('Error loading cards:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load cards. Please try again.',
-        variant: 'destructive'
+        title: "Error",
+        description: "Failed to load flashcards",
+        variant: "destructive"
       });
     }
   };
 
   const handleRating = async (quality: number) => {
-    if (isSubmitting) return;
+    if (isSubmitting || !currentCard) return;
     
     try {
       setIsSubmitting(true);
-      const currentCard = cards[currentCardIndex];
-      
-      // Calculate next review using SM-2 algorithm
+
       const { interval: newInterval, easeFactor: newEaseFactor, mastered } = calculateNextReview(
         quality,
         currentCard.interval || 0,
@@ -57,7 +65,6 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
         currentCard.repetitions || 0
       );
 
-      // Submit the review and get updated card
       const nextReviewDate = mastered ? null : new Date();
       if (nextReviewDate) {
         nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
@@ -73,38 +80,41 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
         mastered
       );
 
-      // Update the card in the local state
-      if (updatedCard) {
-        setCards(cards.map(card => 
-          card.id === currentCard.id 
-            ? { 
-                ...card, 
-                last_reviewed: new Date().toISOString(),
-                next_review: nextReviewDate?.toISOString() || null,
-                review_count: (card.review_count || 0) + 1,
-                mastered: mastered
-              } 
-            : card
-        ));
-      }
+      // Show rating feedback
+      const ratingMessages = {
+        1: "Hard - Review in 2 days",
+        2: "Medium - Review in 4 days",
+        3: "Easy - Review in 1 month",
+        4: "Mastered - Card will not be reviewed again"
+      };
 
-      // Update review count and progress
+      toast({
+        title: "Card Rated",
+        description: ratingMessages[quality as keyof typeof ratingMessages],
+        duration: 3000,
+      });
+
+      setLastRating({ quality, nextReview: nextReviewDate });
+      setShowRatingDialog(true);
+
+      // Update the card in the local state
+      setCards(cards.map(card => 
+        card.id === currentCard.id 
+          ? updatedCard
+          : card
+      ));
+
+      // Move to the next card
+      setCurrentCardIndex(prev => prev + 1);
+      setShowAnswer(false);
       setReviewStreak(prev => prev + 1);
 
-      // Move to next card or finish session
-      if (currentCardIndex < cards.length - 1) {
-        setCurrentCardIndex(prev => prev + 1);
-        setShowAnswer(false);
-      } else {
-        // Session complete
-        handleFinishSession();
-      }
     } catch (error) {
       console.error('Error submitting review:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to submit review. Please try again.',
-        variant: 'destructive'
+        title: "Error",
+        description: "Failed to submit review. Please try again.",
+        variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
@@ -112,12 +122,34 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
   };
 
   const handleFinishSession = () => {
+    toast({
+      title: "Study Session Complete!",
+      description: `You reviewed ${reviewStreak} cards this session.`,
+      duration: 5000,
+    });
     onFinish();
   };
 
+  const currentCard = cards[currentCardIndex];
+
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      
+      <div className="flex justify-between items-center mb-6">
+        <Button
+          variant="outline"
+          className="bg-blue-600 text-white hover:bg-blue-700"
+          onClick={onFinish}
+        >
+          ← Back to Deck
+        </Button>
+        <Button
+          variant="outline"
+          className="bg-blue-600 text-white hover:bg-blue-700"
+          onClick={onBackToDecks}
+        >
+          Back to All Decks
+        </Button>
+      </div>
 
       {cards.length > 0 ? (
         <>
@@ -132,7 +164,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
                 {showAnswer ? 'Back' : 'Front'}
               </h3>
               <div className="text-xl">
-                {showAnswer ? cards[currentCardIndex]?.back_content : cards[currentCardIndex]?.front_content}
+                {showAnswer ? currentCard?.back_content : currentCard?.front_content}
               </div>
             </div>
 
@@ -149,28 +181,32 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
               <div className="space-y-4">
                 <div className="flex justify-center gap-2">
                   <Button
-                    className="bg-red-600 text-white hover:bg-red-700"
+                    className="bg-red-600 text-white hover:bg-red-700 flex flex-col"
                     onClick={() => handleRating(1)}
                   >
-                    Hard
+                    <span>Hard</span>
+                    <span className="text-xs">2 days</span>
                   </Button>
                   <Button
-                    className="bg-yellow-600 text-white hover:bg-yellow-700"
+                    className="bg-yellow-600 text-white hover:bg-yellow-700 flex flex-col"
                     onClick={() => handleRating(2)}
                   >
-                    Medium
+                    <span>Medium</span>
+                    <span className="text-xs">4 days</span>
                   </Button>
                   <Button
-                    className="bg-green-600 text-white hover:bg-green-700"
+                    className="bg-green-600 text-white hover:bg-green-700 flex flex-col"
                     onClick={() => handleRating(3)}
                   >
-                    Easy
+                    <span>Easy</span>
+                    <span className="text-xs">1 month</span>
                   </Button>
                   <Button
-                    className="bg-blue-600 text-white hover:bg-blue-700"
+                    className="bg-blue-600 text-white hover:bg-blue-700 flex flex-col"
                     onClick={() => handleRating(4)}
                   >
-                    Mastered
+                    <span>Mastered</span>
+                    <span className="text-xs">Remove</span>
                   </Button>
                 </div>
               </div>
@@ -189,6 +225,28 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
           </Button>
         </div>
       )}
+
+      <AlertDialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Card Rating Submitted</AlertDialogTitle>
+            <AlertDialogDescription>
+              {lastRating?.quality === 4 ? (
+                "This card has been marked as mastered and won't appear in future reviews."
+              ) : lastRating?.nextReview ? (
+                <>
+                  Next review scheduled for: {lastRating.nextReview.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </>
+              ) : null}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
