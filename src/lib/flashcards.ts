@@ -171,7 +171,7 @@ export const submitReview = async (
   nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
 
   // First update the flashcard
-  const { error: cardError } = await supabase
+  const { data: updatedCard, error: cardError } = await supabase
     .from('flashcards')
     .update({
       review_interval: newInterval,
@@ -180,7 +180,9 @@ export const submitReview = async (
       last_reviewed: new Date().toISOString(),
       next_review: nextReviewDate.toISOString()
     })
-    .eq('id', flashcardId);
+    .eq('id', flashcardId)
+    .select()
+    .single();
 
   if (cardError) {
     console.error('Error updating flashcard:', cardError);
@@ -204,6 +206,8 @@ export const submitReview = async (
     console.error('Error creating review:', reviewError);
     throw reviewError;
   }
+
+  return updatedCard;
 };
 
 // SuperMemo-2 Algorithm implementation

@@ -18,7 +18,7 @@ export const FlashcardDecks: React.FC<{
   onSelectDeck: (deckId: string) => void;
 }> = ({ onSelectDeck }) => {
   const [decks, setDecks] = useState<FlashcardDeck[]>([]);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreatingDeck, setIsCreatingDeck] = useState(false);
   const [formData, setFormData] = useState<DeckFormData>({
     name: '',
     description: '',
@@ -44,7 +44,7 @@ export const FlashcardDecks: React.FC<{
     }
   };
 
-  const handleCreateDeck = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       if (!formData.name.trim()) {
@@ -57,7 +57,7 @@ export const FlashcardDecks: React.FC<{
       }
 
       await createDeck(formData.name, formData.description, formData.tags);
-      setIsCreateDialogOpen(false);
+      setIsCreatingDeck(false);
       setFormData({ name: '', description: '', tags: [] });
       await loadDecks();
       
@@ -97,50 +97,64 @@ export const FlashcardDecks: React.FC<{
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Flashcard Decks</h2>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>Create New Deck</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Deck</DialogTitle>
-              <DialogDescription>
-                Create a new flashcard deck to organize your study materials.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleCreateDeck} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Name</label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Enter deck name"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Enter deck description"
-                  rows={3}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Tags (comma-separated)</label>
-                <Input
-                  value={formData.tags.join(', ')}
-                  onChange={(e) => handleTagInput(e.target.value)}
-                  placeholder="tag1, tag2, tag3"
-                />
-              </div>
-              <Button type="submit" className="w-full">Create Deck</Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <h2 className="text-2xl font-bold">My Flashcard Decks</h2>
+        <Button
+          className="bg-blue-600 text-white hover:bg-blue-700"
+          onClick={() => setIsCreatingDeck(true)}
+        >
+          Create New Deck
+        </Button>
       </div>
+
+      <Dialog open={isCreatingDeck} onOpenChange={setIsCreatingDeck}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Deck</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Name</label>
+              <Input
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Enter deck name"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Description</label>
+              <Textarea
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Enter deck description"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Tags (comma-separated)</label>
+              <Input
+                value={formData.tags.join(', ')}
+                onChange={(e) => handleTagInput(e.target.value)}
+                placeholder="tag1, tag2, tag3"
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsCreatingDeck(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Create Deck
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {decks.length === 0 ? (

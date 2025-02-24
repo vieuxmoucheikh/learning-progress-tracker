@@ -37,11 +37,15 @@ export const FlashcardsTab: React.FC = () => {
               <>
                 <Button
                   variant="outline"
+                  className="bg-blue-600 text-white hover:bg-blue-700"
                   onClick={handleBackToDecks}
                 >
                   ← Back to Decks
                 </Button>
-                <Button onClick={handleStartStudying}>
+                <Button
+                  className="bg-blue-600 text-white hover:bg-blue-700"
+                  onClick={handleStartStudying}
+                >
                   Start Studying
                 </Button>
               </>
@@ -49,12 +53,14 @@ export const FlashcardsTab: React.FC = () => {
               <>
                 <Button
                   variant="outline"
+                  className="bg-blue-600 text-white hover:bg-blue-700"
                   onClick={handleBackToManager}
                 >
                   ← Back to Deck
                 </Button>
                 <Button
                   variant="outline"
+                  className="bg-blue-600 text-white hover:bg-blue-700"
                   onClick={handleBackToDecks}
                 >
                   Back to All Decks
