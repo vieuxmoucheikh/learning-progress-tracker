@@ -23,17 +23,20 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
   const loadDecks = async () => {
     try {
       setLoading(true);
+      // First get all decks
       const { data: decksData, error: decksError } = await supabase
         .from('flashcard_decks')
         .select('*');
 
       if (decksError) throw decksError;
 
+      // Then get due cards with deck information
       const now = new Date().toISOString();
       const { data: dueCardsData, error: dueError } = await supabase
         .from('flashcards')
         .select('deck_id, id')
-        .lt('next_review', now);
+        .lt('next_review', now)
+        .eq('mastered', false);
 
       if (dueError) throw dueError;
 
@@ -47,11 +50,22 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
       setDueCards(dueCountByDeck || {});
 
       // Show toast if there are any due cards
-      const totalDueCards = Object.values(dueCountByDeck || {}).reduce((a, b) => a + b, 0);
-      if (totalDueCards > 0) {
+      if (dueCardsData && dueCardsData.length > 0) {
+        // Get deck names for due cards
+        const dueDecks = decksData
+          ?.filter(deck => dueCountByDeck[deck.id])
+          .map(deck => ({
+            name: deck.name,
+            count: dueCountByDeck[deck.id]
+          }));
+
+        const dueMessage = dueDecks
+          ?.map(deck => `${deck.count} in "${deck.name}"`)
+          .join(', ');
+
         toast({
           title: "Time to review!",
-          description: `You have ${totalDueCards} card${totalDueCards === 1 ? '' : 's'} due for review.`,
+          description: `You have cards due: ${dueMessage}`,
           duration: 5000,
         });
       }
@@ -72,6 +86,12 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
   }
 
   const totalDueCards = Object.values(dueCards).reduce((a, b) => a + b, 0);
+  const dueDecks = decks
+    .filter(deck => dueCards[deck.id])
+    .map(deck => ({
+      name: deck.name,
+      count: dueCards[deck.id]
+    }));
 
   return (
     <div className="space-y-6">
@@ -79,9 +99,15 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
         <Alert className="bg-blue-50 border-blue-200">
           <Bell className="h-4 w-4 text-blue-600" />
           <AlertTitle className="text-blue-800">Time to Review!</AlertTitle>
-          <AlertDescription className="text-blue-600">
-            You have {totalDueCards} card{totalDueCards === 1 ? '' : 's'} due for review
-            across {Object.keys(dueCards).length} deck{Object.keys(dueCards).length === 1 ? '' : 's'}.
+          <AlertDescription className="text-blue-600 space-y-1">
+            <p>You have {totalDueCards} card{totalDueCards === 1 ? '' : 's'} due for review:</p>
+            <ul className="list-disc list-inside pl-2">
+              {dueDecks.map(deck => (
+                <li key={deck.name}>
+                  {deck.count} card{deck.count === 1 ? '' : 's'} in "{deck.name}"
+                </li>
+              ))}
+            </ul>
           </AlertDescription>
         </Alert>
       )}
