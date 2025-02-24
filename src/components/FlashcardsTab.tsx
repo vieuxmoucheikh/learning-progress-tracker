@@ -36,9 +36,9 @@ export const FlashcardsTab: React.FC = () => {
   return (
     <div className="h-full">
       {currentView !== 'decks' && (
-        <div className="p-4 border-b">
-          <div className="flex items-center space-x-4">
-            {currentView === 'manage' ? (
+        <div className="flex justify-between items-center p-4 border-b">
+          <div className="space-x-2">
+            {currentView === 'manage' && (
               <>
                 <Button
                   variant="outline"
@@ -47,14 +47,9 @@ export const FlashcardsTab: React.FC = () => {
                 >
                   ← Back to Decks
                 </Button>
-                <Button
-                  className="bg-blue-600 text-white hover:bg-blue-700"
-                  onClick={handleStartStudying}
-                >
-                  Start Studying
-                </Button>
               </>
-            ) : (
+            )}
+            {currentView === 'study' && (
               <>
                 <Button
                   variant="outline"
@@ -76,7 +71,7 @@ export const FlashcardsTab: React.FC = () => {
         </div>
       )}
 
-      <div className="h-full overflow-y-auto">
+      <div className="p-6">
         {currentView === 'decks' && (
           <FlashcardDecks onSelectDeck={handleDeckSelect} />
         )}

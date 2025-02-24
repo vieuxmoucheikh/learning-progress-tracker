@@ -200,11 +200,12 @@ export interface Flashcard {
   tags: string[];
   media?: any[];
   created_at: string;
-  review_interval: number;
+  interval: number;
   ease_factor: number;
   repetitions: number;
   last_reviewed?: string;
   next_review: string;
+  user_id: string;
 }
 
 export interface FlashcardReview {

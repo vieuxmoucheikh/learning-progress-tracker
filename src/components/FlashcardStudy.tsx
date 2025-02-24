@@ -53,7 +53,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
       // Calculate next review using SM-2 algorithm
       const { interval: newInterval, easeFactor: newEaseFactor } = calculateNextReview(
         quality,
-        currentCard.review_interval || 0,
+        currentCard.interval || 0,
         currentCard.ease_factor || 2.5,
         currentCard.repetitions || 0
       );
@@ -62,7 +62,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
       const updatedCard = await submitReview(
         currentCard.id,
         quality,
-        currentCard.review_interval || 0,
+        currentCard.interval || 0,
         newInterval,
         currentCard.ease_factor || 2.5,
         newEaseFactor

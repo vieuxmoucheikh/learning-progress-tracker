@@ -186,7 +186,7 @@ export const submitReview = async (
   const { data: updatedCard, error: cardError } = await supabase
     .from('flashcards')
     .update({
-      review_interval: newInterval,
+      interval: newInterval,
       ease_factor: newEaseFactor,
       repetitions: (currentCard?.repetitions || 0) + 1,
       last_reviewed: new Date().toISOString(),
@@ -222,25 +222,22 @@ export const submitReview = async (
   return updatedCard;
 };
 
-// SuperMemo-2 Algorithm implementation
 export const calculateNextReview = (
   quality: number,
   previousInterval: number,
   previousEaseFactor: number,
   repetitions: number
 ): { interval: number; easeFactor: number } => {
-  // Quality should be between 0 and 5
-  quality = Math.max(0, Math.min(5, quality));
-  
   let interval: number;
   let easeFactor = previousEaseFactor;
 
   // Update ease factor
-  easeFactor = Math.max(1.3, previousEaseFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
+  easeFactor = previousEaseFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+  if (easeFactor < 1.3) easeFactor = 1.3;
 
   // Calculate interval
   if (quality < 3) {
-    // If response quality is less than 3, start over
+    // If rating is less than 3, reset repetitions and start over
     interval = 1;
   } else {
     if (repetitions === 0) {
