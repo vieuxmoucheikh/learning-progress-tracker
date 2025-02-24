@@ -16,6 +16,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
   const [isFlipped, setIsFlipped] = useState(false);
   const [progress, setProgress] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     loadDueCards();
@@ -28,13 +29,17 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
       setProgress(0);
       setCurrentCardIndex(0);
       setReviewCount(0);
+      setIsFlipped(false);
     } catch (error) {
       console.error('Error loading due cards:', error);
     }
   };
 
   const handleGrade = async (quality: number) => {
+    if (isSubmitting) return;
+    
     try {
+      setIsSubmitting(true);
       const currentCard = cards[currentCardIndex];
       
       // Calculate next review using SM-2 algorithm
@@ -79,6 +84,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
       }
     } catch (error) {
       console.error('Error submitting review:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -148,6 +155,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
                   variant="outline"
                   className="w-24 border-red-200 hover:bg-red-50"
                   onClick={() => handleGrade(1)}
+                  disabled={isSubmitting}
                 >
                   Again
                 </Button>
@@ -155,12 +163,14 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
                   variant="outline"
                   className="w-24 border-yellow-200 hover:bg-yellow-50"
                   onClick={() => handleGrade(3)}
+                  disabled={isSubmitting}
                 >
                   Hard
                 </Button>
                 <Button
                   className="w-24 border-green-200 hover:bg-green-50"
                   onClick={() => handleGrade(5)}
+                  disabled={isSubmitting}
                 >
                   Good
                 </Button>

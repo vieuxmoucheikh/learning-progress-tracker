@@ -53,6 +53,18 @@ export const getDeckById = async (deckId: string) => {
   return data;
 };
 
+export const deleteDeck = async (deckId: string) => {
+  const { error } = await supabase
+    .from('flashcard_decks')
+    .delete()
+    .eq('id', deckId);
+
+  if (error) {
+    console.error('Error deleting deck:', error);
+    throw error;
+  }
+};
+
 // Flashcard operations
 export const createFlashcard = async (
   deckId: string,
@@ -75,6 +87,18 @@ export const createFlashcard = async (
 
   if (error) throw error;
   return data;
+};
+
+export const deleteFlashcard = async (flashcardId: string) => {
+  const { error } = await supabase
+    .from('flashcards')
+    .delete()
+    .eq('id', flashcardId);
+
+  if (error) {
+    console.error('Error deleting flashcard:', error);
+    throw error;
+  }
 };
 
 export const getDueCards = async (deckId?: string) => {
