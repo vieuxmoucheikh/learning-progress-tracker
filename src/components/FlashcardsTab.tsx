@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { FlashcardDecks } from './FlashcardDecks';
 import { FlashcardManager } from './FlashcardManager';
@@ -9,6 +9,7 @@ type View = 'decks' | 'manage' | 'study';
 export const FlashcardsTab: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('decks');
   const [selectedDeckId, setSelectedDeckId] = useState<string | undefined>();
+  const [selectedCard, setSelectedCard] = useState<any>();
 
   const handleDeckSelect = (deckId: string) => {
     setSelectedDeckId(deckId);
@@ -26,6 +27,10 @@ export const FlashcardsTab: React.FC = () => {
 
   const handleBackToManager = () => {
     setCurrentView('manage');
+  };
+
+  const handleDeleteCard = (cardId: string) => {
+    // implement delete card logic here
   };
 
   return (

@@ -51,12 +51,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
         currentCard.repetitions || 0
       );
 
-      // Calculate next review date
-      const nextReviewDate = new Date();
-      nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
-
-      // Submit the review
-      await submitReview(
+      // Submit the review and get updated card
+      const updatedCard = await submitReview(
         currentCard.id,
         quality,
         currentCard.review_interval || 0,
@@ -66,23 +62,21 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
       );
 
       // Update the card in the local state
-      const updatedCards = [...cards];
-      updatedCards[currentCardIndex] = {
-        ...currentCard,
-        review_interval: newInterval,
-        ease_factor: newEaseFactor,
-        repetitions: (currentCard.repetitions || 0) + 1,
-        last_reviewed: new Date().toISOString(),
-        next_review: nextReviewDate.toISOString()
-      };
-      setCards(updatedCards);
+      if (updatedCard) {
+        const updatedCards = [...cards];
+        updatedCards[currentCardIndex] = updatedCard;
+        setCards(updatedCards);
+      }
+
+      // Update review count and progress
       setReviewCount(prev => prev + 1);
+      const newProgress = ((currentCardIndex + 1) / cards.length) * 100;
+      setProgress(newProgress);
 
       // Move to next card or finish session
       if (currentCardIndex < cards.length - 1) {
         setCurrentCardIndex(prev => prev + 1);
         setIsFlipped(false);
-        setProgress(((currentCardIndex + 1) / cards.length) * 100);
       } else {
         // Session complete
         handleFinishSession();
@@ -132,7 +126,9 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
   }
 
   const currentCard = cards[currentCardIndex];
-  const nextReviewDate = currentCard.next_review ? new Date(currentCard.next_review).toLocaleDateString() : 'Not reviewed yet';
+  const nextReviewDate = currentCard.next_review 
+    ? new Date(currentCard.next_review).toLocaleDateString()
+    : 'Not reviewed yet';
   const reviewStreak = currentCard.repetitions || 0;
 
   return (
