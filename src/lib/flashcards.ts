@@ -158,7 +158,7 @@ export const calculateNextReview = (
   previousInterval: number,
   previousEaseFactor: number,
   repetitions: number
-): { interval: number; easeFactor: number; mastered?: boolean } => {
+): { interval: number; easeFactor: number; mastered: boolean } => {
   let interval: number;
   let easeFactor = previousEaseFactor;
   let mastered = false;
@@ -167,19 +167,34 @@ export const calculateNextReview = (
   switch (quality) {
     case 1: // Hard
       interval = 2; // Review in 2 days
+      easeFactor = Math.max(1.3, previousEaseFactor - 0.15);
       break;
     case 2: // Medium
       interval = 4; // Review in 4 days
+      easeFactor = previousEaseFactor;
       break;
     case 3: // Easy
       interval = 30; // Review in a month
+      easeFactor = previousEaseFactor + 0.15;
       break;
     case 4: // Mastered
-      interval = 0; // Don't schedule
       mastered = true;
+      interval = 0; // Don't schedule further reviews
       break;
     default:
-      interval = 2; // Default to 2 days
+      interval = 1; // Review tomorrow
+      easeFactor = Math.max(1.3, previousEaseFactor - 0.2);
+  }
+
+  // If not mastered, apply spaced repetition formula
+  if (!mastered) {
+    if (repetitions === 0) {
+      interval = 1;
+    } else if (repetitions === 1) {
+      interval = 6;
+    } else {
+      interval = Math.ceil(previousInterval * easeFactor);
+    }
   }
 
   // Keep ease factor between 1.3 and 2.5
@@ -195,7 +210,7 @@ export const submitReview = async (
   newInterval: number,
   previousEaseFactor: number,
   newEaseFactor: number,
-  mastered?: boolean
+  mastered: boolean
 ) => {
   const { data: userData } = await supabase.auth.getUser();
   if (!userData?.user) {
@@ -211,7 +226,7 @@ export const submitReview = async (
   // First get the current card to get the current repetitions
   const { data: currentCard, error: getError } = await supabase
     .from('flashcards')
-    .select('repetitions')
+    .select('repetitions, review_count')
     .eq('id', flashcardId)
     .single();
 
@@ -226,10 +241,11 @@ export const submitReview = async (
     .update({
       interval: newInterval,
       ease_factor: newEaseFactor,
-      repetitions: (currentCard?.repetitions || 0) + 1,
+      repetitions: mastered ? currentCard.repetitions : (currentCard?.repetitions || 0) + 1,
       last_reviewed: new Date().toISOString(),
-      next_review: nextReviewDate?.toISOString() || null,
-      mastered: mastered || false
+      next_review: nextReviewDate?.toISOString(),
+      review_count: (currentCard?.review_count || 0) + 1,
+      mastered: mastered
     })
     .eq('id', flashcardId)
     .select()

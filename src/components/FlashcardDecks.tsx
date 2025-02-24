@@ -80,10 +80,10 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
       const dueCountByDeck = dueCardsData?.reduce((acc: { [key: string]: number }, card) => {
         acc[card.deck_id] = (acc[card.deck_id] || 0) + 1;
         return acc;
-      }, {});
+      }, {}) || {};
 
       setDecks(decksData || []);
-      setDueCards(dueCountByDeck || {});
+      setDueCards(dueCountByDeck);
 
       // Show toast if there are any due cards
       if (dueCardsData && dueCardsData.length > 0) {

@@ -51,7 +51,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
       const currentCard = cards[currentCardIndex];
       
       // Calculate next review using SM-2 algorithm
-      const { interval: newInterval, easeFactor: newEaseFactor } = calculateNextReview(
+      const { interval: newInterval, easeFactor: newEaseFactor, mastered } = calculateNextReview(
         quality,
         currentCard.interval || 0,
         currentCard.ease_factor || 2.5,
@@ -59,22 +59,34 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
       );
 
       // Submit the review and get updated card
+      const nextReviewDate = mastered ? null : new Date();
+      if (nextReviewDate) {
+        nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
+      }
+
       const updatedCard = await submitReview(
         currentCard.id,
         quality,
         currentCard.interval || 0,
         newInterval,
         currentCard.ease_factor || 2.5,
-        newEaseFactor
+        newEaseFactor,
+        mastered
       );
 
       // Update the card in the local state
       if (updatedCard) {
-        setCards(prevCards => {
-          const newCards = [...prevCards];
-          newCards[currentCardIndex] = updatedCard;
-          return newCards;
-        });
+        setCards(cards.map(card => 
+          card.id === currentCard.id 
+            ? { 
+                ...card, 
+                last_reviewed: new Date().toISOString(),
+                next_review: nextReviewDate?.toISOString() || null,
+                review_count: (card.review_count || 0) + 1,
+                mastered: mastered
+              } 
+            : card
+        ));
       }
 
       // Update review count and progress

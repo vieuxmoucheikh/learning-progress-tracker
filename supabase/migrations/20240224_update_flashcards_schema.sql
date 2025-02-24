@@ -1,21 +1,15 @@
 -- Update flashcards table with spaced repetition fields
 ALTER TABLE flashcards
-ADD COLUMN IF NOT EXISTS interval INTEGER DEFAULT 0,
-ADD COLUMN IF NOT EXISTS ease_factor FLOAT DEFAULT 2.5,
-ADD COLUMN IF NOT EXISTS repetitions INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS mastered BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS review_count INTEGER DEFAULT 0,
 ADD COLUMN IF NOT EXISTS last_reviewed TIMESTAMP WITH TIME ZONE,
-ADD COLUMN IF NOT EXISTS next_review TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN IF NOT EXISTS mastered BOOLEAN DEFAULT FALSE;
+ADD COLUMN IF NOT EXISTS next_review TIMESTAMP WITH TIME ZONE;
 
 -- Create flashcard_reviews table if it doesn't exist
 CREATE TABLE IF NOT EXISTS flashcard_reviews (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     flashcard_id UUID REFERENCES flashcards(id) ON DELETE CASCADE,
     quality INTEGER NOT NULL CHECK (quality >= 0 AND quality <= 5),
-    previous_interval INTEGER NOT NULL,
-    new_interval INTEGER NOT NULL,
-    previous_ease_factor FLOAT NOT NULL,
-    new_ease_factor FLOAT NOT NULL,
     reviewed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL
 );
@@ -41,11 +35,9 @@ RETURNS TABLE (
     front_content TEXT,
     back_content TEXT,
     tags TEXT[],
-    interval INTEGER,
-    ease_factor FLOAT,
-    repetitions INTEGER,
     last_reviewed TIMESTAMP WITH TIME ZONE,
-    next_review TIMESTAMP WITH TIME ZONE
+    next_review TIMESTAMP WITH TIME ZONE,
+    review_count INTEGER
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -53,7 +45,7 @@ AS $$
 BEGIN
     RETURN QUERY
     SELECT f.id, f.deck_id, f.front_content, f.back_content, f.tags,
-           f.interval, f.ease_factor, f.repetitions, f.last_reviewed, f.next_review
+           f.last_reviewed, f.next_review, f.review_count
     FROM flashcards f
     JOIN flashcard_decks d ON f.deck_id = d.id
     WHERE d.user_id = p_user_id
