@@ -89,9 +89,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onSt
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between border-b pb-4">
-        <div className="flex items-center space-x-4">
-          <h2 className="text-2xl font-bold">Manage Flashcards</h2>
-        </div>
+      
         <div className="flex items-center space-x-4">
           
           <Button
