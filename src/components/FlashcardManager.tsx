@@ -93,13 +93,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onSt
           <h2 className="text-2xl font-bold">Manage Flashcards</h2>
         </div>
         <div className="flex items-center space-x-4">
-          <Button
-            variant="outline"
-            className="bg-blue-600 text-white hover:bg-blue-700"
-            onClick={onBackToDecks}
-          >
-            ← Back to Decks
-          </Button>
+          
           <Button
             className="bg-blue-600 text-white hover:bg-blue-700"
             onClick={() => setIsCreatingCard(true)}
