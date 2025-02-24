@@ -147,12 +147,11 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
   }
 
   const currentCard = cards[currentCardIndex];
-  const progress = (currentCardIndex / cards.length) * 100;
 
   return (
-    <div className="container mx-auto p-4 max-w-2xl">
-      <div className="flex justify-between items-center mb-6">
-        <Button variant="ghost" onClick={onBackToDecks} className="text-gray-600">
+    <div className="flex flex-col h-full max-w-4xl mx-auto p-4 space-y-4">
+      <div className="flex justify-between items-center">
+        <Button variant="outline" onClick={onBackToDecks}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Decks
         </Button>
@@ -161,92 +160,75 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
         </div>
       </div>
 
+      <div className="flex-grow flex flex-col">
+        <div className="flex-grow flex flex-col bg-white rounded-lg shadow-lg p-6 mb-20">
+          <div className="text-lg font-semibold mb-4">
+            {isFlipped ? 'Back' : 'Front'}
+          </div>
+          <div className="flex-grow overflow-y-auto">
+            <div className="prose max-w-none">
+              {isFlipped ? currentCard.back_content : currentCard.front_content}
+            </div>
+          </div>
+        </div>
+
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
+          <div className="max-w-4xl mx-auto p-4">
+            {isFlipped ? (
+              <div className="flex justify-center gap-2">
+                <Button
+                  variant="destructive"
+                  onClick={() => handleRate(1)}
+                  className="w-24"
+                >
+                  <ThumbsDown className="h-4 w-4 mr-2" />
+                  Hard
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handleRate(2)}
+                  className="w-24"
+                >
+                  <Repeat className="h-4 w-4 mr-2" />
+                  Medium
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handleRate(3)}
+                  className="w-24"
+                >
+                  <ThumbsUp className="h-4 w-4 mr-2" />
+                  Easy
+                </Button>
+                <Button
+                  variant="default"
+                  onClick={() => handleRate(4)}
+                  className="w-24"
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  Master
+                </Button>
+              </div>
+            ) : (
+              <div className="flex justify-center">
+                <Button onClick={() => setIsFlipped(true)} className="w-48">
+                  Show Answer
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       <Progress.Root 
         className="relative overflow-hidden bg-gray-200 rounded-full w-full h-2"
-        value={progress}
+        value={(currentCardIndex / cards.length) * 100}
       >
         <Progress.Indicator
           className="bg-blue-600 w-full h-full transition-transform duration-500 ease-in-out"
-          style={{ transform: `translateX(-${100 - progress}%)` }}
+          style={{ transform: `translateX(-${100 - (currentCardIndex / cards.length) * 100}%)` }}
         />
       </Progress.Root>
-
-      <div 
-        className={`relative h-64 rounded-xl shadow-lg transition-all duration-500 transform cursor-pointer
-          ${isFlipped ? 'bg-blue-50' : 'bg-white'}`}
-        style={{ perspective: '1000px' }}
-        onClick={() => setIsFlipped(!isFlipped)}
-      >
-        <div
-          className={`absolute inset-0 p-6 backface-hidden transition-all duration-500 transform rounded-xl
-            ${isFlipped ? 'rotate-y-180 opacity-0' : 'rotate-y-0 opacity-100'}`}
-        >
-          <div className="h-full flex flex-col">
-            <div className="text-sm text-gray-500 mb-2">Front</div>
-            <div className="flex-1 flex items-center justify-center text-lg">
-              {currentCard.front_content}
-            </div>
-            <div className="text-sm text-gray-500 text-center mt-4">
-              Click to flip
-            </div>
-          </div>
-        </div>
-
-        <div
-          className={`absolute inset-0 p-6 backface-hidden transition-all duration-500 transform rounded-xl
-            ${isFlipped ? 'rotate-y-0 opacity-100' : 'rotate-y-180 opacity-0'}`}
-        >
-          <div className="h-full flex flex-col">
-            <div className="text-sm text-gray-500 mb-2">Back</div>
-            <div className="flex-1 flex items-center justify-center text-lg">
-              {currentCard.back_content}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className={`mt-6 space-y-4 transition-opacity duration-300 ${isFlipped ? 'opacity-100' : 'opacity-0'}`}>
-        <div className="grid grid-cols-4 gap-2">
-          <Button
-            className="bg-red-600 hover:bg-red-700 text-white"
-            onClick={() => handleRate(1)}
-            disabled={!isFlipped}
-          >
-            <ThumbsDown className="h-4 w-4 mr-2" />
-            Hard
-          </Button>
-          <Button
-            className="bg-yellow-600 hover:bg-yellow-700 text-white"
-            onClick={() => handleRate(2)}
-            disabled={!isFlipped}
-          >
-            <Repeat className="h-4 w-4 mr-2" />
-            Medium
-          </Button>
-          <Button
-            className="bg-green-600 hover:bg-green-700 text-white"
-            onClick={() => handleRate(3)}
-            disabled={!isFlipped}
-          >
-            <ThumbsUp className="h-4 w-4 mr-2" />
-            Easy
-          </Button>
-          <Button
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-            onClick={() => handleRate(4)}
-            disabled={!isFlipped}
-          >
-            <Check className="h-4 w-4 mr-2" />
-            Master
-          </Button>
-        </div>
-
-        {currentCard.last_reviewed && (
-          <div className="text-sm text-gray-600 text-center">
-            Last reviewed: {new Date(currentCard.last_reviewed).toLocaleDateString()}
-          </div>
-        )}
-      </div>
 
       <div className="mt-6 p-4 bg-gray-50 rounded-lg">
         <div className="text-sm text-gray-600">
