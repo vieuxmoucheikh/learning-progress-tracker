@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import Progress from './ui/progress';
-import { getDueCards, calculateNextReview, submitReview } from '../lib/flashcards';
+import { getCards, calculateNextReview, submitReview } from '../lib/flashcards';
 import type { Flashcard } from '../types';
 
 interface FlashcardStudyProps {
@@ -19,19 +19,20 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    loadDueCards();
+    loadCards();
   }, [deckId]);
 
-  const loadDueCards = async () => {
+  const loadCards = async () => {
+    if (!deckId) return;
     try {
-      const dueCards = await getDueCards(deckId);
-      setCards(dueCards);
+      const allCards = await getCards(deckId);
+      setCards(allCards);
       setProgress(0);
       setCurrentCardIndex(0);
       setReviewCount(0);
       setIsFlipped(false);
     } catch (error) {
-      console.error('Error loading due cards:', error);
+      console.error('Error loading cards:', error);
     }
   };
 
@@ -62,13 +63,16 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
 
       // Update the card in the local state
       const updatedCards = [...cards];
+      const nextReviewDate = new Date();
+      nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
+      
       updatedCards[currentCardIndex] = {
         ...currentCard,
         review_interval: newInterval,
         ease_factor: newEaseFactor,
         repetitions: (currentCard.repetitions || 0) + 1,
         last_reviewed: new Date().toISOString(),
-        next_review: new Date(Date.now() + newInterval * 24 * 60 * 60 * 1000).toISOString()
+        next_review: nextReviewDate.toISOString()
       };
       setCards(updatedCards);
       setReviewCount(prev => prev + 1);
@@ -93,6 +97,20 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
     onFinish();
   };
 
+  const handlePrevCard = () => {
+    if (currentCardIndex > 0) {
+      setCurrentCardIndex(prev => prev - 1);
+      setIsFlipped(false);
+    }
+  };
+
+  const handleNextCard = () => {
+    if (currentCardIndex < cards.length - 1) {
+      setCurrentCardIndex(prev => prev + 1);
+      setIsFlipped(false);
+    }
+  };
+
   if (!deckId) {
     return null;
   }
@@ -100,8 +118,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
   if (cards.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-6">
-        <h2 className="text-2xl font-bold mb-4">No cards due for review!</h2>
-        <p className="text-gray-600 mb-6">Come back later when you have cards to review.</p>
+        <h2 className="text-2xl font-bold mb-4">No cards in this deck!</h2>
+        <p className="text-gray-600 mb-6">Add some cards to start studying.</p>
         <Button onClick={handleFinishSession}>
           Back to Deck
         </Button>
@@ -177,7 +195,22 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
               </div>
             </>
           ) : (
-            <p className="text-gray-600">Click the card to reveal the answer</p>
+            <div className="flex gap-4">
+              <Button
+                variant="outline"
+                onClick={handlePrevCard}
+                disabled={currentCardIndex === 0}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleNextCard}
+                disabled={currentCardIndex === cards.length - 1}
+              >
+                Next
+              </Button>
+            </div>
           )}
         </div>
       </div>

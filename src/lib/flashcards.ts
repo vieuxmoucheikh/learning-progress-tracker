@@ -101,6 +101,21 @@ export const deleteFlashcard = async (flashcardId: string) => {
   }
 };
 
+export const getCards = async (deckId: string) => {
+  const { data, error } = await supabase
+    .from('flashcards')
+    .select('*')
+    .eq('deck_id', deckId)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Error getting cards:', error);
+    throw error;
+  }
+
+  return data || [];
+};
+
 export const getDueCards = async (deckId?: string) => {
   const { data: userData } = await supabase.auth.getUser();
   if (!userData?.user) {
@@ -109,8 +124,7 @@ export const getDueCards = async (deckId?: string) => {
 
   let query = supabase
     .from('flashcards')
-    .select('*')
-    .lte('next_review', new Date().toISOString());
+    .select('*');
 
   if (deckId) {
     query = query.eq('deck_id', deckId);
@@ -152,6 +166,10 @@ export const submitReview = async (
     throw new Error('User not authenticated');
   }
 
+  // Calculate the next review date based on the new interval
+  const nextReviewDate = new Date();
+  nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
+
   // First update the flashcard
   const { error: cardError } = await supabase
     .from('flashcards')
@@ -160,7 +178,7 @@ export const submitReview = async (
       ease_factor: newEaseFactor,
       repetitions: supabase.rpc('increment_repetitions', { flashcard_id: flashcardId }),
       last_reviewed: new Date().toISOString(),
-      next_review: new Date(Date.now() + newInterval * 24 * 60 * 60 * 1000).toISOString()
+      next_review: nextReviewDate.toISOString()
     })
     .eq('id', flashcardId);
 
