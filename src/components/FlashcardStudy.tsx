@@ -5,7 +5,7 @@ import { Card } from './ui/card';
 import { useToast } from './ui/use-toast';
 import type { Flashcard } from '../types';
 import { getCards, calculateNextReview, submitReview } from '../lib/flashcards';
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription } from './ui/alert-dialog';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from './ui/alert-dialog';
 
 interface FlashcardStudyProps {
   deckId?: string;
@@ -96,6 +96,11 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
 
       setLastRating({ quality, nextReview: nextReviewDate });
       setShowRatingDialog(true);
+
+      // Auto-close dialog after 2 seconds
+      setTimeout(() => {
+        setShowRatingDialog(false);
+      }, 2000);
 
       // Update the card in the local state
       setCards(cards.map(card => 
@@ -245,6 +250,11 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
               ) : null}
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowRatingDialog(false)}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
