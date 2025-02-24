@@ -34,9 +34,13 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
 
   const loadDecks = async () => {
     try {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+
       const { data: decks, error: decksError } = await supabase
         .from('flashcard_decks')
         .select('*')
+        .eq('user_id', userData.user?.id)
         .order('created_at', { ascending: false });
 
       if (decksError) throw decksError;
@@ -92,12 +96,25 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
 
   const handleCreateDeck = async () => {
     try {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) throw userError;
+      if (!userData.user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to create a deck",
+          variant: "destructive"
+        });
+        return;
+      }
+
       const { data: deck, error } = await supabase
         .from('flashcard_decks')
         .insert([
           {
             name: formData.name,
-            description: formData.description
+            description: formData.description,
+            user_id: userData.user.id
           }
         ])
         .select()

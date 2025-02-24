@@ -31,6 +31,76 @@ CREATE POLICY "Users can view their own reviews"
     FOR SELECT
     USING (auth.uid() = user_id);
 
+-- Enable Row Level Security
+alter table flashcard_decks enable row level security;
+alter table flashcards enable row level security;
+
+-- Create policies for flashcard_decks
+create policy "Users can view their own decks"
+  on flashcard_decks
+  for select
+  using (auth.uid() = user_id);
+
+create policy "Users can create their own decks"
+  on flashcard_decks
+  for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can update their own decks"
+  on flashcard_decks
+  for update
+  using (auth.uid() = user_id);
+
+create policy "Users can delete their own decks"
+  on flashcard_decks
+  for delete
+  using (auth.uid() = user_id);
+
+-- Create policies for flashcards
+create policy "Users can view flashcards in their decks"
+  on flashcards
+  for select
+  using (
+    exists (
+      select 1 from flashcard_decks
+      where flashcard_decks.id = flashcards.deck_id
+      and flashcard_decks.user_id = auth.uid()
+    )
+  );
+
+create policy "Users can create flashcards in their decks"
+  on flashcards
+  for insert
+  with check (
+    exists (
+      select 1 from flashcard_decks
+      where flashcard_decks.id = deck_id
+      and flashcard_decks.user_id = auth.uid()
+    )
+  );
+
+create policy "Users can update flashcards in their decks"
+  on flashcards
+  for update
+  using (
+    exists (
+      select 1 from flashcard_decks
+      where flashcard_decks.id = flashcards.deck_id
+      and flashcard_decks.user_id = auth.uid()
+    )
+  );
+
+create policy "Users can delete flashcards in their decks"
+  on flashcards
+  for delete
+  using (
+    exists (
+      select 1 from flashcard_decks
+      where flashcard_decks.id = flashcards.deck_id
+      and flashcard_decks.user_id = auth.uid()
+    )
+  );
+
 -- Function to get due cards
 CREATE OR REPLACE FUNCTION get_due_cards(p_user_id UUID, p_deck_id UUID DEFAULT NULL)
 RETURNS TABLE (
