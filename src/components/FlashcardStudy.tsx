@@ -15,6 +15,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
 
   useEffect(() => {
     loadDueCards();
@@ -24,50 +25,46 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
     try {
       const dueCards = await getDueCards(deckId);
       setCards(dueCards);
+      setProgress(0);
       setCurrentCardIndex(0);
-      setIsFlipped(false);
-      updateProgress(0, dueCards.length);
+      setReviewCount(0);
     } catch (error) {
       console.error('Error loading due cards:', error);
     }
   };
 
-  const updateProgress = (current: number, total: number) => {
-    setProgress(total > 0 ? (current / total) * 100 : 0);
-  };
-
-  const handleFlip = () => {
-    setIsFlipped(!isFlipped);
-  };
-
-  const handleQualityResponse = async (quality: number) => {
-    const currentCard = cards[currentCardIndex];
-    
+  const handleGrade = async (quality: number) => {
     try {
-      const { interval, easeFactor } = calculateNextReview(
+      const currentCard = cards[currentCardIndex];
+      
+      // Calculate next review using SM-2 algorithm
+      const { interval: newInterval, easeFactor: newEaseFactor } = calculateNextReview(
         quality,
-        currentCard.interval,
-        currentCard.ease_factor,
-        currentCard.repetitions
+        currentCard.review_interval || 0,
+        currentCard.ease_factor || 2.5,
+        currentCard.repetitions || 0
       );
 
+      // Submit the review
       await submitReview(
         currentCard.id,
         quality,
-        currentCard.interval,
-        interval,
-        currentCard.ease_factor,
-        easeFactor
+        currentCard.review_interval || 0,
+        newInterval,
+        currentCard.ease_factor || 2.5,
+        newEaseFactor
       );
 
-      // Move to next card
+      setReviewCount(prev => prev + 1);
+
+      // Move to next card or finish session
       if (currentCardIndex < cards.length - 1) {
         setCurrentCardIndex(prev => prev + 1);
         setIsFlipped(false);
-        updateProgress(currentCardIndex + 1, cards.length);
+        setProgress(((currentCardIndex + 1) / cards.length) * 100);
       } else {
-        // Finished all cards
-        await loadDueCards();
+        // Session complete
+        handleFinishSession();
       }
     } catch (error) {
       console.error('Error submitting review:', error);
@@ -95,13 +92,20 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
   }
 
   const currentCard = cards[currentCardIndex];
+  const nextReviewDate = new Date(currentCard.next_review).toLocaleDateString();
+  const reviewStreak = currentCard.repetitions || 0;
 
   return (
     <div className="flex flex-col h-full p-6">
       <div className="mb-6">
         <Progress value={progress} className="mb-2" />
-        <div className="text-sm text-gray-600 text-center">
-          {currentCardIndex + 1} of {cards.length} cards
+        <div className="flex justify-between text-sm text-gray-600 mb-4">
+          <span>Card {currentCardIndex + 1} of {cards.length}</span>
+          <span>Reviews this session: {reviewCount}</span>
+        </div>
+        <div className="flex justify-between text-sm text-gray-600">
+          <span>Next review: {nextReviewDate}</span>
+          <span>Review streak: {reviewStreak}</span>
         </div>
       </div>
 
@@ -124,28 +128,33 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
 
         <div className="mt-8 flex flex-col items-center gap-4">
           {isFlipped ? (
-            <div className="flex gap-4">
-              <Button
-                variant="outline"
-                className="w-24"
-                onClick={() => handleQualityResponse(1)}
-              >
-                Again
-              </Button>
-              <Button
-                variant="outline"
-                className="w-24"
-                onClick={() => handleQualityResponse(3)}
-              >
-                Hard
-              </Button>
-              <Button
-                className="w-24"
-                onClick={() => handleQualityResponse(5)}
-              >
-                Good
-              </Button>
-            </div>
+            <>
+              <div className="text-sm text-gray-600 mb-2">
+                Rate how well you knew this:
+              </div>
+              <div className="flex gap-4">
+                <Button
+                  variant="outline"
+                  className="w-24 border-red-200 hover:bg-red-50"
+                  onClick={() => handleGrade(1)}
+                >
+                  Again
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-24 border-yellow-200 hover:bg-yellow-50"
+                  onClick={() => handleGrade(3)}
+                >
+                  Hard
+                </Button>
+                <Button
+                  className="w-24 border-green-200 hover:bg-green-50"
+                  onClick={() => handleGrade(5)}
+                >
+                  Good
+                </Button>
+              </div>
+            </>
           ) : (
             <p className="text-gray-600">Click the card to reveal the answer</p>
           )}

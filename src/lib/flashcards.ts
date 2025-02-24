@@ -113,6 +113,11 @@ export const submitReview = async (
   previousEaseFactor: number,
   newEaseFactor: number
 ) => {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData?.user) {
+    throw new Error('User not authenticated');
+  }
+
   const { error: reviewError } = await supabase
     .from('flashcard_reviews')
     .insert({
@@ -121,7 +126,8 @@ export const submitReview = async (
       previous_interval: previousInterval,
       new_interval: newInterval,
       previous_ease_factor: previousEaseFactor,
-      new_ease_factor: newEaseFactor
+      new_ease_factor: newEaseFactor,
+      user_id: userData.user.id
     });
 
   if (reviewError) throw reviewError;
@@ -129,7 +135,7 @@ export const submitReview = async (
   const { error: cardError } = await supabase
     .from('flashcards')
     .update({
-      interval: newInterval,
+      review_interval: newInterval,
       ease_factor: newEaseFactor,
       repetitions: supabase.rpc('increment_repetitions', { flashcard_id: flashcardId }),
       last_reviewed: new Date().toISOString(),
