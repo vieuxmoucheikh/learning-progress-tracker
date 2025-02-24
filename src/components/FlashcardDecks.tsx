@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { supabase } from '../lib/supabase';
-import { useToast } from './ui/use-toast';
 import { Alert, AlertTitle, AlertDescription } from './ui/alert';
 import { Bell, LayoutGrid, Check, Clock, Trash2 } from 'lucide-react';
 import type { FlashcardDeck } from '../types';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/card';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
+import { useToast } from './ui/use-toast';
 
 interface FlashcardDecksProps {
   onSelectDeck: (deckId: string) => void;

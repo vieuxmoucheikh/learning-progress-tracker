@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Card } from './ui/card';
+import { supabase } from '../lib/supabase';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Textarea } from './ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { createFlashcard, getCardsByDeck, deleteFlashcard } from '../lib/flashcards';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Card } from './ui/card';
 import { useToast } from './ui/use-toast';
 import type { Flashcard } from '../types';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
+import { Trash2 } from 'lucide-react';
+import { createFlashcard, getCardsByDeck, deleteFlashcard } from '../lib/flashcards';
 
 interface FlashcardManagerProps {
   deckId: string;
@@ -88,6 +90,9 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onSt
     <div className="space-y-6">
       <div className="flex items-center justify-between border-b pb-4">
         <div className="flex items-center space-x-4">
+          <h2 className="text-2xl font-bold">Manage Flashcards</h2>
+        </div>
+        <div className="flex items-center space-x-4">
           <Button
             variant="outline"
             className="bg-blue-600 text-white hover:bg-blue-700"
@@ -95,9 +100,6 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onSt
           >
             ← Back to Decks
           </Button>
-          <h2 className="text-2xl font-bold">Manage Flashcards</h2>
-        </div>
-        <div className="flex items-center space-x-4">
           <Button
             className="bg-blue-600 text-white hover:bg-blue-700"
             onClick={() => setIsCreatingCard(true)}
@@ -128,11 +130,6 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onSt
                 <div className="flex-1 pr-8">
                   <p className="font-medium mb-2">{card.front_content}</p>
                   <p className="text-gray-600">{card.back_content}</p>
-                  {card.next_review && (
-                    <p className="text-sm text-gray-500 mt-2">
-                      Next review: {new Date(card.next_review).toLocaleDateString()}
-                    </p>
-                  )}
                   {card.mastered && (
                     <span className="text-sm text-green-600 font-medium mt-2 inline-block">
                       Mastered
@@ -146,9 +143,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onSt
                       size="icon"
                       className="text-red-500 hover:text-red-700 hover:bg-red-50 absolute top-4 right-4"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
@@ -183,7 +178,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onSt
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="text-sm font-medium">Front</label>
-              <Textarea
+              <Input
                 value={formData.front}
                 onChange={(e) => setFormData(prev => ({ ...prev, front: e.target.value }))}
                 placeholder="Enter the front content"
@@ -192,7 +187,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onSt
             </div>
             <div>
               <label className="text-sm font-medium">Back</label>
-              <Textarea
+              <Input
                 value={formData.back}
                 onChange={(e) => setFormData(prev => ({ ...prev, back: e.target.value }))}
                 placeholder="Enter the back content"

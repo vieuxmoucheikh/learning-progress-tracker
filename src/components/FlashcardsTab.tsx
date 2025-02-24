@@ -81,6 +81,7 @@ export const FlashcardsTab: React.FC = () => {
           <FlashcardStudy
             deckId={selectedDeckId}
             onFinish={handleBackToManager}
+            onBackToDecks={handleBackToDecks}
           />
         )}
       </div>
