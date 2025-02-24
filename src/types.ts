@@ -206,6 +206,7 @@ export interface Flashcard {
   last_reviewed?: string;
   next_review: string;
   user_id: string;
+  mastered: boolean;
 }
 
 export interface FlashcardReview {

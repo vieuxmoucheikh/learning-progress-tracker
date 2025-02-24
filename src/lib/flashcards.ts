@@ -153,13 +153,49 @@ export const getCardsByDeck = async (deckId: string) => {
 };
 
 // Review operations
+export const calculateNextReview = (
+  quality: number,
+  previousInterval: number,
+  previousEaseFactor: number,
+  repetitions: number
+): { interval: number; easeFactor: number; mastered?: boolean } => {
+  let interval: number;
+  let easeFactor = previousEaseFactor;
+  let mastered = false;
+
+  // Set intervals based on rating
+  switch (quality) {
+    case 1: // Hard
+      interval = 2; // Review in 2 days
+      break;
+    case 2: // Medium
+      interval = 4; // Review in 4 days
+      break;
+    case 3: // Easy
+      interval = 30; // Review in a month
+      break;
+    case 4: // Mastered
+      interval = 0; // Don't schedule
+      mastered = true;
+      break;
+    default:
+      interval = 2; // Default to 2 days
+  }
+
+  // Keep ease factor between 1.3 and 2.5
+  easeFactor = Math.max(1.3, Math.min(2.5, easeFactor));
+
+  return { interval, easeFactor, mastered };
+};
+
 export const submitReview = async (
   flashcardId: string,
   quality: number,
   previousInterval: number,
   newInterval: number,
   previousEaseFactor: number,
-  newEaseFactor: number
+  newEaseFactor: number,
+  mastered?: boolean
 ) => {
   const { data: userData } = await supabase.auth.getUser();
   if (!userData?.user) {
@@ -167,8 +203,10 @@ export const submitReview = async (
   }
 
   // Calculate the next review date based on the new interval
-  const nextReviewDate = new Date();
-  nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
+  const nextReviewDate = mastered ? null : new Date();
+  if (nextReviewDate) {
+    nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
+  }
 
   // First get the current card to get the current repetitions
   const { data: currentCard, error: getError } = await supabase
@@ -190,7 +228,8 @@ export const submitReview = async (
       ease_factor: newEaseFactor,
       repetitions: (currentCard?.repetitions || 0) + 1,
       last_reviewed: new Date().toISOString(),
-      next_review: nextReviewDate.toISOString()
+      next_review: nextReviewDate?.toISOString() || null,
+      mastered: mastered || false
     })
     .eq('id', flashcardId)
     .select()
@@ -220,34 +259,4 @@ export const submitReview = async (
   }
 
   return updatedCard;
-};
-
-export const calculateNextReview = (
-  quality: number,
-  previousInterval: number,
-  previousEaseFactor: number,
-  repetitions: number
-): { interval: number; easeFactor: number } => {
-  let interval: number;
-  let easeFactor = previousEaseFactor;
-
-  // Set intervals based on rating
-  switch (quality) {
-    case 1: // Hard
-      interval = 1; // Review tomorrow
-      break;
-    case 3: // Medium
-      interval = 2; // Review in 2 days
-      break;
-    case 5: // Easy
-      interval = 30; // Review in a month
-      break;
-    default:
-      interval = 1; // Default to tomorrow for any other rating
-  }
-
-  // Keep ease factor between 1.3 and 2.5
-  easeFactor = Math.max(1.3, Math.min(2.5, easeFactor));
-
-  return { interval, easeFactor };
 };

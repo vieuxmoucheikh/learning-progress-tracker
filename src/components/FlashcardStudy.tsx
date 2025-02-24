@@ -141,21 +141,41 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
 
   const currentCard = cards[currentCardIndex];
   const nextReviewDate = currentCard?.next_review 
-    ? new Date(currentCard.next_review).toLocaleDateString()
-    : 'Not reviewed yet';
+    ? new Date(currentCard.next_review).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    : currentCard?.mastered 
+      ? 'Card Mastered!'
+      : 'Not reviewed yet';
   const reviewStreak = currentCard?.repetitions || 0;
 
   return (
     <div className="flex flex-col h-full p-6">
-      <div className="mb-6">
+      <div className="mb-6 space-y-4">
         <Progress value={progress} className="mb-2" />
-        <div className="flex justify-between text-sm text-gray-600 mb-4">
+        <div className="flex justify-between text-sm text-gray-600">
           <span>Card {currentCardIndex + 1} of {cards.length}</span>
           <span>Reviews this session: {reviewCount}</span>
         </div>
-        <div className="flex justify-between text-sm text-gray-600">
-          <span>Next review: {nextReviewDate}</span>
-          <span>Review streak: {reviewStreak}</span>
+        
+        <div className="bg-white rounded-lg p-4 shadow-md border border-gray-200">
+          <div className="flex justify-between items-center">
+            <div className="space-y-1">
+              <span className="text-sm text-gray-500">Next review</span>
+              <div className="text-lg font-semibold text-gray-900">
+                {nextReviewDate}
+              </div>
+            </div>
+            <div className="space-y-1 text-right">
+              <span className="text-sm text-gray-500">Review streak</span>
+              <div className="text-lg font-semibold text-gray-900">
+                {reviewStreak}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -180,32 +200,40 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
           {isFlipped ? (
             <>
               <div className="text-sm text-gray-600 mb-2">
-                Rate how well you knew this:
+                How well did you know this?
               </div>
-              <div className="flex gap-4">
+              <div className="grid grid-cols-2 gap-4 w-full max-w-xl">
                 <Button
-                  className="w-24 bg-red-500 text-white hover:bg-red-600"
+                  className="p-4 bg-red-500 text-white hover:bg-red-600 flex flex-col items-center"
                   onClick={() => handleGrade(1)}
                   disabled={isSubmitting}
                 >
-                  Hard
-                  <span className="block text-xs opacity-75">Review tomorrow</span>
+                  <span className="text-lg font-semibold">Hard</span>
+                  <span className="text-sm opacity-90">Review in 2 days</span>
                 </Button>
                 <Button
-                  className="w-24 bg-yellow-500 text-white hover:bg-yellow-600"
+                  className="p-4 bg-yellow-500 text-white hover:bg-yellow-600 flex flex-col items-center"
+                  onClick={() => handleGrade(2)}
+                  disabled={isSubmitting}
+                >
+                  <span className="text-lg font-semibold">Medium</span>
+                  <span className="text-sm opacity-90">Review in 4 days</span>
+                </Button>
+                <Button
+                  className="p-4 bg-green-500 text-white hover:bg-green-600 flex flex-col items-center"
                   onClick={() => handleGrade(3)}
                   disabled={isSubmitting}
                 >
-                  Medium
-                  <span className="block text-xs opacity-75">Review in 2 days</span>
+                  <span className="text-lg font-semibold">Easy</span>
+                  <span className="text-sm opacity-90">Review in 1 month</span>
                 </Button>
                 <Button
-                  className="w-24 bg-green-500 text-white hover:bg-green-600"
-                  onClick={() => handleGrade(5)}
+                  className="p-4 bg-blue-500 text-white hover:bg-blue-600 flex flex-col items-center"
+                  onClick={() => handleGrade(4)}
                   disabled={isSubmitting}
                 >
-                  Easy
-                  <span className="block text-xs opacity-75">Review in 1 month</span>
+                  <span className="text-lg font-semibold">Mastered</span>
+                  <span className="text-sm opacity-90">Remove from reviews</span>
                 </Button>
               </div>
             </>
