@@ -74,6 +74,7 @@ export const FlashcardsTab: React.FC = () => {
           <FlashcardManager
             deckId={selectedDeckId}
             onStartStudying={handleStartStudying}
+            onBackToDecks={handleBackToDecks}
           />
         )}
         {currentView === 'study' && selectedDeckId && (

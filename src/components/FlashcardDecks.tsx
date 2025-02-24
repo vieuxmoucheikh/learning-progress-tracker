@@ -6,8 +6,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { supabase } from '../lib/supabase';
 import { useToast } from './ui/use-toast';
 import { Alert, AlertTitle, AlertDescription } from './ui/alert';
-import { Bell } from 'lucide-react';
+import { Bell, LayoutGrid, Check, Clock, Trash2 } from 'lucide-react';
 import type { FlashcardDeck } from '../types';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/card';
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
 
 interface FlashcardDecksProps {
   onSelectDeck: (deckId: string) => void;
@@ -208,45 +210,97 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
     setFormData(prev => ({ ...prev, tags }));
   };
 
-  if (loading) {
-    return <div className="p-4">Loading decks...</div>;
-  }
-
-  const totalDueCards = Object.values(dueCards).reduce((a, b) => a + b, 0);
-  const dueDecks = decks
-    .filter(deck => dueCards[deck.id])
-    .map(deck => ({
-      name: deck.name,
-      count: dueCards[deck.id]
-    }));
-
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">My Flashcard Decks</h2>
-        <Button
-          className="bg-blue-600 text-white hover:bg-blue-700"
+    <div className="container mx-auto p-4 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <h1 className="text-2xl font-bold">Your Flashcard Decks</h1>
+        <Button 
+          className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700"
           onClick={() => setIsCreatingDeck(true)}
         >
           Create New Deck
         </Button>
       </div>
 
-      {totalDueCards > 0 && (
-        <Alert className="bg-blue-50 border-blue-200">
-          <Bell className="h-4 w-4 text-blue-600" />
-          <AlertTitle className="text-blue-800">Time to Review!</AlertTitle>
-          <AlertDescription className="text-blue-600 space-y-1">
-            <p>You have {totalDueCards} card{totalDueCards === 1 ? '' : 's'} due for review:</p>
-            <ul className="list-disc list-inside pl-2">
-              {dueDecks.map(deck => (
-                <li key={deck.name}>
-                  {deck.count} card{deck.count === 1 ? '' : 's'} in "{deck.name}"
-                </li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
+      {loading ? (
+        <div className="text-center py-8">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      ) : decks.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-gray-600">No decks yet. Create your first deck to get started!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {decks.map((deck) => (
+            <Card 
+              key={deck.id} 
+              className="relative hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => onSelectDeck(deck.id)}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-xl font-bold">{deck.name}</CardTitle>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Deck</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete this deck and all its flashcards? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel onClick={(e) => e.stopPropagation()}>
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          className="bg-red-600 text-white hover:bg-red-700"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteDeck(deck.id);
+                          }}
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+                {deck.description && (
+                  <CardDescription>{deck.description}</CardDescription>
+                )}
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-4 text-sm">
+                  <div className="flex items-center gap-1">
+                    <LayoutGrid className="h-4 w-4" />
+                    <span>{cardCounts[deck.id]?.total || 0} cards</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-green-600">
+                    <Check className="h-4 w-4" />
+                    <span>{cardCounts[deck.id]?.mastered || 0} mastered</span>
+                  </div>
+                  {dueCards[deck.id] > 0 && (
+                    <div className="flex items-center gap-1 text-blue-600">
+                      <Clock className="h-4 w-4" />
+                      <span>{dueCards[deck.id]} due</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
 
       <Dialog open={isCreatingDeck} onOpenChange={setIsCreatingDeck}>
@@ -298,54 +352,6 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
           </form>
         </DialogContent>
       </Dialog>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {decks.map((deck) => {
-          const deckStats = cardCounts[deck.id] || { total: 0, mastered: 0 };
-          return (
-            <div
-              key={deck.id}
-              className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow"
-            >
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="text-xl font-semibold">{deck.name}</h3>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                  onClick={() => handleDeleteDeck(deck.id)}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </Button>
-              </div>
-              <p className="text-gray-600 mb-4">{deck.description || 'No description'}</p>
-              <div className="flex items-center justify-between">
-                <div className="text-sm space-y-1">
-                  <div className="text-gray-500">
-                    {deckStats.total} card{deckStats.total === 1 ? '' : 's'} total
-                  </div>
-                  <div className="text-green-600">
-                    {deckStats.mastered} mastered
-                  </div>
-                  {dueCards[deck.id] > 0 && (
-                    <div className="text-blue-600 font-medium">
-                      {dueCards[deck.id]} due
-                    </div>
-                  )}
-                </div>
-                <Button
-                  className="bg-blue-600 text-white hover:bg-blue-700"
-                  onClick={() => onSelectDeck(deck.id)}
-                >
-                  Study Now
-                </Button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 };

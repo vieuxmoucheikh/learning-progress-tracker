@@ -7,16 +7,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { createFlashcard, getCardsByDeck, deleteFlashcard } from '../lib/flashcards';
 import { useToast } from './ui/use-toast';
 import type { Flashcard } from '../types';
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
 
 interface FlashcardManagerProps {
   deckId: string;
   onStartStudying: () => void;
+  onBackToDecks: () => void;
 }
 
-export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onStartStudying }) => {
+export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onStartStudying, onBackToDecks }) => {
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [selectedCard, setSelectedCard] = useState<Flashcard | null>(null);
-  const [isAddingCard, setIsAddingCard] = useState(false);
+  const [isCreatingCard, setIsCreatingCard] = useState(false);
   const [formData, setFormData] = useState({
     front: '',
     back: '',
@@ -48,7 +50,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onSt
     try {
       await createFlashcard(deckId, formData.front, formData.back);
       setFormData({ front: '', back: '' });
-      setIsAddingCard(false);
+      setIsCreatingCard(false);
       loadCards();
       toast({
         title: 'Success',
@@ -65,10 +67,6 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onSt
   };
 
   const handleDeleteCard = async (cardId: string) => {
-    if (!window.confirm('Are you sure you want to delete this card?')) {
-      return;
-    }
-
     try {
       await deleteFlashcard(cardId);
       setCards(cards.filter(card => card.id !== cardId));
@@ -87,13 +85,22 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onSt
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Manage Flashcards</h2>
-        <div className="space-x-2">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between border-b pb-4">
+        <div className="flex items-center space-x-4">
+          <Button
+            variant="outline"
+            className="bg-blue-600 text-white hover:bg-blue-700"
+            onClick={onBackToDecks}
+          >
+            ← Back to Decks
+          </Button>
+          <h2 className="text-2xl font-bold">Manage Flashcards</h2>
+        </div>
+        <div className="flex items-center space-x-4">
           <Button
             className="bg-blue-600 text-white hover:bg-blue-700"
-            onClick={() => setIsAddingCard(true)}
+            onClick={() => setIsCreatingCard(true)}
           >
             Add New Card
           </Button>
@@ -106,7 +113,69 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onSt
         </div>
       </div>
 
-      <Dialog open={isAddingCard} onOpenChange={setIsAddingCard}>
+      {cards.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-gray-600">No flashcards yet. Create your first card to get started!</p>
+        </div>
+      ) : (
+        <div className="grid gap-4">
+          {cards.map((card) => (
+            <div
+              key={card.id}
+              className="bg-white rounded-lg shadow-sm border p-4 relative"
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex-1 pr-8">
+                  <p className="font-medium mb-2">{card.front_content}</p>
+                  <p className="text-gray-600">{card.back_content}</p>
+                  {card.next_review && (
+                    <p className="text-sm text-gray-500 mt-2">
+                      Next review: {new Date(card.next_review).toLocaleDateString()}
+                    </p>
+                  )}
+                  {card.mastered && (
+                    <span className="text-sm text-green-600 font-medium mt-2 inline-block">
+                      Mastered
+                    </span>
+                  )}
+                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 absolute top-4 right-4"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Flashcard</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete this flashcard? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-red-600 text-white hover:bg-red-700"
+                        onClick={() => handleDeleteCard(card.id)}
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <Dialog open={isCreatingCard} onOpenChange={setIsCreatingCard}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Flashcard</DialogTitle>
@@ -134,7 +203,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onSt
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsAddingCard(false)}
+                onClick={() => setIsCreatingCard(false)}
               >
                 Cancel
               </Button>
@@ -148,74 +217,6 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onSt
           </form>
         </DialogContent>
       </Dialog>
-
-      <Dialog open={!!selectedCard} onOpenChange={(open) => !open && setSelectedCard(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Flashcard Details</DialogTitle>
-          </DialogHeader>
-          {selectedCard && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-sm font-medium mb-2">Front</h3>
-                <p className="p-4 bg-gray-50 rounded whitespace-pre-wrap">
-                  {selectedCard.front_content}
-                </p>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium mb-2">Back</h3>
-                <p className="p-4 bg-gray-50 rounded whitespace-pre-wrap">
-                  {selectedCard.back_content}
-                </p>
-              </div>
-              <div className="flex justify-end">
-                <Button
-                  className="bg-blue-600 text-white hover:bg-blue-700"
-                  onClick={() => setSelectedCard(null)}
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {cards.map(card => (
-          <Card
-            key={card.id}
-            className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => setSelectedCard(card)}
-          >
-            <div className="flex justify-between items-start">
-              <div className="flex-1 overflow-hidden">
-                <p className="text-gray-900 font-medium mb-2 line-clamp-3 whitespace-pre-wrap">
-                  {card.front_content}
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-red-500 hover:text-red-700 ml-2"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteCard(card.id);
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </Button>
-            </div>
-            {card.next_review && (
-              <div className="text-sm text-gray-500 mt-2">
-                Next review: {new Date(card.next_review).toLocaleDateString()}
-              </div>
-            )}
-          </Card>
-        ))}
-      </div>
     </div>
   );
 };
