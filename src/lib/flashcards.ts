@@ -226,7 +226,7 @@ export const submitReview = async (
   // First get the current card to get the current repetitions
   const { data: currentCard, error: getError } = await supabase
     .from('flashcards')
-    .select('repetitions, review_count')
+    .select('repetitions')
     .eq('id', flashcardId)
     .single();
 
@@ -244,7 +244,6 @@ export const submitReview = async (
       repetitions: mastered ? currentCard.repetitions : (currentCard?.repetitions || 0) + 1,
       last_reviewed: new Date().toISOString(),
       next_review: nextReviewDate?.toISOString(),
-      review_count: (currentCard?.review_count || 0) + 1,
       mastered: mastered
     })
     .eq('id', flashcardId)

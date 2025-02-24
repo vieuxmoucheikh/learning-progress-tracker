@@ -5,6 +5,10 @@ ADD COLUMN IF NOT EXISTS review_count INTEGER DEFAULT 0,
 ADD COLUMN IF NOT EXISTS last_reviewed TIMESTAMP WITH TIME ZONE,
 ADD COLUMN IF NOT EXISTS next_review TIMESTAMP WITH TIME ZONE;
 
+-- Make sure next_review can be null for mastered cards
+ALTER TABLE flashcards 
+ALTER COLUMN next_review DROP NOT NULL;
+
 -- Create flashcard_reviews table if it doesn't exist
 CREATE TABLE IF NOT EXISTS flashcard_reviews (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
