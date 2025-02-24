@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { supabase } from '../lib/supabase';
 import { useToast } from './ui/use-toast';
 import { Alert, AlertTitle, AlertDescription } from './ui/alert';
@@ -10,10 +13,22 @@ interface FlashcardDecksProps {
   onSelectDeck: (deckId: string) => void;
 }
 
+interface DeckFormData {
+  name: string;
+  description: string;
+  tags: string[];
+}
+
 export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) => {
   const [decks, setDecks] = useState<FlashcardDeck[]>([]);
   const [loading, setLoading] = useState(true);
   const [dueCards, setDueCards] = useState<{ [key: string]: number }>({});
+  const [isCreatingDeck, setIsCreatingDeck] = useState(false);
+  const [formData, setFormData] = useState<DeckFormData>({
+    name: '',
+    description: '',
+    tags: []
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -81,6 +96,59 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
     }
   };
 
+  const handleCreateDeck = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (!formData.name.trim()) {
+        toast({
+          title: "Error",
+          description: "Please enter a deck name",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData?.user) {
+        throw new Error('Not authenticated');
+      }
+
+      const { data: deck, error } = await supabase
+        .from('flashcard_decks')
+        .insert({
+          name: formData.name.trim(),
+          description: formData.description.trim(),
+          tags: formData.tags,
+          user_id: userData.user.id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setDecks([...decks, deck]);
+      setIsCreatingDeck(false);
+      setFormData({ name: '', description: '', tags: [] });
+      
+      toast({
+        title: "Success",
+        description: "Deck created successfully!",
+      });
+    } catch (error) {
+      console.error('Error creating deck:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create deck. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleTagInput = (value: string) => {
+    const tags = value.split(',').map(tag => tag.trim()).filter(Boolean);
+    setFormData(prev => ({ ...prev, tags }));
+  };
+
   if (loading) {
     return <div className="p-4">Loading decks...</div>;
   }
@@ -95,6 +163,16 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">My Flashcard Decks</h2>
+        <Button
+          className="bg-blue-600 text-white hover:bg-blue-700"
+          onClick={() => setIsCreatingDeck(true)}
+        >
+          Create New Deck
+        </Button>
+      </div>
+
       {totalDueCards > 0 && (
         <Alert className="bg-blue-50 border-blue-200">
           <Bell className="h-4 w-4 text-blue-600" />
@@ -111,6 +189,56 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
           </AlertDescription>
         </Alert>
       )}
+
+      <Dialog open={isCreatingDeck} onOpenChange={setIsCreatingDeck}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Deck</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreateDeck} className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Name</label>
+              <Input
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Enter deck name"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Description</label>
+              <Textarea
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Enter deck description"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Tags (comma-separated)</label>
+              <Input
+                value={formData.tags.join(', ')}
+                onChange={(e) => handleTagInput(e.target.value)}
+                placeholder="tag1, tag2, tag3"
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsCreatingDeck(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Create Deck
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {decks.map((deck) => (
