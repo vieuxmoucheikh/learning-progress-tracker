@@ -51,6 +51,10 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
         currentCard.repetitions || 0
       );
 
+      // Calculate next review date
+      const nextReviewDate = new Date();
+      nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
+
       // Submit the review
       await submitReview(
         currentCard.id,
@@ -63,9 +67,6 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
 
       // Update the card in the local state
       const updatedCards = [...cards];
-      const nextReviewDate = new Date();
-      nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
-      
       updatedCards[currentCardIndex] = {
         ...currentCard,
         review_interval: newInterval,
@@ -120,7 +121,10 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
       <div className="flex flex-col items-center justify-center h-full p-6">
         <h2 className="text-2xl font-bold mb-4">No cards in this deck!</h2>
         <p className="text-gray-600 mb-6">Add some cards to start studying.</p>
-        <Button onClick={handleFinishSession}>
+        <Button 
+          onClick={handleFinishSession}
+          className="bg-blue-600 text-white hover:bg-blue-700"
+        >
           Back to Deck
         </Button>
       </div>
@@ -128,7 +132,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
   }
 
   const currentCard = cards[currentCardIndex];
-  const nextReviewDate = new Date(currentCard.next_review).toLocaleDateString();
+  const nextReviewDate = currentCard.next_review ? new Date(currentCard.next_review).toLocaleDateString() : 'Not reviewed yet';
   const reviewStreak = currentCard.repetitions || 0;
 
   return (
@@ -147,16 +151,16 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
 
       <div className="flex-1 flex flex-col items-center justify-center">
         <Card
-          className={`w-full max-w-2xl p-8 cursor-pointer transition-transform duration-500 ${
+          className={`w-full max-w-2xl p-8 cursor-pointer transition-transform duration-500 hover:shadow-lg ${
             isFlipped ? 'scale-[0.98]' : ''
           }`}
           onClick={() => setIsFlipped(!isFlipped)}
         >
           <div className="text-center">
-            <h3 className="text-lg font-medium mb-2">
+            <h3 className="text-lg font-medium mb-4">
               {isFlipped ? 'Back' : 'Front'}
             </h3>
-            <p className="text-gray-800 text-xl">
+            <p className="text-gray-800 text-xl whitespace-pre-wrap">
               {isFlipped ? currentCard.back_content : currentCard.front_content}
             </p>
           </div>
@@ -170,23 +174,21 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
               </div>
               <div className="flex gap-4">
                 <Button
-                  variant="outline"
-                  className="w-24 border-red-200 hover:bg-red-50"
+                  className="w-24 bg-blue-600 text-white hover:bg-blue-700"
                   onClick={() => handleGrade(1)}
                   disabled={isSubmitting}
                 >
                   Again
                 </Button>
                 <Button
-                  variant="outline"
-                  className="w-24 border-yellow-200 hover:bg-yellow-50"
+                  className="w-24 bg-blue-600 text-white hover:bg-blue-700"
                   onClick={() => handleGrade(3)}
                   disabled={isSubmitting}
                 >
                   Hard
                 </Button>
                 <Button
-                  className="w-24 border-green-200 hover:bg-green-50"
+                  className="w-24 bg-blue-600 text-white hover:bg-blue-700"
                   onClick={() => handleGrade(5)}
                   disabled={isSubmitting}
                 >
@@ -197,14 +199,14 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
           ) : (
             <div className="flex gap-4">
               <Button
-                variant="outline"
+                className="bg-blue-600 text-white hover:bg-blue-700"
                 onClick={handlePrevCard}
                 disabled={currentCardIndex === 0}
               >
                 Previous
               </Button>
               <Button
-                variant="outline"
+                className="bg-blue-600 text-white hover:bg-blue-700"
                 onClick={handleNextCard}
                 disabled={currentCardIndex === cards.length - 1}
               >

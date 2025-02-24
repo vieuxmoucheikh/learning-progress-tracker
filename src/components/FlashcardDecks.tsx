@@ -149,12 +149,9 @@ export const FlashcardDecks: React.FC<{
           </div>
         ) : (
           decks.map(deck => (
-            <Card
-              key={deck.id}
-              className="p-6 cursor-pointer hover:shadow-lg transition-shadow"
-            >
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="text-lg font-semibold">{deck.name}</h3>
+            <Card key={deck.id} className="p-6 cursor-pointer hover:shadow-lg transition-shadow">
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-xl font-semibold">{deck.name}</h3>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -170,28 +167,17 @@ export const FlashcardDecks: React.FC<{
                 <p className="text-gray-600 mb-4">{deck.description}</p>
               )}
               <div className="flex justify-between items-center">
-                <div className="flex flex-wrap gap-2">
-                  {deck.tags.map(tag => (
-                    <span
-                      key={tag}
-                      className="px-2 py-1 bg-gray-100 rounded-full text-xs"
-                    >
-                      {tag}
-                    </span>
-                  ))}
+                <span className="text-sm text-gray-500">
+                  {deck.cardCount || 0} cards
+                </span>
+                <div className="space-x-2">
+                  <Button
+                    className="bg-blue-600 text-white hover:bg-blue-700"
+                    onClick={() => onSelectDeck(deck.id)}
+                  >
+                    Study Now
+                  </Button>
                 </div>
-                <div className="text-sm text-gray-600">
-                  {deck.cardCount} cards
-                </div>
-              </div>
-              <div className="flex justify-end mt-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onSelectDeck(deck.id)}
-                >
-                  Study
-                </Button>
               </div>
             </Card>
           ))
