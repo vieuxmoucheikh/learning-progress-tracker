@@ -117,22 +117,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      <div className="flex justify-between items-center mb-6">
-        <Button
-          variant="outline"
-          className="bg-blue-600 text-white hover:bg-blue-700"
-          onClick={onFinish}
-        >
-          ← Back to Deck
-        </Button>
-        <Button
-          variant="outline"
-          className="bg-blue-600 text-white hover:bg-blue-700"
-          onClick={onBackToDecks}
-        >
-          Back to All Decks
-        </Button>
-      </div>
+      
 
       {cards.length > 0 ? (
         <>
