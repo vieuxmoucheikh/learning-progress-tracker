@@ -66,21 +66,18 @@ export const deleteDeck = async (deckId: string) => {
 };
 
 // Flashcard operations
-export const createFlashcard = async (
-  deckId: string,
-  frontContent: string,
-  backContent: string,
-  tags: string[] = [],
-  media: any[] = []
-) => {
+export const createFlashcard = async (deckId: string, frontContent: string, backContent: string) => {
   const { data, error } = await supabase
     .from('flashcards')
     .insert({
       deck_id: deckId,
       front_content: frontContent,
       back_content: backContent,
-      tags,
-      media
+      interval: 0,
+      ease_factor: 2.5,
+      repetitions: 0,
+      review_count: 0,
+      mastered: false
     })
     .select()
     .single();
@@ -89,16 +86,13 @@ export const createFlashcard = async (
   return data;
 };
 
-export const deleteFlashcard = async (flashcardId: string) => {
+export const deleteFlashcard = async (cardId: string) => {
   const { error } = await supabase
     .from('flashcards')
     .delete()
-    .eq('id', flashcardId);
+    .eq('id', cardId);
 
-  if (error) {
-    console.error('Error deleting flashcard:', error);
-    throw error;
-  }
+  if (error) throw error;
 };
 
 export const getCards = async (deckId: string) => {
@@ -106,13 +100,9 @@ export const getCards = async (deckId: string) => {
     .from('flashcards')
     .select('*')
     .eq('deck_id', deckId)
-    .order('created_at', { ascending: true });
+    .order('created_at');
 
-  if (error) {
-    console.error('Error getting cards:', error);
-    throw error;
-  }
-
+  if (error) throw error;
   return data || [];
 };
 
@@ -155,123 +145,86 @@ export const getCardsByDeck = async (deckId: string) => {
 // Review operations
 export const calculateNextReview = (
   quality: number,
-  previousInterval: number,
-  previousEaseFactor: number,
+  prevInterval: number,
+  prevEaseFactor: number,
   repetitions: number
-): { interval: number; easeFactor: number; mastered: boolean } => {
-  let interval: number;
-  let easeFactor = previousEaseFactor;
+) => {
+  // Initialize values for first review
+  let interval = prevInterval || 1;
+  let easeFactor = prevEaseFactor || 2.5;
   let mastered = false;
 
-  // Set intervals based on rating
+  // Quality ratings:
+  // 1 = Hard (2 days)
+  // 2 = Medium (4 days)
+  // 3 = Easy (1 month)
+  // 4 = Mastered (remove from rotation)
+
   switch (quality) {
     case 1: // Hard
-      interval = 2; // Review in 2 days
-      easeFactor = Math.max(1.3, previousEaseFactor - 0.15);
+      interval = 2;
+      easeFactor = Math.max(1.3, easeFactor - 0.15);
       break;
     case 2: // Medium
-      interval = 4; // Review in 4 days
-      easeFactor = previousEaseFactor;
+      interval = 4;
       break;
     case 3: // Easy
-      interval = 30; // Review in a month
-      easeFactor = previousEaseFactor + 0.15;
+      interval = 30; // 1 month
+      easeFactor = easeFactor + 0.15;
       break;
     case 4: // Mastered
       mastered = true;
-      interval = 0; // Don't schedule further reviews
       break;
-    default:
-      interval = 1; // Review tomorrow
-      easeFactor = Math.max(1.3, previousEaseFactor - 0.2);
   }
 
-  // If not mastered, apply spaced repetition formula
-  if (!mastered) {
-    if (repetitions === 0) {
-      interval = 1;
-    } else if (repetitions === 1) {
-      interval = 6;
-    } else {
-      interval = Math.ceil(previousInterval * easeFactor);
-    }
-  }
+  // Increment repetitions
+  repetitions = repetitions + 1;
 
-  // Keep ease factor between 1.3 and 2.5
-  easeFactor = Math.max(1.3, Math.min(2.5, easeFactor));
-
-  return { interval, easeFactor, mastered };
+  return { interval, easeFactor, repetitions, mastered };
 };
 
 export const submitReview = async (
-  flashcardId: string,
+  cardId: string,
   quality: number,
-  previousInterval: number,
+  prevInterval: number,
   newInterval: number,
-  previousEaseFactor: number,
+  prevEaseFactor: number,
   newEaseFactor: number,
   mastered: boolean
 ) => {
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData?.user) {
-    throw new Error('User not authenticated');
+  const now = new Date();
+  let nextReview = null;
+  
+  if (!mastered) {
+    nextReview = new Date(now);
+    nextReview.setDate(nextReview.getDate() + newInterval);
   }
 
-  // Calculate the next review date based on the new interval
-  const nextReviewDate = mastered ? null : new Date();
-  if (nextReviewDate) {
-    nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
-  }
-
-  // First get the current card to get the current repetitions
+  // First get the current review count
   const { data: currentCard, error: getError } = await supabase
     .from('flashcards')
-    .select('repetitions')
-    .eq('id', flashcardId)
+    .select('review_count')
+    .eq('id', cardId)
     .single();
 
-  if (getError) {
-    console.error('Error getting flashcard:', getError);
-    throw getError;
-  }
+  if (getError) throw getError;
 
-  // Then update the flashcard with all metrics
-  const { data: updatedCard, error: cardError } = await supabase
+  // Then update the card with the new review count
+  const { data, error } = await supabase
     .from('flashcards')
     .update({
+      last_reviewed: now.toISOString(),
+      next_review: nextReview?.toISOString() || null,
       interval: newInterval,
       ease_factor: newEaseFactor,
-      repetitions: mastered ? currentCard.repetitions : (currentCard?.repetitions || 0) + 1,
-      last_reviewed: new Date().toISOString(),
-      next_review: nextReviewDate?.toISOString(),
-      mastered: mastered
+      repetitions: (prevInterval || 0) + 1,
+      mastered: mastered,
+      review_count: (currentCard?.review_count || 0) + 1
     })
-    .eq('id', flashcardId)
+    .eq('id', cardId)
     .select()
     .single();
 
-  if (cardError) {
-    console.error('Error updating flashcard:', cardError);
-    throw cardError;
-  }
-
-  // Then create the review record
-  const { error: reviewError } = await supabase
-    .from('flashcard_reviews')
-    .insert({
-      flashcard_id: flashcardId,
-      quality,
-      previous_interval: previousInterval,
-      new_interval: newInterval,
-      previous_ease_factor: previousEaseFactor,
-      new_ease_factor: newEaseFactor,
-      user_id: userData.user.id
-    });
-
-  if (reviewError) {
-    console.error('Error creating review:', reviewError);
-    throw reviewError;
-  }
-
-  return updatedCard;
+  if (error) throw error;
+  return data;
 };

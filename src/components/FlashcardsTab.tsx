@@ -4,86 +4,87 @@ import { FlashcardDecks } from './FlashcardDecks';
 import { FlashcardManager } from './FlashcardManager';
 import { FlashcardStudy } from './FlashcardStudy';
 
-type View = 'decks' | 'manage' | 'study';
+type View = 'decks' | 'study' | 'manage';
 
 export const FlashcardsTab: React.FC = () => {
-  const [currentView, setCurrentView] = useState<View>('decks');
   const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
+  const [view, setView] = useState<View>('decks');
 
-  const handleDeckSelect = (deckId: string) => {
+  const handleSelectDeck = (deckId: string) => {
     setSelectedDeckId(deckId);
-    setCurrentView('manage');
-  };
-
-  const handleStartStudying = () => {
-    setCurrentView('study');
-  };
-
-  const handleBackToManager = () => {
-    setCurrentView('manage');
+    setView('study');
   };
 
   const handleBackToDecks = () => {
     setSelectedDeckId(null);
-    setCurrentView('decks');
+    setView('decks');
   };
+
+  const handleFinishStudy = () => {
+    setView('decks');
+  };
+
+  const handleManageCards = () => {
+    setView('manage');
+  };
+
+  if (view === 'decks' || !selectedDeckId) {
+    return <FlashcardDecks onSelectDeck={handleSelectDeck} />;
+  }
+
+  if (view === 'study') {
+    return (
+      <div className="h-full">
+        <div className="flex justify-between items-center p-4 border-b">
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={handleBackToDecks}
+            >
+              Back to Decks
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleManageCards}
+            >
+              Manage Cards
+            </Button>
+          </div>
+        </div>
+        <div className="p-6">
+          <FlashcardStudy
+            deckId={selectedDeckId}
+            onBackToDecks={handleBackToDecks}
+            onFinish={handleFinishStudy}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full">
-      {currentView !== 'decks' && (
-        <div className="flex justify-between items-center p-4 border-b">
-          <div className="space-x-2">
-            {currentView === 'manage' && (
-              <>
-                <Button
-                  variant="outline"
-                  className="bg-blue-600 text-white hover:bg-blue-700"
-                  onClick={handleBackToDecks}
-                >
-                  ← Back to Decks
-                </Button>
-              </>
-            )}
-            {currentView === 'study' && (
-              <>
-                <Button
-                  variant="outline"
-                  className="bg-blue-600 text-white hover:bg-blue-700"
-                  onClick={handleBackToManager}
-                >
-                  ← Back to Deck
-                </Button>
-                <Button
-                  variant="outline"
-                  className="bg-blue-600 text-white hover:bg-blue-700"
-                  onClick={handleBackToDecks}
-                >
-                  Back to All Decks
-                </Button>
-              </>
-            )}
-          </div>
+      <div className="flex justify-between items-center p-4 border-b">
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleBackToDecks}
+          >
+            Back to Decks
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setView('study')}
+          >
+            Study Cards
+          </Button>
         </div>
-      )}
-
+      </div>
       <div className="p-6">
-        {currentView === 'decks' && (
-          <FlashcardDecks onSelectDeck={handleDeckSelect} />
-        )}
-        {currentView === 'manage' && selectedDeckId && (
-          <FlashcardManager
-            deckId={selectedDeckId}
-            onStartStudying={handleStartStudying}
-            onBackToDecks={handleBackToDecks}
-          />
-        )}
-        {currentView === 'study' && selectedDeckId && (
-          <FlashcardStudy
-            deckId={selectedDeckId}
-            onFinish={handleBackToManager}
-            onBackToDecks={handleBackToDecks}
-          />
-        )}
+        <FlashcardManager
+          deckId={selectedDeckId}
+          onBackToDecks={handleBackToDecks}
+        />
       </div>
     </div>
   );
