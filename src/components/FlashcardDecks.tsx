@@ -1,4 +1,3 @@
-import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Button } from './ui/button';
@@ -6,9 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Alert, AlertTitle, AlertDescription } from './ui/alert';
-import { Bell, LayoutGrid, Check, Clock, Trash2 } from 'lucide-react';
-import type { FlashcardDeck } from '../types';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/card';
+import { Bell, LayoutGrid, Check, Clock, Trash2, BookOpen } from 'lucide-react';
+import type { FlashcardDeck, Flashcard } from '../types';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
 import { useToast } from './ui/use-toast';
 
@@ -16,23 +14,18 @@ interface FlashcardDecksProps {
   onSelectDeck: (deckId: string) => void;
 }
 
-interface DeckFormData {
-  name: string;
-  description: string;
-  tags: string[];
+interface DeckStats {
+  total: number;
+  mastered: number;
+  dueToday: number;
+  notStarted: number;
 }
 
 export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) => {
   const [decks, setDecks] = useState<FlashcardDeck[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [dueCards, setDueCards] = useState<{ [key: string]: number }>({});
-  const [cardCounts, setCardCounts] = useState<{ [key: string]: { total: number; mastered: number } }>({});
-  const [isCreatingDeck, setIsCreatingDeck] = useState(false);
-  const [formData, setFormData] = useState<DeckFormData>({
-    name: '',
-    description: '',
-    tags: []
-  });
+  const [isCreating, setIsCreating] = useState(false);
+  const [formData, setFormData] = useState({ name: '', description: '' });
+  const [deckStats, setDeckStats] = useState<Record<string, DeckStats>>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -41,157 +34,106 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
 
   const loadDecks = async () => {
     try {
-      setLoading(true);
-      // First get all decks
-      const { data: decksData, error: decksError } = await supabase
+      const { data: decks, error: decksError } = await supabase
         .from('flashcard_decks')
-        .select('*');
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (decksError) throw decksError;
 
-      // Get card counts and mastery status for each deck
-      const { data: cardData, error: cardError } = await supabase
-        .from('flashcards')
-        .select('deck_id, mastered');
-
-      if (cardError) throw cardError;
-
-      // Calculate card counts
-      const counts: { [key: string]: { total: number; mastered: number } } = {};
-      cardData?.forEach(card => {
-        if (!counts[card.deck_id]) {
-          counts[card.deck_id] = { total: 0, mastered: 0 };
-        }
-        counts[card.deck_id].total++;
-        if (card.mastered) {
-          counts[card.deck_id].mastered++;
-        }
-      });
-      setCardCounts(counts);
-
-      // Then get due cards (not mastered and due)
-      const now = new Date().toISOString();
-      const { data: dueCardsData, error: dueError } = await supabase
-        .from('flashcards')
-        .select('deck_id, id')
-        .lt('next_review', now)
-        .eq('mastered', false);
-
-      if (dueError) throw dueError;
-
-      // Count due cards per deck
-      const dueCountByDeck = dueCardsData?.reduce((acc: { [key: string]: number }, card) => {
-        acc[card.deck_id] = (acc[card.deck_id] || 0) + 1;
-        return acc;
-      }, {}) || {};
-
-      setDecks(decksData || []);
-      setDueCards(dueCountByDeck);
-
-      // Show toast if there are any due cards
-      if (dueCardsData && dueCardsData.length > 0) {
-        const dueDecks = decksData
-          ?.filter(deck => dueCountByDeck[deck.id])
-          .map(deck => ({
-            name: deck.name,
-            count: dueCountByDeck[deck.id]
-          }));
-
-        const dueMessage = dueDecks
-          ?.map(deck => `${deck.count} in "${deck.name}"`)
-          .join(', ');
-
-        toast({
-          title: "Time to review!",
-          description: `You have cards due: ${dueMessage}`,
-          duration: 5000,
-        });
+      if (decks) {
+        setDecks(decks);
+        // Load stats for each deck
+        decks.forEach(deck => loadDeckStats(deck.id));
       }
     } catch (error) {
       console.error('Error loading decks:', error);
       toast({
         title: "Error",
         description: "Failed to load flashcard decks",
-        variant: "destructive",
+        variant: "destructive"
       });
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleCreateDeck = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const loadDeckStats = async (deckId: string) => {
     try {
-      if (!formData.name.trim()) {
-        toast({
-          title: "Error",
-          description: "Please enter a deck name",
-          variant: "destructive"
-        });
-        return;
-      }
+      const { data: cards, error } = await supabase
+        .from('flashcards')
+        .select('*')
+        .eq('deck_id', deckId);
 
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData?.user) {
-        throw new Error('Not authenticated');
-      }
+      if (error) throw error;
 
+      if (cards) {
+        const now = new Date();
+        const stats: DeckStats = {
+          total: cards.length,
+          mastered: cards.filter(card => card.mastered).length,
+          dueToday: cards.filter(card => {
+            if (card.next_review && !card.mastered) {
+              const reviewDate = new Date(card.next_review);
+              return reviewDate <= now;
+            }
+            return false;
+          }).length,
+          notStarted: cards.filter(card => !card.last_reviewed).length
+        };
+
+        setDeckStats(prev => ({
+          ...prev,
+          [deckId]: stats
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading deck stats:', error);
+    }
+  };
+
+  const handleCreateDeck = async () => {
+    try {
       const { data: deck, error } = await supabase
         .from('flashcard_decks')
-        .insert({
-          name: formData.name.trim(),
-          description: formData.description.trim(),
-          tags: formData.tags,
-          user_id: userData.user.id
-        })
+        .insert([
+          {
+            name: formData.name,
+            description: formData.description
+          }
+        ])
         .select()
         .single();
 
       if (error) throw error;
 
-      setDecks([...decks, deck]);
-      setIsCreatingDeck(false);
-      setFormData({ name: '', description: '', tags: [] });
-      
-      toast({
-        title: "Success",
-        description: "Deck created successfully!",
-      });
+      if (deck) {
+        setDecks([deck, ...decks]);
+        setIsCreating(false);
+        setFormData({ name: '', description: '' });
+        toast({
+          title: "Success",
+          description: "Deck created successfully",
+        });
+      }
     } catch (error) {
       console.error('Error creating deck:', error);
       toast({
         title: "Error",
-        description: "Failed to create deck. Please try again.",
+        description: "Failed to create deck",
         variant: "destructive"
       });
     }
   };
 
   const handleDeleteDeck = async (deckId: string) => {
-    if (!window.confirm('Are you sure you want to delete this deck? This action cannot be undone.')) {
-      return;
-    }
-
     try {
-      // First delete all cards in the deck
-      const { error: cardsError } = await supabase
-        .from('flashcards')
-        .delete()
-        .eq('deck_id', deckId);
-
-      if (cardsError) throw cardsError;
-
-      // Then delete the deck
-      const { error: deckError } = await supabase
+      const { error } = await supabase
         .from('flashcard_decks')
         .delete()
         .eq('id', deckId);
 
-      if (deckError) throw deckError;
+      if (error) throw error;
 
-      // Update local state
       setDecks(decks.filter(deck => deck.id !== deckId));
-      
       toast({
         title: "Success",
         description: "Deck deleted successfully",
@@ -200,157 +142,145 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
       console.error('Error deleting deck:', error);
       toast({
         title: "Error",
-        description: "Failed to delete deck. Please try again.",
+        description: "Failed to delete deck",
         variant: "destructive"
       });
     }
   };
 
-  const handleTagInput = (value: string) => {
-    const tags = value.split(',').map(tag => tag.trim()).filter(Boolean);
-    setFormData(prev => ({ ...prev, tags }));
-  };
-
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold">Your Flashcard Decks</h1>
-        <Button 
-          className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700"
-          onClick={() => setIsCreatingDeck(true)}
+    <div className="container mx-auto p-4 max-w-4xl">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">My Flashcard Decks</h2>
+        <Button
+          className="bg-blue-600 text-white hover:bg-blue-700"
+          onClick={() => setIsCreating(true)}
         >
           Create New Deck
         </Button>
       </div>
 
-      {loading ? (
-        <div className="text-center py-8">
-          <span className="loading loading-spinner loading-lg"></span>
-        </div>
-      ) : decks.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-600">No decks yet. Create your first deck to get started!</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {decks.map((deck) => (
-            <Card 
-              key={deck.id} 
-              className="relative hover:shadow-lg transition-shadow cursor-pointer"
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {decks.map((deck) => {
+          const stats = deckStats[deck.id];
+          return (
+            <div
+              key={deck.id}
+              className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow cursor-pointer"
               onClick={() => onSelectDeck(deck.id)}
             >
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-xl font-bold">{deck.name}</CardTitle>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Deck</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete this deck and all its flashcards? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel onClick={(e) => e.stopPropagation()}>
-                          Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          className="bg-red-600 text-white hover:bg-red-700"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteDeck(deck.id);
-                          }}
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-                {deck.description && (
-                  <CardDescription>{deck.description}</CardDescription>
-                )}
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-4 text-sm">
-                  <div className="flex items-center gap-1">
-                    <LayoutGrid className="h-4 w-4" />
-                    <span>{cardCounts[deck.id]?.total || 0} cards</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-green-600">
-                    <Check className="h-4 w-4" />
-                    <span>{cardCounts[deck.id]?.mastered || 0} mastered</span>
-                  </div>
-                  {dueCards[deck.id] > 0 && (
-                    <div className="flex items-center gap-1 text-blue-600">
-                      <Clock className="h-4 w-4" />
-                      <span>{dueCards[deck.id]} due</span>
-                    </div>
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-xl font-semibold mb-2">{deck.name}</h3>
+                  {deck.description && (
+                    <p className="text-gray-600 mb-4">{deck.description}</p>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-red-600 hover:text-red-700"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Deck</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete this deck? All flashcards in this deck will be permanently deleted.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDeleteDeck(deck.id)}
+                        className="bg-red-600 text-white hover:bg-red-700"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+
+              {stats && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <BookOpen className="h-4 w-4 text-blue-600" />
+                    <span>{stats.total} cards total</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Check className="h-4 w-4 text-green-600" />
+                    <span>{stats.mastered} mastered</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="h-4 w-4 text-yellow-600" />
+                    <span>{stats.dueToday} due today</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Bell className="h-4 w-4 text-purple-600" />
+                    <span>{stats.notStarted} not started</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {decks.length === 0 && (
+        <div className="text-center py-8">
+          <LayoutGrid className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+          <h3 className="text-xl font-medium mb-2">No flashcard decks yet</h3>
+          <p className="text-gray-600 mb-4">Create your first deck to get started!</p>
+          <Button
+            className="bg-blue-600 text-white hover:bg-blue-700"
+            onClick={() => setIsCreating(true)}
+          >
+            Create New Deck
+          </Button>
         </div>
       )}
 
-      <Dialog open={isCreatingDeck} onOpenChange={setIsCreatingDeck}>
+      <Dialog open={isCreating} onOpenChange={setIsCreating}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Deck</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleCreateDeck} className="space-y-4">
+          <div className="space-y-4 mt-4">
             <div>
               <label className="text-sm font-medium">Name</label>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="Enter deck name"
-                required
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Description</label>
+              <label className="text-sm font-medium">Description (optional)</label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Enter deck description"
               />
             </div>
-            <div>
-              <label className="text-sm font-medium">Tags (comma-separated)</label>
-              <Input
-                value={formData.tags.join(', ')}
-                onChange={(e) => handleTagInput(e.target.value)}
-                placeholder="tag1, tag2, tag3"
-              />
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsCreatingDeck(false)}
-              >
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsCreating(false)}>
                 Cancel
               </Button>
               <Button
-                type="submit"
                 className="bg-blue-600 text-white hover:bg-blue-700"
+                onClick={handleCreateDeck}
+                disabled={!formData.name.trim()}
               >
                 Create Deck
               </Button>
             </div>
-          </form>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
