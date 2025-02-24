@@ -50,8 +50,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
       setIsSubmitting(true);
       const currentCard = cards[currentCardIndex];
       
-      // Calculate next review using SM-2 algorithm
-      const { interval: newInterval, easeFactor: newEaseFactor } = calculateNextReview(
+      // Calculate next review using updated intervals
+      const { interval: newInterval, easeFactor: newEaseFactor, mastered } = calculateNextReview(
         quality,
         currentCard.interval || 0,
         currentCard.ease_factor || 2.5,
@@ -65,7 +65,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
         currentCard.interval || 0,
         newInterval,
         currentCard.ease_factor || 2.5,
-        newEaseFactor
+        newEaseFactor,
+        mastered
       );
 
       // Update the card in the local state
@@ -74,6 +75,22 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onFinish
           const newCards = [...prevCards];
           newCards[currentCardIndex] = updatedCard;
           return newCards;
+        });
+
+        // Show feedback toast
+        const message = mastered 
+          ? "Card marked as mastered! It won't appear in future reviews."
+          : `Card scheduled for review on ${new Date(updatedCard.next_review).toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}`;
+
+        toast({
+          title: mastered ? "Card Mastered! 🎉" : "Review Scheduled",
+          description: message,
+          duration: 3000,
         });
       }
 

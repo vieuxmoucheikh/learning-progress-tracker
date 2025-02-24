@@ -14,10 +14,13 @@ interface DeckFormData {
   tags: string[];
 }
 
-export const FlashcardDecks: React.FC<{
+interface FlashcardDecksProps {
   onSelectDeck: (deckId: string) => void;
-}> = ({ onSelectDeck }) => {
+}
+
+export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) => {
   const [decks, setDecks] = useState<FlashcardDeck[]>([]);
+  const [dueCards, setDueCards] = useState<{ [key: string]: number }>({});
   const [isCreatingDeck, setIsCreatingDeck] = useState(false);
   const [formData, setFormData] = useState<DeckFormData>({
     name: '',
@@ -28,6 +31,7 @@ export const FlashcardDecks: React.FC<{
 
   useEffect(() => {
     loadDecks();
+    checkDueCards();
   }, []);
 
   const loadDecks = async () => {
@@ -41,6 +45,37 @@ export const FlashcardDecks: React.FC<{
         description: "Failed to load flashcard decks. Please try again.",
         variant: "destructive"
       });
+    }
+  };
+
+  const checkDueCards = async () => {
+    try {
+      const now = new Date().toISOString();
+      const { data: cards, error } = await supabase
+        .from('flashcards')
+        .select('deck_id, id')
+        .lt('next_review', now);
+
+      if (error) throw error;
+
+      if (cards) {
+        const dueByDeck: { [key: string]: number } = {};
+        cards.forEach(card => {
+          dueByDeck[card.deck_id] = (dueByDeck[card.deck_id] || 0) + 1;
+        });
+        setDueCards(dueByDeck);
+
+        const totalDue = Object.values(dueByDeck).reduce((a, b) => a + b, 0);
+        if (totalDue > 0) {
+          toast({
+            title: "Time to review!",
+            description: `You have ${totalDue} cards due for review.`,
+            duration: 5000,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error checking due cards:', error);
     }
   };
 
@@ -105,6 +140,16 @@ export const FlashcardDecks: React.FC<{
           Create New Deck
         </Button>
       </div>
+
+      {Object.values(dueCards).some(count => count > 0) && (
+        <Alert className="bg-blue-50 border-blue-200">
+          <Bell className="h-4 w-4 text-blue-600" />
+          <AlertTitle className="text-blue-800">Time to Review!</AlertTitle>
+          <AlertDescription className="text-blue-600">
+            You have cards due for review in your decks.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Dialog open={isCreatingDeck} onOpenChange={setIsCreatingDeck}>
         <DialogContent>
@@ -184,6 +229,11 @@ export const FlashcardDecks: React.FC<{
                 <span className="text-sm text-gray-500">
                   {deck.cardCount || 0} cards
                 </span>
+                {dueCards[deck.id] > 0 && (
+                  <span className="text-blue-600 font-medium">
+                    {dueCards[deck.id]} due
+                  </span>
+                )}
                 <div className="space-x-2">
                   <Button
                     className="bg-blue-600 text-white hover:bg-blue-700"
