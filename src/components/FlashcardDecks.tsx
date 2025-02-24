@@ -23,6 +23,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
   const [decks, setDecks] = useState<FlashcardDeck[]>([]);
   const [loading, setLoading] = useState(true);
   const [dueCards, setDueCards] = useState<{ [key: string]: number }>({});
+  const [cardCounts, setCardCounts] = useState<{ [key: string]: { total: number; mastered: number } }>({});
   const [isCreatingDeck, setIsCreatingDeck] = useState(false);
   const [formData, setFormData] = useState<DeckFormData>({
     name: '',
@@ -45,7 +46,27 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
 
       if (decksError) throw decksError;
 
-      // Then get due cards with deck information
+      // Get card counts and mastery status for each deck
+      const { data: cardData, error: cardError } = await supabase
+        .from('flashcards')
+        .select('deck_id, mastered');
+
+      if (cardError) throw cardError;
+
+      // Calculate card counts
+      const counts: { [key: string]: { total: number; mastered: number } } = {};
+      cardData?.forEach(card => {
+        if (!counts[card.deck_id]) {
+          counts[card.deck_id] = { total: 0, mastered: 0 };
+        }
+        counts[card.deck_id].total++;
+        if (card.mastered) {
+          counts[card.deck_id].mastered++;
+        }
+      });
+      setCardCounts(counts);
+
+      // Then get due cards (not mastered and due)
       const now = new Date().toISOString();
       const { data: dueCardsData, error: dueError } = await supabase
         .from('flashcards')
@@ -66,7 +87,6 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
 
       // Show toast if there are any due cards
       if (dueCardsData && dueCardsData.length > 0) {
-        // Get deck names for due cards
         const dueDecks = decksData
           ?.filter(deck => dueCountByDeck[deck.id])
           .map(deck => ({
@@ -139,6 +159,45 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
       toast({
         title: "Error",
         description: "Failed to create deck. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteDeck = async (deckId: string) => {
+    if (!window.confirm('Are you sure you want to delete this deck? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      // First delete all cards in the deck
+      const { error: cardsError } = await supabase
+        .from('flashcards')
+        .delete()
+        .eq('deck_id', deckId);
+
+      if (cardsError) throw cardsError;
+
+      // Then delete the deck
+      const { error: deckError } = await supabase
+        .from('flashcard_decks')
+        .delete()
+        .eq('id', deckId);
+
+      if (deckError) throw deckError;
+
+      // Update local state
+      setDecks(decks.filter(deck => deck.id !== deckId));
+      
+      toast({
+        title: "Success",
+        description: "Deck deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting deck:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete deck. Please try again.",
         variant: "destructive"
       });
     }
@@ -241,31 +300,51 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
       </Dialog>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {decks.map((deck) => (
-          <div
-            key={deck.id}
-            className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow"
-          >
-            <h3 className="text-xl font-semibold mb-2">{deck.name}</h3>
-            <p className="text-gray-600 mb-4">{deck.description || 'No description'}</p>
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-500">
-                {deck.cardCount || 0} cards
-                {dueCards[deck.id] > 0 && (
-                  <span className="ml-2 text-blue-600 font-medium">
-                    • {dueCards[deck.id]} due
-                  </span>
-                )}
+        {decks.map((deck) => {
+          const deckStats = cardCounts[deck.id] || { total: 0, mastered: 0 };
+          return (
+            <div
+              key={deck.id}
+              className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow"
+            >
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="text-xl font-semibold">{deck.name}</h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                  onClick={() => handleDeleteDeck(deck.id)}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </Button>
               </div>
-              <Button
-                className="bg-blue-600 text-white hover:bg-blue-700"
-                onClick={() => onSelectDeck(deck.id)}
-              >
-                Study Now
-              </Button>
+              <p className="text-gray-600 mb-4">{deck.description || 'No description'}</p>
+              <div className="flex items-center justify-between">
+                <div className="text-sm space-y-1">
+                  <div className="text-gray-500">
+                    {deckStats.total} card{deckStats.total === 1 ? '' : 's'} total
+                  </div>
+                  <div className="text-green-600">
+                    {deckStats.mastered} mastered
+                  </div>
+                  {dueCards[deck.id] > 0 && (
+                    <div className="text-blue-600 font-medium">
+                      {dueCards[deck.id]} due
+                    </div>
+                  )}
+                </div>
+                <Button
+                  className="bg-blue-600 text-white hover:bg-blue-700"
+                  onClick={() => onSelectDeck(deck.id)}
+                >
+                  Study Now
+                </Button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
