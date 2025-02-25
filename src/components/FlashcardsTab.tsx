@@ -12,6 +12,11 @@ export const FlashcardsTab: React.FC = () => {
 
   const handleSelectDeck = (deckId: string) => {
     setSelectedDeckId(deckId);
+    setView('manage');
+  };
+
+  const handleStudyDeck = (deckId: string) => {
+    setSelectedDeckId(deckId);
     setView('study');
   };
 
@@ -29,7 +34,12 @@ export const FlashcardsTab: React.FC = () => {
   };
 
   if (view === 'decks' || !selectedDeckId) {
-    return <FlashcardDecks onSelectDeck={handleSelectDeck} />;
+    return (
+      <FlashcardDecks 
+        onSelectDeck={handleSelectDeck}
+        onStudyDeck={handleStudyDeck}
+      />
+    );
   }
 
   if (view === 'study') {
@@ -51,11 +61,11 @@ export const FlashcardsTab: React.FC = () => {
             </Button>
           </div>
         </div>
-        <div className="p-6">
+        <div className="p-4">
           <FlashcardStudy
             deckId={selectedDeckId}
-            onBackToDecks={handleBackToDecks}
             onFinish={handleFinishStudy}
+            onBackToDecks={handleBackToDecks}
           />
         </div>
       </div>
@@ -63,29 +73,9 @@ export const FlashcardsTab: React.FC = () => {
   }
 
   return (
-    <div className="h-full">
-      <div className="flex justify-between items-center p-4 border-b">
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleBackToDecks}
-          >
-            Back to Decks
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => setView('study')}
-          >
-            Study Cards
-          </Button>
-        </div>
-      </div>
-      <div className="p-6">
-        <FlashcardManager
-          deckId={selectedDeckId}
-          onBackToDecks={handleBackToDecks}
-        />
-      </div>
-    </div>
+    <FlashcardManager
+      deckId={selectedDeckId}
+      onBackToDecks={handleBackToDecks}
+    />
   );
 };

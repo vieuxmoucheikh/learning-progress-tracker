@@ -282,3 +282,42 @@ export const submitReview = async (
   if (error) throw error;
   return data;
 };
+
+export interface DeckSummary {
+  deckId: string;
+  totalCards: number;
+  dueToday: number;
+  notStarted: number;
+}
+
+export const getDecksSummary = async (): Promise<DeckSummary[]> => {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData?.user) {
+    throw new Error('User not authenticated');
+  }
+
+  const now = new Date().toISOString();
+  
+  const { data, error } = await supabase
+    .from('flashcard_decks')
+    .select(`
+      id,
+      flashcards!inner (
+        id,
+        last_reviewed,
+        next_review
+      )
+    `)
+    .eq('user_id', userData.user.id);
+
+  if (error) throw error;
+
+  return data.map(deck => ({
+    deckId: deck.id,
+    totalCards: deck.flashcards.length,
+    dueToday: deck.flashcards.filter(card => 
+      card.next_review && new Date(card.next_review) <= new Date()
+    ).length,
+    notStarted: deck.flashcards.filter(card => !card.last_reviewed).length
+  }));
+};

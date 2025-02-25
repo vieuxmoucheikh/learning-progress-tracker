@@ -1,31 +1,27 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
 import { Button } from './ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { Alert, AlertTitle, AlertDescription } from './ui/alert';
-import { Bell, LayoutGrid, Check, Clock, Trash2, BookOpen } from 'lucide-react';
-import type { FlashcardDeck, Flashcard } from '../types';
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useToast } from './ui/use-toast';
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
+import { Plus, Trash2, Play, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { createDeck, getDecks, getDecksSummary } from '../lib/flashcards';
+import type { FlashcardDeck } from '../types';
+import type { DeckSummary } from '../lib/flashcards';
+import { supabase } from '../lib/supabase';
 
 interface FlashcardDecksProps {
   onSelectDeck: (deckId: string) => void;
+  onStudyDeck: (deckId: string) => void;
 }
 
-interface DeckStats {
-  total: number;
-  mastered: number;
-  dueToday: number;
-  notStarted: number;
-}
-
-export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) => {
+export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck, onStudyDeck }) => {
   const [decks, setDecks] = useState<FlashcardDeck[]>([]);
+  const [deckSummaries, setDeckSummaries] = useState<DeckSummary[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState({ name: '', description: '' });
-  const [deckStats, setDeckStats] = useState<Record<string, DeckStats>>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -34,22 +30,12 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
 
   const loadDecks = async () => {
     try {
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
-
-      const { data: decks, error: decksError } = await supabase
-        .from('flashcard_decks')
-        .select('*')
-        .eq('user_id', userData.user?.id)
-        .order('created_at', { ascending: false });
-
-      if (decksError) throw decksError;
-
-      if (decks) {
-        setDecks(decks);
-        // Load stats for each deck
-        decks.forEach(deck => loadDeckStats(deck.id));
-      }
+      const [decksData, summariesData] = await Promise.all([
+        getDecks(),
+        getDecksSummary()
+      ]);
+      setDecks(decksData);
+      setDeckSummaries(summariesData);
     } catch (error) {
       console.error('Error loading decks:', error);
       toast({
@@ -60,38 +46,16 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
     }
   };
 
-  const loadDeckStats = async (deckId: string) => {
-    try {
-      const { data: cards, error } = await supabase
-        .from('flashcards')
-        .select('*')
-        .eq('deck_id', deckId);
+  const getTotalDueCards = () => {
+    return deckSummaries.reduce((total, summary) => total + summary.dueToday, 0);
+  };
 
-      if (error) throw error;
+  const getTotalNotStartedCards = () => {
+    return deckSummaries.reduce((total, summary) => total + summary.notStarted, 0);
+  };
 
-      if (cards) {
-        const now = new Date();
-        const stats: DeckStats = {
-          total: cards.length,
-          mastered: cards.filter(card => card.mastered).length,
-          dueToday: cards.filter(card => {
-            if (card.next_review && !card.mastered) {
-              const reviewDate = new Date(card.next_review);
-              return reviewDate <= now;
-            }
-            return false;
-          }).length,
-          notStarted: cards.filter(card => !card.last_reviewed).length
-        };
-
-        setDeckStats(prev => ({
-          ...prev,
-          [deckId]: stats
-        }));
-      }
-    } catch (error) {
-      console.error('Error loading deck stats:', error);
-    }
+  const getDeckSummary = (deckId: string) => {
+    return deckSummaries.find(summary => summary.deckId === deckId);
   };
 
   const handleCreateDeck = async () => {
@@ -169,45 +133,84 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">My Flashcard Decks</h2>
-        <Button
-          className="bg-blue-600 text-white hover:bg-blue-700"
-          onClick={() => setIsCreating(true)}
-        >
-          Create New Deck
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Your Flashcard Decks</h2>
+        <Button onClick={() => setIsCreating(true)}>
+          <Plus className="w-4 h-4 mr-2" /> Create Deck
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Summary Alerts */}
+      {getTotalDueCards() > 0 && (
+        <Alert variant="default" className="bg-yellow-50 border-yellow-200">
+          <AlertCircle className="h-4 w-4 text-yellow-600" />
+          <AlertTitle className="text-yellow-600">Cards Due Today</AlertTitle>
+          <AlertDescription>
+            You have {getTotalDueCards()} cards due for review today across all decks.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {getTotalNotStartedCards() > 0 && (
+        <Alert variant="default" className="bg-blue-50 border-blue-200">
+          <AlertCircle className="h-4 w-4 text-blue-600" />
+          <AlertTitle className="text-blue-600">New Cards Available</AlertTitle>
+          <AlertDescription>
+            You have {getTotalNotStartedCards()} cards that haven't been studied yet.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {decks.map((deck) => {
-          const stats = deckStats[deck.id];
+          const summary = getDeckSummary(deck.id);
           return (
             <div
               key={deck.id}
-              className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow cursor-pointer"
-              onClick={() => onSelectDeck(deck.id)}
+              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow space-y-4"
             >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">{deck.name}</h3>
-                  {deck.description && (
-                    <p className="text-gray-600 mb-4">{deck.description}</p>
+              <div>
+                <h3 className="text-xl font-semibold mb-2">{deck.name}</h3>
+                <p className="text-gray-600 dark:text-gray-300">{deck.description}</p>
+              </div>
+
+              {/* Deck Statistics */}
+              {summary && (
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Total Cards:</span>
+                    <span className="font-medium">{summary.totalCards}</span>
+                  </div>
+                  {summary.dueToday > 0 && (
+                    <div className="flex justify-between text-yellow-600">
+                      <span>Due Today:</span>
+                      <span className="font-medium">{summary.dueToday}</span>
+                    </div>
+                  )}
+                  {summary.notStarted > 0 && (
+                    <div className="flex justify-between text-blue-600">
+                      <span>Not Started:</span>
+                      <span className="font-medium">{summary.notStarted}</span>
+                    </div>
                   )}
                 </div>
+              )}
+
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" size="sm" onClick={() => onSelectDeck(deck.id)}>
+                  Manage
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => onStudyDeck(deck.id)}>
+                  <Play className="w-4 h-4 mr-1" /> Study
+                </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-600 hover:text-red-700"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Trash2 className="h-4 w-4" />
+                    <Button variant="destructive" size="sm">
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                  <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>Delete Deck</AlertDialogTitle>
                       <AlertDialogDescription>
@@ -216,55 +219,17 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDeleteDeck(deck.id)}
-                        className="bg-red-600 text-white hover:bg-red-700"
-                      >
+                      <AlertDialogAction onClick={() => handleDeleteDeck(deck.id)}>
                         Delete
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
               </div>
-
-              {stats && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2 text-sm">
-                    <BookOpen className="h-4 w-4 text-blue-600" />
-                    <span>{stats.total} cards total</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-green-600" />
-                    <span>{stats.mastered} mastered</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="h-4 w-4 text-yellow-600" />
-                    <span>{stats.dueToday} due today</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Bell className="h-4 w-4 text-purple-600" />
-                    <span>{stats.notStarted} not started</span>
-                  </div>
-                </div>
-              )}
             </div>
           );
         })}
       </div>
-
-      {decks.length === 0 && (
-        <div className="text-center py-8">
-          <LayoutGrid className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-xl font-medium mb-2">No flashcard decks yet</h3>
-          <p className="text-gray-600 mb-4">Create your first deck to get started!</p>
-          <Button
-            className="bg-blue-600 text-white hover:bg-blue-700"
-            onClick={() => setIsCreating(true)}
-          >
-            Create New Deck
-          </Button>
-        </div>
-      )}
 
       <Dialog open={isCreating} onOpenChange={setIsCreating}>
         <DialogContent>
