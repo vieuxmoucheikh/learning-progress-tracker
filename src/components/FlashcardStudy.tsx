@@ -135,13 +135,19 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
     );
   }
 
-  if (!cards.length) {
+  if (cards.length === 0) {
     return (
-      <div className="text-center py-12">
-        <Brain className="mx-auto h-12 w-12 text-blue-600 mb-4" />
-        <h3 className="text-xl font-medium mb-2">No cards due for review!</h3>
-        <p className="text-gray-600 mb-4">All caught up! Come back later for more reviews.</p>
-        <Button onClick={onBackToDecks}>Back to Decks</Button>
+      <div className="flex flex-col items-center justify-center h-full p-4">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-semibold mb-2">No cards due for review!</h2>
+          <p className="text-gray-600">All caught up! Come back later for more reviews.</p>
+        </div>
+        <Button 
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+          onClick={onBackToDecks}
+        >
+          Back to Decks
+        </Button>
       </div>
     );
   }
@@ -150,110 +156,117 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
 
   return (
     <div className="flex flex-col h-full max-w-4xl mx-auto p-4 space-y-4">
-      <div className="flex justify-between items-center">
-        <Button variant="outline" onClick={onBackToDecks}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Decks
-        </Button>
-        <div className="text-sm text-gray-600">
-          Card {currentCardIndex + 1} of {cards.length}
+      <div className="container mx-auto p-4 max-w-2xl">
+        <div className="flex justify-between items-center mb-6">
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={onBackToDecks}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Decks
+          </Button>
+          <div className="text-sm text-gray-600">
+            Card {currentCardIndex + 1} of {cards.length}
+          </div>
         </div>
-      </div>
 
-      <div className="flex-grow flex flex-col">
-        <div 
-          className={`relative h-96 rounded-xl shadow-lg transition-all duration-500 transform cursor-pointer
-            ${isFlipped ? 'bg-blue-50' : 'bg-white'}`}
-          style={{ perspective: '1000px' }}
-          onClick={() => setIsFlipped(!isFlipped)}
+        <div className="flex-grow flex flex-col">
+          <div 
+            className={`relative h-96 rounded-xl shadow-lg transition-all duration-500 transform cursor-pointer
+              ${isFlipped ? 'bg-blue-50' : 'bg-white'}`}
+            style={{ perspective: '1000px' }}
+            onClick={() => setIsFlipped(!isFlipped)}
+          >
+            <div
+              className={`absolute inset-0 p-6 backface-hidden transition-all duration-500 transform rounded-xl
+                ${isFlipped ? 'rotate-y-180 opacity-0' : 'rotate-y-0 opacity-100'}`}
+            >
+              <div className="h-full flex flex-col">
+                <div className="text-sm text-gray-500 mb-2">Front</div>
+                <div className="flex-1 overflow-y-auto">
+                  <div className="text-lg">
+                    {currentCard.front_content}
+                  </div>
+                </div>
+                <div className="text-sm text-gray-500 text-center mt-4">
+                  Click to flip
+                </div>
+              </div>
+            </div>
+
+            <div
+              className={`absolute inset-0 p-6 backface-hidden transition-all duration-500 transform rounded-xl
+                ${isFlipped ? 'rotate-y-0 opacity-100' : 'rotate-y-180 opacity-0'}`}
+            >
+              <div className="h-full flex flex-col">
+                <div className="text-sm text-gray-500 mb-2">Back</div>
+                <div className="flex-1 overflow-y-auto">
+                  <div className="text-lg">
+                    {currentCard.back_content}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className={`mt-8 space-y-4 transition-opacity duration-300 ${isFlipped ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="grid grid-cols-4 gap-2">
+              <Button
+                className="bg-red-600 hover:bg-red-700 text-white"
+                onClick={() => handleRate(1)}
+                disabled={!isFlipped}
+              >
+                <ThumbsDown className="h-4 w-4 mr-2" />
+                Hard
+              </Button>
+              <Button
+                className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                onClick={() => handleRate(2)}
+                disabled={!isFlipped}
+              >
+                <Repeat className="h-4 w-4 mr-2" />
+                Medium
+              </Button>
+              <Button
+                className="bg-green-600 hover:bg-green-700 text-white"
+                onClick={() => handleRate(3)}
+                disabled={!isFlipped}
+              >
+                <ThumbsUp className="h-4 w-4 mr-2" />
+                Easy
+              </Button>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={() => handleRate(4)}
+                disabled={!isFlipped}
+              >
+                <Check className="h-4 w-4 mr-2" />
+                Master
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <Progress.Root 
+          className="relative overflow-hidden bg-gray-200 rounded-full w-full h-2"
+          value={(currentCardIndex / cards.length) * 100}
         >
-          <div
-            className={`absolute inset-0 p-6 backface-hidden transition-all duration-500 transform rounded-xl
-              ${isFlipped ? 'rotate-y-180 opacity-0' : 'rotate-y-0 opacity-100'}`}
-          >
-            <div className="h-full flex flex-col">
-              <div className="text-sm text-gray-500 mb-2">Front</div>
-              <div className="flex-1 overflow-y-auto">
-                <div className="text-lg">
-                  {currentCard.front_content}
-                </div>
-              </div>
-              <div className="text-sm text-gray-500 text-center mt-4">
-                Click to flip
-              </div>
+          <Progress.Indicator
+            className="bg-blue-600 w-full h-full transition-transform duration-500 ease-in-out"
+            style={{ transform: `translateX(-${100 - (currentCardIndex / cards.length) * 100}%)` }}
+          />
+        </Progress.Root>
+
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <div className="text-sm text-gray-600">
+            <div className="flex justify-between mb-2">
+              <span>Session Progress:</span>
+              <span>{sessionStats.reviewed} / {sessionStats.total} cards reviewed</span>
             </div>
-          </div>
-
-          <div
-            className={`absolute inset-0 p-6 backface-hidden transition-all duration-500 transform rounded-xl
-              ${isFlipped ? 'rotate-y-0 opacity-100' : 'rotate-y-180 opacity-0'}`}
-          >
-            <div className="h-full flex flex-col">
-              <div className="text-sm text-gray-500 mb-2">Back</div>
-              <div className="flex-1 overflow-y-auto">
-                <div className="text-lg">
-                  {currentCard.back_content}
-                </div>
-              </div>
+            <div className="flex justify-between">
+              <span>Cards Mastered:</span>
+              <span>{sessionStats.mastered} cards</span>
             </div>
-          </div>
-        </div>
-
-        <div className={`mt-8 space-y-4 transition-opacity duration-300 ${isFlipped ? 'opacity-100' : 'opacity-0'}`}>
-          <Button
-            variant="destructive"
-            onClick={() => handleRate(1)}
-            className="w-24"
-          >
-            <ThumbsDown className="h-4 w-4 mr-2" />
-            Hard
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => handleRate(2)}
-            className="w-24"
-          >
-            <Repeat className="h-4 w-4 mr-2" />
-            Medium
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => handleRate(3)}
-            className="w-24"
-          >
-            <ThumbsUp className="h-4 w-4 mr-2" />
-            Easy
-          </Button>
-          <Button
-            variant="default"
-            onClick={() => handleRate(4)}
-            className="w-24"
-          >
-            <Check className="h-4 w-4 mr-2" />
-            Master
-          </Button>
-        </div>
-      </div>
-
-      <Progress.Root 
-        className="relative overflow-hidden bg-gray-200 rounded-full w-full h-2"
-        value={(currentCardIndex / cards.length) * 100}
-      >
-        <Progress.Indicator
-          className="bg-blue-600 w-full h-full transition-transform duration-500 ease-in-out"
-          style={{ transform: `translateX(-${100 - (currentCardIndex / cards.length) * 100}%)` }}
-        />
-      </Progress.Root>
-
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-        <div className="text-sm text-gray-600">
-          <div className="flex justify-between mb-2">
-            <span>Session Progress:</span>
-            <span>{sessionStats.reviewed} / {sessionStats.total} cards reviewed</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Cards Mastered:</span>
-            <span>{sessionStats.mastered} cards</span>
           </div>
         </div>
       </div>
