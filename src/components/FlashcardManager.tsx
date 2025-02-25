@@ -141,9 +141,8 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
             >
               <path d="m15 18-6-6 6-6"/>
             </svg>
-            Back to Decks
+            Back to Decks 
           </Button>
-          <h2 className="text-2xl font-bold">Manage Flashcards</h2>
         </div>
         <Button onClick={() => setIsCreating(true)} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
           <Plus className="w-4 h-4 mr-2" /> Add Flashcard
