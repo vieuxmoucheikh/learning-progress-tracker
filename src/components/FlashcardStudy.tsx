@@ -94,6 +94,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
     if (!currentCard) return;
 
     try {
+      const now = new Date();
       const { interval, easeFactor, mastered } = calculateNextReview(
         quality,
         currentCard.interval ?? 0,
@@ -101,20 +102,27 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
         currentCard.repetitions ?? 0
       );
 
-      const { error } = await supabase
+      // First update the card
+      const updates = {
+        last_reviewed: now.toISOString(),
+        next_review: new Date(now.getTime() + interval * 24 * 60 * 60 * 1000).toISOString(),
+        interval,
+        ease_factor: easeFactor,
+        repetitions: (currentCard.repetitions ?? 0) + 1,
+        mastered,
+        review_count: (currentCard.review_count ?? 0) + 1
+      };
+
+      console.log('Updating card with:', updates);
+      const { error: updateError } = await supabase
         .from('flashcards')
-        .update({
-          last_reviewed: new Date().toISOString(),
-          next_review: new Date(Date.now() + interval * 24 * 60 * 60 * 1000).toISOString(),
-          interval,
-          ease_factor: easeFactor,
-          repetitions: (currentCard.repetitions ?? 0) + 1,
-          mastered,
-          review_count: (currentCard.review_count ?? 0) + 1
-        })
+        .update(updates)
         .eq('id', currentCard.id);
 
-      if (error) throw error;
+      if (updateError) {
+        console.error('Update error:', updateError);
+        throw updateError;
+      }
 
       // Update session stats
       setSessionStats(prev => ({
@@ -123,6 +131,19 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
         total: prev.total
       }));
 
+      // Show feedback
+      const feedbackMessages = {
+        1: "Keep practicing! You'll get it next time.",
+        2: "Good effort! Review again soon.",
+        3: "Great job! Getting better.",
+        4: "Perfect! You've mastered this card!"
+      };
+
+      toast({
+        title: mastered ? "Card Mastered! 🎉" : "Card Reviewed",
+        description: feedbackMessages[quality as keyof typeof feedbackMessages],
+      });
+
       // Move to next card
       if (currentCardIndex < cards.length - 1) {
         setCurrentCardIndex(prev => prev + 1);
@@ -130,7 +151,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
       } else {
         // Session complete
         toast({
-          title: "Session Complete!",
+          title: "Session Complete! 🎉",
           description: `You reviewed ${sessionStats.reviewed + 1} cards and mastered ${sessionStats.mastered + (mastered ? 1 : 0)} out of ${sessionStats.total} cards.`
         });
         await loadCards(); // Reload cards to get new due cards
@@ -142,7 +163,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
       console.error('Error updating flashcard:', error);
       toast({
         title: "Error",
-        description: "Failed to update flashcard",
+        description: "Failed to update flashcard. Please try again.",
         variant: "destructive"
       });
     }
@@ -201,16 +222,20 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
                     {showBack ? currentCard.parsedBackContent?.text : currentCard.front_content}
                   </div>
                   {showBack && currentCard.parsedBackContent?.imageUrl && (
-                    <div className="mt-4">
-                      <img 
-                        src={currentCard.parsedBackContent.imageUrl} 
-                        alt="Card content" 
-                        className="max-h-64 mx-auto rounded-lg object-contain"
-                        onError={(e) => {
-                          console.error('Image failed to load:', currentCard.parsedBackContent?.imageUrl);
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
+                    <div className="mt-4 flex justify-center">
+                      <div className="relative max-w-full">
+                        <img 
+                          src={currentCard.parsedBackContent.imageUrl} 
+                          alt="Card content" 
+                          className="max-h-64 rounded-lg object-contain bg-white"
+                          onError={(e) => {
+                            console.error('Image failed to load:', currentCard.parsedBackContent?.imageUrl);
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            target.parentElement?.classList.add('hidden');
+                          }}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
