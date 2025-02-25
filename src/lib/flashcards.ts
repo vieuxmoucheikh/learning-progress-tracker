@@ -66,13 +66,19 @@ export const deleteDeck = async (deckId: string) => {
 };
 
 // Flashcard operations
-export const createFlashcard = async (deckId: string, frontContent: string, backContent: string) => {
+export const createFlashcard = async (
+  deckId: string,
+  frontContent: string,
+  backContent: string,
+  backImages: string[] = []
+) => {
   const { data, error } = await supabase
     .from('flashcards')
     .insert({
       deck_id: deckId,
       front_content: frontContent,
       back_content: backContent,
+      back_images: backImages,
       interval: 0,
       ease_factor: 2.5,
       repetitions: 0,

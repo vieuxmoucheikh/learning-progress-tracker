@@ -201,9 +201,21 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
               <div className="h-full flex flex-col">
                 <div className="text-sm text-gray-500 mb-2">Back</div>
                 <div className="flex-1 overflow-y-auto">
-                  <div className="text-lg">
+                  <div className="text-lg mb-4">
                     {currentCard.back_content}
                   </div>
+                  {currentCard.back_images && currentCard.back_images.length > 0 && (
+                    <div className="space-y-4">
+                      {currentCard.back_images.map((url, index) => (
+                        <img
+                          key={url}
+                          src={url}
+                          alt={`Flashcard image ${index + 1}`}
+                          className="max-w-full rounded-lg shadow-md"
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
