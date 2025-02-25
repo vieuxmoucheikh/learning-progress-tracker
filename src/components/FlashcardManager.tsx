@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useToast } from './ui/use-toast';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
 import { Plus, Trash2, Play } from 'lucide-react';
@@ -14,39 +15,28 @@ interface FlashcardManagerProps {
   onBackToDecks: () => void;
 }
 
-interface FlashcardFormData {
-  front_content: string;
-  back_content: string;
-  back_images: string[];
-}
-
 export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBackToDecks }) => {
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [isCreating, setIsCreating] = useState(false);
-  const [formData, setFormData] = useState<FlashcardFormData>({
-    front_content: '',
-    back_content: '',
-    back_images: []
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({ front: '', back: '' });
   const { toast } = useToast();
 
   useEffect(() => {
     loadCards();
-  }, []);
+  }, [deckId]);
 
   const loadCards = async () => {
     try {
-      const { data: cards, error } = await supabase
+      const { data, error } = await supabase
         .from('flashcards')
         .select('*')
         .eq('deck_id', deckId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setCards(cards || []);
+      setCards(data || []);
     } catch (error) {
-      console.error('Error loading flashcards:', error);
+      console.error('Error loading cards:', error);
       toast({
         title: "Error",
         description: "Failed to load flashcards",
@@ -55,118 +45,9 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
     }
   };
 
-  const handleImagePaste = useCallback(async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    const items = e.clipboardData?.items;
-    if (!items) return;
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      if (item.type.indexOf('image') === 0) {
-        e.preventDefault();
-        
-        try {
-          const file = item.getAsFile();
-          if (!file) {
-            console.error('No file found in clipboard');
-            continue;
-          }
-
-          console.log('File info:', {
-            type: file.type,
-            size: file.size,
-            name: file.name
-          });
-
-          // Check file size (5MB limit)
-          if (file.size > 5 * 1024 * 1024) {
-            toast({
-              title: "Error",
-              description: "Image size must be less than 5MB",
-              variant: "destructive"
-            });
-            continue;
-          }
-
-          // Convert file to base64
-          const base64Data = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-              const result = reader.result as string;
-              const base64 = result.split(',')[1];
-              resolve(base64);
-            };
-            reader.onerror = () => reject(reader.error);
-            reader.readAsDataURL(file);
-          });
-
-          // Convert base64 back to binary
-          const binaryStr = atob(base64Data);
-          const bytes = new Uint8Array(binaryStr.length);
-          for (let i = 0; i < binaryStr.length; i++) {
-            bytes[i] = binaryStr.charCodeAt(i);
-          }
-          const imageBlob = new Blob([bytes], { type: 'image/png' });
-
-          // Generate a unique filename
-          const timestamp = new Date().getTime();
-          const filename = `flashcard_${deckId}_${timestamp}.png`;
-
-          console.log('Uploading file:', {
-            filename,
-            type: imageBlob.type,
-            size: imageBlob.size
-          });
-
-          // Upload to Supabase Storage
-          const { data, error: uploadError } = await supabase.storage
-            .from('flashcard_images')
-            .upload(filename, imageBlob, {
-              contentType: 'image/png'
-            });
-
-          if (uploadError) {
-            console.error('Upload error details:', uploadError);
-            throw uploadError;
-          }
-
-          console.log('Upload successful:', data);
-
-          // Get the public URL
-          const { data: { publicUrl } } = supabase.storage
-            .from('flashcard_images')
-            .getPublicUrl(filename);
-
-          if (!publicUrl) {
-            throw new Error('Failed to get public URL for uploaded image');
-          }
-
-          console.log('Public URL generated:', publicUrl);
-
-          // Update form data with new image URL
-          setFormData(prev => ({
-            ...prev,
-            back_images: [...prev.back_images, publicUrl]
-          }));
-
-          toast({
-            title: "Success",
-            description: "Image uploaded successfully",
-          });
-        } catch (error: any) {
-          console.error('Error uploading image:', error);
-          toast({
-            title: "Error",
-            description: error.message || "Failed to upload image",
-            variant: "destructive"
-          });
-        }
-      }
-    }
-  }, [deckId, toast]);
-
   const handleCreateCard = async () => {
     try {
-      if (!formData.front_content.trim() || !formData.back_content.trim()) {
+      if (!formData.front.trim() || !formData.back.trim()) {
         toast({
           title: "Error",
           description: "Please fill in both front and back content",
@@ -175,17 +56,15 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
         return;
       }
 
-      setIsSubmitting(true);
       const newCard = await createFlashcard(
         deckId,
-        formData.front_content.trim(),
-        formData.back_content.trim(),
-        formData.back_images
+        formData.front.trim(),
+        formData.back.trim()
       );
 
       setCards([newCard, ...cards]);
       setIsCreating(false);
-      setFormData({ front_content: '', back_content: '', back_images: [] });
+      setFormData({ front: '', back: '' });
       
       toast({
         title: "Success",
@@ -198,8 +77,6 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
         description: "Failed to create flashcard",
         variant: "destructive"
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -221,36 +98,107 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
     }
   };
 
-  const handleDeleteImage = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      back_images: prev.back_images.filter((_, i) => i !== index)
-    }));
-  };
-
   return (
     <div className="container mx-auto p-4 max-w-4xl">
       <div className="flex justify-between items-center mb-6">
-        <Button variant="outline" onClick={onBackToDecks}>
-          Back to Decks
+        <h2 className="text-2xl font-bold">Manage Flashcards</h2>
+        <Button
+          className="bg-blue-600 text-white hover:bg-blue-700"
+          onClick={() => setIsCreating(true)}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Card
         </Button>
-        {!isCreating && (
-          <Button onClick={() => setIsCreating(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Card
-          </Button>
-        )}
       </div>
 
-      {isCreating ? (
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h3 className="text-lg font-medium mb-4">Create New Flashcard</h3>
-          <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-4">
+        {cards.map((card) => (
+          <div
+            key={card.id}
+            className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex-1">
+                <div className="font-medium mb-2">Front:</div>
+                <div className="text-gray-700 mb-4 whitespace-pre-wrap">
+                  {card.front_content}
+                </div>
+                <div className="font-medium mb-2">Back:</div>
+                <div className="text-gray-700 whitespace-pre-wrap">
+                  {card.back_content}
+                </div>
+              </div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Flashcard</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this flashcard? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => handleDeleteCard(card.id)}
+                      className="bg-red-600 text-white hover:bg-red-700"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+            
+            {card.last_reviewed && (
+              <div className="mt-4 text-sm text-gray-600">
+                Last reviewed: {new Date(card.last_reviewed).toLocaleDateString()}
+                {card.mastered && (
+                  <span className="ml-2 text-green-600">(Mastered)</span>
+                )}
+                {!card.mastered && card.next_review && (
+                  <span className="ml-2 text-blue-600">
+                    (Next review: {new Date(card.next_review).toLocaleDateString()})
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {cards.length === 0 && (
+        <div className="text-center py-8">
+          <p className="text-gray-600 mb-4">No flashcards yet. Create your first card to get started!</p>
+          <Button
+            className="bg-blue-600 text-white hover:bg-blue-700"
+            onClick={() => setIsCreating(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add First Card
+          </Button>
+        </div>
+      )}
+
+      <Dialog open={isCreating} onOpenChange={setIsCreating}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Flashcard</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
             <div>
               <label className="text-sm font-medium">Front</label>
               <Textarea
-                value={formData.front_content}
-                onChange={(e) => setFormData(prev => ({ ...prev, front_content: e.target.value }))}
+                value={formData.front}
+                onChange={(e) => setFormData(prev => ({ ...prev, front: e.target.value }))}
                 placeholder="Enter the front content"
                 className="mt-1"
               />
@@ -258,36 +206,11 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
             <div>
               <label className="text-sm font-medium">Back</label>
               <Textarea
-                value={formData.back_content}
-                onChange={(e) => setFormData(prev => ({ ...prev, back_content: e.target.value }))}
-                onPaste={handleImagePaste}
-                placeholder="Enter the back content (Paste images here)"
-                className="min-h-[100px]"
+                value={formData.back}
+                onChange={(e) => setFormData(prev => ({ ...prev, back: e.target.value }))}
+                placeholder="Enter the back content"
+                className="mt-1"
               />
-              {formData.back_images.length > 0 && (
-                <div className="mt-2 space-y-2">
-                  <label className="block text-sm font-medium">Attached Images:</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {formData.back_images.map((url, index) => (
-                      <div key={url} className="relative group">
-                        <img 
-                          src={url} 
-                          alt={`Flashcard image ${index + 1}`}
-                          className="w-full h-32 object-contain rounded-md bg-gray-100"
-                        />
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => handleDeleteImage(index)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsCreating(false)}>
@@ -296,73 +219,14 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
               <Button
                 className="bg-blue-600 text-white hover:bg-blue-700"
                 onClick={handleCreateCard}
-                disabled={!formData.front_content.trim() || !formData.back_content.trim() || isSubmitting}
+                disabled={!formData.front.trim() || !formData.back.trim()}
               >
                 Create Card
               </Button>
             </div>
           </div>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {cards.map(card => (
-            <div key={card.id} className="bg-white rounded-lg shadow p-6">
-              <div className="mb-4">
-                <div className="font-medium mb-2">Front</div>
-                <div className="text-gray-700 whitespace-pre-wrap">
-                  {card.front_content}
-                </div>
-              </div>
-              <div className="mb-4">
-                <div className="font-medium mb-2">Back</div>
-                <div className="text-gray-700 whitespace-pre-wrap">
-                  {card.back_content}
-                </div>
-                {card.back_images && card.back_images.length > 0 && (
-                  <div className="mt-2 space-y-2">
-                    <label className="block text-sm font-medium">Images:</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {card.back_images.map((url, index) => (
-                        <div key={url} className="relative">
-                          <img 
-                            src={url} 
-                            alt={`Flashcard image ${index + 1}`}
-                            className="w-full h-32 object-contain rounded-md bg-gray-100"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="flex justify-end gap-2">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="sm">
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Flashcard</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete this flashcard? This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDeleteCard(card.id)}>
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
