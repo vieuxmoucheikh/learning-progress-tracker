@@ -146,8 +146,8 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
       const { error } = await supabase
         .from('flashcard_decks')
         .delete()
-        .eq('id', deckId)
-        .maybeSingle();
+        .match({ id: deckId })
+        .select('id');
 
       if (error) throw error;
 

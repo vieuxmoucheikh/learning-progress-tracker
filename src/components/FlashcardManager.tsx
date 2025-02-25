@@ -85,8 +85,8 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
       const { error } = await supabase
         .from('flashcards')
         .delete()
-        .eq('id', cardId)
-        .maybeSingle();
+        .match({ id: cardId })
+        .select('id');  
 
       if (error) throw error;
 
