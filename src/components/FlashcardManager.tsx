@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Label } from './ui/label';
 import { useToast } from './ui/use-toast';
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
-import { Plus, Trash2, Play, ImagePlus, X } from 'lucide-react';
-import { createFlashcard, deleteFlashcard, uploadImage } from '../lib/flashcards';
+import { ImagePlus, X } from 'lucide-react';
+import { createFlashcard, uploadImage } from '../lib/flashcards';
 import type { Flashcard } from '../types';
-import { supabase } from '../lib/supabase';
 
 interface FlashcardManagerProps {
   deckId: string;
@@ -24,7 +23,7 @@ interface FormData {
   backImagePreview: string;
 }
 
-const initialFormState: FormData = {
+const initialFormData: FormData = {
   frontContent: '',
   backContent: '',
   frontImage: null,
@@ -33,83 +32,50 @@ const initialFormState: FormData = {
   backImagePreview: ''
 };
 
-export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBackToDecks }) => {
+export const FlashcardManager = ({ deckId, onBackToDecks }: FlashcardManagerProps) => {
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [isCreating, setIsCreating] = useState(false);
-  const [formData, setFormData] = useState<FormData>(initialFormState);
+  const [formData, setFormData] = useState<FormData>(initialFormData);
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadCards();
-  }, [deckId]);
-
-  const loadCards = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('flashcards')
-        .select('*')
-        .eq('deck_id', deckId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setCards(data || []);
-    } catch (error) {
-      console.error('Error loading cards:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load flashcards",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleImageChange = async (side: 'front' | 'back', e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (side: 'front' | 'back', e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
-      toast({
-        title: "Error",
-        description: "Image size must be less than 5MB",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const preview = URL.createObjectURL(file);
+    const previewUrl = URL.createObjectURL(file);
     setFormData(prev => ({
       ...prev,
       [`${side}Image`]: file,
-      [`${side}ImagePreview`]: preview
+      [`${side}ImagePreview`]: previewUrl
     }));
   };
 
-  const handlePaste = async (e: React.ClipboardEvent, side: 'front' | 'back') => {
+  const handlePaste = (e: React.ClipboardEvent, side: 'front' | 'back') => {
     const items = e.clipboardData?.items;
-    
     if (!items) return;
 
     for (const item of Array.from(items)) {
-      if (item.type.indexOf('image') !== -1) {
+      if (item.type.startsWith('image/')) {
         e.preventDefault();
         const file = item.getAsFile();
         if (!file) continue;
 
-        // Create object URL for preview
         const previewUrl = URL.createObjectURL(file);
-        
         setFormData(prev => ({
           ...prev,
           [`${side}Image`]: file,
           [`${side}ImagePreview`]: previewUrl
         }));
-        
         break;
       }
     }
   };
 
-  const removeImage = (side: 'front' | 'back') => {
+  const handleRemoveImage = (side: 'front' | 'back') => {
+    if (formData[`${side}ImagePreview`]) {
+      URL.revokeObjectURL(formData[`${side}ImagePreview`]);
+    }
+    
     setFormData(prev => ({
       ...prev,
       [`${side}Image`]: null,
@@ -162,7 +128,12 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
 
       setCards([newCard, ...cards]);
       setIsCreating(false);
-      setFormData(initialFormState);
+      
+      // Cleanup preview URLs
+      if (formData.frontImagePreview) URL.revokeObjectURL(formData.frontImagePreview);
+      if (formData.backImagePreview) URL.revokeObjectURL(formData.backImagePreview);
+      
+      setFormData(initialFormData);
       
       toast({
         title: "Success",
@@ -178,219 +149,148 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
     }
   };
 
-  const handleDeleteCard = async (cardId: string) => {
-    try {
-      await deleteFlashcard(cardId);
-      setCards(cards.filter(card => card.id !== cardId));
-      toast({
-        title: "Success",
-        description: "Flashcard deleted successfully",
-      });
-    } catch (error) {
-      console.error('Error deleting flashcard:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete flashcard",
-        variant: "destructive"
-      });
-    }
-  };
-
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
+    <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Manage Flashcards</h2>
-        <Button
-          className="bg-blue-600 text-white hover:bg-blue-700"
-          onClick={() => setIsCreating(true)}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Card
-        </Button>
+        <Button onClick={onBackToDecks}>Back to Decks</Button>
+        <Button onClick={() => setIsCreating(true)}>Create New Card</Button>
       </div>
-
-      <div className="grid grid-cols-1 gap-4">
-        {cards.map((card) => (
-          <div
-            key={card.id}
-            className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex-1">
-                <div className="font-medium mb-2">Front:</div>
-                <div className="text-gray-700 mb-4 whitespace-pre-wrap">
-                  {card.front_content}
-                </div>
-                <div className="font-medium mb-2">Back:</div>
-                <div className="text-gray-700 whitespace-pre-wrap">
-                  {card.back_content}
-                </div>
-              </div>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Flashcard</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete this flashcard? This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => handleDeleteCard(card.id)}
-                      className="bg-red-600 text-white hover:bg-red-700"
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-            
-            {card.last_reviewed && (
-              <div className="mt-4 text-sm text-gray-600">
-                Last reviewed: {new Date(card.last_reviewed).toLocaleDateString()}
-                {card.mastered && (
-                  <span className="ml-2 text-green-600">(Mastered)</span>
-                )}
-                {!card.mastered && card.next_review && (
-                  <span className="ml-2 text-blue-600">
-                    (Next review: {new Date(card.next_review).toLocaleDateString()})
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {cards.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-gray-600 mb-4">No flashcards yet. Create your first card to get started!</p>
-          <Button
-            className="bg-blue-600 text-white hover:bg-blue-700"
-            onClick={() => setIsCreating(true)}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add First Card
-          </Button>
-        </div>
-      )}
 
       <Dialog open={isCreating} onOpenChange={setIsCreating}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Create New Flashcard</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 mt-4">
-            <div className="space-y-2">
-              <label className="text-lg font-medium mb-2">Front Content</label>
-              <Textarea
-                value={formData.frontContent}
-                onChange={(e) => setFormData(prev => ({ ...prev, frontContent: e.target.value }))}
-                onPaste={(e) => handlePaste(e, 'front')}
-                placeholder="Enter front content..."
-                className="min-h-[100px]"
-              />
-              <div className="flex items-center gap-4">
-                <label 
-                  htmlFor="frontImage" 
-                  className="cursor-pointer flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
-                >
-                  <ImagePlus className="h-4 w-4" />
-                  Add Image
-                </label>
-                <input
-                  id="frontImage"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handleImageChange('front', e)}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Front Content</Label>
+                <Textarea
+                  value={formData.frontContent}
+                  onChange={(e) => setFormData(prev => ({ ...prev, frontContent: e.target.value }))}
+                  onPaste={(e) => handlePaste(e, 'front')}
+                  placeholder="Enter front content..."
+                  className="min-h-[100px]"
+                  required
                 />
-                {formData.frontImagePreview && (
-                  <div className="relative">
-                    <img
-                      src={formData.frontImagePreview}
-                      alt="Front preview"
-                      className="h-20 w-20 object-cover rounded-lg"
-                    />
-                    <button
-                      onClick={() => removeImage('front')}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                )}
+                <div className="flex items-center gap-4 mt-2">
+                  <Label 
+                    htmlFor="frontImage" 
+                    className="cursor-pointer flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
+                  >
+                    <ImagePlus className="h-4 w-4" />
+                    Add Image
+                  </Label>
+                  <input
+                    id="frontImage"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleImageChange('front', e)}
+                  />
+                  {formData.frontImagePreview && (
+                    <div className="relative">
+                      <img
+                        src={formData.frontImagePreview}
+                        alt="Front preview"
+                        className="h-20 w-20 object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage('front')}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Back Content</Label>
+                <Textarea
+                  value={formData.backContent}
+                  onChange={(e) => setFormData(prev => ({ ...prev, backContent: e.target.value }))}
+                  onPaste={(e) => handlePaste(e, 'back')}
+                  placeholder="Enter back content..."
+                  className="min-h-[100px]"
+                  required
+                />
+                <div className="flex items-center gap-4 mt-2">
+                  <Label 
+                    htmlFor="backImage" 
+                    className="cursor-pointer flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
+                  >
+                    <ImagePlus className="h-4 w-4" />
+                    Add Image
+                  </Label>
+                  <input
+                    id="backImage"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleImageChange('back', e)}
+                  />
+                  {formData.backImagePreview && (
+                    <div className="relative">
+                      <img
+                        src={formData.backImagePreview}
+                        alt="Back preview"
+                        className="h-20 w-20 object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage('back')}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-lg font-medium mb-2">Back Content</label>
-              <Textarea
-                value={formData.backContent}
-                onChange={(e) => setFormData(prev => ({ ...prev, backContent: e.target.value }))}
-                onPaste={(e) => handlePaste(e, 'back')}
-                placeholder="Enter back content..."
-                className="min-h-[100px]"
-              />
-              <div className="flex items-center gap-4">
-                <label 
-                  htmlFor="backImage" 
-                  className="cursor-pointer flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
-                >
-                  <ImagePlus className="h-4 w-4" />
-                  Add Image
-                </label>
-                <input
-                  id="backImage"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handleImageChange('back', e)}
-                />
-                {formData.backImagePreview && (
-                  <div className="relative">
-                    <img
-                      src={formData.backImagePreview}
-                      alt="Back preview"
-                      className="h-20 w-20 object-cover rounded-lg"
-                    />
-                    <button
-                      onClick={() => removeImage('back')}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsCreating(false)}>
+            <div className="flex justify-end gap-4">
+              <Button type="button" variant="outline" onClick={() => setIsCreating(false)}>
                 Cancel
               </Button>
-              <Button
-                className="bg-blue-600 text-white hover:bg-blue-700"
-                onClick={handleSubmit}
+              <Button 
+                type="submit"
                 disabled={!formData.frontContent.trim() || !formData.backContent.trim()}
               >
                 Create Card
               </Button>
             </div>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {cards.map(card => (
+          <div key={card.id} className="p-4 border rounded-lg shadow">
+            <div className="font-medium">Front:</div>
+            <div className="mt-1">{card.front_content}</div>
+            {card.front_image_url && (
+              <img
+                src={card.front_image_url}
+                alt="Front"
+                className="mt-2 max-h-32 w-auto object-contain rounded"
+              />
+            )}
+            <div className="font-medium mt-4">Back:</div>
+            <div className="mt-1">{card.back_content}</div>
+            {card.back_image_url && (
+              <img
+                src={card.back_image_url}
+                alt="Back"
+                className="mt-2 max-h-32 w-auto object-contain rounded"
+              />
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
