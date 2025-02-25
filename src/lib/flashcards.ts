@@ -285,6 +285,7 @@ export const submitReview = async (
 
 export interface DeckSummary {
   deckId: string;
+  deckName: string;
   totalCards: number;
   dueToday: number;
   notStarted: number;
@@ -303,6 +304,7 @@ export const getDecksSummary = async (): Promise<DeckSummary[]> => {
     .from('flashcard_decks')
     .select(`
       id,
+      name,
       flashcards!inner (
         id,
         last_reviewed,
@@ -324,6 +326,7 @@ export const getDecksSummary = async (): Promise<DeckSummary[]> => {
 
     return {
       deckId: deck.id,
+      deckName: deck.name,
       totalCards: deck.flashcards.length,
       dueToday: dueCards.length,
       notStarted: newCards.length,

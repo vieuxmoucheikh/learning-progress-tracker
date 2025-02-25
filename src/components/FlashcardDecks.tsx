@@ -136,13 +136,16 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck, on
             <AlertDescription className="mt-2">
               <div className="space-y-2">
                 <p>{getTotalDueCards()} cards need review</p>
-                <div className="text-sm space-y-1">
+                <div className="text-sm space-y-3">
                   {deckSummaries.map(summary => 
                     summary.dueCards.length > 0 && (
-                      <div key={summary.deckId} className="pl-4">
+                      <div key={summary.deckId} className="pl-4 space-y-1">
+                        <h4 className="font-medium text-yellow-800 dark:text-yellow-300">
+                          {summary.deckName}
+                        </h4>
                         {summary.dueCards.map(card => (
-                          <div key={card.id} className="text-yellow-700">
-                            • {card.front_content}
+                          <div key={card.id} className="text-yellow-700 dark:text-yellow-400 pl-4">
+                            • <span className="font-semibold">{card.front_content}</span>
                           </div>
                         ))}
                       </div>
@@ -160,13 +163,16 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck, on
             <AlertDescription className="mt-2">
               <div className="space-y-2">
                 <p>{getTotalNotStartedCards()} cards to start</p>
-                <div className="text-sm space-y-1">
+                <div className="text-sm space-y-3">
                   {deckSummaries.map(summary => 
                     summary.newCards.length > 0 && (
-                      <div key={summary.deckId} className="pl-4">
+                      <div key={summary.deckId} className="pl-4 space-y-1">
+                        <h4 className="font-medium text-blue-800 dark:text-blue-300">
+                          {summary.deckName}
+                        </h4>
                         {summary.newCards.map(card => (
-                          <div key={card.id} className="text-blue-700">
-                            • {card.front_content}
+                          <div key={card.id} className="text-blue-700 dark:text-blue-400 pl-4">
+                            • <span className="font-semibold">{card.front_content}</span>
                           </div>
                         ))}
                       </div>
