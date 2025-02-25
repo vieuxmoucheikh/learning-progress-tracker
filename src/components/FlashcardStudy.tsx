@@ -18,10 +18,6 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [currentCard, setCurrentCard] = useState<Flashcard | null>(null);
   const [showBack, setShowBack] = useState(false);
-  const [backContent, setBackContent] = useState<{ text: string; imageUrl: string | null }>({ 
-    text: '', 
-    imageUrl: null 
-  });
   const [loading, setLoading] = useState(true);
   const [sessionStats, setSessionStats] = useState({
     reviewed: 0,
@@ -40,56 +36,51 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
     }
   }, [cards, currentCardIndex]);
 
-  useEffect(() => {
-    if (currentCard) {
-      try {
-        const parsedContent = JSON.parse(currentCard.back_content);
-        if (parsedContent.imageUrl) {
-          setBackContent({
-            text: parsedContent.text || '',
-            imageUrl: parsedContent.imageUrl
-          });
-        } else {
-          setBackContent({
-            text: currentCard.back_content,
-            imageUrl: null
-          });
-        }
-      } catch (e) {
-        setBackContent({
-          text: currentCard.back_content,
-          imageUrl: null
-        });
-      }
-    }
-  }, [currentCard]);
-
   const loadCards = async () => {
     try {
       const { data, error } = await supabase
         .from('flashcards')
         .select('*')
         .eq('deck_id', deckId)
-        .order('next_review', { ascending: true, nullsFirst: true });
+        .order('next_review', { ascending: true });
 
       if (error) throw error;
 
-      const now = new Date();
-      const dueCards = (data || []).filter(card => {
-        if (card.mastered) return false;
-        if (!card.next_review) return true;
-        return new Date(card.next_review) <= now;
+      // Parse back content for each card
+      const cardsWithParsedContent = data.map(card => {
+        try {
+          const parsedContent = JSON.parse(card.back_content);
+          return {
+            ...card,
+            parsedBackContent: {
+              text: parsedContent.text || card.back_content,
+              imageUrl: parsedContent.imageUrl || null
+            }
+          };
+        } catch (e) {
+          return {
+            ...card,
+            parsedBackContent: {
+              text: card.back_content,
+              imageUrl: null
+            }
+          };
+        }
       });
 
-      setCards(dueCards);
-      setSessionStats(prev => ({ ...prev, total: dueCards.length }));
+      setCards(cardsWithParsedContent);
+      setSessionStats({
+        reviewed: 0,
+        mastered: 0,
+        total: cardsWithParsedContent.length
+      });
       setLoading(false);
     } catch (error) {
       console.error('Error loading cards:', error);
       toast({
-        title: "Error",
-        description: "Failed to load flashcards",
-        variant: "destructive"
+        title: 'Error loading cards',
+        description: 'There was an error loading your flashcards.',
+        variant: 'destructive',
       });
     }
   };
@@ -202,13 +193,13 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
                     {showBack ? 'Back' : 'Front'}
                   </h3>
                   <div className="text-gray-700 dark:text-gray-300 text-lg whitespace-pre-wrap">
-                    {showBack ? backContent.text : currentCard.front_content}
+                    {showBack ? currentCard.parsedBackContent?.text : currentCard.front_content}
                   </div>
-                  {showBack && backContent.imageUrl && (
+                  {showBack && currentCard.parsedBackContent?.imageUrl && (
                     <div className="mt-4">
                       <img 
-                        src={backContent.imageUrl} 
-                        alt="Back content" 
+                        src={currentCard.parsedBackContent.imageUrl} 
+                        alt="Card content" 
                         className="max-h-64 mx-auto rounded-lg object-contain"
                       />
                     </div>

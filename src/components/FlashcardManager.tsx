@@ -146,16 +146,20 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
           throw uploadError;
         }
 
-        const { data: { publicUrl } } = supabase.storage
+        const { data: urlData } = await supabase.storage
           .from('flashcards')
           .getPublicUrl(`flashcard-images/${fileName}`);
 
+        if (!urlData?.publicUrl) {
+          throw new Error('Failed to get public URL for uploaded image');
+        }
+
         backContent = JSON.stringify({
-          text: formData.back,
-          imageUrl: publicUrl
+          text: formData.back.trim(),
+          imageUrl: urlData.publicUrl
         });
       } else {
-        backContent = formData.back;
+        backContent = formData.back.trim();
       }
 
       const newCard = await createFlashcard(
