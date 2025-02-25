@@ -62,8 +62,7 @@ export const deleteDeck = async (deckId: string) => {
       .from('flashcard_decks')
       .delete()
       .eq('id', deckId)
-      .limit(1)
-      .single();
+      .order('created_at', { ascending: true });
 
     if (error && error.code !== 'PGRST116') { // Ignore "no rows returned" error
       console.error('Error deleting deck:', error);
@@ -135,8 +134,7 @@ export const deleteFlashcard = async (cardId: string) => {
       .from('flashcards')
       .delete()
       .eq('id', cardId)
-      .limit(1)
-      .single();
+      .order('created_at', { ascending: true });
 
     if (error && error.code !== 'PGRST116') { // Ignore "no rows returned" error
       console.error('Error deleting flashcard:', error);

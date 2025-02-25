@@ -147,10 +147,9 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
         .from('flashcard_decks')
         .delete()
         .eq('id', deckId)
-        .limit(1)
-        .single();
+        .order('created_at', { ascending: true });
 
-      if (error && error.code !== 'PGRST116') { // Ignore "no rows returned" error
+      if (error) {
         throw error;
       }
 
