@@ -93,13 +93,17 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
 
           if (uploadError) throw uploadError;
 
-          // Get the public URL
-          const imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/flashcard_images/${filename}`;
+          // Get the public URL using Supabase's built-in method
+          const { data: { publicUrl } } = supabase.storage
+            .from('flashcard_images')
+            .getPublicUrl(filename);
+
+          if (!publicUrl) throw new Error('Failed to get public URL for uploaded image');
 
           // Update form data with new image URL
           setFormData(prev => ({
             ...prev,
-            back_images: [...prev.back_images, imageUrl]
+            back_images: [...prev.back_images, publicUrl]
           }));
 
           toast({
