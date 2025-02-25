@@ -78,6 +78,16 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
             continue;
           }
 
+          // Convert to proper image file with correct MIME type
+          const blob = await new Promise<Blob>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              const blob = new Blob([event.target?.result as ArrayBuffer], { type: file.type });
+              resolve(blob);
+            };
+            reader.readAsArrayBuffer(file);
+          });
+
           // Generate a unique filename
           const timestamp = new Date().getTime();
           const fileExt = file.type.split('/')[1];
@@ -86,14 +96,15 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
           // Upload to Supabase Storage
           const { data, error: uploadError } = await supabase.storage
             .from('flashcard_images')
-            .upload(filename, file, {
+            .upload(filename, blob, {
+              contentType: file.type,
               cacheControl: '3600',
               upsert: false
             });
 
           if (uploadError) throw uploadError;
 
-          // Get the public URL using Supabase's built-in method
+          // Get the public URL
           const { data: { publicUrl } } = supabase.storage
             .from('flashcard_images')
             .getPublicUrl(filename);
