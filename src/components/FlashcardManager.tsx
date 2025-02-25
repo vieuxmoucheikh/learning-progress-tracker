@@ -68,16 +68,43 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
           const file = item.getAsFile();
           if (!file) continue;
 
+          // Check file size (5MB limit)
+          if (file.size > 5 * 1024 * 1024) {
+            toast({
+              title: "Error",
+              description: "Image size must be less than 5MB",
+              variant: "destructive"
+            });
+            continue;
+          }
+
           // Generate a unique filename
           const timestamp = new Date().getTime();
-          const filename = `flashcard_${deckId}_${timestamp}.${file.type.split('/')[1]}`;
+          const fileExt = file.type.split('/')[1];
+          const filename = `flashcard_${deckId}_${timestamp}.${fileExt}`;
+
+          // Ensure the bucket exists
+          const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+          if (bucketsError) throw bucketsError;
+
+          const flashcardBucket = buckets?.find(b => b.name === 'flashcard_images');
+          if (!flashcardBucket) {
+            await supabase.storage.createBucket('flashcard_images', {
+              public: true,
+              allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif'],
+              fileSizeLimit: 5242880 // 5MB
+            });
+          }
 
           // Upload to Supabase Storage
-          const { data, error } = await supabase.storage
+          const { data, error: uploadError } = await supabase.storage
             .from('flashcard_images')
-            .upload(filename, file);
+            .upload(filename, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
 
-          if (error) throw error;
+          if (uploadError) throw uploadError;
 
           // Get the public URL
           const { data: { publicUrl } } = supabase.storage
@@ -94,11 +121,11 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
             title: "Success",
             description: "Image uploaded successfully",
           });
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error uploading image:', error);
           toast({
             title: "Error",
-            description: "Failed to upload image",
+            description: error.message || "Failed to upload image",
             variant: "destructive"
           });
         }
