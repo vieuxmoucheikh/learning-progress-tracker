@@ -7,7 +7,7 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
 import { Plus, Trash2, Play } from 'lucide-react';
 import { createFlashcard, deleteFlashcard } from '../lib/flashcards';
 import type { Flashcard } from '../types';
-import { supabase, ensureStorageBucket } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 
 interface FlashcardManagerProps {
   deckId: string;
@@ -76,17 +76,6 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
               variant: "destructive"
             });
             continue;
-          }
-
-          // Ensure bucket exists before upload
-          const bucketExists = await ensureStorageBucket();
-          if (!bucketExists) {
-            toast({
-              title: "Error",
-              description: "Failed to initialize storage. Please try again.",
-              variant: "destructive"
-            });
-            return;
           }
 
           // Generate a unique filename
