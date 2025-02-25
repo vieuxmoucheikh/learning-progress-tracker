@@ -230,15 +230,25 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             setCurrentPomodoroId(pomodoro.id);
             setIsActive(true);
 
-            // Update the time based on the actual type
-            const newDuration = (() => {
-                if (isBreak) {
-                    const completedPomodoros = tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0;
-                    const isLongBreak = completedPomodoros > 0 && completedPomodoros % settings.pomodoros_until_long_break === 0;
-                    return isLongBreak ? settings.long_break_duration : settings.break_duration;
+            // Update the time based on the pomodoro type
+            let newDuration;
+            if (pomodoroType === 'work') {
+                newDuration = settings.work_duration;
+            } else {
+                // For break, check if it should be a long break
+                if (activeTaskId) {
+                    const task = tasks.find(t => t.id === activeTaskId);
+                    if (task) {
+                        const completedPomodoros = task.metrics.completedPomodoros;
+                        const isLongBreak = completedPomodoros > 0 && completedPomodoros % settings.pomodoros_until_long_break === 0;
+                        newDuration = isLongBreak ? settings.long_break_duration : settings.break_duration;
+                    } else {
+                        newDuration = settings.break_duration;
+                    }
+                } else {
+                    newDuration = settings.break_duration;
                 }
-                return settings.work_duration;
-            })();
+            }
 
             setTime(newDuration * 60);
 
@@ -250,7 +260,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 variant: 'destructive',
             });
         }
-    }, [settings, isBreak, tasks, activeTaskId, toast]);
+    }, [settings, activeTaskId, tasks, toast]);
 
     // Function to play a more prominent goal achievement sound
     const playGoalAchievedSound = useCallback((context: AudioContext) => {
@@ -790,8 +800,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 setCurrentPomodoroId(null);
             }
 
-            // Mettre à jour les métriques pour le focus time uniquement
-            if (!isBreak && activeTaskId) {
+            // Determine if we're finishing a work session or a break
+            const finishingWorkSession = !isBreak;
+            const finishingBreak = isBreak;
+
+            // Mettre à jour les métriques uniquement à la fin d'une session de travail (pas de pause)
+            if (finishingWorkSession && activeTaskId) {
                 const newPomodoroCount = pomodoroCount + 1;
                 setPomodoroCount(newPomodoroCount);
                 
@@ -820,26 +834,40 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             setIsBreak(!isBreak);
 
             // Calculer la durée suivante
-            const newDuration = isBreak ? settings.break_duration : settings.work_duration;
+            const newDuration = isBreak ? settings.work_duration : 
+                (finishingWorkSession && activeTaskId) ? 
+                    (() => {
+                        const task = tasks.find(t => t.id === activeTaskId);
+                        if (task) {
+                            const completedPomodoros = task.metrics.completedPomodoros;
+                            const isLongBreak = completedPomodoros > 0 && completedPomodoros % settings.pomodoros_until_long_break === 0;
+                            return isLongBreak ? settings.long_break_duration : settings.break_duration;
+                        }
+                        return settings.break_duration;
+                    })() : 
+                    settings.break_duration;
 
             setTime(newDuration * 60);
 
-            // Afficher une notification
+            // Afficher une notification avec le message approprié
+            const title = finishingWorkSession ? "Time for a break!" : "Break complete!";
+            const description = finishingWorkSession
+                ? `Taking a ${newDuration}-minute break.`
+                : "Ready for another focused session!";
+                
             toast({
-                title: isBreak ? "Time for a break!" : "Break complete!",
-                description: isBreak
-                    ? `Taking a ${newDuration}-minute break.`
-                    : "Ready for another focused session!",
+                title,
+                description,
                 duration: 3000,
             });
 
             // Démarrer automatiquement avec un délai
-            const shouldAutoStart = isBreak ? settings.auto_start_breaks : settings.auto_start_pomodoros;
+            const shouldAutoStart = finishingWorkSession ? settings.auto_start_breaks : settings.auto_start_pomodoros;
             if (shouldAutoStart) {
                 // Attendre que les états soient mis à jour
                 setTimeout(async () => {
                     try {
-                        await startNewPomodoro(isBreak ? 'break' : 'work');
+                        await startNewPomodoro(finishingWorkSession ? 'break' : 'work');
                     } catch (error) {
                         console.error('Error auto-starting next session:', error);
                     }
@@ -853,7 +881,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 variant: 'destructive',
             });
         }
-    }, [isBreak, settings, currentPomodoroId, activeTaskId, pomodoroCount, audioContext, playNotificationSound, checkDailyGoal, saveTasks, startNewPomodoro]);
+    }, [isBreak, settings, currentPomodoroId, activeTaskId, pomodoroCount, audioContext, playNotificationSound, checkDailyGoal, saveTasks, startNewPomodoro, tasks]);
 
     return (
         <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate700/30 shadow-2xl">
