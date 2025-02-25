@@ -25,6 +25,7 @@ import { X } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Clock } from 'lucide-react';
 
+// Define interfaces
 interface Task {
     id: string;
     text: string;
@@ -49,6 +50,11 @@ interface PomodoroSettingsDialogProps {
 interface PomodoroTimerProps {
     onSessionComplete?: (sessionData: { duration: number; label: string; type: 'work' | 'break' }) => void;
     sessionId?: string;
+}
+
+interface FailedCompletion {
+    pomodoroId: string;
+    timestamp: string;
 }
 
 // Ajouter une fonction pour le son de célébration
@@ -427,7 +433,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     // Synchronize timer state with server
     const syncWithSupabase = useCallback(async () => {
         try {
-            const failedCompletions = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
+            const failedCompletions: FailedCompletion[] = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
             if (failedCompletions.length > 0) {
                 for (const session of failedCompletions) {
                     try {
@@ -473,12 +479,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     // Function to retry failed pomodoro completions
     const retryFailedCompletions = useCallback(async () => {
         try {
-            const failedCompletions = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
+            const failedCompletions: FailedCompletion[] = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
             if (failedCompletions.length === 0) return;
             
             console.log(`Attempting to sync ${failedCompletions.length} failed pomodoro completions`);
             
-            const successfulIds = [];
+            const successfulIds: string[] = [];
             
             for (const completion of failedCompletions) {
                 try {
@@ -891,7 +897,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 } catch (error) {
                     console.error("Error completing pomodoro in database:", error);
                     // Store failed completion to retry later
-                    const failedCompletions = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
+                    const failedCompletions: FailedCompletion[] = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
                     failedCompletions.push({
                         pomodoroId: currentPomodoroId,
                         timestamp: new Date().toISOString()
