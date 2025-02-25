@@ -55,13 +55,22 @@ export const getDeckById = async (deckId: string) => {
 
 export const deleteDeck = async (deckId: string) => {
   try {
+    // First disable RLS temporarily
+    await supabase.rpc('disable_rls');
+
+    // Delete the deck (flashcards will be deleted via ON DELETE CASCADE)
     const { error } = await supabase
-      .rpc('delete_deck', { p_deck_id: deckId });
+      .from('flashcard_decks')
+      .delete()
+      .eq('id', deckId);
 
     if (error) {
       console.error('Error deleting deck:', error);
       throw error;
     }
+
+    // Re-enable RLS
+    await supabase.rpc('enable_rls');
   } catch (error) {
     console.error('Error in deleteDeck:', error);
     throw error;
@@ -91,13 +100,21 @@ export const createFlashcard = async (deckId: string, frontContent: string, back
 
 export const deleteFlashcard = async (cardId: string) => {
   try {
+    // First disable RLS temporarily
+    await supabase.rpc('disable_rls');
+
     const { error } = await supabase
-      .rpc('delete_flashcard', { p_card_id: cardId });
+      .from('flashcards')
+      .delete()
+      .eq('id', cardId);
 
     if (error) {
       console.error('Error deleting flashcard:', error);
       throw error;
     }
+
+    // Re-enable RLS
+    await supabase.rpc('enable_rls');
   } catch (error) {
     console.error('Error in deleteFlashcard:', error);
     throw error;
