@@ -138,18 +138,24 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
       if (formData.imageFile) {
         const fileExt = formData.imageFile.name.split('.').pop();
         const fileName = `${uuidv4()}.${fileExt}`;
+        const filePath = `flashcard-images/${fileName}`;
+        
+        console.log('Uploading image:', filePath);
         const { error: uploadError } = await supabase.storage
           .from('flashcards')
-          .upload(`flashcard-images/${fileName}`, formData.imageFile);
+          .upload(filePath, formData.imageFile);
 
         if (uploadError) {
+          console.error('Upload error:', uploadError);
           throw uploadError;
         }
 
         const { data: urlData } = await supabase.storage
           .from('flashcards')
-          .getPublicUrl(`flashcard-images/${fileName}`);
+          .getPublicUrl(filePath);
 
+        console.log('Image URL data:', urlData);
+        
         if (!urlData?.publicUrl) {
           throw new Error('Failed to get public URL for uploaded image');
         }
@@ -158,6 +164,8 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
           text: formData.back.trim(),
           imageUrl: urlData.publicUrl
         });
+        
+        console.log('Back content:', backContent);
       } else {
         backContent = formData.back.trim();
       }

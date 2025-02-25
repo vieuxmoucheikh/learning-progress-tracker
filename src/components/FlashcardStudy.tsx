@@ -46,10 +46,13 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
 
       if (error) throw error;
 
+      console.log('Loaded cards:', data);
+
       // Parse back content for each card
       const cardsWithParsedContent = data.map(card => {
         try {
           const parsedContent = JSON.parse(card.back_content);
+          console.log('Parsed content for card:', card.id, parsedContent);
           return {
             ...card,
             parsedBackContent: {
@@ -58,6 +61,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
             }
           };
         } catch (e) {
+          console.log('Failed to parse content for card:', card.id, e);
           return {
             ...card,
             parsedBackContent: {
@@ -68,6 +72,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
         }
       });
 
+      console.log('Cards with parsed content:', cardsWithParsedContent);
       setCards(cardsWithParsedContent);
       setSessionStats({
         reviewed: 0,
@@ -201,6 +206,10 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
                         src={currentCard.parsedBackContent.imageUrl} 
                         alt="Card content" 
                         className="max-h-64 mx-auto rounded-lg object-contain"
+                        onError={(e) => {
+                          console.error('Image failed to load:', currentCard.parsedBackContent?.imageUrl);
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     </div>
                   )}
