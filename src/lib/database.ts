@@ -477,14 +477,13 @@ export async function startPomodoro(type: 'work' | 'break' | 'long_break' = 'wor
   }
 }
 
-export async function completePomodoro(pomodoroId: string, skipped: boolean = false): Promise<Pomodoro> {
+export async function completePomodoro(pomodoroId: string): Promise<Pomodoro> {
   try {
     const { data, error } = await supabase
       .from('pomodoros')
       .update({
         end_time: new Date().toISOString(),
         completed: true,
-        skipped: skipped,
         updated_at: new Date().toISOString()
       })
       .eq('id', pomodoroId)

@@ -113,7 +113,6 @@ export interface Pomodoro {
   end_time?: string;
   type: 'work' | 'break' | 'long_break';
   completed: boolean;
-  skipped?: boolean;
   created_at: string;
   updated_at: string;
 }
