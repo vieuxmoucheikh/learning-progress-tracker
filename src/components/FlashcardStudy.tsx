@@ -6,7 +6,6 @@ import { useToast } from './ui/use-toast';
 import { ArrowLeft, Repeat, ThumbsUp, ThumbsDown, Check, Brain } from 'lucide-react';
 import { calculateNextReview, submitReview } from '../lib/flashcards';
 import type { Flashcard } from '../types';
-import '../styles/flashcard.css';
 
 interface FlashcardStudyProps {
   deckId: string;
@@ -19,7 +18,6 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [sessionStats, setSessionStats] = useState({
     reviewed: 0,
     mastered: 0,
@@ -30,49 +28,6 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
   useEffect(() => {
     loadCards();
   }, [deckId]);
-
-  // Function to sanitize HTML content for safe rendering
-  const sanitizeHtml = (html: string) => {
-    console.log("Original HTML:", html);
-    // Replace newlines with <br> tags but preserve the div tags
-    // Remove the special image comment
-    const sanitized = html
-      .replace(/\n/g, '<br />')
-      .replace(/<!-- FLASHCARD_IMAGES:[^]+ -->/g, '');
-    console.log("Sanitized HTML:", sanitized);
-    return sanitized;
-  };
-
-  // Function to extract image URLs from content
-  const extractImageUrls = (content: string): string[] => {
-    const urls: string[] = [];
-    
-    // Extract from img tags
-    const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/g;
-    let match;
-    while ((match = imgRegex.exec(content)) !== null) {
-      urls.push(match[1]);
-    }
-    
-    // Extract from background-image style
-    const bgRegex = /background-image:\s*url\(['"]([^'"]+)['"]\)/g;
-    while ((match = bgRegex.exec(content)) !== null) {
-      urls.push(match[1]);
-    }
-    
-    // Extract from special comment format
-    const commentRegex = /<!-- FLASHCARD_IMAGES:([^]+) -->/g;
-    while ((match = commentRegex.exec(content)) !== null) {
-      try {
-        const imageUrls = JSON.parse(match[1]);
-        urls.push(...imageUrls);
-      } catch (error) {
-        console.error('Error parsing image URLs:', error);
-      }
-    }
-    
-    return urls;
-  };
 
   const loadCards = async () => {
     try {
@@ -172,15 +127,6 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
     }
   };
 
-  const handleFlip = () => {
-    if (!isFlipped) {
-      // Extract image URLs when flipping to back
-      const urls = extractImageUrls(currentCard.back_content);
-      setImageUrls(urls);
-    }
-    setIsFlipped(!isFlipped);
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -229,7 +175,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
             className={`relative h-96 rounded-xl shadow-lg transition-all duration-500 transform cursor-pointer
               ${isFlipped ? 'bg-blue-50' : 'bg-white'}`}
             style={{ perspective: '1000px' }}
-            onClick={handleFlip}
+            onClick={() => setIsFlipped(!isFlipped)}
           >
             <div
               className={`absolute inset-0 p-6 backface-hidden transition-all duration-500 transform rounded-xl
@@ -255,31 +201,9 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
               <div className="h-full flex flex-col">
                 <div className="text-sm text-gray-500 mb-2">Back</div>
                 <div className="flex-1 overflow-y-auto">
-                  <div 
-                    className="text-lg flashcard-content"
-                    dangerouslySetInnerHTML={{ 
-                      __html: sanitizeHtml(currentCard.back_content)
-                    }}
-                  />
-                  
-                  {/* Direct image display */}
-                  {imageUrls.length > 0 && (
-                    <div className="mt-4">
-                      {imageUrls.map((url, index) => (
-                        <div key={index} className="mb-4">
-                          <img 
-                            src={url} 
-                            alt={`Flashcard image ${index + 1}`}
-                            className="max-w-full h-auto rounded-md"
-                            style={{ maxHeight: '300px', margin: '0 auto' }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="text-sm text-gray-500 text-center mt-4">
-                  Click to flip
+                  <div className="text-lg">
+                    {currentCard.back_content}
+                  </div>
                 </div>
               </div>
             </div>
