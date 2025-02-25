@@ -55,26 +55,16 @@ export const getDeckById = async (deckId: string) => {
 
 export const deleteDeck = async (deckId: string) => {
   try {
-    // First delete all flashcards in the deck
-    const { error: flashcardsError } = await supabase
-      .from('flashcards')
-      .delete()
-      .eq('deck_id', deckId);
-
-    if (flashcardsError) {
-      console.error('Error deleting deck flashcards:', flashcardsError);
-      throw flashcardsError;
-    }
-
-    // Then delete the deck
-    const { error: deckError } = await supabase
+    // Delete the deck (flashcards will be deleted via ON DELETE CASCADE)
+    const { error } = await supabase
       .from('flashcard_decks')
       .delete()
-      .eq('id', deckId);
+      .eq('id', deckId)
+      .select();
 
-    if (deckError) {
-      console.error('Error deleting deck:', deckError);
-      throw deckError;
+    if (error) {
+      console.error('Error deleting deck:', error);
+      throw error;
     }
   } catch (error) {
     console.error('Error in deleteDeck:', error);
@@ -108,7 +98,8 @@ export const deleteFlashcard = async (cardId: string) => {
     const { data, error } = await supabase
       .from('flashcards')
       .delete()
-      .eq('id', cardId);
+      .eq('id', cardId)
+      .select();
 
     if (error) {
       console.error('Error deleting flashcard:', error);
