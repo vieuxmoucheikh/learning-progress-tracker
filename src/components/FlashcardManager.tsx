@@ -87,31 +87,25 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
             continue;
           }
 
-          // Convert image to PNG format
-          const imgBlob = await new Promise<Blob>((resolve, reject) => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const img = new Image();
-            
-            img.onload = () => {
-              canvas.width = img.width;
-              canvas.height = img.height;
-              ctx?.drawImage(img, 0, 0);
-              canvas.toBlob((blob) => {
-                if (blob) {
-                  resolve(blob);
-                } else {
-                  reject(new Error('Failed to convert image'));
-                }
-              }, 'image/png');
+          // Convert file to base64
+          const base64Data = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const result = reader.result as string;
+              const base64 = result.split(',')[1];
+              resolve(base64);
             };
-            
-            img.onerror = () => {
-              reject(new Error('Failed to load image'));
-            };
-            
-            img.src = URL.createObjectURL(file);
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(file);
           });
+
+          // Convert base64 back to binary
+          const binaryStr = atob(base64Data);
+          const bytes = new Uint8Array(binaryStr.length);
+          for (let i = 0; i < binaryStr.length; i++) {
+            bytes[i] = binaryStr.charCodeAt(i);
+          }
+          const imageBlob = new Blob([bytes], { type: 'image/png' });
 
           // Generate a unique filename
           const timestamp = new Date().getTime();
@@ -119,17 +113,15 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
 
           console.log('Uploading file:', {
             filename,
-            blobType: imgBlob.type,
-            blobSize: imgBlob.size
+            type: imageBlob.type,
+            size: imageBlob.size
           });
 
           // Upload to Supabase Storage
           const { data, error: uploadError } = await supabase.storage
             .from('flashcard_images')
-            .upload(filename, imgBlob, {
-              contentType: 'image/png',
-              cacheControl: '3600',
-              upsert: false
+            .upload(filename, imageBlob, {
+              contentType: 'image/png'
             });
 
           if (uploadError) {
