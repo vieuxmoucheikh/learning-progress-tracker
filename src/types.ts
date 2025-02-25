@@ -198,11 +198,13 @@ export interface Flashcard {
   created_at: string;
   last_reviewed?: string;
   next_review?: string;
-  interval?: number;
-  ease_factor?: number;
-  repetitions?: number;
+  interval: number;
+  ease_factor: number;
+  repetitions: number;
+  review_count: number;
   mastered: boolean;
-  review_count?: number;
+  tags?: string[];
+  notes?: string;
 }
 
 export interface FlashcardReview {
