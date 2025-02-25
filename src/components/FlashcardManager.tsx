@@ -66,7 +66,16 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
         
         try {
           const file = item.getAsFile();
-          if (!file) continue;
+          if (!file) {
+            console.error('No file found in clipboard');
+            continue;
+          }
+
+          console.log('File info:', {
+            type: file.type,
+            size: file.size,
+            name: file.name
+          });
 
           // Check file size (5MB limit)
           if (file.size > 5 * 1024 * 1024) {
@@ -78,38 +87,68 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
             continue;
           }
 
-          // Convert to proper image file with correct MIME type
-          const blob = await new Promise<Blob>((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              const blob = new Blob([event.target?.result as ArrayBuffer], { type: file.type });
-              resolve(blob);
+          // Convert image to PNG format
+          const imgBlob = await new Promise<Blob>((resolve, reject) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = () => {
+              canvas.width = img.width;
+              canvas.height = img.height;
+              ctx?.drawImage(img, 0, 0);
+              canvas.toBlob((blob) => {
+                if (blob) {
+                  resolve(blob);
+                } else {
+                  reject(new Error('Failed to convert image'));
+                }
+              }, 'image/png');
             };
-            reader.readAsArrayBuffer(file);
+            
+            img.onerror = () => {
+              reject(new Error('Failed to load image'));
+            };
+            
+            img.src = URL.createObjectURL(file);
           });
 
           // Generate a unique filename
           const timestamp = new Date().getTime();
-          const fileExt = file.type.split('/')[1];
-          const filename = `flashcard_${deckId}_${timestamp}.${fileExt}`;
+          const filename = `flashcard_${deckId}_${timestamp}.png`;
+
+          console.log('Uploading file:', {
+            filename,
+            blobType: imgBlob.type,
+            blobSize: imgBlob.size
+          });
 
           // Upload to Supabase Storage
           const { data, error: uploadError } = await supabase.storage
             .from('flashcard_images')
-            .upload(filename, blob, {
-              contentType: file.type,
+            .upload(filename, imgBlob, {
+              contentType: 'image/png',
               cacheControl: '3600',
               upsert: false
             });
 
-          if (uploadError) throw uploadError;
+          if (uploadError) {
+            console.error('Upload error details:', uploadError);
+            throw uploadError;
+          }
+
+          console.log('Upload successful:', data);
 
           // Get the public URL
           const { data: { publicUrl } } = supabase.storage
             .from('flashcard_images')
             .getPublicUrl(filename);
 
-          if (!publicUrl) throw new Error('Failed to get public URL for uploaded image');
+          if (!publicUrl) {
+            throw new Error('Failed to get public URL for uploaded image');
+          }
+
+          console.log('Public URL generated:', publicUrl);
 
           // Update form data with new image URL
           setFormData(prev => ({
