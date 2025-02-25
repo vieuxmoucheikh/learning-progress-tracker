@@ -19,6 +19,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [sessionStats, setSessionStats] = useState({
     reviewed: 0,
     mastered: 0,
@@ -32,10 +33,11 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
 
   // Function to sanitize HTML content for safe rendering
   const sanitizeHtml = (html: string) => {
-    // Allow only img tags with safe attributes
-    return html
-      .replace(/\n/g, '<br />')
-      .replace(/<img/g, '<img loading="lazy" class="flashcard-image"');
+    console.log("Original HTML:", html);
+    // Replace newlines with <br> tags but preserve the div tags
+    const sanitized = html.replace(/\n/g, '<br />');
+    console.log("Sanitized HTML:", sanitized);
+    return sanitized;
   };
 
   const loadCards = async () => {

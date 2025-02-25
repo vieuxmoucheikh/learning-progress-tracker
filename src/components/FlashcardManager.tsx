@@ -30,10 +30,8 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
 
   // Function to sanitize HTML content for safe rendering
   const sanitizeHtml = (html: string) => {
-    // Allow only img tags with safe attributes
-    return html
-      .replace(/\n/g, '<br />')
-      .replace(/<img/g, '<img loading="lazy" class="flashcard-image"');
+    // Replace newlines with <br> tags but preserve the div tags
+    return html.replace(/\n/g, '<br />');
   };
 
   useEffect(() => {
@@ -87,7 +85,8 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
       if (uploadedImages.length > 0) {
         // Add each image on a new line
         uploadedImages.forEach(imageUrl => {
-          backContent += `\n\n<img src="${imageUrl}" alt="Flashcard image" width="100%" style="max-width: 100%; height: auto; display: block; margin: 10px 0;" />`;
+          // Use a div with background-image instead of an img tag
+          backContent += `\n\n<div style="background-image: url('${imageUrl}'); background-size: contain; background-repeat: no-repeat; background-position: center; width: 100%; height: 200px; margin: 10px 0; border-radius: 4px;"></div>`;
         });
       }
 
