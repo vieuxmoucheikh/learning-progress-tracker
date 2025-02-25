@@ -74,26 +74,39 @@ export const uploadImage = async (file: File): Promise<string> => {
       throw new Error('No file provided');
     }
 
+    // Check file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error('File size must be less than 5MB');
+    }
+
+    // Generate a unique file name
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `public/${fileName}`;
 
-    const { data, error } = await supabase.storage
+    // Upload the file
+    const { error: uploadError } = await supabase.storage
       .from(BUCKET_NAME)
-      .upload(fileName, file, {
+      .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false
       });
 
-    if (error) {
-      console.error('Error uploading file:', error);
-      throw error;
+    if (uploadError) {
+      console.error('Error uploading file:', uploadError);
+      throw uploadError;
     }
 
-    const { data: { publicUrl } } = supabase.storage
+    // Get the public URL
+    const { data } = supabase.storage
       .from(BUCKET_NAME)
-      .getPublicUrl(fileName);
+      .getPublicUrl(filePath);
 
-    return publicUrl;
+    if (!data.publicUrl) {
+      throw new Error('Failed to get public URL');
+    }
+
+    return data.publicUrl;
   } catch (error) {
     console.error('Error in uploadImage:', error);
     throw error;
