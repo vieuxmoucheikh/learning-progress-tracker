@@ -59,8 +59,7 @@ export const deleteDeck = async (deckId: string) => {
     const { error } = await supabase
       .from('flashcard_decks')
       .delete()
-      .match({ id: deckId })
-      .select('id');  // Only select id to avoid path column issue
+      .filter('id', 'eq', deckId);
 
     if (error) {
       console.error('Error deleting deck:', error);
@@ -98,8 +97,7 @@ export const deleteFlashcard = async (cardId: string) => {
     const { error } = await supabase
       .from('flashcards')
       .delete()
-      .match({ id: cardId })
-      .select('id');  // Only select id to avoid path column issue
+      .filter('id', 'eq', cardId);
 
     if (error) {
       console.error('Error deleting flashcard:', error);
