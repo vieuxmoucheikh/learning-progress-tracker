@@ -16,8 +16,7 @@ interface FlashcardStudyProps {
 export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackToDecks, onFinish }) => {
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [currentCard, setCurrentCard] = useState<Flashcard | null>(null);
-  const [showBack, setShowBack] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sessionStats, setSessionStats] = useState({
     reviewed: 0,
@@ -30,140 +29,99 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
     loadCards();
   }, [deckId]);
 
-  useEffect(() => {
-    if (cards.length > 0) {
-      setCurrentCard(cards[currentCardIndex]);
-    }
-  }, [cards, currentCardIndex]);
-
   const loadCards = async () => {
     try {
       const { data, error } = await supabase
         .from('flashcards')
         .select('*')
         .eq('deck_id', deckId)
-        .order('next_review', { ascending: true });
+        .order('next_review', { ascending: true, nullsFirst: true });
 
       if (error) throw error;
 
-      console.log('Loaded cards:', data);
-
-      // Parse back content for each card
-      const cardsWithParsedContent = data.map(card => {
-        try {
-          const parsedContent = JSON.parse(card.back_content);
-          console.log('Parsed content for card:', card.id, parsedContent);
-          return {
-            ...card,
-            parsedBackContent: {
-              text: parsedContent.text || card.back_content,
-              imageUrl: parsedContent.imageUrl || null
-            }
-          };
-        } catch (e) {
-          console.log('Failed to parse content for card:', card.id, e);
-          return {
-            ...card,
-            parsedBackContent: {
-              text: card.back_content,
-              imageUrl: null
-            }
-          };
-        }
+      const now = new Date();
+      const dueCards = (data || []).filter(card => {
+        if (card.mastered) return false;
+        if (!card.next_review) return true;
+        return new Date(card.next_review) <= now;
       });
 
-      console.log('Cards with parsed content:', cardsWithParsedContent);
-      setCards(cardsWithParsedContent);
-      setSessionStats({
-        reviewed: 0,
-        mastered: 0,
-        total: cardsWithParsedContent.length
-      });
+      setCards(dueCards);
+      setSessionStats(prev => ({ ...prev, total: dueCards.length }));
       setLoading(false);
     } catch (error) {
       console.error('Error loading cards:', error);
       toast({
-        title: 'Error loading cards',
-        description: 'There was an error loading your flashcards.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to load flashcards",
+        variant: "destructive"
       });
     }
   };
 
   const handleRate = async (quality: number) => {
-    if (!currentCard) return;
+    if (!cards.length) return;
+
+    const currentCard = cards[currentCardIndex];
+    const { interval, easeFactor, mastered } = calculateNextReview(
+      quality,
+      currentCard.interval || 0,
+      currentCard.ease_factor || 2.5,
+      currentCard.repetitions || 0
+    );
 
     try {
-      const now = new Date();
-      const { interval, easeFactor, mastered } = calculateNextReview(
+      const updatedCard = await submitReview(
+        currentCard.id,
         quality,
-        currentCard.interval ?? 0,
-        currentCard.ease_factor ?? 2.5,
-        currentCard.repetitions ?? 0
-      );
-
-      // First update the card
-      const updates = {
-        last_reviewed: now.toISOString(),
-        next_review: new Date(now.getTime() + interval * 24 * 60 * 60 * 1000).toISOString(),
+        currentCard.interval || 0,
         interval,
-        ease_factor: easeFactor,
-        repetitions: (currentCard.repetitions ?? 0) + 1,
-        mastered,
-        review_count: (currentCard.review_count ?? 0) + 1
-      };
-
-      console.log('Updating card with:', updates);
-      const { error: updateError } = await supabase
-        .from('flashcards')
-        .update(updates)
-        .eq('id', currentCard.id);
-
-      if (updateError) {
-        console.error('Update error:', updateError);
-        throw updateError;
-      }
+        currentCard.ease_factor || 2.5,
+        easeFactor,
+        mastered
+      );
 
       // Update session stats
       setSessionStats(prev => ({
+        ...prev,
         reviewed: prev.reviewed + 1,
-        mastered: prev.mastered + (mastered ? 1 : 0),
-        total: prev.total
+        mastered: prev.mastered + (mastered ? 1 : 0)
       }));
 
-      // Show feedback
+      // Show feedback toast
       const feedbackMessages = {
         1: "Keep practicing! You'll get it next time.",
-        2: "Good effort! Review again soon.",
-        3: "Great job! Getting better.",
-        4: "Perfect! You've mastered this card!"
+        2: "Good progress! Review again in a few days.",
+        3: "Great job! Review again in a month.",
+        4: "Perfect! Card mastered!"
       };
 
       toast({
-        title: mastered ? "Card Mastered! 🎉" : "Card Reviewed",
+        title: mastered ? "Card Mastered! " : "Review Submitted",
         description: feedbackMessages[quality as keyof typeof feedbackMessages],
+        variant: mastered ? "default" : "default"
       });
 
       // Move to next card
       if (currentCardIndex < cards.length - 1) {
         setCurrentCardIndex(prev => prev + 1);
-        setShowBack(false);
+        setIsFlipped(false);
       } else {
         // Session complete
         toast({
-          title: "Session Complete! 🎉",
-          description: `You reviewed ${sessionStats.reviewed + 1} cards and mastered ${sessionStats.mastered + (mastered ? 1 : 0)} out of ${sessionStats.total} cards.`
+          title: "Session Complete! ",
+          description: `You reviewed ${sessionStats.reviewed} cards and mastered ${sessionStats.mastered} cards!`,
         });
         await loadCards(); // Reload cards to get new due cards
         setCurrentCardIndex(0);
-        setShowBack(false);
+        setIsFlipped(false);
         if (onFinish) onFinish();
       }
     } catch (error) {
-      console.error('Error updating flashcard:', error);
+      console.error('Error submitting review:', error);
       toast({
         title: "Error",
-        description: "Failed to update flashcard. Please try again.",
+        description: "Failed to submit review",
         variant: "destructive"
       });
     }
@@ -194,6 +152,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
     );
   }
 
+  const currentCard = cards[currentCardIndex];
+
   return (
     <div className="flex flex-col h-full max-w-4xl mx-auto p-4 space-y-4">
       <div className="container mx-auto p-4 max-w-2xl">
@@ -211,54 +171,50 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
         </div>
 
         <div className="flex-grow flex flex-col">
-          <div className="max-w-2xl mx-auto p-6">
-            {currentCard ? (
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center">
-                <div className="mb-8">
-                  <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-4">
-                    {showBack ? 'Back' : 'Front'}
-                  </h3>
-                  <div className="text-gray-700 dark:text-gray-300 text-lg whitespace-pre-wrap">
-                    {showBack ? currentCard.parsedBackContent?.text : currentCard.front_content}
+          <div 
+            className={`relative h-96 rounded-xl shadow-lg transition-all duration-500 transform cursor-pointer
+              ${isFlipped ? 'bg-blue-50' : 'bg-white'}`}
+            style={{ perspective: '1000px' }}
+            onClick={() => setIsFlipped(!isFlipped)}
+          >
+            <div
+              className={`absolute inset-0 p-6 backface-hidden transition-all duration-500 transform rounded-xl
+                ${isFlipped ? 'rotate-y-180 opacity-0' : 'rotate-y-0 opacity-100'}`}
+            >
+              <div className="h-full flex flex-col">
+                <div className="text-sm text-gray-500 mb-2">Front</div>
+                <div className="flex-1 overflow-y-auto">
+                  <div className="text-lg">
+                    {currentCard.front_content}
                   </div>
-                  {showBack && currentCard.parsedBackContent?.imageUrl && (
-                    <div className="mt-4 flex justify-center">
-                      <div className="relative max-w-full">
-                        <img 
-                          src={currentCard.parsedBackContent.imageUrl} 
-                          alt="Card content" 
-                          className="max-h-64 rounded-lg object-contain bg-white"
-                          onError={(e) => {
-                            console.error('Image failed to load:', currentCard.parsedBackContent?.imageUrl);
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = 'none';
-                            target.parentElement?.classList.add('hidden');
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
                 </div>
-                <div className="flex justify-center">
-                  <Button
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                    onClick={() => setShowBack(!showBack)}
-                  >
-                    {showBack ? 'Show Front' : 'Show Back'}
-                  </Button>
+                <div className="text-sm text-gray-500 text-center mt-4">
+                  Click to flip
                 </div>
               </div>
-            ) : (
-              <div>Loading...</div>
-            )}
+            </div>
+
+            <div
+              className={`absolute inset-0 p-6 backface-hidden transition-all duration-500 transform rounded-xl
+                ${isFlipped ? 'rotate-y-0 opacity-100' : 'rotate-y-180 opacity-0'}`}
+            >
+              <div className="h-full flex flex-col">
+                <div className="text-sm text-gray-500 mb-2">Back</div>
+                <div className="flex-1 overflow-y-auto">
+                  <div className="text-lg">
+                    {currentCard.back_content}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="mt-8 space-y-4">
+          <div className={`mt-8 space-y-4 transition-opacity duration-300 ${isFlipped ? 'opacity-100' : 'opacity-0'}`}>
             <div className="grid grid-cols-4 gap-2">
               <Button
                 className="bg-red-600 hover:bg-red-700 text-white"
                 onClick={() => handleRate(1)}
-                disabled={!showBack}
+                disabled={!isFlipped}
               >
                 <ThumbsDown className="h-4 w-4 mr-2" />
                 Hard
@@ -266,7 +222,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
               <Button
                 className="bg-yellow-600 hover:bg-yellow-700 text-white"
                 onClick={() => handleRate(2)}
-                disabled={!showBack}
+                disabled={!isFlipped}
               >
                 <Repeat className="h-4 w-4 mr-2" />
                 Medium
@@ -274,7 +230,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
               <Button
                 className="bg-green-600 hover:bg-green-700 text-white"
                 onClick={() => handleRate(3)}
-                disabled={!showBack}
+                disabled={!isFlipped}
               >
                 <ThumbsUp className="h-4 w-4 mr-2" />
                 Easy
@@ -282,7 +238,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
               <Button
                 className="bg-blue-600 hover:bg-blue-700 text-white"
                 onClick={() => handleRate(4)}
-                disabled={!showBack}
+                disabled={!isFlipped}
               >
                 <Check className="h-4 w-4 mr-2" />
                 Master

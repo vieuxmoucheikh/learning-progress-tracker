@@ -203,10 +203,6 @@ export interface Flashcard {
   repetitions?: number;
   mastered: boolean;
   review_count?: number;
-  parsedBackContent?: {
-    text: string;
-    imageUrl: string | null;
-  };
 }
 
 export interface FlashcardReview {
