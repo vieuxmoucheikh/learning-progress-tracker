@@ -252,9 +252,81 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     }, [settings, isBreak, tasks, activeTaskId, toast]);
 
+    // Function to play a more prominent goal achievement sound
+    const playGoalAchievedSound = useCallback((context: AudioContext) => {
+        try {
+            // Create a more festive celebration sound
+            // First note - triumphant
+            const osc1 = context.createOscillator();
+            const gain1 = context.createGain();
+            osc1.connect(gain1);
+            gain1.connect(context.destination);
+            
+            osc1.type = 'triangle';
+            osc1.frequency.setValueAtTime(523.25, context.currentTime); // C5
+            gain1.gain.setValueAtTime(0, context.currentTime);
+            gain1.gain.linearRampToValueAtTime(0.3, context.currentTime + 0.1);
+            gain1.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 1.5);
+            
+            osc1.start(context.currentTime);
+            osc1.stop(context.currentTime + 1.5);
+            
+            // Second note - higher
+            const osc2 = context.createOscillator();
+            const gain2 = context.createGain();
+            osc2.connect(gain2);
+            gain2.connect(context.destination);
+            
+            osc2.type = 'triangle';
+            osc2.frequency.setValueAtTime(659.25, context.currentTime + 0.25); // E5
+            gain2.gain.setValueAtTime(0, context.currentTime + 0.25);
+            gain2.gain.linearRampToValueAtTime(0.3, context.currentTime + 0.35);
+            gain2.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 1.75);
+            
+            osc2.start(context.currentTime + 0.25);
+            osc2.stop(context.currentTime + 1.75);
+            
+            // Third note - highest
+            const osc3 = context.createOscillator();
+            const gain3 = context.createGain();
+            osc3.connect(gain3);
+            gain3.connect(context.destination);
+            
+            osc3.type = 'triangle';
+            osc3.frequency.setValueAtTime(783.99, context.currentTime + 0.5); // G5
+            gain3.gain.setValueAtTime(0, context.currentTime + 0.5);
+            gain3.gain.linearRampToValueAtTime(0.3, context.currentTime + 0.6);
+            gain3.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 2.0);
+            
+            osc3.start(context.currentTime + 0.5);
+            osc3.stop(context.currentTime + 2.0);
+            
+            // Final triumphant chord
+            const osc4 = context.createOscillator();
+            const gain4 = context.createGain();
+            osc4.connect(gain4);
+            gain4.connect(context.destination);
+            
+            osc4.type = 'triangle';
+            osc4.frequency.setValueAtTime(1046.50, context.currentTime + 0.75); // C6 (high C)
+            gain4.gain.setValueAtTime(0, context.currentTime + 0.75);
+            gain4.gain.linearRampToValueAtTime(0.4, context.currentTime + 0.85);
+            gain4.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 2.5);
+            
+            osc4.start(context.currentTime + 0.75);
+            osc4.stop(context.currentTime + 2.5);
+            
+            return new Promise(resolve => setTimeout(resolve, 2500));
+        } catch (error) {
+            console.error('Error playing goal achieved sound:', error);
+        }
+    }, []);
+
     // Check daily goal achievement
     const checkDailyGoal = useCallback((completedPomodoros: number) => {
         if (settings?.daily_goal && completedPomodoros >= settings.daily_goal && !isCompleted) {
+            // Stop the timer if it's running
+            setIsActive(false);
             setIsCompleted(true);
             
             // Play celebration sound
@@ -262,105 +334,25 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 playGoalAchievedSound(audioContext);
             }
             
-            // Show celebration toast
+            // Show celebration toast with more emphasis
             toast({
-                title: "Daily Goal Achieved! ",
-                description: `You've completed ${completedPomodoros} pomodoros today!`,
+                title: "🎉 Daily Goal Achieved! 🎉",
+                description: `Congratulations! You've completed ${completedPomodoros} pomodoros today and reached your daily goal of ${settings.daily_goal}!`,
                 variant: "default",
-                duration: 5000,
+                duration: 8000, // Longer duration for celebration
             });
-        }
-    }, [settings, isCompleted, audioContext, toast]);
-
-    // Modifier handleTimerComplete pour mieux gérer les paramètres
-    const handleTimerComplete = useCallback(async () => {
-        if (!settings) return;
-
-        try {
-            // S'assurer que l'AudioContext est créé si nécessaire
-            if (!audioContext) {
-                const newAudioContext = new AudioContext();
-                setAudioContext(newAudioContext);
-            }
-
-            // Jouer le son avant toute autre opération si activé
-            if (settings.sound_enabled && audioContext) {
-                await playNotificationSound();
-            }
-
-            // Arrêter le timer actif
-            setIsActive(false);
             
-            // Compléter le pomodoro actuel
-            if (currentPomodoroId) {
-                await completePomodoro(currentPomodoroId);
-                setCurrentPomodoroId(null);
+            // Show browser notification if enabled
+            if (settings.notification_enabled) {
+                if (Notification.permission === 'granted') {
+                    new Notification('Daily Goal Achieved! 🎉', {
+                        body: `Congratulations! You've completed your daily goal of ${settings.daily_goal} pomodoros!`,
+                        icon: 'favicon.ico'
+                    });
+                }
             }
-
-            // Mettre à jour les métriques pour le focus time uniquement
-            if (!isBreak && activeTaskId) {
-                const newPomodoroCount = pomodoroCount + 1;
-                setPomodoroCount(newPomodoroCount);
-                
-                setTasks(prev => prev.map(task => {
-                    if (task.id === activeTaskId) {
-                        const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
-                        checkDailyGoal(newCompletedPomodoros);
-                        return {
-                            ...task,
-                            metrics: {
-                                ...task.metrics,
-                                currentStreak: task.metrics.currentStreak + 1,
-                                completedPomodoros: newCompletedPomodoros,
-                                totalMinutes: task.metrics.totalMinutes + settings.work_duration
-                            }
-                        };
-                    }
-                    return task;
-                }));
-                
-                // Sauvegarder les tâches mises à jour
-                saveTasks();
-            }
-
-            // Basculer entre focus et pause
-            setIsBreak(!isBreak);
-
-            // Calculer la durée suivante
-            const newDuration = isBreak ? settings.break_duration : settings.work_duration;
-
-            setTime(newDuration * 60);
-
-            // Afficher une notification
-            toast({
-                title: isBreak ? "Time for a break!" : "Break complete!",
-                description: isBreak
-                    ? `Taking a ${newDuration}-minute break.`
-                    : "Ready for another focused session!",
-                duration: 3000,
-            });
-
-            // Démarrer automatiquement avec un délai
-            const shouldAutoStart = isBreak ? settings.auto_start_breaks : settings.auto_start_pomodoros;
-            if (shouldAutoStart) {
-                // Attendre que les états soient mis à jour
-                setTimeout(async () => {
-                    try {
-                        await startNewPomodoro(isBreak ? 'break' : 'work');
-                    } catch (error) {
-                        console.error('Error auto-starting next session:', error);
-                    }
-                }, 1000);
-            }
-        } catch (error) {
-            console.error('Error completing timer:', error);
-            toast({
-                title: 'Error',
-                description: 'Failed to complete timer session',
-                variant: 'destructive',
-            });
         }
-    }, [isBreak, settings, currentPomodoroId, activeTaskId, pomodoroCount, audioContext, playNotificationSound, checkDailyGoal, saveTasks, startNewPomodoro]);
+    }, [settings, isCompleted, audioContext, toast, playGoalAchievedSound]);
 
     // Add streak tracking
     useEffect(() => {
@@ -772,6 +764,96 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             window.removeEventListener('keydown', handleKeyDown);
         };
     }, [activeTaskId, isActive, toggleTimer, skipCurrentInterval, settingsOpen]);
+
+    // Modifier handleTimerComplete pour mieux gérer les paramètres
+    const handleTimerComplete = useCallback(async () => {
+        if (!settings) return;
+
+        try {
+            // S'assurer que l'AudioContext est créé si nécessaire
+            if (!audioContext) {
+                const newAudioContext = new AudioContext();
+                setAudioContext(newAudioContext);
+            }
+
+            // Jouer le son avant toute autre opération si activé
+            if (settings.sound_enabled && audioContext) {
+                await playNotificationSound();
+            }
+
+            // Arrêter le timer actif
+            setIsActive(false);
+            
+            // Compléter le pomodoro actuel
+            if (currentPomodoroId) {
+                await completePomodoro(currentPomodoroId);
+                setCurrentPomodoroId(null);
+            }
+
+            // Mettre à jour les métriques pour le focus time uniquement
+            if (!isBreak && activeTaskId) {
+                const newPomodoroCount = pomodoroCount + 1;
+                setPomodoroCount(newPomodoroCount);
+                
+                setTasks(prev => prev.map(task => {
+                    if (task.id === activeTaskId) {
+                        const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
+                        checkDailyGoal(newCompletedPomodoros);
+                        return {
+                            ...task,
+                            metrics: {
+                                ...task.metrics,
+                                currentStreak: task.metrics.currentStreak + 1,
+                                completedPomodoros: newCompletedPomodoros,
+                                totalMinutes: task.metrics.totalMinutes + settings.work_duration
+                            }
+                        };
+                    }
+                    return task;
+                }));
+                
+                // Sauvegarder les tâches mises à jour
+                saveTasks();
+            }
+
+            // Basculer entre focus et pause
+            setIsBreak(!isBreak);
+
+            // Calculer la durée suivante
+            const newDuration = isBreak ? settings.break_duration : settings.work_duration;
+
+            setTime(newDuration * 60);
+
+            // Afficher une notification
+            toast({
+                title: isBreak ? "Time for a break!" : "Break complete!",
+                description: isBreak
+                    ? `Taking a ${newDuration}-minute break.`
+                    : "Ready for another focused session!",
+                duration: 3000,
+            });
+
+            // Démarrer automatiquement avec un délai
+            const shouldAutoStart = isBreak ? settings.auto_start_breaks : settings.auto_start_pomodoros;
+            if (shouldAutoStart) {
+                // Attendre que les états soient mis à jour
+                setTimeout(async () => {
+                    try {
+                        await startNewPomodoro(isBreak ? 'break' : 'work');
+                    } catch (error) {
+                        console.error('Error auto-starting next session:', error);
+                    }
+                }, 1000);
+            }
+        } catch (error) {
+            console.error('Error completing timer:', error);
+            toast({
+                title: 'Error',
+                description: 'Failed to complete timer session',
+                variant: 'destructive',
+            });
+        }
+    }, [isBreak, settings, currentPomodoroId, activeTaskId, pomodoroCount, audioContext, playNotificationSound, checkDailyGoal, saveTasks, startNewPomodoro]);
 
     return (
         <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate700/30 shadow-2xl">
