@@ -80,23 +80,50 @@ export const deleteDeck = async (deckId: string) => {
 
 // Flashcard operations
 export const createFlashcard = async (deckId: string, frontContent: string, backContent: string) => {
-  const { data, error } = await supabase
-    .from('flashcards')
-    .insert({
-      deck_id: deckId,
-      front_content: frontContent,
-      back_content: backContent,
-      interval: 0,
-      ease_factor: 2.5,
-      repetitions: 0,
-      review_count: 0,
-      mastered: false
-    })
-    .select()
-    .single();
+  try {
+    // First check if the deck exists and is accessible
+    const { data: deck, error: deckError } = await supabase
+      .from('flashcard_decks')
+      .select('id')
+      .eq('id', deckId)
+      .single();
 
-  if (error) throw error;
-  return data;
+    if (deckError) {
+      console.error('Error checking deck:', deckError);
+      throw deckError;
+    }
+
+    if (!deck) {
+      throw new Error('Deck not found');
+    }
+
+    // Create the flashcard with minimal required fields
+    const { data, error } = await supabase
+      .from('flashcards')
+      .insert({
+        deck_id: deckId,
+        front_content: frontContent,
+        back_content: backContent,
+        review_interval: 0,
+        ease_factor: 2.5,
+        repetitions: 0,
+        review_count: 0,
+        mastered: false,
+        next_review: new Date().toISOString()
+      })
+      .select('*')
+      .single();
+
+    if (error) {
+      console.error('Error creating flashcard:', error);
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in createFlashcard:', error);
+    throw error;
+  }
 };
 
 export const deleteFlashcard = async (cardId: string) => {
@@ -244,7 +271,7 @@ export const submitReview = async (
     .update({
       last_reviewed: now.toISOString(),
       next_review: nextReview?.toISOString() || null,
-      interval: newInterval,
+      review_interval: newInterval,
       ease_factor: newEaseFactor,
       repetitions: (prevInterval || 0) + 1,
       mastered: mastered,
