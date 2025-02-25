@@ -34,7 +34,7 @@ CREATE TABLE flashcards (
     tags TEXT[] DEFAULT '{}',
     media JSONB[] DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    interval INTEGER DEFAULT 0,
+    review_interval INTEGER DEFAULT 0,
     ease_factor FLOAT DEFAULT 2.5,
     repetitions INTEGER DEFAULT 0,
     review_count INTEGER DEFAULT 0,
@@ -118,7 +118,7 @@ RETURNS TABLE (
     front_content TEXT,
     back_content TEXT,
     tags TEXT[],
-    interval INTEGER,
+    review_interval INTEGER,
     ease_factor FLOAT,
     repetitions INTEGER,
     last_reviewed TIMESTAMP WITH TIME ZONE,
@@ -130,7 +130,7 @@ AS $$
 BEGIN
     RETURN QUERY
     SELECT f.id, f.deck_id, f.front_content, f.back_content, f.tags,
-           f.interval, f.ease_factor, f.repetitions, f.last_reviewed, f.next_review
+           f.review_interval, f.ease_factor, f.repetitions, f.last_reviewed, f.next_review
     FROM flashcards f
     JOIN flashcard_decks d ON f.deck_id = d.id
     WHERE d.user_id = p_user_id
