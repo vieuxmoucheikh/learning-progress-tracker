@@ -187,42 +187,46 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck, on
           return (
             <div
               key={deck.id}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-200 overflow-hidden"
+              className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden border border-gray-100 dark:border-gray-700"
             >
               <div className="p-6">
                 <div className="mb-4">
-                  <h3 className="text-xl font-semibold mb-2">{deck.name}</h3>
+                  <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">{deck.name}</h3>
                   <p className="text-gray-600 dark:text-gray-300 text-sm">{deck.description}</p>
                 </div>
 
                 {summary && (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">Progress</span>
-                      <span className="font-medium">{Math.round(masteredPercentage)}% Complete</span>
+                      <span className="text-gray-600 dark:text-gray-300">Progress</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{Math.round(masteredPercentage)}% Complete</span>
                     </div>
-                    <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 transition-all duration-300" 
+                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-300" 
                         style={{ width: `${masteredPercentage}%` }} 
                       />
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4 mt-4">
-                      <div className="text-sm text-gray-600">
-                        <span>{summary.totalCards} Total</span>
+                      <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700/50 rounded-lg p-2">
+                        <BookOpen className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{summary.totalCards} Total</span>
                       </div>
-                      <div className="text-sm text-yellow-500">
-                        <span>{summary.mastered} Mastered</span>
+                      <div className="flex items-center gap-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-2">
+                        <Star className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
+                        <span className="text-sm text-yellow-700 dark:text-yellow-500">{summary.mastered} Mastered</span>
                       </div>
                       {summary.dueToday > 0 && (
-                        <div className="text-sm text-yellow-600">
-                          <span>{summary.dueToday} Due</span>
+                        <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg p-2">
+                          <Clock className="h-4 w-4 text-orange-600 dark:text-orange-500" />
+                          <span className="text-sm text-orange-700 dark:text-orange-500">{summary.dueToday} Due</span>
                         </div>
                       )}
                       {summary.notStarted > 0 && (
-                        <div className="text-sm text-blue-600">
-                          <span>{summary.notStarted} New</span>
+                        <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">
+                          <PlusCircle className="h-4 w-4 text-blue-600 dark:text-blue-500" />
+                          <span className="text-sm text-blue-700 dark:text-blue-500">{summary.notStarted} New</span>
                         </div>
                       )}
                     </div>
@@ -230,13 +234,13 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck, on
                 )}
               </div>
 
-              <div className="border-t border-gray-100 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800/50">
+              <div className="border-t border-gray-100 dark:border-gray-700 p-4 bg-gray-50/80 dark:bg-gray-800/50 backdrop-blur-sm">
                 <div className="flex justify-end space-x-2">
                   <Button 
                     variant="outline" 
                     size="sm" 
                     onClick={() => onSelectDeck(deck.id)}
-                    className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="bg-white hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                   >
                     Manage
                   </Button>
@@ -244,7 +248,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck, on
                     variant="default"
                     size="sm"
                     onClick={() => onStudyDeck(deck.id)}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
                   >
                     <Play className="w-4 h-4 mr-1" /> Study
                   </Button>
@@ -253,23 +257,23 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck, on
                       <Button 
                         variant="destructive" 
                         size="sm"
-                        className="hover:bg-red-700"
+                        className="bg-red-600 hover:bg-red-700 text-white dark:bg-red-700 dark:hover:bg-red-800"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent>
+                    <AlertDialogContent className="bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700">
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Deck</AlertDialogTitle>
-                        <AlertDialogDescription>
+                        <AlertDialogTitle className="text-gray-900 dark:text-white">Delete Deck</AlertDialogTitle>
+                        <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
                           Are you sure you want to delete this deck? All flashcards in this deck will be permanently deleted.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300">Cancel</AlertDialogCancel>
                         <AlertDialogAction 
                           onClick={() => handleDeleteDeck(deck.id)}
-                          className="bg-red-600 hover:bg-red-700"
+                          className="bg-red-600 hover:bg-red-700 text-white dark:bg-red-700 dark:hover:bg-red-800"
                         >
                           Delete
                         </AlertDialogAction>
@@ -284,13 +288,13 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck, on
       </div>
 
       {decks.length === 0 && (
-        <div className="text-center py-12">
-          <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-medium mb-2">No flashcard decks yet</h3>
-          <p className="text-gray-600 mb-6">Create your first deck to start learning!</p>
+        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+          <BookOpen className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+          <h3 className="text-xl font-medium mb-2 text-gray-900 dark:text-white">No flashcard decks yet</h3>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">Create your first deck to start learning!</p>
           <Button 
             onClick={() => setIsCreating(true)}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
           >
             <Plus className="w-4 h-4 mr-2" /> Create Your First Deck
           </Button>
@@ -298,35 +302,41 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck, on
       )}
 
       <Dialog open={isCreating} onOpenChange={setIsCreating}>
-        <DialogContent>
+        <DialogContent className="bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle>Create New Deck</DialogTitle>
+            <DialogTitle className="text-gray-900 dark:text-white">Create New Deck</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Name</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Enter deck name"
+                className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Description</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Enter deck description"
+                className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700"
               />
             </div>
           </div>
           <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsCreating(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsCreating(false)}
+              className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+            >
               Cancel
             </Button>
             <Button 
               onClick={handleCreateDeck}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
             >
               Create Deck
             </Button>
