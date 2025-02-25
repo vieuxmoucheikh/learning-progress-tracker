@@ -25,8 +25,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 })
 
 // Initialize storage bucket if it doesn't exist
-export const initializeStorage = async () => {
+export const ensureStorageBucket = async () => {
   try {
+    // First check if bucket exists
     const { data: buckets, error: listError } = await supabase
       .storage
       .listBuckets();
@@ -36,7 +37,8 @@ export const initializeStorage = async () => {
     const flashcardBucket = buckets?.find(b => b.name === 'flashcard_images');
     
     if (!flashcardBucket) {
-      const { data, error } = await supabase
+      // Create the bucket
+      const { data, error: createError } = await supabase
         .storage
         .createBucket('flashcard_images', {
           public: true,
@@ -44,13 +46,20 @@ export const initializeStorage = async () => {
           fileSizeLimit: 5242880 // 5MB
         });
 
-      if (error) throw error;
-      console.log('Created flashcard_images bucket');
+      if (createError) throw createError;
+
+      // Wait a moment for the bucket to be fully created
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      return true;
     }
+
+    return true;
   } catch (error) {
-    console.error('Error initializing storage:', error);
+    console.error('Error ensuring storage bucket exists:', error);
+    return false;
   }
 };
 
 // Call this when the app starts
-initializeStorage();
+ensureStorageBucket();

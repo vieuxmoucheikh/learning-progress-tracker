@@ -7,7 +7,7 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
 import { Plus, Trash2, Play } from 'lucide-react';
 import { createFlashcard, deleteFlashcard } from '../lib/flashcards';
 import type { Flashcard } from '../types';
-import { supabase } from '../lib/supabase';
+import { supabase, ensureStorageBucket } from '../lib/supabase';
 
 interface FlashcardManagerProps {
   deckId: string;
@@ -78,23 +78,21 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
             continue;
           }
 
+          // Ensure bucket exists before upload
+          const bucketExists = await ensureStorageBucket();
+          if (!bucketExists) {
+            toast({
+              title: "Error",
+              description: "Failed to initialize storage. Please try again.",
+              variant: "destructive"
+            });
+            return;
+          }
+
           // Generate a unique filename
           const timestamp = new Date().getTime();
           const fileExt = file.type.split('/')[1];
           const filename = `flashcard_${deckId}_${timestamp}.${fileExt}`;
-
-          // Ensure the bucket exists
-          const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-          if (bucketsError) throw bucketsError;
-
-          const flashcardBucket = buckets?.find(b => b.name === 'flashcard_images');
-          if (!flashcardBucket) {
-            await supabase.storage.createBucket('flashcard_images', {
-              public: true,
-              allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif'],
-              fileSizeLimit: 5242880 // 5MB
-            });
-          }
 
           // Upload to Supabase Storage
           const { data, error: uploadError } = await supabase.storage
