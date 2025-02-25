@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useToast } from './ui/use-toast';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
 import { Plus, Trash2, Play } from 'lucide-react';
-import { createFlashcard, deleteFlashcard } from '../lib/flashcards';
+import { createFlashcard } from '../lib/flashcards';
 import type { Flashcard } from '../types';
 import { supabase } from '../lib/supabase';
 
@@ -82,15 +82,11 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
 
   const handleDeleteCard = async (cardId: string) => {
     try {
-      // First delete the card from Supabase
       const { error } = await supabase
-        .from('flashcards')
-        .delete()
-        .filter('id', 'eq', cardId);
+        .rpc('delete_flashcard', { card_id: cardId });
 
       if (error) throw error;
 
-      // Then update the local state
       setCards(cards.filter(card => card.id !== cardId));
       toast({
         title: "Success",

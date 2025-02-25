@@ -169,3 +169,24 @@ BEGIN
     ORDER BY f.next_review ASC NULLS FIRST, f.created_at ASC;
 END;
 $$;
+
+-- Create function to delete a flashcard
+CREATE OR REPLACE FUNCTION delete_flashcard(card_id UUID)
+RETURNS void AS $$
+BEGIN
+  DELETE FROM flashcards WHERE id = card_id;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create function to delete a deck and its flashcards
+CREATE OR REPLACE FUNCTION delete_deck(deck_id UUID)
+RETURNS void AS $$
+BEGIN
+  DELETE FROM flashcards WHERE deck_id = deck_id;
+  DELETE FROM flashcard_decks WHERE id = deck_id;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Add RPC permissions
+GRANT EXECUTE ON FUNCTION delete_flashcard TO authenticated;
+GRANT EXECUTE ON FUNCTION delete_deck TO authenticated;

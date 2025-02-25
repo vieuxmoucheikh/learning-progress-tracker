@@ -54,26 +54,12 @@ export const getDeckById = async (deckId: string) => {
 };
 
 export const deleteDeck = async (deckId: string) => {
-  // First delete all flashcards in the deck
-  const { error: flashcardsError } = await supabase
-    .from('flashcards')
-    .delete()
-    .filter('deck_id', 'eq', deckId);
+  const { error } = await supabase
+    .rpc('delete_deck', { deck_id: deckId });
 
-  if (flashcardsError) {
-    console.error('Error deleting deck flashcards:', flashcardsError);
-    throw flashcardsError;
-  }
-
-  // Then delete the deck itself
-  const { error: deckError } = await supabase
-    .from('flashcard_decks')
-    .delete()
-    .filter('id', 'eq', deckId);
-
-  if (deckError) {
-    console.error('Error deleting deck:', deckError);
-    throw deckError;
+  if (error) {
+    console.error('Error deleting deck:', error);
+    throw error;
   }
 };
 
@@ -100,9 +86,7 @@ export const createFlashcard = async (deckId: string, frontContent: string, back
 
 export const deleteFlashcard = async (cardId: string) => {
   const { error } = await supabase
-    .from('flashcards')
-    .delete()
-    .filter('id', 'eq', cardId);
+    .rpc('delete_flashcard', { card_id: cardId });
 
   if (error) {
     console.error('Error deleting flashcard:', error);
