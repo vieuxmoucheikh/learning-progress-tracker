@@ -85,7 +85,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
       'image/*': ['.png', '.jpg', '.jpeg', '.gif']
     },
     maxFiles: 1,
-    noClick: true,
+    noClick: false,
     noKeyboard: true
   });
 
@@ -366,13 +366,14 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
               />
               <div
                 {...getRootProps()}
-                className={`border-2 border-dashed rounded-lg p-4 transition-colors ${
+                className={`border-2 border-dashed rounded-lg p-4 transition-colors cursor-pointer ${
                   isDragActive 
                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                    : 'border-gray-300 dark:border-gray-600'
+                    : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500'
                 }`}
                 onPaste={handlePaste}
               >
+                <input {...getInputProps()} />
                 {formData.backImage ? (
                   <div className="relative group">
                     <img 
@@ -396,7 +397,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
                   <div className="text-center">
                     <ImageIcon className="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500 mb-2" />
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Paste an image or drag and drop
+                      Click to select an image, or paste/drag and drop
                     </p>
                   </div>
                 )}
