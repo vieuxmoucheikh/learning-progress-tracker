@@ -143,12 +143,21 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
 
   const handleDeleteDeck = async (deckId: string) => {
     try {
-      const { error } = await supabase
+      // First delete all flashcards in the deck
+      const { error: flashcardsError } = await supabase
+        .from('flashcards')
+        .delete()
+        .eq('deck_id', deckId);
+
+      if (flashcardsError) throw flashcardsError;
+
+      // Then delete the deck
+      const { error: deckError } = await supabase
         .from('flashcard_decks')
         .delete()
         .eq('id', deckId);
 
-      if (error) throw error;
+      if (deckError) throw deckError;
 
       setDecks(decks.filter(deck => deck.id !== deckId));
       toast({
