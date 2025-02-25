@@ -152,12 +152,37 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     const [pomodoroCount, setPomodoroCount] = useState(0); // Ajouter ce state
     const timerWorkerRef = useRef<Worker | null>(null);
 
-    // Helper function to save tasks to localStorage
-    const saveTasks = useCallback(() => {
+    // Load tasks from localStorage on mount
+    useEffect(() => {
+        const loadTasks = async () => {
+            try {
+                const savedTasks = localStorage.getItem('pomodoroTasks');
+                if (savedTasks) {
+                    const parsedTasks = JSON.parse(savedTasks);
+                    const tasksWithMetrics = parsedTasks.map((task: any) => ({
+                        ...task,
+                        metrics: task.metrics || {
+                            totalMinutes: 0,
+                            completedPomodoros: 0,
+                            currentStreak: 0
+                        }
+                    }));
+                    setTasks(tasksWithMetrics);
+                }
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+            }
+        };
+        loadTasks();
+    }, []);
+
+    // Save tasks to localStorage whenever they change
+    useEffect(() => {
         try {
             localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
+            console.log("Tasks saved to localStorage after change");
         } catch (error) {
-            console.error('Error saving tasks to localStorage:', error);
+            console.error("Error saving tasks to localStorage:", error);
         }
     }, [tasks]);
 
@@ -727,33 +752,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             });
         }
     };
-
-    useEffect(() => {
-        const loadTasks = async () => {
-            try {
-                const savedTasks = localStorage.getItem('pomodoroTasks');
-                if (savedTasks) {
-                    const parsedTasks = JSON.parse(savedTasks);
-                    const tasksWithMetrics = parsedTasks.map((task: any) => ({
-                        ...task,
-                        metrics: task.metrics || {
-                            totalMinutes: 0,
-                            completedPomodoros: 0,
-                            currentStreak: 0
-                        }
-                    }));
-                    setTasks(tasksWithMetrics);
-                }
-            } catch (error) {
-                console.error('Error loading tasks:', error);
-            }
-        };
-        loadTasks();
-    }, []);
-
-    useEffect(() => {
-        saveTasks();
-    }, [tasks]);
 
     // Ajouter useEffect pour charger les paramètres au démarrage
     useEffect(() => {
