@@ -209,24 +209,20 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck, on
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4 mt-4">
-                      <div className="flex items-center gap-2">
-                        <BookOpen className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm">{summary.totalCards} Total</span>
+                      <div className="text-sm text-gray-600">
+                        <span>{summary.totalCards} Total</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Star className="h-4 w-4 text-yellow-500" />
-                        <span className="text-sm">{summary.mastered} Mastered</span>
+                      <div className="text-sm text-yellow-500">
+                        <span>{summary.mastered} Mastered</span>
                       </div>
                       {summary.dueToday > 0 && (
-                        <div className="flex items-center gap-2 text-yellow-600">
-                          <Clock className="h-4 w-4" />
-                          <span className="text-sm">{summary.dueToday} Due</span>
+                        <div className="text-sm text-yellow-600">
+                          <span>{summary.dueToday} Due</span>
                         </div>
                       )}
                       {summary.notStarted > 0 && (
-                        <div className="flex items-center gap-2 text-blue-600">
-                          <PlusCircle className="h-4 w-4" />
-                          <span className="text-sm">{summary.notStarted} New</span>
+                        <div className="text-sm text-blue-600">
+                          <span>{summary.notStarted} New</span>
                         </div>
                       )}
                     </div>
