@@ -1,13 +1,124 @@
--- Update flashcards table with spaced repetition fields
-ALTER TABLE flashcards
-ADD COLUMN IF NOT EXISTS mastered BOOLEAN DEFAULT FALSE,
-ADD COLUMN IF NOT EXISTS review_count INTEGER DEFAULT 0,
-ADD COLUMN IF NOT EXISTS last_reviewed TIMESTAMP WITH TIME ZONE,
-ADD COLUMN IF NOT EXISTS next_review TIMESTAMP WITH TIME ZONE;
+-- Create flashcard_decks table
+CREATE TABLE IF NOT EXISTS flashcard_decks (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    description TEXT,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
 
--- Make sure next_review can be null for mastered cards
-ALTER TABLE flashcards 
-ALTER COLUMN next_review DROP NOT NULL;
+-- Create flashcards table
+CREATE TABLE IF NOT EXISTS flashcards (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    deck_id UUID NOT NULL REFERENCES flashcard_decks(id) ON DELETE CASCADE,
+    front_content TEXT NOT NULL,
+    back_content TEXT NOT NULL,
+    tags TEXT[],
+    last_reviewed TIMESTAMP WITH TIME ZONE,
+    next_review TIMESTAMP WITH TIME ZONE,
+    interval INTEGER DEFAULT 0,
+    ease_factor DECIMAL DEFAULT 2.5,
+    repetitions INTEGER DEFAULT 0,
+    review_count INTEGER DEFAULT 0,
+    mastered BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- Enable Row Level Security
+ALTER TABLE flashcard_decks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE flashcards ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for flashcard_decks
+CREATE POLICY "Users can view their own decks"
+    ON flashcard_decks
+    FOR SELECT
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own decks"
+    ON flashcard_decks
+    FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own decks"
+    ON flashcard_decks
+    FOR UPDATE
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own decks"
+    ON flashcard_decks
+    FOR DELETE
+    USING (auth.uid() = user_id);
+
+-- Create policies for flashcards
+CREATE POLICY "Users can view flashcards in their decks"
+    ON flashcards
+    FOR SELECT
+    USING (
+        EXISTS (
+            SELECT 1 FROM flashcard_decks
+            WHERE flashcard_decks.id = flashcards.deck_id
+            AND flashcard_decks.user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "Users can create flashcards in their decks"
+    ON flashcards
+    FOR INSERT
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM flashcard_decks
+            WHERE flashcard_decks.id = deck_id
+            AND flashcard_decks.user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "Users can update flashcards in their decks"
+    ON flashcards
+    FOR UPDATE
+    USING (
+        EXISTS (
+            SELECT 1 FROM flashcard_decks
+            WHERE flashcard_decks.id = flashcards.deck_id
+            AND flashcard_decks.user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "Users can delete flashcards in their decks"
+    ON flashcards
+    FOR DELETE
+    USING (
+        EXISTS (
+            SELECT 1 FROM flashcard_decks
+            WHERE flashcard_decks.id = flashcards.deck_id
+            AND flashcard_decks.user_id = auth.uid()
+        )
+    );
+
+-- Add indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_flashcards_deck_id ON flashcards(deck_id);
+CREATE INDEX IF NOT EXISTS idx_flashcard_decks_user_id ON flashcard_decks(user_id);
+CREATE INDEX IF NOT EXISTS idx_flashcards_next_review ON flashcards(next_review);
+
+-- Add triggers to update the updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = TIMEZONE('utc', NOW());
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_flashcard_decks_updated_at
+    BEFORE UPDATE ON flashcard_decks
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_flashcards_updated_at
+    BEFORE UPDATE ON flashcards
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
 
 -- Create flashcard_reviews table if it doesn't exist
 CREATE TABLE IF NOT EXISTS flashcard_reviews (
@@ -30,76 +141,6 @@ CREATE POLICY "Users can view their own reviews"
     ON flashcard_reviews
     FOR SELECT
     USING (auth.uid() = user_id);
-
--- Enable Row Level Security
-alter table flashcard_decks enable row level security;
-alter table flashcards enable row level security;
-
--- Create policies for flashcard_decks
-create policy "Users can view their own decks"
-  on flashcard_decks
-  for select
-  using (auth.uid() = user_id);
-
-create policy "Users can create their own decks"
-  on flashcard_decks
-  for insert
-  with check (auth.uid() = user_id);
-
-create policy "Users can update their own decks"
-  on flashcard_decks
-  for update
-  using (auth.uid() = user_id);
-
-create policy "Users can delete their own decks"
-  on flashcard_decks
-  for delete
-  using (auth.uid() = user_id);
-
--- Create policies for flashcards
-create policy "Users can view flashcards in their decks"
-  on flashcards
-  for select
-  using (
-    exists (
-      select 1 from flashcard_decks
-      where flashcard_decks.id = flashcards.deck_id
-      and flashcard_decks.user_id = auth.uid()
-    )
-  );
-
-create policy "Users can create flashcards in their decks"
-  on flashcards
-  for insert
-  with check (
-    exists (
-      select 1 from flashcard_decks
-      where flashcard_decks.id = deck_id
-      and flashcard_decks.user_id = auth.uid()
-    )
-  );
-
-create policy "Users can update flashcards in their decks"
-  on flashcards
-  for update
-  using (
-    exists (
-      select 1 from flashcard_decks
-      where flashcard_decks.id = flashcards.deck_id
-      and flashcard_decks.user_id = auth.uid()
-    )
-  );
-
-create policy "Users can delete flashcards in their decks"
-  on flashcards
-  for delete
-  using (
-    exists (
-      select 1 from flashcard_decks
-      where flashcard_decks.id = flashcards.deck_id
-      and flashcard_decks.user_id = auth.uid()
-    )
-  );
 
 -- Function to get due cards
 CREATE OR REPLACE FUNCTION get_due_cards(p_user_id UUID, p_deck_id UUID DEFAULT NULL)
