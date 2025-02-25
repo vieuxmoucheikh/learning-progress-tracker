@@ -193,7 +193,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
                         <img
                           src={currentCard.front_image_url}
                           alt="Front card"
-                          className="max-h-48 object-contain rounded-lg"
+                          className="max-h-64 w-auto object-contain rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                          loading="lazy"
                         />
                       </div>
                     )}
@@ -221,7 +222,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
                         <img
                           src={currentCard.back_image_url}
                           alt="Back card"
-                          className="max-h-48 object-contain rounded-lg"
+                          className="max-h-64 w-auto object-contain rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                          loading="lazy"
                         />
                       </div>
                     )}

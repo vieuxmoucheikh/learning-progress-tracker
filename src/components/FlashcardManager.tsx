@@ -84,6 +84,31 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
     }));
   };
 
+  const handlePaste = async (e: React.ClipboardEvent, side: 'front' | 'back') => {
+    const items = e.clipboardData?.items;
+    
+    if (!items) return;
+
+    for (const item of Array.from(items)) {
+      if (item.type.indexOf('image') !== -1) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (!file) continue;
+
+        // Create object URL for preview
+        const previewUrl = URL.createObjectURL(file);
+        
+        setFormData(prev => ({
+          ...prev,
+          [`${side}Image`]: file,
+          [`${side}ImagePreview`]: previewUrl
+        }));
+        
+        break;
+      }
+    }
+  };
+
   const removeImage = (side: 'front' | 'back') => {
     setFormData(prev => ({
       ...prev,
@@ -267,80 +292,84 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
             <DialogTitle>Create New Flashcard</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            <div>
-              <h3 className="text-lg font-medium mb-2">Front</h3>
+            <div className="space-y-2">
+              <label className="text-lg font-medium mb-2">Front Content</label>
               <Textarea
-                placeholder="Front content"
                 value={formData.frontContent}
                 onChange={(e) => setFormData(prev => ({ ...prev, frontContent: e.target.value }))}
-                required
+                onPaste={(e) => handlePaste(e, 'front')}
+                placeholder="Enter front content..."
+                className="min-h-[100px]"
               />
               <div className="flex items-center gap-4">
-                <label className="cursor-pointer">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleImageChange('front', e)}
-                  />
-                  <div className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700">
-                    <ImagePlus size={20} />
-                    Add Image
-                  </div>
+                <label 
+                  htmlFor="frontImage" 
+                  className="cursor-pointer flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
+                >
+                  <ImagePlus className="h-4 w-4" />
+                  Add Image
                 </label>
+                <input
+                  id="frontImage"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleImageChange('front', e)}
+                />
                 {formData.frontImagePreview && (
                   <div className="relative">
                     <img
                       src={formData.frontImagePreview}
                       alt="Front preview"
-                      className="h-20 w-20 object-cover rounded"
+                      className="h-20 w-20 object-cover rounded-lg"
                     />
                     <button
-                      type="button"
                       onClick={() => removeImage('front')}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
                     >
-                      <X size={16} />
+                      <X className="h-4 w-4" />
                     </button>
                   </div>
                 )}
               </div>
             </div>
 
-            <div>
-              <h3 className="text-lg font-medium mb-2">Back</h3>
+            <div className="space-y-2">
+              <label className="text-lg font-medium mb-2">Back Content</label>
               <Textarea
-                placeholder="Back content"
                 value={formData.backContent}
                 onChange={(e) => setFormData(prev => ({ ...prev, backContent: e.target.value }))}
-                required
+                onPaste={(e) => handlePaste(e, 'back')}
+                placeholder="Enter back content..."
+                className="min-h-[100px]"
               />
               <div className="flex items-center gap-4">
-                <label className="cursor-pointer">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleImageChange('back', e)}
-                  />
-                  <div className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700">
-                    <ImagePlus size={20} />
-                    Add Image
-                  </div>
+                <label 
+                  htmlFor="backImage" 
+                  className="cursor-pointer flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
+                >
+                  <ImagePlus className="h-4 w-4" />
+                  Add Image
                 </label>
+                <input
+                  id="backImage"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleImageChange('back', e)}
+                />
                 {formData.backImagePreview && (
                   <div className="relative">
                     <img
                       src={formData.backImagePreview}
                       alt="Back preview"
-                      className="h-20 w-20 object-cover rounded"
+                      className="h-20 w-20 object-cover rounded-lg"
                     />
                     <button
-                      type="button"
                       onClick={() => removeImage('back')}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
                     >
-                      <X size={16} />
+                      <X className="h-4 w-4" />
                     </button>
                   </div>
                 )}
