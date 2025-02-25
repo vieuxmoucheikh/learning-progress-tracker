@@ -73,10 +73,12 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
 
       // Prepare back content with any uploaded images
       let backContent = formData.back.trim();
+      
+      // Add image tags to the back content
       if (uploadedImages.length > 0) {
-        // Add image tags to the back content
+        // Add each image on a new line
         uploadedImages.forEach(imageUrl => {
-          backContent += `\n\n<img src="${imageUrl}" alt="Flashcard image" />`;
+          backContent += `\n\n<img src="${imageUrl}" alt="Flashcard image" style="max-width: 100%; height: auto; display: block; margin: 10px 0;" />`;
         });
       }
 
@@ -234,7 +236,6 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
                   className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap"
                   dangerouslySetInnerHTML={{ 
                     __html: card.back_content
-                      .replace(/<img/g, '<img class="max-w-full h-auto rounded-md my-2"')
                       .replace(/\n/g, '<br />') 
                   }}
                 />

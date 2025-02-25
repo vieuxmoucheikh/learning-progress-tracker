@@ -12,6 +12,15 @@ export const uploadImage = async (file: File): Promise<string> => {
     const fileName = `${uuidv4()}.${fileExt}`;
     const filePath = `flashcard-images/${fileName}`;
 
+    // Create the bucket if it doesn't exist
+    const { data: buckets } = await supabase.storage.listBuckets();
+    if (!buckets?.find(bucket => bucket.name === 'flashcards')) {
+      await supabase.storage.createBucket('flashcards', {
+        public: true,
+        fileSizeLimit: 5242880, // 5MB
+      });
+    }
+
     const { error: uploadError } = await supabase.storage
       .from('flashcards')
       .upload(filePath, file);

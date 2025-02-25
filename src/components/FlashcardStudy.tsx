@@ -205,10 +205,12 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
                     className="text-lg"
                     dangerouslySetInnerHTML={{ 
                       __html: currentCard.back_content
-                        .replace(/<img/g, '<img class="max-w-full h-auto rounded-md my-2"')
                         .replace(/\n/g, '<br />') 
                     }}
                   />
+                </div>
+                <div className="text-sm text-gray-500 text-center mt-4">
+                  Click to flip
                 </div>
               </div>
             </div>
