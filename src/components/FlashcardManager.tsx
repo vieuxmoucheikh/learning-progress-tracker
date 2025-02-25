@@ -86,7 +86,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
         .from('flashcards')
         .delete()
         .eq('id', cardId)
-        .select();
+        .maybeSingle();
 
       if (error) throw error;
 

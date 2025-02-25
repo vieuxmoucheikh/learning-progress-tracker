@@ -147,7 +147,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
         .from('flashcard_decks')
         .delete()
         .eq('id', deckId)
-        .select();
+        .maybeSingle();
 
       if (error) throw error;
 

@@ -60,7 +60,7 @@ export const deleteDeck = async (deckId: string) => {
       .from('flashcard_decks')
       .delete()
       .eq('id', deckId)
-      .select();
+      .maybeSingle();
 
     if (error) {
       console.error('Error deleting deck:', error);
@@ -95,17 +95,16 @@ export const createFlashcard = async (deckId: string, frontContent: string, back
 
 export const deleteFlashcard = async (cardId: string) => {
   try {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('flashcards')
       .delete()
       .eq('id', cardId)
-      .select();
+      .maybeSingle();
 
     if (error) {
       console.error('Error deleting flashcard:', error);
       throw error;
     }
-    return data;
   } catch (error) {
     console.error('Error in deleteFlashcard:', error);
     throw error;
