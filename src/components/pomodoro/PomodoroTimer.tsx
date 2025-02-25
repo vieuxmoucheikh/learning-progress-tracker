@@ -361,7 +361,15 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         if (settings?.daily_goal && completedPomodoros >= settings.daily_goal && !isCompleted) {
             // Stop the timer if it's running
             setIsActive(false);
+            
+            // Mark the goal as completed
             setIsCompleted(true);
+            
+            // Store completion status in localStorage to persist across refreshes
+            localStorage.setItem('dailyGoalCompleted', 'true');
+            localStorage.setItem('dailyGoalCompletedDate', new Date().toDateString());
+            
+            console.log("Daily goal achieved and marked as completed!");
             
             // Play celebration sound
             if (audioContext && settings.sound_enabled) {
@@ -653,6 +661,25 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             }
         }
     }, [settings, activeTaskId, tasks, checkDailyGoal]);
+
+    useEffect(() => {
+        // Check if the daily goal was already completed today
+        const dailyGoalCompleted = localStorage.getItem('dailyGoalCompleted') === 'true';
+        const completedDate = localStorage.getItem('dailyGoalCompletedDate');
+        const today = new Date().toDateString();
+        
+        // If the goal was completed today, mark it as completed
+        if (dailyGoalCompleted && completedDate === today) {
+            setIsCompleted(true);
+            console.log("Daily goal was already completed today");
+        } else if (completedDate !== today) {
+            // Reset completion status if it's a new day
+            setIsCompleted(false);
+            localStorage.removeItem('dailyGoalCompleted');
+            localStorage.removeItem('dailyGoalCompletedDate');
+            console.log("New day, resetting daily goal completion status");
+        }
+    }, []);
 
     const skipCurrentInterval = async () => {
         if (!isActive || !activeTaskId || !settings) return;
@@ -1128,6 +1155,25 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         task={tasks.find(t => t.id === activeTaskId)!} 
                         settings={settings}
                     />
+                )}
+                {/* Daily goal indicator */}
+                {settings?.daily_goal && (
+                    <div className="mt-2 text-center">
+                        <div className="flex items-center justify-center space-x-2">
+                            <Target className="h-4 w-4 text-blue-400" />
+                            <span className="text-sm text-blue-200">
+                                Daily Goal: {activeTaskId ? 
+                                    tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0 
+                                    : 0} / {settings.daily_goal}
+                            </span>
+                            {isCompleted && (
+                                <Badge variant="secondary" className="ml-2 bg-green-600 text-white">
+                                    <Trophy className="h-3 w-3 mr-1" />
+                                    Completed!
+                                </Badge>
+                            )}
+                        </div>
+                    </div>
                 )}
                 <PomodoroSettingsDialog
                 open={settingsOpen}
