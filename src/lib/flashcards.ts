@@ -1,8 +1,6 @@
 import { supabase } from './supabase';
 import type { Flashcard, FlashcardDeck, FlashcardReview } from '../types';
 
-const BUCKET_NAME = 'flashcard-images';
-
 // Deck operations
 export const createDeck = async (name: string, description?: string, tags: string[] = []) => {
   const { data: userData } = await supabase.auth.getUser();
@@ -68,74 +66,13 @@ export const deleteDeck = async (deckId: string) => {
 };
 
 // Flashcard operations
-export const uploadImage = async (file: File): Promise<string> => {
-  try {
-    if (!file) {
-      throw new Error('No file provided');
-    }
-
-    // Check file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
-      throw new Error('File size must be less than 5MB');
-    }
-
-    // Generate a unique file name
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    const filePath = `public/${fileName}`;
-
-    // Upload the file
-    const { error: uploadError } = await supabase.storage
-      .from(BUCKET_NAME)
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
-
-    if (uploadError) {
-      console.error('Error uploading file:', uploadError);
-      throw uploadError;
-    }
-
-    // Get the public URL
-    const { data } = supabase.storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(filePath);
-
-    if (!data.publicUrl) {
-      throw new Error('Failed to get public URL');
-    }
-
-    return data.publicUrl;
-  } catch (error) {
-    console.error('Error in uploadImage:', error);
-    throw error;
-  }
-};
-
-export interface CreateFlashcardParams {
-  deckId: string;
-  frontContent: string;
-  backContent: string;
-  frontImageUrl?: string;
-  backImageUrl?: string;
-}
-
-export const createFlashcard = async ({
-  deckId,
-  frontContent,
-  backContent,
-  frontImageUrl,
-  backImageUrl
-}: CreateFlashcardParams) => {
+export const createFlashcard = async (deckId: string, frontContent: string, backContent: string) => {
   const { data, error } = await supabase
     .from('flashcards')
     .insert({
       deck_id: deckId,
       front_content: frontContent,
       back_content: backContent,
-      front_image_url: frontImageUrl || null,
-      back_image_url: backImageUrl || null,
       interval: 0,
       ease_factor: 2.5,
       repetitions: 0,

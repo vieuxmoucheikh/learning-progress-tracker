@@ -184,20 +184,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
               <div className="h-full flex flex-col">
                 <div className="text-sm text-gray-500 mb-2">Front</div>
                 <div className="flex-1 overflow-y-auto">
-                  <div className="space-y-4">
-                    <div className="text-lg">
-                      {currentCard.front_content}
-                    </div>
-                    {currentCard.front_image_url && (
-                      <div className="flex justify-center">
-                        <img
-                          src={currentCard.front_image_url}
-                          alt="Front card"
-                          className="max-h-64 w-auto object-contain rounded-lg shadow-md hover:shadow-lg transition-shadow"
-                          loading="lazy"
-                        />
-                      </div>
-                    )}
+                  <div className="text-lg">
+                    {currentCard.front_content}
                   </div>
                 </div>
                 <div className="text-sm text-gray-500 text-center mt-4">
@@ -213,20 +201,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
               <div className="h-full flex flex-col">
                 <div className="text-sm text-gray-500 mb-2">Back</div>
                 <div className="flex-1 overflow-y-auto">
-                  <div className="space-y-4">
-                    <div className="text-lg">
-                      {currentCard.back_content}
-                    </div>
-                    {currentCard.back_image_url && (
-                      <div className="flex justify-center">
-                        <img
-                          src={currentCard.back_image_url}
-                          alt="Back card"
-                          className="max-h-64 w-auto object-contain rounded-lg shadow-md hover:shadow-lg transition-shadow"
-                          loading="lazy"
-                        />
-                      </div>
-                    )}
+                  <div className="text-lg">
+                    {currentCard.back_content}
                   </div>
                 </div>
               </div>
