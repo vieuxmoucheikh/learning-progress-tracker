@@ -115,24 +115,24 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
       if (formData.imageFile) {
         const fileExt = formData.imageFile.name.split('.').pop();
         const fileName = `${uuidv4()}.${fileExt}`;
-        const filePath = `flashcard-images/${fileName}`;
-
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('flashcards')
-          .upload(filePath, formData.imageFile);
+          .upload(`flashcard-images/${fileName}`, formData.imageFile);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          throw uploadError;
+        }
 
-        // Get the public URL for the uploaded image
         const { data: { publicUrl } } = supabase.storage
           .from('flashcards')
-          .getPublicUrl(filePath);
+          .getPublicUrl(`flashcard-images/${fileName}`);
 
-        // Combine text and image URL in the back content
         backContent = JSON.stringify({
-          text: formData.back.trim(),
+          text: formData.back,
           imageUrl: publicUrl
         });
+      } else {
+        backContent = formData.back;
       }
 
       const newCard = await createFlashcard(
