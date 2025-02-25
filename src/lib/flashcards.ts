@@ -58,7 +58,7 @@ export const deleteDeck = async (deckId: string) => {
   const { error: flashcardsError } = await supabase
     .from('flashcards')
     .delete()
-    .eq('deck_id', deckId);
+    .match({ deck_id: deckId });
 
   if (flashcardsError) {
     console.error('Error deleting deck flashcards:', flashcardsError);
@@ -69,7 +69,7 @@ export const deleteDeck = async (deckId: string) => {
   const { error: deckError } = await supabase
     .from('flashcard_decks')
     .delete()
-    .eq('id', deckId);
+    .match({ id: deckId });
 
   if (deckError) {
     console.error('Error deleting deck:', deckError);
@@ -102,7 +102,7 @@ export const deleteFlashcard = async (cardId: string) => {
   const { error } = await supabase
     .from('flashcards')
     .delete()
-    .eq('id', cardId);
+    .match({ id: cardId });
 
   if (error) {
     console.error('Error deleting flashcard:', error);
