@@ -92,16 +92,39 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
     }));
   };
 
-  const handleCreateCard = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     try {
       let frontImageUrl = '';
       let backImageUrl = '';
 
       if (formData.frontImage) {
-        frontImageUrl = await uploadImage(formData.frontImage);
+        try {
+          frontImageUrl = await uploadImage(formData.frontImage);
+        } catch (error) {
+          console.error('Error uploading front image:', error);
+          toast({
+            title: "Error",
+            description: "Failed to upload front image. Please try again.",
+            variant: "destructive"
+          });
+          return;
+        }
       }
+
       if (formData.backImage) {
-        backImageUrl = await uploadImage(formData.backImage);
+        try {
+          backImageUrl = await uploadImage(formData.backImage);
+        } catch (error) {
+          console.error('Error uploading back image:', error);
+          toast({
+            title: "Error",
+            description: "Failed to upload back image. Please try again.",
+            variant: "destructive"
+          });
+          return;
+        }
       }
 
       const newCard = await createFlashcard({
@@ -118,13 +141,13 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
       
       toast({
         title: "Success",
-        description: "Flashcard created successfully",
+        description: "Flashcard created successfully!"
       });
     } catch (error) {
       console.error('Error creating flashcard:', error);
       toast({
         title: "Error",
-        description: "Failed to create flashcard",
+        description: "Failed to create flashcard. Please try again.",
         variant: "destructive"
       });
     }
@@ -330,7 +353,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
               </Button>
               <Button
                 className="bg-blue-600 text-white hover:bg-blue-700"
-                onClick={handleCreateCard}
+                onClick={handleSubmit}
                 disabled={!formData.frontContent.trim() || !formData.backContent.trim()}
               >
                 Create Card

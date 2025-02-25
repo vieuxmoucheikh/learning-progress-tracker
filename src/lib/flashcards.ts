@@ -1,6 +1,8 @@
 import { supabase } from './supabase';
 import type { Flashcard, FlashcardDeck, FlashcardReview } from '../types';
 
+const BUCKET_NAME = 'flashcard-images';
+
 // Deck operations
 export const createDeck = async (name: string, description?: string, tags: string[] = []) => {
   const { data: userData } = await supabase.auth.getUser();
@@ -66,22 +68,57 @@ export const deleteDeck = async (deckId: string) => {
 };
 
 // Flashcard operations
-export const uploadImage = async (file: File) => {
-  const fileExt = file.name.split('.').pop();
-  const fileName = `${Math.random()}.${fileExt}`;
-  const filePath = `${fileName}`;
+export const initializeStorage = async () => {
+  try {
+    const { data: bucket, error } = await supabase.storage.getBucket(BUCKET_NAME);
+    
+    if (error && error.message === 'Bucket not found') {
+      const { data, error: createError } = await supabase.storage.createBucket(BUCKET_NAME, {
+        public: true,
+        allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif'],
+        fileSizeLimit: 5 * 1024 * 1024 // 5MB
+      });
+      
+      if (createError) {
+        console.error('Error creating bucket:', createError);
+        throw createError;
+      }
+    } else if (error) {
+      console.error('Error checking bucket:', error);
+      throw error;
+    }
+  } catch (error) {
+    console.error('Error initializing storage:', error);
+    throw error;
+  }
+};
 
-  const { data, error } = await supabase.storage
-    .from('flashcard-images')
-    .upload(filePath, file);
+export const uploadImage = async (file: File): Promise<string> => {
+  try {
+    await initializeStorage();
 
-  if (error) throw error;
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
 
-  const { data: { publicUrl } } = supabase.storage
-    .from('flashcard-images')
-    .getPublicUrl(filePath);
+    const { data, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(filePath, file);
 
-  return publicUrl;
+    if (error) {
+      console.error('Error uploading file:', error);
+      throw error;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  } catch (error) {
+    console.error('Error in uploadImage:', error);
+    throw error;
+  }
 };
 
 export interface CreateFlashcardParams {
