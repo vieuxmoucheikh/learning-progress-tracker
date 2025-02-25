@@ -119,15 +119,34 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Manage Flashcards</h2>
-        <Button
-          className="bg-blue-600 text-white hover:bg-blue-700"
-          onClick={() => setIsCreating(true)}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Card
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            onClick={onBackToDecks}
+            className="flex items-center gap-2"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-chevron-left"
+            >
+              <path d="m15 18-6-6 6-6"/>
+            </svg>
+            Back to Decks
+          </Button>
+          <h2 className="text-2xl font-bold">Manage Flashcards</h2>
+        </div>
+        <Button onClick={() => setIsCreating(true)} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+          <Plus className="w-4 h-4 mr-2" /> Add Flashcard
         </Button>
       </div>
 
@@ -154,7 +173,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
         </svg>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredCards.map((card) => (
           <div
             key={card.id}
