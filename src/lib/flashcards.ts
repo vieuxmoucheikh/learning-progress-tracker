@@ -288,6 +288,9 @@ export interface DeckSummary {
   totalCards: number;
   dueToday: number;
   notStarted: number;
+  mastered: number;
+  dueCards: Array<{ id: string, front_content: string }>;
+  newCards: Array<{ id: string, front_content: string }>;
 }
 
 export const getDecksSummary = async (): Promise<DeckSummary[]> => {
@@ -296,8 +299,6 @@ export const getDecksSummary = async (): Promise<DeckSummary[]> => {
     throw new Error('User not authenticated');
   }
 
-  const now = new Date().toISOString();
-  
   const { data, error } = await supabase
     .from('flashcard_decks')
     .select(`
@@ -305,19 +306,30 @@ export const getDecksSummary = async (): Promise<DeckSummary[]> => {
       flashcards!inner (
         id,
         last_reviewed,
-        next_review
+        next_review,
+        mastered,
+        front_content
       )
     `)
     .eq('user_id', userData.user.id);
 
   if (error) throw error;
 
-  return data.map(deck => ({
-    deckId: deck.id,
-    totalCards: deck.flashcards.length,
-    dueToday: deck.flashcards.filter(card => 
-      card.next_review && new Date(card.next_review) <= new Date()
-    ).length,
-    notStarted: deck.flashcards.filter(card => !card.last_reviewed).length
-  }));
+  return data.map(deck => {
+    const now = new Date();
+    const dueCards = deck.flashcards.filter(card => 
+      !card.mastered && card.next_review && new Date(card.next_review) <= now
+    );
+    const newCards = deck.flashcards.filter(card => !card.last_reviewed);
+
+    return {
+      deckId: deck.id,
+      totalCards: deck.flashcards.length,
+      dueToday: dueCards.length,
+      notStarted: newCards.length,
+      mastered: deck.flashcards.filter(card => card.mastered).length,
+      dueCards: dueCards.map(card => ({ id: card.id, front_content: card.front_content })),
+      newCards: newCards.map(card => ({ id: card.id, front_content: card.front_content }))
+    };
+  });
 };

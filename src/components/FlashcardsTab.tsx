@@ -26,7 +26,7 @@ export const FlashcardsTab: React.FC = () => {
   };
 
   const handleFinishStudy = () => {
-    setView('decks');
+    handleBackToDecks();
   };
 
   const handleManageCards = () => {
