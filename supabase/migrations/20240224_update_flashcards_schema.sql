@@ -9,6 +9,11 @@ ADD COLUMN IF NOT EXISTS next_review TIMESTAMP WITH TIME ZONE;
 ALTER TABLE flashcards 
 ALTER COLUMN next_review DROP NOT NULL;
 
+-- Add image URL columns to flashcards table
+ALTER TABLE flashcards
+ADD COLUMN front_image_url TEXT,
+ADD COLUMN back_image_url TEXT;
+
 -- Create flashcard_reviews table if it doesn't exist
 CREATE TABLE IF NOT EXISTS flashcard_reviews (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,

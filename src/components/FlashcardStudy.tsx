@@ -184,8 +184,19 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
               <div className="h-full flex flex-col">
                 <div className="text-sm text-gray-500 mb-2">Front</div>
                 <div className="flex-1 overflow-y-auto">
-                  <div className="text-lg">
-                    {currentCard.front_content}
+                  <div className="space-y-4">
+                    <div className="text-lg">
+                      {currentCard.front_content}
+                    </div>
+                    {currentCard.front_image_url && (
+                      <div className="flex justify-center">
+                        <img
+                          src={currentCard.front_image_url}
+                          alt="Front card"
+                          className="max-h-48 object-contain rounded-lg"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="text-sm text-gray-500 text-center mt-4">
@@ -201,8 +212,19 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
               <div className="h-full flex flex-col">
                 <div className="text-sm text-gray-500 mb-2">Back</div>
                 <div className="flex-1 overflow-y-auto">
-                  <div className="text-lg">
-                    {currentCard.back_content}
+                  <div className="space-y-4">
+                    <div className="text-lg">
+                      {currentCard.back_content}
+                    </div>
+                    {currentCard.back_image_url && (
+                      <div className="flex justify-center">
+                        <img
+                          src={currentCard.back_image_url}
+                          alt="Back card"
+                          className="max-h-48 object-contain rounded-lg"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

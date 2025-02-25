@@ -66,13 +66,47 @@ export const deleteDeck = async (deckId: string) => {
 };
 
 // Flashcard operations
-export const createFlashcard = async (deckId: string, frontContent: string, backContent: string) => {
+export const uploadImage = async (file: File) => {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Math.random()}.${fileExt}`;
+  const filePath = `${fileName}`;
+
+  const { data, error } = await supabase.storage
+    .from('flashcard-images')
+    .upload(filePath, file);
+
+  if (error) throw error;
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('flashcard-images')
+    .getPublicUrl(filePath);
+
+  return publicUrl;
+};
+
+export interface CreateFlashcardParams {
+  deckId: string;
+  frontContent: string;
+  backContent: string;
+  frontImageUrl?: string;
+  backImageUrl?: string;
+}
+
+export const createFlashcard = async ({
+  deckId,
+  frontContent,
+  backContent,
+  frontImageUrl,
+  backImageUrl
+}: CreateFlashcardParams) => {
   const { data, error } = await supabase
     .from('flashcards')
     .insert({
       deck_id: deckId,
       front_content: frontContent,
       back_content: backContent,
+      front_image_url: frontImageUrl || null,
+      back_image_url: backImageUrl || null,
       interval: 0,
       ease_factor: 2.5,
       repetitions: 0,

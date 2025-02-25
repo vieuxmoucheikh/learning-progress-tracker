@@ -195,14 +195,16 @@ export interface Flashcard {
   deck_id: string;
   front_content: string;
   back_content: string;
-  created_at: string;
-  last_reviewed?: string;
-  next_review?: string;
-  interval?: number;
-  ease_factor?: number;
-  repetitions?: number;
+  front_image_url?: string | null;
+  back_image_url?: string | null;
+  last_reviewed?: string | null;
+  next_review?: string | null;
+  interval: number;
+  ease_factor: number;
+  repetitions: number;
+  review_count: number;
   mastered: boolean;
-  review_count?: number;
+  created_at: string;
 }
 
 export interface FlashcardReview {

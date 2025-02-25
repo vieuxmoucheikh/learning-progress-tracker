@@ -5,8 +5,8 @@ import { Textarea } from './ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useToast } from './ui/use-toast';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
-import { Plus, Trash2, Play } from 'lucide-react';
-import { createFlashcard, deleteFlashcard } from '../lib/flashcards';
+import { Plus, Trash2, Play, ImagePlus, X } from 'lucide-react';
+import { createFlashcard, deleteFlashcard, uploadImage } from '../lib/flashcards';
 import type { Flashcard } from '../types';
 import { supabase } from '../lib/supabase';
 
@@ -15,10 +15,28 @@ interface FlashcardManagerProps {
   onBackToDecks: () => void;
 }
 
+interface FormData {
+  frontContent: string;
+  backContent: string;
+  frontImage: File | null;
+  backImage: File | null;
+  frontImagePreview: string;
+  backImagePreview: string;
+}
+
+const initialFormState: FormData = {
+  frontContent: '',
+  backContent: '',
+  frontImage: null,
+  backImage: null,
+  frontImagePreview: '',
+  backImagePreview: ''
+};
+
 export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBackToDecks }) => {
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [isCreating, setIsCreating] = useState(false);
-  const [formData, setFormData] = useState({ front: '', back: '' });
+  const [formData, setFormData] = useState<FormData>(initialFormState);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -45,26 +63,58 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
     }
   };
 
+  const handleImageChange = async (side: 'front' | 'back', e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      toast({
+        title: "Error",
+        description: "Image size must be less than 5MB",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const preview = URL.createObjectURL(file);
+    setFormData(prev => ({
+      ...prev,
+      [`${side}Image`]: file,
+      [`${side}ImagePreview`]: preview
+    }));
+  };
+
+  const removeImage = (side: 'front' | 'back') => {
+    setFormData(prev => ({
+      ...prev,
+      [`${side}Image`]: null,
+      [`${side}ImagePreview`]: ''
+    }));
+  };
+
   const handleCreateCard = async () => {
     try {
-      if (!formData.front.trim() || !formData.back.trim()) {
-        toast({
-          title: "Error",
-          description: "Please fill in both front and back content",
-          variant: "destructive"
-        });
-        return;
+      let frontImageUrl = '';
+      let backImageUrl = '';
+
+      if (formData.frontImage) {
+        frontImageUrl = await uploadImage(formData.frontImage);
+      }
+      if (formData.backImage) {
+        backImageUrl = await uploadImage(formData.backImage);
       }
 
-      const newCard = await createFlashcard(
+      const newCard = await createFlashcard({
         deckId,
-        formData.front.trim(),
-        formData.back.trim()
-      );
+        frontContent: formData.frontContent,
+        backContent: formData.backContent,
+        frontImageUrl,
+        backImageUrl
+      });
 
       setCards([newCard, ...cards]);
       setIsCreating(false);
-      setFormData({ front: '', back: '' });
+      setFormData(initialFormState);
       
       toast({
         title: "Success",
@@ -195,23 +245,85 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <div>
-              <label className="text-sm font-medium">Front</label>
+              <h3 className="text-lg font-medium mb-2">Front</h3>
               <Textarea
-                value={formData.front}
-                onChange={(e) => setFormData(prev => ({ ...prev, front: e.target.value }))}
-                placeholder="Enter the front content"
-                className="mt-1"
+                placeholder="Front content"
+                value={formData.frontContent}
+                onChange={(e) => setFormData(prev => ({ ...prev, frontContent: e.target.value }))}
+                required
               />
+              <div className="flex items-center gap-4">
+                <label className="cursor-pointer">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleImageChange('front', e)}
+                  />
+                  <div className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700">
+                    <ImagePlus size={20} />
+                    Add Image
+                  </div>
+                </label>
+                {formData.frontImagePreview && (
+                  <div className="relative">
+                    <img
+                      src={formData.frontImagePreview}
+                      alt="Front preview"
+                      className="h-20 w-20 object-cover rounded"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage('front')}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
+
             <div>
-              <label className="text-sm font-medium">Back</label>
+              <h3 className="text-lg font-medium mb-2">Back</h3>
               <Textarea
-                value={formData.back}
-                onChange={(e) => setFormData(prev => ({ ...prev, back: e.target.value }))}
-                placeholder="Enter the back content"
-                className="mt-1"
+                placeholder="Back content"
+                value={formData.backContent}
+                onChange={(e) => setFormData(prev => ({ ...prev, backContent: e.target.value }))}
+                required
               />
+              <div className="flex items-center gap-4">
+                <label className="cursor-pointer">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleImageChange('back', e)}
+                  />
+                  <div className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700">
+                    <ImagePlus size={20} />
+                    Add Image
+                  </div>
+                </label>
+                {formData.backImagePreview && (
+                  <div className="relative">
+                    <img
+                      src={formData.backImagePreview}
+                      alt="Back preview"
+                      className="h-20 w-20 object-cover rounded"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage('back')}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
+
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsCreating(false)}>
                 Cancel
@@ -219,7 +331,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
               <Button
                 className="bg-blue-600 text-white hover:bg-blue-700"
                 onClick={handleCreateCard}
-                disabled={!formData.front.trim() || !formData.back.trim()}
+                disabled={!formData.frontContent.trim() || !formData.backContent.trim()}
               >
                 Create Card
               </Button>
