@@ -201,21 +201,24 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
               <div className="h-full flex flex-col">
                 <div className="text-sm text-gray-500 mb-2">Back</div>
                 <div className="flex-1 overflow-y-auto">
-                  <div className="text-lg mb-4">
-                    {currentCard.back_content}
+                  <div className="mt-4">
+                    <div className="whitespace-pre-wrap">{currentCard.back_content}</div>
+                    {currentCard.back_images && currentCard.back_images.length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          {currentCard.back_images.map((url, index) => (
+                            <div key={url} className="relative">
+                              <img 
+                                src={url} 
+                                alt={`Flashcard image ${index + 1}`}
+                                className="w-full h-48 object-contain rounded-md bg-gray-100"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  {currentCard.back_images && currentCard.back_images.length > 0 && (
-                    <div className="space-y-4">
-                      {currentCard.back_images.map((url, index) => (
-                        <img
-                          key={url}
-                          src={url}
-                          alt={`Flashcard image ${index + 1}`}
-                          className="max-w-full rounded-lg shadow-md"
-                        />
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             </div>

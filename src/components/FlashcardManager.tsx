@@ -94,14 +94,12 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
           if (uploadError) throw uploadError;
 
           // Get the public URL
-          const { data: { publicUrl } } = supabase.storage
-            .from('flashcard_images')
-            .getPublicUrl(filename);
+          const imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/flashcard_images/${filename}`;
 
           // Update form data with new image URL
           setFormData(prev => ({
             ...prev,
-            back_images: [...prev.back_images, publicUrl]
+            back_images: [...prev.back_images, imageUrl]
           }));
 
           toast({
@@ -229,7 +227,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
                         <img 
                           src={url} 
                           alt={`Flashcard image ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-md"
+                          className="w-full h-32 object-contain rounded-md bg-gray-100"
                         />
                         <Button
                           variant="destructive"
@@ -283,7 +281,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
                           <img 
                             src={url} 
                             alt={`Flashcard image ${index + 1}`}
-                            className="w-full h-32 object-cover rounded-md"
+                            className="w-full h-32 object-contain rounded-md bg-gray-100"
                           />
                         </div>
                       ))}
