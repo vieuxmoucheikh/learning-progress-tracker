@@ -144,9 +144,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
   const handleDeleteDeck = async (deckId: string) => {
     try {
       const { error } = await supabase
-        .from('flashcard_decks')
-        .delete()
-        .filter('id', 'eq', deckId);
+        .rpc('delete_deck', { p_deck_id: deckId });
 
       if (error) throw error;
 
