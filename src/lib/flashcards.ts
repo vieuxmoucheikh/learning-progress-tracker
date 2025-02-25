@@ -68,42 +68,21 @@ export const deleteDeck = async (deckId: string) => {
 };
 
 // Flashcard operations
-export const initializeStorage = async () => {
-  try {
-    const { data: bucket, error } = await supabase.storage.getBucket(BUCKET_NAME);
-    
-    if (error && error.message === 'Bucket not found') {
-      const { data, error: createError } = await supabase.storage.createBucket(BUCKET_NAME, {
-        public: true,
-        allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif'],
-        fileSizeLimit: 5 * 1024 * 1024 // 5MB
-      });
-      
-      if (createError) {
-        console.error('Error creating bucket:', createError);
-        throw createError;
-      }
-    } else if (error) {
-      console.error('Error checking bucket:', error);
-      throw error;
-    }
-  } catch (error) {
-    console.error('Error initializing storage:', error);
-    throw error;
-  }
-};
-
 export const uploadImage = async (file: File): Promise<string> => {
   try {
-    await initializeStorage();
+    if (!file) {
+      throw new Error('No file provided');
+    }
 
     const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `${fileName}`;
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
-      .upload(filePath, file);
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
 
     if (error) {
       console.error('Error uploading file:', error);
@@ -112,7 +91,7 @@ export const uploadImage = async (file: File): Promise<string> => {
 
     const { data: { publicUrl } } = supabase.storage
       .from(BUCKET_NAME)
-      .getPublicUrl(filePath);
+      .getPublicUrl(fileName);
 
     return publicUrl;
   } catch (error) {
