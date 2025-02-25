@@ -18,7 +18,10 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [currentCard, setCurrentCard] = useState<Flashcard | null>(null);
   const [showBack, setShowBack] = useState(false);
-  const [backContent, setBackContent] = useState({ text: '', imageUrl: null as string | null });
+  const [backContent, setBackContent] = useState<{ text: string; imageUrl: string | null }>({ 
+    text: '', 
+    imageUrl: null 
+  });
   const [loading, setLoading] = useState(true);
   const [sessionStats, setSessionStats] = useState({
     reviewed: 0,
@@ -43,7 +46,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
         const parsedContent = JSON.parse(currentCard.back_content);
         if (parsedContent.imageUrl) {
           setBackContent({
-            text: parsedContent.text,
+            text: parsedContent.text || '',
             imageUrl: parsedContent.imageUrl
           });
         } else {
@@ -92,47 +95,37 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
   };
 
   const handleRate = async (quality: number) => {
-    if (!cards.length) return;
-
-    const currentCard = cards[currentCardIndex];
-    const { interval, easeFactor, mastered } = calculateNextReview(
-      quality,
-      currentCard.interval || 0,
-      currentCard.ease_factor || 2.5,
-      currentCard.repetitions || 0
-    );
+    if (!currentCard) return;
 
     try {
-      const updatedCard = await submitReview(
-        currentCard.id,
+      const { interval, easeFactor, mastered } = calculateNextReview(
         quality,
-        currentCard.interval || 0,
-        interval,
-        currentCard.ease_factor || 2.5,
-        easeFactor,
-        mastered
+        currentCard.interval ?? 0,
+        currentCard.ease_factor ?? 2.5,
+        currentCard.repetitions ?? 0
       );
+
+      const { error } = await supabase
+        .from('flashcards')
+        .update({
+          last_reviewed: new Date().toISOString(),
+          next_review: new Date(Date.now() + interval * 24 * 60 * 60 * 1000).toISOString(),
+          interval,
+          ease_factor: easeFactor,
+          repetitions: (currentCard.repetitions ?? 0) + 1,
+          mastered,
+          review_count: (currentCard.review_count ?? 0) + 1
+        })
+        .eq('id', currentCard.id);
+
+      if (error) throw error;
 
       // Update session stats
       setSessionStats(prev => ({
-        ...prev,
         reviewed: prev.reviewed + 1,
-        mastered: prev.mastered + (mastered ? 1 : 0)
+        mastered: prev.mastered + (mastered ? 1 : 0),
+        total: prev.total
       }));
-
-      // Show feedback toast
-      const feedbackMessages = {
-        1: "Keep practicing! You'll get it next time.",
-        2: "Good progress! Review again in a few days.",
-        3: "Great job! Review again in a month.",
-        4: "Perfect! Card mastered!"
-      };
-
-      toast({
-        title: mastered ? "Card Mastered! " : "Review Submitted",
-        description: feedbackMessages[quality as keyof typeof feedbackMessages],
-        variant: mastered ? "default" : "default"
-      });
 
       // Move to next card
       if (currentCardIndex < cards.length - 1) {
@@ -141,8 +134,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
       } else {
         // Session complete
         toast({
-          title: "Session Complete! ",
-          description: `You reviewed ${sessionStats.reviewed} cards and mastered ${sessionStats.mastered} cards!`,
+          title: "Session Complete!",
+          description: `You reviewed ${sessionStats.reviewed + 1} cards and mastered ${sessionStats.mastered + (mastered ? 1 : 0)} out of ${sessionStats.total} cards.`
         });
         await loadCards(); // Reload cards to get new due cards
         setCurrentCardIndex(0);
@@ -150,10 +143,10 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
         if (onFinish) onFinish();
       }
     } catch (error) {
-      console.error('Error submitting review:', error);
+      console.error('Error updating flashcard:', error);
       toast({
         title: "Error",
-        description: "Failed to submit review",
+        description: "Failed to update flashcard",
         variant: "destructive"
       });
     }

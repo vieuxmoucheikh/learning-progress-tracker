@@ -35,10 +35,11 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
   }, [deckId]);
 
   useEffect(() => {
-    const filtered = cards.filter(card => 
-      card.front_content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      card.back_content.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filtered = cards.filter(card => {
+      const frontMatch = card.front_content.toLowerCase().includes(searchQuery.toLowerCase());
+      const backMatch = (card.parsedBackContent?.text || card.back_content).toLowerCase().includes(searchQuery.toLowerCase());
+      return frontMatch || backMatch;
+    });
     setFilteredCards(filtered);
   }, [searchQuery, cards]);
 
@@ -51,14 +52,36 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setCards(data || []);
-      setFilteredCards(data || []);
+
+      // Parse back content for each card
+      const cardsWithParsedContent = data.map(card => {
+        try {
+          const parsedContent = JSON.parse(card.back_content);
+          return {
+            ...card,
+            parsedBackContent: {
+              text: parsedContent.text || card.back_content,
+              imageUrl: parsedContent.imageUrl || null
+            }
+          };
+        } catch (e) {
+          return {
+            ...card,
+            parsedBackContent: {
+              text: card.back_content,
+              imageUrl: null
+            }
+          };
+        }
+      });
+
+      setCards(cardsWithParsedContent);
     } catch (error) {
       console.error('Error loading cards:', error);
       toast({
-        title: "Error",
-        description: "Failed to load flashcards",
-        variant: "destructive"
+        title: 'Error loading cards',
+        description: 'There was an error loading your flashcards.',
+        variant: 'destructive',
       });
     }
   };
@@ -241,91 +264,76 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredCards.map((card) => {
-          let backContent = card.back_content;
-          let backImage = null;
-          
-          try {
-            const parsedContent = JSON.parse(card.back_content);
-            if (parsedContent.imageUrl) {
-              backContent = parsedContent.text;
-              backImage = parsedContent.imageUrl;
-            }
-          } catch (e) {
-            // If parsing fails, use the content as is
-          }
-
-          return (
-            <div
-              key={card.id}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-md transition-shadow border border-gray-100 dark:border-gray-700"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <div className="font-medium text-gray-900 dark:text-white mb-2">Front:</div>
-                  <div className="text-gray-700 dark:text-gray-300 mb-4 whitespace-pre-wrap">
-                    {card.front_content}
-                  </div>
-                  <div className="font-medium text-gray-900 dark:text-white mb-2">Back:</div>
-                  <div className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                    {backContent}
-                    {backImage && (
-                      <div className="mt-2">
-                        <img 
-                          src={backImage} 
-                          alt="Back content" 
-                          className="max-h-48 rounded-lg object-contain"
-                        />
-                      </div>
-                    )}
-                  </div>
+        {filteredCards.map((card) => (
+          <div
+            key={card.id}
+            className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-md transition-shadow border border-gray-100 dark:border-gray-700"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex-1">
+                <div className="font-medium text-gray-900 dark:text-white mb-2">Front:</div>
+                <div className="text-gray-700 dark:text-gray-300 mb-4 whitespace-pre-wrap">
+                  {card.front_content}
                 </div>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-600 hover:text-red-700 dark:text-red-500 dark:hover:text-red-600"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Flashcard</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete this flashcard? This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDeleteCard(card.id)}
-                        className="bg-red-600 text-white hover:bg-red-700"
-                      >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <div className="font-medium text-gray-900 dark:text-white mb-2">Back:</div>
+                <div className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                  {card.parsedBackContent?.text}
+                  {card.parsedBackContent?.imageUrl && (
+                    <div className="mt-2">
+                      <img 
+                        src={card.parsedBackContent.imageUrl} 
+                        alt="Back content" 
+                        className="max-h-48 rounded-lg object-contain"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
-              
-              {card.last_reviewed && (
-                <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-                  Last reviewed: {new Date(card.last_reviewed).toLocaleDateString()}
-                  {card.mastered && (
-                    <span className="ml-2 text-green-600 dark:text-green-500">(Mastered)</span>
-                  )}
-                  {!card.mastered && card.next_review && (
-                    <span className="ml-2 text-blue-600 dark:text-blue-500">
-                      (Next review: {new Date(card.next_review).toLocaleDateString()})
-                    </span>
-                  )}
-                </div>
-              )}
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-red-600 hover:text-red-700 dark:text-red-500 dark:hover:text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Flashcard</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this flashcard? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => handleDeleteCard(card.id)}
+                      className="bg-red-600 text-white hover:bg-red-700"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
-          );
-        })}
+            
+            {card.last_reviewed && (
+              <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                Last reviewed: {new Date(card.last_reviewed).toLocaleDateString()}
+                {card.mastered && (
+                  <span className="ml-2 text-green-600 dark:text-green-500">(Mastered)</span>
+                )}
+                {!card.mastered && card.next_review && (
+                  <span className="ml-2 text-blue-600 dark:text-blue-500">
+                    (Next review: {new Date(card.next_review).toLocaleDateString()})
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
 
       {filteredCards.length === 0 && (
