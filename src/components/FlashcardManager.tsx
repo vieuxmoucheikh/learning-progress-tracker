@@ -31,7 +31,41 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
   // Function to sanitize HTML content for safe rendering
   const sanitizeHtml = (html: string) => {
     // Replace newlines with <br> tags but preserve the div tags
-    return html.replace(/\n/g, '<br />');
+    // Remove the special image comment
+    return html
+      .replace(/\n/g, '<br />')
+      .replace(/<!-- FLASHCARD_IMAGES:[^]+ -->/g, '');
+  };
+
+  // Function to extract image URLs from content
+  const extractImageUrls = (content: string): string[] => {
+    const urls: string[] = [];
+    
+    // Extract from img tags
+    const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/g;
+    let match;
+    while ((match = imgRegex.exec(content)) !== null) {
+      urls.push(match[1]);
+    }
+    
+    // Extract from background-image style
+    const bgRegex = /background-image:\s*url\(['"]([^'"]+)['"]\)/g;
+    while ((match = bgRegex.exec(content)) !== null) {
+      urls.push(match[1]);
+    }
+    
+    // Extract from special comment format
+    const commentRegex = /<!-- FLASHCARD_IMAGES:([^]+) -->/g;
+    while ((match = commentRegex.exec(content)) !== null) {
+      try {
+        const imageUrls = JSON.parse(match[1]);
+        urls.push(...imageUrls);
+      } catch (error) {
+        console.error('Error parsing image URLs:', error);
+      }
+    }
+    
+    return urls;
   };
 
   useEffect(() => {
@@ -78,16 +112,13 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
         return;
       }
 
-      // Prepare back content with any uploaded images
+      // Store the image URLs separately in the back content
       let backContent = formData.back.trim();
       
-      // Add image tags to the back content
+      // Add image URLs as a special JSON string at the end of the content
+      // This will be parsed and displayed separately
       if (uploadedImages.length > 0) {
-        // Add each image on a new line
-        uploadedImages.forEach(imageUrl => {
-          // Use a div with background-image instead of an img tag
-          backContent += `\n\n<div style="background-image: url('${imageUrl}'); background-size: contain; background-repeat: no-repeat; background-position: center; width: 100%; height: 200px; margin: 10px 0; border-radius: 4px;"></div>`;
-        });
+        backContent += `\n\n<!-- FLASHCARD_IMAGES:${JSON.stringify(uploadedImages)} -->`;
       }
 
       const newCard = await createFlashcard(
@@ -246,6 +277,27 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
                     __html: sanitizeHtml(card.back_content)
                   }}
                 />
+                
+                {/* Direct image display */}
+                {(() => {
+                  const imageUrls = extractImageUrls(card.back_content);
+                  return imageUrls.length > 0 && (
+                    <div className="mt-4">
+                      {imageUrls.map((url, index) => (
+                        <div key={index} className="mb-4">
+                          <img 
+                            src={url} 
+                            alt={`Flashcard image ${index + 1}`}
+                            className="max-w-full h-auto rounded-md"
+                            style={{ maxHeight: '200px', margin: '0 auto' }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+
+                {/* Rest of the code remains the same */}
               </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
