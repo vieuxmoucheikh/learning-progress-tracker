@@ -144,9 +144,15 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck }) 
   const handleDeleteDeck = async (deckId: string) => {
     try {
       const { error } = await supabase
-        .rpc('delete_deck', { p_deck_id: deckId });
+        .from('flashcard_decks')
+        .delete()
+        .eq('id', deckId)
+        .limit(1)
+        .single();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') { // Ignore "no rows returned" error
+        throw error;
+      }
 
       setDecks(decks.filter(deck => deck.id !== deckId));
       toast({

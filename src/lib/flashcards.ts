@@ -58,13 +58,14 @@ export const deleteDeck = async (deckId: string) => {
     // First disable RLS temporarily
     await supabase.rpc('disable_rls');
 
-    // Delete the deck (flashcards will be deleted via ON DELETE CASCADE)
     const { error } = await supabase
       .from('flashcard_decks')
       .delete()
-      .eq('id', deckId);
+      .eq('id', deckId)
+      .limit(1)
+      .single();
 
-    if (error) {
+    if (error && error.code !== 'PGRST116') { // Ignore "no rows returned" error
       console.error('Error deleting deck:', error);
       throw error;
     }
@@ -106,9 +107,11 @@ export const deleteFlashcard = async (cardId: string) => {
     const { error } = await supabase
       .from('flashcards')
       .delete()
-      .eq('id', cardId);
+      .eq('id', cardId)
+      .limit(1)
+      .single();
 
-    if (error) {
+    if (error && error.code !== 'PGRST116') { // Ignore "no rows returned" error
       console.error('Error deleting flashcard:', error);
       throw error;
     }

@@ -83,9 +83,15 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
   const handleDeleteCard = async (cardId: string) => {
     try {
       const { error } = await supabase
-        .rpc('delete_flashcard', { p_card_id: cardId });
+        .from('flashcards')
+        .delete()
+        .eq('id', cardId)
+        .limit(1)
+        .single();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') { // Ignore "no rows returned" error
+        throw error;
+      }
 
       setCards(cards.filter(card => card.id !== cardId));
       toast({
