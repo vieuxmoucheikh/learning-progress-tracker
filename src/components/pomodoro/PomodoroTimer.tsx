@@ -377,6 +377,22 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             
             console.log("Daily goal achieved and marked as completed!");
             
+            // Mark the active task as completed
+            if (activeTaskId) {
+                setTasks(prevTasks =>
+                    prevTasks.map(task =>
+                        task.id === activeTaskId ? { ...task, completed: true } : task
+                    )
+                );
+                
+                // Update localStorage with the updated tasks
+                const updatedTasks = tasks.map(task =>
+                    task.id === activeTaskId ? { ...task, completed: true } : task
+                );
+                localStorage.setItem('pomodoroTasks', JSON.stringify(updatedTasks));
+                console.log("Active task marked as completed upon daily goal achievement");
+            }
+            
             // Play celebration sound
             if (audioContext && settings.sound_enabled) {
                 playGoalAchievedSound(audioContext);
@@ -400,7 +416,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 }
             }
         }
-    }, [settings, isCompleted, audioContext, toast, playGoalAchievedSound]);
+    }, [settings, isCompleted, audioContext, toast, playGoalAchievedSound, activeTaskId, tasks]);
 
     // Add streak tracking
     useEffect(() => {
@@ -669,16 +685,47 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     };
 
-    const toggleTask = (id: string) => {
-        setTasks(prevTasks =>
-            prevTasks.map(task =>
-                task.id === id ? { ...task, completed: !task.completed } : task
-            )
-        );
-    };
-
     const removeTask = (taskId: string) => {
         setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+    };
+
+    const toggleTask = (id: string) => {
+        // Get the task we're trying to toggle
+        const taskToToggle = tasks.find(task => task.id === id);
+        
+        // If task doesn't exist, do nothing
+        if (!taskToToggle) return;
+        
+        // If task is already completed, we can toggle it back to incomplete
+        if (taskToToggle.completed) {
+            setTasks(prevTasks =>
+                prevTasks.map(task =>
+                    task.id === id ? { ...task, completed: false } : task
+                )
+            );
+            return;
+        }
+        
+        // If trying to mark as completed, check if daily goal is achieved
+        const activeTask = tasks.find(task => task.id === activeTaskId);
+        const dailyGoal = settings?.daily_goal || 8;
+        
+        if (activeTask && activeTask.metrics.completedPomodoros >= dailyGoal) {
+            // Daily goal achieved, allow marking as completed
+            setTasks(prevTasks =>
+                prevTasks.map(task =>
+                    task.id === id ? { ...task, completed: true } : task
+                )
+            );
+        } else {
+            // Daily goal not achieved, show notification
+            toast({
+                title: "Cannot complete task yet",
+                description: `Complete your daily goal of ${dailyGoal} pomodoros first.`,
+                variant: "default",
+                duration: 3000,
+            });
+        }
     };
 
     useEffect(() => {
@@ -1177,7 +1224,14 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     </div>
                     <ul>
                         {tasks
-                            .filter(task => showCompletedTasks || !task.completed)
+                            .filter(task => {
+                                // Only show completed tasks if showCompletedTasks is true
+                                if (task.completed) {
+                                    return showCompletedTasks;
+                                }
+                                // Always show non-completed tasks
+                                return true;
+                            })
                             .map(task => (
                                 <li key={task.id} className="flex items-center gap-3 p-4 rounded-xl transition-all duration-200">
                                     <Checkbox
