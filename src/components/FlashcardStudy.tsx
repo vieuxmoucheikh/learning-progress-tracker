@@ -201,9 +201,14 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
               <div className="h-full flex flex-col">
                 <div className="text-sm text-gray-500 mb-2">Back</div>
                 <div className="flex-1 overflow-y-auto">
-                  <div className="text-lg">
-                    {currentCard.back_content}
-                  </div>
+                  <div 
+                    className="text-lg"
+                    dangerouslySetInnerHTML={{ 
+                      __html: currentCard.back_content
+                        .replace(/<img/g, '<img class="max-w-full h-auto rounded-md my-2"')
+                        .replace(/\n/g, '<br />') 
+                    }}
+                  />
                 </div>
               </div>
             </div>

@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useToast } from './ui/use-toast';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
-import { Plus, Trash2, Play } from 'lucide-react';
+import { Plus, Trash2, Play, Image as ImageIcon } from 'lucide-react';
 import { createFlashcard } from '../lib/flashcards';
+import { uploadImage } from '../lib/storage';
 import type { Flashcard } from '../types';
 import { supabase } from '../lib/supabase';
 
@@ -21,6 +22,9 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState({ front: '', back: '' });
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -67,15 +71,25 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
         return;
       }
 
+      // Prepare back content with any uploaded images
+      let backContent = formData.back.trim();
+      if (uploadedImages.length > 0) {
+        // Add image tags to the back content
+        uploadedImages.forEach(imageUrl => {
+          backContent += `\n\n<img src="${imageUrl}" alt="Flashcard image" />`;
+        });
+      }
+
       const newCard = await createFlashcard(
         deckId,
         formData.front.trim(),
-        formData.back.trim()
+        backContent
       );
 
       setCards([newCard, ...cards]);
       setIsCreating(false);
       setFormData({ front: '', back: '' });
+      setUploadedImages([]);
       
       toast({
         title: "Success",
@@ -88,6 +102,37 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
         description: "Failed to create flashcard",
         variant: "destructive"
       });
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      const imagePromises = Array.from(files).map(file => uploadImage(file));
+      const imageUrls = await Promise.all(imagePromises);
+      
+      setUploadedImages(prev => [...prev, ...imageUrls]);
+      
+      toast({
+        title: "Success",
+        description: `${files.length} image(s) uploaded successfully`,
+      });
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload images",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+      // Reset the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -176,18 +221,23 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
         {filteredCards.map((card) => (
           <div
             key={card.id}
-            className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-md transition-shadow"
           >
             <div className="flex justify-between items-start mb-4">
               <div className="flex-1">
-                <div className="font-medium mb-2">Front:</div>
-                <div className="text-gray-700 mb-4 whitespace-pre-wrap">
+                <div className="font-medium mb-2 text-gray-900 dark:text-gray-100">Front:</div>
+                <div className="text-gray-700 dark:text-gray-300 mb-4 whitespace-pre-wrap">
                   {card.front_content}
                 </div>
-                <div className="font-medium mb-2">Back:</div>
-                <div className="text-gray-700 whitespace-pre-wrap">
-                  {card.back_content}
-                </div>
+                <div className="font-medium mb-2 text-gray-900 dark:text-gray-100">Back:</div>
+                <div 
+                  className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap"
+                  dangerouslySetInnerHTML={{ 
+                    __html: card.back_content
+                      .replace(/<img/g, '<img class="max-w-full h-auto rounded-md my-2"')
+                      .replace(/\n/g, '<br />') 
+                  }}
+                />
               </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -250,7 +300,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
       )}
 
       <Dialog open={isCreating} onOpenChange={setIsCreating}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Create New Flashcard</DialogTitle>
           </DialogHeader>
@@ -273,14 +323,72 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
                 className="mt-1"
               />
             </div>
+            
+            {/* Image upload section */}
+            <div>
+              <label className="text-sm font-medium">Images</label>
+              <div className="mt-1 flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="flex items-center gap-2"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  {isUploading ? 'Uploading...' : 'Add Images'}
+                </Button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                />
+                <span className="text-sm text-gray-500">
+                  {uploadedImages.length > 0 && `${uploadedImages.length} image(s) added`}
+                </span>
+              </div>
+              
+              {/* Preview uploaded images */}
+              {uploadedImages.length > 0 && (
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  {uploadedImages.map((url, index) => (
+                    <div key={index} className="relative group">
+                      <img 
+                        src={url} 
+                        alt={`Uploaded ${index + 1}`} 
+                        className="h-24 w-full object-cover rounded-md"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setUploadedImages(prev => prev.filter(item => item !== url))}
+                        className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsCreating(false)}>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setIsCreating(false);
+                  setUploadedImages([]);
+                  setFormData({ front: '', back: '' });
+                }}
+              >
                 Cancel
               </Button>
               <Button
                 className="bg-blue-600 text-white hover:bg-blue-700"
                 onClick={handleCreateCard}
-                disabled={!formData.front.trim() || !formData.back.trim()}
+                disabled={!formData.front.trim() || !formData.back.trim() || isUploading}
               >
                 Create Card
               </Button>
