@@ -111,9 +111,9 @@ export interface Pomodoro {
   user_id: string;
   start_time: string;
   end_time?: string;
-  type: 'work' | 'break';
+  type: 'work' | 'break' | 'long_break';
   completed: boolean;
-  label?: string;
+  skipped?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -130,6 +130,7 @@ export interface PomodoroSettings {
     notification_enabled?: boolean;
     vibration_enabled?: boolean;
     theme?: 'light' | 'dark' | 'system';
+    sound_type?: 'bell' | 'chime' | 'soft';
 }
 
 export interface PomodoroStats {

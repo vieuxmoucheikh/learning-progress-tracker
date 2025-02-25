@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -179,6 +179,25 @@ export function PomodoroSettingsDialog({
               onColor="green"
             />
           </div>
+
+          {settings.sound_enabled && (
+            <div className="grid gap-2">
+              <Label htmlFor="soundType">Sound Type</Label>
+              <Select
+                value={settings.sound_type || 'bell'}
+                onValueChange={(value) => handleChange('sound_type', value)}
+              >
+                <SelectTrigger id="soundType">
+                  <SelectValue placeholder="Select sound type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bell">Bell</SelectItem>
+                  <SelectItem value="chime">Chime</SelectItem>
+                  <SelectItem value="soft">Soft</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="flex items-center justify-between">
             <Label htmlFor="notificationEnabled">Desktop Notifications</Label>
