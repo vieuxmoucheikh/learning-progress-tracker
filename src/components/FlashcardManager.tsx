@@ -10,6 +10,7 @@ import { createFlashcard } from '../lib/flashcards';
 import { uploadImage } from '../lib/storage';
 import type { Flashcard } from '../types';
 import { supabase } from '../lib/supabase';
+import '../styles/flashcard.css';
 
 interface FlashcardManagerProps {
   deckId: string;
@@ -26,6 +27,14 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Function to sanitize HTML content for safe rendering
+  const sanitizeHtml = (html: string) => {
+    // Allow only img tags with safe attributes
+    return html
+      .replace(/\n/g, '<br />')
+      .replace(/<img/g, '<img loading="lazy" class="flashcard-image"');
+  };
 
   useEffect(() => {
     loadCards();
@@ -78,7 +87,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
       if (uploadedImages.length > 0) {
         // Add each image on a new line
         uploadedImages.forEach(imageUrl => {
-          backContent += `\n\n<img src="${imageUrl}" alt="Flashcard image" style="max-width: 100%; height: auto; display: block; margin: 10px 0;" />`;
+          backContent += `\n\n<img src="${imageUrl}" alt="Flashcard image" width="100%" style="max-width: 100%; height: auto; display: block; margin: 10px 0;" />`;
         });
       }
 
@@ -233,10 +242,9 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
                 </div>
                 <div className="font-medium mb-2 text-gray-900 dark:text-gray-100">Back:</div>
                 <div 
-                  className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap"
+                  className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap card-back-content"
                   dangerouslySetInnerHTML={{ 
-                    __html: card.back_content
-                      .replace(/\n/g, '<br />') 
+                    __html: sanitizeHtml(card.back_content)
                   }}
                 />
               </div>

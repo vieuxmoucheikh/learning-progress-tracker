@@ -6,6 +6,7 @@ import { useToast } from './ui/use-toast';
 import { ArrowLeft, Repeat, ThumbsUp, ThumbsDown, Check, Brain } from 'lucide-react';
 import { calculateNextReview, submitReview } from '../lib/flashcards';
 import type { Flashcard } from '../types';
+import '../styles/flashcard.css';
 
 interface FlashcardStudyProps {
   deckId: string;
@@ -28,6 +29,14 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
   useEffect(() => {
     loadCards();
   }, [deckId]);
+
+  // Function to sanitize HTML content for safe rendering
+  const sanitizeHtml = (html: string) => {
+    // Allow only img tags with safe attributes
+    return html
+      .replace(/\n/g, '<br />')
+      .replace(/<img/g, '<img loading="lazy" class="flashcard-image"');
+  };
 
   const loadCards = async () => {
     try {
@@ -202,10 +211,9 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
                 <div className="text-sm text-gray-500 mb-2">Back</div>
                 <div className="flex-1 overflow-y-auto">
                   <div 
-                    className="text-lg"
+                    className="text-lg flashcard-content"
                     dangerouslySetInnerHTML={{ 
-                      __html: currentCard.back_content
-                        .replace(/\n/g, '<br />') 
+                      __html: sanitizeHtml(currentCard.back_content)
                     }}
                   />
                 </div>

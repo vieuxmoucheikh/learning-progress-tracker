@@ -73,8 +73,13 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground; 
+    @apply bg-background text-foreground;
     font-family: 'Inter', system-ui, -apple-system, sans-serif; /* Police par défaut */
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
   }
 }
 
@@ -195,4 +200,27 @@ pre {
   border-radius: 4px;
   overflow: auto;
   font-family: monospace;
+}
+
+/* Flashcard specific styles */
+.flashcard-content img,
+.card-back-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 10px 0;
+  border-radius: 4px;
+}
+
+/* Flip card animations */
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.rotate-y-0 {
+  transform: rotateY(0deg);
 }
