@@ -392,6 +392,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             // Final triumphant chord
             const osc4 = context.createOscillator();
             const gain4 = context.createGain();
+            
             osc4.connect(gain4);
             gain4.connect(context.destination);
             
@@ -412,10 +413,14 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
     // Check daily goal achievement
     const checkDailyGoal = useCallback((completedPomodoros: number) => {
-        if (settings?.daily_goal && completedPomodoros >= settings.daily_goal && !isCompleted) {
-            // Stop the timer if it's running
-            setIsActive(false);
-            
+        if (!settings) return; // Add a null check for settings
+        
+        const dailyGoal = settings.daily_goal || 8;
+        
+        // Check if any task has reached the daily goal
+        const taskReachedGoal = tasks.some(task => task.metrics.completedPomodoros >= dailyGoal);
+        
+        if (taskReachedGoal && !isCompleted) {
             // Mark the goal as completed
             setIsCompleted(true);
             
@@ -425,25 +430,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             
             console.log("Daily goal achieved and marked as completed!");
             
-            // Mark the active task as completed
-            if (activeTaskId) {
-                setTasks(prevTasks => {
-                    const updatedTasks = prevTasks.map(task =>
-                        task.id === activeTaskId ? { ...task, completed: true } : task
-                    );
-                    
-                    // Update localStorage with the updated tasks
-                    try {
-                        localStorage.setItem('pomodoroTasks', JSON.stringify(updatedTasks));
-                        console.log("Active task marked as completed upon daily goal achievement");
-                    } catch (error) {
-                        console.error("Error saving updated tasks to localStorage:", error);
-                    }
-                    
-                    return updatedTasks;
-                });
-            }
-            
             // Play celebration sound
             if (audioContext && settings.sound_enabled) {
                 playGoalAchievedSound(audioContext);
@@ -452,7 +438,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             // Show celebration toast with more emphasis
             toast({
                 title: "🎉 Daily Goal Achieved! 🎉",
-                description: `Congratulations! You've completed ${completedPomodoros} pomodoros today and reached your daily goal of ${settings.daily_goal}!`,
+                description: `Congratulations! You've completed ${completedPomodoros} pomodoros today and reached your daily goal of ${dailyGoal}!`,
                 variant: "default",
                 duration: 8000, // Longer duration for celebration
             });
@@ -461,13 +447,13 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             if (settings.notification_enabled) {
                 if (Notification.permission === 'granted') {
                     new Notification('Daily Goal Achieved! 🎉', {
-                        body: `Congratulations! You've completed your daily goal of ${settings.daily_goal} pomodoros!`,
+                        body: `Congratulations! You've completed your daily goal of ${dailyGoal} pomodoros!`,
                         icon: 'favicon.ico'
                     });
                 }
             }
         }
-    }, [settings, isCompleted, audioContext, toast, playGoalAchievedSound, activeTaskId, tasks]);
+    }, [settings, isCompleted, audioContext, toast, playGoalAchievedSound, tasks]);
 
     // Add streak tracking
     useEffect(() => {
@@ -757,19 +743,25 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             return;
         }
         
-        // If trying to mark as completed, check if daily goal is achieved
-        if (isCompleted) {
-            // Daily goal achieved, allow marking as completed
+        // If trying to mark as completed, check if this task has reached the daily goal
+        const dailyGoal = settings?.daily_goal || 8;
+        if (taskToToggle.metrics.completedPomodoros >= dailyGoal) {
+            // Daily goal achieved for this task, allow marking as completed
             setTasks(prevTasks =>
                 prevTasks.map(task =>
                     task.id === id ? { ...task, completed: true } : task
                 )
             );
+            
+            // Also set isCompleted to true since a task has reached the daily goal
+            setIsCompleted(true);
+            localStorage.setItem('dailyGoalCompleted', 'true');
+            localStorage.setItem('dailyGoalCompletedDate', new Date().toDateString());
         } else {
             // Daily goal not achieved, show notification
             toast({
                 title: "Cannot complete task yet",
-                description: `Complete your daily goal of ${settings?.daily_goal || 8} pomodoros first.`,
+                description: `Complete your daily goal of ${dailyGoal} pomodoros for this task first.`,
                 variant: "default",
                 duration: 3000,
             });
@@ -945,7 +937,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             }
 
             // Jouer le son avant toute autre opération si activé
-            if (settings.sound_enabled && audioContext) {
+            if (settings?.sound_enabled && audioContext) {
                 try {
                     await playNotificationSound();
                 } catch (error) {
@@ -1007,23 +999,47 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         
                         console.log("Updating pomodoro count from", task.metrics.completedPomodoros, "to", newCompletedPomodoros);
                         
-                        // Check if goal is achieved
-                        if (settings.daily_goal && newCompletedPomodoros >= settings.daily_goal && !isCompleted) {
+                        // Check if this task has reached the daily goal
+                        const dailyGoal = settings?.daily_goal || 8;
+                        const hasReachedDailyGoal = newCompletedPomodoros >= dailyGoal;
+                        
+                        // If this task has reached the daily goal, mark it as completed
+                        const shouldMarkCompleted = hasReachedDailyGoal && !task.completed;
+                        
+                        // Check if goal is achieved for any task
+                        if (hasReachedDailyGoal && !isCompleted) {
                             try {
-                                checkDailyGoal(newCompletedPomodoros);
+                                // Set the overall completion status
+                                setIsCompleted(true);
+                                localStorage.setItem('dailyGoalCompleted', 'true');
+                                localStorage.setItem('dailyGoalCompletedDate', new Date().toDateString());
+                                
+                                // Show celebration toast
+                                toast({
+                                    title: "🎉 Daily Goal Achieved! 🎉",
+                                    description: `Congratulations! You've completed ${newCompletedPomodoros} pomodoros for this task and reached your daily goal of ${dailyGoal}!`,
+                                    variant: "default",
+                                    duration: 8000,
+                                });
+                                
+                                // Play celebration sound
+                                if (audioContext && settings?.sound_enabled) {
+                                    playGoalAchievedSound(audioContext);
+                                }
                             } catch (error) {
-                                console.warn("Error checking daily goal:", error);
-                                // Continue anyway
+                                console.warn("Error handling daily goal achievement:", error);
                             }
                         }
                         
                         return {
                             ...task,
+                            // Mark as completed if it reached the daily goal
+                            completed: shouldMarkCompleted ? true : task.completed,
                             metrics: {
                                 ...task.metrics,
                                 currentStreak: task.metrics.currentStreak + 1,
                                 completedPomodoros: newCompletedPomodoros,
-                                totalMinutes: task.metrics.totalMinutes + settings.work_duration
+                                totalMinutes: task.metrics.totalMinutes + (settings?.work_duration || 25)
                             }
                         };
                     }
@@ -1061,20 +1077,20 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     const task = tasks.find(t => t.id === activeTaskId);
                     if (task) {
                         const completedPomodoros = task.metrics.completedPomodoros;
-                        const isLongBreak = completedPomodoros > 0 && completedPomodoros % settings.pomodoros_until_long_break === 0;
-                        newDuration = isLongBreak ? settings.long_break_duration : settings.break_duration;
+                        const isLongBreak = completedPomodoros > 0 && completedPomodoros % (settings?.pomodoros_until_long_break || 4) === 0;
+                        newDuration = isLongBreak ? (settings?.long_break_duration || 15) : (settings?.break_duration || 5);
                         console.log("Break duration:", newDuration, isLongBreak ? "(long break)" : "(short break)");
                     } else {
-                        newDuration = settings.break_duration;
+                        newDuration = settings?.break_duration || 5;
                         console.log("Break duration (default):", newDuration);
                     }
                 } else {
-                    newDuration = settings.break_duration;
+                    newDuration = settings?.break_duration || 5;
                     console.log("Break duration (no active task):", newDuration);
                 }
             } else {
                 // If we're switching to work mode
-                newDuration = settings.work_duration;
+                newDuration = settings?.work_duration || 25;
                 console.log("Work duration:", newDuration);
             }
 
@@ -1093,7 +1109,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             });
 
             // Démarrer automatiquement avec un délai
-            const shouldAutoStart = finishingWorkSession ? settings.auto_start_breaks : settings.auto_start_pomodoros;
+            const shouldAutoStart = finishingWorkSession ? settings?.auto_start_breaks : settings?.auto_start_pomodoros;
             if (shouldAutoStart) {
                 console.log("Auto-starting next session:", newIsBreak ? "break" : "work");
                 // Attendre que les états soient mis à jour
@@ -1131,7 +1147,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                 metrics: {
                                     ...task.metrics,
                                     completedPomodoros: task.metrics.completedPomodoros + 1,
-                                    totalMinutes: task.metrics.totalMinutes + settings.work_duration
+                                    totalMinutes: task.metrics.totalMinutes + (settings?.work_duration || 25)
                                 }
                             };
                         }
@@ -1146,7 +1162,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 }
             }
         }
-    }, [isBreak, settings, currentPomodoroId, activeTaskId, pomodoroCount, audioContext, playNotificationSound, isCompleted, checkDailyGoal, tasks, startNewPomodoro]);
+    }, [isBreak, settings, currentPomodoroId, activeTaskId, pomodoroCount, audioContext, playNotificationSound, isCompleted, tasks, startNewPomodoro]);
 
     // Add keyboard shortcut handling
     useEffect(() => {
@@ -1237,7 +1253,10 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setShowCompletedTasks(prev => !prev)}
+                            onClick={() => {
+                                setShowCompletedTasks(prev => !prev);
+                                console.log("Toggle show completed tasks:", !showCompletedTasks);
+                            }}
                             className="bg-slate-700/50 text-slate-200 hover:bg-slate-600/50 hover:text-white"
                         >
                             {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
@@ -1266,7 +1285,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                             task.completed ? "text-slate-400 line-through" : "text-blue-100"
                                         )}>
                                             {task.text}
-                                            {task.completed && isCompleted && (
+                                            {task.completed && task.metrics.completedPomodoros >= (settings?.daily_goal || 8) && (
                                                 <Badge variant="secondary" className="ml-2 bg-green-600 text-white">
                                                     <Trophy className="h-3 w-3 mr-1" />
                                                     Completed!
