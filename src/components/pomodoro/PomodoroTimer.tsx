@@ -13,7 +13,11 @@ import {
     completePomodoro,
     getPomodoroSettings,
     getPomodoroStats,
-    updatePomodoroSettings
+    updatePomodoroSettings,
+    getPomodoroTasks,
+    createPomodoroTask,
+    updatePomodoroTask,
+    deletePomodoroTask
 } from '@/lib/database';
 import { PomodoroSettings, PomodoroStats } from '@/types';
 import { PomodoroSettingsDialog } from './PomodoroSettingsDialog';
@@ -30,12 +34,14 @@ interface Task {
     id: string;
     text: string;
     completed: boolean;
-    progress: number;
     metrics: {
         totalMinutes: number;
         completedPomodoros: number;
         currentStreak: number;
     };
+    user_id?: string;
+    created_at?: string;
+    updated_at?: string;
 }
 
 interface PomodoroSettingsDialogProps {
@@ -152,29 +158,83 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     const [pomodoroCount, setPomodoroCount] = useState(0); // Ajouter ce state
     const timerWorkerRef = useRef<Worker | null>(null);
 
-    // Load tasks from localStorage on mount
+    // Load tasks from Supabase on mount
     useEffect(() => {
         const loadTasks = async () => {
             try {
-                const savedTasks = localStorage.getItem('pomodoroTasks');
-                if (savedTasks) {
-                    const parsedTasks = JSON.parse(savedTasks);
-                    const tasksWithMetrics = parsedTasks.map((task: any) => ({
-                        ...task,
-                        metrics: task.metrics || {
-                            totalMinutes: 0,
-                            completedPomodoros: 0,
-                            currentStreak: 0
+                // Only attempt to load tasks if user is authenticated
+                if (user) {
+                    const supabaseTasks = await getPomodoroTasks();
+                    if (supabaseTasks && supabaseTasks.length > 0) {
+                        // Convert PomodoroTask[] to Task[]
+                        const convertedTasks: Task[] = supabaseTasks.map(task => ({
+                            id: task.id,
+                            text: task.text,
+                            completed: task.completed,
+                            metrics: task.metrics,
+                            user_id: task.user_id,
+                            created_at: task.created_at,
+                            updated_at: task.updated_at
+                        }));
+                        setTasks(convertedTasks);
+                        console.log("Tasks loaded from Supabase:", convertedTasks);
+                    } else {
+                        // Migrate from localStorage if available
+                        const savedTasks = localStorage.getItem('pomodoroTasks');
+                        if (savedTasks) {
+                            const parsedTasks = JSON.parse(savedTasks);
+                            const tasksWithMetrics = parsedTasks.map((task: any) => ({
+                                id: task.id,
+                                text: task.text,
+                                completed: task.completed,
+                                metrics: task.metrics || {
+                                    totalMinutes: 0,
+                                    completedPomodoros: 0,
+                                    currentStreak: 0
+                                }
+                            }));
+                            
+                            // Save migrated tasks to Supabase
+                            for (const task of tasksWithMetrics) {
+                                await createPomodoroTask(task);
+                            }
+                            
+                            setTasks(tasksWithMetrics);
+                            console.log("Tasks migrated from localStorage to Supabase");
+                            
+                            // Clear localStorage after migration
+                            localStorage.removeItem('pomodoroTasks');
                         }
-                    }));
-                    setTasks(tasksWithMetrics);
+                    }
+                } else {
+                    // Fallback to localStorage if user is not authenticated
+                    const savedTasks = localStorage.getItem('pomodoroTasks');
+                    if (savedTasks) {
+                        const parsedTasks = JSON.parse(savedTasks);
+                        const tasksWithMetrics = parsedTasks.map((task: any) => ({
+                            id: task.id,
+                            text: task.text,
+                            completed: task.completed,
+                            metrics: task.metrics || {
+                                totalMinutes: 0,
+                                completedPomodoros: 0,
+                                currentStreak: 0
+                            }
+                        }));
+                        setTasks(tasksWithMetrics);
+                    }
                 }
             } catch (error) {
                 console.error('Error loading tasks:', error);
+                toast({
+                    title: "Error loading tasks",
+                    description: "Could not load your tasks. Please try again later.",
+                    variant: "destructive",
+                });
             }
         };
         loadTasks();
-    }, []);
+    }, [user, toast]);
 
     // Load daily goal completion status from localStorage
     useEffect(() => {
@@ -198,16 +258,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             console.error('Error loading daily goal completion status:', error);
         }
     }, []);
-
-    // Save tasks to localStorage whenever they change
-    useEffect(() => {
-        try {
-            localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
-            console.log("Tasks saved to localStorage after change");
-        } catch (error) {
-            console.error("Error saving tasks to localStorage:", error);
-        }
-    }, [tasks]);
 
     // Define playNotificationSound function
     const playNotificationSound = useCallback(async () => {
@@ -687,27 +737,122 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         return () => clearInterval(syncInterval);
     }, [syncWithSupabase]);
 
+    // Add a function to sync failed task updates
+    const syncFailedTaskUpdates = useCallback(async () => {
+        if (!user) return;
+        
+        try {
+            const failedUpdates = JSON.parse(localStorage.getItem('failedTaskUpdates') || '[]') as Array<{
+                taskId: string;
+                metrics: Task['metrics'];
+                completed: boolean;
+                timestamp: string;
+            }>;
+            
+            if (failedUpdates.length === 0) return;
+            
+            console.log(`Attempting to sync ${failedUpdates.length} failed task updates`);
+            
+            const successfulSyncs: Array<{
+                taskId: string;
+                metrics: Task['metrics'];
+                completed: boolean;
+                timestamp: string;
+            }> = [];
+            
+            for (const update of failedUpdates) {
+                try {
+                    await updatePomodoroTask(update.taskId, {
+                        metrics: update.metrics,
+                        completed: update.completed
+                    });
+                    successfulSyncs.push(update);
+                    console.log(`Successfully synced task update for task ${update.taskId}`);
+                } catch (error) {
+                    console.error(`Failed to sync task update for task ${update.taskId}:`, error);
+                }
+            }
+            
+            // Remove successful syncs from the failed updates
+            if (successfulSyncs.length > 0) {
+                const remainingUpdates = failedUpdates.filter(
+                    update => !successfulSyncs.some(sync => sync.taskId === update.taskId && sync.timestamp === update.timestamp)
+                );
+                localStorage.setItem('failedTaskUpdates', JSON.stringify(remainingUpdates));
+                
+                if (remainingUpdates.length === 0) {
+                    console.log("All failed task updates successfully synced");
+                    toast({
+                        title: "Sync Complete",
+                        description: `Successfully synced ${successfulSyncs.length} task updates.`,
+                        duration: 3000,
+                    });
+                } else {
+                    console.log(`${remainingUpdates.length} task updates still pending sync`);
+                    toast({
+                        title: "Partial Sync",
+                        description: `Synced ${successfulSyncs.length} task updates. ${remainingUpdates.length} updates still pending.`,
+                        duration: 3000,
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Error syncing failed task updates:", error);
+        }
+    }, [user, toast]);
+
+    // Try to sync failed updates when user logs in or when component mounts
+    useEffect(() => {
+        if (user) {
+            syncFailedTaskUpdates();
+        }
+    }, [user, syncFailedTaskUpdates]);
+
     const addTask = async (text: string) => {
+        if (!text.trim()) return;
+        
         const newTaskId = crypto.randomUUID();
         const newTask: Task = {
             id: newTaskId,
             text,
             completed: false,
-            progress: 0,
             metrics: {
                 totalMinutes: 0,
                 completedPomodoros: 0,
                 currentStreak: 0
             }
         };
-        setTasks(prev => [...prev, newTask]);
-        setActiveTaskId(newTaskId);
-        setTime(settings?.work_duration ? settings.work_duration * 60 : 25 * 60);
-        setIsActive(false);
-        setIsBreak(false);
-        if (currentPomodoroId) {
-            await completePomodoro(currentPomodoroId);
-            setCurrentPomodoroId(null);
+        
+        try {
+            // Save to Supabase if user is authenticated
+            if (user) {
+                // Create a task object that matches the PomodoroTask interface
+                await createPomodoroTask({
+                    id: newTask.id,
+                    text: newTask.text,
+                    completed: newTask.completed,
+                    metrics: newTask.metrics
+                });
+            }
+            
+            // Update local state
+            setTasks(prev => [...prev, newTask]);
+            setActiveTaskId(newTaskId);
+            setTime(settings?.work_duration ? settings.work_duration * 60 : 25 * 60);
+            setIsActive(false);
+            setIsBreak(false);
+            
+            if (currentPomodoroId) {
+                await completePomodoro(currentPomodoroId);
+                setCurrentPomodoroId(null);
+            }
+        } catch (error) {
+            console.error('Error adding task:', error);
+            toast({
+                title: "Error adding task",
+                description: "Could not add your task. Please try again later.",
+                variant: "destructive",
+            });
         }
     };
 
@@ -722,48 +867,84 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
     };
 
-    const removeTask = (taskId: string) => {
-        setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+    const removeTask = async (taskId: string) => {
+        try {
+            // Delete from Supabase if user is authenticated
+            if (user) {
+                await deletePomodoroTask(taskId);
+            }
+            
+            // Update local state
+            setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+        } catch (error) {
+            console.error('Error removing task:', error);
+            toast({
+                title: "Error removing task",
+                description: "Could not remove your task. Please try again later.",
+                variant: "destructive",
+            });
+        }
     };
 
-    const toggleTask = (id: string) => {
+    const toggleTask = async (id: string) => {
         // Get the task we're trying to toggle
         const taskToToggle = tasks.find(task => task.id === id);
         
         // If task doesn't exist, do nothing
         if (!taskToToggle) return;
         
-        // If task is already completed, we can toggle it back to incomplete
-        if (taskToToggle.completed) {
-            setTasks(prevTasks =>
-                prevTasks.map(task =>
-                    task.id === id ? { ...task, completed: false } : task
-                )
-            );
-            return;
-        }
-        
-        // If trying to mark as completed, check if this task has reached the daily goal
-        const dailyGoal = settings?.daily_goal ?? 8; // Fix TypeScript error by using nullish coalescing operator
-        if (taskToToggle.metrics.completedPomodoros >= dailyGoal) {
-            // Daily goal achieved for this task, allow marking as completed
-            setTasks(prevTasks =>
-                prevTasks.map(task =>
-                    task.id === id ? { ...task, completed: true } : task
-                )
-            );
+        try {
+            // If task is already completed, we can toggle it back to incomplete
+            if (taskToToggle.completed) {
+                // Update in Supabase if user is authenticated
+                if (user) {
+                    await updatePomodoroTask(id, { completed: false });
+                }
+                
+                // Update local state
+                setTasks(prevTasks =>
+                    prevTasks.map(task =>
+                        task.id === id ? { ...task, completed: false } : task
+                    )
+                );
+                return;
+            }
             
-            // Also set isCompleted to true since a task has reached the daily goal
-            setIsCompleted(true);
-            localStorage.setItem('dailyGoalCompleted', 'true');
-            localStorage.setItem('dailyGoalCompletedDate', new Date().toDateString());
-        } else {
-            // Daily goal not achieved, show notification
+            // If trying to mark as completed, check if this task has reached the daily goal
+            const dailyGoal = settings?.daily_goal ?? 8;
+            if (taskToToggle.metrics.completedPomodoros >= dailyGoal) {
+                // Daily goal achieved for this task, allow marking as completed
+                // Update in Supabase if user is authenticated
+                if (user) {
+                    await updatePomodoroTask(id, { completed: true });
+                }
+                
+                // Update local state
+                setTasks(prevTasks =>
+                    prevTasks.map(task =>
+                        task.id === id ? { ...task, completed: true } : task
+                    )
+                );
+                
+                // Also set isCompleted to true since a task has reached the daily goal
+                setIsCompleted(true);
+                localStorage.setItem('dailyGoalCompleted', 'true');
+                localStorage.setItem('dailyGoalCompletedDate', new Date().toDateString());
+            } else {
+                // Daily goal not achieved, show notification
+                toast({
+                    title: "Cannot complete task yet",
+                    description: `Complete your daily goal of ${dailyGoal} pomodoros for this task first.`,
+                    variant: "default",
+                    duration: 3000,
+                });
+            }
+        } catch (error) {
+            console.error('Error toggling task:', error);
             toast({
-                title: "Cannot complete task yet",
-                description: `Complete your daily goal of ${dailyGoal} pomodoros for this task first.`,
-                variant: "default",
-                duration: 3000,
+                title: "Error updating task",
+                description: "Could not update your task. Please try again later.",
+                variant: "destructive",
             });
         }
     };
@@ -971,6 +1152,32 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         variant: "default",
                         duration: 3000,
                     });
+                    
+                    // Even if there's an error, try to update the local state
+                    if (activeTaskId) {
+                        try {
+                            // Update local metrics as a fallback
+                            const updatedTasks = tasks.map(task => {
+                                if (task.id === activeTaskId) {
+                                    return {
+                                        ...task,
+                                        metrics: {
+                                            ...task.metrics,
+                                            completedPomodoros: task.metrics.completedPomodoros + 1,
+                                            totalMinutes: task.metrics.totalMinutes + (settings?.work_duration ?? 25)
+                                        }
+                                    };
+                                }
+                                return task;
+                            });
+                            
+                            setTasks(updatedTasks);
+                            localStorage.setItem('pomodoroTasks', JSON.stringify(updatedTasks));
+                            console.log("Emergency fallback: Tasks updated locally despite error");
+                        } catch (fallbackError) {
+                            console.error("Critical error: Even fallback update failed:", fallbackError);
+                        }
+                    }
                 }
                 setCurrentPomodoroId(null);
             }
@@ -1031,16 +1238,47 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             }
                         }
                         
+                        // Create updated metrics object
+                        const updatedMetrics = {
+                            ...task.metrics,
+                            currentStreak: task.metrics.currentStreak + 1,
+                            completedPomodoros: newCompletedPomodoros,
+                            totalMinutes: task.metrics.totalMinutes + (settings?.work_duration ?? 25)
+                        };
+                        
+                        // Update task in Supabase if user is authenticated
+                        if (user) {
+                            (async () => {
+                                try {
+                                    await updatePomodoroTask(task.id, {
+                                        metrics: updatedMetrics,
+                                        completed: shouldMarkCompleted ? true : task.completed
+                                    });
+                                    console.log("Task metrics updated in Supabase:", task.id);
+                                } catch (error) {
+                                    console.error("Error updating task metrics in Supabase:", error);
+                                    
+                                    // Store failed update for later sync
+                                    try {
+                                        const failedUpdates = JSON.parse(localStorage.getItem('failedTaskUpdates') || '[]');
+                                        failedUpdates.push({
+                                            taskId: task.id,
+                                            metrics: updatedMetrics,
+                                            completed: shouldMarkCompleted ? true : task.completed,
+                                            timestamp: new Date().toISOString()
+                                        });
+                                        localStorage.setItem('failedTaskUpdates', JSON.stringify(failedUpdates));
+                                    } catch (storageError) {
+                                        console.error("Failed to store update for later sync:", storageError);
+                                    }
+                                }
+                            })();
+                        }
+                        
                         return {
                             ...task,
-                            // Mark as completed if it reached the daily goal
                             completed: shouldMarkCompleted ? true : task.completed,
-                            metrics: {
-                                ...task.metrics,
-                                currentStreak: task.metrics.currentStreak + 1,
-                                completedPomodoros: newCompletedPomodoros,
-                                totalMinutes: task.metrics.totalMinutes + (settings?.work_duration ?? 25)
-                            }
+                            metrics: updatedMetrics
                         };
                     }
                     return task;
@@ -1049,15 +1287,15 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 // Set tasks state with the updated tasks
                 setTasks(updatedTasks);
                 
-                // Save tasks to localStorage
+                // Save tasks to localStorage as a backup
                 try {
                     localStorage.setItem('pomodoroTasks', JSON.stringify(updatedTasks));
-                    console.log("Tasks updated in localStorage");
+                    console.log("Tasks updated in localStorage as backup");
                 } catch (error) {
                     console.error("Error saving tasks to localStorage:", error);
                     toast({
                         title: "Error",
-                        description: "Could not save progress. Please check your device storage.",
+                        description: "Could not save backup progress. Please check your device storage.",
                         variant: "destructive",
                         duration: 3000,
                     });
@@ -1077,20 +1315,20 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     const task = tasks.find(t => t.id === activeTaskId);
                     if (task) {
                         const completedPomodoros = task.metrics.completedPomodoros;
-                        const isLongBreak = completedPomodoros > 0 && completedPomodoros % (settings?.pomodoros_until_long_break ?? 4) === 0;
-                        newDuration = isLongBreak ? (settings?.long_break_duration ?? 15) : (settings?.break_duration ?? 5);
+                        const isLongBreak = completedPomodoros > 0 && completedPomodoros % settings.pomodoros_until_long_break === 0;
+                        newDuration = isLongBreak ? settings.long_break_duration : settings.break_duration;
                         console.log("Break duration:", newDuration, isLongBreak ? "(long break)" : "(short break)");
                     } else {
-                        newDuration = settings?.break_duration ?? 5;
+                        newDuration = settings.break_duration;
                         console.log("Break duration (default):", newDuration);
                     }
                 } else {
-                    newDuration = settings?.break_duration ?? 5;
+                    newDuration = settings.break_duration;
                     console.log("Break duration (no active task):", newDuration);
                 }
             } else {
                 // If we're switching to work mode
-                newDuration = settings?.work_duration ?? 25;
+                newDuration = settings.work_duration;
                 console.log("Work duration:", newDuration);
             }
 
@@ -1109,7 +1347,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             });
 
             // Démarrer automatiquement avec un délai
-            const shouldAutoStart = finishingWorkSession ? settings?.auto_start_breaks : settings?.auto_start_pomodoros;
+            const shouldAutoStart = finishingWorkSession ? settings.auto_start_breaks : settings.auto_start_pomodoros;
             if (shouldAutoStart) {
                 console.log("Auto-starting next session:", newIsBreak ? "break" : "work");
                 // Attendre que les états soient mis à jour

@@ -1231,3 +1231,101 @@ export async function addTestActivityData() {
     console.error('Error adding test data:', error);
   }
 }
+
+// Pomodoro Tasks Management
+export interface PomodoroTask {
+  id: string;
+  user_id: string;
+  text: string;
+  completed: boolean;
+  metrics: {
+    totalMinutes: number;
+    completedPomodoros: number;
+    currentStreak: number;
+  };
+  created_at?: string;
+  updated_at?: string;
+}
+
+export async function getPomodoroTasks(): Promise<PomodoroTask[]> {
+  try {
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) throw new Error('No authenticated user');
+
+    const { data, error } = await supabase
+      .from('pomodoro_tasks')
+      .select('*')
+      .eq('user_id', user.data.user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error in getPomodoroTasks:', error);
+    return [];
+  }
+}
+
+export async function createPomodoroTask(task: Omit<PomodoroTask, 'user_id' | 'created_at' | 'updated_at'>): Promise<PomodoroTask> {
+  try {
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) throw new Error('No authenticated user');
+
+    const { data, error } = await supabase
+      .from('pomodoro_tasks')
+      .insert({
+        ...task,
+        user_id: user.data.user.id
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error in createPomodoroTask:', error);
+    throw error;
+  }
+}
+
+export async function updatePomodoroTask(id: string, updates: Partial<Omit<PomodoroTask, 'id' | 'user_id' | 'created_at' | 'updated_at'>>): Promise<PomodoroTask> {
+  try {
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) throw new Error('No authenticated user');
+
+    const { data, error } = await supabase
+      .from('pomodoro_tasks')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', user.data.user.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error in updatePomodoroTask:', error);
+    throw error;
+  }
+}
+
+export async function deletePomodoroTask(id: string): Promise<void> {
+  try {
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) throw new Error('No authenticated user');
+
+    const { error } = await supabase
+      .from('pomodoro_tasks')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.data.user.id);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Error in deletePomodoroTask:', error);
+    throw error;
+  }
+}
