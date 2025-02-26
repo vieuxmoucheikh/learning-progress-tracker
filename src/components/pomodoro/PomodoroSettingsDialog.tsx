@@ -262,10 +262,17 @@ export function PomodoroSettingsDialog({
         </div>
 
         <div className="flex justify-end gap-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)}
+            className="border-slate-600 text-slate-200 hover:bg-slate-700 hover:text-white"
+          >
             Cancel
           </Button>
-          <Button onClick={handleSave}>
+          <Button 
+            onClick={handleSave}
+            className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+          >
             Save Changes
           </Button>
         </div>

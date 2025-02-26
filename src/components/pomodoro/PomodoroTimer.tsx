@@ -174,7 +174,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             metrics: task.metrics,
                             user_id: task.user_id,
                             created_at: task.created_at,
-                            updated_at: task.updated_at
+                            updated_at: task.updated_at,
                         }));
                         setTasks(convertedTasks);
                         console.log("Tasks loaded from Supabase:", convertedTasks);
@@ -509,6 +509,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     useEffect(() => {
         const lastActive = localStorage.getItem('lastActiveDate');
         const today = new Date().toDateString();
+        
         if (lastActive === today) {
             const savedStreak = parseInt(localStorage.getItem('pomodoroStreak') || '0');
             setStreak(savedStreak);
@@ -826,13 +827,25 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         try {
             // Save to Supabase if user is authenticated
             if (user) {
-                // Create a task object that matches the PomodoroTask interface
-                await createPomodoroTask({
-                    id: newTask.id,
-                    text: newTask.text,
-                    completed: newTask.completed,
-                    metrics: newTask.metrics
-                });
+                try {
+                    // Create a task object that matches the PomodoroTask interface
+                    await createPomodoroTask({
+                        id: newTask.id,
+                        text: newTask.text,
+                        completed: newTask.completed,
+                        metrics: newTask.metrics
+                    });
+                    console.log("Task created in Supabase:", newTask);
+                } catch (error) {
+                    console.error("Error creating task in Supabase:", error);
+                    // Save to localStorage as a fallback
+                    const savedTasks = JSON.parse(localStorage.getItem('pomodoroTasks') || '[]');
+                    localStorage.setItem('pomodoroTasks', JSON.stringify([...savedTasks, newTask]));
+                }
+            } else {
+                // Save to localStorage if user is not authenticated
+                const savedTasks = JSON.parse(localStorage.getItem('pomodoroTasks') || '[]');
+                localStorage.setItem('pomodoroTasks', JSON.stringify([...savedTasks, newTask]));
             }
             
             // Update local state
@@ -1445,12 +1458,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     }, [activeTaskId, isActive, toggleTimer, skipCurrentInterval, settingsOpen]);
 
     return (
-        <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate700/30 shadow-2xl">
+        <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate-700/30 shadow-2xl rounded-xl">
             <div className="pomodoro-timer space-y-6 md:space-y-8">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full shadow-lg">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1.5 rounded-full shadow-lg bg-blue-600/90 backdrop-blur-sm">
                     <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full animate-pulse bg-blue-500" />
-                        <span className="text-sm font-medium text-blue-100">
+                        <div className="w-2 h-2 rounded-full animate-pulse bg-blue-300" />
+                        <span className="text-sm font-medium text-white">
                             {isBreak ? "Break Time" : "Focus Time"}
                         </span>
                     </div>
@@ -1462,9 +1475,9 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             value={currentTask}
                             onChange={(e) => setCurrentTask(e.target.value)}
                             placeholder="Add a new task..."
-                            className="flex h-10 w-full rounded-md border border-slate-600/30 bg-slate-800/80 px-3 py-2
+                            className="flex h-10 w-full rounded-md border border-slate-600/50 bg-slate-800/90 px-3 py-2
                             text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium
-                            placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-blue-50"
+                            placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-blue-50"
                             id="new-task-input"
                         />
                         <Button
@@ -1479,12 +1492,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             Add
                         </Button>
                     </div>
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center mb-4">
                         <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
+                            <Badge variant="outline" className="bg-blue-500/30 text-blue-200 border-blue-400/30 px-3 py-1">
                                 {tasks.filter(t => !t.completed).length} active
                             </Badge>
-                            <Badge variant="outline" className="bg-slate-700/50 text-slate-200 border-slate-500/30">
+                            <Badge variant="outline" className="bg-slate-700/60 text-slate-200 border-slate-500/30 px-3 py-1">
                                 {tasks.filter(t => t.completed).length} completed
                             </Badge>
                         </div>
@@ -1495,12 +1508,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                 setShowCompletedTasks(prev => !prev);
                                 console.log("Toggle show completed tasks:", !showCompletedTasks);
                             }}
-                            className="bg-slate-700/50 text-slate-200 hover:bg-slate-600/50 hover:text-white"
+                            className="bg-slate-700/60 text-slate-200 hover:bg-slate-600/60 hover:text-white"
                         >
                             {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
                         </Button>
                     </div>
-                    <ul>
+                    <ul className="space-y-2">
                         {tasks
                             .filter(task => {
                                 // Only show completed tasks if showCompletedTasks is true
@@ -1511,7 +1524,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                 return true;
                             })
                             .map(task => (
-                                <li key={task.id} className="flex items-center gap-3 p-4 rounded-xl transition-all duration-200">
+                                <li key={task.id} className="flex items-center gap-3 p-4 rounded-xl transition-all duration-200 bg-slate-800/40 hover:bg-slate-800/60 border border-slate-700/30">
                                     <Checkbox
                                         checked={task.completed}
                                         onChange={() => toggleTask(task.id)}
@@ -1536,7 +1549,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                                     <Clock className="w-3 h-3" />
                                                     {formatTotalTime(task.metrics.totalMinutes)}
                                                 </span>
-                                                <span>*</span>
+                                                <span>•</span>
                                                 <span className="flex items-center gap-1">
                                                     <Target className="w-3 h-3" />
                                                     {task.metrics.completedPomodoros} pomodoros
@@ -1579,7 +1592,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         isBreak={isBreak}
                     />
                 </div>
-                <div className="flex justify-center gap-4">
+                <div className="flex justify-center gap-4 mb-4">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -1589,18 +1602,18 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     disabled={!activeTaskId}
                                     size="lg"
                                     className={cn(
-                                        "w-24 transition-all duration-300 shadow-lg",
+                                        "w-24 transition-all duration-300 shadow-lg rounded-full",
                                         isActive
-                                            ? "bg-blue-500/80 hover:bg-blue-600/80 shadow-blue-500/20"
-                                            : "bg-blue-500/60 hover:bg-blue-500/80 shadow-blue-500/10",
+                                            ? "bg-blue-500 hover:bg-blue-600 shadow-blue-500/30"
+                                            : "bg-green-500 hover:bg-green-600 shadow-green-500/30",
                                         !activeTaskId && "opacity-50"
                                     )}
                                 >
                                     {isActive ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent>
-                                {activeTaskId ? 'Select a task first' : `Space to ${isActive ? 'Pause' : 'Start'}`}
+                            <TooltipContent className="bg-blue-600 text-white border-blue-700">
+                                {activeTaskId ? `Space to ${isActive ? 'Pause' : 'Start'}` : 'Select a task first'}
                             </TooltipContent>
                         </Tooltip>
                         <Tooltip>
@@ -1611,12 +1624,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     disabled={!activeTaskId || !isActive}
                                     variant="outline"
                                     size="lg"
-                                    className="border-white/10 hover:border-white/20 hover:bg-white/5"
+                                    className="border-slate-600/50 hover:border-slate-500 hover:bg-slate-700/50 rounded-full"
                                 >
                                     <SkipForwardIcon className="h-6 w-6" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent>
+                            <TooltipContent className="bg-blue-600 text-white border-blue-700">
                                 Press 'S' to Skip
                             </TooltipContent>
                         </Tooltip>
@@ -1627,12 +1640,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     onClick={() => setSettingsOpen(true)}
                                     variant="outline"
                                     size="lg"
-                                    className="border-white/10 hover:border-white/20 hover:bg-white/5"
+                                    className="border-slate-600/50 hover:border-slate-500 hover:bg-slate-700/50 rounded-full"
                                 >
                                     <Settings2Icon className="h-6 w-6" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent>
+                            <TooltipContent className="bg-blue-600 text-white border-blue-700">
                                 Settings
                             </TooltipContent>
                         </Tooltip>

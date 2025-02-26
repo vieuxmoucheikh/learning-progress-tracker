@@ -1271,12 +1271,20 @@ export async function createPomodoroTask(task: Omit<PomodoroTask, 'user_id' | 'c
     const user = await supabase.auth.getUser();
     if (!user.data.user) throw new Error('No authenticated user');
 
+    // Ensure metrics is properly formatted
+    const taskWithDefaults = {
+      ...task,
+      metrics: task.metrics || {
+        totalMinutes: 0,
+        completedPomodoros: 0,
+        currentStreak: 0
+      },
+      user_id: user.data.user.id
+    };
+
     const { data, error } = await supabase
       .from('pomodoro_tasks')
-      .insert({
-        ...task,
-        user_id: user.data.user.id
-      })
+      .insert(taskWithDefaults)
       .select()
       .single();
 
@@ -1293,12 +1301,24 @@ export async function updatePomodoroTask(id: string, updates: Partial<Omit<Pomod
     const user = await supabase.auth.getUser();
     if (!user.data.user) throw new Error('No authenticated user');
 
+    // If metrics is being updated, ensure it has the correct structure
+    const updatesWithDefaults = {
+      ...updates,
+      updated_at: new Date().toISOString()
+    };
+
+    // If metrics is being updated, make sure it's properly formatted as JSONB
+    if (updates.metrics) {
+      updatesWithDefaults.metrics = {
+        totalMinutes: updates.metrics.totalMinutes || 0,
+        completedPomodoros: updates.metrics.completedPomodoros || 0,
+        currentStreak: updates.metrics.currentStreak || 0
+      };
+    }
+
     const { data, error } = await supabase
       .from('pomodoro_tasks')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString()
-      })
+      .update(updatesWithDefaults)
       .eq('id', id)
       .eq('user_id', user.data.user.id)
       .select()
