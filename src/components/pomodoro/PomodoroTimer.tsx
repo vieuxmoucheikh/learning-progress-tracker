@@ -744,7 +744,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
         
         // If trying to mark as completed, check if this task has reached the daily goal
-        const dailyGoal = settings?.daily_goal || 8;
+        const dailyGoal = settings?.daily_goal ?? 8; // Fix TypeScript error by using nullish coalescing operator
         if (taskToToggle.metrics.completedPomodoros >= dailyGoal) {
             // Daily goal achieved for this task, allow marking as completed
             setTasks(prevTasks =>
@@ -1000,7 +1000,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         console.log("Updating pomodoro count from", task.metrics.completedPomodoros, "to", newCompletedPomodoros);
                         
                         // Check if this task has reached the daily goal
-                        const dailyGoal = settings?.daily_goal || 8;
+                        const dailyGoal = settings?.daily_goal ?? 8; // Fix TypeScript error by using nullish coalescing operator
                         const hasReachedDailyGoal = newCompletedPomodoros >= dailyGoal;
                         
                         // If this task has reached the daily goal, mark it as completed
@@ -1039,7 +1039,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                 ...task.metrics,
                                 currentStreak: task.metrics.currentStreak + 1,
                                 completedPomodoros: newCompletedPomodoros,
-                                totalMinutes: task.metrics.totalMinutes + (settings?.work_duration || 25)
+                                totalMinutes: task.metrics.totalMinutes + (settings?.work_duration ?? 25)
                             }
                         };
                     }
@@ -1077,20 +1077,20 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     const task = tasks.find(t => t.id === activeTaskId);
                     if (task) {
                         const completedPomodoros = task.metrics.completedPomodoros;
-                        const isLongBreak = completedPomodoros > 0 && completedPomodoros % (settings?.pomodoros_until_long_break || 4) === 0;
-                        newDuration = isLongBreak ? (settings?.long_break_duration || 15) : (settings?.break_duration || 5);
+                        const isLongBreak = completedPomodoros > 0 && completedPomodoros % (settings?.pomodoros_until_long_break ?? 4) === 0;
+                        newDuration = isLongBreak ? (settings?.long_break_duration ?? 15) : (settings?.break_duration ?? 5);
                         console.log("Break duration:", newDuration, isLongBreak ? "(long break)" : "(short break)");
                     } else {
-                        newDuration = settings?.break_duration || 5;
+                        newDuration = settings?.break_duration ?? 5;
                         console.log("Break duration (default):", newDuration);
                     }
                 } else {
-                    newDuration = settings?.break_duration || 5;
+                    newDuration = settings?.break_duration ?? 5;
                     console.log("Break duration (no active task):", newDuration);
                 }
             } else {
                 // If we're switching to work mode
-                newDuration = settings?.work_duration || 25;
+                newDuration = settings?.work_duration ?? 25;
                 console.log("Work duration:", newDuration);
             }
 
@@ -1147,7 +1147,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                 metrics: {
                                     ...task.metrics,
                                     completedPomodoros: task.metrics.completedPomodoros + 1,
-                                    totalMinutes: task.metrics.totalMinutes + (settings?.work_duration || 25)
+                                    totalMinutes: task.metrics.totalMinutes + (settings?.work_duration ?? 25)
                                 }
                             };
                         }
@@ -1285,7 +1285,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                             task.completed ? "text-slate-400 line-through" : "text-blue-100"
                                         )}>
                                             {task.text}
-                                            {task.completed && task.metrics.completedPomodoros >= (settings?.daily_goal || 8) && (
+                                            {task.completed && task.metrics.completedPomodoros >= (settings?.daily_goal ?? 8) && (
                                                 <Badge variant="secondary" className="ml-2 bg-green-600 text-white">
                                                     <Trophy className="h-3 w-3 mr-1" />
                                                     Completed!
@@ -1337,7 +1337,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     <TimerDisplay
                         time={time}
                         isActive={isActive}
-                        totalTime={isBreak ? (settings?.break_duration || 5) * 60 : (settings?.work_duration || 25) * 60}
+                        totalTime={isBreak ? (settings?.break_duration ?? 5) * 60 : (settings?.work_duration ?? 25) * 60}
                         isBreak={isBreak}
                     />
                 </div>
@@ -1548,7 +1548,7 @@ function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; is
 // Modifier le composant TaskProgress pour recevoir les settings
 function TaskProgress({ task, settings }: { task: Task; settings: PomodoroSettings | null }) {
     const { streakPercentage, dailyGoalPercentage } = getProgressStats(task, settings);
-    const dailyGoal = settings?.daily_goal || 8;
+    const dailyGoal = settings?.daily_goal ?? 8; // Fix TypeScript error by using nullish coalescing operator
     
     return (
         <div className="p-6 rounded-xl bg-blue-600/20 border border-blue-400/30 shadow-lg">
@@ -1627,15 +1627,15 @@ function PomodoroSettingsDialogComponent({
     isActive: boolean;
     setTime: (time: number) => void;
 }): JSX.Element {
-    const [workDuration, setWorkDuration] = useState(initialSettings?.work_duration || 25);
-    const [breakDuration, setBreakDuration] = useState(initialSettings?.break_duration || 5);
-    const [dailyGoal, setDailyGoal] = useState(initialSettings?.daily_goal || 4);
+    const [workDuration, setWorkDuration] = useState(initialSettings?.work_duration ?? 25);
+    const [breakDuration, setBreakDuration] = useState(initialSettings?.break_duration ?? 5);
+    const [dailyGoal, setDailyGoal] = useState(initialSettings?.daily_goal ?? 4);
     const [autoStartPomodoros, setAutoStartPomodoros] = useState<boolean>(initialSettings?.auto_start_pomodoros ?? false);
     const [autoStartBreaks, setAutoStartBreaks] = useState<boolean>(initialSettings?.auto_start_breaks ?? false);
     const [soundEnabled, setSoundEnabled] = useState<boolean>(initialSettings?.sound_enabled ?? true);
     const [notificationEnabled, setNotificationEnabled] = useState<boolean>(initialSettings?.notification_enabled ?? true);
-    const [longBreakDuration, setLongBreakDuration] = useState(initialSettings?.long_break_duration || 15);
-    const [pomodorosUntilLongBreak, setPomodorosUntilLongBreak] = useState(initialSettings?.pomodoros_until_long_break || 4);
+    const [longBreakDuration, setLongBreakDuration] = useState(initialSettings?.long_break_duration ?? 15);
+    const [pomodorosUntilLongBreak, setPomodorosUntilLongBreak] = useState(initialSettings?.pomodoros_until_long_break ?? 4);
 
     const handleWorkDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setWorkDuration(parseInt(event.target.value));
