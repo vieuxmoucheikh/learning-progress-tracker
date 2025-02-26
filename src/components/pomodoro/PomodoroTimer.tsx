@@ -176,6 +176,29 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         loadTasks();
     }, []);
 
+    // Load daily goal completion status from localStorage
+    useEffect(() => {
+        try {
+            const dailyGoalCompleted = localStorage.getItem('dailyGoalCompleted') === 'true';
+            const completedDate = localStorage.getItem('dailyGoalCompletedDate');
+            const today = new Date().toDateString();
+            
+            // Only consider it completed if it was completed today
+            if (dailyGoalCompleted && completedDate === today) {
+                setIsCompleted(true);
+                console.log("Daily goal completion status loaded from localStorage: completed");
+            } else {
+                // Reset completion status if it's a new day
+                setIsCompleted(false);
+                localStorage.removeItem('dailyGoalCompleted');
+                localStorage.removeItem('dailyGoalCompletedDate');
+                console.log("Daily goal completion status reset for new day");
+            }
+        } catch (error) {
+            console.error('Error loading daily goal completion status:', error);
+        }
+    }, []);
+
     // Save tasks to localStorage whenever they change
     useEffect(() => {
         try {
@@ -404,18 +427,21 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             
             // Mark the active task as completed
             if (activeTaskId) {
-                setTasks(prevTasks =>
-                    prevTasks.map(task =>
+                setTasks(prevTasks => {
+                    const updatedTasks = prevTasks.map(task =>
                         task.id === activeTaskId ? { ...task, completed: true } : task
-                    )
-                );
-                
-                // Update localStorage with the updated tasks
-                const updatedTasks = tasks.map(task =>
-                    task.id === activeTaskId ? { ...task, completed: true } : task
-                );
-                localStorage.setItem('pomodoroTasks', JSON.stringify(updatedTasks));
-                console.log("Active task marked as completed upon daily goal achievement");
+                    );
+                    
+                    // Update localStorage with the updated tasks
+                    try {
+                        localStorage.setItem('pomodoroTasks', JSON.stringify(updatedTasks));
+                        console.log("Active task marked as completed upon daily goal achievement");
+                    } catch (error) {
+                        console.error("Error saving updated tasks to localStorage:", error);
+                    }
+                    
+                    return updatedTasks;
+                });
             }
             
             // Play celebration sound
@@ -732,10 +758,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         }
         
         // If trying to mark as completed, check if daily goal is achieved
-        const activeTask = tasks.find(task => task.id === activeTaskId);
-        const dailyGoal = settings?.daily_goal || 8;
-        
-        if (activeTask && activeTask.metrics.completedPomodoros >= dailyGoal) {
+        if (isCompleted) {
             // Daily goal achieved, allow marking as completed
             setTasks(prevTasks =>
                 prevTasks.map(task =>
@@ -746,7 +769,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             // Daily goal not achieved, show notification
             toast({
                 title: "Cannot complete task yet",
-                description: `Complete your daily goal of ${dailyGoal} pomodoros first.`,
+                description: `Complete your daily goal of ${settings?.daily_goal || 8} pomodoros first.`,
                 variant: "default",
                 duration: 3000,
             });
@@ -1243,6 +1266,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                             task.completed ? "text-slate-400 line-through" : "text-blue-100"
                                         )}>
                                             {task.text}
+                                            {task.completed && isCompleted && (
+                                                <Badge variant="secondary" className="ml-2 bg-green-600 text-white">
+                                                    <Trophy className="h-3 w-3 mr-1" />
+                                                    Completed!
+                                                </Badge>
+                                            )}
                                         </div>
                                         {activeTaskId === task.id && (
                                             <div className="text-xs text-blue-200 mt-1 flex items-center gap-2">
