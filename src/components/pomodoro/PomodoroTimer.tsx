@@ -1406,25 +1406,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         settings={settings}
                     />
                 )}
-                {/* Daily goal indicator */}
-                {settings?.daily_goal && (
-                    <div className="mt-2 text-center">
-                        <div className="flex items-center justify-center space-x-2">
-                            <Target className="h-4 w-4 text-blue-400" />
-                            <span className="text-sm text-blue-200">
-                                Daily Goal: {activeTaskId ? 
-                                    tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0 
-                                    : 0} / {settings.daily_goal}
-                            </span>
-                            {isCompleted && (
-                                <Badge variant="secondary" className="ml-2 bg-green-600 text-white">
-                                    <Trophy className="h-3 w-3 mr-1" />
-                                    Completed!
-                                </Badge>
-                            )}
-                        </div>
-                    </div>
-                )}
+            
                 <PomodoroSettingsDialog
                 open={settingsOpen}
                 onOpenChange={setSettingsOpen}
