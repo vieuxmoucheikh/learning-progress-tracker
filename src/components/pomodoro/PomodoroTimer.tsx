@@ -1592,25 +1592,15 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         </Button>
                     </div>
                     <div className="flex justify-between items-center mb-4">
+                        <div className="text-sm font-medium">
+                            <span className="text-blue-300">Current Task:</span>
+                            <span className="ml-2 text-blue-100">{currentTask || "No task selected"}</span>
+                        </div>
                         <div className="flex items-center gap-2">
                             <Badge variant="outline" className="bg-blue-500/30 text-blue-200 border-blue-400/30">
-                                {tasks.filter(t => !t.completed).length} active
-                            </Badge>
-                            <Badge variant="outline" className="bg-slate-700/60 text-slate-200 border-slate-500/30">
-                                {tasks.filter(t => t.completed).length} completed
+                                {tasks.length > 0 ? tasks.filter(t => !t.completed).length : 0} active tasks
                             </Badge>
                         </div>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                                setShowCompletedTasks(prev => !prev);
-                                console.log("Toggle show completed tasks:", !showCompletedTasks);
-                            }}
-                            className="bg-slate-700/60 text-slate-200 hover:bg-slate-600/60 hover:text-white"
-                        >
-                            {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
-                        </Button>
                     </div>
                     <ul className="space-y-2">
                         {tasks

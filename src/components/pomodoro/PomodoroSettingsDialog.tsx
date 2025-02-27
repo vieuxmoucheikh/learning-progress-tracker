@@ -182,20 +182,10 @@ export function PomodoroSettingsDialog({
 
           {settings.sound_enabled && (
             <div className="grid gap-2">
-              <Label htmlFor="soundType">Sound Type</Label>
-              <Select
-                value={settings.sound_type || 'bell'}
-                onValueChange={(value) => handleChange('sound_type', value)}
-              >
-                <SelectTrigger id="soundType">
-                  <SelectValue placeholder="Select sound type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="bell">Bell</SelectItem>
-                  <SelectItem value="chime">Chime</SelectItem>
-                  <SelectItem value="soft">Soft</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="soundEnabled">Sound Enabled</Label>
+              <p className="text-sm text-muted-foreground">
+                Default sound will be used for notifications
+              </p>
             </div>
           )}
 
