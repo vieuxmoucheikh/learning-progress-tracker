@@ -655,100 +655,51 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
     // Timer logic with Web Worker
     useEffect(() => {
-        // Create a new worker or use the existing one
-        let worker = timerWorkerRef.current;
-        
-        if (!worker) {
-            console.log("Creating new timer worker");
-            worker = new Worker(new URL('./timerWorker.js', import.meta.url));
-            timerWorkerRef.current = worker;
-        }
-        
-        // Set up message handler
-        const messageHandler = (e: MessageEvent) => {
+        const worker = new Worker(new URL('./timerWorker.js', import.meta.url));
+        worker.onmessage = (e) => {
             if (e.data.type === 'tick') {
                 setTime(prevTime => {
                     const newTime = Math.max(0, prevTime - 1);
-                    if (newTime === 0 && prevTime > 0) {
-                        console.log("Timer completed via worker tick");
-                        // Use a setTimeout to avoid the handleTimerComplete reference issue
-                        setTimeout(() => {
-                            if (isActive) {
-                                console.log("Calling handleTimerComplete from worker tick");
-                                handleTimerComplete();
-                            }
-                        }, 0);
+                    if (newTime === 0) {
+                        handleTimerComplete();
                     }
                     return newTime;
                 });
             }
         };
-        
-        worker.onmessage = messageHandler;
-        
-        // Start or stop the timer based on isActive state
         if (isActive) {
-            console.log("Starting timer worker with time:", time);
-            worker.postMessage({ command: 'start', time });
+            worker.postMessage({ command: 'start' });
         } else {
-            console.log("Stopping timer worker");
             worker.postMessage({ command: 'stop' });
         }
-        
-        // Cleanup function - only terminate the worker when component unmounts
+        timerWorkerRef.current = worker;
         return () => {
-            // Don't terminate the worker when tab changes, just stop it
-            if (worker) {
-                worker.postMessage({ command: 'stop' });
-            }
+            worker.terminate();
         };
-    }, [isActive, time]); // Remove handleTimerComplete from dependency array
+    }, [isActive]);
 
     // Handle visibility change
     const handleVisibilityChange = useCallback(() => {
         if (document.visibilityState === 'hidden') {
-            // Save current state when tab becomes hidden
-            const currentState = {
+            localStorage.setItem('pomodoroLastTimestamp', Date.now().toString());
+            localStorage.setItem('pomodoroTimerState', JSON.stringify({
                 time,
                 isActive,
                 isBreak,
-                currentPomodoroId,
-                activeTaskId,
-                lastUpdate: Date.now()
-            };
-            
-            console.log("Tab hidden, saving state:", currentState);
-            localStorage.setItem('pomodoroTimerState', JSON.stringify(currentState));
+                currentPomodoroId
+            }));
         } else {
             try {
-                // Restore state when tab becomes visible again
                 const savedState = localStorage.getItem('pomodoroTimerState');
                 if (savedState) {
                     const parsedState = JSON.parse(savedState);
-                    const elapsedMs = Date.now() - parsedState.lastUpdate;
-                    const elapsedSeconds = Math.floor(elapsedMs / 1000);
-                    
-                    console.log(`Tab visible again. Time elapsed: ${elapsedSeconds}s`);
-                    
-                    // Only adjust time if timer was active
+                    const storedTimestamp = parseInt(localStorage.getItem('pomodoroLastTimestamp') || Date.now().toString());
+                    const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
                     if (parsedState.isActive && elapsedSeconds > 0) {
                         const adjustedTime = Math.max(0, parsedState.time - elapsedSeconds);
-                        console.log(`Adjusting time from ${parsedState.time} to ${adjustedTime}`);
-                        
-                        // Update the timer
                         setTime(adjustedTime);
-                        
-                        // Sync the worker
-                        if (timerWorkerRef.current) {
-                            timerWorkerRef.current.postMessage({ command: 'sync' });
-                        }
-                        
-                        // If timer reached zero while tab was hidden, handle completion
-                        if (adjustedTime === 0 && parsedState.time > 0) {
-                            console.log("Timer completed while tab was hidden");
-                            setTimeout(() => {
-                                handleTimerComplete();
-                            }, 0);
+                        if (adjustedTime === 0) {
+                            handleTimerComplete();
                         }
                     }
                 }
@@ -756,78 +707,34 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 console.error('Error handling visibility change:', error);
             }
         }
-    }, [time, isActive, isBreak, currentPomodoroId, activeTaskId]); // Remove handleTimerComplete from dependency array
-
-    // Add event listener for visibility change
-    useEffect(() => {
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        return () => {
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-        };
-    }, [handleVisibilityChange]);
+    }, [time, isActive, isBreak, currentPomodoroId]);
 
     // Persist timer state to localStorage
     useEffect(() => {
-        if (!isActive && time === 0) {
-            // Don't persist when timer is inactive and at zero
-            return;
-        }
-        
         const timerState = {
             time,
             isActive,
             isBreak,
             currentPomodoroId,
-            activeTaskId,
-            lastUpdate: Date.now()
+            lastUpdate: new Date().toISOString()
         };
-        
-        try {
-            localStorage.setItem('pomodoroState', JSON.stringify(timerState));
-            console.log("Timer state persisted to localStorage:", timerState);
-        } catch (error) {
-            console.error("Error persisting timer state:", error);
-        }
-    }, [time, isActive, isBreak, currentPomodoroId, activeTaskId]);
+        localStorage.setItem('pomodoroState', JSON.stringify(timerState));
+    }, [time, isActive, isBreak, currentPomodoroId]);
 
     // Load persisted state on mount
     useEffect(() => {
         const savedState = localStorage.getItem('pomodoroState');
         if (savedState) {
-            try {
-                const parsedState = JSON.parse(savedState);
-                console.log("Loading saved timer state:", parsedState);
-                
-                const elapsedSeconds = Math.floor((Date.now() - new Date(parsedState.lastUpdate).getTime()) / 1000);
-                
-                // Only adjust time if it was active
-                if (parsedState.isActive) {
-                    const adjustedTime = Math.max(0, parsedState.time - elapsedSeconds);
-                    console.log(`Timer was active. Adjusting time from ${parsedState.time} to ${adjustedTime} (elapsed: ${elapsedSeconds}s)`);
-                    setTime(adjustedTime);
-                } else {
-                    console.log(`Timer was inactive. Setting time to ${parsedState.time}`);
-                    setTime(parsedState.time);
-                }
-                
-                setIsActive(parsedState.isActive);
-                setIsBreak(parsedState.isBreak);
-                
-                if (parsedState.currentPomodoroId) {
-                    console.log(`Restoring current pomodoro ID: ${parsedState.currentPomodoroId}`);
-                    setCurrentPomodoroId(parsedState.currentPomodoroId);
-                }
-                
-                // Restore active task ID if it exists
-                if (parsedState.activeTaskId) {
-                    console.log(`Restoring active task ID: ${parsedState.activeTaskId}`);
-                    setActiveTaskId(parsedState.activeTaskId);
-                }
-            } catch (error) {
-                console.error("Error parsing saved timer state:", error);
-                // Clear the corrupted state
-                localStorage.removeItem('pomodoroState');
+            const parsedState = JSON.parse(savedState);
+            const elapsedSeconds = Math.floor((Date.now() - new Date(parsedState.lastUpdate).getTime()) / 1000);
+            if (parsedState.isActive) {
+                setTime(Math.max(0, parsedState.time - elapsedSeconds));
+            } else {
+                setTime(parsedState.time);
             }
+            setIsActive(parsedState.isActive);
+            setIsBreak(parsedState.isBreak);
+            setCurrentPomodoroId(parsedState.currentPomodoroId);
         }
     }, []);
 
@@ -878,7 +785,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 const remainingUpdates = failedUpdates.filter(
                     update => !successfulSyncs.some(sync => sync.taskId === update.taskId && sync.timestamp === update.timestamp)
                 );
-                
                 localStorage.setItem('failedTaskUpdates', JSON.stringify(remainingUpdates));
                 
                 if (remainingUpdates.length === 0) {
@@ -1143,7 +1049,8 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             
             // Reset the timer state
             setIsActive(false);
-
+            setIsBreak(!isBreak);
+            
             // Set the appropriate time for the next interval
             if (isBreak) {
                 // Switching to work mode
@@ -1666,42 +1573,33 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             type="text"
                             value={currentTask}
                             onChange={(e) => setCurrentTask(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' && currentTask.trim()) {
-                                    addTask(currentTask.trim());
-                                    setCurrentTask('');
-                                }
-                            }}
-                            placeholder="What are you working on?"
-                            className="flex-1 bg-slate-800/50 border-slate-700 text-slate-200 placeholder:text-slate-400"
+                            placeholder="Add a new task..."
+                            className="flex h-10 w-full rounded-md border border-slate-600/50 bg-slate-800/90 px-3 py-2
+                            text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium
+                            placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-blue-50"
+                            id="new-task-input"
                         />
                         <Button
                             onClick={() => {
                                 if (currentTask.trim()) {
-                                    addTask(currentTask.trim());
-                                    setCurrentTask('');
+                                    addTask(currentTask);
+                                    setCurrentTask("");
                                 }
                             }}
-                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                            className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20"
                         >
                             Add
                         </Button>
                     </div>
                     <div className="flex justify-between items-center mb-4">
-                        <div className="text-sm font-medium">
-                            <span className="text-blue-300">Current Task:</span>
-                            <span className="ml-2 text-blue-100">{tasks.find(t => t.id === activeTaskId)?.text || "None selected"}</span>
-                        </div>
                         <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
+                            <Badge variant="outline" className="bg-blue-500/30 text-blue-200 border-blue-400/30">
                                 {tasks.filter(t => !t.completed).length} active
                             </Badge>
                             <Badge variant="outline" className="bg-slate-700/60 text-slate-200 border-slate-500/30">
                                 {tasks.filter(t => t.completed).length} completed
                             </Badge>
                         </div>
-                    </div>
-                    <div className="flex justify-end mb-4">
                         <Button
                             variant="ghost"
                             size="sm"
