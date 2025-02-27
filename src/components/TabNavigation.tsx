@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { BarChart3, BookOpen, LayoutDashboard, Timer, Notebook, Library } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FlashcardsTab } from './FlashcardsTab';
@@ -59,16 +59,61 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
   activeTab,
   onTabChange,
 }) => {
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const activeTabRef = useRef<HTMLButtonElement>(null);
+
+  // Scroll to active tab when it changes
+  useEffect(() => {
+    if (tabsContainerRef.current && activeTabRef.current) {
+      const container = tabsContainerRef.current;
+      const activeTabElement = activeTabRef.current;
+      
+      // Calculate the scroll position to center the active tab
+      const scrollLeft = activeTabElement.offsetLeft - (container.offsetWidth / 2) + (activeTabElement.offsetWidth / 2);
+      
+      // Ensure we don't scroll past the beginning
+      const finalScrollLeft = Math.max(0, scrollLeft);
+      
+      // Smooth scroll to the position
+      container.scrollTo({
+        left: finalScrollLeft,
+        behavior: 'smooth'
+      });
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   return (
     <div className="flex flex-col h-full">
-      <nav className="flex justify-center mb-8 border-b overflow-x-auto w-full bg-gradient-to-r from-blue-600 to-blue-500 p-0.5 sm:p-1">
-        <div className="flex -mb-px max-w-2xl w-full min-w-max px-0.5 sm:px-1">
+      <nav className="flex justify-center mb-8 border-b w-full bg-gradient-to-r from-blue-600 to-blue-500 p-0.5 sm:p-1">
+        <div 
+          ref={tabsContainerRef}
+          className="flex -mb-px max-w-2xl w-full overflow-x-auto px-0.5 sm:px-1 hide-scrollbar"
+          style={{ 
+            scrollbarWidth: 'none', 
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch'
+          }}
+        >
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
+                ref={isActive ? activeTabRef : null}
                 onClick={() => onTabChange(tab.id)}
                 className={cn(
                   "flex-shrink-0 text-sm font-medium py-3 px-2.5 sm:px-4 border-b-2 flex items-center justify-center gap-1.5 sm:gap-2 transition-all min-w-[72px] sm:min-w-[90px]",
