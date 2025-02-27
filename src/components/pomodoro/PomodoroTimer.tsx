@@ -686,7 +686,9 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 time,
                 isActive,
                 isBreak,
-                currentPomodoroId
+                currentPomodoroId,
+                activeTaskId,
+                lastUpdate: new Date().toISOString()
             }));
         } else {
             try {
@@ -707,7 +709,15 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 console.error('Error handling visibility change:', error);
             }
         }
-    }, [time, isActive, isBreak, currentPomodoroId]);
+    }, [time, isActive, isBreak, currentPomodoroId, activeTaskId]);
+
+    // Add event listener for visibility change
+    useEffect(() => {
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [handleVisibilityChange]);
 
     // Persist timer state to localStorage
     useEffect(() => {
@@ -716,25 +726,50 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             isActive,
             isBreak,
             currentPomodoroId,
+            activeTaskId,
             lastUpdate: new Date().toISOString()
         };
         localStorage.setItem('pomodoroState', JSON.stringify(timerState));
-    }, [time, isActive, isBreak, currentPomodoroId]);
+    }, [time, isActive, isBreak, currentPomodoroId, activeTaskId]);
 
     // Load persisted state on mount
     useEffect(() => {
         const savedState = localStorage.getItem('pomodoroState');
         if (savedState) {
-            const parsedState = JSON.parse(savedState);
-            const elapsedSeconds = Math.floor((Date.now() - new Date(parsedState.lastUpdate).getTime()) / 1000);
-            if (parsedState.isActive) {
-                setTime(Math.max(0, parsedState.time - elapsedSeconds));
-            } else {
-                setTime(parsedState.time);
+            try {
+                const parsedState = JSON.parse(savedState);
+                console.log("Loading saved timer state:", parsedState);
+                
+                const elapsedSeconds = Math.floor((Date.now() - new Date(parsedState.lastUpdate).getTime()) / 1000);
+                
+                // Only adjust time if it was active
+                if (parsedState.isActive) {
+                    const adjustedTime = Math.max(0, parsedState.time - elapsedSeconds);
+                    console.log(`Timer was active. Adjusting time from ${parsedState.time} to ${adjustedTime} (elapsed: ${elapsedSeconds}s)`);
+                    setTime(adjustedTime);
+                } else {
+                    console.log(`Timer was inactive. Setting time to ${parsedState.time}`);
+                    setTime(parsedState.time);
+                }
+                
+                setIsActive(parsedState.isActive);
+                setIsBreak(parsedState.isBreak);
+                
+                if (parsedState.currentPomodoroId) {
+                    console.log(`Restoring current pomodoro ID: ${parsedState.currentPomodoroId}`);
+                    setCurrentPomodoroId(parsedState.currentPomodoroId);
+                }
+                
+                // Restore active task ID if it exists
+                if (parsedState.activeTaskId) {
+                    console.log(`Restoring active task ID: ${parsedState.activeTaskId}`);
+                    setActiveTaskId(parsedState.activeTaskId);
+                }
+            } catch (error) {
+                console.error("Error parsing saved timer state:", error);
+                // Clear the corrupted state
+                localStorage.removeItem('pomodoroState');
             }
-            setIsActive(parsedState.isActive);
-            setIsBreak(parsedState.isBreak);
-            setCurrentPomodoroId(parsedState.currentPomodoroId);
         }
     }, []);
 
@@ -785,6 +820,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 const remainingUpdates = failedUpdates.filter(
                     update => !successfulSyncs.some(sync => sync.taskId === update.taskId && sync.timestamp === update.timestamp)
                 );
+                
                 localStorage.setItem('failedTaskUpdates', JSON.stringify(remainingUpdates));
                 
                 if (remainingUpdates.length === 0) {
@@ -1049,8 +1085,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             
             // Reset the timer state
             setIsActive(false);
-            setIsBreak(!isBreak);
-            
+
             // Set the appropriate time for the next interval
             if (isBreak) {
                 // Switching to work mode
@@ -1573,33 +1608,42 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             type="text"
                             value={currentTask}
                             onChange={(e) => setCurrentTask(e.target.value)}
-                            placeholder="Add a new task..."
-                            className="flex h-10 w-full rounded-md border border-slate-600/50 bg-slate-800/90 px-3 py-2
-                            text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium
-                            placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-blue-50"
-                            id="new-task-input"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && currentTask.trim()) {
+                                    addTask(currentTask.trim());
+                                    setCurrentTask('');
+                                }
+                            }}
+                            placeholder="What are you working on?"
+                            className="flex-1 bg-slate-800/50 border-slate-700 text-slate-200 placeholder:text-slate-400"
                         />
                         <Button
                             onClick={() => {
                                 if (currentTask.trim()) {
-                                    addTask(currentTask);
-                                    setCurrentTask("");
+                                    addTask(currentTask.trim());
+                                    setCurrentTask('');
                                 }
                             }}
-                            className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
                         >
                             Add
                         </Button>
                     </div>
                     <div className="flex justify-between items-center mb-4">
+                        <div className="text-sm font-medium">
+                            <span className="text-blue-300">Current Task:</span>
+                            <span className="ml-2 text-blue-100">{tasks.find(t => t.id === activeTaskId)?.text || "None selected"}</span>
+                        </div>
                         <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="bg-blue-500/30 text-blue-200 border-blue-400/30">
+                            <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
                                 {tasks.filter(t => !t.completed).length} active
                             </Badge>
                             <Badge variant="outline" className="bg-slate-700/60 text-slate-200 border-slate-500/30">
                                 {tasks.filter(t => t.completed).length} completed
                             </Badge>
                         </div>
+                    </div>
+                    <div className="flex justify-end mb-4">
                         <Button
                             variant="ghost"
                             size="sm"
