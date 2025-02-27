@@ -613,7 +613,7 @@ export default function App() {
           <header className="mb-8 relative">
             <div className="flex items-center justify-between mb-2">
               <div className="flex-1"></div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex-grow text-center">Learning Progress Tracker</h1>
+              <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 flex-grow text-center">Learning Progress Tracker</h1>
               <div className="flex-1 flex justify-end">
                 <ThemeToggle />
               </div>
