@@ -138,7 +138,9 @@ export const LearningCardsPage = () => {
       const matchesSearch = card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         card.content.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesTags = selectedTags.length === 0 || selectedTags.every(tag => card.tags.includes(tag));
-      const matchesCategory = selectedCategory === 'all' || card.category === selectedCategory;
+      const matchesCategory = selectedCategory === 'all' || 
+                             (card.category && selectedCategory && 
+                              card.category.toLowerCase() === selectedCategory.toLowerCase());
       return matchesSearch && matchesTags && matchesCategory;
     })
     .sort((a, b) => {

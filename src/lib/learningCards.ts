@@ -68,7 +68,7 @@ class LearningCardsService {
 
   async updateCard(id: string, updates: Partial<EnhancedLearningCard>): Promise<EnhancedLearningCard> {
     try {
-      const normalizedCategory = (updates.category || 'Uncategorized').toUpperCase();
+      const normalizedCategory = (updates.category || 'Uncategorized');
       const now = new Date().toISOString();
 
       const updateData: any = {
