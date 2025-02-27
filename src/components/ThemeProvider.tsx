@@ -18,8 +18,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
     // Check if theme preference is stored in localStorage
     const storedTheme = localStorage.getItem('theme') as Theme;
-    if (storedTheme === 'light' || storedTheme === 'dark') {
-      return storedTheme;
+    if (storedTheme === 'dark') {
+      return 'dark';
     }
     // Default to light mode
     return 'light';

@@ -28,6 +28,13 @@ import { cn } from "@/lib/utils";
 import { X } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Clock } from 'lucide-react';
+import { 
+    Select, 
+    SelectContent, 
+    SelectItem, 
+    SelectTrigger, 
+    SelectValue 
+} from "@/components/ui/select";
 
 // Define interfaces
 interface Task {
@@ -1591,97 +1598,89 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             Add
                         </Button>
                     </div>
-                    <div className="flex justify-between items-center mb-4">
-                        <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="bg-blue-500/30 text-blue-200 border-blue-400/30">
-                                {tasks.filter(t => !t.completed).length} active
-                            </Badge>
-                            <Badge variant="outline" className="bg-slate-700/60 text-slate-200 border-slate-500/30">
-                                {tasks.filter(t => t.completed).length} completed
-                            </Badge>
-                        </div>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                                setShowCompletedTasks(prev => !prev);
-                                console.log("Toggle show completed tasks:", !showCompletedTasks);
-                            }}
-                            className="bg-slate-700/60 text-slate-200 hover:bg-slate-600/60 hover:text-white"
-                        >
-                            {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
-                        </Button>
-                    </div>
-                    <ul className="space-y-2">
-                        {tasks
-                            .filter(task => {
-                                // Only show completed tasks if showCompletedTasks is true
-                                if (task.completed) {
-                                    return showCompletedTasks;
-                                }
-                                // Always show non-completed tasks
-                                return true;
-                            })
-                            .map(task => (
-                                <li key={task.id} className="flex items-center gap-3 p-4 rounded-xl transition-all duration-200 bg-slate-800/40 hover:bg-slate-800/60 border border-slate-700/30">
-                                    <Checkbox
-                                        checked={task.completed}
-                                        onChange={() => toggleTask(task.id)}
-                                        className="data-[state=checked]:bg-blue-500"
-                                    />
-                                    <div className="flex-1 min-w-0">
-                                        <div className={cn(
-                                            "font-medium truncate",
-                                            task.completed ? "text-slate-400 line-through" : "text-blue-100"
-                                        )}>
-                                            {task.text}
-                                            {task.completed && task.metrics && task.metrics.completedPomodoros >= (settings?.daily_goal ?? 8) && (
-                                                <Badge variant="secondary" className="ml-2 bg-green-600 text-white">
-                                                    <Trophy className="h-3 w-3 mr-1" />
-                                                    Completed!
-                                                </Badge>
-                                            )}
-                                        </div>
-                                        {activeTaskId === task.id && task.metrics && (
-                                            <div className="text-xs text-blue-200 mt-1 flex items-center gap-2">
-                                                <span className="flex items-center gap-1">
-                                                    <Clock className="w-3 h-3" />
-                                                    {formatTotalTime(task.metrics.totalMinutes)}
-                                                </span>
-                                                <span>•</span>
-                                                <span className="flex items-center gap-1">
-                                                    <Target className="w-3 h-3" />
-                                                    {task.metrics.completedPomodoros} pomodoros
-                                                </span>
+                    
+                    {activeTaskId && (
+                        <div className="mt-6">
+                            {/* Only render task info if we can find the active task */}
+                            {tasks.find(t => t.id === activeTaskId) && (
+                                <div>
+                                    {/* Get the active task */}
+                                    {(() => {
+                                        const task = tasks.find(t => t.id === activeTaskId)!;
+                                        const dailyGoal = settings?.daily_goal || 8;
+                                        
+                                        if (!task.metrics) {
+                                            return (
+                                                <div className="text-sm font-medium">
+                                                    <span className="text-blue-300">Current Task:</span>
+                                                    <span className="ml-2 text-blue-100">{task.text}</span>
+                                                </div>
+                                            );
+                                        }
+                                        
+                                        const { streakPercentage, dailyGoalPercentage } = getProgressStats(task, settings);
+                                        
+                                        return (
+                                            <div>
+                                                <div className="flex justify-between items-center mb-4">
+                                                    <div className="text-sm font-medium">
+                                                        <span className="text-blue-300">Current Task:</span>
+                                                        <span className="ml-2 text-blue-100">{task.text}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
+                                                            {task.metrics.completedPomodoros} pomodoros
+                                                        </Badge>
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-2 mb-4">
+                                                    <div>
+                                                        <div className="flex justify-between mb-1">
+                                                            <span className="text-xs text-blue-300">Daily Goal</span>
+                                                            <span className="text-xs text-blue-200">{task.metrics.completedPomodoros} / {dailyGoal}</span>
+                                                        </div>
+                                                        <div className="w-full bg-blue-500/10 rounded-full h-2.5 overflow-hidden">
+                                                            <div 
+                                                                className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2.5 rounded-full transition-all duration-500 ease-out"
+                                                                style={{ width: `${dailyGoalPercentage}%` }}
+                                                            ></div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div>
+                                                        <div className="flex justify-between mb-1">
+                                                            <span className="text-xs text-blue-300">Current Streak</span>
+                                                            <span className="text-xs text-blue-200">{task.metrics.currentStreak} consecutive</span>
+                                                        </div>
+                                                        <div className="w-full bg-blue-500/10 rounded-full h-2.5 overflow-hidden">
+                                                            <div 
+                                                                className="bg-gradient-to-r from-green-500 to-emerald-500 h-2.5 rounded-full transition-all duration-500 ease-out"
+                                                                style={{ width: `${streakPercentage}%` }}
+                                                            ></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex justify-between items-center">
+                                                    <div className="text-sm text-blue-200">
+                                                        <span className="flex items-center gap-1">
+                                                            <Clock className="w-3 h-3" />
+                                                            {formatTotalTime(task.metrics.totalMinutes)} total focus time
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-xs font-medium text-blue-200 bg-blue-500/20 px-2 py-1 rounded-full">
+                                                            {getMotivationalMessage(task.metrics.currentStreak)}
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Button
-                                            variant={activeTaskId === task.id ? "default" : "ghost"}
-                                            size="sm"
-                                            onClick={() => setTaskActive(task.id)}
-                                            className={cn(
-                                                "transition-all duration-200",
-                                                activeTaskId === task.id
-                                                    ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20"
-                                                    : "bg-blue-500/20 text-blue-100 hover:bg-blue-500/30"
-                                            )}
-                                        >
-                                            {activeTaskId === task.id ? "Active" : "Start"}
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => removeTask(task.id)}
-                                            className="bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-red-100"
-                                        >
-                                            <X className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </li>
-                            ))}
-                    </ul>
+                                        );
+                                    })()}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
                 <div className="relative mb-8" ref={timerRef}>
                     <TimerDisplay
@@ -1750,19 +1749,98 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         </Tooltip>
                     </TooltipProvider>
                 </div>
-                {activeTaskId && (
-                    <div className="mt-6">
-                        {/* Only render TaskProgress if we can find the active task */}
-                        {tasks.find(t => t.id === activeTaskId) && (
-                            <TaskProgress 
-                                task={tasks.find(t => t.id === activeTaskId)!} 
-                                settings={settings} 
-                            />
-                        )}
+                <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="bg-blue-500/30 text-blue-200 border-blue-400/30">
+                            {tasks.filter(t => !t.completed).length} active
+                        </Badge>
+                        <Badge variant="outline" className="bg-slate-700/60 text-slate-200 border-slate-500/30">
+                            {tasks.filter(t => t.completed).length} completed
+                        </Badge>
                     </div>
-                )}
-            
-                <PomodoroSettingsDialog
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                            setShowCompletedTasks(prev => !prev);
+                            console.log("Toggle show completed tasks:", !showCompletedTasks);
+                        }}
+                        className="bg-slate-700/60 text-slate-200 hover:bg-slate-600/60 hover:text-white"
+                    >
+                        {showCompletedTasks ? 'Hide Completed' : 'Show Completed'}
+                    </Button>
+                </div>
+                <ul className="space-y-2">
+                    {tasks
+                        .filter(task => {
+                            // Only show completed tasks if showCompletedTasks is true
+                            if (task.completed) {
+                                return showCompletedTasks;
+                            }
+                            // Always show non-completed tasks
+                            return true;
+                        })
+                        .map(task => (
+                            <li key={task.id} className="flex items-center gap-3 p-4 rounded-xl transition-all duration-200 bg-slate-800/40 hover:bg-slate-800/60 border border-slate-700/30">
+                                <Checkbox
+                                    checked={task.completed}
+                                    onChange={() => toggleTask(task.id)}
+                                    className="data-[state=checked]:bg-blue-500"
+                                />
+                                <div className="flex-1 min-w-0">
+                                    <div className={cn(
+                                        "font-medium truncate",
+                                        task.completed ? "text-slate-400 line-through" : "text-blue-100"
+                                    )}>
+                                        {task.text}
+                                        {task.completed && task.metrics && task.metrics.completedPomodoros >= (settings?.daily_goal ?? 8) && (
+                                            <Badge variant="secondary" className="ml-2 bg-green-600 text-white">
+                                                <Trophy className="h-3 w-3 mr-1" />
+                                                Completed!
+                                            </Badge>
+                                        )}
+                                    </div>
+                                    {activeTaskId === task.id && task.metrics && (
+                                        <div className="text-xs text-blue-200 mt-1 flex items-center gap-2">
+                                            <span className="flex items-center gap-1">
+                                                <Clock className="w-3 h-3" />
+                                                {formatTotalTime(task.metrics.totalMinutes)}
+                                            </span>
+                                            <span>•</span>
+                                            <span className="flex items-center gap-1">
+                                                <Target className="w-3 h-3" />
+                                                {task.metrics.completedPomodoros} pomodoros
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        variant={activeTaskId === task.id ? "default" : "ghost"}
+                                        size="sm"
+                                        onClick={() => setTaskActive(task.id)}
+                                        className={cn(
+                                            "transition-all duration-200",
+                                            activeTaskId === task.id
+                                                ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+                                                : "bg-blue-500/20 text-blue-100 hover:bg-blue-500/30"
+                                        )}
+                                    >
+                                        {activeTaskId === task.id ? "Active" : "Start"}
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => removeTask(task.id)}
+                                        className="bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-red-100"
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </li>
+                        ))}
+                </ul>
+                <PomodoroSettingsDialogComponent
                 open={settingsOpen}
                 onOpenChange={setSettingsOpen}
                 isActive={isActive}
@@ -1787,6 +1865,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         }
                     }}
                     initialSettings={settings}
+                    setTime={setTime}
                 />
             </div>
         </Card>
@@ -1976,6 +2055,7 @@ function PomodoroSettingsDialogComponent({
     const [notificationEnabled, setNotificationEnabled] = useState<boolean>(initialSettings?.notification_enabled ?? true);
     const [longBreakDuration, setLongBreakDuration] = useState(initialSettings?.long_break_duration ?? 15);
     const [pomodorosUntilLongBreak, setPomodorosUntilLongBreak] = useState(initialSettings?.pomodoros_until_long_break ?? 4);
+    const [soundType, setSoundType] = useState<string>(initialSettings?.sound_type ?? 'bell');
 
     const handleWorkDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setWorkDuration(parseInt(event.target.value));
@@ -2021,6 +2101,7 @@ function PomodoroSettingsDialogComponent({
             notification_enabled: notificationEnabled,
             long_break_duration: longBreakDuration,
             pomodoros_until_long_break: pomodorosUntilLongBreak,
+            sound_type: soundType as 'bell' | 'chime' | 'soft',
         };
         await onSettingsUpdate(newSettings);
         
@@ -2064,6 +2145,19 @@ function PomodoroSettingsDialogComponent({
                                 value={dailyGoal}
                                 onChange={(e) => setDailyGoal(parseInt(e.target.value))}
                             />
+                        </div>
+                        <div>
+                            <Label>Sound Type</Label>
+                            <Select value={soundType} onValueChange={setSoundType}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select sound type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="bell">Bell</SelectItem>
+                                    <SelectItem value="chime">Chime</SelectItem>
+                                    <SelectItem value="soft">Soft</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div>
                             <Label>Auto-Start Pomodoros</Label>
