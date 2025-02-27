@@ -201,15 +201,15 @@ export const LearningCardsPage = () => {
 
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className={cn(
-                "bg-white dark:bg-gray-800",
-                "text-gray-900 dark:text-gray-100",
-                "border-gray-200 dark:border-gray-700",
+                "bg-white",
+                "text-gray-900",
+                "border-gray-200",
                 "focus:ring-2 focus:ring-blue-500"
               )}>
-                <Filter className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
+                <Filter className="w-4 h-4 mr-2 text-gray-500" />
                 <SelectValue placeholder="Filter by category" />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-gray-800">
+              <SelectContent className="bg-white">
                 <SelectItem value="all">All Categories</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category} value={category}>
@@ -221,15 +221,15 @@ export const LearningCardsPage = () => {
 
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'updated' | 'created' | 'mastered')}>
               <SelectTrigger className={cn(
-                "bg-white dark:bg-gray-800",
-                "text-gray-900 dark:text-gray-100",
-                "border-gray-200 dark:border-gray-700",
+                "bg-white",
+                "text-gray-900",
+                "border-gray-200",
                 "focus:ring-2 focus:ring-blue-500"
               )}>
-                <Clock className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
+                <Clock className="w-4 h-4 mr-2 text-gray-500" />
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-gray-800">
+              <SelectContent className="bg-white">
                 <SelectItem value="updated">Last Updated</SelectItem>
                 <SelectItem value="created">Created Date</SelectItem>
                 <SelectItem value="mastered">Mastered First</SelectItem>
@@ -293,8 +293,8 @@ export const LearningCardsPage = () => {
           )}
 
           {!loading && filteredCards.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <div className="text-gray-500 dark:text-gray-400 mb-4">
+            <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-gray-50 rounded-lg">
+              <div className="text-gray-500 mb-4">
                 {searchTerm || selectedTags.length > 0 || selectedCategory !== 'all'
                   ? 'No cards match your filters. Try adjusting your search criteria.'
                   : 'No cards yet. Create your first card to get started!'}
