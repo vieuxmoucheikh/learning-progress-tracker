@@ -119,6 +119,12 @@ function getMotivationalMessage(streak: number): string {
 // Helper function to calculate progress stats
 function getProgressStats(task: Task, settings?: PomodoroSettings | null) {
     const dailyGoal = settings?.daily_goal || 8; // Utiliser la valeur des settings ou 8 par défaut
+    
+    // Check if metrics exists before accessing its properties
+    if (!task.metrics) {
+        return { streakPercentage: 0, dailyGoalPercentage: 0 };
+    }
+    
     const streakPercentage = Math.min((task.metrics.currentStreak / 4) * 100, 100);
     const dailyGoalPercentage = Math.min((task.metrics.completedPomodoros / dailyGoal) * 100, 100);
     return { streakPercentage, dailyGoalPercentage };
@@ -989,7 +995,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         // Check if the daily goal has been reached
         if (settings?.daily_goal && activeTaskId) {
             const task = tasks.find(t => t.id === activeTaskId);
-            if (task && task.metrics.completedPomodoros >= settings.daily_goal) {
+            if (task && task.metrics && task.metrics.completedPomodoros >= settings.daily_goal) {
                 checkDailyGoal(task.metrics.completedPomodoros);
             }
         }
@@ -1037,7 +1043,8 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 setTime(settings.work_duration * 60);
             } else {
                 // Switching to break mode
-                const completedPomodoros = tasks.find(t => t.id === activeTaskId)?.metrics.completedPomodoros || 0;
+                const activeTask = tasks.find(t => t.id === activeTaskId);
+                const completedPomodoros = activeTask?.metrics?.completedPomodoros || 0;
                 const isLongBreak = completedPomodoros > 0 && completedPomodoros % settings.pomodoros_until_long_break === 0;
                 setTime(isLongBreak ? settings.long_break_duration * 60 : settings.break_duration * 60);
             }
@@ -1572,10 +1579,10 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     </div>
                     <div className="flex justify-between items-center mb-4">
                         <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="bg-blue-500/30 text-blue-200 border-blue-400/30 px-3 py-1">
+                            <Badge variant="outline" className="bg-blue-500/30 text-blue-200 border-blue-400/30">
                                 {tasks.filter(t => !t.completed).length} active
                             </Badge>
-                            <Badge variant="outline" className="bg-slate-700/60 text-slate-200 border-slate-500/30 px-3 py-1">
+                            <Badge variant="outline" className="bg-slate-700/60 text-slate-200 border-slate-500/30">
                                 {tasks.filter(t => t.completed).length} completed
                             </Badge>
                         </div>
@@ -1861,6 +1868,9 @@ function TaskProgress({ task, settings }: { task: Task; settings: PomodoroSettin
     const { streakPercentage, dailyGoalPercentage } = getProgressStats(task, settings);
     const dailyGoal = settings?.daily_goal ?? 8; // Fix TypeScript error by using nullish coalescing operator
     
+    // Initialize metrics if they don't exist
+    const metrics = task.metrics || { completedPomodoros: 0, currentStreak: 0, totalMinutes: 0 };
+    
     return (
         <div className="p-6 rounded-xl bg-blue-600/20 border border-blue-400/30 shadow-lg">
             <div className="flex items-center justify-between mb-4">
@@ -1870,7 +1880,7 @@ function TaskProgress({ task, settings }: { task: Task; settings: PomodoroSettin
                 </div>
                 <div className="flex items-center gap-2">
                     <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
-                        {task.metrics.completedPomodoros} pomodoros
+                        {metrics.completedPomodoros} pomodoros
                     </Badge>
                 </div>
             </div>
@@ -1881,7 +1891,7 @@ function TaskProgress({ task, settings }: { task: Task; settings: PomodoroSettin
                 <div>
                     <div className="flex justify-between mb-1">
                         <span className="text-xs text-blue-300">Daily Goal</span>
-                        <span className="text-xs text-blue-200">{task.metrics.completedPomodoros} / {dailyGoal}</span>
+                        <span className="text-xs text-blue-200">{metrics.completedPomodoros} / {dailyGoal}</span>
                     </div>
                     <div className="w-full bg-blue-500/10 rounded-full h-2.5 overflow-hidden">
                         <div 
@@ -1895,7 +1905,7 @@ function TaskProgress({ task, settings }: { task: Task; settings: PomodoroSettin
                 <div>
                     <div className="flex justify-between mb-1">
                         <span className="text-xs text-blue-300">Current Streak</span>
-                        <span className="text-xs text-blue-200">{task.metrics.currentStreak} consecutive</span>
+                        <span className="text-xs text-blue-200">{metrics.currentStreak} consecutive</span>
                     </div>
                     <div className="w-full bg-blue-500/10 rounded-full h-2.5 overflow-hidden">
                         <div 
@@ -1910,12 +1920,12 @@ function TaskProgress({ task, settings }: { task: Task; settings: PomodoroSettin
                 <div className="text-sm text-blue-200">
                     <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
-                        {formatTotalTime(task.metrics.totalMinutes)} total focus time
+                        {formatTotalTime(metrics.totalMinutes)} total focus time
                     </span>
                 </div>
                 <div>
                     <span className="text-xs font-medium text-blue-200 bg-blue-500/20 px-2 py-1 rounded-full">
-                        {getMotivationalMessage(task.metrics.currentStreak)}
+                        {getMotivationalMessage(metrics.currentStreak)}
                     </span>
                 </div>
             </div>
