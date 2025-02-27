@@ -429,22 +429,16 @@ async function ensurePomodoroTableExists() {
 
 async function ensurePomodoroSettingsTableExists() {
   try {
-    const { error } = await supabase.rpc('create_pomodoro_settings_table_if_not_exists', {
-      work_duration_default: 25,
-      break_duration_default: 5,
-      long_break_duration_default: 15,
-      pomodoros_until_long_break_default: 4,
-      sound_enabled_default: true,
-      auto_start_breaks_default: false,
-      auto_start_pomodoros_default: false,
-      daily_goal_default: 4,
-      notification_enabled_default: true,
-      vibration_enabled_default: false,
-      sound_type_default: 'bell'
-    });
-    if (error) throw error;
+    const { error } = await supabase
+      .from('pomodoro_settings')
+      .select('user_id')
+      .limit(1);
+
+    if (error && error.code === 'PGRST204') {
+      await supabase.rpc('create_pomodoro_settings_table');
+    }
   } catch (error) {
-    console.error('Error creating pomodoro_settings table:', error);
+    console.error('Error in ensurePomodoroSettingsTableExists:', error);
   }
 }
 

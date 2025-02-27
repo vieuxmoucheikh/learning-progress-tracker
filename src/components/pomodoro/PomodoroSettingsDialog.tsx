@@ -18,7 +18,7 @@ import {
 import { Button } from '../ui/button';
 import type { PomodoroSettings } from '../../types';
 
-type Theme = 'light' | 'dark';
+type Theme = 'light' | 'dark' | 'system';
 
 interface PomodoroSettingsDialogProps {
   open: boolean;
@@ -42,22 +42,35 @@ export function PomodoroSettingsDialog({
   // Theme handling
   const applyTheme = (theme: Theme) => {
     const root = document.documentElement;
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.classList.remove('light', 'dark');
+      root.classList.add(systemTheme);
+    } else {
+      root.classList.remove('light', 'dark');
+      root.classList.add(theme);
+    }
     localStorage.setItem('theme', theme);
   };
 
-  // Initialize theme from localStorage or default to light
+  // Initialize theme from localStorage or system preference
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme === 'dark') {
-      setSettings(prev => ({ ...prev, theme: 'dark' }));
-      applyTheme('dark');
-    } else {
-      setSettings(prev => ({ ...prev, theme: 'light' }));
-      applyTheme('light');
-    }
+    const savedTheme = (localStorage.getItem('theme') as Theme) || 'system';
+    setSettings(prev => ({ ...prev, theme: savedTheme }));
+    applyTheme(savedTheme);
   }, []);
+
+  // Watch for system theme changes
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemThemeChange = (e: MediaQueryListEvent) => {
+      if (settings.theme === 'system') {
+        applyTheme(e.matches ? 'dark' : 'light');
+      }
+    };
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+    return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
+  }, [settings.theme]);
 
   React.useEffect(() => {
     if (initialSettings) {
@@ -66,14 +79,14 @@ export function PomodoroSettingsDialog({
   }, [initialSettings]);
 
   const handleChange = (key: keyof PomodoroSettings, value: unknown) => {
-    if (key === 'theme' && !['light', 'dark'].includes(value as string)) {
+    if (key === 'theme' && !['light', 'dark', 'system'].includes(value as string)) {
       return;
     }
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
     
     // Apply theme immediately when changed
-    if (key === 'theme' && typeof value === 'string' && ['light', 'dark'].includes(value)) {
+    if (key === 'theme' && typeof value === 'string' && ['light', 'dark', 'system'].includes(value)) {
       applyTheme(value as Theme);
     }
   };
@@ -105,7 +118,6 @@ export function PomodoroSettingsDialog({
               onChange={(e) => handleChange('work_duration', parseInt(e.target.value))}
               min={1}
               max={60}
-              disabled={isActive}
             />
           </div>
           
@@ -118,7 +130,6 @@ export function PomodoroSettingsDialog({
               onChange={(e) => handleChange('break_duration', parseInt(e.target.value))}
               min={1}
               max={30}
-              disabled={isActive}
             />
           </div>
 
@@ -131,7 +142,6 @@ export function PomodoroSettingsDialog({
               onChange={(e) => handleChange('long_break_duration', parseInt(e.target.value))}
               min={1}
               max={60}
-              disabled={isActive}
             />
           </div>
 
@@ -144,7 +154,6 @@ export function PomodoroSettingsDialog({
               onChange={(e) => handleChange('pomodoros_until_long_break', parseInt(e.target.value))}
               min={1}
               max={10}
-              disabled={isActive}
             />
           </div>
 
@@ -160,23 +169,6 @@ export function PomodoroSettingsDialog({
             />
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="soundType">Sound Type</Label>
-            <Select
-              value={settings.sound_type || 'bell'}
-              onValueChange={(value) => handleChange('sound_type', value)}
-            >
-              <SelectTrigger id="soundType">
-                <SelectValue placeholder="Select sound type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="bell">Bell</SelectItem>
-                <SelectItem value="chime">Chime</SelectItem>
-                <SelectItem value="soft">Soft</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
           <div className="flex items-center justify-between">
             <Label htmlFor="soundEnabled">Sound Notifications</Label>
             <Switch
@@ -187,6 +179,25 @@ export function PomodoroSettingsDialog({
               onColor="green"
             />
           </div>
+
+          {settings.sound_enabled && (
+            <div className="grid gap-2">
+              <Label htmlFor="soundType">Sound Type</Label>
+              <Select
+                value={settings.sound_type || 'bell'}
+                onValueChange={(value) => handleChange('sound_type', value)}
+              >
+                <SelectTrigger id="soundType">
+                  <SelectValue placeholder="Select sound type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bell">Bell</SelectItem>
+                  <SelectItem value="chime">Chime</SelectItem>
+                  <SelectItem value="soft">Soft</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="flex items-center justify-between">
             <Label htmlFor="notificationEnabled">Desktop Notifications</Label>
@@ -235,7 +246,7 @@ export function PomodoroSettingsDialog({
           <div className="grid gap-2">
             <Label htmlFor="theme">Theme</Label>
             <Select
-              value={settings.theme || 'light'}
+              value={settings.theme || 'system'}
               onValueChange={(value) => handleChange('theme', value)}
             >
               <SelectTrigger id="theme">
@@ -244,6 +255,7 @@ export function PomodoroSettingsDialog({
               <SelectContent>
                 <SelectItem value="light">Light</SelectItem>
                 <SelectItem value="dark">Dark</SelectItem>
+                <SelectItem value="system">System</SelectItem>
               </SelectContent>
             </Select>
           </div>
