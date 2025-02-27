@@ -393,7 +393,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
   return (
     <Card className={cn(
-      "w-full h-full flex flex-col overflow-hidden transition-all duration-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700",
+      "w-full h-full flex flex-col overflow-hidden transition-all duration-200 bg-white border border-gray-200 shadow-md",
       isEditing ? "shadow-lg" : "hover:shadow-md",
       isZoomed && "fixed inset-0 z-50 max-w-none rounded-none"
     )}>
@@ -409,7 +409,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             />
           ) : (
             <h3 
-              className="text-lg sm:text-xl font-semibold flex-1 text-gray-900 dark:text-gray-100" 
+              className="text-lg sm:text-xl font-semibold flex-1 text-gray-900" 
               onClick={() => !isEditing && setIsZoomed(!isZoomed)}
             >
               {title || "Untitled Card"}
@@ -510,7 +510,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
         {/* Content Section */}
         <CardContent className={cn(
-          "px-4 sm:px-6 flex-1 overflow-y-auto",
+          "px-4 sm:px-6 flex-1 overflow-y-auto bg-white text-gray-900",
           !showContent && "hidden"
         )}>
           <div className="space-y-4">
@@ -524,7 +524,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               </div>
             ) : (
               <div 
-                className="prose prose-blue max-w-none text-gray-800 dark:text-gray-200" 
+                className="prose prose-blue max-w-none text-gray-800" 
                 dangerouslySetInnerHTML={{ __html: content }}
               />
             )}
@@ -545,8 +545,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 variant="secondary"
                 className={cn(
                   "px-2 py-0.5",
-                  "bg-white dark:bg-white",
-                  "text-gray-700 dark:text-gray-700",
+                  "bg-white",
+                  "text-gray-700",
                   "border border-gray-200",
                   "rounded-full"
                 )}
@@ -573,8 +573,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   placeholder="Add tag..."
                   className={cn(
                     "h-7 text-sm w-24 sm:w-32",
-                    "bg-white dark:bg-white",
-                    "text-gray-900 dark:text-gray-900",
+                    "bg-white",
+                    "text-gray-900",
                     "border-gray-200",
                     "focus-visible:ring-2 focus-visible:ring-blue-500",
                     "placeholder:text-gray-500",
@@ -587,7 +587,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         </div>
       </CardHeader>
 
-      <CardFooter className="px-4 sm:px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+      <CardFooter className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50">
         <div className="flex flex-col sm:flex-row w-full gap-3 sm:items-center sm:justify-between">
           {/* Tags Section */}
           <div className="flex flex-wrap gap-2 items-center">
@@ -629,20 +629,20 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               </div>
             ) : (
               <>
-                <TagIcon className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+                <TagIcon className="h-4 w-4 text-blue-500" />
                 <div className="flex flex-wrap gap-1.5">
                   {tags.length > 0 ? (
                     tags.map((tag, index) => (
                       <Badge 
                         key={index} 
                         variant="secondary"
-                        className="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+                        className="bg-blue-50 text-blue-700 border border-blue-200"
                       >
                         {tag}
                       </Badge>
                     ))
                   ) : (
-                    <span className="text-sm text-gray-500 dark:text-gray-400">No tags</span>
+                    <span className="text-sm text-gray-500">No tags</span>
                   )}
                 </div>
               </>
@@ -651,7 +651,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           
           {/* Card Actions */}
           <div className="flex items-center justify-between sm:justify-end gap-3 mt-3 sm:mt-0">
-            <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+            <div className="flex items-center gap-1 text-gray-500">
               <Clock className="h-4 w-4" />
               <span className="text-xs">
                 {formatDistanceToNow(new Date(updatedAt || createdAt), { addSuffix: true })}
@@ -671,7 +671,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     setItemCategory(initialCategory);
                     setMastered(initialMastered);
                   }}
-                  className="text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600"
+                  className="text-gray-700 border-gray-300"
                 >
                   Cancel
                 </Button>
@@ -704,8 +704,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   className={cn(
                     "h-8 px-2",
                     mastered 
-                      ? "text-yellow-600 hover:text-yellow-700 dark:text-yellow-500 dark:hover:text-yellow-400" 
-                      : "text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                      ? "text-yellow-600 hover:text-yellow-700" 
+                      : "text-gray-600 hover:text-gray-700"
                   )}
                   title={mastered ? "Mark as not mastered" : "Mark as mastered"}
                 >
@@ -721,7 +721,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 px-2 text-red-600 hover:text-red-700 dark:text-red-500 dark:hover:text-red-400"
+                      className="h-8 px-2 text-red-600 hover:text-red-700"
                       title="Delete card"
                     >
                       <Trash2 className="h-4 w-4" />

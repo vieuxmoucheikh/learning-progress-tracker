@@ -225,6 +225,10 @@ pre {
   @apply bg-gradient-to-br from-white to-gray-100 dark:from-gray-800 dark:to-gray-900;
 }
 
+.pomodoro-timer-card {
+  @apply backdrop-blur-sm bg-slate-900/90 border-slate-700/30 !important;
+}
+
 .card-glass {
   @apply backdrop-blur-sm bg-white/90 dark:bg-gray-900/90;
 }
