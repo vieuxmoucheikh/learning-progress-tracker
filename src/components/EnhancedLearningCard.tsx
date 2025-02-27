@@ -393,237 +393,143 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
   return (
     <Card className={cn(
-      "w-full h-full flex flex-col overflow-hidden transition-all duration-200 card-gradient border border-gray-200 dark:border-gray-700",
+      "w-full h-full flex flex-col overflow-hidden transition-all duration-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700",
       isEditing ? "shadow-lg" : "hover:shadow-md",
       isZoomed && "fixed inset-0 z-50 max-w-none rounded-none"
     )}>
       <CardHeader className="space-y-4 pb-4 px-4 sm:px-6">
         {/* Title Section */}
-        <div className="space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              {isEditing ? (
-                <Input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className={cn(
-                    "text-lg font-semibold",
-                    "bg-gray-50",
-                    "text-gray-900",
-                    "border-gray-200",
-                    "focus-visible:ring-2 focus-visible:ring-blue-500",
-                    "placeholder:text-gray-400",
-                    "w-full sm:text-xl"
-                  )}
-                  placeholder="Enter title..."
-                />
-              ) : (
-                <h3 
-                  className={cn(
-                    "text-xl sm:text-2xl font-semibold line-clamp-2",
-                    "bg-gradient-to-r from-blue-900 via-blue-700 to-blue-800",
-                    "bg-clip-text text-transparent",
-                    "hover:from-blue-800 hover:via-blue-600 hover:to-blue-700",
-                    "cursor-pointer"
-                  )}
-                  onClick={() => setShowContent(!showContent)}
-                >
-                  {title}
-                </h3>
-              )}
-            </div>
-            
-            <div className="flex items-center gap-2 sm:gap-3">
-              {mastered && (
-                <Trophy className="w-5 h-5 text-yellow-500 animate-pulse" />
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowContent(!showContent)}
-                className="h-9 w-9 hover:bg-blue-100 rounded-lg"
-                title={showContent ? "Hide content" : "Show content"}
-              >
-                {showContent ? (
-                  <EyeOff className="w-5 h-5 text-blue-900" />
-                ) : (
-                  <Eye className="w-5 h-5 text-blue-900" />
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsEditing(!isEditing)}
-                className="h-9 w-9 hover:bg-blue-100 rounded-lg"
-                title={isEditing ? "Save changes" : "Edit card"}
-              >
-                {isEditing ? (
-                  <Save className="w-5 h-5 text-blue-900" />
-                ) : (
-                  <Edit className="w-5 h-5 text-blue-900" />
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={exportToPdf}
-                className="h-9 w-9 hover:bg-blue-100 rounded-lg"
-                title="Export to PDF"
-              >
-                <Download className="w-5 h-5 text-blue-900" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Category Section */}
+        <div className="flex items-start justify-between gap-2">
           {isEditing ? (
-            <div className="flex items-center gap-2">
-              <Select
-                value={itemCategory}
-                onValueChange={handleUpdateCategory}
-              >
-                <SelectTrigger className={cn(
-                  "w-full max-w-xs",
-                  "bg-gray-50",
-                  "border-gray-200",
-                  "text-gray-900",
-                  "focus:ring-2 focus:ring-blue-500",
-                  "h-9"
-                )}>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <div className="px-2 py-1.5 text-sm font-medium text-gray-500">
-                      Categories
-                    </div>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
-                      </SelectItem>
-                    ))}
-                    {itemCategory && !categories.includes(itemCategory) && (
-                      <SelectItem value={itemCategory}>
-                        {itemCategory} (New)
-                      </SelectItem>
-                    )}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          ) : itemCategory ? (
-            <Badge 
-              variant="secondary" 
-              className={cn(
-                "font-medium px-2 py-0.5",
-                "bg-blue-50 text-blue-700 hover:bg-blue-100",
-                "border border-blue-200",
-                "rounded-full"
-              )}
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Card Title"
+              className="text-lg font-semibold flex-1 border-blue-300 focus:border-blue-500"
+            />
+          ) : (
+            <h3 
+              className="text-lg sm:text-xl font-semibold flex-1 text-gray-900 dark:text-gray-100" 
+              onClick={() => !isEditing && setIsZoomed(!isZoomed)}
             >
-              {itemCategory}
-            </Badge>
-          ) : null}
+              {title || "Untitled Card"}
+            </h3>
+          )}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {mastered && (
+              <Trophy className="w-5 h-5 text-yellow-500 animate-pulse" />
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowContent(!showContent)}
+              className="h-9 w-9 hover:bg-blue-100 rounded-lg"
+              title={showContent ? "Hide content" : "Show content"}
+            >
+              {showContent ? (
+                <EyeOff className="w-5 h-5 text-blue-900" />
+              ) : (
+                <Eye className="w-5 h-5 text-blue-900" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsEditing(!isEditing)}
+              className="h-9 w-9 hover:bg-blue-100 rounded-lg"
+              title={isEditing ? "Save changes" : "Edit card"}
+            >
+              {isEditing ? (
+                <Save className="w-5 h-5 text-blue-900" />
+              ) : (
+                <Edit className="w-5 h-5 text-blue-900" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={exportToPdf}
+              className="h-9 w-9 hover:bg-blue-100 rounded-lg"
+              title="Export to PDF"
+            >
+              <Download className="w-5 h-5 text-blue-900" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Category Section */}
+        {isEditing ? (
+          <div className="flex items-center gap-2">
+            <Select
+              value={itemCategory}
+              onValueChange={handleUpdateCategory}
+            >
+              <SelectTrigger className={cn(
+                "w-full max-w-xs",
+                "bg-gray-50",
+                "border-gray-200",
+                "text-gray-900",
+                "focus:ring-2 focus:ring-blue-500",
+                "h-9"
+              )}>
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <div className="px-2 py-1.5 text-sm font-medium text-gray-500">
+                    Categories
+                  </div>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                  {itemCategory && !categories.includes(itemCategory) && (
+                    <SelectItem value={itemCategory}>
+                      {itemCategory} (New)
+                    </SelectItem>
+                  )}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+        ) : itemCategory ? (
+          <Badge 
+            variant="secondary" 
+            className={cn(
+              "font-medium px-2 py-0.5",
+              "bg-blue-50 text-blue-700 hover:bg-blue-100",
+              "border border-blue-200",
+              "rounded-full"
+            )}
+          >
+            {itemCategory}
+          </Badge>
+        ) : null}
         </div>
 
         {/* Content Section */}
-        <div 
-          className={cn(
-            "transition-all duration-300",
-            !showContent && "hidden"
-          )}
-        >
-          {isEditing ? (
-            <div className="space-y-4">
-              <div className="space-y-2 relative">
+        <CardContent className={cn(
+          "px-4 sm:px-6 flex-1 overflow-y-auto",
+          !showContent && "hidden"
+        )}>
+          <div className="space-y-4">
+            {isEditing ? (
+              <div className="mt-2">
                 <RichTextEditor
-                  content={content}
+                  value={content}
                   onChange={setContent}
-                  className={cn(
-                    "min-h-[200px] rounded-lg",
-                    "bg-gray-50",
-                    "text-gray-900",
-                    "border border-gray-200",
-                    "focus-within:ring-2 focus-within:ring-blue-500",
-                    "prose prose-sm sm:prose-base max-w-none",
-                    "overflow-y-auto max-h-[60vh]",
-                    "prose-headings:font-semibold prose-headings:text-gray-900",
-                    "prose-p:text-gray-700 prose-p:leading-relaxed",
-                    "prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline",
-                    "prose-strong:font-semibold prose-strong:text-gray-900",
-                    "prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:rounded",
-                    "prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200",
-                    "prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto",
-                    "prose-ul:list-disc prose-ol:list-decimal",
-                    "prose-li:marker:text-gray-400",
-                    "[&_.tiptap]:min-h-[150px] [&_.tiptap]:p-4",
-                    "[&_.tiptap.ProseMirror-focused]:outline-none",
-                    "[&_.tiptap]:prose-sm [&_.tiptap]:sm:prose-base",
-                    "[&_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_p.is-editor-empty:first-child]:before:text-gray-400",
-                    "[&_.tiptap_p]:my-3 [&_.tiptap_h1]:my-4 [&_.tiptap_h2]:my-4 [&_.tiptap_h3]:my-3",
-                    "[&_.tiptap_ul]:my-3 [&_.tiptap_ol]:my-3 [&_.tiptap_blockquote]:my-3",
-                    "[&_.tiptap_pre]:my-3 [&_.tiptap_hr]:my-4"
-                  )}
+                  className="min-h-[200px] border-blue-300 focus-within:border-blue-500 bg-white"
                 />
               </div>
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setIsEditing(false);
-                    setContent(initialContent);
-                    setTitle(initialTitle);
-                  }}
-                  className="bg-white hover:bg-gray-50"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={async () => {
-                    try {
-                      await handleSave();
-                      setIsEditing(false);
-                      toast({
-                        title: "Success",
-                        description: "Card updated successfully",
-                      });
-                    } catch (error) {
-                      console.error('Error saving:', error);
-                    }
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  Save Changes
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div 
-              className="relative"
-              onClick={() => !isZoomed && setIsZoomed(true)}
-            >
+            ) : (
               <div 
-                className={cn(
-                  "prose prose-sm sm:prose-base max-w-none",
-                  "prose-headings:font-semibold prose-headings:text-gray-900",
-                  "prose-p:text-gray-700 prose-p:leading-relaxed",
-                  "prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline",
-                  "prose-strong:font-semibold prose-strong:text-gray-900",
-                  "prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:rounded",
-                  "prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200",
-                  "prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto",
-                  "prose-ul:list-disc prose-ol:list-decimal",
-                  "prose-li:marker:text-gray-400",
-                  !isZoomed && "max-h-[300px] overflow-hidden cursor-pointer"
-                )}
+                className="prose prose-blue max-w-none text-gray-800 dark:text-gray-200" 
                 dangerouslySetInnerHTML={{ __html: content }}
               />
-              {!isZoomed && content.length > 300 && (
-                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none" />
-              )}
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        </CardContent>
 
         {/* Meta Section */}
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-sm">
@@ -681,41 +587,168 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         </div>
       </CardHeader>
 
-      <CardFooter className={cn(
-        "flex justify-between p-4 sm:p-6 gap-4",
-        "bg-gradient-to-b from-transparent via-gray-50/50 to-gray-100/50"
-      )}>
-        <Button
-          variant="ghost"
-          size="sm"
-          className={cn(
-            "text-sm transition-colors flex-1 sm:flex-none justify-start sm:justify-center",
-            mastered 
-              ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50" 
-              : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
-          )}
-          onClick={toggleMastered}
-        >
-          {mastered ? (
-            <BookmarkCheck className="w-4 h-4 mr-2" />
-          ) : (
-            <Bookmark className="w-4 h-4 mr-2" />
-          )}
-          <span>{mastered ? 'Mastered' : 'Mark as Mastered'}</span>
-        </Button>
-        
-        <Button
-          variant="ghost"
-          size="sm"
-          className={cn(
-            "text-sm transition-colors",
-            "text-red-600 hover:text-red-700 hover:bg-red-50"
-          )}
-          onClick={() => setShowDeleteDialog(true)}
-        >
-          <Trash2 className="w-4 h-4 mr-2" />
-          <span>Delete</span>
-        </Button>
+      <CardFooter className="px-4 sm:px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+        <div className="flex flex-col sm:flex-row w-full gap-3 sm:items-center sm:justify-between">
+          {/* Tags Section */}
+          <div className="flex flex-wrap gap-2 items-center">
+            {isEditing ? (
+              <div className="flex flex-wrap gap-2 items-center">
+                {tags.map((tag, index) => (
+                  <Badge 
+                    key={index} 
+                    variant="secondary"
+                    className="flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200"
+                  >
+                    <span>{tag}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeTag(tag)}
+                      className="text-blue-700 hover:text-blue-900"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+                <form onSubmit={handleAddTag} className="flex">
+                  <Input
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder="Add tag..."
+                    className="h-8 w-24 min-w-[6rem] text-sm border-blue-300 focus:border-blue-500"
+                  />
+                  <Button 
+                    type="submit" 
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 px-2 text-blue-700"
+                    disabled={!newTag.trim()}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </form>
+              </div>
+            ) : (
+              <>
+                <TagIcon className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+                <div className="flex flex-wrap gap-1.5">
+                  {tags.length > 0 ? (
+                    tags.map((tag, index) => (
+                      <Badge 
+                        key={index} 
+                        variant="secondary"
+                        className="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+                      >
+                        {tag}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-sm text-gray-500 dark:text-gray-400">No tags</span>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+          
+          {/* Card Actions */}
+          <div className="flex items-center justify-between sm:justify-end gap-3 mt-3 sm:mt-0">
+            <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+              <Clock className="h-4 w-4" />
+              <span className="text-xs">
+                {formatDistanceToNow(new Date(updatedAt || createdAt), { addSuffix: true })}
+              </span>
+            </div>
+            
+            {isEditing ? (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setContent(initialContent);
+                    setTitle(initialTitle);
+                    setTags(initialTags);
+                    setItemCategory(initialCategory);
+                    setMastered(initialMastered);
+                  }}
+                  className="text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      await handleSave();
+                      setIsEditing(false);
+                      toast({
+                        title: "Success",
+                        description: "Card updated successfully",
+                      });
+                    } catch (error) {
+                      console.error('Error saving:', error);
+                    }
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Save
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setMastered(!mastered)}
+                  className={cn(
+                    "h-8 px-2",
+                    mastered 
+                      ? "text-yellow-600 hover:text-yellow-700 dark:text-yellow-500 dark:hover:text-yellow-400" 
+                      : "text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                  )}
+                  title={mastered ? "Mark as not mastered" : "Mark as mastered"}
+                >
+                  {mastered ? (
+                    <BookmarkCheck className="h-4 w-4" />
+                  ) : (
+                    <Bookmark className="h-4 w-4" />
+                  )}
+                </Button>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-2 text-red-600 hover:text-red-700 dark:text-red-500 dark:hover:text-red-400"
+                      title="Delete card"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Card</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete this card? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDelete}
+                        className="bg-red-600 hover:bg-red-700 text-white"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            )}
+          </div>
+        </div>
       </CardFooter>
 
       {/* Delete Confirmation Dialog */}

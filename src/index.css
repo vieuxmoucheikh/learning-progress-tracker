@@ -256,3 +256,46 @@ pre {
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+
+/* Prose styling for dark mode */
+.dark .prose {
+  color: hsl(var(--foreground));
+}
+
+.dark .prose h1,
+.dark .prose h2,
+.dark .prose h3,
+.dark .prose h4,
+.dark .prose h5,
+.dark .prose h6 {
+  color: hsl(var(--foreground));
+}
+
+.dark .prose p,
+.dark .prose ul,
+.dark .prose ol,
+.dark .prose blockquote {
+  color: hsl(var(--foreground));
+}
+
+.dark .prose a {
+  color: hsl(var(--primary));
+}
+
+.dark .prose strong {
+  color: hsl(var(--foreground));
+}
+
+.dark .prose code {
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.1);
+}
+
+.dark .prose pre {
+  background: hsl(var(--muted));
+  border-color: hsl(var(--border));
+}
+
+.dark .prose img {
+  border-color: hsl(var(--border));
+}
