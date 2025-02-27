@@ -925,7 +925,9 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             
             // If trying to mark as completed, check if this task has reached the daily goal
             const dailyGoal = settings?.daily_goal ?? 8;
-            if (taskToToggle.metrics.completedPomodoros >= dailyGoal) {
+            
+            // Ensure metrics exists and has completedPomodoros property
+            if (taskToToggle.metrics && taskToToggle.metrics.completedPomodoros >= dailyGoal) {
                 // Daily goal achieved for this task, allow marking as completed
                 // Update in Supabase if user is authenticated
                 if (user) {
@@ -939,16 +941,20 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     )
                 );
                 
-                // Also set isCompleted to true since a task has reached the daily goal
-                setIsCompleted(true);
-                localStorage.setItem('dailyGoalCompleted', 'true');
-                localStorage.setItem('dailyGoalCompletedDate', new Date().toDateString());
-            } else {
-                // Daily goal not achieved, show notification
+                // Show celebration
                 toast({
-                    title: "Cannot complete task yet",
-                    description: `Complete your daily goal of ${dailyGoal} pomodoros for this task first.`,
-                    variant: "default",
+                    title: "Task Completed! 🎉",
+                    description: `You've completed your daily goal for "${taskToToggle.text}"!`,
+                    duration: 5000,
+                });
+                
+                // Play celebration sound
+                playCelebrationSound();
+            } else {
+                // Task hasn't reached daily goal yet, show message
+                toast({
+                    title: "Keep Going!",
+                    description: `Complete ${dailyGoal} pomodoros to mark this task as done.`,
                     duration: 3000,
                 });
             }
@@ -1457,6 +1463,78 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         };
     }, [activeTaskId, isActive, toggleTimer, skipCurrentInterval, settingsOpen]);
 
+    // Play a celebration sound when a task is completed
+    const playCelebrationSound = useCallback(async () => {
+        try {
+            if (!settings?.sound_enabled) return;
+            
+            if (audioContext) {
+                // Create a more festive sound for celebration
+                const oscillator1 = audioContext.createOscillator();
+                const oscillator2 = audioContext.createOscillator();
+                const oscillator3 = audioContext.createOscillator();
+                
+                const gainNode1 = audioContext.createGain();
+                const gainNode2 = audioContext.createGain();
+                const gainNode3 = audioContext.createGain();
+                
+                oscillator1.connect(gainNode1);
+                oscillator2.connect(gainNode2);
+                oscillator3.connect(gainNode3);
+                
+                gainNode1.connect(audioContext.destination);
+                gainNode2.connect(audioContext.destination);
+                gainNode3.connect(audioContext.destination);
+                
+                // First note
+                oscillator1.type = 'sine';
+                oscillator1.frequency.value = 523.25; // C5
+                gainNode1.gain.value = 0;
+                gainNode1.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.1);
+                gainNode1.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                // Second note
+                oscillator2.type = 'sine';
+                oscillator2.frequency.value = 659.25; // E5
+                gainNode2.gain.value = 0;
+                gainNode2.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.3);
+                gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.7);
+                
+                // Third note
+                oscillator3.type = 'sine';
+                oscillator3.frequency.value = 783.99; // G5
+                gainNode3.gain.value = 0;
+                gainNode3.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.5);
+                gainNode3.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.9);
+                
+                oscillator1.start();
+                oscillator2.start();
+                oscillator3.start();
+                
+                oscillator1.stop(audioContext.currentTime + 0.5);
+                oscillator2.stop(audioContext.currentTime + 0.7);
+                oscillator3.stop(audioContext.currentTime + 0.9);
+                
+                // Show browser notification if enabled
+                if (settings.notification_enabled) {
+                    if (Notification.permission === 'granted') {
+                        new Notification('Task Completed! 🎉', {
+                            body: 'Congratulations! You\'ve completed your daily goal for this task!',
+                            icon: 'favicon.ico'
+                        });
+                    } else if (Notification.permission !== 'denied') {
+                        Notification.requestPermission();
+                    }
+                }
+                
+                // Return a promise that resolves when the sound is finished
+                return new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        } catch (error) {
+            console.error('Error playing celebration sound:', error);
+        }
+    }, [settings, audioContext]);
+
     return (
         <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate-700/30 shadow-2xl rounded-xl">
             <div className="pomodoro-timer space-y-6 md:space-y-8">
@@ -1536,14 +1614,14 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                             task.completed ? "text-slate-400 line-through" : "text-blue-100"
                                         )}>
                                             {task.text}
-                                            {task.completed && task.metrics.completedPomodoros >= (settings?.daily_goal ?? 8) && (
+                                            {task.completed && task.metrics && task.metrics.completedPomodoros >= (settings?.daily_goal ?? 8) && (
                                                 <Badge variant="secondary" className="ml-2 bg-green-600 text-white">
                                                     <Trophy className="h-3 w-3 mr-1" />
                                                     Completed!
                                                 </Badge>
                                             )}
                                         </div>
-                                        {activeTaskId === task.id && (
+                                        {activeTaskId === task.id && task.metrics && (
                                             <div className="text-xs text-blue-200 mt-1 flex items-center gap-2">
                                                 <span className="flex items-center gap-1">
                                                     <Clock className="w-3 h-3" />
