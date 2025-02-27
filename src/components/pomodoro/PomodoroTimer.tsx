@@ -474,7 +474,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         const dailyGoal = settings.daily_goal || 8;
         
         // Check if any task has reached the daily goal
-        const taskReachedGoal = tasks.some(task => task.metrics.completedPomodoros >= dailyGoal);
+        const taskReachedGoal = tasks.some(task => task.metrics && task.metrics.completedPomodoros >= dailyGoal);
         
         if (taskReachedGoal && !isCompleted) {
             // Mark the goal as completed
@@ -888,6 +888,20 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
     const removeTask = async (taskId: string) => {
         try {
+            // If this is the active task, reset the timer and clear the active task
+            if (taskId === activeTaskId) {
+                setActiveTaskId(null);
+                setIsActive(false);
+                if (currentPomodoroId) {
+                    try {
+                        await completePomodoro(currentPomodoroId);
+                    } catch (error) {
+                        console.error('Error completing active pomodoro:', error);
+                    }
+                    setCurrentPomodoroId(null);
+                }
+            }
+            
             // Delete from Supabase if user is authenticated
             if (user) {
                 await deletePomodoroTask(taskId);
@@ -1737,10 +1751,15 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     </TooltipProvider>
                 </div>
                 {activeTaskId && (
-                    <TaskProgress 
-                        task={tasks.find(t => t.id === activeTaskId)!} 
-                        settings={settings}
-                    />
+                    <div className="mt-6">
+                        {/* Only render TaskProgress if we can find the active task */}
+                        {tasks.find(t => t.id === activeTaskId) && (
+                            <TaskProgress 
+                                task={tasks.find(t => t.id === activeTaskId)!} 
+                                settings={settings} 
+                            />
+                        )}
+                    </div>
                 )}
             
                 <PomodoroSettingsDialog
