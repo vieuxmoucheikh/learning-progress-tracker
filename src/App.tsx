@@ -610,12 +610,15 @@ export default function App() {
       <div className="min-h-screen bg-background text-foreground">
         <Toaster />
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <header className="flex flex-col items-center mb-8 relative">
-            <div className="absolute right-0 top-0">
-              <ThemeToggle />
+          <header className="mb-8 relative">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex-1"></div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex-grow text-center">Learning Progress Tracker</h1>
+              <div className="flex-1 flex justify-end">
+                <ThemeToggle />
+              </div>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Learning Progress Tracker</h1>
-            <p className="text-gray-600 dark:text-gray-400">Track your learning journey and stay motivated</p>
+            <p className="text-gray-600 dark:text-gray-400 text-center">Track your learning journey and stay motivated</p>
           </header>
 
           <TabNavigation activeTab={selectedTab} onTabChange={setSelectedTab} />
