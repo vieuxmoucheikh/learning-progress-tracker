@@ -50,7 +50,7 @@ const tabs: Tab[] = [
   {
     id: "flashcards",
     label: "Flashcards",
-    shortLabel: "Flashcards",
+    shortLabel: "Flash",
     icon: Library
   }
 ];
@@ -61,8 +61,9 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
 }) => {
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const activeTabRef = useRef<HTMLButtonElement>(null);
+  const indicatorRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to active tab when it changes
+  // Scroll to active tab when it changes and update indicator position
   useEffect(() => {
     if (tabsContainerRef.current && activeTabRef.current) {
       const container = tabsContainerRef.current;
@@ -79,9 +80,16 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
         left: finalScrollLeft,
         behavior: 'smooth'
       });
+
+      // Update indicator position
+      if (indicatorRef.current) {
+        indicatorRef.current.style.width = `${activeTabElement.offsetWidth}px`;
+        indicatorRef.current.style.transform = `translateX(${activeTabElement.offsetLeft}px)`;
+      }
     }
   }, [activeTab]);
 
+  // Add CSS for hiding scrollbars
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
@@ -97,10 +105,10 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
 
   return (
     <div className="flex flex-col h-full">
-      <nav className="flex justify-center mb-8 border-b w-full bg-gradient-to-r from-blue-600 to-blue-500 p-0.5 sm:p-1">
+      <nav className="flex justify-center mb-8 w-full bg-card shadow-sm relative">
         <div 
           ref={tabsContainerRef}
-          className="flex -mb-px max-w-2xl w-full overflow-x-auto px-0.5 sm:px-1 hide-scrollbar"
+          className="flex max-w-2xl w-full overflow-x-auto px-0.5 sm:px-1 hide-scrollbar relative"
           style={{ 
             scrollbarWidth: 'none', 
             msOverflowStyle: 'none',
@@ -116,21 +124,28 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
                 ref={isActive ? activeTabRef : null}
                 onClick={() => onTabChange(tab.id)}
                 className={cn(
-                  "flex-shrink-0 text-sm font-medium py-3 px-2.5 sm:px-4 border-b-2 flex items-center justify-center gap-1.5 sm:gap-2 transition-all min-w-[72px] sm:min-w-[90px]",
-                  "hover:bg-white/10",
+                  "flex-shrink-0 text-sm font-medium py-4 px-3 sm:px-5 flex items-center justify-center gap-2 transition-all duration-200 ease-in-out min-w-[80px] sm:min-w-[100px] relative z-10",
                   isActive
-                    ? "border-white text-white"
-                    : "border-transparent text-white/80 hover:text-white hover:border-white/30"
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
+                aria-selected={isActive}
               >
                 <Icon className={cn(
-                  "w-4 h-4 flex-shrink-0",
-                  isActive ? "text-white" : "text-white/80"
+                  "w-5 h-5 flex-shrink-0 transition-all duration-200",
+                  isActive ? "text-primary" : "text-muted-foreground"
                 )} />
-                <span className="whitespace-nowrap">{tab.shortLabel}</span>
+                <span className="whitespace-nowrap font-medium">{tab.shortLabel}</span>
               </button>
             );
           })}
+          
+          {/* Animated indicator */}
+          <div 
+            ref={indicatorRef}
+            className="absolute bottom-0 h-0.5 bg-primary transition-all duration-300 ease-in-out"
+            style={{ height: '2px' }}
+          />
         </div>
       </nav>
       <div className="flex-1 overflow-auto">

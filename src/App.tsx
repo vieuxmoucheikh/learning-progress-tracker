@@ -602,13 +602,24 @@ export default function App() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Toaster />
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <header className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Learning Progress Tracker</h1>
-          <p className="text-gray-600">Track your learning journey and stay motivated</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <header className="mb-8">
+          <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0 md:space-x-4">
+            <div className="text-center md:text-left">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-700 bg-clip-text text-transparent">
+                Learning Progress Tracker
+              </h1>
+              <p className="text-muted-foreground mt-1">Track your learning journey and stay motivated</p>
+            </div>
+            <div className="flex items-center space-x-4">
+              {/* User profile or additional header elements can go here */}
+            </div>
+          </div>
         </header>
 
-        <TabNavigation activeTab={selectedTab} onTabChange={setSelectedTab} />
+        <div className="rounded-lg bg-card shadow-sm overflow-hidden">
+          <TabNavigation activeTab={selectedTab} onTabChange={setSelectedTab} />
+        </div>
 
         {showAddDialog && ( 
           <AddLearningItem
@@ -619,7 +630,7 @@ export default function App() {
           />
         )}
 
-        <main>
+        <main className="mt-6">
           {selectedTab === TAB_OPTIONS.DASHBOARD && (
             <DashboardTab
               items={state.items}
