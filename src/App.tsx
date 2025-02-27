@@ -16,6 +16,7 @@ import { AnalyticsTab } from './components/AnalyticsTab';
 import { Toaster } from "@/components/ui/toaster";
 import { PomodoroTimer } from './components/pomodoro/PomodoroTimer';
 import { LearningCardsPage } from './pages/LearningCards';
+import { ThemeToggle } from './components/ui/theme-toggle';
 
 interface State {
   items: LearningItem[];
@@ -606,18 +607,18 @@ export default function App() {
         <header className="mb-8">
           <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0 md:space-x-4">
             <div className="text-center md:text-left">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-700 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
                 Learning Progress Tracker
               </h1>
               <p className="text-muted-foreground mt-1">Track your learning journey and stay motivated</p>
             </div>
             <div className="flex items-center space-x-4">
-              {/* User profile or additional header elements can go here */}
+              <ThemeToggle />
             </div>
           </div>
         </header>
 
-        <div className="rounded-lg bg-card shadow-sm overflow-hidden">
+        <div className="rounded-lg overflow-hidden shadow-md">
           <TabNavigation activeTab={selectedTab} onTabChange={setSelectedTab} />
         </div>
 

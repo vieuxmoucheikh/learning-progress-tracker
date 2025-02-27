@@ -105,10 +105,10 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
 
   return (
     <div className="flex flex-col h-full">
-      <nav className="flex justify-center mb-8 w-full bg-card shadow-sm relative">
+      <nav className="flex justify-center mb-8 border-b w-full bg-gradient-to-r from-blue-700 to-blue-500 p-0.5 sm:p-1 shadow-md">
         <div 
           ref={tabsContainerRef}
-          className="flex max-w-2xl w-full overflow-x-auto px-0.5 sm:px-1 hide-scrollbar relative"
+          className="flex -mb-px max-w-2xl w-full overflow-x-auto px-0.5 sm:px-1 hide-scrollbar relative"
           style={{ 
             scrollbarWidth: 'none', 
             msOverflowStyle: 'none',
@@ -124,16 +124,17 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
                 ref={isActive ? activeTabRef : null}
                 onClick={() => onTabChange(tab.id)}
                 className={cn(
-                  "flex-shrink-0 text-sm font-medium py-4 px-3 sm:px-5 flex items-center justify-center gap-2 transition-all duration-200 ease-in-out min-w-[80px] sm:min-w-[100px] relative z-10",
+                  "flex-shrink-0 text-sm font-medium py-3 px-3 sm:px-4 border-b-2 flex items-center justify-center gap-1.5 sm:gap-2 transition-all duration-200 min-w-[72px] sm:min-w-[90px]",
+                  "hover:bg-white/10",
                   isActive
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "border-white text-white"
+                    : "border-transparent text-white/80 hover:text-white hover:border-white/30"
                 )}
                 aria-selected={isActive}
               >
                 <Icon className={cn(
-                  "w-5 h-5 flex-shrink-0 transition-all duration-200",
-                  isActive ? "text-primary" : "text-muted-foreground"
+                  "w-4 h-4 flex-shrink-0 transition-all duration-200",
+                  isActive ? "text-white" : "text-white/80"
                 )} />
                 <span className="whitespace-nowrap font-medium">{tab.shortLabel}</span>
               </button>
@@ -143,7 +144,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
           {/* Animated indicator */}
           <div 
             ref={indicatorRef}
-            className="absolute bottom-0 h-0.5 bg-primary transition-all duration-300 ease-in-out"
+            className="absolute bottom-0 h-0.5 bg-white transition-all duration-300 ease-in-out"
             style={{ height: '2px' }}
           />
         </div>
