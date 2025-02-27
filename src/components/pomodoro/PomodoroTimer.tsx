@@ -164,14 +164,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     const [pomodoroCount, setPomodoroCount] = useState(0); // Ajouter ce state
     const timerWorkerRef = useRef<Worker | null>(null);
 
-    // Forward declaration of handleTimerComplete to avoid "used before declaration" errors
-    const handleTimerCompleteDeclaration = useCallback(async () => {
-        // This will call the actual implementation once it's defined
-        if (typeof handleTimerComplete === 'function') {
-            return handleTimerComplete();
-        }
-    }, []); // Empty dependency array to avoid circular dependencies
-
     // Load tasks from Supabase on mount
     useEffect(() => {
         const loadTasks = async () => {
@@ -663,58 +655,34 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
     // Timer logic with Web Worker
     useEffect(() => {
-        // Create a new worker if it doesn't exist
-        if (!timerWorkerRef.current) {
-            console.log("Creating new timer worker");
-            const worker = new Worker(new URL('./timerWorker.js', import.meta.url));
-            
-            worker.onmessage = (e) => {
-                if (e.data.type === 'tick') {
-                    setTime(prevTime => {
-                        const newTime = Math.max(0, prevTime - 1);
-                        if (newTime === 0 && prevTime > 0) {
-                            console.log("Timer reached zero, completing timer");
-                            handleTimerCompleteDeclaration();
-                        }
-                        return newTime;
-                    });
-                }
-            };
-            
-            timerWorkerRef.current = worker;
-        }
-        
-        // Send appropriate command to the worker
-        if (timerWorkerRef.current) {
-            if (isActive) {
-                console.log("Sending start command to timer worker with current time:", time);
-                timerWorkerRef.current.postMessage({ 
-                    command: 'start',
-                    time: time
+        const worker = new Worker(new URL('./timerWorker.js', import.meta.url));
+        worker.onmessage = (e) => {
+            if (e.data.type === 'tick') {
+                setTime(prevTime => {
+                    const newTime = Math.max(0, prevTime - 1);
+                    if (newTime === 0) {
+                        handleTimerComplete();
+                    }
+                    return newTime;
                 });
-            } else {
-                console.log("Sending stop command to timer worker");
-                timerWorkerRef.current.postMessage({ command: 'stop' });
-            }
-        }
-        
-        // Cleanup worker on component unmount
-        return () => {
-            if (timerWorkerRef.current) {
-                console.log("Cleaning up timer worker");
-                timerWorkerRef.current.postMessage({ command: 'stop' });
-                // Don't terminate the worker, just stop it
-                // This allows the timer to continue when navigating between tabs
             }
         };
-    }, [isActive, handleTimerCompleteDeclaration, time]);
+        if (isActive) {
+            worker.postMessage({ command: 'start' });
+        } else {
+            worker.postMessage({ command: 'stop' });
+        }
+        timerWorkerRef.current = worker;
+        return () => {
+            worker.terminate();
+        };
+    }, [isActive]);
 
     // Handle visibility change
     const handleVisibilityChange = useCallback(() => {
         if (document.visibilityState === 'hidden') {
-            console.log("Tab hidden, saving timer state");
             localStorage.setItem('pomodoroLastTimestamp', Date.now().toString());
-            localStorage.setItem('pomodoroState', JSON.stringify({
+            localStorage.setItem('pomodoroTimerState', JSON.stringify({
                 time,
                 isActive,
                 isBreak,
@@ -722,70 +690,26 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 activeTaskId,
                 lastUpdate: new Date().toISOString()
             }));
-            
-            // Pause the timer worker when tab is hidden
-            if (timerWorkerRef.current && isActive) {
-                console.log("Pausing timer worker");
-                timerWorkerRef.current.postMessage({ command: 'pause' });
-            }
         } else {
             try {
-                console.log("Tab visible again, restoring timer state");
-                const savedState = localStorage.getItem('pomodoroState');
+                const savedState = localStorage.getItem('pomodoroTimerState');
                 if (savedState) {
                     const parsedState = JSON.parse(savedState);
                     const storedTimestamp = parseInt(localStorage.getItem('pomodoroLastTimestamp') || Date.now().toString());
                     const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
-                    
-                    console.log("Elapsed seconds since tab was hidden:", elapsedSeconds);
-                    console.log("Timer state when tab was hidden:", parsedState);
-                    
-                    // Always restore the active task ID
-                    if (parsedState.activeTaskId) {
-                        setActiveTaskId(parsedState.activeTaskId);
-                    }
-                    
-                    // Always restore break state
-                    setIsBreak(parsedState.isBreak);
-                    
-                    // Always restore current pomodoro ID
-                    if (parsedState.currentPomodoroId) {
-                        setCurrentPomodoroId(parsedState.currentPomodoroId);
-                    }
-                    
-                    // Only adjust time if timer was active
                     if (parsedState.isActive && elapsedSeconds > 0) {
                         const adjustedTime = Math.max(0, parsedState.time - elapsedSeconds);
-                        console.log(`Timer was active. Adjusting time from ${parsedState.time} to ${adjustedTime}`);
                         setTime(adjustedTime);
-                        
-                        // Ensure timer is still active
-                        setIsActive(true);
-                        
-                        // Resume the timer worker
-                        if (timerWorkerRef.current) {
-                            console.log("Resuming timer worker with adjusted time:", adjustedTime);
-                            timerWorkerRef.current.postMessage({ 
-                                command: 'start',
-                                time: adjustedTime
-                            });
-                        }
-                        
                         if (adjustedTime === 0) {
-                            handleTimerCompleteDeclaration();
+                            handleTimerComplete();
                         }
-                    } else {
-                        // If timer wasn't active, just restore the time
-                        console.log(`Timer was inactive. Setting time to ${parsedState.time}`);
-                        setTime(parsedState.time);
-                        setIsActive(parsedState.isActive);
                     }
                 }
             } catch (error) {
                 console.error('Error handling visibility change:', error);
             }
         }
-    }, [time, isActive, isBreak, currentPomodoroId, activeTaskId, handleTimerCompleteDeclaration]);
+    }, [time, isActive, isBreak, currentPomodoroId, activeTaskId]);
 
     // Add event listener for visibility change
     useEffect(() => {
@@ -818,39 +742,28 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 
                 const elapsedSeconds = Math.floor((Date.now() - new Date(parsedState.lastUpdate).getTime()) / 1000);
                 
-                // Restore active task ID if it exists
-                if (parsedState.activeTaskId) {
-                    console.log(`Restoring active task ID: ${parsedState.activeTaskId}`);
-                    setActiveTaskId(parsedState.activeTaskId);
+                // Only adjust time if it was active
+                if (parsedState.isActive) {
+                    const adjustedTime = Math.max(0, parsedState.time - elapsedSeconds);
+                    console.log(`Timer was active. Adjusting time from ${parsedState.time} to ${adjustedTime} (elapsed: ${elapsedSeconds}s)`);
+                    setTime(adjustedTime);
+                } else {
+                    console.log(`Timer was inactive. Setting time to ${parsedState.time}`);
+                    setTime(parsedState.time);
                 }
                 
-                // Restore break state
+                setIsActive(parsedState.isActive);
                 setIsBreak(parsedState.isBreak);
                 
-                // Restore current pomodoro ID
                 if (parsedState.currentPomodoroId) {
                     console.log(`Restoring current pomodoro ID: ${parsedState.currentPomodoroId}`);
                     setCurrentPomodoroId(parsedState.currentPomodoroId);
                 }
                 
-                // Only adjust time if timer was active
-                if (parsedState.isActive) {
-                    const adjustedTime = Math.max(0, parsedState.time - elapsedSeconds);
-                    console.log(`Timer was active. Adjusting time from ${parsedState.time} to ${adjustedTime} (elapsed: ${elapsedSeconds}s)`);
-                    setTime(adjustedTime);
-                    
-                    // Important: Restore the active state to continue the timer
-                    console.log("Restoring timer active state");
-                    setIsActive(true);
-                    
-                    // If timer reached zero while away, handle completion
-                    if (adjustedTime === 0) {
-                        console.log("Timer reached zero while away, handling completion");
-                        handleTimerCompleteDeclaration();
-                    }
-                } else {
-                    console.log(`Timer was inactive. Setting time to ${parsedState.time}`);
-                    setTime(parsedState.time);
+                // Restore active task ID if it exists
+                if (parsedState.activeTaskId) {
+                    console.log(`Restoring active task ID: ${parsedState.activeTaskId}`);
+                    setActiveTaskId(parsedState.activeTaskId);
                 }
             } catch (error) {
                 console.error("Error parsing saved timer state:", error);
@@ -858,30 +771,13 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 localStorage.removeItem('pomodoroState');
             }
         }
-    }, [handleTimerCompleteDeclaration]);
+    }, []);
 
     // Sync periodically
     useEffect(() => {
         const syncInterval = setInterval(syncWithSupabase, 5000);
         return () => clearInterval(syncInterval);
     }, [syncWithSupabase]);
-
-    // Save timer state on unmount
-    useEffect(() => {
-        // Save state when component unmounts
-        return () => {
-            console.log("Component unmounting, saving timer state");
-            const timerState = {
-                time,
-                isActive,
-                isBreak,
-                currentPomodoroId,
-                activeTaskId,
-                lastUpdate: new Date().toISOString()
-            };
-            localStorage.setItem('pomodoroState', JSON.stringify(timerState));
-        };
-    }, [time, isActive, isBreak, currentPomodoroId, activeTaskId]);
 
     // Add a function to sync failed task updates
     const syncFailedTaskUpdates = useCallback(async () => {
