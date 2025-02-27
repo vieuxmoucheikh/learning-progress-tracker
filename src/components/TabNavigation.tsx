@@ -97,7 +97,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
 
   return (
     <div className="flex flex-col h-full">
-      <nav className="flex justify-center mb-8 border-b w-full bg-gradient-to-r from-blue-600 to-blue-500 p-0.5 sm:p-1">
+      <nav className="flex justify-center mb-8 border-b w-full bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-700 dark:to-blue-600 p-0.5 sm:p-1">
         <div 
           ref={tabsContainerRef}
           className="flex -mb-px max-w-2xl w-full overflow-x-auto px-0.5 sm:px-1 hide-scrollbar"
@@ -117,15 +117,15 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
                 onClick={() => onTabChange(tab.id)}
                 className={cn(
                   "flex-shrink-0 text-sm font-medium py-3 px-2.5 sm:px-4 border-b-2 flex items-center justify-center gap-1.5 sm:gap-2 transition-all min-w-[72px] sm:min-w-[90px]",
-                  "hover:bg-white/10",
+                  "hover:bg-white/10 dark:hover:bg-white/5",
                   isActive
-                    ? "border-white text-white"
-                    : "border-transparent text-white/80 hover:text-white hover:border-white/30"
+                    ? "border-white text-white dark:border-white dark:text-white"
+                    : "border-transparent text-white/80 hover:text-white hover:border-white/30 dark:text-white/70 dark:hover:text-white dark:hover:border-white/30"
                 )}
               >
                 <Icon className={cn(
                   "w-4 h-4 flex-shrink-0",
-                  isActive ? "text-white" : "text-white/80"
+                  isActive ? "text-white dark:text-white" : "text-white/80 dark:text-white/70"
                 )} />
                 <span className="whitespace-nowrap">{tab.shortLabel}</span>
               </button>

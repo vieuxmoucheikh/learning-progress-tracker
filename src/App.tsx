@@ -16,6 +16,8 @@ import { AnalyticsTab } from './components/AnalyticsTab';
 import { Toaster } from "@/components/ui/toaster";
 import { PomodoroTimer } from './components/pomodoro/PomodoroTimer';
 import { LearningCardsPage } from './pages/LearningCards';
+import { ThemeProvider } from './components/ThemeProvider';
+import { ThemeToggle } from './components/ThemeToggle';
 
 interface State {
   items: LearningItem[];
@@ -577,90 +579,99 @@ export default function App() {
 
   if (state.loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
-      </div>
+      <ThemeProvider>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"></div>
+        </div>
+      </ThemeProvider>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Retry
-          </button>
+      <ThemeProvider>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Retry
+            </button>
+          </div>
         </div>
-      </div>
+      </ThemeProvider>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Toaster />
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <header className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Learning Progress Tracker</h1>
-          <p className="text-gray-600">Track your learning journey and stay motivated</p>
-        </header>
+    <ThemeProvider>
+      <div className="min-h-screen bg-background text-foreground">
+        <Toaster />
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <header className="flex flex-col items-center mb-8 relative">
+            <div className="absolute right-0 top-0">
+              <ThemeToggle />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Learning Progress Tracker</h1>
+            <p className="text-gray-600 dark:text-gray-400">Track your learning journey and stay motivated</p>
+          </header>
 
-        <TabNavigation activeTab={selectedTab} onTabChange={setSelectedTab} />
+          <TabNavigation activeTab={selectedTab} onTabChange={setSelectedTab} />
 
-        {showAddDialog && ( 
-          <AddLearningItem
-            onAdd={handleSubmitItem}
-            onClose={() => setShowAddDialog(false)}
-            isOpen={showAddDialog}
-            selectedDate={selectedDate}
-          />
-        )}
-
-        <main>
-          {selectedTab === TAB_OPTIONS.DASHBOARD && (
-            <DashboardTab
-              items={state.items}
-              onAddItem={handleDashboardAddItem}
-              onUpdate={handleDashboardUpdate}
-              onDateSelect={handleDateSelect}
-              onDelete={handleDeleteItem}
-              onStartTracking={handleStartTracking}
-              onStopTracking={handleStopTracking}
-              onNotesUpdate={handleUpdateNotes}
-              onSessionNoteAdd={handleAddSessionNote}
-              onSetActiveItem={handleSetActiveItem}
+          {showAddDialog && ( 
+            <AddLearningItem
+              onAdd={handleSubmitItem}
+              onClose={() => setShowAddDialog(false)}
+              isOpen={showAddDialog}
+              selectedDate={selectedDate}
             />
           )}
 
-          {selectedTab === TAB_OPTIONS.ITEMS && (
-            <ItemsTab
-              items={state.items}
-              onAddItem={handleItemsAddItem}
-              onUpdate={handleUpdateItem}
-              onDelete={handleDeleteItem}
-              onStartTracking={handleStartTracking}
-              onStopTracking={handleStopTracking}
-              onNotesUpdate={handleUpdateNotes}
-              onSessionNoteAdd={handleAddSessionNote}
-              onSetActiveItem={handleSetActiveItem}
-            />
-          )}
+          <main>
+            {selectedTab === TAB_OPTIONS.DASHBOARD && (
+              <DashboardTab
+                items={state.items}
+                onAddItem={handleDashboardAddItem}
+                onUpdate={handleDashboardUpdate}
+                onDateSelect={handleDateSelect}
+                onDelete={handleDeleteItem}
+                onStartTracking={handleStartTracking}
+                onStopTracking={handleStopTracking}
+                onNotesUpdate={handleUpdateNotes}
+                onSessionNoteAdd={handleAddSessionNote}
+                onSetActiveItem={handleSetActiveItem}
+              />
+            )}
 
-          {selectedTab === TAB_OPTIONS.ANALYTICS && (
-            <AnalyticsTab items={state.items} />
-          )}
+            {selectedTab === TAB_OPTIONS.ITEMS && (
+              <ItemsTab
+                items={state.items}
+                onAddItem={handleItemsAddItem}
+                onUpdate={handleUpdateItem}
+                onDelete={handleDeleteItem}
+                onStartTracking={handleStartTracking}
+                onStopTracking={handleStopTracking}
+                onNotesUpdate={handleUpdateNotes}
+                onSessionNoteAdd={handleAddSessionNote}
+                onSetActiveItem={handleSetActiveItem}
+              />
+            )}
 
-          {selectedTab === TAB_OPTIONS.POMODORO && (
-            <PomodoroTimer />
-          )}
-          {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
-            <LearningCardsPage />
-          )}
-        </main>
+            {selectedTab === TAB_OPTIONS.ANALYTICS && (
+              <AnalyticsTab items={state.items} />
+            )}
+
+            {selectedTab === TAB_OPTIONS.POMODORO && (
+              <PomodoroTimer />
+            )}
+            {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
+              <LearningCardsPage />
+            )}
+          </main>
+        </div>
       </div>
-    </div>
+    </ThemeProvider>
   );
 }
