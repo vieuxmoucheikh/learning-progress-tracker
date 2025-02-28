@@ -41,7 +41,7 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState("all");
   const [newGoal, setNewGoal] = useState({
     title: '',
     targetDate: '',
@@ -56,7 +56,7 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
         searchQuery === "" ||
         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (item.notes && item.notes.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (item.type.toLowerCase().includes(searchQuery.toLowerCase()));
+        (item.category.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesStatus =
         selectedStatus === "all" || 
@@ -65,12 +65,12 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
         (selectedStatus === "in_progress" && !item.completed && item.progress?.current);
 
       const matchesCategory =
-        selectedCategory === "all" ||
-        (item.type === selectedCategory);
+        selectedCategoryFilter === "all" ||
+        (item.category === selectedCategoryFilter);
 
       return matchesSearch && matchesStatus && matchesCategory;
     });
-  }, [items, searchQuery, selectedStatus, selectedCategory]);
+  }, [items, searchQuery, selectedStatus, selectedCategoryFilter]);
 
   const exportToPdf = useCallback(() => {
     const element = document.createElement('div');
@@ -102,7 +102,7 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
       const cardInfo = document.createElement('div');
       cardInfo.className = 'mt-4 text-sm text-gray-600';
       cardInfo.innerHTML = `
-        <div>Type: ${item.type}</div>
+        <div>Category: ${item.category}</div>
         <div>Status: ${item.completed ? 'Completed' : item.progress?.current ? 'In Progress' : 'Not Started'}</div>
         ${item.completed_at ? `<div>Completed: ${new Date(item.completed_at).toLocaleDateString()}</div>` : ''}
       `;
@@ -167,16 +167,16 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
             ]}
           />
           <CustomSelect
-            value={selectedCategory}
-            onValueChange={setSelectedCategory}
+            value={selectedCategoryFilter}
+            onValueChange={setSelectedCategoryFilter}
             items={[
-              { value: 'all', label: 'All Types' },
-              { value: 'video', label: 'Video' },
-              { value: 'pdf', label: 'PDF' },
-              { value: 'url', label: 'URL' },
-              { value: 'book', label: 'Book' },
-              { value: 'course', label: 'Course' },
-              { value: 'article', label: 'Article' }
+              { value: 'all', label: 'All Categories' },
+              { value: 'programming', label: 'Programming' },
+              { value: 'design', label: 'Design' },
+              { value: 'business', label: 'Business' },
+              { value: 'marketing', label: 'Marketing' },
+              { value: 'personal', label: 'Personal' },
+              { value: 'other', label: 'Other' }
             ]}
           />
         </div>
