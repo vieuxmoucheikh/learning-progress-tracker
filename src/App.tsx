@@ -215,11 +215,6 @@ function reducer(state: State, action: Action): State {
     case 'UPDATE_NOTES':
       return {
         ...state,
-        items: state.items.map(item => 
-          item.id === action.payload.id 
-            ? { ...item, notes: action.payload.notes }
-            : item
-        ),
         notes: {
           ...state.notes,
           [action.payload.id]: action.payload.notes,
@@ -415,16 +410,12 @@ export default function App() {
 
   const handleUpdateItem = async (id: string, updates: Partial<LearningItem>) => {
     try {
-      console.log('handleUpdateItem called with:', { id, updates });
       const item = state.items.find(item => item.id === id);
-      if (!item) {
-        console.log('Item not found:', id);
-        return;
-      }
+      if (!item) return;
 
       // If marking as completed
       if (updates.completed && !item.completed) {
-        updates.completed_at = new Date().toISOString();
+        updates.completed_at = new Date('2025-01-03T11:07:05+01:00').toISOString();
         updates.status = 'completed' as const;
         
         // Track learning activity when completing an item
@@ -434,12 +425,9 @@ export default function App() {
       }
 
       // Update local state first for immediate feedback
-      console.log('Dispatching UPDATE_ITEM action:', { id, updates });
       dispatch({ type: 'UPDATE_ITEM', payload: { id, updates } });
 
-      console.log('Calling updateLearningItem with:', { id, updates });
       const updatedItem = await updateLearningItem(id, updates);
-      console.log('updateLearningItem result:', updatedItem);
       setError(null);
     } catch (error) {
       console.error('Error updating item:', error);
@@ -562,26 +550,8 @@ export default function App() {
     }
   };
 
-  const handleUpdateNotes = async (id: string, notes: string) => {
-    try {
-      const item = state.items.find(item => item.id === id);
-      if (!item) return;
-
-      // Update local state first for immediate feedback
-      dispatch({ type: 'UPDATE_ITEM', payload: { id, updates: { notes } } });
-
-      // Update the database
-      const updatedItem = await updateLearningItem(id, { notes });
-      setError(null);
-    } catch (error) {
-      console.error('Error updating notes:', error);
-      setError('Failed to update notes. Please try again.');
-      // Revert the local state change on error
-      const item = state.items.find(item => item.id === id);
-      if (item) {
-        dispatch({ type: 'UPDATE_ITEM', payload: { id, updates: { notes: item.notes } } });
-      }
-    }
+  const handleUpdateNotes = (id: string, notes: string) => {
+    dispatch({ type: 'UPDATE_NOTES', payload: { id, notes } });
   };
 
   const handleAddSessionNote = (id: string, note: string) => {

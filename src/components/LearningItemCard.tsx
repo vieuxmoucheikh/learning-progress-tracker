@@ -41,7 +41,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { updateLearningItem } from '../lib/database';
 
 interface Props {
   item: LearningItem;
@@ -90,7 +89,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(item.title);
   const [editedNotes, setEditedNotes] = useState(item.notes || '');
-  const [isNotesEditing, setIsNotesEditing] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [sessionNote, setSessionNote] = useState('');
   const [showNoteDialog, setShowNoteDialog] = useState(false);
@@ -327,39 +325,16 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     setShowNoteDialog(false);
   }, [item.id, item.progress, sessionNote, onSessionNoteAdd, onUpdate, activeSession]);
 
-  const handleSaveNotes = async () => {
-    try {
-      console.log('Saving notes for item:', item.id, editedNotes.trim());
-      
-      // Update directly in the database
-      const result = await updateLearningItem(item.id, { notes: editedNotes.trim() });
-      console.log('Update result:', result);
-      
-      // Also update via the onUpdate prop for UI consistency
-      onUpdate(item.id, { notes: editedNotes.trim() });
-      
-      setIsNotesEditing(false);
-    } catch (error) {
-      console.error('Error saving notes:', error);
-    }
+  const handleSaveNotes = () => {
+    onNotesUpdate(item.id, editedNotes);
+    setIsEditing(false);
   };
 
-  const handleTitleSave = async () => {
-    try {
-      if (editedTitle.trim() !== item.title) {
-        console.log('Saving title for item:', item.id, editedTitle.trim());
-        
-        // Update directly in the database
-        const result = await updateLearningItem(item.id, { title: editedTitle.trim() });
-        console.log('Title update result:', result);
-        
-        // Also update via the onUpdate prop for UI consistency
-        onUpdate(item.id, { title: editedTitle.trim() });
-      }
-      setIsEditing(false);
-    } catch (error) {
-      console.error('Error saving title:', error);
+  const handleTitleSave = () => {
+    if (editedTitle.trim() !== item.title) {
+      onUpdate(item.id, { title: editedTitle.trim() });
     }
+    setIsEditing(false);
   };
 
   const handleDeleteClick = () => {
@@ -381,7 +356,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     setShowHistory(false);
     setShowNoteDialog(false);
     setIsEditing(false);
-    setIsNotesEditing(false);
     setShowDeleteDialog(false);
     
     // Finally delete the item
@@ -688,51 +662,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                         "overflow-hidden"
                       )}>
                         <div className="max-w-full">
-                          {isNotesEditing ? (
-                            <div className="space-y-3">
-                              <Textarea
-                                value={editedNotes}
-                                onChange={(e) => setEditedNotes(e.target.value)}
-                                placeholder="Add notes about this learning item..."
-                                className="min-h-[120px] resize-none bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                              />
-                              <div className="flex justify-end gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={handleSaveNotes}
-                                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                >
-                                  <Save className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setIsNotesEditing(false);
-                                    setEditedNotes(item.notes || '');
-                                  }}
-                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="flex justify-between items-start group">
-                              <p className="text-gray-700 break-words whitespace-pre-line overflow-hidden">
-                                {item.notes}
-                              </p>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setIsNotesEditing(true)}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50 ml-2"
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          )}
+                          <p className="text-gray-700 break-words whitespace-pre-line overflow-hidden">
+                            {item.notes}
+                          </p>
                         </div>
                       </li>
                     )}
@@ -1193,20 +1125,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           </DialogContent>
         </Dialog>
       </Card>
-
-      {isNotesEditing && (
-        <div className="mt-2 flex justify-end">
-          <Button
-            variant="default"
-            size="sm"
-            onClick={handleSaveNotes}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <Save className="h-4 w-4 mr-2" />
-            Save Changes
-          </Button>
-        </div>
-      )}
     </div>
   );
 };

@@ -101,24 +101,16 @@ export async function addLearningItem(item: LearningItemFormData): Promise<Learn
 
 export async function updateLearningItem(id: string, updates: Partial<LearningItem>) {
   try {
-    console.log('updateLearningItem function called with:', { id, updates });
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      console.log('No user found, returning null');
-      return null;
-    }
+    if (!user) return null;
 
-    console.log('User authenticated, proceeding with update');
-    console.log('Update payload:', { 
-      ...updates, 
-      updated_at: new Date().toISOString() 
-    });
+    console.log('Updating learning item:', { id, updates });
 
     const { data, error } = await supabase
       .from('learning_items')
       .update({
         ...updates,
-        updated_at: new Date().toISOString()
+        updated_at: new Date('2025-01-02T23:38:16+01:00').toISOString()
       })
       .eq('id', id)
       .select()
@@ -126,7 +118,6 @@ export async function updateLearningItem(id: string, updates: Partial<LearningIt
 
     if (error) {
       console.error('Error updating learning item:', error);
-      console.error('Error details:', error.message, error.details);
       return null;
     }
 
