@@ -89,6 +89,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(item.title);
   const [editedNotes, setEditedNotes] = useState(item.notes || '');
+  const [isNotesEditing, setIsNotesEditing] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [sessionNote, setSessionNote] = useState('');
   const [showNoteDialog, setShowNoteDialog] = useState(false);
@@ -327,7 +328,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
   const handleSaveNotes = () => {
     onNotesUpdate(item.id, editedNotes);
-    setIsEditing(false);
+    setIsNotesEditing(false);
   };
 
   const handleTitleSave = () => {
@@ -356,6 +357,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     setShowHistory(false);
     setShowNoteDialog(false);
     setIsEditing(false);
+    setIsNotesEditing(false);
     setShowDeleteDialog(false);
     
     // Finally delete the item
@@ -662,9 +664,51 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                         "overflow-hidden"
                       )}>
                         <div className="max-w-full">
-                          <p className="text-gray-700 break-words whitespace-pre-line overflow-hidden">
-                            {item.notes}
-                          </p>
+                          {isNotesEditing ? (
+                            <div className="space-y-3">
+                              <Textarea
+                                value={editedNotes}
+                                onChange={(e) => setEditedNotes(e.target.value)}
+                                placeholder="Add notes about this learning item..."
+                                className="min-h-[120px] resize-none bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                              />
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={handleSaveNotes}
+                                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                >
+                                  <Save className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setIsNotesEditing(false);
+                                    setEditedNotes(item.notes || '');
+                                  }}
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex justify-between items-start group">
+                              <p className="text-gray-700 break-words whitespace-pre-line overflow-hidden">
+                                {item.notes}
+                              </p>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setIsNotesEditing(true)}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50 ml-2"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </li>
                     )}

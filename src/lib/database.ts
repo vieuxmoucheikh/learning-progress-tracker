@@ -110,7 +110,7 @@ export async function updateLearningItem(id: string, updates: Partial<LearningIt
       .from('learning_items')
       .update({
         ...updates,
-        updated_at: new Date('2025-01-02T23:38:16+01:00').toISOString()
+        updated_at: new Date().toISOString()
       })
       .eq('id', id)
       .select()

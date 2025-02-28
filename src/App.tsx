@@ -415,7 +415,7 @@ export default function App() {
 
       // If marking as completed
       if (updates.completed && !item.completed) {
-        updates.completed_at = new Date('2025-01-03T11:07:05+01:00').toISOString();
+        updates.completed_at = new Date().toISOString();
         updates.status = 'completed' as const;
         
         // Track learning activity when completing an item
@@ -550,7 +550,10 @@ export default function App() {
     }
   };
 
-  const handleUpdateNotes = (id: string, notes: string) => {
+  const handleUpdateNotes = async (id: string, notes: string) => {
+    // Update the database
+    await updateLearningItem(id, { notes });
+    // Update the local state
     dispatch({ type: 'UPDATE_NOTES', payload: { id, notes } });
   };
 
