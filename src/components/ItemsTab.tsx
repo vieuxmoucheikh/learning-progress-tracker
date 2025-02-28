@@ -50,6 +50,23 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
     priority: 'medium' as const,
   });
 
+  // Extract unique categories from items
+  const categoryOptions = useMemo(() => {
+    const categories = items
+      .map(item => item.category)
+      .filter((category): category is string => !!category); // Filter out undefined/null
+    
+    const uniqueCategories = Array.from(new Set(categories)).sort();
+    
+    return [
+      { value: 'all', label: 'All Categories' },
+      ...uniqueCategories.map(category => ({
+        value: category,
+        label: category.charAt(0).toUpperCase() + category.slice(1) // Capitalize first letter
+      }))
+    ];
+  }, [items]);
+
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
       const matchesSearch =
@@ -169,15 +186,7 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
           <CustomSelect
             value={selectedCategoryFilter}
             onValueChange={setSelectedCategoryFilter}
-            items={[
-              { value: 'all', label: 'All Categories' },
-              { value: 'programming', label: 'Programming' },
-              { value: 'design', label: 'Design' },
-              { value: 'business', label: 'Business' },
-              { value: 'marketing', label: 'Marketing' },
-              { value: 'personal', label: 'Personal' },
-              { value: 'other', label: 'Other' }
-            ]}
+            items={categoryOptions}
           />
         </div>
       </div>
