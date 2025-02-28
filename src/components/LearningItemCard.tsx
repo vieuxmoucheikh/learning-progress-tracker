@@ -1070,7 +1070,15 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 >
                   Cancel
                 </Button>
-               
+                <Button
+                  variant="default"
+                  onClick={handleEditNote}
+                  className="px-4 bg-blue-600 hover:bg-blue-700 text-white gap-2"
+                  disabled={!editingNote?.content.trim()}
+                >
+                  <Pencil className="h-4 w-4" />
+                  Save Changes
+                </Button>
               </div>
             </div>
           </DialogContent>
