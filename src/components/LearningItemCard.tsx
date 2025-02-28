@@ -1077,7 +1077,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                   disabled={!editingNote?.content.trim()}
                 >
                   <Pencil className="h-4 w-4" />
-                  Save Changes
+                  Update Note
                 </Button>
               </div>
             </div>
