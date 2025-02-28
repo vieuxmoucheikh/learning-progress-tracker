@@ -327,7 +327,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   }, [item.id, item.progress, sessionNote, onSessionNoteAdd, onUpdate, activeSession]);
 
   const handleSaveNotes = () => {
-    onNotesUpdate(item.id, editedNotes);
+    onUpdate(item.id, { notes: editedNotes.trim() });
     setIsNotesEditing(false);
   };
 
@@ -1169,6 +1169,23 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           </DialogContent>
         </Dialog>
       </Card>
+
+      {isNotesEditing && (
+        <div className="mt-2 flex justify-end">
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => {
+              onUpdate(item.id, { notes: editedNotes.trim() });
+              setIsNotesEditing(false);
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            Save Changes
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
