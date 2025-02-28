@@ -215,6 +215,11 @@ function reducer(state: State, action: Action): State {
     case 'UPDATE_NOTES':
       return {
         ...state,
+        items: state.items.map(item => 
+          item.id === action.payload.id 
+            ? { ...item, notes: action.payload.notes }
+            : item
+        ),
         notes: {
           ...state.notes,
           [action.payload.id]: action.payload.notes,
@@ -551,10 +556,25 @@ export default function App() {
   };
 
   const handleUpdateNotes = async (id: string, notes: string) => {
-    // Update the database
-    await updateLearningItem(id, { notes });
-    // Update the local state
-    dispatch({ type: 'UPDATE_NOTES', payload: { id, notes } });
+    try {
+      const item = state.items.find(item => item.id === id);
+      if (!item) return;
+
+      // Update local state first for immediate feedback
+      dispatch({ type: 'UPDATE_ITEM', payload: { id, updates: { notes } } });
+
+      // Update the database
+      const updatedItem = await updateLearningItem(id, { notes });
+      setError(null);
+    } catch (error) {
+      console.error('Error updating notes:', error);
+      setError('Failed to update notes. Please try again.');
+      // Revert the local state change on error
+      const item = state.items.find(item => item.id === id);
+      if (item) {
+        dispatch({ type: 'UPDATE_ITEM', payload: { id, updates: { notes: item.notes } } });
+      }
+    }
   };
 
   const handleAddSessionNote = (id: string, note: string) => {
