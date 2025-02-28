@@ -613,12 +613,16 @@ export default function App() {
           <header className="mb-8 relative">
             <div className="flex items-center justify-between mb-2">
               <div className="flex-1"></div>
-              <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 flex-grow text-center">Learning Progress Tracker</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex-grow text-center">
+                <span className="bg-gradient-to-r from-blue-700 to-indigo-800 dark:from-blue-500 dark:to-indigo-400 bg-clip-text text-transparent">
+                  Learning Progress Tracker
+                </span>
+              </h1>
               <div className="flex-1 flex justify-end">
                 <ThemeToggle />
               </div>
             </div>
-            <p className="text-gray-600 dark:text-gray-400 text-center">Track your learning journey and stay motivated</p>
+            <p className="text-gray-700 dark:text-gray-400 text-center">Track your learning journey and stay motivated</p>
           </header>
 
           <TabNavigation activeTab={selectedTab} onTabChange={setSelectedTab} />

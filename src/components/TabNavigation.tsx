@@ -116,7 +116,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
                 ref={isActive ? activeTabRef : null}
                 onClick={() => onTabChange(tab.id)}
                 className={cn(
-                  "flex-shrink-0 text-sm font-medium py-2.5 px-3 sm:px-4 flex items-center justify-center gap-1.5 sm:gap-2 transition-all min-w-[72px] sm:min-w-[90px] rounded-lg mx-0.5",
+                  "flex-shrink-0 text-sm font-medium py-2.5 px-3 sm:px-4 flex items-center justify-center gap-1.5 sm:gap-2 transition-all min-w-[72px] sm:min-w-[90px] rounded-lg mx-0.5 relative",
                   isActive
                     ? "bg-white/15 text-white shadow-sm backdrop-blur-sm"
                     : "text-white/80 hover:text-white hover:bg-white/10 dark:text-white/70 dark:hover:text-white"
@@ -127,6 +127,9 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
                   isActive ? "text-white dark:text-white" : "text-white/80 dark:text-white/70"
                 )} />
                 <span className="whitespace-nowrap">{tab.shortLabel}</span>
+                {isActive && (
+                  <span className="absolute bottom-1 left-3 right-3 h-0.5 bg-white rounded-full"></span>
+                )}
               </button>
             );
           })}
