@@ -300,8 +300,10 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
     editable: isEditing,
     onUpdate: ({ editor }) => {
       const newContent = editor.getHTML();
-      setLocalContent(newContent);
-      onChange(newContent);
+      if (newContent !== localContent) {
+        setLocalContent(newContent);
+        onChange(newContent);
+      }
     },
     editorProps: {
       attributes: {
