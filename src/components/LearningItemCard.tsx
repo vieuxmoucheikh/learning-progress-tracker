@@ -1073,13 +1073,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 <Button
                   variant="default"
                   onClick={handleEditNote}
-                  className="px-4 bg-blue-600 hoveronUpdate: ({ editor }) => {
-                    const newContent = editor.getHTML();
-                    if (newContent !== localContent) {
-                      setLocalContent(newContent);
-                      onChange(newContent);  // This line was missing
-                    }
-                  },:bg-blue-700 text-white gap-2"
+                  className="px-4 bg-blue-600 hover:bg-blue-700 text-white gap-2"
                   disabled={!editingNote?.content.trim()}
                 >
                   <Pencil className="h-4 w-4" />

@@ -460,7 +460,13 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsEditing(!isEditing)}
+                onClick={() => {
+                  if (isEditing) {
+                    handleSave();
+                  } else {
+                    setIsEditing(true);
+                  }
+                }}
                 className="h-9 w-9 hover:bg-blue-100 rounded-lg"
                 title={isEditing ? "Save changes" : "Edit card"}
               >
