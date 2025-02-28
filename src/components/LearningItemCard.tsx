@@ -41,6 +41,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { updateLearningItem } from '../lib/database';
 
 interface Props {
   item: LearningItem;
@@ -326,16 +327,39 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     setShowNoteDialog(false);
   }, [item.id, item.progress, sessionNote, onSessionNoteAdd, onUpdate, activeSession]);
 
-  const handleSaveNotes = () => {
-    onUpdate(item.id, { notes: editedNotes.trim() });
-    setIsNotesEditing(false);
+  const handleSaveNotes = async () => {
+    try {
+      console.log('Saving notes for item:', item.id, editedNotes.trim());
+      
+      // Update directly in the database
+      const result = await updateLearningItem(item.id, { notes: editedNotes.trim() });
+      console.log('Update result:', result);
+      
+      // Also update via the onUpdate prop for UI consistency
+      onUpdate(item.id, { notes: editedNotes.trim() });
+      
+      setIsNotesEditing(false);
+    } catch (error) {
+      console.error('Error saving notes:', error);
+    }
   };
 
-  const handleTitleSave = () => {
-    if (editedTitle.trim() !== item.title) {
-      onUpdate(item.id, { title: editedTitle.trim() });
+  const handleTitleSave = async () => {
+    try {
+      if (editedTitle.trim() !== item.title) {
+        console.log('Saving title for item:', item.id, editedTitle.trim());
+        
+        // Update directly in the database
+        const result = await updateLearningItem(item.id, { title: editedTitle.trim() });
+        console.log('Title update result:', result);
+        
+        // Also update via the onUpdate prop for UI consistency
+        onUpdate(item.id, { title: editedTitle.trim() });
+      }
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving title:', error);
     }
-    setIsEditing(false);
   };
 
   const handleDeleteClick = () => {
@@ -1175,10 +1199,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           <Button
             variant="default"
             size="sm"
-            onClick={() => {
-              onUpdate(item.id, { notes: editedNotes.trim() });
-              setIsNotesEditing(false);
-            }}
+            onClick={handleSaveNotes}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             <Save className="h-4 w-4 mr-2" />

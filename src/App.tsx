@@ -415,8 +415,12 @@ export default function App() {
 
   const handleUpdateItem = async (id: string, updates: Partial<LearningItem>) => {
     try {
+      console.log('handleUpdateItem called with:', { id, updates });
       const item = state.items.find(item => item.id === id);
-      if (!item) return;
+      if (!item) {
+        console.log('Item not found:', id);
+        return;
+      }
 
       // If marking as completed
       if (updates.completed && !item.completed) {
@@ -430,9 +434,12 @@ export default function App() {
       }
 
       // Update local state first for immediate feedback
+      console.log('Dispatching UPDATE_ITEM action:', { id, updates });
       dispatch({ type: 'UPDATE_ITEM', payload: { id, updates } });
 
+      console.log('Calling updateLearningItem with:', { id, updates });
       const updatedItem = await updateLearningItem(id, updates);
+      console.log('updateLearningItem result:', updatedItem);
       setError(null);
     } catch (error) {
       console.error('Error updating item:', error);
