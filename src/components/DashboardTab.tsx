@@ -125,47 +125,33 @@ export function DashboardTab({
           }
           
           // For active sessions (no endTime) that started on the selected date
-          if (sessionDate === dateStr && !session.endTime) {
-            // Check if the session is paused
-            const isPaused = !!localStorage.getItem(`sessionPauseTime_${item.id}`);
-            
-            if (session.status === 'on_hold' || isPaused) {
-              // For paused sessions, use the saved elapsed time
-              const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${item.id}`);
-              if (savedElapsedTimeStr) {
-                const savedElapsedTime = parseInt(savedElapsedTimeStr, 10);
-                if (!isNaN(savedElapsedTime)) {
-                  // Convert seconds to minutes (round down to avoid jumping)
-                  dailyTimeSpent += Math.floor(savedElapsedTime / 60);
-                }
-              }
-            } else {
-              // For active, non-paused sessions
-              try {
+          if (sessionDate === dateStr && !session.endTime && session.status !== 'on_hold') {
+            try {
+              // Check if this session is paused
+              const isPaused = !!localStorage.getItem(`sessionPauseTime_${item.id}`);
+              
+              // Only calculate active time if the session is not paused
+              if (!isPaused) {
                 const startTime = new Date(session.startTime);
-                if (!isNaN(startTime.getTime())) {
+                if (!isNaN(startTime.getTime())) {  // Check if startTime is valid
                   const now = new Date();
-                  
-                  // Check if we have a saved elapsed time (from a previous pause)
-                  const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${item.id}`);
-                  let adjustedStartTime = startTime;
-                  
-                  if (savedElapsedTimeStr) {
-                    const savedElapsedTime = parseInt(savedElapsedTimeStr, 10);
-                    if (!isNaN(savedElapsedTime)) {
-                      // Adjust the start time based on the saved elapsed time
-                      adjustedStartTime = new Date(now.getTime() - (savedElapsedTime * 1000));
-                    }
-                  }
-                  
-                  const activeMinutes = Math.floor((now.getTime() - adjustedStartTime.getTime()) / (1000 * 60));
-                  if (activeMinutes > 0) {
+                  const activeMinutes = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
+                  if (activeMinutes > 0) {  // Ensure we don't add negative time
                     dailyTimeSpent += activeMinutes;
                   }
                 }
-              } catch (error) {
-                console.error('Error calculating active session time:', error);
+              } else {
+                // If the session is paused, use the saved elapsed time
+                const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${item.id}`);
+                if (savedElapsedTimeStr) {
+                  const savedElapsedSeconds = parseInt(savedElapsedTimeStr, 10);
+                  if (!isNaN(savedElapsedSeconds)) {
+                    dailyTimeSpent += Math.floor(savedElapsedSeconds / 60);
+                  }
+                }
               }
+            } catch (error) {
+              console.error('Error calculating active session time:', error);
             }
           }
         });
