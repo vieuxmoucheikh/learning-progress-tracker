@@ -100,12 +100,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [editedMinutes, setEditedMinutes] = useState(calculateTotalTimeSpent(item));
 
   const activeSession = item.progress?.sessions?.find(session => !session.endTime);
-  const isPaused = activeSession?.status === 'on_hold';
   const { elapsedTime, formatElapsedTime, lastUpdateTime, isValidSession } = useSessionTimer({
     isActive: !!activeSession,
     startTime: activeSession?.startTime || null,
-    itemId: item.id,
-    isPaused: isPaused
+    itemId: item.id
   });
 
   // Handle session persistence and cleanup
@@ -227,10 +225,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     const pausedSession = item.progress.sessions.find(s => s.status === 'on_hold' && !s.endTime);
     if (!pausedSession) return;
 
-    // Get the accumulated time from localStorage
-    const accumulatedTime = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
-    
-    // Clean up pause time marker
+    // Clean up any existing active session in localStorage
+    localStorage.removeItem(`activeSession_${item.id}`);
+    localStorage.removeItem(`sessionLastUpdate_${item.id}`);
     localStorage.removeItem(`sessionPauseTime_${item.id}`);
 
     // Update the session status
@@ -268,15 +265,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     const updatedSessions = item.progress.sessions.map(s => {
       if (!s.endTime) {
         const startTime = new Date(s.startTime);
-        
-        // Calculate duration including accumulated time
-        let diffInMinutes = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
-        
-        // Add accumulated time if exists (convert from seconds to minutes)
-        const accumulatedTime = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
-        if (accumulatedTime) {
-          diffInMinutes += Math.floor(parseInt(accumulatedTime, 10) / 60);
-        }
+        const diffInMinutes = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
         
         return {
           ...s,
@@ -295,7 +284,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     localStorage.removeItem(`activeSession_${item.id}`);
     localStorage.removeItem(`sessionLastUpdate_${item.id}`);
     localStorage.removeItem(`sessionPauseTime_${item.id}`);
-    localStorage.removeItem(`sessionAccumulatedTime_${item.id}`);
 
     // Stop tracking before updating the sessions
     onStopTracking(item.id);
@@ -358,7 +346,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     localStorage.removeItem(`activeSession_${item.id}`);
     localStorage.removeItem(`sessionLastUpdate_${item.id}`);
     localStorage.removeItem(`sessionPauseTime_${item.id}`);
-    localStorage.removeItem(`sessionAccumulatedTime_${item.id}`);
     
     // Stop tracking if item is being tracked
     if (activeSession) {
