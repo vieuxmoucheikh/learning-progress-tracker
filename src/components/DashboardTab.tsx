@@ -135,7 +135,21 @@ export function DashboardTab({
                 const startTime = new Date(session.startTime);
                 if (!isNaN(startTime.getTime())) {  // Check if startTime is valid
                   const now = new Date();
-                  const activeMinutes = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
+                  
+                  // Check if we have a saved elapsed time (from a previous pause)
+                  const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${item.id}`);
+                  let adjustedStartTime = startTime;
+                  
+                  if (savedElapsedTimeStr) {
+                    const savedElapsedTime = parseInt(savedElapsedTimeStr, 10);
+                    if (!isNaN(savedElapsedTime)) {
+                      // Adjust the start time based on the saved elapsed time
+                      // This prevents the "jump" when resuming
+                      adjustedStartTime = new Date(now.getTime() - (savedElapsedTime * 1000));
+                    }
+                  }
+                  
+                  const activeMinutes = Math.floor((now.getTime() - adjustedStartTime.getTime()) / (1000 * 60));
                   if (activeMinutes > 0) {  // Ensure we don't add negative time
                     dailyTimeSpent += activeMinutes;
                   }

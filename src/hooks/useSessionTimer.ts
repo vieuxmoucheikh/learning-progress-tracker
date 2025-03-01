@@ -10,6 +10,7 @@ export function useSessionTimer({ isActive, startTime, itemId }: SessionTimerPro
   const [elapsedTime, setElapsedTime] = useState(0);
   const [lastUpdateTime, setLastUpdateTime] = useState<number | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const wasActiveRef = useRef<boolean>(false);
   
   // Check if there's a paused session
   const isPaused = useCallback(() => {
@@ -36,6 +37,57 @@ export function useSessionTimer({ isActive, startTime, itemId }: SessionTimerPro
       }
     }
   }, [itemId]);
+
+  // Handle page visibility changes
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && wasActiveRef.current && isActive) {
+        // Page is visible again and the session was active before
+        // Update the timer to account for the time the page was hidden
+        const lastVisibleTimeStr = localStorage.getItem(`sessionLastVisibleTime_${itemId}`);
+        if (lastVisibleTimeStr) {
+          const lastVisibleTime = parseInt(lastVisibleTimeStr, 10);
+          const now = Date.now();
+          
+          // If the page was hidden for more than 5 seconds
+          if (now - lastVisibleTime > 5000) {
+            // Restart the timer with the adjusted time
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
+            }
+            
+            // Start the timer again
+            const updateElapsedTime = () => {
+              const currentTime = Date.now();
+              const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${itemId}`);
+              const baseElapsedTime = savedElapsedTimeStr ? parseInt(savedElapsedTimeStr, 10) : elapsedTime;
+              
+              setElapsedTime(baseElapsedTime + Math.floor((currentTime - now) / 1000));
+              setLastUpdateTime(currentTime);
+            };
+            
+            // Initial update
+            updateElapsedTime();
+            
+            // Start interval
+            intervalRef.current = setInterval(updateElapsedTime, 1000);
+          }
+        }
+      }
+    };
+    
+    // Add event listener
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Update wasActiveRef
+    wasActiveRef.current = isActive && !isPaused();
+    
+    // Clean up
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isActive, itemId, isPaused, elapsedTime]);
 
   // Start or stop the timer based on active status and pause state
   useEffect(() => {
@@ -91,6 +143,9 @@ export function useSessionTimer({ isActive, startTime, itemId }: SessionTimerPro
       
       // Start interval
       intervalRef.current = setInterval(updateElapsedTime, 1000);
+      
+      // Update wasActiveRef
+      wasActiveRef.current = true;
     } 
     // If we're completely stopped, reset everything
     else if (!isActive && !startTime) {
@@ -98,6 +153,9 @@ export function useSessionTimer({ isActive, startTime, itemId }: SessionTimerPro
       setLastUpdateTime(null);
       localStorage.removeItem(`sessionLastUpdate_${itemId}`);
       localStorage.removeItem(`sessionPauseElapsedTime_${itemId}`);
+      
+      // Update wasActiveRef
+      wasActiveRef.current = false;
     }
 
     // Clean up on unmount or when dependencies change

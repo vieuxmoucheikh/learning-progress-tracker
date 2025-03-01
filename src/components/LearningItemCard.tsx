@@ -169,11 +169,48 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       }
     }
     
+    // Add page visibility change listener
+    const handleVisibilityChange = () => {
+      // Only handle visibility changes if we have an active session that's not already paused
+      if (activeSession && activeSession.status !== 'on_hold' && !isPausedSession) {
+        if (document.visibilityState === 'hidden') {
+          // Page is hidden - store the current state but don't pause
+          localStorage.setItem(`sessionLastVisibleTime_${item.id}`, Date.now().toString());
+        } else if (document.visibilityState === 'visible') {
+          // Page is visible again - check if we need to update the timer
+          const lastVisibleTimeStr = localStorage.getItem(`sessionLastVisibleTime_${item.id}`);
+          if (lastVisibleTimeStr) {
+            const lastVisibleTime = parseInt(lastVisibleTimeStr, 10);
+            const now = Date.now();
+            
+            // If the page was hidden for more than 5 seconds, update the elapsed time
+            if (now - lastVisibleTime > 5000) {
+              // Update the elapsed time to account for the time the page was hidden
+              const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${item.id}`);
+              const currentElapsedTime = savedElapsedTimeStr ? 
+                parseInt(savedElapsedTimeStr, 10) : elapsedTime;
+              
+              // Store the updated elapsed time
+              localStorage.setItem(`sessionPauseElapsedTime_${item.id}`, 
+                (currentElapsedTime + Math.floor((now - lastVisibleTime) / 1000)).toString());
+            }
+            
+            // Clean up
+            localStorage.removeItem(`sessionLastVisibleTime_${item.id}`);
+          }
+        }
+      }
+    };
+    
+    // Add event listener
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
     // Cleanup on unmount
     return () => {
       // Don't clean up localStorage here, as it might be needed for persistence
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [item.id, item.progress, onUpdate, onStartTracking, onSetActiveItem]);
+  }, [item.id, item.progress, onUpdate, onStartTracking, onSetActiveItem, activeSession, elapsedTime, isPausedSession]);
 
   // Handle session start
   const handleStartSession = useCallback(() => {
