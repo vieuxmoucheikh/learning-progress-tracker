@@ -194,9 +194,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const handlePauseSession = useCallback(() => {
     if (!activeSession || !item.progress?.sessions) return;
 
-    // Store pause time in localStorage
-    localStorage.setItem(`sessionPauseTime_${item.id}`, Date.now().toString());
-
     // Update the current session to paused state
     const updatedSessions = item.progress.sessions.map(s => 
       s.startTime === activeSession.startTime ? {
@@ -216,6 +213,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         sessions: updatedSessions
       }
     });
+
+    // Important: We no longer need to manually set pauseTime as useSessionTimer hook handles that
   }, [item, activeSession, onUpdate, onStopTracking]);
 
   // Handle session resume
@@ -224,11 +223,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
     const pausedSession = item.progress.sessions.find(s => s.status === 'on_hold' && !s.endTime);
     if (!pausedSession) return;
-
-    // Clean up any existing active session in localStorage
-    localStorage.removeItem(`activeSession_${item.id}`);
-    localStorage.removeItem(`sessionLastUpdate_${item.id}`);
-    localStorage.removeItem(`sessionPauseTime_${item.id}`);
 
     // Update the session status
     const updatedSessions = item.progress.sessions.map(s => 
@@ -249,6 +243,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
     // Then start tracking
     onStartTracking(item.id);
+    
+    // The useSessionTimer hook will handle resuming the timer from where it was paused
   }, [item, onUpdate, onStartTracking]);
 
   // Handle session stop
