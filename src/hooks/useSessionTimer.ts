@@ -4,34 +4,18 @@ interface SessionTimerProps {
   isActive: boolean;
   startTime: string | null;
   itemId: string; 
-  isPaused?: boolean; // Add isPaused prop to control pause state
+  isPaused?: boolean; // New parameter to control pause state
 }
 
 export function useSessionTimer({ isActive, startTime, itemId, isPaused = false }: SessionTimerProps) {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [lastUpdateTime, setLastUpdateTime] = useState<number | null>(null);
-  // Store accumulated time for pause/resume functionality
-  const [accumulatedTime, setAccumulatedTime] = useState<number>(0);
-  // Use refs to track visibility state and interval
-  const visibilityRef = useRef<boolean>(true);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Load any saved state from localStorage
-  useEffect(() => {
-    if (isActive && startTime) {
-      // Load accumulated time if it exists (for resuming paused sessions)
-      const savedAccumulatedTime = localStorage.getItem(`sessionAccumulatedTime_${itemId}`);
-      if (savedAccumulatedTime) {
-        setAccumulatedTime(parseInt(savedAccumulatedTime, 10));
-      }
-      
-      // Load last elapsed time if it exists
-      const savedElapsedTime = localStorage.getItem(`sessionElapsedTime_${itemId}`);
-      if (savedElapsedTime) {
-        setElapsedTime(parseInt(savedElapsedTime, 10));
-      }
-    }
-  }, [isActive, startTime, itemId]);
+  
+  // Use refs to maintain state across renders and visibility changes
+  const accumulatedTimeRef = useRef(0);
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number | null>(null);
+  const isVisibleRef = useRef(true);
 
   const validateSession = useCallback(() => {
     if (!startTime) return false;
@@ -46,84 +30,155 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
   useEffect(() => {
     const handleVisibilityChange = () => {
       const isVisible = document.visibilityState === 'visible';
-      visibilityRef.current = isVisible;
+      isVisibleRef.current = isVisible;
       
-      if (isActive && !isPaused && isVisible && validateSession()) {
-        // Page is visible again - sync our timer with real elapsed time
-        updateTimerState();
+      if (isActive && !isPaused) {
+        if (isVisible) {
+          // Page is visible again, sync the timer state
+          const storedLastUpdate = localStorage.getItem(`sessionLastUpdate_${itemId}`);
+          const pauseTime = localStorage.getItem(`sessionPauseTime_${itemId}`);
+          
+          if (storedLastUpdate) {
+            const lastUpdate = parseInt(storedLastUpdate, 10);
+            const now = Date.now();
+            
+            // If we were paused, don't accumulate time
+            if (!pauseTime) {
+              // Calculate time passed while page was hidden
+              const timeDiff = Math.floor((now - lastUpdate) / 1000);
+              
+              // Update accumulated time
+              accumulatedTimeRef.current += timeDiff;
+              
+              // Update localStorage with new accumulated time
+              localStorage.setItem(`sessionAccumulatedTime_${itemId}`, accumulatedTimeRef.current.toString());
+            }
+          }
+          
+          // Restart the timer
+          startTimeTracking();
+        } else {
+          // Page is hidden, pause the interval but keep tracking time
+          if (timerIntervalRef.current) {
+            clearInterval(timerIntervalRef.current);
+            timerIntervalRef.current = null;
+          }
+          
+          // Store the current time as the last update
+          const now = Date.now();
+          localStorage.setItem(`sessionLastUpdate_${itemId}`, now.toString());
+        }
       }
     };
 
+    // Add event listener for visibility changes
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isActive, isPaused, validateSession]);
+  }, [isActive, itemId, isPaused]);
 
-  // Calculate and update the timer state
-  const updateTimerState = useCallback(() => {
-    if (!startTime) return;
+  // Start time tracking function
+  const startTimeTracking = useCallback(() => {
+    // Clear any existing interval
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+    
+    if (!startTime || !isActive || isPaused) return;
+    
+    // Get accumulated time from localStorage if it exists
+    const storedAccumulatedTime = localStorage.getItem(`sessionAccumulatedTime_${itemId}`);
+    if (storedAccumulatedTime) {
+      accumulatedTimeRef.current = parseInt(storedAccumulatedTime, 10);
+    }
     
     const start = new Date(startTime).getTime();
-    const now = Date.now();
+    startTimeRef.current = start;
     
-    // If paused, we use the accumulated time which doesn't change
-    // If active, we calculate current elapsed time and add accumulated time
-    const elapsed = isPaused 
-      ? accumulatedTime 
-      : Math.floor((now - start) / 1000) + accumulatedTime;
+    const updateElapsedTime = () => {
+      const now = Date.now();
+      const baseElapsed = Math.floor((now - start) / 1000);
+      const totalElapsed = baseElapsed + accumulatedTimeRef.current;
       
-    setElapsedTime(elapsed);
-    setLastUpdateTime(now);
-    
-    // Store current state in localStorage for recovery
-    localStorage.setItem(`sessionLastUpdate_${itemId}`, now.toString());
-    localStorage.setItem(`sessionElapsedTime_${itemId}`, elapsed.toString());
-    localStorage.setItem(`sessionAccumulatedTime_${itemId}`, accumulatedTime.toString());
-  }, [startTime, isPaused, accumulatedTime, itemId]);
+      setElapsedTime(totalElapsed);
+      setLastUpdateTime(now);
+      
+      localStorage.setItem(`sessionLastUpdate_${itemId}`, now.toString());
+    };
 
-  // Save accumulated time when pausing
+    updateElapsedTime(); 
+    timerIntervalRef.current = setInterval(updateElapsedTime, 1000);
+  }, [isActive, startTime, itemId, isPaused]);
+
+  // Handle pausing the timer
   useEffect(() => {
-    if (isActive && startTime && isPaused && lastUpdateTime) {
-      // When pausing, save the current accumulated time
-      const start = new Date(startTime).getTime();
-      const elapsed = Math.floor((lastUpdateTime - start) / 1000) + accumulatedTime;
-      setAccumulatedTime(elapsed);
-      localStorage.setItem(`sessionAccumulatedTime_${itemId}`, elapsed.toString());
+    if (isPaused) {
+      // If we're pausing, store the current time
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
+      
+      // Store pause time in localStorage
+      const now = Date.now();
+      localStorage.setItem(`sessionPauseTime_${itemId}`, now.toString());
+      
+      // Calculate and store accumulated time
+      if (startTimeRef.current) {
+        const additionalTime = Math.floor((now - startTimeRef.current) / 1000);
+        accumulatedTimeRef.current += additionalTime;
+        localStorage.setItem(`sessionAccumulatedTime_${itemId}`, accumulatedTimeRef.current.toString());
+      }
+    } else if (isActive) {
+      // If we're resuming, clear pause time
+      localStorage.removeItem(`sessionPauseTime_${itemId}`);
+      
+      // Start tracking again
+      startTimeTracking();
     }
-  }, [isPaused, isActive, startTime, lastUpdateTime, accumulatedTime, itemId]);
+  }, [isPaused, isActive, itemId, startTimeTracking]);
 
   // Main timer effect
   useEffect(() => {
-    // Clear any existing interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-
-    if (isActive && startTime && validateSession() && !isPaused) {
-      // Initialize state
-      updateTimerState();
+    if (isActive && !isPaused && validateSession()) {
+      // Initialize accumulated time from localStorage
+      const storedAccumulatedTime = localStorage.getItem(`sessionAccumulatedTime_${itemId}`);
+      if (storedAccumulatedTime) {
+        accumulatedTimeRef.current = parseInt(storedAccumulatedTime, 10);
+      } else {
+        accumulatedTimeRef.current = 0;
+        localStorage.setItem(`sessionAccumulatedTime_${itemId}`, '0');
+      }
       
-      // Set up interval for active, non-paused timer
-      intervalRef.current = setInterval(updateTimerState, 1000);
-    } else if (!isActive) {
-      // Reset state when inactive
-      setElapsedTime(0);
-      setLastUpdateTime(null);
-      setAccumulatedTime(0);
-      localStorage.removeItem(`sessionLastUpdate_${itemId}`);
-      localStorage.removeItem(`sessionElapsedTime_${itemId}`);
-      localStorage.removeItem(`sessionAccumulatedTime_${itemId}`);
+      startTimeTracking();
+    } else {
+      // Clean up when not active
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
+      
+      if (!isActive) {
+        setElapsedTime(0);
+        setLastUpdateTime(null);
+        localStorage.removeItem(`sessionLastUpdate_${itemId}`);
+        localStorage.removeItem(`sessionAccumulatedTime_${itemId}`);
+        localStorage.removeItem(`sessionPauseTime_${itemId}`);
+        accumulatedTimeRef.current = 0;
+        startTimeRef.current = null;
+      }
     }
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
       }
     };
-  }, [isActive, startTime, itemId, validateSession, isPaused, updateTimerState]);
+  }, [isActive, startTime, itemId, validateSession, isPaused, startTimeTracking]);
 
   const formatElapsedTime = () => {
     const hours = Math.floor(elapsedTime / 3600);
@@ -137,6 +192,6 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
     formatElapsedTime, 
     lastUpdateTime,
     isValidSession: validateSession(),
-    accumulatedTime
+    accumulatedTime: accumulatedTimeRef.current
   };
 }
