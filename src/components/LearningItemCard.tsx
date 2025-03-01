@@ -113,6 +113,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   useEffect(() => {
     const storedSessionStr = localStorage.getItem(`activeSession_${item.id}`);
     const lastUpdateStr = localStorage.getItem(`sessionLastUpdate_${item.id}`);
+    const isPausedSession = !!localStorage.getItem(`sessionPauseTime_${item.id}`);
     
     if (storedSessionStr) {
       try {
@@ -121,7 +122,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         const now = Date.now();
         
         // Check if session is stale (no updates in last 5 minutes)
-        const isStaleSession = lastUpdate && (now - lastUpdate) > 5 * 60 * 1000;
+        // Don't consider paused sessions as stale
+        const isStaleSession = !isPausedSession && lastUpdate && (now - lastUpdate) > 5 * 60 * 1000;
         
         const isAlreadyInSessions = item.progress?.sessions?.some(
           s => s.startTime === storedSession.startTime
@@ -135,12 +137,17 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               sessions: [storedSession, ...(item.progress?.sessions || [])]
             }
           });
-          onStartTracking(item.id);
+          
+          // Only start tracking if not paused
+          if (!isPausedSession) {
+            onStartTracking(item.id);
+          }
+          
           onSetActiveItem(item.id);
         } else {
           // Clean up stale or duplicate session
-          if (isStaleSession && !storedSession.endTime) {
-            // Auto-end stale session
+          if (isStaleSession && !storedSession.endTime && !isPausedSession) {
+            // Auto-end stale session only if it's not paused
             const endedSession = {
               ...storedSession,
               endTime: new Date(lastUpdate || now).toISOString(),
@@ -152,13 +159,33 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 sessions: [endedSession, ...(item.progress?.sessions || [])]
               }
             });
+            
+            // Clean up localStorage for completed sessions
+            localStorage.removeItem(`activeSession_${item.id}`);
+            localStorage.removeItem(`sessionLastUpdate_${item.id}`);
+          } else if (isPausedSession) {
+            // For paused sessions, keep the localStorage data but update the session status
+            const pausedSession = {
+              ...storedSession,
+              status: 'on_hold' as const
+            };
+            
+            if (!isAlreadyInSessions) {
+              onUpdate(item.id, {
+                status: 'on_hold',
+                progress: {
+                  ...item.progress,
+                  sessions: [pausedSession, ...(item.progress?.sessions || [])]
+                }
+              });
+            }
+          } else {
+            // Clean up localStorage for other cases
+            localStorage.removeItem(`activeSession_${item.id}`);
+            localStorage.removeItem(`sessionLastUpdate_${item.id}`);
+            localStorage.removeItem(`sessionPauseTime_${item.id}`);
+            localStorage.removeItem(`sessionPauseElapsedTime_${item.id}`);
           }
-          
-          // Clean up localStorage
-          localStorage.removeItem(`activeSession_${item.id}`);
-          localStorage.removeItem(`sessionLastUpdate_${item.id}`);
-          localStorage.removeItem(`sessionPauseTime_${item.id}`);
-          localStorage.removeItem(`sessionPauseElapsedTime_${item.id}`);
         }
       } catch (error) {
         console.error('Error parsing stored session:', error);
