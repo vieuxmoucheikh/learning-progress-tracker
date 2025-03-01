@@ -100,8 +100,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [editedMinutes, setEditedMinutes] = useState(calculateTotalTimeSpent(item));
 
   const activeSession = item.progress?.sessions?.find(session => !session.endTime);
+  const isPausedSession = activeSession?.status === 'on_hold' || 
+                          !!localStorage.getItem(`sessionPauseTime_${item.id}`);
+  
   const { elapsedTime, formatElapsedTime, lastUpdateTime, isValidSession, isPaused } = useSessionTimer({
-    isActive: !!activeSession,
+    isActive: !!activeSession && !isPausedSession,
     startTime: activeSession?.startTime || null,
     itemId: item.id
   });
@@ -239,11 +242,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     const pausedSession = item.progress.sessions.find(s => s.status === 'on_hold' && !s.endTime);
     if (!pausedSession) return;
 
-    // We keep the sessionPauseElapsedTime_${item.id} in localStorage
-    // so that the timer can resume from the correct time
-    
     // Remove the pause time marker to indicate we're no longer paused
     localStorage.removeItem(`sessionPauseTime_${item.id}`);
+    
+    // Keep the elapsed time in localStorage so the timer can resume from there
+    // localStorage.getItem(`sessionPauseElapsedTime_${item.id}`) will be used by the timer
 
     // Update the session status
     const updatedSessions = item.progress.sessions.map(s => 
@@ -979,11 +982,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
             {(activeSession || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime)) && (
               <div className="flex items-center gap-3">
                 <span className="text-sm font-medium text-blue-600">
-                  {isPaused
-                    ? 'Session Paused'
+                  {isPausedSession
+                    ? `Session Paused: ${formatElapsedTime()}`
                     : `Current Session: ${formatElapsedTime()}`}
                 </span>
-                {!isPaused && activeSession?.status !== 'on_hold' && (
+                {!isPausedSession && (
                   <Button
                     variant="ghost"
                     size="sm"

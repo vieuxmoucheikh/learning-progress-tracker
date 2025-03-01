@@ -39,14 +39,29 @@ export function useSessionTimer({ isActive, startTime, itemId }: SessionTimerPro
 
   // Start or stop the timer based on active status and pause state
   useEffect(() => {
-    // Clear any existing interval
+    // Always clear any existing interval first
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
 
+    // Check if we're paused
+    const paused = isPaused();
+
+    // If we're paused, load the saved elapsed time and don't start the timer
+    if (paused) {
+      const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${itemId}`);
+      if (savedElapsedTimeStr) {
+        const savedElapsedTime = parseInt(savedElapsedTimeStr, 10);
+        if (!isNaN(savedElapsedTime)) {
+          setElapsedTime(savedElapsedTime);
+        }
+      }
+      return; // Exit early - don't start the timer
+    }
+
     // Only start a new interval if the session is active and not paused
-    if (isActive && startTime && validateSession() && !isPaused()) {
+    if (isActive && startTime && validateSession()) {
       const startTimeMs = new Date(startTime).getTime();
       const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${itemId}`);
       const initialElapsedSeconds = savedElapsedTimeStr ? parseInt(savedElapsedTimeStr, 10) : 0;
@@ -77,16 +92,6 @@ export function useSessionTimer({ isActive, startTime, itemId }: SessionTimerPro
       // Start interval
       intervalRef.current = setInterval(updateElapsedTime, 1000);
     } 
-    // If we're paused, just use the saved elapsed time
-    else if (isPaused()) {
-      const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${itemId}`);
-      if (savedElapsedTimeStr) {
-        const savedElapsedTime = parseInt(savedElapsedTimeStr, 10);
-        if (!isNaN(savedElapsedTime)) {
-          setElapsedTime(savedElapsedTime);
-        }
-      }
-    }
     // If we're completely stopped, reset everything
     else if (!isActive && !startTime) {
       setElapsedTime(0);
