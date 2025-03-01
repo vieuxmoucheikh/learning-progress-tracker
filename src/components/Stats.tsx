@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { LearningItem } from '../types';
-import { BarChart3, Clock, Calendar as CalendarIcon, Trophy, TrendingUp, Target } from 'lucide-react';
+import { BarChart3, Clock, Calendar as CalendarIcon, Trophy, TrendingUp, Target, Pause } from 'lucide-react';
 import { calculateTimeByCategory } from '../lib/utils';
 import { YearlyActivityStats } from './YearlyActivityStats';
 import GoalManager from './pomodoro/GoalManager';
@@ -13,12 +13,15 @@ import { format } from "date-fns";
 import { clsx } from "clsx";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { LucideCalendar } from 'lucide-react';
+import { useSessionTimer } from '../hooks/useSessionTimer';
 
 interface Props {
   items: LearningItem[];
+  activeItem?: LearningItem | null;
+  pausedItem?: LearningItem | null;
 }
 
-export function Stats({ items }: Props) {
+export function Stats({ items, activeItem, pausedItem }: Props) {
   const [isGoalPopoverOpen, setIsGoalPopoverOpen] = useState(false);
   const [newGoal, setNewGoal] = useState({
     title: '',
@@ -28,6 +31,24 @@ export function Stats({ items }: Props) {
     priority: 'medium' as const,
   });
   const [isAddingGoal, setIsAddingGoal] = useState(false);
+
+  // Get active session details
+  const activeSession = activeItem?.progress?.sessions?.find(session => !session.endTime && session.status === 'in_progress');
+  const { elapsedTime: activeElapsedTime, formatElapsedTime: formatActiveElapsedTime } = useSessionTimer({
+    isActive: !!activeSession,
+    startTime: activeSession?.startTime || null,
+    itemId: activeItem?.id || 'none',
+    isPaused: false
+  });
+
+  // Get paused session details
+  const pausedSession = pausedItem?.progress?.sessions?.find(session => !session.endTime && session.status === 'on_hold');
+  const { elapsedTime: pausedElapsedTime, formatElapsedTime: formatPausedElapsedTime } = useSessionTimer({
+    isActive: !!pausedSession,
+    startTime: pausedSession?.startTime || null,
+    itemId: pausedItem?.id || 'none',
+    isPaused: true
+  });
 
   const stats = useMemo(() => {
     // Calculate status distribution
@@ -201,34 +222,43 @@ export function Stats({ items }: Props) {
           </div>
           <div className="flex justify-between items-center">
             <p className="text-gray-600">Completion Rate</p>
-            <span className="text-2xl font-bold text-purple-600">{Math.round(stats.completionRate)}%</span>
-          </div>
-          <div className="w-full bg-gray-100 rounded-full h-3 mt-4">
-            <div
-              className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-300"
-              style={{ width: `${stats.completionRate}%` }}
-            />
+            <span className="text-2xl font-bold text-purple-600">{stats.completionRate.toFixed(1)}%</span>
           </div>
         </div>
       </div>
 
       {/* Time Stats */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-green-100 transition-all duration-200 hover:shadow-md">
+      <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-blue-100 transition-all duration-200 hover:shadow-md">
         <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
-          <div className="p-2 bg-green-50 rounded-lg">
-            <Clock className="w-6 h-6 text-green-500" />
+          <div className="p-2 bg-blue-50 rounded-lg">
+            <Clock className="w-6 h-6 text-blue-500" />
           </div>
-          Time Statistics
+          Time Investment
         </h3>
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <p className="text-gray-600">Total Time</p>
-            <span className="text-2xl font-bold text-green-600">{formatTime(stats.totalTime)}</span>
+            <p className="text-gray-600">Total Time Invested</p>
+            <span className="text-2xl font-bold text-blue-600">{formatTime(stats.totalTime)}</span>
           </div>
           <div className="flex justify-between items-center">
-            <p className="text-gray-600">Average Time</p>
+            <p className="text-gray-600">Avg. Time per Item</p>
             <span className="text-2xl font-bold text-green-600">{formatTime(stats.averageTime)}</span>
           </div>
+          {activeItem && (
+            <div className="flex justify-between items-center">
+              <p className="text-gray-600">Current Session</p>
+              <span className="text-2xl font-bold text-amber-600">{formatActiveElapsedTime()}</span>
+            </div>
+          )}
+          {pausedItem && (
+            <div className="flex justify-between items-center">
+              <p className="text-gray-600 flex items-center">
+                <Pause className="w-4 h-4 mr-1 text-yellow-500" />
+                Session Paused
+              </p>
+              <span className="text-2xl font-bold text-yellow-500">{formatPausedElapsedTime()}</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -278,7 +308,7 @@ export function Stats({ items }: Props) {
       <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-red-100 transition-all duration-200 hover:shadow-md">
         <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
           <div className="p-2 bg-red-50 rounded-lg">
-            <Calendar className="w-6 h-6 text-red-500" />
+            <CalendarIcon className="w-6 h-6 text-red-500" />
           </div>
           Time by Category
         </h3>

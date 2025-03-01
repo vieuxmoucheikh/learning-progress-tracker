@@ -577,6 +577,21 @@ export default function App() {
     setShowAddDialog(true);
   };
 
+  const activeItem = state.items.find(item => item.id === state.activeItem);
+  const pausedItem = state.items.find(item => 
+    item.progress?.sessions?.some(s => !s.endTime && s.status === 'on_hold')
+  );
+
+  const renderStats = () => {
+    return (
+      <Stats 
+        items={state.items} 
+        activeItem={activeItem} 
+        pausedItem={pausedItem}
+      />
+    );
+  };
+
   if (state.loading) {
     return (
       <ThemeProvider>
@@ -615,7 +630,7 @@ export default function App() {
               <div className="flex-1"></div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex-grow text-center">
                 <span className="bg-gradient-to-r from-blue-700 to-indigo-800 dark:from-blue-500 dark:to-indigo-400 bg-clip-text text-transparent">
-                  Learning Progress Tracker
+                  Learning Tracker
                 </span>
               </h1>
               <div className="flex-1 flex justify-end">
@@ -638,36 +653,45 @@ export default function App() {
 
           <main>
             {selectedTab === TAB_OPTIONS.DASHBOARD && (
-              <DashboardTab
-                items={state.items}
-                onAddItem={handleDashboardAddItem}
-                onUpdate={handleDashboardUpdate}
-                onDateSelect={handleDateSelect}
-                onDelete={handleDeleteItem}
-                onStartTracking={handleStartTracking}
-                onStopTracking={handleStopTracking}
-                onNotesUpdate={handleUpdateNotes}
-                onSessionNoteAdd={handleAddSessionNote}
-                onSetActiveItem={handleSetActiveItem}
-              />
+              <div className="space-y-6">
+                {renderStats()}
+                <DashboardTab
+                  items={state.items}
+                  onAddItem={handleDashboardAddItem}
+                  onUpdate={handleDashboardUpdate}
+                  onDateSelect={handleDateSelect}
+                  onDelete={handleDeleteItem}
+                  onStartTracking={handleStartTracking}
+                  onStopTracking={handleStopTracking}
+                  onNotesUpdate={handleUpdateNotes}
+                  onSessionNoteAdd={handleAddSessionNote}
+                  onSetActiveItem={handleSetActiveItem}
+                />
+              </div>
             )}
 
             {selectedTab === TAB_OPTIONS.ITEMS && (
-              <ItemsTab
-                items={state.items}
-                onAddItem={handleItemsAddItem}
-                onUpdate={handleUpdateItem}
-                onDelete={handleDeleteItem}
-                onStartTracking={handleStartTracking}
-                onStopTracking={handleStopTracking}
-                onNotesUpdate={handleUpdateNotes}
-                onSessionNoteAdd={handleAddSessionNote}
-                onSetActiveItem={handleSetActiveItem}
-              />
+              <div className="space-y-6">
+                {renderStats()}
+                <ItemsTab
+                  items={state.items}
+                  onAddItem={handleItemsAddItem}
+                  onUpdate={handleUpdateItem}
+                  onDelete={handleDeleteItem}
+                  onStartTracking={handleStartTracking}
+                  onStopTracking={handleStopTracking}
+                  onNotesUpdate={handleUpdateNotes}
+                  onSessionNoteAdd={handleAddSessionNote}
+                  onSetActiveItem={handleSetActiveItem}
+                />
+              </div>
             )}
 
             {selectedTab === TAB_OPTIONS.ANALYTICS && (
-              <AnalyticsTab items={state.items} />
+              <div className="space-y-6">
+                {renderStats()}
+                <AnalyticsTab items={state.items} />
+              </div>
             )}
 
             {selectedTab === TAB_OPTIONS.POMODORO && (
