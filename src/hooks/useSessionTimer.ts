@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface SessionTimerProps {
   isActive: boolean;
@@ -9,7 +9,13 @@ interface SessionTimerProps {
 export function useSessionTimer({ isActive, startTime, itemId }: SessionTimerProps) {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [lastUpdateTime, setLastUpdateTime] = useState<number | null>(null);
-  const [pausedElapsedTime, setPausedElapsedTime] = useState<number | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Check if there's a paused session
+  const isPaused = useCallback(() => {
+    const pausedTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
+    return !!pausedTimeStr;
+  }, [itemId]);
 
   const validateSession = useCallback(() => {
     if (!startTime) return false;
@@ -20,83 +26,96 @@ export function useSessionTimer({ isActive, startTime, itemId }: SessionTimerPro
     return start <= now && (now - start) < 24 * 60 * 60 * 1000;
   }, [startTime]);
 
-  // Load saved pause time when component mounts
+  // Load saved elapsed time when component mounts
   useEffect(() => {
-    const savedPausedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${itemId}`);
-    if (savedPausedTimeStr) {
-      const savedPausedTime = parseInt(savedPausedTimeStr, 10);
-      if (!isNaN(savedPausedTime)) {
-        setPausedElapsedTime(savedPausedTime);
+    const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${itemId}`);
+    if (savedElapsedTimeStr) {
+      const savedElapsedTime = parseInt(savedElapsedTimeStr, 10);
+      if (!isNaN(savedElapsedTime)) {
+        setElapsedTime(savedElapsedTime);
       }
     }
   }, [itemId]);
 
+  // Start or stop the timer based on active status and pause state
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
 
-    if (isActive && startTime && validateSession()) {
-      // If we have a paused elapsed time, use that as our starting point
-      const start = new Date(startTime).getTime();
+    // Only start a new interval if the session is active and not paused
+    if (isActive && startTime && validateSession() && !isPaused()) {
+      const startTimeMs = new Date(startTime).getTime();
+      const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${itemId}`);
+      const initialElapsedSeconds = savedElapsedTimeStr ? parseInt(savedElapsedTimeStr, 10) : 0;
+      
+      // If we're resuming from a pause, we need to adjust the start time
+      const adjustedStartTime = initialElapsedSeconds > 0 
+        ? Date.now() - (initialElapsedSeconds * 1000) 
+        : startTimeMs;
       
       const updateElapsedTime = () => {
         const now = Date.now();
-        let elapsed;
-        
-        if (pausedElapsedTime !== null) {
-          // If we have a paused elapsed time, we're resuming from a pause
-          elapsed = pausedElapsedTime + Math.floor((now - start) / 1000);
-          // Clear the paused elapsed time since we're now running
-          setPausedElapsedTime(null);
-          localStorage.removeItem(`sessionPauseElapsedTime_${itemId}`);
-        } else {
-          // Normal case - calculate elapsed time from start
-          elapsed = Math.floor((now - start) / 1000);
-        }
+        const elapsed = Math.floor((now - adjustedStartTime) / 1000);
         
         setElapsedTime(elapsed);
         setLastUpdateTime(now);
         
         localStorage.setItem(`sessionLastUpdate_${itemId}`, now.toString());
+        
+        // Clear the pause elapsed time since we're now running
+        if (initialElapsedSeconds > 0) {
+          localStorage.removeItem(`sessionPauseElapsedTime_${itemId}`);
+        }
       };
 
-      updateElapsedTime(); 
-      interval = setInterval(updateElapsedTime, 1000);
-    } else if (!isActive && startTime) {
-      // We're paused - save the current elapsed time
-      if (elapsedTime > 0) {
-        setPausedElapsedTime(elapsedTime);
-        localStorage.setItem(`sessionPauseElapsedTime_${itemId}`, elapsedTime.toString());
-      }
+      // Initial update
+      updateElapsedTime();
       
-      // Don't reset elapsed time when paused
-      // This keeps the timer display showing the correct time
-    } else {
-      // Not active and no start time (completely stopped)
+      // Start interval
+      intervalRef.current = setInterval(updateElapsedTime, 1000);
+    } 
+    // If we're paused, just use the saved elapsed time
+    else if (isPaused()) {
+      const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${itemId}`);
+      if (savedElapsedTimeStr) {
+        const savedElapsedTime = parseInt(savedElapsedTimeStr, 10);
+        if (!isNaN(savedElapsedTime)) {
+          setElapsedTime(savedElapsedTime);
+        }
+      }
+    }
+    // If we're completely stopped, reset everything
+    else if (!isActive && !startTime) {
       setElapsedTime(0);
       setLastUpdateTime(null);
-      setPausedElapsedTime(null);
       localStorage.removeItem(`sessionLastUpdate_${itemId}`);
       localStorage.removeItem(`sessionPauseElapsedTime_${itemId}`);
     }
 
+    // Clean up on unmount or when dependencies change
     return () => {
-      if (interval) {
-        clearInterval(interval);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
-  }, [isActive, startTime, itemId, validateSession, elapsedTime, pausedElapsedTime]);
+  }, [isActive, startTime, itemId, validateSession, isPaused]);
 
-  const formatElapsedTime = () => {
+  const formatElapsedTime = useCallback(() => {
     const hours = Math.floor(elapsedTime / 3600);
     const minutes = Math.floor((elapsedTime % 3600) / 60);
     const seconds = elapsedTime % 60;
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
+  }, [elapsedTime]);
 
   return { 
     elapsedTime, 
     formatElapsedTime, 
     lastUpdateTime,
-    isValidSession: validateSession()
+    isValidSession: validateSession(),
+    isPaused: isPaused()
   };
 }
