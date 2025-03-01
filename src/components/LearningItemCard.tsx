@@ -457,7 +457,23 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   };
 
   const renderDuration = () => {
-    const totalCurrentMinutes = calculateTotalTimeSpent(item);
+    // Calculate the total time without including the current active session
+    const calculateTotalWithoutCurrentSession = () => {
+      const sessions = item.progress?.sessions || [];
+      return sessions.reduce((total, session) => {
+        // Only include sessions with duration (completed sessions)
+        // OR paused sessions (we'll calculate their time separately)
+        if (session.duration) {
+          return total + (session.duration.hours * 60) + session.duration.minutes;
+        }
+        return total;
+      }, 0);
+    };
+
+    // Calculate base total from completed sessions
+    const baseTotal = calculateTotalWithoutCurrentSession();
+    // Total to display - we'll add the active session time if needed
+    const totalToDisplay = baseTotal + (activeSession && activeSession.status === 'in_progress' ? Math.floor(elapsedTime / 60) : 0);
     
     if (isTimeEditing) {
       return (
@@ -499,7 +515,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         <div className="flex items-center gap-1.5">
           <Clock className="h-4 w-4 text-gray-500" />
           <span className="text-sm font-medium">
-            {totalCurrentMinutes}m (Total minutes)
+            {totalToDisplay}m (Total minutes)
           </span>
         </div>
         <Button
@@ -961,7 +977,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 <span className="text-sm font-medium text-blue-600">
                   {activeSession?.status === 'on_hold' || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime)
                     ? 'Session Paused'
-                    : `Current Session: ${formatElapsedTime()}`}
+                    : activeSession?.status === 'in_progress' 
+                      ? `Current Session: ${formatElapsedTime()}`
+                      : ''}
                 </span>
                 {activeSession?.status !== 'on_hold' && (
                   <Button

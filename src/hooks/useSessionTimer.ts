@@ -26,111 +26,136 @@ export function useSessionTimer({ isActive, startTime, itemId }: SessionTimerPro
     return start <= now && (now - start) < 24 * 60 * 60 * 1000;
   }, [startTime]);
 
-  // Initialize or update the session state when props change
+  // Initialize timer state based on localStorage values
   useEffect(() => {
-    // Clear previous state
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+    // Check for stored timer state
+    const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
+    const totalPausedTimeStr = localStorage.getItem(`sessionTotalPausedTime_${itemId}`);
+    
+    if (pauseTimeStr) {
+      pausedAtRef.current = parseInt(pauseTimeStr, 10);
     }
-
-    if (!startTime || !validateSession()) {
-      // Reset everything if no valid session
-      startTimeRef.current = null;
-      pausedAtRef.current = null;
-      totalPausedTimeRef.current = 0;
-      isRunningRef.current = false;
-      setElapsedTime(0);
-      setLastUpdateTime(null);
-      return;
+    
+    if (totalPausedTimeStr) {
+      totalPausedTimeRef.current = parseInt(totalPausedTimeStr, 10);
     }
-
-    // Set the start time if not already set
-    if (!startTimeRef.current) {
+    
+    if (startTime) {
       startTimeRef.current = new Date(startTime).getTime();
     }
-
-    // Check for stored paused state
-    const storedPauseTime = localStorage.getItem(`sessionPauseTime_${itemId}`);
-    const storedTotalPausedTime = localStorage.getItem(`sessionTotalPausedTime_${itemId}`);
-
-    if (storedPauseTime) {
-      pausedAtRef.current = parseInt(storedPauseTime, 10);
-    }
-
-    if (storedTotalPausedTime) {
-      totalPausedTimeRef.current = parseInt(storedTotalPausedTime, 10);
-    }
-
-    // Update running state based on isActive prop
+    
     isRunningRef.current = isActive;
-
-    // If active, start the timer
-    if (isActive) {
-      // If we were paused, calculate additional pause time
-      if (pausedAtRef.current) {
-        const now = Date.now();
-        const additionalPauseTime = now - pausedAtRef.current;
-        totalPausedTimeRef.current += additionalPauseTime;
-        
-        // Store the updated total paused time
-        localStorage.setItem(`sessionTotalPausedTime_${itemId}`, totalPausedTimeRef.current.toString());
-        
-        // Clear the pause timestamp
-        pausedAtRef.current = null;
-        localStorage.removeItem(`sessionPauseTime_${itemId}`);
-      }
-
-      // Start the interval
-      const updateTimer = () => {
-        if (!startTimeRef.current) return;
-
-        const now = Date.now();
-        // Calculate elapsed time compensating for paused time
-        const rawElapsed = now - startTimeRef.current;
-        const adjustedElapsed = Math.floor((rawElapsed - totalPausedTimeRef.current) / 1000);
-        
-        setElapsedTime(adjustedElapsed > 0 ? adjustedElapsed : 0);
-        setLastUpdateTime(now);
-        
-        // Update localStorage
-        localStorage.setItem(`sessionLastUpdate_${itemId}`, now.toString());
-      };
-
-      updateTimer(); // Initial update
-      intervalRef.current = setInterval(updateTimer, 1000);
-    } else {
-      // If not active and not already paused, record pause time
-      if (!pausedAtRef.current) {
-        pausedAtRef.current = Date.now();
-        localStorage.setItem(`sessionPauseTime_${itemId}`, pausedAtRef.current.toString());
-      }
-    }
-
-    // Cleanup function
+    
+    // Clean up function
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
     };
-  }, [isActive, startTime, itemId, validateSession]);
+  }, [itemId, startTime]);
+
+  // Handle active/inactive state changes
+  useEffect(() => {
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    if (!startTimeRef.current || !validateSession()) {
+      // Reset everything if there's no valid start time
+      setElapsedTime(0);
+      setLastUpdateTime(null);
+      return;
+    }
+
+    if (isActive) {
+      // If we're resuming from a paused state
+      if (pausedAtRef.current) {
+        const now = Date.now();
+        // Calculate additional pause time since last pause
+        const additionalPauseTime = now - pausedAtRef.current;
+        // Add to the total
+        totalPausedTimeRef.current += additionalPauseTime;
+        
+        // Update localStorage
+        localStorage.setItem(`sessionTotalPausedTime_${itemId}`, totalPausedTimeRef.current.toString());
+        
+        // Clear the pause time
+        pausedAtRef.current = null;
+        localStorage.removeItem(`sessionPauseTime_${itemId}`);
+      }
+      
+      // Start the timer
+      const updateTimer = () => {
+        if (!startTimeRef.current) return;
+        
+        const now = Date.now();
+        // Calculate elapsed time with pause compensation
+        const totalElapsed = now - startTimeRef.current;
+        const adjustedElapsed = totalElapsed - totalPausedTimeRef.current;
+        
+        // Ensure we don't have negative time (shouldn't happen, but just in case)
+        const elapsedSeconds = Math.max(0, Math.floor(adjustedElapsed / 1000));
+        
+        setElapsedTime(elapsedSeconds);
+        setLastUpdateTime(now);
+      };
+      
+      // Initial update
+      updateTimer();
+      
+      // Start interval for continuous updates
+      intervalRef.current = setInterval(updateTimer, 1000);
+      isRunningRef.current = true;
+    } else {
+      // Pause the timer if it's not already paused
+      if (!pausedAtRef.current) {
+        pausedAtRef.current = Date.now();
+        localStorage.setItem(`sessionPauseTime_${itemId}`, pausedAtRef.current.toString());
+      }
+      
+      isRunningRef.current = false;
+      
+      // Important: we keep the current displayed time but don't update it anymore
+    }
+    
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isActive, validateSession, itemId]);
 
   // Handle visibility changes
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (!startTimeRef.current || !isRunningRef.current) return;
-
+      // Only care about visibility if the timer is supposed to be running
+      if (!isRunningRef.current || !startTimeRef.current) return;
+      
       if (document.visibilityState === 'hidden') {
-        // Tab hidden - record the time but DON'T pause the timer
+        // Tab is hidden but timer should keep running in the background
+        // Record when we went to background
         localStorage.setItem(`tabHiddenTime_${itemId}`, Date.now().toString());
       } else if (document.visibilityState === 'visible') {
-        // Tab visible again - update last update time but don't change the timing logic
+        // Tab is visible again
         const hiddenTimeStr = localStorage.getItem(`tabHiddenTime_${itemId}`);
-        if (hiddenTimeStr) {
+        if (hiddenTimeStr && isRunningRef.current) {
+          const hiddenTime = parseInt(hiddenTimeStr, 10);
           const now = Date.now();
-          setLastUpdateTime(now);
-          localStorage.setItem(`sessionLastUpdate_${itemId}`, now.toString());
+          
+          // Update the UI immediately to prevent stale time display
+          if (startTimeRef.current) {
+            const totalElapsed = now - startTimeRef.current;
+            const adjustedElapsed = totalElapsed - totalPausedTimeRef.current;
+            const elapsedSeconds = Math.max(0, Math.floor(adjustedElapsed / 1000));
+            
+            setElapsedTime(elapsedSeconds);
+            setLastUpdateTime(now);
+          }
+          
+          // Remove the hidden time marker
           localStorage.removeItem(`tabHiddenTime_${itemId}`);
         }
       }
@@ -142,7 +167,7 @@ export function useSessionTimer({ isActive, startTime, itemId }: SessionTimerPro
     };
   }, [itemId]);
 
-  // Format the elapsed time for display
+  // Format elapsed time as HH:MM:SS
   const formatElapsedTime = useCallback(() => {
     const hours = Math.floor(elapsedTime / 3600);
     const minutes = Math.floor((elapsedTime % 3600) / 60);
