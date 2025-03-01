@@ -125,35 +125,14 @@ export function DashboardTab({
           }
           
           // For active sessions (no endTime) that started on the selected date
-          if (sessionDate === dateStr && !session.endTime && session.status === 'in_progress') {
+          if (sessionDate === dateStr && !session.endTime) {
             try {
-              // Check if this session is paused
-              const isPaused = !!localStorage.getItem(`sessionPauseTime_${item.id}`);
-              
-              // Only calculate active time if the session is not paused
-              if (!isPaused) {
-                // Get the last update time to ensure we're not counting stale time
-                const lastUpdateStr = localStorage.getItem(`sessionLastUpdate_${item.id}`);
-                const lastUpdate = lastUpdateStr ? parseInt(lastUpdateStr, 10) : null;
-                
-                if (lastUpdate) {
-                  const startTime = new Date(session.startTime);
-                  if (!isNaN(startTime.getTime())) {  // Check if startTime is valid
-                    // Use the last update time instead of current time to avoid counting time when the app was closed
-                    const activeMinutes = Math.floor((lastUpdate - startTime.getTime()) / (1000 * 60));
-                    if (activeMinutes > 0) {  // Ensure we don't add negative time
-                      dailyTimeSpent += activeMinutes;
-                    }
-                  }
-                }
-              } else {
-                // If the session is paused, use the saved elapsed time
-                const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${item.id}`);
-                if (savedElapsedTimeStr) {
-                  const savedElapsedSeconds = parseInt(savedElapsedTimeStr, 10);
-                  if (!isNaN(savedElapsedSeconds)) {
-                    dailyTimeSpent += Math.floor(savedElapsedSeconds / 60);
-                  }
+              const startTime = new Date(session.startTime);
+              if (!isNaN(startTime.getTime())) {  // Check if startTime is valid
+                const now = new Date();
+                const activeMinutes = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
+                if (activeMinutes > 0) {  // Ensure we don't add negative time
+                  dailyTimeSpent += activeMinutes;
                 }
               }
             } catch (error) {
