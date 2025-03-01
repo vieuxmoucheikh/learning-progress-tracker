@@ -125,18 +125,34 @@ export function DashboardTab({
           }
           
           // For active sessions (no endTime) that started on the selected date
-          if (sessionDate === dateStr && !session.endTime) {
-            try {
-              const startTime = new Date(session.startTime);
-              if (!isNaN(startTime.getTime())) {  // Check if startTime is valid
-                const now = new Date();
-                const activeMinutes = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
-                if (activeMinutes > 0) {  // Ensure we don't add negative time
-                  dailyTimeSpent += activeMinutes;
+          if (sessionDate === dateStr && !session.endTime && session.status !== 'on_hold') {
+            // Check if the session is paused
+            const isPaused = !!localStorage.getItem(`sessionPauseTime_${item.id}`);
+            
+            // Only count time for sessions that are not paused
+            if (!isPaused) {
+              try {
+                const startTime = new Date(session.startTime);
+                if (!isNaN(startTime.getTime())) {  // Check if startTime is valid
+                  const now = new Date();
+                  const activeMinutes = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
+                  if (activeMinutes > 0) {  // Ensure we don't add negative time
+                    dailyTimeSpent += activeMinutes;
+                  }
+                }
+              } catch (error) {
+                console.error('Error calculating active session time:', error);
+              }
+            } else {
+              // For paused sessions, use the saved elapsed time
+              const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${item.id}`);
+              if (savedElapsedTimeStr) {
+                const savedElapsedTime = parseInt(savedElapsedTimeStr, 10);
+                if (!isNaN(savedElapsedTime)) {
+                  // Convert seconds to minutes
+                  dailyTimeSpent += Math.floor(savedElapsedTime / 60);
                 }
               }
-            } catch (error) {
-              console.error('Error calculating active session time:', error);
             }
           }
         });
