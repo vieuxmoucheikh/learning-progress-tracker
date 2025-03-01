@@ -282,9 +282,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     // Remove the pause time marker to indicate we're no longer paused
     localStorage.removeItem(`sessionPauseTime_${item.id}`);
     
-    // Keep the elapsed time in localStorage so the timer can resume from there
-    // localStorage.getItem(`sessionPauseElapsedTime_${item.id}`) will be used by the timer
-
+    // We keep the sessionPauseElapsedTime_${item.id} in localStorage
+    // The timer will use this to calculate the correct elapsed time
+    
     // Update the session status
     const updatedSessions = item.progress.sessions.map(s => 
       s.startTime === pausedSession.startTime ? {

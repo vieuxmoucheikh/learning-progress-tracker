@@ -10,7 +10,6 @@ export function useSessionTimer({ isActive, startTime, itemId }: SessionTimerPro
   const [elapsedTime, setElapsedTime] = useState(0);
   const [lastUpdateTime, setLastUpdateTime] = useState<number | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const wasActiveRef = useRef<boolean>(false);
   
   // Check if there's a paused session
   const isPaused = useCallback(() => {
@@ -27,138 +26,69 @@ export function useSessionTimer({ isActive, startTime, itemId }: SessionTimerPro
     return start <= now && (now - start) < 24 * 60 * 60 * 1000;
   }, [startTime]);
 
-  // Load saved elapsed time when component mounts
+  // Load saved elapsed time on mount and when itemId changes
   useEffect(() => {
-    const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${itemId}`);
-    if (savedElapsedTimeStr) {
-      const savedElapsedTime = parseInt(savedElapsedTimeStr, 10);
-      if (!isNaN(savedElapsedTime)) {
-        setElapsedTime(savedElapsedTime);
-      }
-    }
-  }, [itemId]);
-
-  // Handle page visibility changes
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && wasActiveRef.current && isActive) {
-        // Page is visible again and the session was active before
-        // Update the timer to account for the time the page was hidden
-        const lastVisibleTimeStr = localStorage.getItem(`sessionLastVisibleTime_${itemId}`);
-        if (lastVisibleTimeStr) {
-          const lastVisibleTime = parseInt(lastVisibleTimeStr, 10);
-          const now = Date.now();
-          
-          // If the page was hidden for more than 5 seconds
-          if (now - lastVisibleTime > 5000) {
-            // Restart the timer with the adjusted time
-            if (intervalRef.current) {
-              clearInterval(intervalRef.current);
-              intervalRef.current = null;
-            }
-            
-            // Start the timer again
-            const updateElapsedTime = () => {
-              const currentTime = Date.now();
-              const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${itemId}`);
-              const baseElapsedTime = savedElapsedTimeStr ? parseInt(savedElapsedTimeStr, 10) : elapsedTime;
-              
-              setElapsedTime(baseElapsedTime + Math.floor((currentTime - now) / 1000));
-              setLastUpdateTime(currentTime);
-            };
-            
-            // Initial update
-            updateElapsedTime();
-            
-            // Start interval
-            intervalRef.current = setInterval(updateElapsedTime, 1000);
-          }
+    const loadSavedElapsedTime = () => {
+      const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${itemId}`);
+      if (savedElapsedTimeStr) {
+        const savedElapsedTime = parseInt(savedElapsedTimeStr, 10);
+        if (!isNaN(savedElapsedTime)) {
+          setElapsedTime(savedElapsedTime);
+          return true;
         }
       }
+      return false;
     };
     
-    // Add event listener
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    // Update wasActiveRef
-    wasActiveRef.current = isActive && !isPaused();
-    
-    // Clean up
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [isActive, itemId, isPaused, elapsedTime]);
+    loadSavedElapsedTime();
+  }, [itemId]);
 
-  // Start or stop the timer based on active status and pause state
+  // Core timer logic
   useEffect(() => {
     // Always clear any existing interval first
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-
-    // Check if we're paused
-    const paused = isPaused();
-
-    // If we're paused, load the saved elapsed time and don't start the timer
-    if (paused) {
-      const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${itemId}`);
-      if (savedElapsedTimeStr) {
-        const savedElapsedTime = parseInt(savedElapsedTimeStr, 10);
-        if (!isNaN(savedElapsedTime)) {
-          setElapsedTime(savedElapsedTime);
+    
+    // Don't proceed if session is not active or is paused
+    if (!isActive || isPaused() || !startTime || !validateSession()) {
+      // If paused, make sure we're showing the correct paused time
+      if (isPaused()) {
+        const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${itemId}`);
+        if (savedElapsedTimeStr) {
+          const savedElapsedTime = parseInt(savedElapsedTimeStr, 10);
+          if (!isNaN(savedElapsedTime)) {
+            setElapsedTime(savedElapsedTime);
+          }
         }
       }
-      return; // Exit early - don't start the timer
+      return;
     }
-
-    // Only start a new interval if the session is active and not paused
-    if (isActive && startTime && validateSession()) {
-      const startTimeMs = new Date(startTime).getTime();
-      const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${itemId}`);
-      const initialElapsedSeconds = savedElapsedTimeStr ? parseInt(savedElapsedTimeStr, 10) : 0;
+    
+    // Get the base elapsed time (from localStorage if available)
+    const savedElapsedTimeStr = localStorage.getItem(`sessionPauseElapsedTime_${itemId}`);
+    const baseElapsedSeconds = savedElapsedTimeStr ? parseInt(savedElapsedTimeStr, 10) : 0;
+    
+    // Calculate the reference point for our timer
+    const timerStartPoint = Date.now() - (baseElapsedSeconds * 1000);
+    
+    // Update function that will be called every second
+    const updateTimer = () => {
+      const now = Date.now();
+      const newElapsedSeconds = Math.floor((now - timerStartPoint) / 1000);
       
-      // If we're resuming from a pause, we need to adjust the start time
-      const adjustedStartTime = initialElapsedSeconds > 0 
-        ? Date.now() - (initialElapsedSeconds * 1000) 
-        : startTimeMs;
-      
-      const updateElapsedTime = () => {
-        const now = Date.now();
-        const elapsed = Math.floor((now - adjustedStartTime) / 1000);
-        
-        setElapsedTime(elapsed);
-        setLastUpdateTime(now);
-        
-        localStorage.setItem(`sessionLastUpdate_${itemId}`, now.toString());
-        
-        // Clear the pause elapsed time since we're now running
-        if (initialElapsedSeconds > 0) {
-          localStorage.removeItem(`sessionPauseElapsedTime_${itemId}`);
-        }
-      };
-
-      // Initial update
-      updateElapsedTime();
-      
-      // Start interval
-      intervalRef.current = setInterval(updateElapsedTime, 1000);
-      
-      // Update wasActiveRef
-      wasActiveRef.current = true;
-    } 
-    // If we're completely stopped, reset everything
-    else if (!isActive && !startTime) {
-      setElapsedTime(0);
-      setLastUpdateTime(null);
-      localStorage.removeItem(`sessionLastUpdate_${itemId}`);
-      localStorage.removeItem(`sessionPauseElapsedTime_${itemId}`);
-      
-      // Update wasActiveRef
-      wasActiveRef.current = false;
-    }
-
-    // Clean up on unmount or when dependencies change
+      setElapsedTime(newElapsedSeconds);
+      setLastUpdateTime(now);
+    };
+    
+    // Initial update
+    updateTimer();
+    
+    // Set up interval
+    intervalRef.current = setInterval(updateTimer, 1000);
+    
+    // Cleanup function
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -166,6 +96,58 @@ export function useSessionTimer({ isActive, startTime, itemId }: SessionTimerPro
       }
     };
   }, [isActive, startTime, itemId, validateSession, isPaused]);
+  
+  // Handle page visibility changes
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      // If page becomes hidden and we have an active timer
+      if (document.visibilityState === 'hidden' && isActive && !isPaused()) {
+        // Save the current elapsed time and timestamp
+        localStorage.setItem(`sessionHiddenAt_${itemId}`, Date.now().toString());
+        localStorage.setItem(`sessionHiddenElapsedTime_${itemId}`, elapsedTime.toString());
+      }
+      // If page becomes visible again
+      else if (document.visibilityState === 'visible') {
+        const hiddenAtStr = localStorage.getItem(`sessionHiddenAt_${itemId}`);
+        const hiddenElapsedTimeStr = localStorage.getItem(`sessionHiddenElapsedTime_${itemId}`);
+        
+        if (hiddenAtStr && hiddenElapsedTimeStr && isActive && !isPaused()) {
+          const hiddenAt = parseInt(hiddenAtStr, 10);
+          const hiddenElapsedTime = parseInt(hiddenElapsedTimeStr, 10);
+          const now = Date.now();
+          
+          // Calculate how long the page was hidden
+          const hiddenDuration = Math.floor((now - hiddenAt) / 1000);
+          
+          // Update the elapsed time to include the hidden duration
+          const newElapsedTime = hiddenElapsedTime + hiddenDuration;
+          
+          // Store this as our new base elapsed time
+          localStorage.setItem(`sessionPauseElapsedTime_${itemId}`, newElapsedTime.toString());
+          
+          // Force a reload of the timer
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
+          
+          // The main useEffect will restart the timer with the new elapsed time
+        }
+        
+        // Clean up
+        localStorage.removeItem(`sessionHiddenAt_${itemId}`);
+        localStorage.removeItem(`sessionHiddenElapsedTime_${itemId}`);
+      }
+    };
+    
+    // Add event listener
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Clean up
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isActive, itemId, isPaused, elapsedTime]);
 
   const formatElapsedTime = useCallback(() => {
     const hours = Math.floor(elapsedTime / 3600);
