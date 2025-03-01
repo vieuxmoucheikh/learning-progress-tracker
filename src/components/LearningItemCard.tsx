@@ -194,6 +194,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const handlePauseSession = useCallback(() => {
     if (!activeSession || !item.progress?.sessions) return;
 
+    // Store pause time in localStorage
+    localStorage.setItem(`sessionPauseTime_${item.id}`, Date.now().toString());
+
     // Update the current session to paused state
     const updatedSessions = item.progress.sessions.map(s => 
       s.startTime === activeSession.startTime ? {
@@ -213,8 +216,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         sessions: updatedSessions
       }
     });
-
-    // Important: We no longer need to manually set pauseTime as useSessionTimer hook handles that
   }, [item, activeSession, onUpdate, onStopTracking]);
 
   // Handle session resume
@@ -223,6 +224,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
     const pausedSession = item.progress.sessions.find(s => s.status === 'on_hold' && !s.endTime);
     if (!pausedSession) return;
+
+    // Clean up any existing active session in localStorage
+    localStorage.removeItem(`activeSession_${item.id}`);
+    localStorage.removeItem(`sessionLastUpdate_${item.id}`);
+    localStorage.removeItem(`sessionPauseTime_${item.id}`);
 
     // Update the session status
     const updatedSessions = item.progress.sessions.map(s => 
@@ -243,8 +249,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
     // Then start tracking
     onStartTracking(item.id);
-    
-    // The useSessionTimer hook will handle resuming the timer from where it was paused
   }, [item, onUpdate, onStartTracking]);
 
   // Handle session stop
@@ -457,23 +461,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   };
 
   const renderDuration = () => {
-    // Calculate the total time without including the current active session
-    const calculateTotalWithoutCurrentSession = () => {
-      const sessions = item.progress?.sessions || [];
-      return sessions.reduce((total, session) => {
-        // Only include sessions with duration (completed sessions)
-        // OR paused sessions (we'll calculate their time separately)
-        if (session.duration) {
-          return total + (session.duration.hours * 60) + session.duration.minutes;
-        }
-        return total;
-      }, 0);
-    };
-
-    // Calculate base total from completed sessions
-    const baseTotal = calculateTotalWithoutCurrentSession();
-    // Total to display - we'll add the active session time if needed
-    const totalToDisplay = baseTotal + (activeSession && activeSession.status === 'in_progress' ? Math.floor(elapsedTime / 60) : 0);
+    const totalCurrentMinutes = calculateTotalTimeSpent(item);
     
     if (isTimeEditing) {
       return (
@@ -515,7 +503,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         <div className="flex items-center gap-1.5">
           <Clock className="h-4 w-4 text-gray-500" />
           <span className="text-sm font-medium">
-            {totalToDisplay}m (Total minutes)
+            {totalCurrentMinutes}m (Total minutes)
           </span>
         </div>
         <Button
@@ -977,9 +965,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 <span className="text-sm font-medium text-blue-600">
                   {activeSession?.status === 'on_hold' || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime)
                     ? 'Session Paused'
-                    : activeSession?.status === 'in_progress' 
-                      ? `Current Session: ${formatElapsedTime()}`
-                      : ''}
+                    : `Current Session: ${formatElapsedTime()}`}
                 </span>
                 {activeSession?.status !== 'on_hold' && (
                   <Button
