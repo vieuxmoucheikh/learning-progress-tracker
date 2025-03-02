@@ -165,7 +165,7 @@ export function YearlyActivityHeatmap({
   };
 
   return (
-    <div className="w-full max-w-full bg-white/80 dark:bg-white/10 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100 dark:border-white/10">
+    <div className="w-full max-w-full bg-white/80 dark:bg-white/10 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100 dark:border-white/10 overflow-hidden">
       {/* Year navigation */}
       <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-white/10">
         <Button
@@ -188,8 +188,8 @@ export function YearlyActivityHeatmap({
       </div>
 
       {/* Heatmap grid */}
-      <div className="w-full p-3">
-        <div className="w-full" style={{ fontSize: 'min(1.5vw, 11px)' }}>
+      <div className="w-full p-3 overflow-x-auto">
+        <div className="w-full min-w-[800px]" style={{ fontSize: 'min(1.5vw, 11px)' }}>
           {/* Month labels */}
           <div className="flex mb-1.5 w-full">
             <div className="w-5" /> {/* Offset for day labels */}
@@ -214,7 +214,7 @@ export function YearlyActivityHeatmap({
           {/* Main grid */}
           <div className="flex w-full">
             {/* Day labels */}
-            <div className="flex flex-col gap-[2px] pr-1.5">
+            <div className="flex flex-col gap-[2px] pr-1.5 flex-shrink-0">
               {DAYS.map((day) => (
                 <div 
                   key={day} 
@@ -230,17 +230,17 @@ export function YearlyActivityHeatmap({
             </div>
 
             {/* Calendar grid */}
-            <div className="flex-1 w-full">
+            <div className="flex-1 w-full min-w-0">
               <div className="grid grid-cols-[repeat(53,1fr)] gap-[2px] w-full">
                 {weeks.map((week, weekIndex) => (
-                  <div key={weekIndex} className="flex flex-col gap-[2px]">
+                  <div key={weekIndex} className="flex flex-col gap-[2px] w-full">
                     {week.map((day, dayIndex) => (
                       <TooltipProvider key={day.date}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div
                               className={cn(
-                                'rounded-[1px] transition-colors duration-200',
+                                'rounded-[1px] transition-colors duration-200 w-full',
                                 day.isCurrentYear
                                   ? getColorForCount(day.count)
                                   : 'bg-gray-200 dark:bg-gray-200'

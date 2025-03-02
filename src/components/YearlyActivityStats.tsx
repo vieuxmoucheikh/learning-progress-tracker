@@ -193,7 +193,7 @@ export const YearlyActivityStats: React.FC = () => {
         ) : (
           <div className="space-y-6 w-full">
             {/* Stats Cards */}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-6">
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-600/10 p-2.5 rounded-lg border border-blue-200/50 dark:border-blue-400/10">
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-blue-500" />
@@ -217,12 +217,9 @@ export const YearlyActivityStats: React.FC = () => {
               </div>
             </div>
 
-            {/* Heatmap */}
-            <div className="w-full">
-              <YearlyActivityHeatmap 
-                data={heatmapData} 
-                year={new Date().getFullYear()}
-              />
+            {/* Heatmap - Full Width */}
+            <div className="w-full overflow-hidden">
+              <YearlyActivityHeatmap data={heatmapData} />
             </div>
           </div>
         )}

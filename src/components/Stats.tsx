@@ -293,10 +293,14 @@ export function Stats({ items }: Props) {
       </div>
 
       {/* Yearly Activity Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full">
-        <div className="col-span-full w-full">
-          <YearlyActivityStats />
-        </div>
+      <div className="col-span-full w-full max-w-full overflow-hidden">
+        <h2 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
+          <div className="p-2 bg-purple-50 rounded-lg">
+            <TrendingUp className="w-6 h-6 text-purple-500" />
+          </div>
+          Learning Insights
+        </h2>
+        <YearlyActivityStats />
       </div>
       </div>
     </div>
