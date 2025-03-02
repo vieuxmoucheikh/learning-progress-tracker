@@ -157,26 +157,24 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
   // Effect to handle resuming the timer
   useEffect(() => {
     // Only handle resume when transitioning from paused to active state
-    if (isActive && !internalPaused && wasRunningRef.current && startTime) {
-      console.log('Timer resumed');
+    if (isActive && !internalPaused && startTime) {
+      console.log('Timer may need to resume, wasRunningRef:', wasRunningRef.current);
       
-      // Get the frozen time if available
+      // Get the frozen time if available, regardless of wasRunningRef
       const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
       if (frozenTimeStr) {
         const frozenTime = parseInt(frozenTimeStr, 10);
-        console.log('Resuming from frozen time:', frozenTime);
+        console.log('Found frozen time:', frozenTime, 'seconds');
         
-        // Set elapsed time to the frozen time
+        // Set elapsed time to the frozen time to resume from the right point
         setElapsedTime(frozenTime);
       }
       
-      // Start the interval again
+      // Start the interval if it's not already running
       if (!intervalRef.current) {
-        console.log('Starting interval on resume');
+        console.log('Starting interval on resume or initial start');
         intervalRef.current = setInterval(() => {
-          if (!internalPaused) {
-            validateSession();
-          }
+          validateSession();
         }, 1000);
       }
       
@@ -203,15 +201,16 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
     
     // Only create a new interval if we don't already have one
     if (!intervalRef.current) {
+      console.log('Creating new interval for timer');
       intervalRef.current = setInterval(() => {
-        if (!internalPaused) {
-          validateSession();
-        }
+        validateSession();
       }, 1000);
     }
     
+    // Cleanup when component unmounts or dependencies change
     return () => {
       if (intervalRef.current) {
+        console.log('Cleaning up interval on dependency change');
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }

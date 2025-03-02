@@ -274,6 +274,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     const pausedSession = item.progress.sessions.find(s => s.status === 'on_hold' && !s.endTime);
     if (!pausedSession) return;
     
+    console.log('Resuming session...');
+    
     // Get the pause time from localStorage
     const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${item.id}`);
     
@@ -288,10 +290,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       
       // Add this pause duration to the accumulated time
       const newAccumulatedTime = accumulatedTime + Math.floor(pauseDuration / 1000);
+      console.log('New accumulated pause time:', newAccumulatedTime);
       localStorage.setItem(`sessionAccumulatedTime_${item.id}`, newAccumulatedTime.toString());
       
-      // Remove the pause time marker but keep the frozen time
-      // This is critical - we need to keep the frozen time so the timer resumes from the correct point
+      // CRITICAL: Remove the pause time marker but keep the frozen time
+      // We need to keep frozen time for the timer to know where to resume from
       localStorage.removeItem(`sessionPauseTime_${item.id}`);
       localStorage.removeItem(`sessionPauseTimeDisplay_${item.id}`);
       
@@ -312,8 +315,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           }
         });
         
-        // Reset the paused state
+        // Reset the paused state in the component
+        // This will trigger the useSessionTimer hook to start the timer again
         setIsPausedState(false);
+        setPausedTime(null);
       }
     }
   }, [item, onUpdate]);
@@ -577,34 +582,48 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   };
 
   const getSessionTimeDisplay = useCallback(() => {
-    // If session is paused, use the pausedTime state
+    // If session is paused, check for a frozen display time
     if (isPausedState) {
       // First try to get from state
       if (pausedTime) {
+        console.log('Using pausedTime from state:', pausedTime);
         return pausedTime;
       }
       
-      // Then try to get from localStorage
-      const frozenTimeFormatted = localStorage.getItem(`sessionCurrentTimeFormatted_${item.id}`);
-      if (frozenTimeFormatted) {
-        return frozenTimeFormatted;
-      }
-      
+      // Next try to get from localStorage
       const pauseTimeDisplay = localStorage.getItem(`sessionPauseTimeDisplay_${item.id}`);
       if (pauseTimeDisplay) {
+        console.log('Using pauseTimeDisplay from localStorage:', pauseTimeDisplay);
         return pauseTimeDisplay;
       }
-    } else {
-      // For active sessions, use the centralized time source
-      const currentTimeFormatted = localStorage.getItem(`sessionCurrentTimeFormatted_${item.id}`);
-      if (currentTimeFormatted) {
-        return currentTimeFormatted;
+      
+      // Next try to get frozen time
+      const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${item.id}`);
+      if (frozenTimeStr) {
+        const frozenTime = parseInt(frozenTimeStr, 10);
+        const formatted = formatSecondsToHHMMSS(frozenTime);
+        console.log('Using frozenTime from localStorage:', formatted);
+        return formatted;
       }
+    }
+    
+    // If active session but not paused, show the current timer
+    if (activeSession && activeSession.status === 'in_progress') {
+      console.log('Using formattedTime from timer:', formattedTime);
+      return formattedTime;
     }
     
     // Fallback to the timer's formatted time or default
     return formattedTime || '00:00:00';
-  }, [isPausedState, pausedTime, item.id, formattedTime]);
+  }, [isPausedState, pausedTime, item.id, formattedTime, activeSession]);
+
+  const formatSecondsToHHMMSS = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const renderDuration = () => {
     const totalCurrentMinutes = calculateTotalTimeSpent(item);
