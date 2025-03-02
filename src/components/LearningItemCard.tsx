@@ -563,6 +563,21 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     );
   };
 
+  const getSessionTimeDisplay = () => {
+    if (isPaused) {
+      return pausedTime || '00:00:00';
+    }
+    
+    // For active sessions, check if we're in the middle of a pause
+    const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${item.id}`);
+    if (pauseTimeStr) {
+      return pausedTime || '00:00:00';
+    }
+    
+    // Otherwise use the current formatElapsedTime value
+    return formatElapsedTime();
+  };
+
   const renderSessionHistory = () => {
     if (!item.progress?.sessions?.length) {
       return (
@@ -1009,8 +1024,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               <div className="flex items-center gap-3">
                 <span className="text-sm font-medium text-blue-600">
                   {activeSession?.status === 'on_hold' || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime)
-                    ? `Session Paused: ${pausedTime || '00:00:00'}`
-                    : `Current Session: ${formatElapsedTime()}`}
+                    ? `Session Paused: ${getSessionTimeDisplay()}`
+                    : `Current Session: ${getSessionTimeDisplay()}`}
                 </span>
                 {activeSession?.status !== 'on_hold' && (
                   <Button

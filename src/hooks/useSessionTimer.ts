@@ -282,6 +282,18 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
     };
   }, [isActive, internalPaused, startTime, itemId, validateSession]);
 
+  // Ensure elapsed time remains frozen when a session is paused
+  useEffect(() => {
+    if (internalPaused && itemId) {
+      // Check for frozen time
+      const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
+      if (frozenTimeStr) {
+        const frozenTime = parseInt(frozenTimeStr, 10);
+        setElapsedTime(frozenTime);
+      }
+    }
+  }, [internalPaused, itemId, elapsedTime]);
+
   const formatElapsedTime = () => {
     const hours = Math.floor(elapsedTime / 3600);
     const minutes = Math.floor((elapsedTime % 3600) / 60);
