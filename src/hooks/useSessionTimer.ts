@@ -1,40 +1,97 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-interface SessionTimerProps {
+interface Props {
   isActive: boolean;
   startTime: string | null;
   itemId: string;
-  isPaused?: boolean; 
+  isPaused: boolean;
 }
 
-export function useSessionTimer({ isActive, startTime, itemId, isPaused = false }: SessionTimerProps) {
-  const [elapsedTime, setElapsedTime] = useState(0);
+export function useSessionTimer({ isActive, startTime, itemId, isPaused }: Props) {
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [lastUpdateTime, setLastUpdateTime] = useState<number | null>(null);
   const accumulatedTimeRef = useRef<number>(0);
-  const pauseTimeRef = useRef<number | null>(null);
+  const timerRef = useRef<number | null>(null);
+  const isValidSession = isActive && startTime;
 
+  // Function to calculate elapsed time
+  const calculateElapsedTime = () => {
+    if (!isValidSession) return 0;
+    
+    // If paused, return the accumulated time without adding current time
+    if (isPaused) {
+      const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
+      if (pauseTimeStr) {
+        const pauseTime = parseInt(pauseTimeStr, 10);
+        const startTimeMs = new Date(startTime).getTime();
+        return accumulatedTimeRef.current + (pauseTime - startTimeMs);
+      }
+      return accumulatedTimeRef.current;
+    }
+    
+    // If active and not paused, calculate current elapsed time
+    const startTimeMs = new Date(startTime).getTime();
+    const now = Date.now();
+    
+    // Get accumulated time from localStorage or use the ref value
+    const storedAccumulatedTime = localStorage.getItem(`accumulatedTime_${itemId}`);
+    const accumulatedTime = storedAccumulatedTime 
+      ? parseInt(storedAccumulatedTime, 10) 
+      : accumulatedTimeRef.current;
+    
+    return accumulatedTime + (now - startTimeMs);
+  };
+
+  // Update timer
   useEffect(() => {
-    const storedAccumulatedTime = localStorage.getItem(`sessionAccumulatedTime_${itemId}`);
+    if (!isValidSession) {
+      setElapsedTime(0);
+      return;
+    }
+
+    // Load accumulated time from localStorage
+    const storedAccumulatedTime = localStorage.getItem(`accumulatedTime_${itemId}`);
     if (storedAccumulatedTime) {
       accumulatedTimeRef.current = parseInt(storedAccumulatedTime, 10);
     }
-  }, [itemId]);
 
-  const validateSession = useCallback(() => {
-    if (!startTime) return false;
-    
-    const start = new Date(startTime).getTime();
-    const now = Date.now();
-    
-    return start <= now && (now - start) < 24 * 60 * 60 * 1000;
-  }, [startTime]);
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
 
+    // Only start interval if session is active and not paused
+    if (isActive && !isPaused) {
+      // Initial calculation
+      setElapsedTime(calculateElapsedTime());
+      setLastUpdateTime(Date.now());
+      
+      // Start interval
+      timerRef.current = window.setInterval(() => {
+        setElapsedTime(calculateElapsedTime());
+        setLastUpdateTime(Date.now());
+      }, 1000);
+    } else if (isPaused) {
+      // If paused, just set the elapsed time once
+      setElapsedTime(calculateElapsedTime());
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [isActive, startTime, isPaused, itemId]);
+
+  // Handle page visibility changes
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && isActive && !isPaused) {
-        const now = Date.now();
-        localStorage.setItem(`sessionLastUpdate_${itemId}`, now.toString());
-        setLastUpdateTime(now);
+      if (document.visibilityState === 'visible') {
+        if (isValidSession && !isPaused) {
+          // Recalculate elapsed time when page becomes visible
+          setElapsedTime(calculateElapsedTime());
+          setLastUpdateTime(Date.now());
+        }
       }
     };
 
@@ -42,77 +99,22 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isActive, isPaused, itemId]);
+  }, [isValidSession, isPaused]);
 
-  useEffect(() => {
-    if (isPaused && isActive) {
-      const pauseTime = Date.now();
-      pauseTimeRef.current = pauseTime;
-      localStorage.setItem(`sessionPauseTime_${itemId}`, pauseTime.toString());
-    } else if (!isPaused && isActive) {
-      const storedPauseTime = pauseTimeRef.current || 
-        parseInt(localStorage.getItem(`sessionPauseTime_${itemId}`) || '0', 10);
-      
-      if (storedPauseTime) {
-        const now = Date.now();
-        const pauseDuration = Math.floor((now - storedPauseTime) / 1000);
-        
-        accumulatedTimeRef.current += pauseDuration;
-        localStorage.setItem(`sessionAccumulatedTime_${itemId}`, accumulatedTimeRef.current.toString());
-        
-        pauseTimeRef.current = null;
-        localStorage.removeItem(`sessionPauseTime_${itemId}`);
-      }
-    }
-  }, [isPaused, isActive, itemId]);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-
-    if (isActive && startTime && validateSession() && !isPaused) {
-      const start = new Date(startTime).getTime();
-      
-      const updateElapsedTime = () => {
-        const now = Date.now();
-        const rawElapsed = Math.floor((now - start) / 1000);
-        const adjusted = Math.max(0, rawElapsed - accumulatedTimeRef.current);
-        
-        setElapsedTime(adjusted);
-        setLastUpdateTime(now);
-        
-        localStorage.setItem(`sessionLastUpdate_${itemId}`, now.toString());
-      };
-
-      updateElapsedTime(); 
-      interval = setInterval(updateElapsedTime, 1000);
-    } else if (!isActive) {
-      setElapsedTime(0);
-      setLastUpdateTime(null);
-      accumulatedTimeRef.current = 0;
-      pauseTimeRef.current = null;
-      localStorage.removeItem(`sessionLastUpdate_${itemId}`);
-      localStorage.removeItem(`sessionAccumulatedTime_${itemId}`);
-      localStorage.removeItem(`sessionPauseTime_${itemId}`);
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [isActive, startTime, itemId, validateSession, isPaused]);
-
+  // Format elapsed time
   const formatElapsedTime = () => {
-    const hours = Math.floor(elapsedTime / 3600);
-    const minutes = Math.floor((elapsedTime % 3600) / 60);
-    const seconds = elapsedTime % 60;
+    const totalSeconds = Math.floor(elapsedTime / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  return { 
-    elapsedTime, 
-    formatElapsedTime, 
+  return {
+    elapsedTime,
+    formatElapsedTime,
     lastUpdateTime,
-    isValidSession: validateSession()
+    isValidSession
   };
 }

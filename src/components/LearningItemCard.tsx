@@ -99,8 +99,20 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [isTimeEditing, setIsTimeEditing] = useState(false);
   const [editedMinutes, setEditedMinutes] = useState(calculateTotalTimeSpent(item));
 
-  const activeSession = item.progress?.sessions?.find(session => !session.endTime);
-  const isPaused = activeSession?.status === 'on_hold';
+  // Get active session
+  const activeSession = item.progress?.sessions?.find(
+    session => !session.endTime && session.status === 'in_progress'
+  );
+  
+  // Get paused session
+  const pausedSession = item.progress?.sessions?.find(
+    session => !session.endTime && session.status === 'on_hold'
+  );
+  
+  // Determine if this session is paused
+  const isPaused = !!pausedSession;
+
+  // Use session timer
   const { elapsedTime, formatElapsedTime, lastUpdateTime, isValidSession } = useSessionTimer({
     isActive: !!activeSession,
     startTime: activeSession?.startTime || null,
@@ -180,7 +192,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     
     // Then update item with new session and status
     onUpdate(item.id, {
-      status: 'in_progress',
+      status: 'in_progress' as const,
       progress: {
         ...item.progress,
         sessions: [...[newSession], ...(item.progress.sessions || [])]  // Add new session at the beginning
@@ -195,121 +207,134 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   // Handle session pause
   const handlePauseSession = useCallback(() => {
     if (!activeSession || !item.progress?.sessions) return;
-
-    // Store pause time in localStorage
-    localStorage.setItem(`sessionPauseTime_${item.id}`, Date.now().toString());
-
-    // Update the current session to paused state
-    const updatedSessions = item.progress.sessions.map(s => 
-      s.startTime === activeSession.startTime ? {
-        ...s,
-        status: 'on_hold' as const
-      } : s
-    );
-
-    // First stop tracking
-    onStopTracking(item.id);
-
-    // Then update the session status
+    
+    // Store the pause time in localStorage
+    const pauseTime = Date.now();
+    localStorage.setItem(`sessionPauseTime_${item.id}`, pauseTime.toString());
+    
+    // Calculate accumulated time up to this point
+    const startTimeMs = new Date(activeSession.startTime).getTime();
+    const accumulatedTime = pauseTime - startTimeMs;
+    
+    // Store accumulated time
+    localStorage.setItem(`accumulatedTime_${item.id}`, accumulatedTime.toString());
+    
+    // Update session status
+    const updatedSessions = item.progress.sessions.map(session => {
+      if (!session.endTime && session.status === 'in_progress') {
+        return { ...session, status: 'on_hold' as const };
+      }
+      return session;
+    });
+    
     onUpdate(item.id, {
-      status: 'on_hold',
       progress: {
-        ...item.progress,
+        current: item.progress.current,
+        total: item.progress.total,
         sessions: updatedSessions
       }
     });
-  }, [item, activeSession, onUpdate, onStopTracking]);
+  }, [item, activeSession, onUpdate]);
 
   // Handle session resume
   const handleResumeSession = useCallback(() => {
     if (!item.progress?.sessions) return;
-
-    const pausedSession = item.progress.sessions.find(s => s.status === 'on_hold' && !s.endTime);
-    if (!pausedSession) return;
-
-    // Clean up any existing active session in localStorage
-    localStorage.removeItem(`activeSession_${item.id}`);
-    localStorage.removeItem(`sessionLastUpdate_${item.id}`);
-    localStorage.removeItem(`sessionPauseTime_${item.id}`);
-
-    // Update the session status
-    const updatedSessions = item.progress.sessions.map(s => 
-      s.startTime === pausedSession.startTime ? {
-        ...s,
-        status: 'in_progress' as const
-      } : s
+    
+    // Find the paused session
+    const pausedSession = item.progress.sessions.find(
+      session => !session.endTime && session.status === 'on_hold'
     );
-
-    // First update the session status
+    
+    if (!pausedSession) return;
+    
+    // Update session status
+    const updatedSessions = item.progress.sessions.map(session => {
+      if (!session.endTime && session.status === 'on_hold') {
+        return { ...session, status: 'in_progress' as const };
+      }
+      return session;
+    });
+    
     onUpdate(item.id, {
-      status: 'in_progress',
       progress: {
-        ...item.progress,
+        current: item.progress.current,
+        total: item.progress.total,
         sessions: updatedSessions
       }
     });
-
-    // Then start tracking
-    onStartTracking(item.id);
-  }, [item, onUpdate, onStartTracking]);
+    
+    // Set active item
+    onSetActiveItem(item.id);
+  }, [item, onUpdate, onSetActiveItem]);
 
   // Handle session stop
   const handleStopSession = useCallback(() => {
     if (!item.progress?.sessions) return;
-
-    // Find all active or paused sessions
-    const activeSessions = item.progress.sessions.filter(s => !s.endTime);
-    if (activeSessions.length === 0) return;
-
-    const now = new Date();
-
-    // Update all active/on-hold sessions to completed
-    const updatedSessions = item.progress.sessions.map(s => {
-      if (!s.endTime) {
-        const startTime = new Date(s.startTime);
-        const diffInMinutes = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
-        
+    
+    // Find the active or paused session
+    const currentSession = item.progress.sessions.find(
+      session => !session.endTime && (session.status === 'in_progress' || session.status === 'on_hold')
+    );
+    
+    if (!currentSession) return;
+    
+    // Clean up localStorage
+    localStorage.removeItem(`sessionPauseTime_${item.id}`);
+    localStorage.removeItem(`accumulatedTime_${item.id}`);
+    
+    // Calculate duration
+    const startTime = new Date(currentSession.startTime).getTime();
+    const endTime = Date.now();
+    const durationMs = endTime - startTime;
+    const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+    const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    // Update session with end time and duration
+    const updatedSessions = item.progress.sessions.map(session => {
+      if (session === currentSession) {
         return {
-          ...s,
-          endTime: now.toISOString(),
+          ...session,
+          endTime: new Date().toISOString(),
+          status: 'completed' as const,
           duration: {
-            hours: Math.floor(diffInMinutes / 60),
-            minutes: diffInMinutes % 60
-          },
-          status: 'completed' as const
+            hours: durationHours,
+            minutes: durationMinutes
+          }
         };
       }
-      return s;
+      return session;
     });
-
-    // Clean up all localStorage items first
-    localStorage.removeItem(`activeSession_${item.id}`);
-    localStorage.removeItem(`sessionLastUpdate_${item.id}`);
-    localStorage.removeItem(`sessionPauseTime_${item.id}`);
-
-    // Stop tracking before updating the sessions
-    onStopTracking(item.id);
-
-    // Finally update the sessions
+    
+    // Update item
     onUpdate(item.id, {
-      status: item.completed ? 'completed' : 'in_progress',
       progress: {
-        ...item.progress,
+        current: item.progress.current,
+        total: item.progress.total,
         sessions: updatedSessions
       }
     });
-  }, [item, onUpdate, onStopTracking]);
+    
+    // Clear active item if this was the active item
+    if (activeSession) {
+      onSetActiveItem(null);
+    }
+  }, [item, activeSession, onUpdate, onSetActiveItem]);
 
   const handleAddNote = useCallback(() => {
     if (!sessionNote.trim() || !activeSession) return;
 
-    const sessions = item.progress?.sessions || [];
-    
-    const updatedSessions = sessions.map(session => {
-      if (session.startTime === activeSession.startTime) {
+    const updatedSessions = item.progress.sessions.map(session => {
+      if (session === activeSession) {
+        const updatedNotes = session.notes || [];
         return {
           ...session,
-          notes: [...(session.notes || []), sessionNote.trim()]
+          notes: [
+            ...updatedNotes,
+            {
+              content: sessionNote,
+              timestamp: new Date().toISOString()
+            }
+          ]
         };
       }
       return session;
@@ -317,15 +342,16 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
     onUpdate(item.id, {
       progress: {
-        ...item.progress,
+        current: item.progress.current,
+        total: item.progress.total,
         sessions: updatedSessions
       }
     });
 
-    onSessionNoteAdd(item.id, sessionNote);
     setSessionNote('');
     setShowNoteDialog(false);
-  }, [item.id, item.progress, sessionNote, onSessionNoteAdd, onUpdate, activeSession]);
+    onSessionNoteAdd(item.id, sessionNote);
+  }, [sessionNote, activeSession, item, onUpdate, onSessionNoteAdd]);
 
   const handleSaveNotes = () => {
     onNotesUpdate(item.id, editedNotes);
@@ -454,7 +480,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     // Update the sessions in the progress
     onUpdate(item.id, {
       progress: {
-        ...item.progress,
+        current: item.progress.current,
+        total: item.progress.total,
         sessions: updatedSessions
       }
     });
@@ -691,7 +718,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       
       onUpdate(item.id, {
         progress: {
-          ...item.progress,
+          current: item.progress.current,
+          total: item.progress.total,
           sessions: updatedSessions
         }
       });

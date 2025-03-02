@@ -653,7 +653,6 @@ export default function App() {
         <main>
           {selectedTab === TAB_OPTIONS.DASHBOARD && (
             <div className="space-y-6 mt-6">
-              {renderStats()}
               <DashboardTab
                 items={state.items}
                 onAddItem={handleDashboardAddItem}
@@ -671,7 +670,6 @@ export default function App() {
 
           {selectedTab === TAB_OPTIONS.ITEMS && (
             <div className="space-y-6 mt-6">
-              {renderStats()}
               <ItemsTab
                 items={state.items}
                 onAddItem={handleItemsAddItem}
