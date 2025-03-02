@@ -200,7 +200,23 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       notes: [],
       status: 'in_progress' as const
     };
-
+    
+    // IMPORTANT: Clean up any old timer values in localStorage
+    // This prevents negative numbers and other unexpected behavior
+    console.log('Cleaning up previous timer state before starting new session');
+    localStorage.removeItem(`sessionCurrentTimeSeconds_${item.id}`);
+    localStorage.removeItem(`sessionCurrentTimeFormatted_${item.id}`);
+    localStorage.removeItem(`sessionFrozenTime_${item.id}`);
+    localStorage.removeItem(`sessionPauseTime_${item.id}`);
+    localStorage.removeItem(`sessionPauseTimeDisplay_${item.id}`);
+    localStorage.removeItem(`sessionAccumulatedTime_${item.id}`);
+    localStorage.removeItem(`sessionLastUpdate_${item.id}`);
+    
+    // Reset the local state for timers
+    setPausedTime(null);
+    setIsPausedState(false);
+    setIsPaused(false);
+    
     // First update local state
     onStartTracking(item.id);
     
@@ -213,10 +229,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       }
     });
 
-    // Finally update localStorage
+    // Finally update localStorage with the new clean session
     localStorage.setItem(`activeSession_${item.id}`, JSON.stringify(newSession));
     localStorage.setItem(`sessionLastUpdate_${item.id}`, Date.now().toString());
-  }, [item, onUpdate, onStartTracking, activeSession]);
+    
+    // Force initialize new timer at 0
+    localStorage.setItem(`sessionCurrentTimeSeconds_${item.id}`, "0");
+    localStorage.setItem(`sessionCurrentTimeFormatted_${item.id}`, "00:00:00");
+  }, [item, onUpdate, onStartTracking, activeSession, setIsPaused]);
 
   // Handle session pause
   const handlePauseSession = useCallback(() => {
