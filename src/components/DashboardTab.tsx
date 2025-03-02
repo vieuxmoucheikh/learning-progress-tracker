@@ -101,7 +101,6 @@ export function DashboardTab({
   // Calculate stats
   const stats = useMemo(() => {
     if (!selectedDate) return {
-      totalItems: items.length,
       dailyTimeSpentHours: 0,
       dailyTimeSpentMinutes: 0
     };
@@ -217,7 +216,6 @@ export function DashboardTab({
     });
 
     return {
-      totalItems: items.length,
       dailyTimeSpentHours: Math.floor(dailyTimeSpent / 60),
       dailyTimeSpentMinutes: dailyTimeSpent % 60
     };
@@ -226,18 +224,7 @@ export function DashboardTab({
   return (
     <div className="space-y-4">
       {/* Stats Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <Card className="p-4 hover:shadow-md transition-shadow">
-          <div className="flex items-start justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Total Items</h3>
-              <p className="mt-2 text-3xl font-semibold">{stats.totalItems}</p>
-            </div>
-            <div className="p-2 bg-blue-50 rounded-lg">
-              <BookOpen className="w-5 h-5 text-blue-500" />
-            </div>
-          </div>
-        </Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Card className="p-4 hover:shadow-md transition-shadow">
           <div className="flex items-start justify-between">
             <div>
@@ -259,17 +246,6 @@ export function DashboardTab({
             </div>
             <div className="p-2 bg-green-50 rounded-lg">
               <CheckCircle className="w-5 h-5 text-green-500" />
-            </div>
-          </div>
-        </Card>
-        <Card className="p-4 hover:shadow-md transition-shadow">
-          <div className="flex items-start justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Today's Goals</h3>
-              <p className="mt-2 text-3xl font-semibold text-yellow-600">{activeTasks.length}</p>
-            </div>
-            <div className="p-2 bg-yellow-50 rounded-lg">
-              <Target className="w-5 h-5 text-yellow-500" />
             </div>
           </div>
         </Card>
