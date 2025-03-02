@@ -323,20 +323,49 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     if (!activeSession || !item.progress?.sessions) return;
 
     // Get the current elapsed time directly from our centralized source
-    const currentTimeSecondsStr = localStorage.getItem(`sessionCurrentTimeSeconds_${item.id}`);
-    const elapsedSeconds = currentTimeSecondsStr ? parseInt(currentTimeSecondsStr, 10) : 0;
+    let totalSessionTime = 0;
     
-    // If we're paused, use the accumulated time correctly
-    let totalSessionTime = elapsedSeconds;
-    
-    // If this was a paused session, make sure we don't count any time since the pause
+    // If we're paused, use the frozen time
     if (activeSession.status === 'on_hold') {
       // Use the frozen time for consistent calculations
       const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${item.id}`);
       if (frozenTimeStr) {
         totalSessionTime = parseInt(frozenTimeStr, 10);
+      } else {
+        // Fallback to pause time if frozen time is not available
+        const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${item.id}`);
+        const startTime = new Date(activeSession.startTime).getTime();
+        if (pauseTimeStr && !isNaN(startTime)) {
+          const pauseTime = parseInt(pauseTimeStr, 10);
+          // Get accumulated time from previous pauses
+          const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
+          const accumulatedTime = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
+          
+          // Calculate elapsed time up to the pause point
+          totalSessionTime = Math.floor((pauseTime - startTime) / 1000) - accumulatedTime;
+        }
+      }
+    } else {
+      // For active sessions, use the current time from our centralized source
+      const currentTimeSecondsStr = localStorage.getItem(`sessionCurrentTimeSeconds_${item.id}`);
+      if (currentTimeSecondsStr) {
+        totalSessionTime = parseInt(currentTimeSecondsStr, 10);
+      } else {
+        // Fallback to calculating from start time with accumulated pauses
+        const startTime = new Date(activeSession.startTime).getTime();
+        const now = Date.now();
+        
+        // Get accumulated time from previous pauses
+        const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
+        const accumulatedTime = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
+        
+        // Calculate total time accounting for pauses
+        totalSessionTime = Math.floor((now - startTime) / 1000) - accumulatedTime;
       }
     }
+    
+    // Ensure we have a positive value
+    totalSessionTime = Math.max(0, totalSessionTime);
     
     // Calculate final duration in minutes (rounding down)
     const durationMinutes = Math.floor(totalSessionTime / 60);
@@ -547,6 +576,36 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     setIsTimeEditing(false);
   };
 
+  const getSessionTimeDisplay = useCallback(() => {
+    // If session is paused, use the pausedTime state
+    if (isPaused) {
+      // First try to get from state
+      if (pausedTime) {
+        return pausedTime;
+      }
+      
+      // Then try to get from localStorage
+      const frozenTimeFormatted = localStorage.getItem(`sessionCurrentTimeFormatted_${item.id}`);
+      if (frozenTimeFormatted) {
+        return frozenTimeFormatted;
+      }
+      
+      const pauseTimeDisplay = localStorage.getItem(`sessionPauseTimeDisplay_${item.id}`);
+      if (pauseTimeDisplay) {
+        return pauseTimeDisplay;
+      }
+    } else {
+      // For active sessions, use the centralized time source
+      const currentTimeFormatted = localStorage.getItem(`sessionCurrentTimeFormatted_${item.id}`);
+      if (currentTimeFormatted) {
+        return currentTimeFormatted;
+      }
+    }
+    
+    // Fallback to the timer's formatted time or default
+    return formattedTime || '00:00:00';
+  }, [isPaused, pausedTime, item.id, formattedTime]);
+
   const renderDuration = () => {
     const totalCurrentMinutes = calculateTotalTimeSpent(item);
     
@@ -605,19 +664,108 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     );
   };
 
-  const getSessionTimeDisplay = () => {
-    if (isPaused) {
-      return pausedTime || '00:00:00';
-    }
+  const handleEditNote = useCallback(() => {
+    if (!editingNote || !item.progress?.sessions) return;
+
+    const { sessionIndex, noteIndex, content } = editingNote;
+    const updatedSessions = [...item.progress.sessions];
     
-    // For active sessions, check if we're in the middle of a pause
-    const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${item.id}`);
-    if (pauseTimeStr) {
-      return pausedTime || '00:00:00';
+    if (updatedSessions[sessionIndex]?.notes) {
+      updatedSessions[sessionIndex].notes[noteIndex] = content.trim();
+      
+      onUpdate(item.id, {
+        progress: {
+          ...item.progress,
+          sessions: updatedSessions
+        }
+      });
     }
-    
-    // Otherwise use the current formatElapsedTime value
-    return formatElapsedTime();
+
+    setShowEditNoteDialog(false);
+    setEditingNote(null);
+  }, [editingNote, item.id, item.progress, onUpdate]);
+
+  const openEditNoteDialog = (sessionIndex: number, noteIndex: number, content: string) => {
+    setEditingNote({ sessionIndex, noteIndex, content });
+    setShowEditNoteDialog(true);
+  };
+
+  const handleOpenNoteDialog = () => {
+    setShowNoteDialog(true);
+    setSessionNote('');
+  };
+
+  const handleCloseNoteDialog = () => {
+    setShowNoteDialog(false);
+    setSessionNote('');
+  };
+
+  const handleAddNoteSubmit = () => {
+    handleAddNote();
+    handleCloseNoteDialog();
+  };
+
+  const getBorderColorClass = () => {
+    if (!item.status) {
+      return 'border-gray-300';
+    }
+
+    switch (item.status) {
+      case 'not_started':
+        return 'border-gray-300';
+      case 'in_progress':
+        return 'border-blue-400';
+      case 'completed':
+        return 'border-green-400';
+      case 'on_hold':
+        return 'border-yellow-400';
+      case 'archived':
+        return 'border-gray-400';
+      default:
+        return 'border-gray-300';
+    }
+  };
+
+  const getStatusBadgeClass = () => {
+    if (!item.status) {
+      return 'bg-gray-100 text-gray-600';
+    }
+
+    switch (item.status) {
+      case 'not_started':
+        return 'bg-gray-100 text-gray-600';
+      case 'in_progress':
+        return 'bg-blue-100 text-blue-700';
+      case 'completed':
+        return 'bg-green-100 text-green-700';
+      case 'on_hold':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'archived':
+        return 'bg-gray-200 text-gray-700';
+      default:
+        return 'bg-gray-100 text-gray-600';
+    }
+  };
+
+  const getStatusText = () => {
+    if (!item.status) {
+      return 'Not Started';
+    }
+
+    switch (item.status) {
+      case 'not_started':
+        return 'Not Started';
+      case 'in_progress':
+        return 'In Progress';
+      case 'completed':
+        return 'Completed';
+      case 'on_hold':
+        return 'On Hold';
+      case 'archived':
+        return 'Archived';
+      default:
+        return 'Not Started';
+    }
   };
 
   const renderSessionHistory = () => {
@@ -778,110 +926,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         })}
       </div>
     );
-  };
-
-  const handleEditNote = useCallback(() => {
-    if (!editingNote || !item.progress?.sessions) return;
-
-    const { sessionIndex, noteIndex, content } = editingNote;
-    const updatedSessions = [...item.progress.sessions];
-    
-    if (updatedSessions[sessionIndex]?.notes) {
-      updatedSessions[sessionIndex].notes[noteIndex] = content.trim();
-      
-      onUpdate(item.id, {
-        progress: {
-          ...item.progress,
-          sessions: updatedSessions
-        }
-      });
-    }
-
-    setShowEditNoteDialog(false);
-    setEditingNote(null);
-  }, [editingNote, item.id, item.progress, onUpdate]);
-
-  const openEditNoteDialog = (sessionIndex: number, noteIndex: number, content: string) => {
-    setEditingNote({ sessionIndex, noteIndex, content });
-    setShowEditNoteDialog(true);
-  };
-
-  const handleOpenNoteDialog = () => {
-    setShowNoteDialog(true);
-    setSessionNote('');
-  };
-
-  const handleCloseNoteDialog = () => {
-    setShowNoteDialog(false);
-    setSessionNote('');
-  };
-
-  const handleAddNoteSubmit = () => {
-    handleAddNote();
-    handleCloseNoteDialog();
-  };
-
-  const getBorderColorClass = () => {
-    if (!item.status) {
-      return 'border-gray-300';
-    }
-
-    switch (item.status) {
-      case 'not_started':
-        return 'border-gray-300';
-      case 'in_progress':
-        return 'border-blue-400';
-      case 'completed':
-        return 'border-green-400';
-      case 'on_hold':
-        return 'border-yellow-400';
-      case 'archived':
-        return 'border-gray-400';
-      default:
-        return 'border-gray-300';
-    }
-  };
-
-  const getStatusBadgeClass = () => {
-    if (!item.status) {
-      return 'bg-gray-100 text-gray-600';
-    }
-
-    switch (item.status) {
-      case 'not_started':
-        return 'bg-gray-100 text-gray-600';
-      case 'in_progress':
-        return 'bg-blue-100 text-blue-700';
-      case 'completed':
-        return 'bg-green-100 text-green-700';
-      case 'on_hold':
-        return 'bg-yellow-100 text-yellow-700';
-      case 'archived':
-        return 'bg-gray-200 text-gray-700';
-      default:
-        return 'bg-gray-100 text-gray-600';
-    }
-  };
-
-  const getStatusText = () => {
-    if (!item.status) {
-      return 'Not Started';
-    }
-
-    switch (item.status) {
-      case 'not_started':
-        return 'Not Started';
-      case 'in_progress':
-        return 'In Progress';
-      case 'completed':
-        return 'Completed';
-      case 'on_hold':
-        return 'On Hold';
-      case 'archived':
-        return 'Archived';
-      default:
-        return 'Not Started';
-    }
   };
 
   return (
@@ -1066,8 +1110,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               <div className="flex items-center gap-3">
                 <span className="text-sm font-medium text-blue-600">
                   {activeSession?.status === 'on_hold' || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime)
-                    ? `Session Paused: ${pausedTime || '00:00:00'}`
-                    : `Current Session: ${localStorage.getItem(`sessionCurrentTimeFormatted_${item.id}`) || formattedTime || '00:00:00'}`}
+                    ? `Session Paused: ${formatElapsedTime()}`
+                    : `Current Session: ${formatElapsedTime()}`}
                 </span>
                 {activeSession?.status !== 'on_hold' && (
                   <Button

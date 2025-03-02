@@ -260,7 +260,9 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
     // Only create a new interval if we don't already have one
     if (!intervalRef.current) {
       intervalRef.current = setInterval(() => {
-        validateSession();
+        if (!internalPaused) {
+          validateSession();
+        }
       }, 1000);
     }
     
