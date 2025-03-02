@@ -221,50 +221,53 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const handleStartSession = useCallback(() => {
     if (activeSession || !item.progress) return; // Prevent multiple active sessions
     
-    const now = new Date();
-    const newSession = {
-      startTime: now.toISOString(),
-      date: now.toISOString().split('T')[0],
-      notes: [],
-      status: 'in_progress' as const
-    };
+    console.log('Starting new session...');
     
-    // IMPORTANT: Clean up any old timer values in localStorage
-    // This prevents negative numbers and other unexpected behavior
-    console.log('Cleaning up previous timer state before starting new session');
-    localStorage.removeItem(`sessionCurrentTimeSeconds_${item.id}`);
-    localStorage.removeItem(`sessionCurrentTimeFormatted_${item.id}`);
+    // IMPORTANT: Reset all timer state in localStorage
     localStorage.removeItem(`sessionFrozenTime_${item.id}`);
     localStorage.removeItem(`sessionPauseTime_${item.id}`);
     localStorage.removeItem(`sessionPauseTimeDisplay_${item.id}`);
+    localStorage.removeItem(`sessionCurrentTimeFormatted_${item.id}`);
+    localStorage.removeItem(`sessionCurrentTimeSeconds_${item.id}`);
+    localStorage.removeItem(`sessionIsPaused_${item.id}`);
     localStorage.removeItem(`sessionAccumulatedTime_${item.id}`);
-    localStorage.removeItem(`sessionLastUpdate_${item.id}`);
     
-    // Reset the local state for timers
+    // Set accumulated time to 0 for a fresh start
+    localStorage.setItem(`sessionAccumulatedTime_${item.id}`, '0');
+    
+    const now = new Date();
+    const newSession: LocalSession = {
+      startTime: now.toISOString(),
+      date: now.toISOString().split('T')[0],
+      hours: 0,
+      minutes: 0,
+      notes: [],
+      status: 'in_progress'
+    };
+    
+    // Store the new session in localStorage for persistence
+    localStorage.setItem(`activeSession_${item.id}`, JSON.stringify(newSession));
+    localStorage.setItem(`sessionLastUpdate_${item.id}`, Date.now().toString());
+    
+    // Update the item with the new session
+    onUpdate(item.id, {
+      progress: {
+        ...item.progress,
+        sessions: [newSession, ...(item.progress.sessions || [])]
+      }
+    });
+    
+    // Notify parent components
+    onStartTracking(item.id);
+    onSetActiveItem(item.id);
+    
+    // Reset any paused state
     setPausedTime(null);
     setIsPausedState(false);
     setIsPaused(false);
     
-    // First update local state
-    onStartTracking(item.id);
-    
-    // Then update item with new session and status
-    onUpdate(item.id, {
-      status: 'in_progress',
-      progress: {
-        ...item.progress,
-        sessions: [...[newSession], ...(item.progress.sessions || [])]  // Add new session at the beginning
-      }
-    });
-
-    // Finally update localStorage with the new clean session
-    localStorage.setItem(`activeSession_${item.id}`, JSON.stringify(newSession));
-    localStorage.setItem(`sessionLastUpdate_${item.id}`, Date.now().toString());
-    
-    // Force initialize new timer at 0
-    localStorage.setItem(`sessionCurrentTimeSeconds_${item.id}`, "0");
-    localStorage.setItem(`sessionCurrentTimeFormatted_${item.id}`, "00:00:00");
-  }, [item, onUpdate, onStartTracking, activeSession, setIsPaused]);
+    console.log('New session started with ID:', item.id);
+  }, [item, onStartTracking, onSetActiveItem, onUpdate, activeSession, setIsPaused]);
 
   // Handle session pause
   const handlePauseSession = useCallback(() => {

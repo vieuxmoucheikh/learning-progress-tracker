@@ -102,7 +102,10 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
   
   // Start or resume the timer
   const startTimer = useCallback(() => {
-    if (!startTime || internalPaused) return;
+    if (!startTime || internalPaused) {
+      console.log("Cannot start timer: timer is paused or no start time");
+      return;
+    }
     
     console.log("Starting/resuming timer...");
     
@@ -196,9 +199,11 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     }
     
     // Start a new interval with a faster update rate (250ms) for smoother updates
+    console.log('Creating new timer interval');
     intervalRef.current = setInterval(() => {
       if (internalPaused) {
         // Double-check: if somehow we're paused but the interval is running, stop it
+        console.log('Timer is paused but interval is running - stopping interval');
         clearTimerInterval();
         return;
       }
@@ -210,6 +215,12 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     }, 250); // Faster updates for smoother UI
     
     console.log('Timer interval started');
+    
+    // Force an immediate update to make sure the timer is visibly running
+    const currentElapsed = calculateElapsedTime();
+    setElapsedTime(currentElapsed);
+    updateFormattedTime(currentElapsed);
+    setLastUpdateTime(Date.now());
   }, [calculateElapsedTime, clearTimerInterval, internalPaused, itemId, startTime, updateFormattedTime]);
   
   // Effect to initialize from localStorage
@@ -224,6 +235,9 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
       if (shouldBePaused) {
         console.log('Found explicit pause flag or externally paused state - timer should be paused');
         setInternalPaused(true);
+      } else {
+        // If not paused, make sure we're definitely not paused
+        setInternalPaused(false);
       }
       
       // Initialize accumulated time from localStorage
@@ -232,6 +246,11 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
         const accumulatedTime = parseInt(accumulatedTimeStr, 10);
         accumulatedTimeRef.current = accumulatedTime;
         console.log('Initialized accumulated time:', accumulatedTime, 'seconds');
+      } else {
+        // If no accumulated time, initialize to 0
+        accumulatedTimeRef.current = 0;
+        localStorage.setItem(`sessionAccumulatedTime_${itemId}`, '0');
+        console.log('No accumulated time found, initialized to 0');
       }
       
       // Check if we are paused based on pause time marker
@@ -264,18 +283,26 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
           // Store this for future reference
           localStorage.setItem(`sessionFrozenTime_${itemId}`, safeElapsed.toString());
         }
-      } else if (!externalPaused) {
-        // Not paused - initialize from frozen time if available
+      } else {
+        // Not paused - check if we have a frozen time to start from
         const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
         if (frozenTimeStr) {
           const frozenTime = parseInt(frozenTimeStr, 10);
           setElapsedTime(frozenTime);
           updateFormattedTime(frozenTime);
           console.log('Initialized elapsed time from frozen time:', frozenTime, 'seconds');
+        } else {
+          // No frozen time - this is likely a new session or one that should start from 0
+          console.log('No frozen time found, starting timer from 0');
+          setElapsedTime(0);
+          updateFormattedTime(0);
+          
+          // Make sure to start the timer
+          startTimer();
         }
       }
     }
-  }, [isActive, externalPaused, itemId, startTime, updateFormattedTime]);
+  }, [isActive, externalPaused, itemId, startTime, updateFormattedTime, startTimer]);
   
   // Effect to sync internal paused state with external
   useEffect(() => {
@@ -339,11 +366,16 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
       return;
     }
     
+    console.log('Main timer effect - checking if timer should be running');
+    
     // Check if we need to be paused
     const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
-    if (pauseTimeStr) {
+    const isPausedStr = localStorage.getItem(`sessionIsPaused_${itemId}`);
+    const shouldBePaused = isPausedStr === 'true' || !!pauseTimeStr;
+    
+    if (shouldBePaused) {
       if (!internalPaused) {
-        console.log('Found pause marker in localStorage, forcing pause');
+        console.log('Found pause markers in localStorage, forcing pause');
         setInternalPaused(true);
       }
       return;
@@ -351,6 +383,7 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     
     // Start timer if not paused
     if (!internalPaused) {
+      console.log('Timer should be running - starting interval');
       startTimer();
     }
     
