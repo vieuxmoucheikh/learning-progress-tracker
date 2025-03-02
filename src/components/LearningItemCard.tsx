@@ -98,10 +98,18 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [showEditNoteDialog, setShowEditNoteDialog] = useState(false);
   const [isTimeEditing, setIsTimeEditing] = useState(false);
   const [editedMinutes, setEditedMinutes] = useState(calculateTotalTimeSpent(item));
-  const [pausedTime, setPausedTime] = useState<string | null>(null);
 
   const activeSession = item.progress?.sessions?.find(session => !session.endTime);
   const isPaused = activeSession?.status === 'on_hold'; // Check if session is paused
+
+  const [pausedTime, setPausedTime] = useState<string | null>(null);
+
+  const { elapsedTime, formatElapsedTime, lastUpdateTime, isValidSession } = useSessionTimer({
+    isActive: !!activeSession,
+    startTime: activeSession?.startTime || null,
+    itemId: item.id,
+    isPaused: isPaused // Pass the paused state to the hook
+  });
 
   // Initialize pausedTime from localStorage if session is paused
   useEffect(() => {
@@ -112,18 +120,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       if (storedPauseTimeDisplay) {
         setPausedTime(storedPauseTimeDisplay);
       } else {
-        // If not, use formatElapsedTime as a fallback (should be frozen from useSessionTimer)
-        setPausedTime(formatElapsedTime());
+        // If not, create a default display format (00:00:00)
+        setPausedTime('00:00:00');
       }
     }
-  }, [item.id, activeSession, formatElapsedTime, item.progress?.sessions]);
-
-  const { elapsedTime, formatElapsedTime, lastUpdateTime, isValidSession } = useSessionTimer({
-    isActive: !!activeSession,
-    startTime: activeSession?.startTime || null,
-    itemId: item.id,
-    isPaused: isPaused // Pass the paused state to the hook
-  });
+  }, [item.id, activeSession, item.progress?.sessions]);
 
   // Handle session persistence and cleanup
   useEffect(() => {
@@ -222,7 +223,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     localStorage.setItem(`sessionPauseTime_${item.id}`, now.toString());
     
     // Store the current formatted elapsed time for display during pause
-    localStorage.setItem(`sessionPauseTimeDisplay_${item.id}`, formatElapsedTime());
+    const formattedTime = formatElapsedTime();
+    localStorage.setItem(`sessionPauseTimeDisplay_${item.id}`, formattedTime);
+    setPausedTime(formattedTime);
     
     // Then update the session status
     const updatedSessions = item.progress.sessions.map(s => 
