@@ -286,9 +286,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     const elapsedUntilPause = Math.floor((pauseTime - startTime) / 1000) - accumulatedTime;
     
     // Store the frozen time and formatted display
-    const currentFormattedTime = formatSecondsToHHMMSS(elapsedUntilPause);
-    localStorage.setItem(`sessionFrozenTime_${item.id}`, elapsedUntilPause.toString());
-    localStorage.setItem(`sessionCurrentTimeSeconds_${item.id}`, elapsedUntilPause.toString());
+    const currentFormattedTime = formatSecondsToHHMMSS(Math.max(0, elapsedUntilPause));
+    localStorage.setItem(`sessionFrozenTime_${item.id}`, Math.max(0, elapsedUntilPause).toString());
+    localStorage.setItem(`sessionCurrentTimeSeconds_${item.id}`, Math.max(0, elapsedUntilPause).toString());
     localStorage.setItem(`sessionCurrentTimeFormatted_${item.id}`, currentFormattedTime);
     localStorage.setItem(`sessionPauseTimeDisplay_${item.id}`, currentFormattedTime);
     
@@ -298,7 +298,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     // Update the local state immediately to show the paused time
     setPausedTime(currentFormattedTime);
     
-    // Force the timer to stop immediately by setting both state variables
+    // CRITICAL: Force the timer to stop immediately by setting both state variables
+    // This must happen BEFORE updating the session to ensure the timer stops
     setIsPausedState(true);
     setIsPaused(true);
     

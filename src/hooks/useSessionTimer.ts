@@ -318,23 +318,32 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
       }
     }
     
+    // Update internal state to match external state
     setInternalPaused(externalPaused);
     
-    // If we're now paused, make sure to save the current state
+    // If we're now paused, make sure to save the current state and stop the timer
     if (externalPaused && startTime) {
       console.log('Saving pause state on external pause change');
+      
+      // Stop any running interval
+      clearTimerInterval();
+      
+      // Calculate and save the current elapsed time
       const currentElapsed = calculateElapsedTime();
       localStorage.setItem(`sessionFrozenTime_${itemId}`, currentElapsed.toString());
+      
+      // Update the display time immediately and freeze it
       updateFormattedTime(currentElapsed);
+      setElapsedTime(currentElapsed);
     }
-  }, [externalPaused, calculateElapsedTime, itemId, startTime, updateFormattedTime, internalPaused]);
+  }, [externalPaused, calculateElapsedTime, itemId, startTime, updateFormattedTime, internalPaused, clearTimerInterval]);
   
   // Effect to handle pausing
   useEffect(() => {
     if (!isActive || !startTime) return;
     
     if (internalPaused) {
-      console.log('Timer is now paused');
+      console.log('Timer is now paused - stopping interval');
       
       // Stop any running interval
       clearTimerInterval();
@@ -347,10 +356,14 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
         
         // Update the display time immediately
         updateFormattedTime(currentElapsed);
+        
+        // IMPORTANT: Make sure the timer display stays frozen
+        setElapsedTime(currentElapsed);
       } else {
         console.warn('Not storing negative frozen time:', currentElapsed);
         localStorage.setItem(`sessionFrozenTime_${itemId}`, '0');
         updateFormattedTime(0);
+        setElapsedTime(0);
       }
     } else {
       // Start/resume the timer
