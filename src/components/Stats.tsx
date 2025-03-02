@@ -111,7 +111,7 @@ export function Stats({ items }: Props) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="w-full space-y-4">
       <div className="flex justify-between items-center">
         <GoalManager />
         <Popover open={isGoalPopoverOpen} onOpenChange={setIsGoalPopoverOpen}>
@@ -293,7 +293,7 @@ export function Stats({ items }: Props) {
       </div>
 
       {/* Yearly Activity Stats */}
-      <div className="col-span-full w-full max-w-full overflow-hidden">
+      <div className="w-full max-w-full overflow-hidden">
         <h2 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
           <div className="p-2 bg-purple-50 rounded-lg">
             <TrendingUp className="w-6 h-6 text-purple-500" />
@@ -301,7 +301,6 @@ export function Stats({ items }: Props) {
           Learning Insights
         </h2>
         <YearlyActivityStats />
-      </div>
       </div>
     </div>
   );
