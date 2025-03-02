@@ -41,7 +41,13 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
     
     const start = new Date(startTime).getTime();
     const now = Date.now();
-    return Math.floor((now - start) / 1000) - accumulatedTimeRef.current;
+    const rawElapsed = Math.floor((now - start) / 1000);
+    
+    // Subtract the accumulated pause time
+    const adjusted = rawElapsed - accumulatedTimeRef.current;
+    
+    console.log(`Calculating time: raw ${rawElapsed}s - accumulated ${accumulatedTimeRef.current}s = ${adjusted}s`);
+    return adjusted;
   }, [startTime]);
   
   // Stop the timer
@@ -64,6 +70,8 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
   const startTimer = useCallback(() => {
     if (!startTime || internalPaused) return;
     
+    console.log("Starting/resuming timer...");
+    
     // Clear any existing interval first
     clearTimerInterval();
     
@@ -71,8 +79,24 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
     const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
     if (frozenTimeStr) {
       const frozenTime = parseInt(frozenTimeStr, 10);
+      console.log(`Starting timer from frozen time: ${frozenTime} seconds`);
+      
+      // Set the elapsed time to the frozen time
       setElapsedTime(frozenTime);
-      console.log(`Timer starting from frozen time: ${frozenTime} seconds`);
+      
+      // CRITICAL: For resume to work correctly, we need to adjust the accumulated time
+      // to ensure the timer continues from the frozen point
+      const start = new Date(startTime).getTime();
+      const now = Date.now();
+      const rawElapsed = Math.floor((now - start) / 1000);
+      
+      // Calculate what the accumulated time should be to make elapsed time = frozen time
+      const newAccumulatedTime = rawElapsed - frozenTime;
+      console.log(`Adjusting accumulated time for resume: raw ${rawElapsed}s - frozen ${frozenTime}s = ${newAccumulatedTime}s`);
+      
+      // Update our accumulated time
+      accumulatedTimeRef.current = newAccumulatedTime;
+      localStorage.setItem(`sessionAccumulatedTime_${itemId}`, newAccumulatedTime.toString());
     }
     
     // Start a new interval
@@ -92,7 +116,7 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
       localStorage.setItem(`sessionCurrentTimeFormatted_${itemId}`, formatSeconds(currentElapsed));
     }, 1000);
     
-    console.log('Timer started');
+    console.log('Timer interval started');
   }, [calculateElapsedTime, clearTimerInterval, internalPaused, itemId, startTime]);
   
   // Effect to initialize from localStorage

@@ -126,10 +126,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         return;
       }
       
-      // Fallback to stored pause time display
-      const pausedTimeStr = localStorage.getItem(`sessionPauseTimeDisplay_${item.id}`);
-      if (pausedTimeStr) {
-        setPausedTime(pausedTimeStr);
+      // Next try to get from localStorage
+      const pauseTimeDisplay = localStorage.getItem(`sessionPauseTimeDisplay_${item.id}`);
+      if (pauseTimeDisplay) {
+        setPausedTime(pauseTimeDisplay);
       }
     }
   }, [isPausedState, item.id]);
@@ -284,24 +284,36 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       const now = Date.now();
       const pauseDuration = now - pauseTime; // How long we've been paused
       
-      // Get the current accumulated time (time we've been paused in previous pauses)
-      const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
-      const accumulatedTime = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
+      console.log(`Session was paused for ${Math.floor(pauseDuration / 1000)} seconds`);
       
-      // Add this pause duration to the accumulated time
-      const newAccumulatedTime = accumulatedTime + Math.floor(pauseDuration / 1000);
-      console.log('New accumulated pause time:', newAccumulatedTime);
-      localStorage.setItem(`sessionAccumulatedTime_${item.id}`, newAccumulatedTime.toString());
+      // IMPORTANT: We DO NOT directly update accumulated time here 
+      // The timer's startTimer function will calculate the correct accumulated time based on the frozen time
       
-      // CRITICAL: Remove the pause time marker but keep the frozen time
-      // We need to keep frozen time for the timer to know where to resume from
+      // CRITICAL: Save the frozen time before removing pause markers
+      // This ensures that when we resume, we have a frozen time reference to resume from
+      const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${item.id}`);
+      if (!frozenTimeStr) {
+        // If we don't have a frozen time yet, create one from the current time
+        const startTime = new Date(pausedSession.startTime).getTime();
+        const elapsedUntilPause = Math.floor((pauseTime - startTime) / 1000);
+        
+        // Store the frozen time
+        localStorage.setItem(`sessionFrozenTime_${item.id}`, elapsedUntilPause.toString());
+        console.log(`Created frozen time at pause point: ${elapsedUntilPause}s`);
+      } else {
+        console.log(`Using existing frozen time: ${frozenTimeStr}s`);
+      }
+      
+      // Remove the pause time marker
       localStorage.removeItem(`sessionPauseTime_${item.id}`);
+      localStorage.removeItem(`sessionPauseTimeDisplay_${item.id}`);
       
-      // Update the session
+      // Update the session status
       const updatedSessions = [...item.progress.sessions];
       const sessionIndex = updatedSessions.findIndex(s => s.status === 'on_hold' && !s.endTime);
       
       if (sessionIndex !== -1) {
+        // Update the session status to in_progress
         updatedSessions[sessionIndex] = {
           ...updatedSessions[sessionIndex],
           status: 'in_progress'
@@ -314,11 +326,15 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           }
         });
         
-        // Force the timer to restart by setting both state variables
-        // This will trigger the timer to resume from the frozen time
+        // Reset UI state
+        setPausedTime(null);
+        
+        // Force the timer to restart by setting the pause states to false
+        // This will trigger the timer's startTimer function which will handle the accumulated time
         setIsPausedState(false);
         setIsPaused(false);
-        setPausedTime(null);
+        
+        console.log('Resume complete - timer should restart from frozen time');
       }
     }
   }, [item, onUpdate, setIsPaused]);
@@ -582,105 +598,41 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   };
 
   const getSessionTimeDisplay = useCallback(() => {
-    // If session is paused, check for a frozen display time
-    if (isPausedState) {
-      // First try to get from state
-      if (pausedTime) {
-        console.log('Using pausedTime from state:', pausedTime);
-        return pausedTime;
-      }
-      
-      // Next try to get from localStorage
-      const pauseTimeDisplay = localStorage.getItem(`sessionPauseTimeDisplay_${item.id}`);
-      if (pauseTimeDisplay) {
-        console.log('Using pauseTimeDisplay from localStorage:', pauseTimeDisplay);
-        return pauseTimeDisplay;
-      }
-      
-      // Next try to get frozen time
-      const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${item.id}`);
-      if (frozenTimeStr) {
-        const frozenTime = parseInt(frozenTimeStr, 10);
-        const formatted = formatSecondsToHHMMSS(frozenTime);
-        console.log('Using frozenTime from localStorage:', formatted);
-        return formatted;
-      }
+    if (!activeSession) return '00:00:00';
+    
+    // If the session is paused and we have a pause time in local state, use that first
+    if (isPausedState && pausedTime) {
+      console.log('Using local paused time for display:', pausedTime);
+      return pausedTime;
     }
     
-    // If active session but not paused, show the current timer
-    if (activeSession && activeSession.status === 'in_progress') {
-      console.log('Using formattedTime from timer:', formattedTime);
-      return formattedTime;
+    // Next try to get from localStorage (when paused)
+    const pauseTimeDisplay = localStorage.getItem(`sessionPauseTimeDisplay_${item.id}`);
+    if (pauseTimeDisplay) {
+      console.log('Using stored pause time display:', pauseTimeDisplay);
+      return pauseTimeDisplay;
     }
     
-    // Fallback to the timer's formatted time or default
-    return formattedTime || '00:00:00';
-  }, [isPausedState, pausedTime, item.id, formattedTime, activeSession]);
+    // Check for a frozen time (after pause/resume)
+    const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${item.id}`);
+    if (frozenTimeStr) {
+      const frozenTime = parseInt(frozenTimeStr, 10);
+      const formatted = formatSecondsToHHMMSS(frozenTime);
+      console.log('Using formatted frozen time:', formatted);
+      return formatted;
+    }
+    
+    // Finally, use the current formatted time from the timer
+    console.log('Using timer formatted time:', formattedTime);
+    return formattedTime;
+  }, [activeSession, formattedTime, isPausedState, pausedTime, item.id]);
 
-  const formatSecondsToHHMMSS = (seconds: number) => {
+  const formatSecondsToHHMMSS = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
     
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const renderDuration = () => {
-    const totalCurrentMinutes = calculateTotalTimeSpent(item);
-    
-    if (isTimeEditing) {
-      return (
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Input
-              type="number"
-              min="0"
-              value={editedMinutes}
-              onChange={(e) => setEditedMinutes(Math.max(0, parseInt(e.target.value) || 0))}
-              className="w-20 text-sm border-blue-200 focus:ring-blue-500"
-            />
-            <span className="text-sm text-gray-600">min</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleTimeSave}
-              className="text-green-600 hover:text-green-700 hover:bg-green-50"
-            >
-              <Save className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleTimeCancel}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex items-center gap-2 group">
-        <div className="flex items-center gap-1.5">
-          <Clock className="h-4 w-4 text-gray-500" />
-          <span className="text-sm font-medium">
-            {totalCurrentMinutes}m (Total minutes)
-          </span>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleTimeEdit}
-          className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50 p-1"
-        >
-          <Edit className="h-3.5 w-3.5" />
-        </Button>
-      </div>
-    );
   };
 
   const handleEditNote = useCallback(() => {
@@ -947,6 +899,64 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     );
   };
 
+  const renderDuration = () => {
+    const totalCurrentMinutes = calculateTotalTimeSpent(item);
+    
+    if (isTimeEditing) {
+      return (
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              min="0"
+              value={editedMinutes}
+              onChange={(e) => setEditedMinutes(Math.max(0, parseInt(e.target.value) || 0))}
+              className="w-20 text-sm border-blue-200 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-600">min</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleTimeSave}
+              className="text-green-600 hover:text-green-700 hover:bg-green-50"
+            >
+              <Save className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleTimeCancel}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center gap-2 group">
+        <div className="flex items-center gap-1.5">
+          <Clock className="h-4 w-4 text-gray-500" />
+          <span className="text-sm font-medium">
+            {totalCurrentMinutes}m (Total minutes)
+          </span>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleTimeEdit}
+          className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50 p-1"
+        >
+          <Edit className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    );
+  };
+
   return (
     <div className="w-full">
       <Card className={clsx(
@@ -1188,7 +1198,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 <Button
                   variant="outline"
                   onClick={handleCloseNoteDialog}
-                  className="px-4 hover:bg-gray-50"
                 >
                   Cancel
                 </Button>
