@@ -653,96 +653,153 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         };
     }, [retryFailedCompletions]);
 
-    // Timer logic with Web Worker
+    // Persist timer state using localStorage
     useEffect(() => {
-        const worker = new Worker(new URL('./timerWorker.js', import.meta.url));
-        worker.onmessage = (e) => {
-            if (e.data.type === 'tick') {
-                setTime(prevTime => {
-                    const newTime = Math.max(0, prevTime - 1);
-                    if (newTime === 0) {
-                        handleTimerComplete();
-                    }
-                    return newTime;
-                });
-            }
-        };
-        if (isActive) {
-            worker.postMessage({ command: 'start' });
-        } else {
-            worker.postMessage({ command: 'stop' });
-        }
-        timerWorkerRef.current = worker;
-        return () => {
-            worker.terminate();
-        };
-    }, [isActive]);
-
-    // Handle visibility change
-    const handleVisibilityChange = useCallback(() => {
-        if (document.visibilityState === 'hidden') {
-            localStorage.setItem('pomodoroLastTimestamp', Date.now().toString());
-            localStorage.setItem('pomodoroTimerState', JSON.stringify({
-                time,
-                isActive,
-                isBreak,
-                currentPomodoroId
-            }));
-        } else {
-            try {
-                const savedState = localStorage.getItem('pomodoroTimerState');
-                if (savedState) {
-                    const parsedState = JSON.parse(savedState);
-                    const storedTimestamp = parseInt(localStorage.getItem('pomodoroLastTimestamp') || Date.now().toString());
-                    const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
-                    if (parsedState.isActive && elapsedSeconds > 0) {
-                        const adjustedTime = Math.max(0, parsedState.time - elapsedSeconds);
-                        setTime(adjustedTime);
-                        if (adjustedTime === 0) {
-                            handleTimerComplete();
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Error handling visibility change:', error);
-            }
-        }
-    }, [time, isActive, isBreak, currentPomodoroId]);
-
-    // Persist timer state to localStorage
-    useEffect(() => {
-        const timerState = {
+        // Save the current timer state to localStorage
+        localStorage.setItem('pomodoroTimerState', JSON.stringify({
             time,
             isActive,
             isBreak,
+            settings,
             currentPomodoroId,
-            lastUpdate: new Date().toISOString()
-        };
-        localStorage.setItem('pomodoroState', JSON.stringify(timerState));
-    }, [time, isActive, isBreak, currentPomodoroId]);
+            focusLabel,
+            dailyGoal,
+            tasks,
+            showCompletedTasks,
+            currentTask,
+            activeTaskId,
+            streak,
+            pomodoroCount,
+            isCompleted
+        }));
+    }, [time, isActive, isBreak, settings, currentPomodoroId, focusLabel, dailyGoal, tasks, 
+        showCompletedTasks, currentTask, activeTaskId, streak, pomodoroCount, isCompleted]);
 
-    // Load persisted state on mount
+    // Load timer state from localStorage on mount
     useEffect(() => {
-        const savedState = localStorage.getItem('pomodoroState');
-        if (savedState) {
-            const parsedState = JSON.parse(savedState);
-            const elapsedSeconds = Math.floor((Date.now() - new Date(parsedState.lastUpdate).getTime()) / 1000);
-            if (parsedState.isActive) {
-                setTime(Math.max(0, parsedState.time - elapsedSeconds));
-            } else {
+        const storedState = localStorage.getItem('pomodoroTimerState');
+        if (storedState) {
+            try {
+                const parsedState = JSON.parse(storedState);
                 setTime(parsedState.time);
+                setIsActive(parsedState.isActive);
+                setIsBreak(parsedState.isBreak);
+                if (parsedState.settings) setSettings(parsedState.settings);
+                if (parsedState.currentPomodoroId) setCurrentPomodoroId(parsedState.currentPomodoroId);
+                if (parsedState.focusLabel) setFocusLabel(parsedState.focusLabel);
+                if (parsedState.dailyGoal) setDailyGoal(parsedState.dailyGoal);
+                if (parsedState.showCompletedTasks !== undefined) setShowCompletedTasks(parsedState.showCompletedTasks);
+                if (parsedState.currentTask) setCurrentTask(parsedState.currentTask);
+                if (parsedState.activeTaskId) setActiveTaskId(parsedState.activeTaskId);
+                if (parsedState.streak !== undefined) setStreak(parsedState.streak);
+                if (parsedState.pomodoroCount !== undefined) setPomodoroCount(parsedState.pomodoroCount);
+                if (parsedState.isCompleted !== undefined) setIsCompleted(parsedState.isCompleted);
+            } catch (error) {
+                console.error('Error parsing timer state from localStorage:', error);
             }
-            setIsActive(parsedState.isActive);
-            setIsBreak(parsedState.isBreak);
-            setCurrentPomodoroId(parsedState.currentPomodoroId);
         }
     }, []);
 
-    // Sync periodically
+    // Use a web worker for the timer to ensure it keeps running even when the tab is not active
     useEffect(() => {
-        const syncInterval = setInterval(syncWithSupabase, 5000);
-        return () => clearInterval(syncInterval);
-    }, [syncWithSupabase]);
+        if (isActive) {
+            // Create a Web Worker for the timer
+            const timerWorker = new Worker(
+                URL.createObjectURL(
+                    new Blob([
+                        `
+                        let interval = null;
+                        self.onmessage = function(e) {
+                            if (e.data === 'start') {
+                                interval = setInterval(() => {
+                                    self.postMessage('tick');
+                                }, 1000);
+                            } else if (e.data === 'stop') {
+                                clearInterval(interval);
+                                interval = null;
+                            }
+                        };
+                        `
+                    ], { type: 'application/javascript' })
+                )
+            );
+
+            // Start the worker
+            timerWorker.postMessage('start');
+
+            // Handle tick events from the worker
+            timerWorker.onmessage = function(e) {
+                if (e.data === 'tick') {
+                    setTime(prevTime => {
+                        const newTime = prevTime - 1;
+                        
+                        // Save the updated time to localStorage
+                        const storedState = localStorage.getItem('pomodoroTimerState');
+                        if (storedState) {
+                            try {
+                                const parsedState = JSON.parse(storedState);
+                                localStorage.setItem('pomodoroTimerState', JSON.stringify({
+                                    ...parsedState,
+                                    time: newTime
+                                }));
+                            } catch (error) {
+                                console.error('Error updating time in localStorage:', error);
+                            }
+                        }
+                        
+                        return newTime;
+                    });
+                }
+            };
+
+            // Save the worker reference
+            timerWorkerRef.current = timerWorker;
+
+            // Cleanup function
+            return () => {
+                timerWorker.postMessage('stop');
+                timerWorker.terminate();
+                timerWorkerRef.current = null;
+            };
+        } else if (timerWorkerRef.current) {
+            // Stop the worker if timer is not active
+            timerWorkerRef.current.postMessage('stop');
+            timerWorkerRef.current.terminate();
+            timerWorkerRef.current = null;
+        }
+    }, [isActive]);
+
+    // Handle visibility change to keep timer running when tab is not active
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                console.log('Page visible again, checking timer state');
+                
+                // Reload the timer state from localStorage
+                const storedState = localStorage.getItem('pomodoroTimerState');
+                if (storedState) {
+                    try {
+                        const parsedState = JSON.parse(storedState);
+                        // Update the time state if the timer is active
+                        if (parsedState.isActive) {
+                            setTime(parsedState.time);
+                            // Restart the timer if it's not already running
+                            if (!timerWorkerRef.current && parsedState.isActive) {
+                                setIsActive(true);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error parsing timer state on visibility change:', error);
+                    }
+                }
+            }
+        };
+        
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, []);
 
     // Add a function to sync failed task updates
     const syncFailedTaskUpdates = useCallback(async () => {

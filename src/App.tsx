@@ -18,6 +18,7 @@ import { PomodoroTimer } from './components/pomodoro/PomodoroTimer';
 import { LearningCardsPage } from './pages/LearningCards';
 import { ThemeProvider } from './components/ThemeProvider';
 import { ThemeToggle } from './components/ThemeToggle';
+import { PomodoroProvider } from './lib/PomodoroContext';
 
 interface State {
   items: LearningItem[];
@@ -607,78 +608,80 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-background text-foreground">
-        <Toaster />
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <header className="mb-8 relative">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex-1"></div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex-grow text-center">
-                <span className="bg-gradient-to-r from-blue-700 to-indigo-800 dark:from-blue-500 dark:to-indigo-400 bg-clip-text text-transparent">
-                  Learning Tracker
-                </span>
-              </h1>
-              <div className="flex-1 flex justify-end">
-                <ThemeToggle />
+      <PomodoroProvider>
+        <div className="min-h-screen bg-background text-foreground">
+          <Toaster />
+          <div className="max-w-7xl mx-auto px-4 py-8">
+            <header className="mb-8 relative">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex-1"></div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex-grow text-center">
+                  <span className="bg-gradient-to-r from-blue-700 to-indigo-800 dark:from-blue-500 dark:to-indigo-400 bg-clip-text text-transparent">
+                    Learning Tracker
+                  </span>
+                </h1>
+                <div className="flex-1 flex justify-end">
+                  <ThemeToggle />
+                </div>
               </div>
-            </div>
-            <p className="text-gray-700 dark:text-gray-400 text-center">Track your learning journey and stay motivated</p>
-          </header>
+              <p className="text-gray-700 dark:text-gray-400 text-center">Track your learning journey and stay motivated</p>
+            </header>
 
-          <TabNavigation activeTab={selectedTab} onTabChange={setSelectedTab} />
+            <TabNavigation activeTab={selectedTab} onTabChange={setSelectedTab} />
 
-          {showAddDialog && ( 
-            <AddLearningItem
-              onAdd={handleSubmitItem}
-              onClose={() => setShowAddDialog(false)}
-              isOpen={showAddDialog}
-              selectedDate={selectedDate}
-            />
-          )}
-
-          <main>
-            {selectedTab === TAB_OPTIONS.DASHBOARD && (
-              <DashboardTab
-                items={state.items}
-                onAddItem={handleDashboardAddItem}
-                onUpdate={handleDashboardUpdate}
-                onDateSelect={handleDateSelect}
-                onDelete={handleDeleteItem}
-                onStartTracking={handleStartTracking}
-                onStopTracking={handleStopTracking}
-                onNotesUpdate={handleUpdateNotes}
-                onSessionNoteAdd={handleAddSessionNote}
-                onSetActiveItem={handleSetActiveItem}
+            {showAddDialog && ( 
+              <AddLearningItem
+                onAdd={handleSubmitItem}
+                onClose={() => setShowAddDialog(false)}
+                isOpen={showAddDialog}
+                selectedDate={selectedDate}
               />
             )}
 
-            {selectedTab === TAB_OPTIONS.ITEMS && (
-              <ItemsTab
-                items={state.items}
-                onAddItem={handleItemsAddItem}
-                onUpdate={handleUpdateItem}
-                onDelete={handleDeleteItem}
-                onStartTracking={handleStartTracking}
-                onStopTracking={handleStopTracking}
-                onNotesUpdate={handleUpdateNotes}
-                onSessionNoteAdd={handleAddSessionNote}
-                onSetActiveItem={handleSetActiveItem}
-              />
-            )}
+            <main>
+              {selectedTab === TAB_OPTIONS.DASHBOARD && (
+                <DashboardTab
+                  items={state.items}
+                  onAddItem={handleDashboardAddItem}
+                  onUpdate={handleDashboardUpdate}
+                  onDateSelect={handleDateSelect}
+                  onDelete={handleDeleteItem}
+                  onStartTracking={handleStartTracking}
+                  onStopTracking={handleStopTracking}
+                  onNotesUpdate={handleUpdateNotes}
+                  onSessionNoteAdd={handleAddSessionNote}
+                  onSetActiveItem={handleSetActiveItem}
+                />
+              )}
 
-            {selectedTab === TAB_OPTIONS.ANALYTICS && (
-              <AnalyticsTab items={state.items} />
-            )}
+              {selectedTab === TAB_OPTIONS.ITEMS && (
+                <ItemsTab
+                  items={state.items}
+                  onAddItem={handleItemsAddItem}
+                  onUpdate={handleUpdateItem}
+                  onDelete={handleDeleteItem}
+                  onStartTracking={handleStartTracking}
+                  onStopTracking={handleStopTracking}
+                  onNotesUpdate={handleUpdateNotes}
+                  onSessionNoteAdd={handleAddSessionNote}
+                  onSetActiveItem={handleSetActiveItem}
+                />
+              )}
 
-            {selectedTab === TAB_OPTIONS.POMODORO && (
-              <PomodoroTimer />
-            )}
-            {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
-              <LearningCardsPage />
-            )}
-          </main>
+              {selectedTab === TAB_OPTIONS.ANALYTICS && (
+                <AnalyticsTab items={state.items} />
+              )}
+
+              {selectedTab === TAB_OPTIONS.POMODORO && (
+                <PomodoroTimer />
+              )}
+              {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
+                <LearningCardsPage />
+              )}
+            </main>
+          </div>
         </div>
-      </div>
+      </PomodoroProvider>
     </ThemeProvider>
   );
 }
