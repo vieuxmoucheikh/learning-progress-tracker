@@ -11,6 +11,7 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
   const [elapsedTime, setElapsedTime] = useState(0);
   const [lastUpdateTime, setLastUpdateTime] = useState<number | null>(null);
   const accumulatedTimeRef = useRef<number>(0); 
+  const intervalRef = useRef<NodeJS.Timeout | null>(null); 
   
   useEffect(() => {
     const storedAccumulatedTime = localStorage.getItem(`sessionAccumulatedTime_${itemId}`);
@@ -29,6 +30,15 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
   }, [startTime]);
 
   useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && isActive && !isPaused) {
         const storedPauseTime = localStorage.getItem(`sessionPauseTime_${itemId}`);
@@ -42,7 +52,7 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
           const start = new Date(startTime).getTime();
           const now = Date.now();
           
-          const elapsed = Math.floor((now - start) / 1000) - (storedPauseTime ? 0 : accumulatedTimeRef.current);
+          const elapsed = Math.floor((now - start) / 1000) - accumulatedTimeRef.current;
           setElapsedTime(elapsed);
           setLastUpdateTime(now);
         }
@@ -56,7 +66,10 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
   }, [isActive, isPaused, itemId, startTime]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
 
     if (isActive && startTime && validateSession() && !isPaused) {
       const start = new Date(startTime).getTime();
@@ -71,7 +84,7 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
       };
 
       updateElapsedTime(); 
-      interval = setInterval(updateElapsedTime, 1000);
+      intervalRef.current = setInterval(updateElapsedTime, 1000);
     } else if (isActive && isPaused && startTime) {
       const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
       
@@ -84,11 +97,6 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
         
         localStorage.setItem(`sessionAccumulatedTime_${itemId}`, accumulatedTimeRef.current.toString());
       }
-      
-      if (interval) {
-        clearInterval(interval);
-        interval = null;
-      }
     } else if (!isActive) {
       setElapsedTime(0);
       setLastUpdateTime(null);
@@ -100,8 +108,9 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
     }
 
     return () => {
-      if (interval) {
-        clearInterval(interval);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
   }, [isActive, startTime, itemId, validateSession, isPaused]);
@@ -117,6 +126,11 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
         const actualElapsed = elapsedUntilNow - accumulatedTimeRef.current;
         
         setElapsedTime(actualElapsed);
+        
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
       } else {
         const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
         
