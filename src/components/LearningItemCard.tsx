@@ -100,14 +100,19 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [editedMinutes, setEditedMinutes] = useState(calculateTotalTimeSpent(item));
   const [pausedTime, setPausedTime] = useState<string | null>(null);
 
-  const activeSession = item.progress?.sessions?.find(session => !session.endTime);
-  const [isPausedState, setIsPausedState] = useState(activeSession?.status === 'on_hold'); // Track pause state
-
+  const getActiveSession = () => {
+    if (!item.progress?.sessions) return null;
+    return item.progress.sessions.find(s => !s.endTime);
+  };
+  
+  const activeSession = getActiveSession();
+  const [isPausedState, setIsPausedState] = useState(activeSession?.status === 'on_hold');
+  
   // Use the session timer hook to track elapsed time
-  const { elapsedTime, formattedTime, isPaused, setIsPaused } = useSessionTimer({
+  const { formattedTime, isPaused, setIsPaused } = useSessionTimer({
     isActive: !!activeSession,
-    isPaused: isPausedState,
     startTime: activeSession?.startTime || null,
+    externalPaused: isPausedState,  // Changed from isPaused to externalPaused
     itemId: item.id
   });
 
@@ -116,7 +121,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     setIsPausedState(isPaused);
   }, [isPaused]);
 
-  // Initialize pausedTime from localStorage if session is paused
+  // Initialize paused time from localStorage if session is paused
   useEffect(() => {
     if (isPausedState) {
       // First try to get the formatted time

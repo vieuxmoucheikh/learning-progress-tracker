@@ -2,13 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseSessionTimerProps {
   isActive: boolean;
-  isPaused: boolean;
   startTime: string | null;
+  externalPaused?: boolean;
   itemId: string;
 }
 
-// Helper to sanitize and format time values
-const formatElapsedTime = useCallback((seconds: number): string => {
+// Helper function to format seconds as HH:MM:SS
+const formatSeconds = (seconds: number): string => {
   // Ensure seconds is a positive number
   seconds = Math.max(0, seconds);
   
@@ -17,35 +17,25 @@ const formatElapsedTime = useCallback((seconds: number): string => {
   const remainingSeconds = seconds % 60;
   
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-}, []);
-
-// Helper function to format seconds as HH:MM:SS
-const formatSeconds = (seconds: number): string => {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
-  
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
-export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime, itemId }: UseSessionTimerProps) => {
-  // Internal state
+export const useSessionTimer = ({ isActive, startTime, externalPaused = false, itemId }: UseSessionTimerProps) => {
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [lastUpdateTime, setLastUpdateTime] = useState<number | null>(null);
-  const [internalPaused, setInternalPaused] = useState(externalPaused);
   const [formattedTime, setFormattedTime] = useState('00:00:00');
+  const [internalPaused, setInternalPaused] = useState(externalPaused);
+  const [lastUpdateTime, setLastUpdateTime] = useState(0);
   
-  // Refs to preserve values between renders
+  // References to preserve values across renders
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const accumulatedTimeRef = useRef(0);
-  const wasResumedRef = useRef(false);
+  const accumulatedTimeRef = useRef<number>(0);
+  const wasResumedRef = useRef<boolean>(false);
   
-  // Simple helper to clear the interval
+  // Clear any existing interval
   const clearTimerInterval = useCallback(() => {
     if (intervalRef.current) {
-      console.log('Clearing timer interval');
       clearInterval(intervalRef.current);
       intervalRef.current = null;
+      console.log('Timer interval cleared');
     }
   }, []);
   
@@ -82,7 +72,7 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
       seconds = 0;
     }
     
-    const formatted = formatElapsedTime(seconds);
+    const formatted = formatSeconds(seconds);
     setFormattedTime(formatted);
     localStorage.setItem(`sessionCurrentTimeSeconds_${itemId}`, seconds.toString());
     localStorage.setItem(`sessionCurrentTimeFormatted_${itemId}`, formatted);
@@ -92,7 +82,7 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
       localStorage.removeItem(`sessionPauseTimeDisplay_${itemId}`);
       localStorage.removeItem(`sessionFrozenTime_${itemId}`);
     }
-  }, [formatElapsedTime, itemId]);
+  }, [itemId]);
   
   // Stop the timer
   const stopTimer = useCallback(() => {
