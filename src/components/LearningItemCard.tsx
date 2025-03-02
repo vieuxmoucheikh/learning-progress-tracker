@@ -324,44 +324,42 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     
     console.log('Resuming session...');
     
+    // Find the paused session
     const pausedSession = item.progress.sessions.find(s => s.status === 'on_hold' && !s.endTime);
-    if (!pausedSession) {
-      console.warn('No paused session found to resume');
-      return;
-    }
+    if (!pausedSession) return;
     
-    // Calculate the time spent paused
+    // Get the pause time from localStorage
     const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${item.id}`);
-    if (pauseTimeStr) {
-      const pauseTime = parseInt(pauseTimeStr, 10);
-      const resumeTime = Date.now();
-      const pauseDuration = Math.floor((resumeTime - pauseTime) / 1000);
+    const pauseTime = pauseTimeStr ? parseInt(pauseTimeStr, 10) : null;
+    
+    // Calculate accumulated time (time spent paused)
+    if (pauseTime) {
+      const now = Date.now();
+      const pauseDuration = Math.floor((now - pauseTime) / 1000);
       
-      // Get current accumulated time and add the pause duration
+      // Get existing accumulated time
       const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
-      const currentAccumulated = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
-      const newAccumulated = currentAccumulated + pauseDuration;
+      const accumulatedTime = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
       
-      // Store the new accumulated time
-      localStorage.setItem(`sessionAccumulatedTime_${item.id}`, newAccumulated.toString());
-      console.log(`Pause duration: ${pauseDuration}s, New accumulated: ${newAccumulated}s`);
+      // Add pause duration to accumulated time
+      const newAccumulatedTime = accumulatedTime + pauseDuration;
+      localStorage.setItem(`sessionAccumulatedTime_${item.id}`, newAccumulatedTime.toString());
+      console.log(`Updated accumulated time: ${accumulatedTime} + ${pauseDuration} = ${newAccumulatedTime} seconds`);
     }
     
-    // Also remove the pause state flag
+    // Clear pause markers
+    localStorage.removeItem(`sessionPauseTime_${item.id}`);
+    localStorage.removeItem(`sessionPauseTimeDisplay_${item.id}`);
+    
+    // Also remove the explicit pause state flag
     localStorage.removeItem(`sessionIsPaused_${item.id}`);
     
-    // Remove the pause time marker
-    localStorage.removeItem(`sessionPauseTime_${item.id}`);
-    
-    // Clear any pause display values
-    localStorage.removeItem(`sessionPauseTimeDisplay_${item.id}`);
+    // Update local state
     setPausedTime(null);
-    
-    // Immediately update local UI state
     setIsPausedState(false);
     setIsPaused(false);
     
-    // Update the session status to in_progress in the database
+    // Update the session status to in_progress
     const updatedSessions = [...item.progress.sessions];
     const sessionIndex = updatedSessions.findIndex(s => s.status === 'on_hold' && !s.endTime);
     
@@ -371,9 +369,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         status: 'in_progress'
       };
       
-      // Also remove the explicit pause state flag
-      localStorage.removeItem(`sessionIsPaused_${item.id}`);
-      
       // Update the session first so database is updated
       onUpdate(item.id, {
         progress: {
@@ -382,7 +377,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         }
       });
     }
-  }, [item, onUpdate, setIsPaused]);
+  }, [item, setIsPaused, onUpdate]);
 
   // Handle session stop
   const handleStopSession = useCallback(() => {
@@ -825,7 +820,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       if (frozenTimeStr) {
         const frozenTime = parseInt(frozenTimeStr, 10);
         const formatted = formatSecondsToHHMMSS(frozenTime);
-        console.log('Using formatted frozen time:', formatted);
         return formatted;
       }
     }
