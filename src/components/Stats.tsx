@@ -111,7 +111,7 @@ export function Stats({ items }: Props) {
   };
 
   return (
-    <div className="w-full space-y-4">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
         <GoalManager />
         <Popover open={isGoalPopoverOpen} onOpenChange={setIsGoalPopoverOpen}>
@@ -181,129 +181,123 @@ export function Stats({ items }: Props) {
           </PopoverContent>
         </Popover>
       </div>
-      
-      {/* Main stats grid - 2x2 layout */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-        {/* Overall Progress */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-blue-100 transition-all duration-200 hover:shadow-md">
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
-            <div className="p-2 bg-blue-50 rounded-lg">
-              <Target className="w-6 h-6 text-blue-500" />
-            </div>
-            Overall Progress
-          </h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <p className="text-gray-600">Total Items</p>
-              <span className="text-2xl font-bold text-blue-600">{stats.totalItems}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <p className="text-gray-600">Completed</p>
-              <span className="text-2xl font-bold text-green-600">{stats.completedItems}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <p className="text-gray-600">Completion Rate</p>
-              <span className="text-2xl font-bold text-purple-600">{Math.round(stats.completionRate)}%</span>
-            </div>
-            <div className="w-full bg-gray-100 rounded-full h-3 mt-4">
-              <div
-                className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-300"
-                style={{ width: `${stats.completionRate}%` }}
-              />
-            </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {/* Overall Progress */}
+      <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-blue-100 transition-all duration-200 hover:shadow-md">
+        <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
+          <div className="p-2 bg-blue-50 rounded-lg">
+            <Target className="w-6 h-6 text-blue-500" />
           </div>
-        </div>
-
-        {/* Time Stats */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-green-100 transition-all duration-200 hover:shadow-md">
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
-            <div className="p-2 bg-green-50 rounded-lg">
-              <Clock className="w-6 h-6 text-green-500" />
-            </div>
-            Time Statistics
-          </h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <p className="text-gray-600">Total Time</p>
-              <span className="text-2xl font-bold text-green-600">{formatTime(stats.totalTime)}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <p className="text-gray-600">Average Time</p>
-              <span className="text-2xl font-bold text-green-600">{formatTime(stats.averageTime)}</span>
-            </div>
+          Overall Progress
+        </h3>
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <p className="text-gray-600">Total Items</p>
+            <span className="text-2xl font-bold text-blue-600">{stats.totalItems}</span>
           </div>
-        </div>
-
-        {/* Status Distribution */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-orange-100 transition-all duration-200 hover:shadow-md">
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
-            <div className="p-2 bg-orange-50 rounded-lg">
-              <BarChart3 className="w-6 h-6 text-orange-500" />
-            </div>
-            Status Distribution
-          </h3>
-          <div className="space-y-3">
-            {Object.entries(stats.statusDistribution).map(([status, count]) => (
-              <div key={status} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${getStatusColor(status)}`} />
-                  <span className="capitalize">{status.replace('_', ' ')}</span>
-                </div>
-                <span className="font-semibold">{count}</span>
-              </div>
-            ))}
+          <div className="flex justify-between items-center">
+            <p className="text-gray-600">Completed</p>
+            <span className="text-2xl font-bold text-green-600">{stats.completedItems}</span>
           </div>
-        </div>
-
-        {/* Priority Distribution */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-yellow-100 transition-all duration-200 hover:shadow-md">
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
-            <div className="p-2 bg-yellow-50 rounded-lg">
-              <Trophy className="w-6 h-6 text-yellow-500" />
-            </div>
-            Priority Levels
-          </h3>
-          <div className="space-y-3">
-            {Object.entries(stats.priorityDistribution).map(([priority, count]) => (
-              <div key={priority} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${getPriorityColor(priority)}`} />
-                  <span className="capitalize">{priority}</span>
-                </div>
-                <span className="font-semibold">{count}</span>
-              </div>
-            ))}
+          <div className="flex justify-between items-center">
+            <p className="text-gray-600">Completion Rate</p>
+            <span className="text-2xl font-bold text-purple-600">{Math.round(stats.completionRate)}%</span>
           </div>
-        </div>
-
-        {/* Time by Category */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-red-100 transition-all duration-200 hover:shadow-md">
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
-            <div className="p-2 bg-red-50 rounded-lg">
-              <CalendarIcon className="w-6 h-6 text-red-500" />
-            </div>
-            Time by Category
-          </h3>
-          <div className="space-y-3">
-            {Object.entries(stats.categoryTimes).map(([category, time]) => (
-              <div key={category} className="flex items-center justify-between">
-                <span className="capitalize">{category}</span>
-                <span className="font-semibold">{formatTime(time)}</span>
-              </div>
-            ))}
+          <div className="w-full bg-gray-100 rounded-full h-3 mt-4">
+            <div
+              className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-300"
+              style={{ width: `${stats.completionRate}%` }}
+            />
           </div>
         </div>
       </div>
-      
-      {/* Yearly Activity Stats - Full Width Row */}
-      <div className="w-full max-w-full mt-4">
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
-          <div className="p-2 bg-purple-50 rounded-lg">
-            <TrendingUp className="w-6 h-6 text-purple-500" />
+
+      {/* Time Stats */}
+      <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-green-100 transition-all duration-200 hover:shadow-md">
+        <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
+          <div className="p-2 bg-green-50 rounded-lg">
+            <Clock className="w-6 h-6 text-green-500" />
           </div>
-          Learning Insights
-        </h2>
-        <YearlyActivityStats />
+          Time Statistics
+        </h3>
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <p className="text-gray-600">Total Time</p>
+            <span className="text-2xl font-bold text-green-600">{formatTime(stats.totalTime)}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <p className="text-gray-600">Average Time</p>
+            <span className="text-2xl font-bold text-green-600">{formatTime(stats.averageTime)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Status Distribution */}
+      <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-orange-100 transition-all duration-200 hover:shadow-md">
+        <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
+          <div className="p-2 bg-orange-50 rounded-lg">
+            <BarChart3 className="w-6 h-6 text-orange-500" />
+          </div>
+          Status Distribution
+        </h3>
+        <div className="space-y-3">
+          {Object.entries(stats.statusDistribution).map(([status, count]) => (
+            <div key={status} className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className={`w-3 h-3 rounded-full ${getStatusColor(status)}`} />
+                <span className="capitalize">{status.replace('_', ' ')}</span>
+              </div>
+              <span className="font-semibold">{count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Priority Distribution */}
+      <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-yellow-100 transition-all duration-200 hover:shadow-md">
+        <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
+          <div className="p-2 bg-yellow-50 rounded-lg">
+            <Trophy className="w-6 h-6 text-yellow-500" />
+          </div>
+          Priority Levels
+        </h3>
+        <div className="space-y-3">
+          {Object.entries(stats.priorityDistribution).map(([priority, count]) => (
+            <div key={priority} className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className={`w-3 h-3 rounded-full ${getPriorityColor(priority)}`} />
+                <span className="capitalize">{priority}</span>
+              </div>
+              <span className="font-semibold">{count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Time by Category */}
+      <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-red-100 transition-all duration-200 hover:shadow-md">
+        <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
+          <div className="p-2 bg-red-50 rounded-lg">
+            <Calendar className="w-6 h-6 text-red-500" />
+          </div>
+          Time by Category
+        </h3>
+        <div className="space-y-3">
+          {Object.entries(stats.categoryTimes).map(([category, time]) => (
+            <div key={category} className="flex items-center justify-between">
+              <span className="capitalize">{category}</span>
+              <span className="font-semibold">{formatTime(time)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Yearly Activity Stats */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="col-span-full">
+          <YearlyActivityStats />
+        </div>
+      </div>
       </div>
     </div>
   );

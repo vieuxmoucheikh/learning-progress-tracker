@@ -168,9 +168,9 @@ export const YearlyActivityStats: React.FC = () => {
   }, [activityData]);
 
   return (
-    <div className="w-full">
-      <div className="w-full bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-purple-100 transition-all duration-200 hover:shadow-md">
-        <div className="flex items-center justify-between w-full mb-6">
+    <div className="w-full space-y-8">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">Learning Activity</h2>
           <Select value={selectedCategory} onValueChange={handleCategoryChange}>
             <SelectTrigger className="w-32">
@@ -187,13 +187,13 @@ export const YearlyActivityStats: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center h-64 w-full">
+          <div className="flex justify-center items-center h-64">
             Loading...
           </div>
         ) : (
-          <>
+          <div className="space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-6 w-full">
+            <div className="grid grid-cols-3 gap-2">
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-600/10 p-2.5 rounded-lg border border-blue-200/50 dark:border-blue-400/10">
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-blue-500" />
@@ -217,11 +217,14 @@ export const YearlyActivityStats: React.FC = () => {
               </div>
             </div>
 
-            {/* Heatmap - Full Width */}
+            {/* Heatmap */}
             <div className="w-full">
-              <YearlyActivityHeatmap data={heatmapData} />
+              <YearlyActivityHeatmap 
+                data={heatmapData} 
+                year={new Date().getFullYear()}
+              />
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>

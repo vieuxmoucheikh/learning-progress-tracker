@@ -191,10 +191,10 @@ export function YearlyActivityHeatmap({
       <div className="w-full p-3">
         <div className="w-full" style={{ fontSize: 'min(1.5vw, 11px)' }}>
           {/* Month labels */}
-          <div className="flex mb-1.5 w-full">
+          <div className="flex mb-1.5">
             <div className="w-5" /> {/* Offset for day labels */}
-            <div className="flex-1 w-full">
-              <div className="grid grid-cols-[repeat(53,minmax(0,1fr))] gap-[2px] w-full">
+            <div className="flex-1">
+              <div className="grid grid-cols-[repeat(53,1fr)] gap-[2px]">
                 {monthLabels.map((label, i) => (
                   <div
                     key={i}
@@ -214,7 +214,7 @@ export function YearlyActivityHeatmap({
           {/* Main grid */}
           <div className="flex w-full">
             {/* Day labels */}
-            <div className="flex flex-col gap-[2px] pr-1.5 flex-shrink-0">
+            <div className="flex flex-col gap-[2px] pr-1.5">
               {DAYS.map((day) => (
                 <div 
                   key={day} 
@@ -230,42 +230,42 @@ export function YearlyActivityHeatmap({
             </div>
 
             {/* Calendar grid */}
-            <div className="flex-1 w-full">
-              <div className="grid grid-cols-[repeat(53,minmax(0,1fr))] gap-[2px] w-full">
+            <div className="flex-1">
+              <div className="grid grid-cols-[repeat(53,1fr)] gap-[2px]">
                 {weeks.map((week, weekIndex) => (
-                  <div key={weekIndex} className="flex flex-col gap-[2px] w-full">
+                  <div key={weekIndex} className="flex flex-col gap-[2px]">
                     {week.map((day, dayIndex) => (
-                      day ? (
-                        <TooltipProvider key={`${weekIndex}-${dayIndex}`}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div
-                                className={`aspect-square rounded-sm ${getColorForCount(day.count)}`}
-                                style={{ minWidth: '10px', minHeight: '10px' }}
-                              />
-                            </TooltipTrigger>
-                            <TooltipContent 
-                              side="top"
-                              className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-100 dark:border-white/10"
-                            >
-                              <div className="text-xs">
-                                <div className="font-medium text-black dark:text-black">
-                                  {format(parseISO(day.date), 'MMM d, yyyy')}
-                                </div>
-                                <div className="text-black dark:text-black">
-                                  {day.count} {day.count === 1 ? 'activity' : 'activities'}
-                                </div>
+                      <TooltipProvider key={day.date}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div
+                              className={cn(
+                                'rounded-[1px] transition-colors duration-200',
+                                day.isCurrentYear
+                                  ? getColorForCount(day.count)
+                                  : 'bg-gray-200 dark:bg-gray-200'
+                              )}
+                              style={{ 
+                                height: 'min(1.5vw, 14px)',
+                                minHeight: '6px'
+                              }}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent 
+                            side="top"
+                            className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-100 dark:border-white/10"
+                          >
+                            <div className="text-xs">
+                              <div className="font-medium text-black dark:text-black">
+                                {format(parseISO(day.date), 'MMM d, yyyy')}
                               </div>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      ) : (
-                        <div
-                          key={`${weekIndex}-${dayIndex}`}
-                          className="aspect-square rounded-sm bg-gray-100 dark:bg-gray-800/20"
-                          style={{ minWidth: '10px', minHeight: '10px' }}
-                        />
-                      )
+                              <div className="text-black dark:text-black">
+                                {day.count} {day.count === 1 ? 'activity' : 'activities'}
+                              </div>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     ))}
                   </div>
                 ))}
