@@ -124,6 +124,10 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
         
         // Freeze the timer at this value
         setElapsedTime(elapsedUntilPause);
+        
+        // Store the frozen time value in localStorage for consistency
+        localStorage.setItem(`sessionFrozenTime_${itemId}`, elapsedUntilPause.toString());
+        
         console.log('Timer frozen at:', elapsedUntilPause, 'seconds');
       }
       
@@ -140,25 +144,33 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
       
       // Get current pause time from localStorage
       const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
-      
       if (pauseTimeStr) {
         const pauseTime = parseInt(pauseTimeStr, 10);
         const now = Date.now();
         
-        // Calculate pause duration and add to accumulated time
+        // Calculate how long we were paused
         const pauseDuration = Math.floor((now - pauseTime) / 1000);
-        accumulatedTimeRef.current += pauseDuration;
         
-        console.log('Adding pause duration:', pauseDuration, 'seconds, total accumulated:', accumulatedTimeRef.current);
+        // Get current accumulated time
+        const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${itemId}`);
+        const accumulatedTime = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
         
-        // Store updated accumulated time
-        localStorage.setItem(`sessionAccumulatedTime_${itemId}`, accumulatedTimeRef.current.toString());
+        // Add pause duration to accumulated time
+        const newAccumulatedTime = accumulatedTime + pauseDuration;
         
-        // Critical: Remove the pause time marker
+        // Update accumulated time
+        accumulatedTimeRef.current = newAccumulatedTime;
+        localStorage.setItem(`sessionAccumulatedTime_${itemId}`, newAccumulatedTime.toString());
+        
+        // CRITICAL: Remove pause marker and frozen time
         localStorage.removeItem(`sessionPauseTime_${itemId}`);
+        localStorage.removeItem(`sessionFrozenTime_${itemId}`);
+        
+        console.log('Added pause duration to accumulated time:', pauseDuration, 'seconds');
+        console.log('New accumulated time:', newAccumulatedTime, 'seconds');
       }
       
-      // Reset running flag
+      // Reset flag
       wasRunningRef.current = false;
     }
   }, [internalPaused, isActive, itemId, startTime]);
@@ -183,9 +195,18 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
       return; // Exit early and let the re-render handle the rest
     }
 
-    // If we're paused, do not start the timer and maintain frozen state
+    // If we're paused, use the frozen time value if available
     if (isPausedNow || internalPaused) {
       console.log('Timer is paused, not starting interval');
+      
+      // If we have a frozen time value, use it
+      const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
+      if (frozenTimeStr) {
+        const frozenTime = parseInt(frozenTimeStr, 10);
+        setElapsedTime(frozenTime);
+        console.log('Using frozen time value:', frozenTime, 'seconds');
+      }
+      
       return;
     }
 
@@ -212,6 +233,10 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
           const pauseTime = parseInt(currentPauseTimeStr, 10);
           const elapsedUntilPause = Math.floor((pauseTime - start) / 1000) - accumulatedTimeRef.current;
           setElapsedTime(elapsedUntilPause);
+          
+          // Store the frozen time
+          localStorage.setItem(`sessionFrozenTime_${itemId}`, elapsedUntilPause.toString());
+          
           console.log('Timer frozen at:', elapsedUntilPause, 'seconds');
           return;
         }
@@ -242,6 +267,7 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
       localStorage.removeItem(`sessionPauseTime_${itemId}`);
       localStorage.removeItem(`sessionAccumulatedTime_${itemId}`);
       localStorage.removeItem(`sessionPauseTimeDisplay_${itemId}`);
+      localStorage.removeItem(`sessionFrozenTime_${itemId}`);
       
       console.log('Timer reset');
     }

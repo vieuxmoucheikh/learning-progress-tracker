@@ -129,10 +129,45 @@ export function DashboardTab({
             try {
               const startTime = new Date(session.startTime);
               if (!isNaN(startTime.getTime())) {  // Check if startTime is valid
-                const now = new Date();
-                const activeMinutes = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
-                if (activeMinutes > 0) {  // Ensure we don't add negative time
-                  dailyTimeSpent += activeMinutes;
+                // Check if this session is paused
+                const isPaused = session.status === 'on_hold';
+                
+                if (isPaused) {
+                  // For paused sessions, get the pause time from localStorage
+                  const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${item.id}`);
+                  if (pauseTimeStr) {
+                    const pauseTime = new Date(parseInt(pauseTimeStr, 10));
+                    if (!isNaN(pauseTime.getTime())) {
+                      // Calculate minutes until the pause point
+                      const pausedMinutes = Math.floor((pauseTime.getTime() - startTime.getTime()) / (1000 * 60));
+                      
+                      // Get accumulated time (for previous pauses in this session)
+                      const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
+                      const accumulatedSeconds = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
+                      const accumulatedMinutes = Math.floor(accumulatedSeconds / 60);
+                      
+                      // Add paused time minus accumulated time (to avoid double counting)
+                      if (pausedMinutes > 0) {
+                        dailyTimeSpent += pausedMinutes - accumulatedMinutes;
+                      }
+                    }
+                  }
+                } else {
+                  // For active sessions, calculate current elapsed time
+                  const now = new Date();
+                  
+                  // Get accumulated time (for previous pauses)
+                  const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
+                  const accumulatedSeconds = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
+                  const accumulatedMinutes = Math.floor(accumulatedSeconds / 60);
+                  
+                  // Calculate active minutes, adjusting for accumulated pause time
+                  const totalMinutes = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
+                  
+                  // Only count positive time values
+                  if (totalMinutes > accumulatedMinutes) {
+                    dailyTimeSpent += (totalMinutes - accumulatedMinutes);
+                  }
                 }
               }
             } catch (error) {

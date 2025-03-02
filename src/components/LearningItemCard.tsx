@@ -326,6 +326,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     localStorage.removeItem(`sessionLastUpdate_${item.id}`);
     localStorage.removeItem(`sessionPauseTime_${item.id}`);
     localStorage.removeItem(`sessionPauseTimeDisplay_${item.id}`);
+    localStorage.removeItem(`sessionFrozenTime_${item.id}`);
 
     // Stop tracking before updating the sessions
     onStopTracking(item.id);
@@ -389,6 +390,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     localStorage.removeItem(`sessionLastUpdate_${item.id}`);
     localStorage.removeItem(`sessionPauseTime_${item.id}`);
     localStorage.removeItem(`sessionPauseTimeDisplay_${item.id}`);
+    localStorage.removeItem(`sessionFrozenTime_${item.id}`);
     
     // Stop tracking if item is being tracked
     if (activeSession) {
