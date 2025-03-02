@@ -109,10 +109,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [isPausedState, setIsPausedState] = useState(activeSession?.status === 'on_hold');
   
   // Use the session timer hook to track elapsed time
-  const { formattedTime, isPaused, setIsPaused } = useSessionTimer({
+  const { formattedTime, isPaused, setIsPaused, handleResume } = useSessionTimer({
     isActive: !!activeSession,
     startTime: activeSession?.startTime || null,
-    externalPaused: isPausedState,  // Changed from isPaused to externalPaused
+    externalPaused: isPausedState,
     itemId: item.id
   });
 
@@ -363,6 +363,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     setIsPausedState(false);
     setIsPaused(false);
     
+    // Resume the timer
+    handleResume();
+    
     // Update the session status to in_progress
     const updatedSessions = [...item.progress.sessions];
     const sessionIndex = updatedSessions.findIndex(s => s.status === 'on_hold' && !s.endTime);
@@ -381,7 +384,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         }
       });
     }
-  }, [item, setIsPaused, onUpdate]);
+  }, [item, setIsPaused, onUpdate, handleResume]);
 
   // Handle session stop
   const handleStopSession = useCallback(() => {

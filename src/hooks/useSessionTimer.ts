@@ -76,335 +76,150 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     setFormattedTime(formatted);
     localStorage.setItem(`sessionCurrentTimeSeconds_${itemId}`, seconds.toString());
     localStorage.setItem(`sessionCurrentTimeFormatted_${itemId}`, formatted);
-    
-    // If we recently resumed, make sure to remove any pause display markers
-    if (wasResumedRef.current) {
-      localStorage.removeItem(`sessionPauseTimeDisplay_${itemId}`);
-      localStorage.removeItem(`sessionFrozenTime_${itemId}`);
-    }
   }, [itemId]);
   
-  // Stop the timer
-  const stopTimer = useCallback(() => {
-    clearTimerInterval();
-    
-    // Get and save the current elapsed time if we have a valid start time
-    if (startTime) {
-      const currentElapsed = calculateElapsedTime();
-      setElapsedTime(currentElapsed);
-      updateFormattedTime(currentElapsed);
-      
-      // Save to localStorage for persistence
-      localStorage.setItem(`sessionFrozenTime_${itemId}`, currentElapsed.toString());
-      console.log(`Timer stopped at ${currentElapsed} seconds`);
-    }
-  }, [calculateElapsedTime, clearTimerInterval, itemId, startTime, updateFormattedTime]);
-  
-  // Start or resume the timer
-  const startTimer = useCallback(() => {
-    if (!startTime || internalPaused) {
-      console.log("Cannot start timer: timer is paused or no start time");
-      return;
-    }
-    
-    console.log("Starting/resuming timer...");
-    
-    // Clear any existing interval first
-    clearTimerInterval();
-    
-    // CRITICAL: Always check for frozen time first when starting/resuming
-    const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
-    const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
-    
-    // If we were previously paused, use the frozen time as our starting point
-    if (frozenTimeStr || pauseTimeStr) {
-      let frozenTime = 0;
-      
-      if (frozenTimeStr) {
-        // Use stored frozen time if available
-        frozenTime = parseInt(frozenTimeStr, 10);
-        console.log(`Starting timer from frozen time: ${frozenTime} seconds`);
-      } else if (pauseTimeStr && startTime) {
-        // Calculate frozen time from pause time if no frozen time available
-        const pauseTime = parseInt(pauseTimeStr, 10);
-        const startTimeMs = new Date(startTime).getTime();
-        const accumulatedTime = accumulatedTimeRef.current || 0;
-        const elapsedUntilPause = Math.floor((pauseTime - startTimeMs) / 1000) - accumulatedTime;
-        frozenTime = Math.max(0, elapsedUntilPause);
-        console.log(`Calculated frozen time from pause time: ${frozenTime} seconds`);
-        
-        // Store this for future reference
-        localStorage.setItem(`sessionFrozenTime_${itemId}`, frozenTime.toString());
-      }
-      
-      // Set the elapsed time to the frozen time (but ensure it's at least 0)
-      const safeTime = Math.max(0, frozenTime);
-      setElapsedTime(safeTime);
-      updateFormattedTime(safeTime);
-      
-      // CRITICAL: For resume to work correctly, we need to adjust the accumulated time
-      // to ensure the timer continues from the frozen point
-      const start = new Date(startTime).getTime();
-      const now = Date.now();
-      const rawElapsed = Math.floor((now - start) / 1000);
-      
-      // Calculate what the accumulated time should be to make elapsed time = frozen time
-      const newAccumulatedTime = Math.max(0, rawElapsed - safeTime);
-      console.log(`Adjusting accumulated time for resume: raw ${rawElapsed}s - frozen ${safeTime}s = ${newAccumulatedTime}s`);
-      
-      // Update our accumulated time
-      accumulatedTimeRef.current = newAccumulatedTime;
-      localStorage.setItem(`sessionAccumulatedTime_${itemId}`, newAccumulatedTime.toString());
-      
-      // Set the wasResumed flag to true for the next few updates
-      wasResumedRef.current = true;
-      
-      // IMPORTANT: Force immediate updates after resume to make the timer visibly running
-      // This creates a more visible timer animation effect
-      const quickUpdate = () => {
-        const currentElapsed = calculateElapsedTime();
-        setElapsedTime(currentElapsed);
-        updateFormattedTime(currentElapsed);
-        setLastUpdateTime(Date.now());
-      };
-      
-      // Schedule several quick updates to make timer movement visible
-      setTimeout(quickUpdate, 100);
-      setTimeout(quickUpdate, 350);
-      setTimeout(quickUpdate, 600);
-      setTimeout(quickUpdate, 850);
-      
-      // Clear wasResumed flag after delay
-      setTimeout(() => {
-        wasResumedRef.current = false;
-        
-        // Also clean up any lingering pause markers
-        localStorage.removeItem(`sessionPauseTimeDisplay_${itemId}`);
-      }, 5000);
-    } else {
-      // No frozen time - starting a fresh timer
-      console.log('Starting new timer from 0');
-      
-      // Initialize a brand new timer starting at 0
-      setElapsedTime(0);
-      updateFormattedTime(0);
-      
-      // For a new timer, reset accumulated time
-      accumulatedTimeRef.current = 0;
-      localStorage.setItem(`sessionAccumulatedTime_${itemId}`, '0');
-      
-      // Remove any stale timer values
-      localStorage.removeItem(`sessionFrozenTime_${itemId}`);
-      localStorage.removeItem(`sessionPauseTimeDisplay_${itemId}`);
-    }
-    
-    // Start a new interval with a faster update rate (250ms) for smoother updates
-    console.log('Creating new timer interval');
-    intervalRef.current = setInterval(() => {
-      if (internalPaused) {
-        // Double-check: if somehow we're paused but the interval is running, stop it
-        console.log('Timer is paused but interval is running - stopping interval');
-        clearTimerInterval();
-        return;
-      }
-      
-      const currentElapsed = calculateElapsedTime();
-      setElapsedTime(currentElapsed);
-      updateFormattedTime(currentElapsed);
-      setLastUpdateTime(Date.now());
-    }, 250); // Faster updates for smoother UI
-    
-    console.log('Timer interval started');
-    
-    // Force an immediate update to make sure the timer is visibly running
-    const currentElapsed = calculateElapsedTime();
-    setElapsedTime(currentElapsed);
-    updateFormattedTime(currentElapsed);
-    setLastUpdateTime(Date.now());
-  }, [calculateElapsedTime, clearTimerInterval, internalPaused, itemId, startTime, updateFormattedTime]);
-  
-  // Effect to initialize from localStorage
+  // CRITICAL: This effect handles the timer interval based on pause state
   useEffect(() => {
-    if (isActive && startTime) {
-      console.log('Initializing timer, external pause state:', externalPaused);
-      
-      // IMPORTANT: First check for explicit is-paused flag
-      const isPausedStr = localStorage.getItem(`sessionIsPaused_${itemId}`);
-      const shouldBePaused = isPausedStr === 'true' || externalPaused;
-      
-      if (shouldBePaused) {
-        console.log('Found explicit pause flag or externally paused state - timer should be paused');
-        setInternalPaused(true);
-      } else {
-        // If not paused, make sure we're definitely not paused
-        setInternalPaused(false);
-      }
-      
-      // Initialize accumulated time from localStorage
-      const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${itemId}`);
-      if (accumulatedTimeStr) {
-        const accumulatedTime = parseInt(accumulatedTimeStr, 10);
-        accumulatedTimeRef.current = accumulatedTime;
-        console.log('Initialized accumulated time:', accumulatedTime, 'seconds');
-      } else {
-        // If no accumulated time, initialize to 0
-        accumulatedTimeRef.current = 0;
-        localStorage.setItem(`sessionAccumulatedTime_${itemId}`, '0');
-        console.log('No accumulated time found, initialized to 0');
-      }
-      
-      // Check if we are paused based on pause time marker
-      const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
-      if (pauseTimeStr || shouldBePaused) {
-        // We are supposed to be paused
-        console.log('Found pause time marker or should be paused - ensuring timer is paused');
-        setInternalPaused(true);
-        
-        // Get the frozen time to display while paused
-        const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
-        if (frozenTimeStr) {
-          const frozenTime = parseInt(frozenTimeStr, 10);
-          setElapsedTime(frozenTime);
-          updateFormattedTime(frozenTime);
-          console.log('Set timer to frozen time:', frozenTime, 'seconds');
-        } else {
-          // If we don't have a frozen time yet, calculate it from the pause time
-          const pauseTime = pauseTimeStr ? parseInt(pauseTimeStr, 10) : Date.now();
-          const startTimeMs = new Date(startTime).getTime();
-          const accumulatedTime = accumulatedTimeRef.current || 0;
-          const elapsedUntilPause = Math.floor((pauseTime - startTimeMs) / 1000) - accumulatedTime;
-          
-          // Ensure we don't have negative time
-          const safeElapsed = Math.max(0, elapsedUntilPause);
-          setElapsedTime(safeElapsed);
-          updateFormattedTime(safeElapsed);
-          console.log('Calculated and set frozen time:', safeElapsed, 'seconds');
-          
-          // Store this for future reference
-          localStorage.setItem(`sessionFrozenTime_${itemId}`, safeElapsed.toString());
-        }
-      } else {
-        // Not paused - check if we have a frozen time to start from
-        const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
-        if (frozenTimeStr) {
-          const frozenTime = parseInt(frozenTimeStr, 10);
-          setElapsedTime(frozenTime);
-          updateFormattedTime(frozenTime);
-          console.log('Initialized elapsed time from frozen time:', frozenTime, 'seconds');
-        } else {
-          // No frozen time - this is likely a new session or one that should start from 0
-          console.log('No frozen time found, starting timer from 0');
-          setElapsedTime(0);
-          updateFormattedTime(0);
-          
-          // Make sure to start the timer
-          startTimer();
-        }
-      }
-    }
-  }, [isActive, externalPaused, itemId, startTime, updateFormattedTime, startTimer]);
-  
-  // Effect to sync internal paused state with external
-  useEffect(() => {
-    console.log('External pause state changed:', externalPaused);
-    
-    // If we're already paused internally, but not externally, 
-    // check localStorage to see if we should still be paused
-    if (internalPaused && !externalPaused) {
-      const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
-      if (pauseTimeStr) {
-        console.log('Found pause marker in localStorage, keeping pause state');
-        return; // Keep paused state
-      }
-    }
-    
-    // Update internal state to match external state
-    setInternalPaused(externalPaused);
-    
-    // If we're now paused, make sure to save the current state and stop the timer
-    if (externalPaused && startTime) {
-      console.log('Saving pause state on external pause change');
-      
-      // Stop any running interval
-      clearTimerInterval();
-      
-      // Calculate and save the current elapsed time
-      const currentElapsed = calculateElapsedTime();
-      localStorage.setItem(`sessionFrozenTime_${itemId}`, currentElapsed.toString());
-      
-      // Update the display time immediately and freeze it
-      updateFormattedTime(currentElapsed);
-      setElapsedTime(currentElapsed);
-    }
-  }, [externalPaused, calculateElapsedTime, itemId, startTime, updateFormattedTime, internalPaused, clearTimerInterval]);
-  
-  // Effect to handle pausing
-  useEffect(() => {
-    if (!isActive || !startTime) return;
-    
-    if (internalPaused) {
-      console.log('Timer is now paused - stopping interval');
-      
-      // Stop any running interval
-      clearTimerInterval();
-      
-      // Calculate and store the currently elapsed time
-      const currentElapsed = calculateElapsedTime();
-      if (currentElapsed >= 0) {
-        console.log('Storing frozen time on pause:', currentElapsed, 'seconds');
-        localStorage.setItem(`sessionFrozenTime_${itemId}`, currentElapsed.toString());
-        
-        // Update the display time immediately
-        updateFormattedTime(currentElapsed);
-        
-        // IMPORTANT: Make sure the timer display stays frozen
-        setElapsedTime(currentElapsed);
-      } else {
-        console.warn('Not storing negative frozen time:', currentElapsed);
-        localStorage.setItem(`sessionFrozenTime_${itemId}`, '0');
-        updateFormattedTime(0);
-        setElapsedTime(0);
-      }
-    } else {
-      // Start/resume the timer
-      console.log('Starting timer - isPaused:', internalPaused);
-      startTimer();
-    }
-  }, [internalPaused, isActive, startTime, startTimer, clearTimerInterval, calculateElapsedTime, updateFormattedTime, itemId]);
-  
-  // Main effect to manage timer based on active state
-  useEffect(() => {
+    // If not active or no start time, don't do anything
     if (!isActive || !startTime) {
       clearTimerInterval();
       return;
     }
     
-    console.log('Main timer effect - checking if timer should be running');
-    
-    // Check if we need to be paused
-    const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
-    const isPausedStr = localStorage.getItem(`sessionIsPaused_${itemId}`);
-    const shouldBePaused = isPausedStr === 'true' || !!pauseTimeStr;
-    
-    if (shouldBePaused) {
-      if (!internalPaused) {
-        console.log('Found pause markers in localStorage, forcing pause');
-        setInternalPaused(true);
+    // IMPORTANT: Check if we should be paused
+    if (internalPaused) {
+      console.log('Timer is paused - ensuring interval is cleared');
+      
+      // Stop any running interval
+      clearTimerInterval();
+      
+      // Get the frozen time to display
+      const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
+      if (frozenTimeStr) {
+        const frozenTime = parseInt(frozenTimeStr, 10);
+        setElapsedTime(frozenTime);
+        updateFormattedTime(frozenTime);
+        console.log('Using frozen time while paused:', frozenTime);
+      } else {
+        // If no frozen time exists, calculate and store it
+        const currentElapsed = calculateElapsedTime();
+        const safeElapsed = Math.max(0, currentElapsed);
+        setElapsedTime(safeElapsed);
+        updateFormattedTime(safeElapsed);
+        localStorage.setItem(`sessionFrozenTime_${itemId}`, safeElapsed.toString());
+        console.log('Created new frozen time while paused:', safeElapsed);
       }
+      
+      // We return here to prevent starting the interval
       return;
     }
     
-    // Start timer if not paused
-    if (!internalPaused) {
-      console.log('Timer should be running - starting interval');
-      startTimer();
-    }
+    // If we get here, we're active and not paused, so we should be running
+    console.log('Timer should be running - starting interval');
     
-    // Cleanup on unmount
+    // Clear any existing interval first
+    clearTimerInterval();
+    
+    // Start a new interval
+    intervalRef.current = setInterval(() => {
+      const currentElapsed = calculateElapsedTime();
+      setElapsedTime(currentElapsed);
+      updateFormattedTime(currentElapsed);
+      setLastUpdateTime(Date.now());
+    }, 250);
+    
+    console.log('Timer interval started');
+    
+    // Force an immediate update
+    const currentElapsed = calculateElapsedTime();
+    setElapsedTime(currentElapsed);
+    updateFormattedTime(currentElapsed);
+    setLastUpdateTime(Date.now());
+    
+    // Cleanup on unmount or when dependencies change
     return () => {
       clearTimerInterval();
     };
-  }, [isActive, internalPaused, itemId, startTime, clearTimerInterval, startTimer]);
+  }, [isActive, internalPaused, startTime, itemId, clearTimerInterval, calculateElapsedTime, updateFormattedTime]);
+  
+  // Effect to sync internal paused state with external
+  useEffect(() => {
+    console.log('External pause state changed:', externalPaused);
+    
+    // Update internal state to match external state
+    setInternalPaused(externalPaused);
+    
+    // If paused, calculate and store the current elapsed time
+    if (externalPaused && startTime) {
+      const currentElapsed = calculateElapsedTime();
+      const safeElapsed = Math.max(0, currentElapsed);
+      localStorage.setItem(`sessionFrozenTime_${itemId}`, safeElapsed.toString());
+      setElapsedTime(safeElapsed);
+      updateFormattedTime(safeElapsed);
+      console.log('Stored frozen time on external pause:', safeElapsed);
+    }
+  }, [externalPaused, calculateElapsedTime, itemId, startTime, updateFormattedTime]);
+  
+  // Effect to initialize from localStorage when the component mounts
+  useEffect(() => {
+    if (!isActive || !startTime) return;
+    
+    console.log('Initializing timer state');
+    
+    // Check if we should be paused
+    const isPausedStr = localStorage.getItem(`sessionIsPaused_${itemId}`);
+    const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
+    const shouldBePaused = isPausedStr === 'true' || !!pauseTimeStr || externalPaused;
+    
+    if (shouldBePaused) {
+      console.log('Timer should be paused on initialization');
+      setInternalPaused(true);
+      
+      // Get the frozen time to display
+      const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
+      if (frozenTimeStr) {
+        const frozenTime = parseInt(frozenTimeStr, 10);
+        setElapsedTime(frozenTime);
+        updateFormattedTime(frozenTime);
+        console.log('Using frozen time on init:', frozenTime);
+      } else {
+        // If no frozen time exists but we should be paused, calculate it
+        const pauseTime = pauseTimeStr ? parseInt(pauseTimeStr, 10) : Date.now();
+        const startTimeMs = new Date(startTime).getTime();
+        
+        // Get accumulated time
+        const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${itemId}`);
+        const accumulatedTime = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
+        accumulatedTimeRef.current = accumulatedTime;
+        
+        // Calculate elapsed time at pause point
+        const elapsedUntilPause = Math.floor((pauseTime - startTimeMs) / 1000) - accumulatedTime;
+        const safeElapsed = Math.max(0, elapsedUntilPause);
+        
+        setElapsedTime(safeElapsed);
+        updateFormattedTime(safeElapsed);
+        localStorage.setItem(`sessionFrozenTime_${itemId}`, safeElapsed.toString());
+        console.log('Calculated frozen time on init:', safeElapsed);
+      }
+    } else {
+      // Not paused - initialize accumulated time
+      const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${itemId}`);
+      if (accumulatedTimeStr) {
+        const accumulatedTime = parseInt(accumulatedTimeStr, 10);
+        accumulatedTimeRef.current = accumulatedTime;
+        console.log('Initialized accumulated time:', accumulatedTime);
+      } else {
+        accumulatedTimeRef.current = 0;
+        localStorage.setItem(`sessionAccumulatedTime_${itemId}`, '0');
+      }
+      
+      // Force an initial update
+      const currentElapsed = calculateElapsedTime();
+      setElapsedTime(currentElapsed);
+      updateFormattedTime(currentElapsed);
+      console.log('Initialized running timer at:', currentElapsed);
+    }
+  }, [isActive, startTime, externalPaused, itemId, calculateElapsedTime, updateFormattedTime]);
   
   // Handle page visibility changes
   useEffect(() => {
@@ -412,75 +227,68 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
       if (document.visibilityState === 'visible') {
         console.log('Page visible again');
         
-        // First check for explicit pause flag
+        // Check if we should be paused
         const isPausedStr = localStorage.getItem(`sessionIsPaused_${itemId}`);
-        
-        // Then check for pause time marker
         const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
-        
-        // Determine if we should be paused based on all available information
         const shouldBePaused = isPausedStr === 'true' || !!pauseTimeStr;
         
-        if (shouldBePaused) {
-          // If we should be paused, make sure we're paused
-          if (!internalPaused) {
-            console.log('Found pause indicators on visibility change, forcing pause state');
-            setInternalPaused(true);
-            
-            // Also restore the frozen time display
-            const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
-            if (frozenTimeStr) {
-              const frozenTime = parseInt(frozenTimeStr, 10);
-              setElapsedTime(frozenTime);
-              updateFormattedTime(frozenTime);
-              console.log('Restored frozen time on visibility change:', frozenTime);
-            }
-          }
-        } else if (isActive && startTime && !internalPaused) {
-          // If we're active and not paused, restart the timer
-          console.log('Restarting timer on visibility change');
-          startTimer();
-        }
-      } else {
-        // When page becomes hidden, save current state but don't stop the timer
-        // This helps maintain accuracy when the user returns to the page
-        console.log('Page hidden');
-        
-        if (isActive && startTime) {
-          if (internalPaused) {
-            // If paused, make sure the frozen time is saved
-            const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
-            if (!frozenTimeStr) {
-              // If no frozen time exists, calculate and save it
-              const currentElapsed = calculateElapsedTime();
-              localStorage.setItem(`sessionFrozenTime_${itemId}`, currentElapsed.toString());
-              console.log('Saved frozen time on page hide while paused:', currentElapsed);
-            }
-          } else {
-            // If running, save current elapsed time
-            const currentElapsed = calculateElapsedTime();
-            updateFormattedTime(currentElapsed);
-            console.log('Updated formatted time on page hide while running:', currentElapsed);
-          }
+        if (shouldBePaused && !internalPaused) {
+          console.log('Found pause markers on visibility change, forcing pause');
+          setInternalPaused(true);
+        } else if (!shouldBePaused && internalPaused) {
+          console.log('No pause markers but paused internally, resuming');
+          setInternalPaused(false);
         }
       }
     };
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
-    // Call the handler once on mount to ensure proper state
+    // Call once on mount
     handleVisibilityChange();
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [calculateElapsedTime, internalPaused, isActive, itemId, startTime, startTimer, updateFormattedTime]);
+  }, [internalPaused, itemId]);
+  
+  // Handle resuming a session
+  const handleResume = useCallback(() => {
+    if (!startTime || !internalPaused) return;
+    
+    // Get pause time
+    const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
+    if (pauseTimeStr) {
+      const pauseTime = parseInt(pauseTimeStr, 10);
+      const now = Date.now();
+      const pauseDuration = Math.floor((now - pauseTime) / 1000);
+      
+      // Add pause duration to accumulated time
+      const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${itemId}`);
+      const accumulatedTime = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
+      const newAccumulatedTime = accumulatedTime + pauseDuration;
+      
+      // Update accumulated time
+      accumulatedTimeRef.current = newAccumulatedTime;
+      localStorage.setItem(`sessionAccumulatedTime_${itemId}`, newAccumulatedTime.toString());
+      console.log(`Updated accumulated time: ${accumulatedTime} + ${pauseDuration} = ${newAccumulatedTime}`);
+    }
+    
+    // Clear pause markers
+    localStorage.removeItem(`sessionPauseTime_${itemId}`);
+    localStorage.removeItem(`sessionPauseTimeDisplay_${itemId}`);
+    localStorage.removeItem(`sessionIsPaused_${itemId}`);
+    
+    // Resume the timer
+    setInternalPaused(false);
+  }, [internalPaused, itemId, startTime]);
   
   return {
     elapsedTime,
     formattedTime,
     lastUpdateTime,
     isPaused: internalPaused,
-    setIsPaused: setInternalPaused
+    setIsPaused: setInternalPaused,
+    handleResume
   };
 };
