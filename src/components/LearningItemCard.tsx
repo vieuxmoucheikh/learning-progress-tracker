@@ -98,6 +98,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [showEditNoteDialog, setShowEditNoteDialog] = useState(false);
   const [isTimeEditing, setIsTimeEditing] = useState(false);
   const [editedMinutes, setEditedMinutes] = useState(calculateTotalTimeSpent(item));
+  const [pausedTime, setPausedTime] = useState<string | null>(null);
 
   const activeSession = item.progress?.sessions?.find(session => !session.endTime);
   const isPaused = activeSession?.status === 'on_hold'; // Check if session is paused
@@ -204,6 +205,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     // Store the exact time we paused
     localStorage.setItem(`sessionPauseTime_${item.id}`, now.toString());
     
+    // Store the current formatted elapsed time for display during pause
+    setPausedTime(formatElapsedTime());
+    
     // Then update the session status
     const updatedSessions = item.progress.sessions.map(s => 
       s.startTime === activeSession.startTime ? {
@@ -220,7 +224,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         sessions: updatedSessions
       }
     });
-  }, [item, activeSession, onUpdate]);
+  }, [item, activeSession, onUpdate, formatElapsedTime]);
 
   // Handle session resume
   const handleResumeSession = useCallback(() => {
@@ -985,7 +989,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               <div className="flex items-center gap-3">
                 <span className="text-sm font-medium text-blue-600">
                   {activeSession?.status === 'on_hold' || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime)
-                    ? 'Session Paused'
+                    ? `Session Paused: ${pausedTime || '00:00:00'}`
                     : `Current Session: ${formatElapsedTime()}`}
                 </span>
                 {activeSession?.status !== 'on_hold' && (
