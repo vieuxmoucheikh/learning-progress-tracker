@@ -322,74 +322,65 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const handleResumeSession = useCallback(() => {
     if (!item.progress?.sessions) return;
     
-    const pausedSession = item.progress.sessions.find(s => s.status === 'on_hold' && !s.endTime);
-    if (!pausedSession) return;
-    
     console.log('Resuming session...');
     
-    // Get the pause time from localStorage
-    const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${item.id}`);
+    const pausedSession = item.progress.sessions.find(s => s.status === 'on_hold' && !s.endTime);
+    if (!pausedSession) {
+      console.warn('No paused session found to resume');
+      return;
+    }
     
+    // Calculate the time spent paused
+    const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${item.id}`);
     if (pauseTimeStr) {
       const pauseTime = parseInt(pauseTimeStr, 10);
-      const now = Date.now();
-      const pauseDuration = now - pauseTime; // How long we've been paused
+      const resumeTime = Date.now();
+      const pauseDuration = Math.floor((resumeTime - pauseTime) / 1000);
       
-      console.log(`Session was paused for ${Math.floor(pauseDuration / 1000)} seconds`);
+      // Get current accumulated time and add the pause duration
+      const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
+      const currentAccumulated = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
+      const newAccumulated = currentAccumulated + pauseDuration;
       
-      // IMPORTANT: Make sure we have a valid frozen time to resume from
-      const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${item.id}`);
-      if (!frozenTimeStr) {
-        // If we don't have a frozen time yet, create one from the current time
-        const startTime = new Date(pausedSession.startTime).getTime();
-        const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
-        const accumulatedTime = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
-        const elapsedUntilPause = Math.floor((pauseTime - startTime) / 1000) - accumulatedTime;
-        
-        // Store the frozen time
-        localStorage.setItem(`sessionFrozenTime_${item.id}`, elapsedUntilPause.toString());
-        console.log(`Created frozen time at pause point: ${elapsedUntilPause}s`);
-      } else {
-        console.log(`Using existing frozen time: ${frozenTimeStr}s`);
-      }
+      // Store the new accumulated time
+      localStorage.setItem(`sessionAccumulatedTime_${item.id}`, newAccumulated.toString());
+      console.log(`Pause duration: ${pauseDuration}s, New accumulated: ${newAccumulated}s`);
+    }
+    
+    // Also remove the pause state flag
+    localStorage.removeItem(`sessionIsPaused_${item.id}`);
+    
+    // Remove the pause time marker
+    localStorage.removeItem(`sessionPauseTime_${item.id}`);
+    
+    // Clear any pause display values
+    localStorage.removeItem(`sessionPauseTimeDisplay_${item.id}`);
+    setPausedTime(null);
+    
+    // Immediately update local UI state
+    setIsPausedState(false);
+    setIsPaused(false);
+    
+    // Update the session status to in_progress in the database
+    const updatedSessions = [...item.progress.sessions];
+    const sessionIndex = updatedSessions.findIndex(s => s.status === 'on_hold' && !s.endTime);
+    
+    if (sessionIndex !== -1) {
+      updatedSessions[sessionIndex] = {
+        ...updatedSessions[sessionIndex],
+        status: 'in_progress'
+      };
       
-      // Clear any saved pause display time markers
-      localStorage.removeItem(`sessionPauseTime_${item.id}`);
+      // Also remove the explicit pause state flag
+      localStorage.removeItem(`sessionIsPaused_${item.id}`);
       
-      // Keep the frozen time and pause time display temporarily
-      // The timer will remove them once it starts updating
-      
-      // Update the session status
-      const updatedSessions = [...item.progress.sessions];
-      const sessionIndex = updatedSessions.findIndex(s => s.status === 'on_hold' && !s.endTime);
-      
-      if (sessionIndex !== -1) {
-        // Update the session status to in_progress
-        updatedSessions[sessionIndex] = {
-          ...updatedSessions[sessionIndex],
-          status: 'in_progress'
-        };
-        
-        // Also remove the explicit pause state flag
-        localStorage.removeItem(`sessionIsPaused_${item.id}`);
-        
-        // Update the session first so database is updated
-        onUpdate(item.id, {
-          progress: {
-            ...item.progress,
-            sessions: updatedSessions
-          }
-        });
-        
-        // Then immediately reset UI state to make sure timer updates are visible
-        setPausedTime(null);
-        
-        // Force the timer to restart by setting the pause states to false
-        setIsPausedState(false);
-        setIsPaused(false);
-        
-        console.log('Resume complete - timer should restart from frozen time');
-      }
+      // Update the session first so database is updated
+      onUpdate(item.id, {
+        progress: {
+          ...item.progress,
+          sessions: updatedSessions
+        }
+      });
     }
   }, [item, onUpdate, setIsPaused]);
 
