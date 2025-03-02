@@ -271,7 +271,7 @@ export default function App() {
   });
   const [selectedTab, setSelectedTab] = useState<string>(TAB_OPTIONS.DASHBOARD);
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'completed'>('all');
@@ -601,6 +601,13 @@ export default function App() {
 
   const handleTabChange = (tab: string) => {
     setSelectedTab(tab);
+    
+    // If switching to the Add tab, open the add dialog
+    if (tab === 'add') {
+      setShowAddDialog(true);
+      // Reset back to previous tab
+      setSelectedTab('dashboard');
+    }
   };
 
   const activeItem = state.items.find(item => item.id === state.activeItem);
@@ -706,10 +713,10 @@ export default function App() {
 
         {/* Add Item Dialog */}
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-          <DialogContent>
+          <DialogContent className="max-w-3xl w-[90vw] p-6">
             <DialogHeader>
-              <DialogTitle>Add Learning Item</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-2xl font-bold">Add Learning Item</DialogTitle>
+              <DialogDescription className="text-base">
                 Create a new learning item to track your progress
               </DialogDescription>
             </DialogHeader>
