@@ -14,18 +14,10 @@ import { DashboardTab } from './components/DashboardTab';
 import { ItemsTab } from './components/ItemsTab';
 import { AnalyticsTab } from './components/AnalyticsTab';
 import { Toaster } from "@/components/ui/toaster";
-import { toast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
 import { PomodoroTimer } from './components/pomodoro/PomodoroTimer';
 import { LearningCardsPage } from './pages/LearningCards';
 import { ThemeProvider } from './components/ThemeProvider';
 import { ThemeToggle } from './components/ThemeToggle';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './components/ui/dialog';
-
-// Helper function to generate unique IDs
-const generateId = (): string => {
-  return 'id-' + Math.random().toString(36).substr(2, 9);
-};
 
 interface State {
   items: LearningItem[];
@@ -252,6 +244,8 @@ function reducer(state: State, action: Action): State {
   }
 }
 
+const generateId = () => crypto.randomUUID();
+
 // Helper function to get date string in YYYY-MM-DD format
 const getDateStr = (date: Date) => {
   const year = date.getFullYear();
@@ -271,7 +265,7 @@ export default function App() {
   });
   const [selectedTab, setSelectedTab] = useState<string>(TAB_OPTIONS.DASHBOARD);
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'completed'>('all');
@@ -373,27 +367,11 @@ export default function App() {
     }
   }, [state.loading, state.items]);
 
-  const handleAddItem = (item: LearningItemFormData) => {
-    const newItem: LearningItem = {
-      ...item,
-      id: generateId(),
-      progress: {
-        sessions: [],
-        current: item.current || { hours: 0, minutes: 0 },
-        total: item.total,
-      },
-    };
-
-    dispatch({ type: 'ADD_ITEM', payload: newItem });
-    setShowAddDialog(false);
-    toast({
-      title: "Success",
-      description: "Learning item added successfully!",
-    });
-  };
-
-  const handleAddClick = () => {
+  const handleAddItem = async (selectedDate?: Date | null) => {
     setShowAddDialog(true);
+    if (selectedDate) {
+      setSelectedDate(selectedDate);
+    }
   };
 
   const handleSubmitItem = async (formData: LearningItemFormData) => {
@@ -599,39 +577,28 @@ export default function App() {
     setShowAddDialog(true);
   };
 
-  const handleTabChange = (tab: string) => {
-    setSelectedTab(tab);
-    
-    // If switching to the Add tab, open the add dialog
-    if (tab === 'add') {
-      setShowAddDialog(true);
-      // Reset back to previous tab
-      setSelectedTab('dashboard');
-    }
-  };
-
-  const activeItem = state.items.find(item => item.id === state.activeItem);
-  const pausedItem = state.items.find(item => 
-    item.progress?.sessions?.some(s => !s.endTime && s.status === 'on_hold')
-  );
-
-  const renderStats = () => {
-    return (
-      <Stats 
-        items={state.items} 
-        activeItem={activeItem} 
-        pausedItem={pausedItem}
-      />
-    );
-  };
-
   if (state.loading) {
     return (
       <ThemeProvider>
-        <div className="container mx-auto p-4 flex justify-center items-center h-screen">
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"></div>
+        </div>
+      </ThemeProvider>
+    );
+  }
+
+  if (error) {
+    return (
+      <ThemeProvider>
+        <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <h2 className="text-xl font-semibold mb-2">Loading...</h2>
-            <p>Fetching your learning items</p>
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Retry
+            </button>
           </div>
         </div>
       </ThemeProvider>
@@ -640,26 +607,37 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      <div className="container mx-auto p-4 max-w-6xl">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Learning Progress Tracker</h1>
-          <div className="flex gap-2">
-            <ThemeToggle />
-            <Button onClick={handleAddClick} className="flex gap-2 items-center">
-              <Plus size={16} />
-              Add Item
-            </Button>
-          </div>
-        </div>
+      <div className="min-h-screen bg-background text-foreground">
+        <Toaster />
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <header className="mb-8 relative">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex-1"></div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex-grow text-center">
+                <span className="bg-gradient-to-r from-blue-700 to-indigo-800 dark:from-blue-500 dark:to-indigo-400 bg-clip-text text-transparent">
+                  Learning Tracker
+                </span>
+              </h1>
+              <div className="flex-1 flex justify-end">
+                <ThemeToggle />
+              </div>
+            </div>
+            <p className="text-gray-700 dark:text-gray-400 text-center">Track your learning journey and stay motivated</p>
+          </header>
 
-        <TabNavigation 
-          activeTab={selectedTab} 
-          onTabChange={handleTabChange} 
-        />
+          <TabNavigation activeTab={selectedTab} onTabChange={setSelectedTab} />
 
-        <main>
-          {selectedTab === TAB_OPTIONS.DASHBOARD && (
-            <div className="space-y-6 mt-6">
+          {showAddDialog && ( 
+            <AddLearningItem
+              onAdd={handleSubmitItem}
+              onClose={() => setShowAddDialog(false)}
+              isOpen={showAddDialog}
+              selectedDate={selectedDate}
+            />
+          )}
+
+          <main>
+            {selectedTab === TAB_OPTIONS.DASHBOARD && (
               <DashboardTab
                 items={state.items}
                 onAddItem={handleDashboardAddItem}
@@ -672,11 +650,9 @@ export default function App() {
                 onSessionNoteAdd={handleAddSessionNote}
                 onSetActiveItem={handleSetActiveItem}
               />
-            </div>
-          )}
+            )}
 
-          {selectedTab === TAB_OPTIONS.ITEMS && (
-            <div className="space-y-6 mt-6">
+            {selectedTab === TAB_OPTIONS.ITEMS && (
               <ItemsTab
                 items={state.items}
                 onAddItem={handleItemsAddItem}
@@ -688,48 +664,20 @@ export default function App() {
                 onSessionNoteAdd={handleAddSessionNote}
                 onSetActiveItem={handleSetActiveItem}
               />
-            </div>
-          )}
+            )}
 
-          {selectedTab === TAB_OPTIONS.ANALYTICS && (
-            <div className="space-y-6 mt-6">
-              {renderStats()}
+            {selectedTab === TAB_OPTIONS.ANALYTICS && (
               <AnalyticsTab items={state.items} />
-            </div>
-          )}
+            )}
 
-          {selectedTab === TAB_OPTIONS.POMODORO && (
-            <div className="mt-6">
+            {selectedTab === TAB_OPTIONS.POMODORO && (
               <PomodoroTimer />
-            </div>
-          )}
-          
-          {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
-            <div className="mt-6">
+            )}
+            {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
               <LearningCardsPage />
-            </div>
-          )}
-        </main>
-
-        {/* Add Item Dialog */}
-        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-          <DialogContent className="max-w-3xl w-[90vw] p-6 max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">Add Learning Item</DialogTitle>
-              <DialogDescription className="text-base">
-                Create a new learning item to track your progress
-              </DialogDescription>
-            </DialogHeader>
-            <AddLearningItem 
-              onAdd={handleAddItem} 
-              onClose={() => setShowAddDialog(false)} 
-              isOpen={showAddDialog}
-              selectedDate={selectedDate}
-            />
-          </DialogContent>
-        </Dialog>
-
-        <Toaster />
+            )}
+          </main>
+        </div>
       </div>
     </ThemeProvider>
   );

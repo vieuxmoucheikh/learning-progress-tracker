@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { LearningItem } from '../types';
-import { BarChart3, Clock, Calendar as CalendarIcon, Trophy, TrendingUp, Target, Pause } from 'lucide-react';
+import { BarChart3, Clock, Calendar as CalendarIcon, Trophy, TrendingUp, Target } from 'lucide-react';
 import { calculateTimeByCategory } from '../lib/utils';
 import { YearlyActivityStats } from './YearlyActivityStats';
 import GoalManager from './pomodoro/GoalManager';
@@ -13,15 +13,12 @@ import { format } from "date-fns";
 import { clsx } from "clsx";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { LucideCalendar } from 'lucide-react';
-import { useSessionTimer } from '../hooks/useSessionTimer';
 
 interface Props {
   items: LearningItem[];
-  activeItem?: LearningItem | null;
-  pausedItem?: LearningItem | null;
 }
 
-export function Stats({ items, activeItem, pausedItem }: Props) {
+export function Stats({ items }: Props) {
   const [isGoalPopoverOpen, setIsGoalPopoverOpen] = useState(false);
   const [newGoal, setNewGoal] = useState({
     title: '',
@@ -31,24 +28,6 @@ export function Stats({ items, activeItem, pausedItem }: Props) {
     priority: 'medium' as const,
   });
   const [isAddingGoal, setIsAddingGoal] = useState(false);
-
-  // Get active session details
-  const activeSession = activeItem?.progress?.sessions?.find(session => !session.endTime && session.status === 'in_progress');
-  const { elapsedTime: activeElapsedTime, formatElapsedTime: formatActiveElapsedTime } = useSessionTimer({
-    isActive: !!activeSession,
-    startTime: activeSession?.startTime || null,
-    itemId: activeItem?.id || 'none',
-    isPaused: false
-  });
-
-  // Get paused session details
-  const pausedSession = pausedItem?.progress?.sessions?.find(session => !session.endTime && session.status === 'on_hold');
-  const { elapsedTime: pausedElapsedTime, formatElapsedTime: formatPausedElapsedTime } = useSessionTimer({
-    isActive: !!pausedSession,
-    startTime: pausedSession?.startTime || null,
-    itemId: pausedItem?.id || 'none',
-    isPaused: true
-  });
 
   const stats = useMemo(() => {
     // Calculate status distribution
@@ -250,21 +229,6 @@ export function Stats({ items, activeItem, pausedItem }: Props) {
             <p className="text-gray-600">Average Time</p>
             <span className="text-2xl font-bold text-green-600">{formatTime(stats.averageTime)}</span>
           </div>
-          {activeItem && (
-            <div className="flex justify-between items-center">
-              <p className="text-gray-600">Current Session</p>
-              <span className="text-2xl font-bold text-amber-600">{formatActiveElapsedTime()}</span>
-            </div>
-          )}
-          {pausedItem && (
-            <div className="flex justify-between items-center">
-              <p className="text-gray-600 flex items-center">
-                <Pause className="w-4 h-4 mr-1 text-yellow-500" />
-                Session Paused
-              </p>
-              <span className="text-2xl font-bold text-yellow-500">{formatPausedElapsedTime()}</span>
-            </div>
-          )}
         </div>
       </div>
 
@@ -314,7 +278,7 @@ export function Stats({ items, activeItem, pausedItem }: Props) {
       <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-red-100 transition-all duration-200 hover:shadow-md">
         <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
           <div className="p-2 bg-red-50 rounded-lg">
-            <CalendarIcon className="w-6 h-6 text-red-500" />
+            <Calendar className="w-6 h-6 text-red-500" />
           </div>
           Time by Category
         </h3>
@@ -327,17 +291,13 @@ export function Stats({ items, activeItem, pausedItem }: Props) {
           ))}
         </div>
       </div>
-      </div>
 
       {/* Yearly Activity Stats */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-purple-100 transition-all duration-200 hover:shadow-md">
-        <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
-          <div className="p-2 bg-purple-50 rounded-lg">
-            <TrendingUp className="w-6 h-6 text-purple-500" />
-          </div>
-          Yearly Activity
-        </h3>
-        <YearlyActivityStats />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="col-span-full">
+          <YearlyActivityStats />
+        </div>
+      </div>
       </div>
     </div>
   );
