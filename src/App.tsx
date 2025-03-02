@@ -14,10 +14,18 @@ import { DashboardTab } from './components/DashboardTab';
 import { ItemsTab } from './components/ItemsTab';
 import { AnalyticsTab } from './components/AnalyticsTab';
 import { Toaster } from "@/components/ui/toaster";
+import { toast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
 import { PomodoroTimer } from './components/pomodoro/PomodoroTimer';
 import { LearningCardsPage } from './pages/LearningCards';
 import { ThemeProvider } from './components/ThemeProvider';
 import { ThemeToggle } from './components/ThemeToggle';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './components/ui/dialog';
+
+// Helper function to generate unique IDs
+const generateId = (): string => {
+  return 'id-' + Math.random().toString(36).substr(2, 9);
+};
 
 interface State {
   items: LearningItem[];
@@ -244,8 +252,6 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-const generateId = () => crypto.randomUUID();
-
 // Helper function to get date string in YYYY-MM-DD format
 const getDateStr = (date: Date) => {
   const year = date.getFullYear();
@@ -367,11 +373,27 @@ export default function App() {
     }
   }, [state.loading, state.items]);
 
-  const handleAddItem = async (selectedDate?: Date | null) => {
+  const handleAddItem = (item: LearningItemFormData) => {
+    const newItem: LearningItem = {
+      ...item,
+      id: generateId(),
+      progress: {
+        sessions: [],
+        current: item.current || { hours: 0, minutes: 0 },
+        total: item.total,
+      },
+    };
+
+    dispatch({ type: 'ADD_ITEM', payload: newItem });
+    setShowAddDialog(false);
+    toast({
+      title: "Success",
+      description: "Learning item added successfully!",
+    });
+  };
+
+  const handleAddClick = () => {
     setShowAddDialog(true);
-    if (selectedDate) {
-      setSelectedDate(selectedDate);
-    }
   };
 
   const handleSubmitItem = async (formData: LearningItemFormData) => {
@@ -577,6 +599,10 @@ export default function App() {
     setShowAddDialog(true);
   };
 
+  const handleTabChange = (tab: string) => {
+    setSelectedTab(tab);
+  };
+
   const activeItem = state.items.find(item => item.id === state.activeItem);
   const pausedItem = state.items.find(item => 
     item.progress?.sessions?.some(s => !s.endTime && s.status === 'on_hold')
@@ -595,25 +621,10 @@ export default function App() {
   if (state.loading) {
     return (
       <ThemeProvider>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"></div>
-        </div>
-      </ThemeProvider>
-    );
-  }
-
-  if (error) {
-    return (
-      <ThemeProvider>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="container mx-auto p-4 flex justify-center items-center h-screen">
           <div className="text-center">
-            <p className="text-red-600 mb-4">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Retry
-            </button>
+            <h2 className="text-xl font-semibold mb-2">Loading...</h2>
+            <p>Fetching your learning items</p>
           </div>
         </div>
       </ThemeProvider>
@@ -622,86 +633,98 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-background text-foreground">
-        <Toaster />
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <header className="mb-8 relative">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex-1"></div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex-grow text-center">
-                <span className="bg-gradient-to-r from-blue-700 to-indigo-800 dark:from-blue-500 dark:to-indigo-400 bg-clip-text text-transparent">
-                  Learning Tracker
-                </span>
-              </h1>
-              <div className="flex-1 flex justify-end">
-                <ThemeToggle />
-              </div>
+      <div className="container mx-auto p-4 max-w-6xl">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Learning Progress Tracker</h1>
+          <div className="flex gap-2">
+            <ThemeToggle />
+            <Button onClick={handleAddClick} className="flex gap-2 items-center">
+              <Plus size={16} />
+              Add Item
+            </Button>
+          </div>
+        </div>
+
+        <TabNavigation 
+          activeTab={selectedTab} 
+          onTabChange={handleTabChange} 
+        />
+
+        <main>
+          {selectedTab === TAB_OPTIONS.DASHBOARD && (
+            <div className="space-y-6 mt-6">
+              {renderStats()}
+              <DashboardTab
+                items={state.items}
+                onAddItem={handleDashboardAddItem}
+                onUpdate={handleDashboardUpdate}
+                onDateSelect={handleDateSelect}
+                onDelete={handleDeleteItem}
+                onStartTracking={handleStartTracking}
+                onStopTracking={handleStopTracking}
+                onNotesUpdate={handleUpdateNotes}
+                onSessionNoteAdd={handleAddSessionNote}
+                onSetActiveItem={handleSetActiveItem}
+              />
             </div>
-            <p className="text-gray-700 dark:text-gray-400 text-center">Track your learning journey and stay motivated</p>
-          </header>
+          )}
 
-          <TabNavigation activeTab={selectedTab} onTabChange={setSelectedTab} />
+          {selectedTab === TAB_OPTIONS.ITEMS && (
+            <div className="space-y-6 mt-6">
+              {renderStats()}
+              <ItemsTab
+                items={state.items}
+                onAddItem={handleItemsAddItem}
+                onUpdate={handleUpdateItem}
+                onDelete={handleDeleteItem}
+                onStartTracking={handleStartTracking}
+                onStopTracking={handleStopTracking}
+                onNotesUpdate={handleUpdateNotes}
+                onSessionNoteAdd={handleAddSessionNote}
+                onSetActiveItem={handleSetActiveItem}
+              />
+            </div>
+          )}
 
-          {showAddDialog && ( 
-            <AddLearningItem
-              onAdd={handleSubmitItem}
-              onClose={() => setShowAddDialog(false)}
+          {selectedTab === TAB_OPTIONS.ANALYTICS && (
+            <div className="space-y-6 mt-6">
+              {renderStats()}
+              <AnalyticsTab items={state.items} />
+            </div>
+          )}
+
+          {selectedTab === TAB_OPTIONS.POMODORO && (
+            <div className="mt-6">
+              <PomodoroTimer />
+            </div>
+          )}
+          
+          {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
+            <div className="mt-6">
+              <LearningCardsPage />
+            </div>
+          )}
+        </main>
+
+        {/* Add Item Dialog */}
+        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Learning Item</DialogTitle>
+              <DialogDescription>
+                Create a new learning item to track your progress
+              </DialogDescription>
+            </DialogHeader>
+            <AddLearningItem 
+              onAdd={handleAddItem} 
+              onClose={() => setShowAddDialog(false)} 
               isOpen={showAddDialog}
               selectedDate={selectedDate}
             />
-          )}
+          </DialogContent>
+        </Dialog>
 
-          <main>
-            {selectedTab === TAB_OPTIONS.DASHBOARD && (
-              <div className="space-y-6">
-                {renderStats()}
-                <DashboardTab
-                  items={state.items}
-                  onAddItem={handleDashboardAddItem}
-                  onUpdate={handleDashboardUpdate}
-                  onDateSelect={handleDateSelect}
-                  onDelete={handleDeleteItem}
-                  onStartTracking={handleStartTracking}
-                  onStopTracking={handleStopTracking}
-                  onNotesUpdate={handleUpdateNotes}
-                  onSessionNoteAdd={handleAddSessionNote}
-                  onSetActiveItem={handleSetActiveItem}
-                />
-              </div>
-            )}
-
-            {selectedTab === TAB_OPTIONS.ITEMS && (
-              <div className="space-y-6">
-                {renderStats()}
-                <ItemsTab
-                  items={state.items}
-                  onAddItem={handleItemsAddItem}
-                  onUpdate={handleUpdateItem}
-                  onDelete={handleDeleteItem}
-                  onStartTracking={handleStartTracking}
-                  onStopTracking={handleStopTracking}
-                  onNotesUpdate={handleUpdateNotes}
-                  onSessionNoteAdd={handleAddSessionNote}
-                  onSetActiveItem={handleSetActiveItem}
-                />
-              </div>
-            )}
-
-            {selectedTab === TAB_OPTIONS.ANALYTICS && (
-              <div className="space-y-6">
-                {renderStats()}
-                <AnalyticsTab items={state.items} />
-              </div>
-            )}
-
-            {selectedTab === TAB_OPTIONS.POMODORO && (
-              <PomodoroTimer />
-            )}
-            {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
-              <LearningCardsPage />
-            )}
-          </main>
-        </div>
+        <Toaster />
       </div>
     </ThemeProvider>
   );

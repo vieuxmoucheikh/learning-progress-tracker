@@ -222,26 +222,32 @@ export function Stats({ items, activeItem, pausedItem }: Props) {
           </div>
           <div className="flex justify-between items-center">
             <p className="text-gray-600">Completion Rate</p>
-            <span className="text-2xl font-bold text-purple-600">{stats.completionRate.toFixed(1)}%</span>
+            <span className="text-2xl font-bold text-purple-600">{Math.round(stats.completionRate)}%</span>
+          </div>
+          <div className="w-full bg-gray-100 rounded-full h-3 mt-4">
+            <div
+              className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-300"
+              style={{ width: `${stats.completionRate}%` }}
+            />
           </div>
         </div>
       </div>
 
       {/* Time Stats */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-blue-100 transition-all duration-200 hover:shadow-md">
+      <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-green-100 transition-all duration-200 hover:shadow-md">
         <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
-          <div className="p-2 bg-blue-50 rounded-lg">
-            <Clock className="w-6 h-6 text-blue-500" />
+          <div className="p-2 bg-green-50 rounded-lg">
+            <Clock className="w-6 h-6 text-green-500" />
           </div>
-          Time Investment
+          Time Statistics
         </h3>
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <p className="text-gray-600">Total Time Invested</p>
-            <span className="text-2xl font-bold text-blue-600">{formatTime(stats.totalTime)}</span>
+            <p className="text-gray-600">Total Time</p>
+            <span className="text-2xl font-bold text-green-600">{formatTime(stats.totalTime)}</span>
           </div>
           <div className="flex justify-between items-center">
-            <p className="text-gray-600">Avg. Time per Item</p>
+            <p className="text-gray-600">Average Time</p>
             <span className="text-2xl font-bold text-green-600">{formatTime(stats.averageTime)}</span>
           </div>
           {activeItem && (
@@ -321,13 +327,17 @@ export function Stats({ items, activeItem, pausedItem }: Props) {
           ))}
         </div>
       </div>
+      </div>
 
       {/* Yearly Activity Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="col-span-full">
-          <YearlyActivityStats />
-        </div>
-      </div>
+      <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-purple-100 transition-all duration-200 hover:shadow-md">
+        <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
+          <div className="p-2 bg-purple-50 rounded-lg">
+            <TrendingUp className="w-6 h-6 text-purple-500" />
+          </div>
+          Yearly Activity
+        </h3>
+        <YearlyActivityStats />
       </div>
     </div>
   );
