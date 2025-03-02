@@ -102,7 +102,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const activeSession = item.progress?.sessions?.find(session => !session.endTime);
   const { elapsedTime, formatElapsedTime, lastUpdateTime, isValidSession } = useSessionTimer({
     isActive: !!activeSession,
-    isPaused: activeSession?.status === 'on_hold',
     startTime: activeSession?.startTime || null,
     itemId: item.id
   });

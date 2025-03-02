@@ -2,15 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 
 interface SessionTimerProps {
   isActive: boolean;
-  isPaused: boolean;
   startTime: string | null;
   itemId: string; 
 }
 
-export function useSessionTimer({ isActive, isPaused, startTime, itemId }: SessionTimerProps) {
+export function useSessionTimer({ isActive, startTime, itemId }: SessionTimerProps) {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [lastUpdateTime, setLastUpdateTime] = useState<number | null>(null);
-  const [accumulatedTime, setAccumulatedTime] = useState(0);
 
   const validateSession = useCallback(() => {
     if (!startTime) return false;
@@ -24,31 +22,22 @@ export function useSessionTimer({ isActive, isPaused, startTime, itemId }: Sessi
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 
-    if (isActive && startTime && validateSession() && !isPaused) {
-      if (lastUpdateTime === null) {
-        setLastUpdateTime(Date.now());
-      }
-
+    if (isActive && startTime && validateSession()) {
+      const start = new Date(startTime).getTime();
+      
       const updateElapsedTime = () => {
         const now = Date.now();
-        if (lastUpdateTime !== null) {
-          const deltaSeconds = Math.floor((now - lastUpdateTime) / 1000);
-          setElapsedTime(accumulatedTime + deltaSeconds);
-        }
+        const elapsed = Math.floor((now - start) / 1000);
+        setElapsedTime(elapsed);
         setLastUpdateTime(now);
+        
         localStorage.setItem(`sessionLastUpdate_${itemId}`, now.toString());
       };
 
       updateElapsedTime(); 
       interval = setInterval(updateElapsedTime, 1000);
     } else {
-      if (isPaused && lastUpdateTime !== null) {
-        const now = Date.now();
-        const deltaSeconds = Math.floor((now - lastUpdateTime) / 1000);
-        const newAccumulated = accumulatedTime + deltaSeconds;
-        setElapsedTime(newAccumulated);
-        setAccumulatedTime(newAccumulated);
-      }
+      setElapsedTime(0);
       setLastUpdateTime(null);
       localStorage.removeItem(`sessionLastUpdate_${itemId}`);
     }
@@ -58,7 +47,7 @@ export function useSessionTimer({ isActive, isPaused, startTime, itemId }: Sessi
         clearInterval(interval);
       }
     };
-  }, [isActive, isPaused, startTime, itemId, accumulatedTime, lastUpdateTime, validateSession]);
+  }, [isActive, startTime, itemId, validateSession]);
 
   const formatElapsedTime = () => {
     const hours = Math.floor(elapsedTime / 3600);
