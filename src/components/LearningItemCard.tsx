@@ -175,6 +175,32 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     }
   }, [item.id]);
 
+  // Handle visibility change
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Only check for active sessions, not paused ones
+        if (activeSession && activeSession.status === 'in_progress') {
+          // Refresh the session state but don't automatically complete it
+          const lastUpdateTimeStr = localStorage.getItem(`sessionLastUpdate_${item.id}`);
+          if (lastUpdateTimeStr) {
+            const lastUpdateTime = parseInt(lastUpdateTimeStr, 10);
+            const now = Date.now();
+            // Only update if it's been more than 2 seconds since last update
+            if (now - lastUpdateTime > 2000) {
+              localStorage.setItem(`sessionLastUpdate_${item.id}`, now.toString());
+            }
+          }
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [item.id, activeSession]);
+
   // Handle session start
   const handleStartSession = useCallback(() => {
     if (activeSession || !item.progress) return; // Prevent multiple active sessions

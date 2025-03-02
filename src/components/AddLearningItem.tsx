@@ -16,7 +16,7 @@ const generateId = (): string => {
 
 const getAdjustedDateStr = (date: Date) => {
   const d = new Date(date);
-  d.setHours(0, 0, 0, 0);  // Set to midnight in local timezone
+  // No adjustment needed - just format as YYYY-MM-DD
   return d.toISOString().split('T')[0];
 };
 
@@ -46,8 +46,8 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
   };
 
   const [formData, setFormData] = useState<LearningItemFormData>(() => {
-    const date = selectedDate ? new Date(selectedDate) : new Date();
-    date.setHours(0, 0, 0, 0);
+    // Use the current date without any timezone adjustments
+    const date = selectedDate || new Date();
     return {
       ...initialFormData,
       date: getAdjustedDateStr(date)
@@ -55,19 +55,17 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedDateState, setSelectedDateState] = useState<Date | undefined>(
-    selectedDate ? new Date(selectedDate) : new Date()
+    selectedDate || new Date()
   );
 
   // Update form data when selected date changes
   useEffect(() => {
     if (selectedDate) {
-      const date = new Date(selectedDate);
-      date.setHours(0, 0, 0, 0);
       setFormData(prev => ({
         ...prev,
-        date: getAdjustedDateStr(date)
+        date: getAdjustedDateStr(selectedDate)
       }));
-      setSelectedDateState(date);
+      setSelectedDateState(selectedDate);
     }
   }, [selectedDate]);
 
