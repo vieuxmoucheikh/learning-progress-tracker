@@ -196,12 +196,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const handlePauseSession = useCallback(() => {
     if (!activeSession || !item.progress?.sessions) return;
 
-    // Store pause time in localStorage
+    // Store pause time in localStorage to mark when we paused
     const now = Date.now();
     localStorage.setItem(`sessionPauseTime_${item.id}`, now.toString());
-    
-    // The timer will read this pause time and calculate accumulated time
-    // We don't need to stop tracking first as the isPaused flag will handle this
     
     // Update the current session to paused state
     const updatedSessions = item.progress.sessions.map(s => 
@@ -211,7 +208,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       } : s
     );
 
-    // Update the session status
+    // Update the session status in the item data
     onUpdate(item.id, {
       status: 'on_hold',
       progress: {
@@ -219,9 +216,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         sessions: updatedSessions
       }
     });
-    
-    // We DON'T call onStopTracking since we want to keep the session active but paused
-    // The isPaused flag in useSessionTimer will handle freezing the timer
   }, [item, activeSession, onUpdate]);
 
   // Handle session resume
@@ -231,20 +225,27 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     const pausedSession = item.progress.sessions.find(s => s.status === 'on_hold' && !s.endTime);
     if (!pausedSession) return;
 
-    // Calculate accumulated pause time before removing the pause marker
+    // Calculate pause time for accumulated time tracking
     const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${item.id}`);
+    const now = Date.now();
+    
     if (pauseTimeStr) {
       const pauseTime = parseInt(pauseTimeStr, 10);
-      const now = Date.now();
+      const pauseDuration = Math.floor((now - pauseTime) / 1000);
       
-      // The pause duration will be added to accumulated time in the useSessionTimer hook
-      // when isPaused changes from true to false
+      // Get current accumulated time
+      const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
+      const accumulatedTime = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
+      
+      // Store updated accumulated time with the added pause duration
+      const newAccumulatedTime = accumulatedTime + pauseDuration;
+      localStorage.setItem(`sessionAccumulatedTime_${item.id}`, newAccumulatedTime.toString());
+      
+      // Critical: Remove the pause time marker to indicate we're no longer paused
+      localStorage.removeItem(`sessionPauseTime_${item.id}`);
     }
 
-    // Remove pause time from localStorage - signals to useSessionTimer that we're resuming
-    localStorage.removeItem(`sessionPauseTime_${item.id}`);
-
-    // Update the session status
+    // Update the session status to in_progress
     const updatedSessions = item.progress.sessions.map(s => 
       s.startTime === pausedSession.startTime ? {
         ...s,
@@ -252,7 +253,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       } : s
     );
 
-    // First update the session status
+    // Update the item with the resumed session
     onUpdate(item.id, {
       status: 'in_progress',
       progress: {
@@ -260,8 +261,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         sessions: updatedSessions
       }
     });
-
-    // No need to start tracking again - the timer is already running but paused
   }, [item, onUpdate]);
 
   // Handle session stop
