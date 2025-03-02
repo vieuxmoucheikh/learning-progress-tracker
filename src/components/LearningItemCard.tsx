@@ -121,23 +121,46 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     setIsPausedState(isPaused);
   }, [isPaused]);
 
-  // Initialize paused time from localStorage if session is paused
+  // Initialize paused time from localStorage when component mounts
   useEffect(() => {
-    if (isPausedState) {
-      // First try to get the formatted time
-      const formattedTimeStr = localStorage.getItem(`sessionCurrentTimeFormatted_${item.id}`);
-      if (formattedTimeStr) {
-        setPausedTime(formattedTimeStr);
-        return;
-      }
+    // Check if we should be in paused state
+    const isPausedFromStorage = localStorage.getItem(`sessionIsPaused_${item.id}`) === 'true';
+    const isPausedFromSession = activeSession?.status === 'on_hold';
+    const hasPauseTime = !!localStorage.getItem(`sessionPauseTime_${item.id}`);
+    
+    // If any of these conditions is true, the session should be paused
+    const shouldBePaused = isPausedFromStorage || isPausedFromSession || hasPauseTime;
+    
+    console.log('Initial pause state detection:', { 
+      isPausedFromStorage, 
+      isPausedFromSession, 
+      hasPauseTime, 
+      shouldBePaused 
+    });
+    
+    if (shouldBePaused) {
+      console.log('Session should be paused, setting paused state');
+      setIsPausedState(true);
+      setIsPaused(true);
       
-      // Next try to get from localStorage
+      // Also try to restore pausedTime
       const pauseTimeDisplay = localStorage.getItem(`sessionPauseTimeDisplay_${item.id}`);
       if (pauseTimeDisplay) {
+        console.log('Restoring pause time display:', pauseTimeDisplay);
         setPausedTime(pauseTimeDisplay);
+      } else {
+        // Try to get from frozen time
+        const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${item.id}`);
+        if (frozenTimeStr) {
+          const frozenTime = parseInt(frozenTimeStr, 10);
+          const formatted = formatSecondsToHHMMSS(frozenTime);
+          setPausedTime(formatted);
+          console.log('Created pause time display from frozen time:', formatted);
+          localStorage.setItem(`sessionPauseTimeDisplay_${item.id}`, formatted);
+        }
       }
     }
-  }, [isPausedState, item.id]);
+  }, [item.id, activeSession, setIsPaused]);
 
   // Handle session persistence and cleanup
   useEffect(() => {
@@ -266,6 +289,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     localStorage.setItem(`sessionCurrentTimeFormatted_${item.id}`, currentFormattedTime);
     localStorage.setItem(`sessionPauseTimeDisplay_${item.id}`, currentFormattedTime);
     
+    // Also store an explicit pause state flag to ensure it persists through navigation
+    localStorage.setItem(`sessionIsPaused_${item.id}`, 'true');
+    
     // Update the local state immediately to show the paused time
     setPausedTime(currentFormattedTime);
     
@@ -291,35 +317,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       });
     }
   }, [item, activeSession, onUpdate, setIsPaused]);
-
-  // Initialize paused time from localStorage when component mounts
-  useEffect(() => {
-    // If we have an active session that's paused, make sure to set the proper display time
-    if (activeSession && activeSession.status === 'on_hold') {
-      console.log('Initializing paused time display...');
-      
-      // Check for pause time display in localStorage
-      const pauseTimeDisplay = localStorage.getItem(`sessionPauseTimeDisplay_${item.id}`);
-      if (pauseTimeDisplay) {
-        setPausedTime(pauseTimeDisplay);
-        console.log('Restored pause time display:', pauseTimeDisplay);
-      } else {
-        // If no pause time display exists but we should be paused, try to create one
-        const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${item.id}`);
-        if (frozenTimeStr) {
-          const frozenTime = parseInt(frozenTimeStr, 10);
-          const formatted = formatSecondsToHHMMSS(frozenTime);
-          setPausedTime(formatted);
-          localStorage.setItem(`sessionPauseTimeDisplay_${item.id}`, formatted);
-          console.log('Created pause time display from frozen time:', formatted);
-        }
-      }
-      
-      // Ensure we're in paused state
-      setIsPausedState(true);
-      setIsPaused(true);
-    }
-  }, [activeSession, item.id, setIsPaused]);
 
   // Handle session resume
   const handleResumeSession = useCallback(() => {
@@ -372,6 +369,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           ...updatedSessions[sessionIndex],
           status: 'in_progress'
         };
+        
+        // Also remove the explicit pause state flag
+        localStorage.removeItem(`sessionIsPaused_${item.id}`);
         
         // Update the session first so database is updated
         onUpdate(item.id, {
@@ -926,7 +926,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
     
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    const pad = (num: number) => num.toString().padStart(2, '0');
+    return `${pad(hours)}:${pad(minutes)}:${pad(secs)}`;
   };
 
   const handleEditNote = useCallback(() => {
