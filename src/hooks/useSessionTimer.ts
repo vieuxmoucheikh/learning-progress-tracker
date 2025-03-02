@@ -177,6 +177,29 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
 
   // Main timer effect
   useEffect(() => {
+    // If we are explicitly paused or a pause time exists, stop everything
+    const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
+    if (internalPaused || pauseTimeStr) {
+      // No interval should be running
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+        console.log('Cleared interval because session is paused');
+      }
+      
+      // Use frozen time if available
+      const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
+      if (frozenTimeStr) {
+        const frozenTime = parseInt(frozenTimeStr, 10);
+        setElapsedTime(frozenTime);
+        console.log('Using frozen time:', frozenTime);
+      }
+      
+      // Indicate that we're paused
+      setInternalPaused(true);
+      return;
+    }
+    
     // Clean up any existing interval first
     if (intervalRef.current) {
       console.log('Cleaning up interval:', intervalRef.current);
@@ -184,34 +207,8 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
       intervalRef.current = null;
     }
 
-    // Force check of pause state from localStorage
-    const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
-    const isPausedNow = !!pauseTimeStr;
-    
-    // If localStorage says we're paused but our internal state disagrees, sync them
-    if (isPausedNow !== internalPaused) {
-      console.log('Correcting internal paused state from localStorage');
-      setInternalPaused(isPausedNow);
-      return; // Exit early and let the re-render handle the rest
-    }
-
-    // If we're paused, use the frozen time value if available
-    if (isPausedNow || internalPaused) {
-      console.log('Timer is paused, not starting interval');
-      
-      // If we have a frozen time value, use it
-      const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
-      if (frozenTimeStr) {
-        const frozenTime = parseInt(frozenTimeStr, 10);
-        setElapsedTime(frozenTime);
-        console.log('Using frozen time value:', frozenTime, 'seconds');
-      }
-      
-      return;
-    }
-
     // Only run the timer when we're active, not paused, and have a valid start time
-    if (isActive && !internalPaused && !isPausedNow && startTime && validateSession()) {
+    if (isActive && !internalPaused && startTime && validateSession()) {
       console.log('Starting timer interval');
       
       const start = new Date(startTime).getTime();
@@ -295,16 +292,31 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
   }, [internalPaused, itemId, elapsedTime]);
 
   const formatElapsedTime = () => {
+    // Always check if we're paused first, and if so, use the frozen time
+    if (internalPaused && itemId) {
+      const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
+      if (frozenTimeStr) {
+        const frozenTime = parseInt(frozenTimeStr, 10);
+        // Format this frozen time instead of using elapsedTime
+        const hours = Math.floor(frozenTime / 3600);
+        const minutes = Math.floor((frozenTime % 3600) / 60);
+        const seconds = frozenTime % 60;
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      }
+    }
+    
+    // Normal case for active sessions
     const hours = Math.floor(elapsedTime / 3600);
     const minutes = Math.floor((elapsedTime % 3600) / 60);
     const seconds = elapsedTime % 60;
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  return { 
-    elapsedTime, 
-    formatElapsedTime, 
-    lastUpdateTime,
-    isValidSession: validateSession()
+  return {
+    elapsedTime,
+    formatElapsedTime,
+    totalSeconds: elapsedTime,
+    isPaused: internalPaused,
+    formattedTime: formatElapsedTime()
   };
 }

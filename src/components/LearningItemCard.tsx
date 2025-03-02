@@ -98,17 +98,16 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [showEditNoteDialog, setShowEditNoteDialog] = useState(false);
   const [isTimeEditing, setIsTimeEditing] = useState(false);
   const [editedMinutes, setEditedMinutes] = useState(calculateTotalTimeSpent(item));
-
-  const activeSession = item.progress?.sessions?.find(session => !session.endTime);
-  const isPaused = activeSession?.status === 'on_hold'; // Check if session is paused
-
   const [pausedTime, setPausedTime] = useState<string | null>(null);
 
-  const { elapsedTime, formatElapsedTime, lastUpdateTime, isValidSession } = useSessionTimer({
+  const activeSession = item.progress?.sessions?.find(session => !session.endTime);
+  const [isPaused, setIsPaused] = useState(activeSession?.status === 'on_hold'); // Track pause state
+
+  const { elapsedTime, formatElapsedTime, isPaused: timerIsPaused, formattedTime } = useSessionTimer({
     isActive: !!activeSession,
     startTime: activeSession?.startTime || null,
     itemId: item.id,
-    isPaused: isPaused // Pass the paused state to the hook
+    isPaused: isPaused
   });
 
   // Initialize pausedTime from localStorage if session is paused
@@ -213,83 +212,79 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   // Handle session pause
   const handlePauseSession = useCallback(() => {
     if (!activeSession || !item.progress?.sessions) return;
-
-    // CRITICAL: Set pause time in localStorage first, before updating any state
-    // This ensures the timer stops immediately
-    const now = Date.now();
-    console.log('Pausing session at:', new Date(now).toISOString());
     
-    // Store the exact time we paused
-    localStorage.setItem(`sessionPauseTime_${item.id}`, now.toString());
+    // Store the pause time in localStorage for timer calculations
+    const pauseTime = Date.now();
+    localStorage.setItem(`sessionPauseTime_${item.id}`, pauseTime.toString());
     
-    // Store the current formatted elapsed time for display during pause
+    // Format the current timer display and store it
     const formattedTime = formatElapsedTime();
     localStorage.setItem(`sessionPauseTimeDisplay_${item.id}`, formattedTime);
-    setPausedTime(formattedTime);
     
-    // Then update the session status
-    const updatedSessions = item.progress.sessions.map(s => 
-      s.startTime === activeSession.startTime ? {
-        ...s,
-        status: 'on_hold' as const
-      } : s
-    );
-
-    // Update the item with the paused session
-    onUpdate(item.id, {
-      status: 'on_hold',
-      progress: {
-        ...item.progress,
-        sessions: updatedSessions
-      }
-    });
+    // Update the local state immediately to show the paused time
+    setPausedTime(formattedTime);
+    setIsPaused(true);
+    
+    // Update the session status to on_hold
+    const updatedSessions = [...item.progress.sessions];
+    const sessionIndex = updatedSessions.findIndex(s => !s.endTime && s.status === 'in_progress');
+    
+    if (sessionIndex !== -1) {
+      updatedSessions[sessionIndex] = {
+        ...updatedSessions[sessionIndex],
+        status: 'on_hold'
+      };
+      
+      onUpdate(item.id, {
+        progress: {
+          ...item.progress,
+          sessions: updatedSessions
+        },
+        status: 'on_hold'
+      });
+    }
+    
+    // Force frozen time storage for consistency
+    const startTime = activeSession.startTime ? new Date(activeSession.startTime).getTime() : 0;
+    if (startTime) {
+      const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
+      const accumulatedTime = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
+      const elapsedUntilPause = Math.floor((pauseTime - startTime) / 1000) - accumulatedTime;
+      localStorage.setItem(`sessionFrozenTime_${item.id}`, elapsedUntilPause.toString());
+    }
   }, [item, activeSession, onUpdate, formatElapsedTime]);
 
   // Handle session resume
   const handleResumeSession = useCallback(() => {
     if (!item.progress?.sessions) return;
-
+    
+    // Find the paused session
     const pausedSession = item.progress.sessions.find(s => s.status === 'on_hold' && !s.endTime);
     if (!pausedSession) return;
-
-    // Get and process pause details
-    const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${item.id}`);
-    if (pauseTimeStr) {
-      const pauseTime = parseInt(pauseTimeStr, 10);
-      const now = Date.now();
-      const pauseDuration = Math.floor((now - pauseTime) / 1000); // seconds
-      
-      console.log('Resuming session, adding pause duration:', pauseDuration, 'seconds');
-      
-      // Store the accumulated pause time for the timer
-      const currentAccumulatedTime = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
-      const accumulatedTime = currentAccumulatedTime ? parseInt(currentAccumulatedTime, 10) : 0;
-      const newAccumulatedTime = accumulatedTime + pauseDuration;
-      
-      console.log('New accumulated time:', newAccumulatedTime, 'seconds');
-      localStorage.setItem(`sessionAccumulatedTime_${item.id}`, newAccumulatedTime.toString());
-      
-      // CRITICAL: Remove pause marker and pause display value
-      localStorage.removeItem(`sessionPauseTime_${item.id}`);
-      localStorage.removeItem(`sessionPauseTimeDisplay_${item.id}`);
-      setPausedTime(null); // Clear the paused time display value
-    }
-
-    // Now update the session status
-    const updatedSessions = item.progress.sessions.map(s => 
-      s.status === 'on_hold' && !s.endTime ? {
-        ...s,
-        status: 'in_progress' as const
-      } : s
-    );
     
-    onUpdate(item.id, {
-      status: 'in_progress',
-      progress: {
-        ...item.progress,
-        sessions: updatedSessions
-      }
-    });
+    // Clear the paused state and reset timers
+    localStorage.removeItem(`sessionPauseTimeDisplay_${item.id}`);
+    setPausedTime(null);
+    setIsPaused(false);
+    
+    // Update session status
+    const updatedSessions = [...item.progress.sessions];
+    const sessionIndex = updatedSessions.findIndex(s => !s.endTime && s.status === 'on_hold');
+    
+    if (sessionIndex !== -1) {
+      updatedSessions[sessionIndex] = {
+        ...updatedSessions[sessionIndex],
+        status: 'in_progress'
+      };
+      
+      onUpdate(item.id, {
+        progress: {
+          ...item.progress,
+          sessions: updatedSessions
+        },
+        status: 'in_progress'
+      });
+    }
   }, [item, onUpdate]);
 
   // Handle session stop
@@ -1024,8 +1019,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               <div className="flex items-center gap-3">
                 <span className="text-sm font-medium text-blue-600">
                   {activeSession?.status === 'on_hold' || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime)
-                    ? `Session Paused: ${getSessionTimeDisplay()}`
-                    : `Current Session: ${getSessionTimeDisplay()}`}
+                    ? `Session Paused: ${pausedTime || '00:00:00'}`
+                    : `Current Session: ${formattedTime || formatElapsedTime()}`}
                 </span>
                 {activeSession?.status !== 'on_hold' && (
                   <Button
