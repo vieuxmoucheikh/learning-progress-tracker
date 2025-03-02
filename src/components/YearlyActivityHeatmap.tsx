@@ -235,38 +235,37 @@ export function YearlyActivityHeatmap({
                 {weeks.map((week, weekIndex) => (
                   <div key={weekIndex} className="flex flex-col gap-[2px] w-full">
                     {week.map((day, dayIndex) => (
-                      <TooltipProvider key={day.date}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div
-                              className={cn(
-                                'rounded-[1px] transition-colors duration-200 w-full',
-                                day.isCurrentYear
-                                  ? getColorForCount(day.count)
-                                  : 'bg-gray-200 dark:bg-gray-200'
-                              )}
-                              style={{ 
-                                height: 'min(1.5vw, 14px)',
-                                minHeight: '6px',
-                                width: '100%'
-                              }}
-                            />
-                          </TooltipTrigger>
-                          <TooltipContent 
-                            side="top"
-                            className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-100 dark:border-white/10"
-                          >
-                            <div className="text-xs">
-                              <div className="font-medium text-black dark:text-black">
-                                {format(parseISO(day.date), 'MMM d, yyyy')}
+                      day ? (
+                        <TooltipProvider key={`${weekIndex}-${dayIndex}`}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div
+                                className={`aspect-square rounded-sm ${getColorForCount(day.count)}`}
+                                style={{ minWidth: '10px', minHeight: '10px' }}
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent 
+                              side="top"
+                              className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-100 dark:border-white/10"
+                            >
+                              <div className="text-xs">
+                                <div className="font-medium text-black dark:text-black">
+                                  {format(parseISO(day.date), 'MMM d, yyyy')}
+                                </div>
+                                <div className="text-black dark:text-black">
+                                  {day.count} {day.count === 1 ? 'activity' : 'activities'}
+                                </div>
                               </div>
-                              <div className="text-black dark:text-black">
-                                {day.count} {day.count === 1 ? 'activity' : 'activities'}
-                              </div>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <div
+                          key={`${weekIndex}-${dayIndex}`}
+                          className="aspect-square rounded-sm bg-gray-100 dark:bg-gray-800/20"
+                          style={{ minWidth: '10px', minHeight: '10px' }}
+                        />
+                      )
                     ))}
                   </div>
                 ))}

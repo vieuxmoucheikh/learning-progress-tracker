@@ -169,7 +169,7 @@ export const YearlyActivityStats: React.FC = () => {
 
   return (
     <div className="w-full">
-      <div className="w-full mb-6">
+      <div className="w-full bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-purple-100 transition-all duration-200 hover:shadow-md">
         <div className="flex items-center justify-between w-full mb-6">
           <h2 className="text-xl font-semibold">Learning Activity</h2>
           <Select value={selectedCategory} onValueChange={handleCategoryChange}>
