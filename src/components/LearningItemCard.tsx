@@ -112,18 +112,21 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
   // Initialize pausedTime from localStorage if session is paused
   useEffect(() => {
-    // Check if we have a paused session
-    if (activeSession?.status === 'on_hold' || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime)) {
-      // Check if we have a stored pause time display value
-      const storedPauseTimeDisplay = localStorage.getItem(`sessionPauseTimeDisplay_${item.id}`);
-      if (storedPauseTimeDisplay) {
-        setPausedTime(storedPauseTimeDisplay);
-      } else {
-        // If not, create a default display format (00:00:00)
-        setPausedTime('00:00:00');
+    if (isPaused) {
+      // First try to get the formatted time
+      const formattedTimeStr = localStorage.getItem(`sessionCurrentTimeFormatted_${item.id}`);
+      if (formattedTimeStr) {
+        setPausedTime(formattedTimeStr);
+        return;
+      }
+      
+      // Fallback to stored pause time display
+      const pausedTimeStr = localStorage.getItem(`sessionPauseTimeDisplay_${item.id}`);
+      if (pausedTimeStr) {
+        setPausedTime(pausedTimeStr);
       }
     }
-  }, [item.id, activeSession, item.progress?.sessions]);
+  }, [isPaused, item.id]);
 
   // Handle session persistence and cleanup
   useEffect(() => {
@@ -217,8 +220,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     const pauseTime = Date.now();
     localStorage.setItem(`sessionPauseTime_${item.id}`, pauseTime.toString());
     
-    // Format the current timer display and store it
-    const formattedTime = formatElapsedTime();
+    // Get the current formatted time from our centralized source
+    const formattedTime = localStorage.getItem(`sessionCurrentTimeFormatted_${item.id}`) || formatElapsedTime();
+    
+    // Store the formatted time for display during pause
     localStorage.setItem(`sessionPauseTimeDisplay_${item.id}`, formattedTime);
     
     // Update the local state immediately to show the paused time
@@ -251,6 +256,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       const accumulatedTime = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
       const elapsedUntilPause = Math.floor((pauseTime - startTime) / 1000) - accumulatedTime;
       localStorage.setItem(`sessionFrozenTime_${item.id}`, elapsedUntilPause.toString());
+      
+      // Also update our centralized time source
+      localStorage.setItem(`sessionCurrentTimeSeconds_${item.id}`, elapsedUntilPause.toString());
+      localStorage.setItem(`sessionCurrentTimeFormatted_${item.id}`, formattedTime);
     }
   }, [item, activeSession, onUpdate, formatElapsedTime]);
 
@@ -262,8 +271,30 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     const pausedSession = item.progress.sessions.find(s => s.status === 'on_hold' && !s.endTime);
     if (!pausedSession) return;
     
-    // Clear the paused state and reset timers
-    localStorage.removeItem(`sessionPauseTimeDisplay_${item.id}`);
+    // Process the pause time to calculate accumulated time
+    const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${item.id}`);
+    if (pauseTimeStr) {
+      const pauseTime = parseInt(pauseTimeStr, 10);
+      const now = Date.now();
+      
+      // Calculate how long we've been paused
+      const pauseDuration = Math.floor((now - pauseTime) / 1000); // seconds
+      
+      // Update the accumulated time
+      const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
+      const accumulatedTime = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
+      const newAccumulatedTime = accumulatedTime + pauseDuration;
+      
+      // Store updated accumulated time
+      localStorage.setItem(`sessionAccumulatedTime_${item.id}`, newAccumulatedTime.toString());
+      
+      // CRITICAL: Remove pause and frozen time markers
+      localStorage.removeItem(`sessionPauseTime_${item.id}`);
+      localStorage.removeItem(`sessionPauseTimeDisplay_${item.id}`);
+      localStorage.removeItem(`sessionFrozenTime_${item.id}`);
+    }
+    
+    // Clear the paused state
     setPausedTime(null);
     setIsPaused(false);
     
@@ -1020,7 +1051,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 <span className="text-sm font-medium text-blue-600">
                   {activeSession?.status === 'on_hold' || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime)
                     ? `Session Paused: ${pausedTime || '00:00:00'}`
-                    : `Current Session: ${formattedTime || formatElapsedTime()}`}
+                    : `Current Session: ${localStorage.getItem(`sessionCurrentTimeFormatted_${item.id}`) || formattedTime || '00:00:00'}`}
                 </span>
                 {activeSession?.status !== 'on_hold' && (
                   <Button

@@ -100,6 +100,29 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
     };
   }, [isActive, itemId, startTime, internalPaused]);
 
+  // Helper function to format the elapsed time as HH:MM:SS
+  const formatElapsedTime = () => {
+    // Always check if we're paused first, and if so, use the frozen time
+    if (internalPaused && itemId) {
+      const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
+      if (frozenTimeStr) {
+        const frozenTime = parseInt(frozenTimeStr, 10);
+        // Format this frozen time instead of using elapsedTime
+        const hours = Math.floor(frozenTime / 3600);
+        const minutes = Math.floor((frozenTime % 3600) / 60);
+        const seconds = frozenTime % 60;
+        
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      }
+    }
+    
+    const hours = Math.floor(elapsedTime / 3600);
+    const minutes = Math.floor((elapsedTime % 3600) / 60);
+    const seconds = elapsedTime % 60;
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   // Effect to handle pausing the timer
   useEffect(() => {
     // Only handle pause when transitioning to paused state and we're active
@@ -127,6 +150,8 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
         
         // Store the frozen time value in localStorage for consistency
         localStorage.setItem(`sessionFrozenTime_${itemId}`, elapsedUntilPause.toString());
+        localStorage.setItem(`sessionCurrentTimeSeconds_${itemId}`, elapsedUntilPause.toString());
+        localStorage.setItem(`sessionCurrentTimeFormatted_${itemId}`, formatElapsedTime());
         
         console.log('Timer frozen at:', elapsedUntilPause, 'seconds');
       }
@@ -134,7 +159,7 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
       // Mark that we were running (for resume)
       wasRunningRef.current = true;
     }
-  }, [internalPaused, isActive, itemId, startTime]);
+  }, [internalPaused, isActive, itemId, startTime, formatElapsedTime]);
 
   // Effect to handle resuming the timer
   useEffect(() => {
@@ -233,6 +258,8 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
           
           // Store the frozen time
           localStorage.setItem(`sessionFrozenTime_${itemId}`, elapsedUntilPause.toString());
+          localStorage.setItem(`sessionCurrentTimeSeconds_${itemId}`, elapsedUntilPause.toString());
+          localStorage.setItem(`sessionCurrentTimeFormatted_${itemId}`, formatElapsedTime());
           
           console.log('Timer frozen at:', elapsedUntilPause, 'seconds');
           return;
@@ -245,6 +272,8 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
         setLastUpdateTime(now);
         
         localStorage.setItem(`sessionLastUpdate_${itemId}`, now.toString());
+        localStorage.setItem(`sessionCurrentTimeSeconds_${itemId}`, elapsed.toString());
+        localStorage.setItem(`sessionCurrentTimeFormatted_${itemId}`, formatElapsedTime());
       };
       
       // Update immediately then set interval
@@ -265,6 +294,8 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
       localStorage.removeItem(`sessionAccumulatedTime_${itemId}`);
       localStorage.removeItem(`sessionPauseTimeDisplay_${itemId}`);
       localStorage.removeItem(`sessionFrozenTime_${itemId}`);
+      localStorage.removeItem(`sessionCurrentTimeSeconds_${itemId}`);
+      localStorage.removeItem(`sessionCurrentTimeFormatted_${itemId}`);
       
       console.log('Timer reset');
     }
@@ -279,6 +310,16 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
     };
   }, [isActive, internalPaused, startTime, itemId, validateSession]);
 
+  // Effect to update our centralized time state for consistent time tracking
+  useEffect(() => {
+    // Only update centralized time when active and not paused
+    if (isActive && !internalPaused && startTime) {
+      // Store current formatted time in localStorage for other components to use
+      localStorage.setItem(`sessionCurrentTimeSeconds_${itemId}`, elapsedTime.toString());
+      localStorage.setItem(`sessionCurrentTimeFormatted_${itemId}`, formatElapsedTime());
+    }
+  }, [isActive, internalPaused, elapsedTime, itemId, startTime, formatElapsedTime]);
+
   // Ensure elapsed time remains frozen when a session is paused
   useEffect(() => {
     if (internalPaused && itemId) {
@@ -290,27 +331,6 @@ export function useSessionTimer({ isActive, startTime, itemId, isPaused = false 
       }
     }
   }, [internalPaused, itemId, elapsedTime]);
-
-  const formatElapsedTime = () => {
-    // Always check if we're paused first, and if so, use the frozen time
-    if (internalPaused && itemId) {
-      const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
-      if (frozenTimeStr) {
-        const frozenTime = parseInt(frozenTimeStr, 10);
-        // Format this frozen time instead of using elapsedTime
-        const hours = Math.floor(frozenTime / 3600);
-        const minutes = Math.floor((frozenTime % 3600) / 60);
-        const seconds = frozenTime % 60;
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-      }
-    }
-    
-    // Normal case for active sessions
-    const hours = Math.floor(elapsedTime / 3600);
-    const minutes = Math.floor((elapsedTime % 3600) / 60);
-    const seconds = elapsedTime % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
 
   return {
     elapsedTime,
