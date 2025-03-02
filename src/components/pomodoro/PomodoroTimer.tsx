@@ -1,10 +1,4 @@
-import React, {
-    useState,
-    useEffect,
-    useCallback,
-    useRef,
-    useContext,
-} from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
@@ -34,7 +28,6 @@ import { cn } from "@/lib/utils";
 import { X } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Clock } from 'lucide-react';
-import { PomodoroContext } from '../../lib/PomodoroContext';
 
 // Define interfaces
 interface Task {
@@ -170,16 +163,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     const [isCompleted, setIsCompleted] = useState(false);
     const [pomodoroCount, setPomodoroCount] = useState(0); // Ajouter ce state
     const timerWorkerRef = useRef<Worker | null>(null);
-
-    const { 
-        isRunning: contextIsRunning,
-        remainingTime: contextRemainingTime,
-        startTimer: contextStartTimer,
-        pauseTimer: contextPauseTimer,
-        resetTimer: contextResetTimer,
-        skipInterval: contextSkipInterval,
-        setRemainingTime: contextSetRemainingTime
-    } = useContext(PomodoroContext);
 
     // Load tasks from Supabase on mount
     useEffect(() => {
@@ -349,31 +332,28 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     }, [isBreak, settings, audioContext]);
 
     // Define startNewPomodoro function
-    const startNewPomodoro = useCallback(async (type: 'work' | 'break') => {
+    const startNewPomodoro = useCallback(async (pomodoroType: 'work' | 'break') => {
         if (!settings) return;
         
         try {
-            // If no task is selected and this is a work pomodoro, show an error
-            if (type === 'work' && !activeTaskId) {
-                toast({
-                    title: 'No task selected',
-                    description: 'Please select a task to start a pomodoro.',
-                    variant: 'destructive',
-                });
-                return;
+            console.log("Starting new pomodoro of type:", pomodoroType);
+            
+            // Only start a new pomodoro in the database if this is a work session
+            if (pomodoroType === 'work') {
+                console.log("Starting new work pomodoro in database");
+                const pomodoro = await startPomodoro(pomodoroType);
+                setCurrentPomodoroId(pomodoro.id);
+            } else {
+                console.log("Starting break (not creating database entry)");
+                // For breaks, we don't need to create a database entry
+                setCurrentPomodoroId(null);
             }
             
-            // Set the timer state
             setIsActive(true);
-            
-            // Start the context timer if it's a work pomodoro
-            if (type === 'work' && activeTaskId) {
-                contextStartTimer(activeTaskId);
-            }
-            
-            // Determine the duration based on the type and settings
+
+            // Update the time based on the pomodoro type
             let newDuration;
-            if (type === 'work') {
+            if (pomodoroType === 'work') {
                 newDuration = settings.work_duration;
             } else {
                 // For break, check if it should be a long break
@@ -415,7 +395,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             });
         }
     }, [settings, activeTaskId, tasks, toast, timerWorkerRef]);
-
+    
     // Function to play a more prominent goal achievement sound
     const playGoalAchievedSound = useCallback((context: AudioContext) => {
         try {
@@ -1071,9 +1051,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             setIsActive(false);
             setIsBreak(!isBreak);
             
-            // Update context timer state
-            contextSkipInterval();
-            
             // Set the appropriate time for the next interval
             if (isBreak) {
                 // Switching to work mode
@@ -1104,12 +1081,8 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     const toggleTimer = async () => {
         if (!isActive) {
             await startNewPomodoro(isBreak ? 'break' : 'work');
-            if (activeTaskId) {
-                contextStartTimer(activeTaskId);
-            }
         } else {
             setIsActive(false);
-            contextPauseTimer();
         }
     };
 
@@ -1196,7 +1169,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
             // Arrêter le timer actif
             setIsActive(false);
-            contextResetTimer(); // Also reset the context timer
             
             // Compléter le pomodoro actuel uniquement s'il s'agit d'une session de travail
             if (currentPomodoroId && !isBreak) {

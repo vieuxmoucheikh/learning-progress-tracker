@@ -18,7 +18,6 @@ import { PomodoroTimer } from './components/pomodoro/PomodoroTimer';
 import { LearningCardsPage } from './pages/LearningCards';
 import { ThemeProvider } from './components/ThemeProvider';
 import { ThemeToggle } from './components/ThemeToggle';
-import { PomodoroProvider } from './lib/PomodoroContext';
 
 interface State {
   items: LearningItem[];
@@ -672,9 +671,7 @@ export default function App() {
             )}
 
             {selectedTab === TAB_OPTIONS.POMODORO && (
-              <PomodoroProvider>
-                <PomodoroTimer />
-              </PomodoroProvider>
+              <PomodoroTimer />
             )}
             {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
               <LearningCardsPage />
