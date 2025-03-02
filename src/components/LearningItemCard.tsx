@@ -320,52 +320,68 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
   // Handle session stop
   const handleStopSession = useCallback(() => {
-    if (!item.progress?.sessions) return;
+    if (!activeSession || !item.progress?.sessions) return;
 
-    // Find all active or paused sessions
-    const activeSessions = item.progress.sessions.filter(s => !s.endTime);
-    if (activeSessions.length === 0) return;
-
-    const now = new Date();
-
-    // Update all active/on-hold sessions to completed
-    const updatedSessions = item.progress.sessions.map(s => {
-      if (!s.endTime) {
-        const startTime = new Date(s.startTime);
-        const diffInMinutes = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
-        
-        return {
-          ...s,
-          endTime: now.toISOString(),
-          duration: {
-            hours: Math.floor(diffInMinutes / 60),
-            minutes: diffInMinutes % 60
-          },
-          status: 'completed' as const
-        };
+    // Get the current elapsed time directly from our centralized source
+    const currentTimeSecondsStr = localStorage.getItem(`sessionCurrentTimeSeconds_${item.id}`);
+    const elapsedSeconds = currentTimeSecondsStr ? parseInt(currentTimeSecondsStr, 10) : 0;
+    
+    // If we're paused, use the accumulated time correctly
+    let totalSessionTime = elapsedSeconds;
+    
+    // If this was a paused session, make sure we don't count any time since the pause
+    if (activeSession.status === 'on_hold') {
+      // Use the frozen time for consistent calculations
+      const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${item.id}`);
+      if (frozenTimeStr) {
+        totalSessionTime = parseInt(frozenTimeStr, 10);
       }
-      return s;
-    });
-
-    // Clean up all localStorage items first
-    localStorage.removeItem(`activeSession_${item.id}`);
-    localStorage.removeItem(`sessionLastUpdate_${item.id}`);
-    localStorage.removeItem(`sessionPauseTime_${item.id}`);
-    localStorage.removeItem(`sessionPauseTimeDisplay_${item.id}`);
-    localStorage.removeItem(`sessionFrozenTime_${item.id}`);
-
-    // Stop tracking before updating the sessions
-    onStopTracking(item.id);
-
-    // Finally update the sessions
-    onUpdate(item.id, {
-      status: item.completed ? 'completed' : 'in_progress',
-      progress: {
-        ...item.progress,
-        sessions: updatedSessions
-      }
-    });
-  }, [item, onUpdate, onStopTracking]);
+    }
+    
+    // Calculate final duration in minutes (rounding down)
+    const durationMinutes = Math.floor(totalSessionTime / 60);
+    
+    // Create end time
+    const endDate = new Date();
+    
+    // Update the session
+    const updatedSessions = [...item.progress.sessions];
+    const sessionIndex = updatedSessions.findIndex(s => !s.endTime);
+    
+    if (sessionIndex !== -1) {
+      updatedSessions[sessionIndex] = {
+        ...updatedSessions[sessionIndex],
+        endTime: endDate.toISOString(),
+        status: 'completed',
+        duration: {
+          hours: Math.floor(durationMinutes / 60),
+          minutes: durationMinutes % 60
+        },
+      };
+      
+      // Clean up all localStorage entries related to this session
+      localStorage.removeItem(`sessionLastUpdate_${item.id}`);
+      localStorage.removeItem(`sessionPauseTime_${item.id}`);
+      localStorage.removeItem(`sessionAccumulatedTime_${item.id}`);
+      localStorage.removeItem(`sessionPauseTimeDisplay_${item.id}`);
+      localStorage.removeItem(`sessionFrozenTime_${item.id}`);
+      localStorage.removeItem(`sessionCurrentTimeSeconds_${item.id}`);
+      localStorage.removeItem(`sessionCurrentTimeFormatted_${item.id}`);
+      
+      // Reset timer state
+      setPausedTime(null);
+      setIsPaused(false);
+      
+      // Update the learning item
+      onUpdate(item.id, {
+        progress: {
+          ...item.progress,
+          sessions: updatedSessions,
+        },
+        status: 'in_progress' // Use a valid status value from the type definition
+      });
+    }
+  }, [item, activeSession, onUpdate]);
 
   const handleAddNote = useCallback(() => {
     if (!sessionNote.trim() || !activeSession) return;

@@ -116,14 +116,30 @@ export function DashboardTab({
           // Get the date part of the session start time
           const sessionDate = session.startTime?.split('T')[0];
           
-          // For completed sessions on the selected date
+          // For sessions that have ended (completed sessions) on the selected date
           if (sessionDate === dateStr && session.endTime) {
-            const duration = session.duration;
-            if (duration) {
-              dailyTimeSpent += (duration.hours * 60 + duration.minutes);
+            // For completed sessions, just add the stored duration (minutes)
+            if (session.duration) {
+              if (typeof session.duration === 'object' && 'hours' in session.duration && 'minutes' in session.duration) {
+                dailyTimeSpent += (session.duration.hours * 60 + session.duration.minutes);
+              }
+            }
+            // Legacy fallback if duration isn't available
+            else {
+              try {
+                const startTime = new Date(session.startTime);
+                const endTime = new Date(session.endTime);
+                
+                // Ensure both dates are valid
+                if (!isNaN(startTime.getTime()) && !isNaN(endTime.getTime())) {
+                  // Calculate minutes
+                  dailyTimeSpent += Math.floor((endTime.getTime() - startTime.getTime()) / (1000 * 60));
+                }
+              } catch (error) {
+                console.error('Error calculating session duration:', error);
+              }
             }
           }
-          
           // For active sessions (no endTime) that started on the selected date
           if (sessionDate === dateStr && !session.endTime) {
             try {
