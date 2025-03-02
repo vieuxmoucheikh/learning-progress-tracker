@@ -222,19 +222,31 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const handlePauseSession = useCallback(() => {
     if (!activeSession || !item.progress?.sessions) return;
     
+    console.log('Pausing session...');
+    
     // Record the pause time
     const pauseTime = Date.now();
     localStorage.setItem(`sessionPauseTime_${item.id}`, pauseTime.toString());
     
-    // Get the current formatted time from our centralized source
-    const currentFormattedTime = localStorage.getItem(`sessionCurrentTimeFormatted_${item.id}`) || formattedTime;
+    // Force the timer to stop immediately by setting both state variables
+    setIsPausedState(true);
+    setIsPaused(true);
     
-    // Store the formatted time for display during pause
+    // Calculate elapsed time up to the pause point for storage
+    const startTime = new Date(activeSession.startTime).getTime();
+    const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
+    const accumulatedTime = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
+    const elapsedUntilPause = Math.floor((pauseTime - startTime) / 1000) - accumulatedTime;
+    
+    // Store the frozen time and formatted display
+    const currentFormattedTime = formatSecondsToHHMMSS(elapsedUntilPause);
+    localStorage.setItem(`sessionFrozenTime_${item.id}`, elapsedUntilPause.toString());
+    localStorage.setItem(`sessionCurrentTimeSeconds_${item.id}`, elapsedUntilPause.toString());
+    localStorage.setItem(`sessionCurrentTimeFormatted_${item.id}`, currentFormattedTime);
     localStorage.setItem(`sessionPauseTimeDisplay_${item.id}`, currentFormattedTime);
     
     // Update the local state immediately to show the paused time
     setPausedTime(currentFormattedTime);
-    setIsPausedState(true);
     
     // Update the session status to on_hold
     const updatedSessions = [...item.progress.sessions];
@@ -252,20 +264,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           sessions: updatedSessions
         }
       });
-      
-      // Calculate elapsed time up to the pause point for storage
-      const startTime = new Date(updatedSessions[sessionIndex].startTime).getTime();
-      const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
-      const accumulatedTime = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
-      
-      const elapsedUntilPause = Math.floor((pauseTime - startTime) / 1000) - accumulatedTime;
-      
-      // Store the frozen time for later reference
-      localStorage.setItem(`sessionFrozenTime_${item.id}`, elapsedUntilPause.toString());
-      localStorage.setItem(`sessionCurrentTimeSeconds_${item.id}`, elapsedUntilPause.toString());
-      localStorage.setItem(`sessionCurrentTimeFormatted_${item.id}`, currentFormattedTime);
     }
-  }, [item, activeSession, onUpdate, formattedTime]);
+  }, [item, activeSession, onUpdate, setIsPaused]);
 
   // Handle session resume
   const handleResumeSession = useCallback(() => {
@@ -296,7 +296,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       // CRITICAL: Remove the pause time marker but keep the frozen time
       // We need to keep frozen time for the timer to know where to resume from
       localStorage.removeItem(`sessionPauseTime_${item.id}`);
-      localStorage.removeItem(`sessionPauseTimeDisplay_${item.id}`);
       
       // Update the session
       const updatedSessions = [...item.progress.sessions];
@@ -315,13 +314,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           }
         });
         
-        // Reset the paused state in the component
-        // This will trigger the useSessionTimer hook to start the timer again
+        // Force the timer to restart by setting both state variables
+        // This will trigger the timer to resume from the frozen time
         setIsPausedState(false);
+        setIsPaused(false);
         setPausedTime(null);
       }
     }
-  }, [item, onUpdate]);
+  }, [item, onUpdate, setIsPaused]);
 
   // Handle session stop
   const handleStopSession = useCallback(() => {
