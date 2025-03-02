@@ -21,10 +21,12 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
   const [elapsedTime, setElapsedTime] = useState(0);
   const [lastUpdateTime, setLastUpdateTime] = useState<number | null>(null);
   const [internalPaused, setInternalPaused] = useState(externalPaused);
+  const [formattedTime, setFormattedTime] = useState('00:00:00');
   
   // Refs to preserve values between renders
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const accumulatedTimeRef = useRef(0);
+  const wasResumedRef = useRef(false);
   
   // Simple helper to clear the interval
   const clearTimerInterval = useCallback(() => {
@@ -50,6 +52,22 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
     return adjusted;
   }, [startTime]);
   
+  // Update the formatted time display
+  const updateFormattedTime = useCallback((seconds: number) => {
+    const formatted = formatSeconds(seconds);
+    setFormattedTime(formatted);
+    
+    // Also save to localStorage for consistency
+    localStorage.setItem(`sessionCurrentTimeFormatted_${itemId}`, formatted);
+    localStorage.setItem(`sessionCurrentTimeSeconds_${itemId}`, seconds.toString());
+    
+    // If we recently resumed, make sure to remove any pause display markers
+    if (wasResumedRef.current) {
+      localStorage.removeItem(`sessionPauseTimeDisplay_${itemId}`);
+      localStorage.removeItem(`sessionFrozenTime_${itemId}`);
+    }
+  }, [itemId]);
+  
   // Stop the timer
   const stopTimer = useCallback(() => {
     clearTimerInterval();
@@ -58,13 +76,13 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
     if (startTime) {
       const currentElapsed = calculateElapsedTime();
       setElapsedTime(currentElapsed);
+      updateFormattedTime(currentElapsed);
       
       // Save to localStorage for persistence
       localStorage.setItem(`sessionFrozenTime_${itemId}`, currentElapsed.toString());
-      localStorage.setItem(`sessionCurrentTimeFormatted_${itemId}`, formatSeconds(currentElapsed));
       console.log(`Timer stopped at ${currentElapsed} seconds`);
     }
-  }, [calculateElapsedTime, clearTimerInterval, itemId, startTime]);
+  }, [calculateElapsedTime, clearTimerInterval, itemId, startTime, updateFormattedTime]);
   
   // Start or resume the timer
   const startTimer = useCallback(() => {
@@ -83,6 +101,7 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
       
       // Set the elapsed time to the frozen time
       setElapsedTime(frozenTime);
+      updateFormattedTime(frozenTime);
       
       // CRITICAL: For resume to work correctly, we need to adjust the accumulated time
       // to ensure the timer continues from the frozen point
@@ -97,9 +116,35 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
       // Update our accumulated time
       accumulatedTimeRef.current = newAccumulatedTime;
       localStorage.setItem(`sessionAccumulatedTime_${itemId}`, newAccumulatedTime.toString());
+      
+      // Set the wasResumed flag to true for the next few updates
+      wasResumedRef.current = true;
+      
+      // IMPORTANT: Force immediate updates after resume to make the timer visibly running
+      // This creates a more visible timer animation effect
+      const quickUpdate = () => {
+        const currentElapsed = calculateElapsedTime();
+        setElapsedTime(currentElapsed);
+        updateFormattedTime(currentElapsed);
+        setLastUpdateTime(Date.now());
+      };
+      
+      // Schedule several quick updates to make timer movement visible
+      setTimeout(quickUpdate, 100);
+      setTimeout(quickUpdate, 350);
+      setTimeout(quickUpdate, 600);
+      setTimeout(quickUpdate, 850);
+      
+      // Clear wasResumed flag after delay
+      setTimeout(() => {
+        wasResumedRef.current = false;
+        
+        // Also clean up any lingering pause markers
+        localStorage.removeItem(`sessionPauseTimeDisplay_${itemId}`);
+      }, 5000);
     }
     
-    // Start a new interval
+    // Start a new interval with a faster update rate (250ms) for smoother updates
     intervalRef.current = setInterval(() => {
       if (internalPaused) {
         // Double-check: if somehow we're paused but the interval is running, stop it
@@ -109,15 +154,12 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
       
       const currentElapsed = calculateElapsedTime();
       setElapsedTime(currentElapsed);
+      updateFormattedTime(currentElapsed);
       setLastUpdateTime(Date.now());
-      
-      // Save current time to localStorage
-      localStorage.setItem(`sessionCurrentTimeSeconds_${itemId}`, currentElapsed.toString());
-      localStorage.setItem(`sessionCurrentTimeFormatted_${itemId}`, formatSeconds(currentElapsed));
-    }, 1000);
+    }, 250); // Faster updates for smoother UI
     
     console.log('Timer interval started');
-  }, [calculateElapsedTime, clearTimerInterval, internalPaused, itemId, startTime]);
+  }, [calculateElapsedTime, clearTimerInterval, internalPaused, itemId, startTime, updateFormattedTime]);
   
   // Effect to initialize from localStorage
   useEffect(() => {
@@ -135,10 +177,11 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
       if (frozenTimeStr) {
         const frozenTime = parseInt(frozenTimeStr, 10);
         setElapsedTime(frozenTime);
+        updateFormattedTime(frozenTime);
         console.log('Initialized elapsed time from frozen time:', frozenTime, 'seconds');
       }
     }
-  }, [isActive, itemId, startTime]);
+  }, [isActive, itemId, startTime, updateFormattedTime]);
   
   // Effect to sync internal paused state with external
   useEffect(() => {
@@ -212,8 +255,7 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
         
         if (isActive && startTime && !internalPaused) {
           const currentElapsed = calculateElapsedTime();
-          localStorage.setItem(`sessionCurrentTimeSeconds_${itemId}`, currentElapsed.toString());
-          localStorage.setItem(`sessionCurrentTimeFormatted_${itemId}`, formatSeconds(currentElapsed));
+          updateFormattedTime(currentElapsed);
         }
       }
     };
@@ -223,11 +265,11 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [calculateElapsedTime, internalPaused, isActive, itemId, startTime, startTimer]);
+  }, [calculateElapsedTime, internalPaused, isActive, itemId, startTime, startTimer, updateFormattedTime]);
   
   return {
     elapsedTime,
-    formattedTime: formatSeconds(elapsedTime),
+    formattedTime,
     lastUpdateTime,
     isPaused: internalPaused,
     setIsPaused: setInternalPaused
