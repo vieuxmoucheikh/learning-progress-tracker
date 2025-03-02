@@ -271,7 +271,7 @@ export const LearningCardsPage = () => {
             </div>
           ) : (
             <AnimatePresence mode="popLayout">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {filteredCards.map((card) => (
                   <motion.div
                     key={card.id}
