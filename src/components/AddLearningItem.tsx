@@ -173,7 +173,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                   value={formData.title}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="Learning item title"
                 />
               </div>
@@ -189,7 +189,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                     value={formData.type}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-colors"
                   >
                     <option value="video">Video</option>
                     <option value="article">Article</option>
@@ -211,7 +211,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                       value={formData.category}
                       onChange={handleInputChange}
                       list="categories"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       placeholder="e.g., Programming, Design"
                     />
                     <datalist id="categories">
@@ -237,7 +237,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                     name="url"
                     value={formData.url}
                     onChange={handleInputChange}
-                    className="w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     placeholder="https://example.com"
                   />
                 </div>
@@ -266,12 +266,13 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0 z-50" align="start">
                       <Calendar
                         mode="single"
                         selected={selectedDateState}
                         onSelect={handleDateChange}
                         initialFocus
+                        className="rounded-md border shadow-md bg-white p-3"
                       />
                     </PopoverContent>
                   </Popover>
@@ -285,7 +286,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                     name="difficulty"
                     value={formData.difficulty}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-colors"
                   >
                     <option value="easy">Easy</option>
                     <option value="medium">Medium</option>
@@ -304,7 +305,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                     name="priority"
                     value={formData.priority}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-colors"
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -320,7 +321,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                     name="status"
                     value={formData.status}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-colors"
                   >
                     <option value="not_started">Not Started</option>
                     <option value="in_progress">In Progress</option>
@@ -344,7 +345,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                         min="0"
                         value={formData.current.hours}
                         onChange={(e) => handleTimeInputChange(e, 'current')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         placeholder="Hours"
                       />
                     </div>
@@ -357,7 +358,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                         max="59"
                         value={formData.current.minutes}
                         onChange={(e) => handleTimeInputChange(e, 'current')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         placeholder="Minutes"
                       />
                     </div>
@@ -377,7 +378,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                         min="0"
                         value={formData.total?.hours || ''}
                         onChange={(e) => handleTimeInputChange(e, 'total')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         placeholder="Hours"
                       />
                     </div>
@@ -390,7 +391,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                         max="59"
                         value={formData.total?.minutes || ''}
                         onChange={(e) => handleTimeInputChange(e, 'total')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         placeholder="Minutes"
                       />
                     </div>
@@ -408,7 +409,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                   type="text"
                   value={formData.tags.join(', ')}
                   onChange={(e) => handleTagsChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="javascript, web development, react"
                 />
               </div>
@@ -422,7 +423,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                   name="notes"
                   value={formData.notes}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[100px]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[100px] transition-colors"
                   placeholder="Add any additional notes or thoughts about this learning item..."
                 />
               </div>
@@ -432,14 +433,14 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
                 <Button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                 >
                   {isSubmitting ? 'Adding...' : 'Add Item'}
                 </Button>

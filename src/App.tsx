@@ -713,7 +713,7 @@ export default function App() {
 
         {/* Add Item Dialog */}
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-          <DialogContent className="max-w-3xl w-[90vw] p-6">
+          <DialogContent className="max-w-3xl w-[90vw] p-6 max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold">Add Learning Item</DialogTitle>
               <DialogDescription className="text-base">
