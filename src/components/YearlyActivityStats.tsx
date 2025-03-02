@@ -169,8 +169,8 @@ export const YearlyActivityStats: React.FC = () => {
 
   return (
     <div className="w-full space-y-8">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 w-full">
+        <div className="flex items-center justify-between w-full">
           <h2 className="text-xl font-semibold">Learning Activity</h2>
           <Select value={selectedCategory} onValueChange={handleCategoryChange}>
             <SelectTrigger className="w-32">
@@ -191,7 +191,7 @@ export const YearlyActivityStats: React.FC = () => {
             Loading...
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-6 w-full">
             {/* Stats Cards */}
             <div className="grid grid-cols-3 gap-2">
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-600/10 p-2.5 rounded-lg border border-blue-200/50 dark:border-blue-400/10">

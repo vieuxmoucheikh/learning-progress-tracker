@@ -278,7 +278,7 @@ export function Stats({ items }: Props) {
       <div className="bg-white p-6 rounded-xl shadow-sm border-2 border-gray-100 hover:border-red-100 transition-all duration-200 hover:shadow-md">
         <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-gray-800">
           <div className="p-2 bg-red-50 rounded-lg">
-            <Calendar className="w-6 h-6 text-red-500" />
+            <CalendarIcon className="w-6 h-6 text-red-500" />
           </div>
           Time by Category
         </h3>
@@ -293,8 +293,8 @@ export function Stats({ items }: Props) {
       </div>
 
       {/* Yearly Activity Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="col-span-full">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full">
+        <div className="col-span-full w-full">
           <YearlyActivityStats />
         </div>
       </div>
