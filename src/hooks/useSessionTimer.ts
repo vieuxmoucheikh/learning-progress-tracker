@@ -164,6 +164,8 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
   // Effect to initialize from localStorage
   useEffect(() => {
     if (isActive && startTime) {
+      console.log('Initializing timer, pause state:', externalPaused);
+      
       // Initialize accumulated time from localStorage
       const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${itemId}`);
       if (accumulatedTimeStr) {
@@ -172,22 +174,60 @@ export const useSessionTimer = ({ isActive, isPaused: externalPaused, startTime,
         console.log('Initialized accumulated time:', accumulatedTime, 'seconds');
       }
       
-      // Initialize elapsed time from localStorage
-      const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
-      if (frozenTimeStr) {
-        const frozenTime = parseInt(frozenTimeStr, 10);
-        setElapsedTime(frozenTime);
-        updateFormattedTime(frozenTime);
-        console.log('Initialized elapsed time from frozen time:', frozenTime, 'seconds');
+      // Check if we are paused - this is the most important check
+      const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
+      if (pauseTimeStr) {
+        // We are supposed to be paused
+        console.log('Found pause time marker - timer should be paused');
+        setInternalPaused(true);
+        
+        // Get the frozen time to display while paused
+        const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
+        if (frozenTimeStr) {
+          const frozenTime = parseInt(frozenTimeStr, 10);
+          setElapsedTime(frozenTime);
+          updateFormattedTime(frozenTime);
+          console.log('Set timer to frozen time:', frozenTime, 'seconds');
+        } else {
+          // If we don't have a frozen time yet, calculate it from the pause time
+          const pauseTime = parseInt(pauseTimeStr, 10);
+          const startTimeMs = new Date(startTime).getTime();
+          const accumulatedTime = accumulatedTimeRef.current || 0;
+          const elapsedUntilPause = Math.floor((pauseTime - startTimeMs) / 1000) - accumulatedTime;
+          
+          setElapsedTime(elapsedUntilPause);
+          updateFormattedTime(elapsedUntilPause);
+          console.log('Calculated and set frozen time:', elapsedUntilPause, 'seconds');
+          
+          // Store this for future reference
+          localStorage.setItem(`sessionFrozenTime_${itemId}`, elapsedUntilPause.toString());
+        }
+      } else if (!externalPaused) {
+        // Not paused - initialize from frozen time if available
+        const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${itemId}`);
+        if (frozenTimeStr) {
+          const frozenTime = parseInt(frozenTimeStr, 10);
+          setElapsedTime(frozenTime);
+          updateFormattedTime(frozenTime);
+          console.log('Initialized elapsed time from frozen time:', frozenTime, 'seconds');
+        }
       }
     }
-  }, [isActive, itemId, startTime, updateFormattedTime]);
+  }, [isActive, externalPaused, itemId, startTime, updateFormattedTime]);
   
   // Effect to sync internal paused state with external
   useEffect(() => {
     console.log('External pause state changed:', externalPaused);
     setInternalPaused(externalPaused);
-  }, [externalPaused]);
+    
+    // If we're now paused, make sure to save the current state
+    if (externalPaused && startTime) {
+      console.log('Saving pause state on external pause change');
+      const currentElapsed = calculateElapsedTime();
+      localStorage.setItem(`sessionFrozenTime_${itemId}`, currentElapsed.toString());
+      updateFormattedTime(currentElapsed);
+    }
+  }, [externalPaused, calculateElapsedTime, itemId, startTime, updateFormattedTime]);
   
   // Effect to handle pausing
   useEffect(() => {
