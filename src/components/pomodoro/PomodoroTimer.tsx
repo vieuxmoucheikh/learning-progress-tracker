@@ -614,7 +614,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             successfulIds.push(completion.pomodoroId);
                             console.log(`Successfully synced pomodoro: ${completion.pomodoroId}`);
                             
-                            // Remove this from failed completions immediately
+                            // Remove successful sync from the failed completions
                             const remainingFailedCompletions = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]')
                                 .filter((fc: FailedCompletion) => fc.pomodoroId !== completion.pomodoroId);
                             localStorage.setItem('failedPomodoroCompletions', JSON.stringify(remainingFailedCompletions));
@@ -716,11 +716,23 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     const parsedState = JSON.parse(savedState);
                     const storedTimestamp = parseInt(localStorage.getItem('pomodoroLastTimestamp') || Date.now().toString());
                     const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
+                    
                     if (parsedState.isActive && elapsedSeconds > 0) {
+                        // Calculate what the time would be after the elapsed time
                         const adjustedTime = Math.max(0, parsedState.time - elapsedSeconds);
-                        setTime(adjustedTime);
+                        
                         if (adjustedTime === 0) {
-                            handleTimerComplete();
+                            // Instead of automatically completing the timer, show a notification
+                            // and pause the timer
+                            setIsActive(false);
+                            toast({
+                                title: "Timer Expired",
+                                description: "Your timer expired while you were away. Click 'Skip' to move to the next phase.",
+                                duration: 5000,
+                            });
+                        } else {
+                            // Just update the time if it hasn't expired
+                            setTime(adjustedTime);
                         }
                     }
                 }
@@ -728,7 +740,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 console.error('Error handling visibility change:', error);
             }
         }
-    }, [time, isActive, isBreak, currentPomodoroId]);
+    }, [time, isActive, isBreak, currentPomodoroId, toast]);
 
     useEffect(() => {
         document.addEventListener('visibilitychange', handleVisibilityChange);
