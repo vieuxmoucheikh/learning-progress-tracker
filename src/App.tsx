@@ -447,343 +447,341 @@ export default function App() {
     };
   }, [state.activeItem, state.items]);
 
-  useEffect(() => {
-    const handleAddItem = async (selectedDate?: Date | null) => {
-      setShowAddDialog(true);
-      if (selectedDate) {
-        setSelectedDate(selectedDate);
+  const handleAddItem = async (selectedDate?: Date | null) => {
+    setShowAddDialog(true);
+    if (selectedDate) {
+      setSelectedDate(selectedDate);
+    }
+  };
+
+  const handleSubmitItem = async (formData: LearningItemFormData) => {
+    try {
+      // Create a date string at midnight in local timezone
+      const date = selectedDate ? selectedDate : new Date();
+      const dateStr = getDateStr(date);
+
+      // Create a clean form data object that matches LearningItemFormData
+      const cleanFormData: LearningItemFormData = {
+        title: formData.title,
+        type: formData.type,
+        current: formData.current || { hours: 0, minutes: 0 },
+        unit: formData.unit || 'hours',
+        url: formData.url || '',
+        notes: formData.notes || '',
+        completed: formData.completed || false,
+        priority: formData.priority || 'medium',
+        tags: formData.tags || [],
+        goal: formData.goal,
+        total: formData.total,
+        category: formData.category || '',
+        date: dateStr,
+        difficulty: formData.difficulty || 'medium',
+        status: formData.status || 'not_started'
+      };
+
+      const addedItem = await addLearningItem(cleanFormData);
+      dispatch({ type: 'ADD_ITEM', payload: addedItem });
+      setShowAddDialog(false);
+    } catch (error) {
+      console.error('Error adding item:', error);
+      setError('Failed to add item. Please try again.');
+    }
+  };
+
+  const handleUpdateItem = async (id: string, updates: Partial<LearningItem>) => {
+    try {
+      const item = state.items.find(item => item.id === id);
+      if (!item) return;
+
+      // If marking as completed
+      if (updates.completed && !item.completed) {
+        updates.completed_at = new Date('2025-01-03T11:07:05+01:00').toISOString();
+        updates.status = 'completed' as const;
+        
+        // Track learning activity when completing an item
+        const normalizedCategory = (item.category || 'Uncategorized').toUpperCase();
+        console.log('Tracking activity for category:', { category: normalizedCategory });
+        await trackLearningActivity(normalizedCategory);
       }
-    };
 
-    const handleSubmitItem = async (formData: LearningItemFormData) => {
-      try {
-        // Create a date string at midnight in local timezone
-        const date = selectedDate ? selectedDate : new Date();
-        const dateStr = getDateStr(date);
+      // Update local state first for immediate feedback
+      dispatch({ type: 'UPDATE_ITEM', payload: { id, updates } });
 
-        // Create a clean form data object that matches LearningItemFormData
-        const cleanFormData: LearningItemFormData = {
-          title: formData.title,
-          type: formData.type,
-          current: formData.current || { hours: 0, minutes: 0 },
-          unit: formData.unit || 'hours',
-          url: formData.url || '',
-          notes: formData.notes || '',
-          completed: formData.completed || false,
-          priority: formData.priority || 'medium',
-          tags: formData.tags || [],
-          goal: formData.goal,
-          total: formData.total,
-          category: formData.category || '',
-          date: dateStr,
-          difficulty: formData.difficulty || 'medium',
-          status: formData.status || 'not_started'
-        };
-
-        const addedItem = await addLearningItem(cleanFormData);
-        dispatch({ type: 'ADD_ITEM', payload: addedItem });
-        setShowAddDialog(false);
-      } catch (error) {
-        console.error('Error adding item:', error);
-        setError('Failed to add item. Please try again.');
+      const updatedItem = await updateLearningItem(id, updates);
+      setError(null);
+    } catch (error) {
+      console.error('Error updating item:', error);
+      setError('Failed to update item. Please try again.');
+      // Revert the local state change on error
+      const item = state.items.find(item => item.id === id);
+      if (item) {
+        dispatch({ type: 'UPDATE_ITEM', payload: { id, updates: item } });
       }
-    };
+    }
+  };
 
-    const handleUpdateItem = async (id: string, updates: Partial<LearningItem>) => {
-      try {
-        const item = state.items.find(item => item.id === id);
-        if (!item) return;
+  const handleDeleteItem = async (id: string) => {
+    try {
+      await deleteLearningItem(id);
+      dispatch({ type: 'DELETE_ITEM', payload: id });
+      setError(null);
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      setError('Failed to delete item. Please try again.');
+    }
+  };
 
-        // If marking as completed
-        if (updates.completed && !item.completed) {
-          updates.completed_at = new Date('2025-01-03T11:07:05+01:00').toISOString();
-          updates.status = 'completed' as const;
-          
-          // Track learning activity when completing an item
-          const normalizedCategory = (item.category || 'Uncategorized').toUpperCase();
-          console.log('Tracking activity for category:', { category: normalizedCategory });
-          await trackLearningActivity(normalizedCategory);
-        }
+  const handleStartTracking = async (id: string) => {
+    try {
+      const item = state.items.find(item => item.id === id);
+      if (!item) return;
 
-        // Update local state first for immediate feedback
-        dispatch({ type: 'UPDATE_ITEM', payload: { id, updates } });
+      // Update local state first for immediate feedback
+      dispatch({ type: 'START_TRACKING', payload: id });
 
-        const updatedItem = await updateLearningItem(id, updates);
-        setError(null);
-      } catch (error) {
-        console.error('Error updating item:', error);
-        setError('Failed to update item. Please try again.');
-        // Revert the local state change on error
-        const item = state.items.find(item => item.id === id);
-        if (item) {
-          dispatch({ type: 'UPDATE_ITEM', payload: { id, updates: item } });
-        }
-      }
-    };
-
-    const handleDeleteItem = async (id: string) => {
-      try {
-        await deleteLearningItem(id);
-        dispatch({ type: 'DELETE_ITEM', payload: id });
-        setError(null);
-      } catch (error) {
-        console.error('Error deleting item:', error);
-        setError('Failed to delete item. Please try again.');
-      }
-    };
-
-    const handleStartTracking = async (id: string) => {
-      try {
-        const item = state.items.find(item => item.id === id);
-        if (!item) return;
-
-        // Update local state first for immediate feedback
-        dispatch({ type: 'START_TRACKING', payload: id });
-
-        const currentTime = new Date();
-        const updates: Partial<LearningItem> = {
-          progress: {
-            ...item.progress,
-            lastAccessed: currentTime.toISOString(),
-            sessions: [
-              ...item.progress.sessions,
-              {
-                startTime: currentTime.toISOString(),
-                date: currentTime.toISOString().split('T')[0]
-              }
-            ]
-          }
-        };
-
-        await updateLearningItem(id, updates);
-      } catch (error) {
-        console.error('Error starting tracking:', error);
-        setError('Failed to start tracking. Please try again.');
-        // Revert the local state change on error
-        dispatch({ type: 'STOP_TRACKING', payload: id });
-      }
-    };
-
-    const handleStopTracking = async (id: string) => {
-      try {
-        const item = state.items.find(item => item.id === id);
-        if (!item) return;
-
-        // Check if the session was active when page was hidden
-        const sessionVisibilityStr = localStorage.getItem(`session_visibility_${id}`);
-        if (sessionVisibilityStr) {
-          try {
-            const sessionState = JSON.parse(sessionVisibilityStr);
-            
-            // If this function was called automatically when returning to the app,
-            // we should preserve the session instead of stopping it
-            const isAutoStopOnVisibilityChange = document.visibilityState === 'visible' && 
-                                                sessionState.status === 'active';
-            
-            if (isAutoStopOnVisibilityChange) {
-              console.log('Preventing auto-stop of session that was active when page was hidden');
-              return; // Exit without stopping the session
+      const currentTime = new Date();
+      const updates: Partial<LearningItem> = {
+        progress: {
+          ...item.progress,
+          lastAccessed: currentTime.toISOString(),
+          sessions: [
+            ...item.progress.sessions,
+            {
+              startTime: currentTime.toISOString(),
+              date: currentTime.toISOString().split('T')[0]
             }
-            
-            // Clear the visibility state if we're actually stopping the session
-            localStorage.removeItem(`session_visibility_${id}`);
-          } catch (e) {
-            console.error('Error parsing session visibility state:', e);
-          }
+          ]
         }
+      };
 
-        // First update local state for immediate feedback
-        dispatch({ type: 'STOP_TRACKING', payload: id });
+      await updateLearningItem(id, updates);
+    } catch (error) {
+      console.error('Error starting tracking:', error);
+      setError('Failed to start tracking. Please try again.');
+      // Revert the local state change on error
+      dispatch({ type: 'STOP_TRACKING', payload: id });
+    }
+  };
 
-        const currentTime = new Date();
-        const lastSession = item.progress.sessions[item.progress.sessions.length - 1];
+  const handleStopTracking = async (id: string) => {
+    try {
+      const item = state.items.find(item => item.id === id);
+      if (!item) return;
 
-        if (!lastSession || !lastSession.startTime) return;
+      // Check if the session was active when page was hidden
+      const sessionVisibilityStr = localStorage.getItem(`session_visibility_${id}`);
+      if (sessionVisibilityStr) {
+        try {
+          const sessionState = JSON.parse(sessionVisibilityStr);
+          
+          // If this function was called automatically when returning to the app,
+          // we should preserve the session instead of stopping it
+          const isAutoStopOnVisibilityChange = document.visibilityState === 'visible' && 
+                                             sessionState.status === 'active';
+          
+          if (isAutoStopOnVisibilityChange) {
+            console.log('Preventing auto-stop of session that was active when page was hidden');
+            return; // Exit without stopping the session
+          }
+          
+          // Clear the visibility state if we're actually stopping the session
+          localStorage.removeItem(`session_visibility_${id}`);
+        } catch (e) {
+          console.error('Error parsing session visibility state:', e);
+        }
+      }
 
-        const startTime = new Date(lastSession.startTime);
-        const elapsedMinutes = Math.round((currentTime.getTime() - startTime.getTime()) / 60000);
+      // First update local state for immediate feedback
+      dispatch({ type: 'STOP_TRACKING', payload: id });
 
-        // Convert all times to minutes for accurate calculations
-        const currentMinutes = (item.progress.current.hours * 60) + item.progress.current.minutes;
-        const totalMinutes = item.progress.total ? (item.progress.total.hours * 60) + item.progress.total.minutes : 0;
-        const newCurrentValue = currentMinutes + elapsedMinutes;
-        const completed = totalMinutes > 0 && newCurrentValue >= totalMinutes;
+      const currentTime = new Date();
+      const lastSession = item.progress.sessions[item.progress.sessions.length - 1];
 
-        const updates: Partial<LearningItem> = {
-          progress: {
-            ...item.progress,
-            current: {
-              hours: Math.floor(newCurrentValue / 60),
-              minutes: newCurrentValue % 60
-            },
-            total: item.progress.total || { hours: 0, minutes: 0 },
-            lastAccessed: currentTime.toISOString(),
-            sessions: [
-              ...item.progress.sessions.slice(0, -1),
-              {
-                ...lastSession,
-                endTime: currentTime.toISOString(),
-                duration: {
-                  hours: Math.floor(elapsedMinutes / 60),
-                  minutes: elapsedMinutes % 60
-                }
+      if (!lastSession || !lastSession.startTime) return;
+
+      const startTime = new Date(lastSession.startTime);
+      const elapsedMinutes = Math.round((currentTime.getTime() - startTime.getTime()) / 60000);
+
+      // Convert all times to minutes for accurate calculations
+      const currentMinutes = (item.progress.current.hours * 60) + item.progress.current.minutes;
+      const totalMinutes = item.progress.total ? (item.progress.total.hours * 60) + item.progress.total.minutes : 0;
+      const newCurrentValue = currentMinutes + elapsedMinutes;
+      const completed = totalMinutes > 0 && newCurrentValue >= totalMinutes;
+
+      const updates: Partial<LearningItem> = {
+        progress: {
+          ...item.progress,
+          current: {
+            hours: Math.floor(newCurrentValue / 60),
+            minutes: newCurrentValue % 60
+          },
+          total: item.progress.total || { hours: 0, minutes: 0 },
+          lastAccessed: currentTime.toISOString(),
+          sessions: [
+            ...item.progress.sessions.slice(0, -1),
+            {
+              ...lastSession,
+              endTime: currentTime.toISOString(),
+              duration: {
+                hours: Math.floor(elapsedMinutes / 60),
+                minutes: elapsedMinutes % 60
               }
-            ]
-          }
-        };
-
-        // Only update completion status if it's newly completed
-        if (completed && !item.completed) {
-          updates.completed = true;
-          updates.completed_at = currentTime.toISOString();
-          updates.status = 'completed' as const;
+            }
+          ]
         }
+      };
 
-        await updateLearningItem(id, updates);
-      } catch (error) {
-        console.error('Error stopping tracking:', error);
-        setError('Failed to stop tracking. Please try again.');
-        // Revert the local state change on error
-        dispatch({ type: 'START_TRACKING', payload: id });
+      // Only update completion status if it's newly completed
+      if (completed && !item.completed) {
+        updates.completed = true;
+        updates.completed_at = currentTime.toISOString();
+        updates.status = 'completed' as const;
       }
-    };
 
-    const handleDateSelect = (date?: Date) => {
-      if (date) {
-        setSelectedDate(date);
-      }
-    };
-
-    const handleUpdateNotes = (id: string, notes: string) => {
-      dispatch({ type: 'UPDATE_NOTES', payload: { id, notes } });
-    };
-
-    const handleAddSessionNote = (id: string, note: string) => {
-      dispatch({ type: 'ADD_SESSION_NOTE', payload: { id, note } });
-    };
-
-    const handleSetActiveItem = (id: string | null) => {
-      dispatch({ type: 'SET_ACTIVE_ITEM', payload: id });
-    };
-
-    const handleDashboardUpdate = (id: string, updates: Partial<LearningItem>) => {
-      handleUpdateItem(id, updates);
-    };
-
-    const handleDashboardAddItem = (date?: Date | null) => {
-      if (date) {
-        setSelectedDate(date);
-      }
-      setShowAddDialog(true);
-    };
-
-    const handleItemsAddItem = () => {
-      setShowAddDialog(true);
-    };
-
-    if (state.loading) {
-      return (
-        <ThemeProvider>
-          <div className="min-h-screen flex items-center justify-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"></div>
-          </div>
-        </ThemeProvider>
-      );
+      await updateLearningItem(id, updates);
+    } catch (error) {
+      console.error('Error stopping tracking:', error);
+      setError('Failed to stop tracking. Please try again.');
+      // Revert the local state change on error
+      dispatch({ type: 'START_TRACKING', payload: id });
     }
+  };
 
-    if (error) {
-      return (
-        <ThemeProvider>
-          <div className="min-h-screen flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-red-600 mb-4">{error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Retry
-              </button>
-            </div>
-          </div>
-        </ThemeProvider>
-      );
+  const handleDateSelect = (date?: Date) => {
+    if (date) {
+      setSelectedDate(date);
     }
+  };
 
+  const handleUpdateNotes = (id: string, notes: string) => {
+    dispatch({ type: 'UPDATE_NOTES', payload: { id, notes } });
+  };
+
+  const handleAddSessionNote = (id: string, note: string) => {
+    dispatch({ type: 'ADD_SESSION_NOTE', payload: { id, note } });
+  };
+
+  const handleSetActiveItem = (id: string | null) => {
+    dispatch({ type: 'SET_ACTIVE_ITEM', payload: id });
+  };
+
+  const handleDashboardUpdate = (id: string, updates: Partial<LearningItem>) => {
+    handleUpdateItem(id, updates);
+  };
+
+  const handleDashboardAddItem = (date?: Date | null) => {
+    if (date) {
+      setSelectedDate(date);
+    }
+    setShowAddDialog(true);
+  };
+
+  const handleItemsAddItem = () => {
+    setShowAddDialog(true);
+  };
+
+  if (state.loading) {
     return (
       <ThemeProvider>
-        <div className="min-h-screen bg-background text-foreground">
-          <Toaster />
-          <div className="max-w-7xl mx-auto px-4 py-8">
-            <header className="mb-8 relative">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex-1"></div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex-grow text-center">
-                  <span className="bg-gradient-to-r from-blue-700 to-indigo-800 dark:from-blue-500 dark:to-indigo-400 bg-clip-text text-transparent">
-                    Learning Tracker
-                  </span>
-                </h1>
-                <div className="flex-1 flex justify-end">
-                  <ThemeToggle />
-                </div>
-              </div>
-              <p className="text-gray-700 dark:text-gray-400 text-center">Track your learning journey and stay motivated</p>
-            </header>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"></div>
+        </div>
+      </ThemeProvider>
+    );
+  }
 
-            <TabNavigation activeTab={selectedTab} onTabChange={setSelectedTab} />
-
-            {showAddDialog && ( 
-              <AddLearningItem
-                onAdd={handleSubmitItem}
-                onClose={() => setShowAddDialog(false)}
-                isOpen={showAddDialog}
-                selectedDate={selectedDate}
-              />
-            )}
-
-            <main>
-              {selectedTab === TAB_OPTIONS.DASHBOARD && (
-                <DashboardTab
-                  items={state.items}
-                  onAddItem={handleDashboardAddItem}
-                  onUpdate={handleDashboardUpdate}
-                  onDateSelect={handleDateSelect}
-                  onDelete={handleDeleteItem}
-                  onStartTracking={handleStartTracking}
-                  onStopTracking={handleStopTracking}
-                  onNotesUpdate={handleUpdateNotes}
-                  onSessionNoteAdd={handleAddSessionNote}
-                  onSetActiveItem={handleSetActiveItem}
-                />
-              )}
-
-              {selectedTab === TAB_OPTIONS.ITEMS && (
-                <ItemsTab
-                  items={state.items}
-                  onAddItem={handleItemsAddItem}
-                  onUpdate={handleUpdateItem}
-                  onDelete={handleDeleteItem}
-                  onStartTracking={handleStartTracking}
-                  onStopTracking={handleStopTracking}
-                  onNotesUpdate={handleUpdateNotes}
-                  onSessionNoteAdd={handleAddSessionNote}
-                  onSetActiveItem={handleSetActiveItem}
-                />
-              )}
-
-              {selectedTab === TAB_OPTIONS.ANALYTICS && (
-                <AnalyticsTab items={state.items} />
-              )}
-
-              {selectedTab === TAB_OPTIONS.POMODORO && (
-                <PomodoroTimer />
-              )}
-              {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
-                <LearningCardsPage />
-              )}
-            </main>
+  if (error) {
+    return (
+      <ThemeProvider>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Retry
+            </button>
           </div>
         </div>
       </ThemeProvider>
     );
   }
+
+  return (
+    <ThemeProvider>
+      <div className="min-h-screen bg-background text-foreground">
+        <Toaster />
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <header className="mb-8 relative">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex-1"></div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex-grow text-center">
+                <span className="bg-gradient-to-r from-blue-700 to-indigo-800 dark:from-blue-500 dark:to-indigo-400 bg-clip-text text-transparent">
+                  Learning Tracker
+                </span>
+              </h1>
+              <div className="flex-1 flex justify-end">
+                <ThemeToggle />
+              </div>
+            </div>
+            <p className="text-gray-700 dark:text-gray-400 text-center">Track your learning journey and stay motivated</p>
+          </header>
+
+          <TabNavigation activeTab={selectedTab} onTabChange={setSelectedTab} />
+
+          {showAddDialog && ( 
+            <AddLearningItem
+              onAdd={handleSubmitItem}
+              onClose={() => setShowAddDialog(false)}
+              isOpen={showAddDialog}
+              selectedDate={selectedDate}
+            />
+          )}
+
+          <main>
+            {selectedTab === TAB_OPTIONS.DASHBOARD && (
+              <DashboardTab
+                items={state.items}
+                onAddItem={handleDashboardAddItem}
+                onUpdate={handleDashboardUpdate}
+                onDateSelect={handleDateSelect}
+                onDelete={handleDeleteItem}
+                onStartTracking={handleStartTracking}
+                onStopTracking={handleStopTracking}
+                onNotesUpdate={handleUpdateNotes}
+                onSessionNoteAdd={handleAddSessionNote}
+                onSetActiveItem={handleSetActiveItem}
+              />
+            )}
+
+            {selectedTab === TAB_OPTIONS.ITEMS && (
+              <ItemsTab
+                items={state.items}
+                onAddItem={handleItemsAddItem}
+                onUpdate={handleUpdateItem}
+                onDelete={handleDeleteItem}
+                onStartTracking={handleStartTracking}
+                onStopTracking={handleStopTracking}
+                onNotesUpdate={handleUpdateNotes}
+                onSessionNoteAdd={handleAddSessionNote}
+                onSetActiveItem={handleSetActiveItem}
+              />
+            )}
+
+            {selectedTab === TAB_OPTIONS.ANALYTICS && (
+              <AnalyticsTab items={state.items} />
+            )}
+
+            {selectedTab === TAB_OPTIONS.POMODORO && (
+              <PomodoroTimer />
+            )}
+            {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
+              <LearningCardsPage />
+            )}
+          </main>
+        </div>
+      </div>
+    </ThemeProvider>
+  );
 }
