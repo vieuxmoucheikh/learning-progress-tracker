@@ -170,6 +170,21 @@ function reducer(state: State, action: Action): State {
       const stoppingItem = state.items.find(item => item.id === action.payload);
       if (!stoppingItem?.progress) return state;
 
+      // Check if the session was active when page was hidden
+      const sessionVisibilityStr = localStorage.getItem(`session_visibility_${action.payload}`);
+      if (sessionVisibilityStr) {
+        // Clear the visibility state
+        localStorage.removeItem(`session_visibility_${action.payload}`);
+        
+        // If this function was called automatically when returning to the app,
+        // we should preserve the session instead of stopping it
+        const isAutoStopOnVisibilityChange = document.visibilityState === 'visible';
+        if (isAutoStopOnVisibilityChange) {
+          console.log('Preventing auto-stop of session that was active when page was hidden');
+          return state; // Exit without stopping the session
+        }
+      }
+
       // End all active sessions
       const updatedSessions = stoppingItem.progress.sessions.map(session => {
         if (!session.endTime) {
@@ -367,6 +382,55 @@ export default function App() {
     }
   }, [state.loading, state.items]);
 
+  useEffect(() => {
+    // Skip if no active item
+    if (!state.activeItem) return;
+
+    const handleVisibilityChange = () => {
+      const activeItemId = state.activeItem;
+      if (!activeItemId) return;
+
+      const item = state.items.find(i => i.id === activeItemId);
+      if (!item?.progress?.sessions) return;
+
+      const activeSession = item.progress.sessions.find(s => !s.endTime);
+      if (!activeSession) return;
+
+      if (document.visibilityState === 'hidden') {
+        // Page is hidden (user navigated away) - mark session state
+        console.log('Page hidden, saving session state for', activeItemId);
+        localStorage.setItem(`session_visibility_${activeItemId}`, JSON.stringify({
+          timestamp: Date.now(),
+          status: 'hidden',
+          wasActive: true
+        }));
+      } else if (document.visibilityState === 'visible') {
+        // Page is visible again - check if session was active when page was hidden
+        const sessionStateStr = localStorage.getItem(`session_visibility_${activeItemId}`);
+        if (sessionStateStr) {
+          try {
+            const sessionState = JSON.parse(sessionStateStr);
+            if (sessionState.wasActive) {
+              console.log('Page visible again, session was active when hidden');
+              // Clear the visibility state
+              localStorage.removeItem(`session_visibility_${activeItemId}`);
+            }
+          } catch (e) {
+            console.error('Error parsing session visibility state:', e);
+          }
+        }
+      }
+    };
+
+    // Add event listener
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Clean up
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [state.activeItem, state.items]);
+
   const handleAddItem = async (selectedDate?: Date | null) => {
     setShowAddDialog(true);
     if (selectedDate) {
@@ -487,6 +551,21 @@ export default function App() {
     try {
       const item = state.items.find(item => item.id === id);
       if (!item) return;
+
+      // Check if the session was active when page was hidden
+      const sessionVisibilityStr = localStorage.getItem(`session_visibility_${id}`);
+      if (sessionVisibilityStr) {
+        // Clear the visibility state
+        localStorage.removeItem(`session_visibility_${id}`);
+        
+        // If this function was called automatically when returning to the app,
+        // we should preserve the session instead of stopping it
+        const isAutoStopOnVisibilityChange = document.visibilityState === 'visible';
+        if (isAutoStopOnVisibilityChange) {
+          console.log('Preventing auto-stop of session that was active when page was hidden');
+          return; // Exit without stopping the session
+        }
+      }
 
       // First update local state for immediate feedback
       dispatch({ type: 'STOP_TRACKING', payload: id });
