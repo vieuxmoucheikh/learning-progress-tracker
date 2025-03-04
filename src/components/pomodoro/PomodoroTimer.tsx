@@ -361,7 +361,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     const task = tasks.find(t => t.id === activeTaskId);
                     if (task) {
                         const completedPomodoros = task.metrics.completedPomodoros;
-                        const isLongBreak = completedPomodoros > 0 && (completedPomodoros - 1) % settings.pomodoros_until_long_break === 0;
+                        const isLongBreak = completedPomodoros > 0 && completedPomodoros % settings.pomodoros_until_long_break === 0;
                         newDuration = isLongBreak ? settings.long_break_duration : settings.break_duration;
                     } else {
                         newDuration = settings.break_duration;
@@ -702,6 +702,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     // Handle visibility change
     const handleVisibilityChange = useCallback(() => {
         if (document.visibilityState === 'hidden') {
+            // Just save the current state when tab becomes hidden
             localStorage.setItem('pomodoroLastTimestamp', Date.now().toString());
             localStorage.setItem('pomodoroTimerState', JSON.stringify({
                 time,
@@ -709,7 +710,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 isBreak,
                 currentPomodoroId
             }));
-        } else {
+        } else if (isActive) { // Only adjust time if timer was active when tab was hidden
             try {
                 const savedState = localStorage.getItem('pomodoroTimerState');
                 if (savedState) {
@@ -814,14 +815,14 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         console.log(`Successfully synced task update for task ${update.taskId}`);
                         
                         // Remove successful sync from the failed updates
-                        const remainingUpdates = JSON.parse(localStorage.getItem('failedTaskUpdates') || '[]')
+                        const remainingFailedUpdates = JSON.parse(localStorage.getItem('failedTaskUpdates') || '[]')
                             .filter((failedUpdate: any) => 
                                 !(failedUpdate.taskId === update.taskId && failedUpdate.timestamp === update.timestamp)
                             );
                         
-                        localStorage.setItem('failedTaskUpdates', JSON.stringify(remainingUpdates));
+                        localStorage.setItem('failedTaskUpdates', JSON.stringify(remainingFailedUpdates));
                         
-                        if (remainingUpdates.length === 0) {
+                        if (remainingFailedUpdates.length === 0) {
                             console.log("All failed task updates successfully synced");
                             toast({
                                 title: "Sync Complete",
@@ -1159,7 +1160,19 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 // Switching to break mode
                 const activeTask = tasks.find(t => t.id === activeTaskId);
                 const completedPomodoros = activeTask?.metrics?.completedPomodoros || 0;
-                const isLongBreak = completedPomodoros > 0 && (completedPomodoros - 1) % settings.pomodoros_until_long_break === 0;
+                
+                // Log the values to help debug
+                console.log("Task:", activeTask?.text);
+                console.log("Completed Pomodoros:", completedPomodoros);
+                console.log("Pomodoros until long break:", settings.pomodoros_until_long_break);
+                console.log("Calculation:", completedPomodoros % settings.pomodoros_until_long_break);
+                
+                // Determine if this should be a long break
+                // A long break should occur after every N completed pomodoros
+                const isLongBreak = completedPomodoros > 0 && completedPomodoros % settings.pomodoros_until_long_break === 0;
+                
+                console.log("Is Long Break:", isLongBreak);
+                
                 setTime(isLongBreak ? settings.long_break_duration * 60 : settings.break_duration * 60);
             }
             
@@ -1432,21 +1445,11 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             let newDuration;
             if (newIsBreak) {
                 // If we're switching to break mode
-                if (activeTaskId) {
-                    const task = tasks.find(t => t.id === activeTaskId);
-                    if (task) {
-                        const completedPomodoros = task.metrics.completedPomodoros;
-                        const isLongBreak = completedPomodoros > 0 && (completedPomodoros - 1) % settings.pomodoros_until_long_break === 0;
-                        newDuration = isLongBreak ? settings.long_break_duration : settings.break_duration;
-                        console.log("Break duration:", newDuration, isLongBreak ? "(long break)" : "(short break)");
-                    } else {
-                        newDuration = settings.break_duration;
-                        console.log("Break duration (default):", newDuration);
-                    }
-                } else {
-                    newDuration = settings.break_duration;
-                    console.log("Break duration (no active task):", newDuration);
-                }
+                const activeTask = tasks.find(t => t.id === activeTaskId);
+                const completedPomodoros = activeTask?.metrics?.completedPomodoros || 0;
+                const isLongBreak = completedPomodoros > 0 && completedPomodoros % settings.pomodoros_until_long_break === 0;
+                newDuration = isLongBreak ? settings.long_break_duration : settings.break_duration;
+                console.log("Break duration:", newDuration, isLongBreak ? "(long break)" : "(short break)");
             } else {
                 // If we're switching to work mode
                 newDuration = settings.work_duration;
