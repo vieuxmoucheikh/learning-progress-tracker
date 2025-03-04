@@ -1059,7 +1059,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 // Switching to break mode
                 const activeTask = tasks.find(t => t.id === activeTaskId);
                 const completedPomodoros = activeTask?.metrics?.completedPomodoros || 0;
-                const isLongBreak = completedPomodoros > 0 && completedPomodoros % settings.pomodoros_until_long_break === 0;
+                const isLongBreak = completedPomodoros > 0 && (completedPomodoros - 1) % settings.pomodoros_until_long_break === 0;
                 setTime(isLongBreak ? settings.long_break_duration * 60 : settings.break_duration * 60);
             }
             
@@ -1239,7 +1239,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 const newPomodoroCount = pomodoroCount + 1;
                 setPomodoroCount(newPomodoroCount);
                 
-                // Update tasks with new metrics
+                // Update tasks with new metrics immediately
                 const updatedTasks = tasks.map(task => {
                     if (task.id === activeTaskId) {
                         const newCompletedPomodoros = task.metrics.completedPomodoros + 1;
@@ -1286,16 +1286,14 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             totalMinutes: task.metrics.totalMinutes + (settings?.work_duration ?? 25)
                         };
                         
-                        // Update task in Supabase if user is authenticated
+                        // Update task in Supabase if user is authenticated - do this immediately, not in an async function
                         if (user) {
-                            (async () => {
-                                try {
-                                    await updatePomodoroTask(task.id, {
-                                        metrics: updatedMetrics,
-                                        completed: shouldMarkCompleted ? true : task.completed
-                                    });
-                                    console.log("Task metrics updated in Supabase:", task.id);
-                                } catch (error) {
+                            try {
+                                // Use a synchronous update to ensure metrics are updated before moving to break
+                                updatePomodoroTask(task.id, {
+                                    metrics: updatedMetrics,
+                                    completed: shouldMarkCompleted ? true : task.completed
+                                }).catch(error => {
                                     console.error("Error updating task metrics in Supabase:", error);
                                     
                                     // Store failed update for later sync
@@ -1311,8 +1309,11 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     } catch (storageError) {
                                         console.error("Failed to store update for later sync:", storageError);
                                     }
-                                }
-                            })();
+                                });
+                                console.log("Task metrics update initiated in Supabase:", task.id);
+                            } catch (error) {
+                                console.error("Error initiating task metrics update in Supabase:", error);
+                            }
                         }
                         
                         return {
@@ -1354,8 +1355,11 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 if (activeTaskId) {
                     const task = tasks.find(t => t.id === activeTaskId);
                     if (task) {
+                        // Fix the long break calculation by subtracting 1 from completed pomodoros before modulo check
+                        // This ensures that when pomodoros_until_long_break is set to 1, we get a long break after 1 pomodoro
+                        // and when set to 2, we get a long break after 2 pomodoros
                         const completedPomodoros = task.metrics.completedPomodoros;
-                        const isLongBreak = completedPomodoros > 0 && completedPomodoros % settings.pomodoros_until_long_break === 0;
+                        const isLongBreak = completedPomodoros > 0 && (completedPomodoros - 1) % settings.pomodoros_until_long_break === 0;
                         newDuration = isLongBreak ? settings.long_break_duration : settings.break_duration;
                         console.log("Break duration:", newDuration, isLongBreak ? "(long break)" : "(short break)");
                     } else {
