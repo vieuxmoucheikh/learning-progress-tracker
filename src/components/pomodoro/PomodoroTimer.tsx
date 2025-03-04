@@ -547,20 +547,10 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             if (failedCompletions.length > 0) {
                 for (const session of failedCompletions) {
                     try {
-                        // Use non-blocking pattern for better performance
-                        completePomodoro(session.pomodoroId)
-                            .then(() => {
-                                console.log(`Successfully synced pomodoro: ${session.pomodoroId}`);
-                                // Remove this from failed completions
-                                const remainingFailedCompletions = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]')
-                                    .filter((fc: FailedCompletion) => fc.pomodoroId !== session.pomodoroId);
-                                localStorage.setItem('failedPomodoroCompletions', JSON.stringify(remainingFailedCompletions));
-                            })
-                            .catch(error => {
-                                console.error('Error syncing failed completion:', error);
-                            });
+                        await completePomodoro(session.pomodoroId);
                     } catch (error) {
-                        console.error('Error initiating sync of failed completion:', error);
+                        console.error('Error syncing failed completion:', error);
+                        return;
                     }
                 }
                 localStorage.removeItem('failedPomodoroCompletions');
@@ -608,23 +598,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             
             for (const completion of failedCompletions) {
                 try {
-                    // Use non-blocking pattern for better performance
-                    completePomodoro(completion.pomodoroId)
-                        .then(() => {
-                            successfulIds.push(completion.pomodoroId);
-                            console.log(`Successfully synced pomodoro: ${completion.pomodoroId}`);
-                            
-                            // Remove successful sync from the failed completions
-                            const remainingFailedCompletions = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]')
-                                .filter((fc: FailedCompletion) => fc.pomodoroId !== completion.pomodoroId);
-                            localStorage.setItem('failedPomodoroCompletions', JSON.stringify(remainingFailedCompletions));
-                        })
-                        .catch(error => {
-                            console.error(`Failed to sync pomodoro: ${completion.pomodoroId}`, error);
-                            // Keep this one in the failed list
-                        });
+                    await completePomodoro(completion.pomodoroId);
+                    successfulIds.push(completion.pomodoroId);
+                    console.log(`Successfully synced pomodoro: ${completion.pomodoroId}`);
                 } catch (error) {
-                    console.error(`Error initiating sync for pomodoro: ${completion.pomodoroId}`, error);
+                    console.error(`Failed to sync pomodoro: ${completion.pomodoroId}`, error);
+                    // Keep this one in the failed list
                 }
             }
             
@@ -702,7 +681,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     // Handle visibility change
     const handleVisibilityChange = useCallback(() => {
         if (document.visibilityState === 'hidden') {
-            // Just save the current state when tab becomes hidden
             localStorage.setItem('pomodoroLastTimestamp', Date.now().toString());
             localStorage.setItem('pomodoroTimerState', JSON.stringify({
                 time,
@@ -710,30 +688,18 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 isBreak,
                 currentPomodoroId
             }));
-        } else if (isActive) { // Only adjust time if timer was active when tab was hidden
+        } else {
             try {
                 const savedState = localStorage.getItem('pomodoroTimerState');
                 if (savedState) {
                     const parsedState = JSON.parse(savedState);
                     const storedTimestamp = parseInt(localStorage.getItem('pomodoroLastTimestamp') || Date.now().toString());
                     const elapsedSeconds = Math.floor((Date.now() - storedTimestamp) / 1000);
-                    
                     if (parsedState.isActive && elapsedSeconds > 0) {
-                        // Calculate what the time would be after the elapsed time
                         const adjustedTime = Math.max(0, parsedState.time - elapsedSeconds);
-                        
+                        setTime(adjustedTime);
                         if (adjustedTime === 0) {
-                            // Instead of automatically completing the timer, show a notification
-                            // and pause the timer
-                            setIsActive(false);
-                            toast({
-                                title: "Timer Expired",
-                                description: "Your timer expired while you were away. Click 'Skip' to move to the next phase.",
-                                duration: 5000,
-                            });
-                        } else {
-                            // Just update the time if it hasn't expired
-                            setTime(adjustedTime);
+                            handleTimerComplete();
                         }
                     }
                 }
@@ -741,14 +707,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 console.error('Error handling visibility change:', error);
             }
         }
-    }, [time, isActive, isBreak, currentPomodoroId, toast]);
-
-    useEffect(() => {
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        return () => {
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-        };
-    }, [handleVisibilityChange]);
+    }, [time, isActive, isBreak, currentPomodoroId]);
 
     // Persist timer state to localStorage
     useEffect(() => {
@@ -787,13 +746,17 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
     // Add a function to sync failed task updates
     const syncFailedTaskUpdates = useCallback(async () => {
+        if (!user) return;
+        
         try {
-            // Get failed updates from localStorage
-            const failedUpdatesString = localStorage.getItem('failedTaskUpdates');
-            if (!failedUpdatesString) return;
+            const failedUpdates = JSON.parse(localStorage.getItem('failedTaskUpdates') || '[]') as Array<{
+                taskId: string;
+                metrics: Task['metrics'];
+                completed: boolean;
+                timestamp: string;
+            }>;
             
-            const failedUpdates = JSON.parse(failedUpdatesString);
-            if (!failedUpdates.length) return;
+            if (failedUpdates.length === 0) return;
             
             console.log(`Attempting to sync ${failedUpdates.length} failed task updates`);
             
@@ -806,46 +769,44 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             
             for (const update of failedUpdates) {
                 try {
-                    // Use non-blocking pattern for updatePomodoroTask
-                    updatePomodoroTask(update.taskId, {
+                    await updatePomodoroTask(update.taskId, {
                         metrics: update.metrics,
                         completed: update.completed
-                    }).then(() => {
-                        successfulSyncs.push(update);
-                        console.log(`Successfully synced task update for task ${update.taskId}`);
-                        
-                        // Remove successful sync from the failed updates
-                        const remainingFailedUpdates = JSON.parse(localStorage.getItem('failedTaskUpdates') || '[]')
-                            .filter((failedUpdate: any) => 
-                                !(failedUpdate.taskId === update.taskId && failedUpdate.timestamp === update.timestamp)
-                            );
-                        
-                        localStorage.setItem('failedTaskUpdates', JSON.stringify(remainingFailedUpdates));
-                        
-                        if (remainingFailedUpdates.length === 0) {
-                            console.log("All failed task updates successfully synced");
-                            toast({
-                                title: "Sync Complete",
-                                description: "All pending updates have been synchronized.",
-                                variant: "default",
-                            });
-                        }
-                    }).catch(error => {
-                        console.error(`Error syncing task update for task ${update.taskId}:`, error);
                     });
+                    successfulSyncs.push(update);
+                    console.log(`Successfully synced task update for task ${update.taskId}`);
                 } catch (error) {
-                    console.error(`Error initiating sync for task ${update.taskId}:`, error);
+                    console.error(`Failed to sync task update for task ${update.taskId}:`, error);
+                }
+            }
+            
+            // Remove successful syncs from the failed updates
+            if (successfulSyncs.length > 0) {
+                const remainingUpdates = failedUpdates.filter(
+                    update => !successfulSyncs.some(sync => sync.taskId === update.taskId && sync.timestamp === update.timestamp)
+                );
+                localStorage.setItem('failedTaskUpdates', JSON.stringify(remainingUpdates));
+                
+                if (remainingUpdates.length === 0) {
+                    console.log("All failed task updates successfully synced");
+                    toast({
+                        title: "Sync Complete",
+                        description: `Successfully synced ${successfulSyncs.length} task updates.`,
+                        duration: 3000,
+                    });
+                } else {
+                    console.log(`${remainingUpdates.length} task updates still pending sync`);
+                    toast({
+                        title: "Partial Sync",
+                        description: `Synced ${successfulSyncs.length} task updates. ${remainingUpdates.length} updates still pending.`,
+                        duration: 3000,
+                    });
                 }
             }
         } catch (error) {
             console.error("Error syncing failed task updates:", error);
-            toast({
-                title: "Sync Error",
-                description: "Failed to synchronize pending updates.",
-                variant: "destructive",
-            });
         }
-    }, [toast]);
+    }, [user, toast]);
 
     // Try to sync failed updates when user logs in or when component mounts
     useEffect(() => {
@@ -901,16 +862,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             setIsBreak(false);
             
             if (currentPomodoroId) {
-                completePomodoro(currentPomodoroId).catch(error => {
-                    console.error("Error completing pomodoro on visibility change:", error);
-                    // Store failed completion to retry later
-                    const failedCompletions: FailedCompletion[] = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
-                    failedCompletions.push({
-                        pomodoroId: currentPomodoroId,
-                        timestamp: new Date().toISOString()
-                    });
-                    localStorage.setItem('failedPomodoroCompletions', JSON.stringify(failedCompletions));
-                });
+                await completePomodoro(currentPomodoroId);
                 setCurrentPomodoroId(null);
             }
         } catch (error) {
@@ -929,16 +881,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         setIsActive(false);
         setIsBreak(false);
         if (currentPomodoroId) {
-            completePomodoro(currentPomodoroId).catch(error => {
-                console.error("Error completing pomodoro on visibility change:", error);
-                // Store failed completion to retry later
-                const failedCompletions: FailedCompletion[] = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
-                failedCompletions.push({
-                    pomodoroId: currentPomodoroId,
-                    timestamp: new Date().toISOString()
-                });
-                localStorage.setItem('failedPomodoroCompletions', JSON.stringify(failedCompletions));
-            });
+            await completePomodoro(currentPomodoroId);
             setCurrentPomodoroId(null);
         }
     };
@@ -951,18 +894,9 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 setIsActive(false);
                 if (currentPomodoroId) {
                     try {
-                        completePomodoro(currentPomodoroId).catch(error => {
-                            console.error('Error completing active pomodoro:', error);
-                            // Store failed completion to retry later
-                            const failedCompletions: FailedCompletion[] = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
-                            failedCompletions.push({
-                                pomodoroId: currentPomodoroId,
-                                timestamp: new Date().toISOString()
-                            });
-                            localStorage.setItem('failedPomodoroCompletions', JSON.stringify(failedCompletions));
-                        });
+                        await completePomodoro(currentPomodoroId);
                     } catch (error) {
-                        console.error('Error initiating pomodoro completion:', error);
+                        console.error('Error completing active pomodoro:', error);
                     }
                     setCurrentPomodoroId(null);
                 }
@@ -995,33 +929,17 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         try {
             // If task is already completed, we can toggle it back to incomplete
             if (taskToToggle.completed) {
-                // Update local state immediately
+                // Update in Supabase if user is authenticated
+                if (user) {
+                    await updatePomodoroTask(id, { completed: false });
+                }
+                
+                // Update local state
                 setTasks(prevTasks =>
                     prevTasks.map(task =>
                         task.id === id ? { ...task, completed: false } : task
                     )
                 );
-                
-                // Update in Supabase if user is authenticated - non-blocking
-                if (user) {
-                    updatePomodoroTask(id, { completed: false }).catch(error => {
-                        console.error("Error updating task completion status in Supabase:", error);
-                        
-                        // Store failed update for later sync
-                        try {
-                            const failedUpdates = JSON.parse(localStorage.getItem('failedTaskUpdates') || '[]');
-                            failedUpdates.push({
-                                taskId: id,
-                                metrics: taskToToggle.metrics,
-                                completed: false,
-                                timestamp: new Date().toISOString()
-                            });
-                            localStorage.setItem('failedTaskUpdates', JSON.stringify(failedUpdates));
-                        } catch (storageError) {
-                            console.error("Failed to store update for later sync:", storageError);
-                        }
-                    });
-                }
                 return;
             }
             
@@ -1031,46 +949,40 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             // Ensure metrics exists and has completedPomodoros property
             if (taskToToggle.metrics && taskToToggle.metrics.completedPomodoros >= dailyGoal) {
                 // Daily goal achieved for this task, allow marking as completed
-                // Update local state immediately
+                // Update in Supabase if user is authenticated
+                if (user) {
+                    await updatePomodoroTask(id, { completed: true });
+                }
+                
+                // Update local state
                 setTasks(prevTasks =>
                     prevTasks.map(task =>
                         task.id === id ? { ...task, completed: true } : task
                     )
                 );
                 
-                // Update in Supabase if user is authenticated - non-blocking
-                if (user) {
-                    updatePomodoroTask(id, { completed: true }).catch(error => {
-                        console.error("Error updating task completion status in Supabase:", error);
-                        
-                        // Store failed update for later sync
-                        try {
-                            const failedUpdates = JSON.parse(localStorage.getItem('failedTaskUpdates') || '[]');
-                            failedUpdates.push({
-                                taskId: id,
-                                metrics: taskToToggle.metrics,
-                                completed: true,
-                                timestamp: new Date().toISOString()
-                            });
-                            localStorage.setItem('failedTaskUpdates', JSON.stringify(failedUpdates));
-                        } catch (storageError) {
-                            console.error("Failed to store update for later sync:", storageError);
-                        }
-                    });
-                }
-            } else {
-                // Show a toast notification explaining why the task can't be marked as completed
+                // Show celebration
                 toast({
-                    title: "Cannot mark as completed",
-                    description: `This task needs at least ${dailyGoal} completed pomodoros to be marked as done.`,
-                    variant: "destructive",
+                    title: "Task Completed! 🎉",
+                    description: `You've completed your daily goal for "${taskToToggle.text}"!`,
+                    duration: 5000,
+                });
+                
+                // Play celebration sound
+                playCelebrationSound();
+            } else {
+                // Task hasn't reached daily goal yet, show message
+                toast({
+                    title: "Keep Going!",
+                    description: `Complete ${dailyGoal} pomodoros to mark this task as done.`,
+                    duration: 3000,
                 });
             }
         } catch (error) {
-            console.error("Error toggling task:", error);
+            console.error('Error toggling task:', error);
             toast({
-                title: "Error",
-                description: "Failed to update task status.",
+                title: "Error updating task",
+                description: "Could not update your task. Please try again later.",
                 variant: "destructive",
             });
         }
@@ -1128,21 +1040,8 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
         try {
             // If we're in a work interval, complete it but don't count it as a full pomodoro
             if (!isBreak && currentPomodoroId) {
-                // Just complete the pomodoro without incrementing the counter using non-blocking pattern
-                completePomodoro(currentPomodoroId)
-                    .then(() => {
-                        console.log(`Successfully skipped pomodoro: ${currentPomodoroId}`);
-                    })
-                    .catch(error => {
-                        console.error("Error completing skipped pomodoro in database:", error);
-                        // Store failed completion to retry later
-                        const failedCompletions: FailedCompletion[] = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
-                        failedCompletions.push({
-                            pomodoroId: currentPomodoroId,
-                            timestamp: new Date().toISOString()
-                        });
-                        localStorage.setItem('failedPomodoroCompletions', JSON.stringify(failedCompletions));
-                    });
+                // Just complete the pomodoro without incrementing the counter
+                await completePomodoro(currentPomodoroId);
                 setCurrentPomodoroId(null);
                 
                 // We don't increment the pomodoro count or update task metrics for skipped pomodoros
@@ -1160,19 +1059,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                 // Switching to break mode
                 const activeTask = tasks.find(t => t.id === activeTaskId);
                 const completedPomodoros = activeTask?.metrics?.completedPomodoros || 0;
-                
-                // Log the values to help debug
-                console.log("Task:", activeTask?.text);
-                console.log("Completed Pomodoros:", completedPomodoros);
-                console.log("Pomodoros until long break:", settings.pomodoros_until_long_break);
-                console.log("Calculation:", completedPomodoros % settings.pomodoros_until_long_break);
-                
-                // Determine if this should be a long break
-                // A long break should occur after every N completed pomodoros
-                const isLongBreak = completedPomodoros > 0 && completedPomodoros % settings.pomodoros_until_long_break === 0;
-                
-                console.log("Is Long Break:", isLongBreak);
-                
+                const isLongBreak = completedPomodoros > 0 && (completedPomodoros - 1) % settings.pomodoros_until_long_break === 0;
                 setTime(isLongBreak ? settings.long_break_duration * 60 : settings.break_duration * 60);
             }
             
@@ -1287,30 +1174,50 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             if (currentPomodoroId && !isBreak) {
                 console.log("Completing work pomodoro:", currentPomodoroId);
                 try {
-                    // Use non-blocking pattern to ensure metrics update immediately
-                    completePomodoro(currentPomodoroId)
-                        .then(() => {
-                            console.log(`Successfully completed pomodoro: ${currentPomodoroId}`);
-                        })
-                        .catch(error => {
-                            console.error("Error completing pomodoro in database:", error);
-                            // Store failed completion to retry later
-                            const failedCompletions: FailedCompletion[] = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
-                            failedCompletions.push({
-                                pomodoroId: currentPomodoroId,
-                                timestamp: new Date().toISOString()
-                            });
-                            localStorage.setItem('failedPomodoroCompletions', JSON.stringify(failedCompletions));
-                            // Show a warning toast but continue with the local updates
-                            toast({
-                                title: "Warning",
-                                description: "Pomodoro completed offline. Will sync when connection is restored.",
-                                variant: "default",
-                                duration: 3000,
-                            });
-                        });
+                    await completePomodoro(currentPomodoroId);
                 } catch (error) {
-                    console.error("Error initiating pomodoro completion:", error);
+                    console.error("Error completing pomodoro in database:", error);
+                    // Store failed completion to retry later
+                    const failedCompletions: FailedCompletion[] = JSON.parse(localStorage.getItem('failedPomodoroCompletions') || '[]');
+                    failedCompletions.push({
+                        pomodoroId: currentPomodoroId,
+                        timestamp: new Date().toISOString()
+                    });
+                    localStorage.setItem('failedPomodoroCompletions', JSON.stringify(failedCompletions));
+                    
+                    // Show a warning toast but continue with the local updates
+                    toast({
+                        title: "Warning",
+                        description: "Pomodoro completed offline. Will sync when connection is restored.",
+                        variant: "default",
+                        duration: 3000,
+                    });
+                    
+                    // Even if there's an error, try to update the local state
+                    if (activeTaskId) {
+                        try {
+                            // Update local metrics as a fallback
+                            const updatedTasks = tasks.map(task => {
+                                if (task.id === activeTaskId) {
+                                    return {
+                                        ...task,
+                                        metrics: {
+                                            ...task.metrics,
+                                            completedPomodoros: task.metrics.completedPomodoros + 1,
+                                            totalMinutes: task.metrics.totalMinutes + (settings?.work_duration ?? 25)
+                                        }
+                                    };
+                                }
+                                return task;
+                            });
+                            
+                            setTasks(updatedTasks);
+                            localStorage.setItem('pomodoroTasks', JSON.stringify(updatedTasks));
+                            console.log("Emergency fallback: Tasks updated locally despite error");
+                        } catch (fallbackError) {
+                            console.error("Critical error: Even fallback update failed:", fallbackError);
+                        }
+                    }
                 }
                 setCurrentPomodoroId(null);
             }
@@ -1445,11 +1352,24 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             let newDuration;
             if (newIsBreak) {
                 // If we're switching to break mode
-                const activeTask = tasks.find(t => t.id === activeTaskId);
-                const completedPomodoros = activeTask?.metrics?.completedPomodoros || 0;
-                const isLongBreak = completedPomodoros > 0 && completedPomodoros % settings.pomodoros_until_long_break === 0;
-                newDuration = isLongBreak ? settings.long_break_duration : settings.break_duration;
-                console.log("Break duration:", newDuration, isLongBreak ? "(long break)" : "(short break)");
+                if (activeTaskId) {
+                    const task = tasks.find(t => t.id === activeTaskId);
+                    if (task) {
+                        // Fix the long break calculation by subtracting 1 from completed pomodoros before modulo check
+                        // This ensures that when pomodoros_until_long_break is set to 1, we get a long break after 1 pomodoro
+                        // and when set to 2, we get a long break after 2 pomodoros
+                        const completedPomodoros = task.metrics.completedPomodoros;
+                        const isLongBreak = completedPomodoros > 0 && (completedPomodoros - 1) % settings.pomodoros_until_long_break === 0;
+                        newDuration = isLongBreak ? settings.long_break_duration : settings.break_duration;
+                        console.log("Break duration:", newDuration, isLongBreak ? "(long break)" : "(short break)");
+                    } else {
+                        newDuration = settings.break_duration;
+                        console.log("Break duration (default):", newDuration);
+                    }
+                } else {
+                    newDuration = settings.break_duration;
+                    console.log("Break duration (no active task):", newDuration);
+                }
             } else {
                 // If we're switching to work mode
                 newDuration = settings.work_duration;
