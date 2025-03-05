@@ -238,42 +238,6 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
         } else if (!shouldBePaused && internalPaused) {
           console.log('No pause markers but paused internally, resuming');
           setInternalPaused(false);
-        } else if (!shouldBePaused && !internalPaused && isActive && startTime) {
-          // Timer is running - recalculate elapsed time to account for time passed while away
-          console.log('Recalculating elapsed time after page was hidden');
-          const currentElapsed = calculateElapsedTime();
-          setElapsedTime(currentElapsed);
-          updateFormattedTime(currentElapsed);
-          setLastUpdateTime(Date.now());
-          
-          // Restart the interval if it was cleared
-          if (!intervalRef.current && isActive && !internalPaused) {
-            console.log('Restarting interval after visibility change');
-            intervalRef.current = setInterval(() => {
-              const currentElapsed = calculateElapsedTime();
-              setElapsedTime(currentElapsed);
-              updateFormattedTime(currentElapsed);
-              setLastUpdateTime(Date.now());
-            }, 250);
-          }
-        }
-      } else if (document.visibilityState === 'hidden') {
-        console.log('Page hidden');
-        
-        // Store the current time when the page becomes hidden
-        localStorage.setItem(`sessionHiddenTime_${itemId}`, Date.now().toString());
-        
-        // If the timer is running (not paused), we want it to continue running in the background
-        if (isActive && !internalPaused && startTime) {
-          console.log('Timer is active and not paused - will continue in background');
-          
-          // Store the current elapsed time for reference
-          const currentElapsed = calculateElapsedTime();
-          localStorage.setItem(`sessionElapsedAtHidden_${itemId}`, currentElapsed.toString());
-          
-          // We'll clear the interval but NOT pause the timer - this saves battery
-          // while still allowing the timer to continue conceptually
-          clearTimerInterval();
         }
       }
     };
@@ -286,7 +250,7 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [internalPaused, itemId, isActive, startTime, calculateElapsedTime, updateFormattedTime, clearTimerInterval]);
+  }, [internalPaused, itemId]);
   
   // Handle resuming a session
   const handleResume = useCallback(() => {
