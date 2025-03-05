@@ -393,9 +393,7 @@ export default function App() {
   }, [state.loading, state.items]);
 
   useEffect(() => {
-    // Handle page visibility changes to ensure timers keep running when navigating away
-    if (!state.activeItem) return;
-
+    // Handle page visibility changes
     const handleVisibilityChange = () => {
       const activeItemId = state.activeItem;
       if (!activeItemId) return;
@@ -412,14 +410,27 @@ export default function App() {
           timestamp: Date.now(),
           startTime: activeSession.startTime,
           status: 'active',
-          wasActive: true
+          wasActive: true,
+          lastUpdated: Date.now(),
+          itemId: activeItemId
         };
         
         console.log('Page hidden, saving session state with timestamp', sessionState);
         localStorage.setItem(`session_visibility_${activeItemId}`, JSON.stringify(sessionState));
+        
+        // Also save in a global key so we can restore ANY active session on page load
+        localStorage.setItem('global_active_session', activeItemId);
+        localStorage.setItem('global_session_state', JSON.stringify({
+          timestamp: Date.now(),
+          itemId: activeItemId
+        }));
       } else if (document.visibilityState === 'visible') {
         // Page is visible again - check if there was an active session
         const sessionStateStr = localStorage.getItem(`session_visibility_${activeItemId}`);
+        
+        // Also check global session state to see if any session was active
+        const globalActiveSession = localStorage.getItem('global_active_session');
+        
         if (sessionStateStr) {
           try {
             const sessionState = JSON.parse(sessionStateStr);
@@ -430,6 +441,10 @@ export default function App() {
               if (sessionState.timestamp) {
                 const timeHidden = Date.now() - sessionState.timestamp;
                 console.log(`Session was hidden for ${Math.round(timeHidden / 1000)} seconds`);
+                
+                // Update the timestamp to ensure we track continued absence correctly
+                sessionState.lastUpdated = Date.now();
+                localStorage.setItem(`session_visibility_${activeItemId}`, JSON.stringify(sessionState));
                 
                 // Only update the DOM if significant time has passed (avoid unnecessary updates)
                 if (timeHidden > 5000) {
@@ -444,6 +459,13 @@ export default function App() {
           } catch (e) {
             console.error('Error parsing session visibility state:', e);
           }
+        } else if (globalActiveSession && globalActiveSession !== activeItemId) {
+          // Check if we need to restore a different session than the currently active one
+          console.log(`Found global active session ${globalActiveSession} different from current ${activeItemId}`);
+          
+          // Dispatch action to set the correct active item
+          // This will ensure the correct session timer is displayed
+          dispatch({ type: 'SET_ACTIVE_ITEM', payload: globalActiveSession });
         }
       }
     };
@@ -457,7 +479,7 @@ export default function App() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [state.activeItem, state.items]);
+  }, [state.activeItem, state.items, dispatch]);
 
   const handleAddItem = async (selectedDate?: Date | null) => {
     setShowAddDialog(true);
@@ -552,31 +574,53 @@ export default function App() {
       dispatch({ type: 'START_TRACKING', payload: id });
 
       const currentTime = new Date();
+      const currentTimeIso = currentTime.toISOString();
+      const currentTimestamp = currentTime.getTime();
       
-      // Store the session state in localStorage immediately when starting a session
-      // This ensures that it persists even if the user immediately navigates away
+      // Store complete session state in localStorage to ensure it persists through page refreshes and navigations
+      
+      // 1. Save session visibility state for app navigation
       const sessionState = {
         status: 'active',
-        startTime: currentTime.toISOString(),
-        wasActive: true
+        startTime: currentTimeIso,
+        startTimestamp: currentTimestamp,
+        wasActive: true,
+        lastUpdated: currentTimestamp,
+        itemId: id
       };
       localStorage.setItem(`session_visibility_${id}`, JSON.stringify(sessionState));
+      
+      // 2. Save timer state for the useSessionTimer hook
+      localStorage.setItem(`sessionStartTimeBase_${id}`, currentTimeIso);
+      localStorage.setItem(`sessionIsPaused_${id}`, 'false');
+      localStorage.removeItem(`sessionPauseTime_${id}`); // Clear any old pause time
+      localStorage.setItem(`sessionCurrentTimeSeconds_${id}`, '0'); // Start at 0 seconds
+      localStorage.setItem(`sessionCurrentTimeFormatted_${id}`, '00:00:00');
+      
+      // 3. Save global active session state
+      localStorage.setItem('global_active_session', id);
+      localStorage.setItem('global_session_state', JSON.stringify({
+        timestamp: currentTimestamp,
+        itemId: id,
+        startTime: currentTimeIso
+      }));
       
       const updates: Partial<LearningItem> = {
         progress: {
           ...item.progress,
-          lastAccessed: currentTime.toISOString(),
+          lastAccessed: currentTimeIso,
           sessions: [
             ...item.progress.sessions,
             {
-              startTime: currentTime.toISOString(),
-              date: currentTime.toISOString().split('T')[0]
+              startTime: currentTimeIso,
+              date: currentTimeIso.split('T')[0]
             }
           ]
         }
       };
 
       await updateLearningItem(id, updates);
+      console.log('Successfully started tracking session with all persistence flags set');
     } catch (error) {
       console.error('Error starting tracking:', error);
       setError('Failed to start tracking. Please try again.');
@@ -584,6 +628,8 @@ export default function App() {
       dispatch({ type: 'STOP_TRACKING', payload: id });
       // Also remove the session visibility state if there was an error
       localStorage.removeItem(`session_visibility_${id}`);
+      localStorage.removeItem(`sessionStartTimeBase_${id}`);
+      localStorage.removeItem('global_active_session');
     }
   };
 

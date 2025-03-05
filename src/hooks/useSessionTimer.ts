@@ -224,8 +224,45 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
   // Handle page visibility changes
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === 'hidden') {
+        // Page is being hidden (user navigated away)
+        if (isActive && !internalPaused) {
+          console.log('Page hidden while timer active - saving current state');
+          
+          // Store current time and state
+          const currentElapsed = calculateElapsedTime();
+          localStorage.setItem(`sessionLastElapsedTime_${itemId}`, currentElapsed.toString());
+          localStorage.setItem(`sessionHiddenTimestamp_${itemId}`, Date.now().toString());
+          localStorage.setItem(`sessionWasActiveOnHide_${itemId}`, 'true');
+        }
+      } else if (document.visibilityState === 'visible') {
         console.log('Page visible again');
+        
+        // Check if the session was active when the page was hidden
+        const wasActiveOnHide = localStorage.getItem(`sessionWasActiveOnHide_${itemId}`) === 'true';
+        const hiddenTimestampStr = localStorage.getItem(`sessionHiddenTimestamp_${itemId}`);
+        const lastElapsedTimeStr = localStorage.getItem(`sessionLastElapsedTime_${itemId}`);
+        
+        if (wasActiveOnHide && hiddenTimestampStr && lastElapsedTimeStr && isActive) {
+          // Calculate how long we were away
+          const hiddenTimestamp = parseInt(hiddenTimestampStr, 10);
+          const timeAway = (Date.now() - hiddenTimestamp) / 1000; // in seconds
+          
+          // Add the time away to our accumulated time offset
+          const lastElapsedTime = parseInt(lastElapsedTimeStr, 10);
+          const newAccumulatedTime = accumulatedTimeRef.current || 0;
+          
+          console.log(`Session was active when hidden. Time away: ${timeAway}s, Last elapsed: ${lastElapsedTime}s`);
+          
+          // Update timer with the elapsed time
+          setElapsedTime(lastElapsedTime + timeAway);
+          updateFormattedTime(lastElapsedTime + timeAway);
+          
+          // Clear the hidden state
+          localStorage.removeItem(`sessionWasActiveOnHide_${itemId}`);
+          localStorage.removeItem(`sessionHiddenTimestamp_${itemId}`);
+          localStorage.removeItem(`sessionLastElapsedTime_${itemId}`);
+        }
         
         // Check if we should be paused
         const isPausedStr = localStorage.getItem(`sessionIsPaused_${itemId}`);
@@ -250,7 +287,7 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [internalPaused, itemId]);
+  }, [internalPaused, itemId, isActive, calculateElapsedTime, updateFormattedTime]);
   
   // Handle resuming a session
   const handleResume = useCallback(() => {
