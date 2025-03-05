@@ -88,7 +88,10 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
         start: new Date(start).toISOString(),
         rawDuration,
         accumulatedTime,
-        adjustedTime
+        adjustedTime,
+        nowTimestamp: now,
+        startTimestamp: start,
+        diffMs: now - start
       });
     }
     
@@ -198,13 +201,11 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     // Start a new interval
     intervalRef.current = setInterval(() => {
       if (mountedRef.current) {
-        // Check if the page is visible before updating
-        if (document.visibilityState === 'visible') {
-          const currentElapsed = calculateElapsedTime();
-          setElapsedTime(currentElapsed);
-          updateFormattedTime(currentElapsed);
-          setLastUpdateTime(Date.now());
-        }
+        // Update the timer regardless of page visibility
+        const currentElapsed = calculateElapsedTime();
+        setElapsedTime(currentElapsed);
+        updateFormattedTime(currentElapsed);
+        setLastUpdateTime(Date.now());
       }
     }, 250);
     
@@ -356,6 +357,7 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
         
         // We don't stop the timer when the page is hidden
         // This allows the timer to continue running in the background
+        console.log('Timer will continue running in the background');
       } else if (document.visibilityState === 'visible') {
         console.log('Page visible again');
         
@@ -383,6 +385,8 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
           console.log(`Page was hidden for ${hiddenDuration}ms`);
           
           // Force an immediate update to sync the timer
+          // No need to adjust the accumulated time since the timer should have been running
+          // in the background while the page was hidden
           const currentElapsed = calculateElapsedTime();
           setElapsedTime(currentElapsed);
           updateFormattedTime(currentElapsed);
