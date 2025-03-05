@@ -166,33 +166,9 @@ function reducer(state: State, action: Action): State {
         activeItem: action.payload,
       };
 
-    case 'STOP_TRACKING': {
+    case 'STOP_TRACKING':
       const stoppingItem = state.items.find(item => item.id === action.payload);
       if (!stoppingItem?.progress) return state;
-
-      // Check if the session was active when page was hidden
-      const sessionVisibilityStr = localStorage.getItem(`session_visibility_${action.payload}`);
-      if (sessionVisibilityStr) {
-        try {
-          const sessionState = JSON.parse(sessionVisibilityStr);
-          
-          // If returning to app visibility and this stop is automatic (not user-initiated),
-          // preserve the session instead of stopping it
-          const isAutoStopOnVisibilityChange = document.visibilityState === 'visible' && 
-                                             sessionState.status === 'active';
-          
-          if (isAutoStopOnVisibilityChange) {
-            console.log('Preserving session that was active when page was hidden');
-            // Do not remove the session state yet, as we want to keep the timer running
-            return state; // Return unchanged state to keep session running
-          }
-          
-          // If explicit user stop, clean up the visibility state
-          localStorage.removeItem(`session_visibility_${action.payload}`);
-        } catch (e) {
-          console.error('Error parsing session visibility state in reducer:', e);
-        }
-      }
 
       // End all active sessions
       const updatedSessions = stoppingItem.progress.sessions.map(session => {
@@ -235,7 +211,6 @@ function reducer(state: State, action: Action): State {
         ),
         activeItem: null,
       };
-    }
 
     case 'UPDATE_NOTES':
       return {
@@ -392,61 +367,6 @@ export default function App() {
     }
   }, [state.loading, state.items]);
 
-  useEffect(() => {
-    // Handle page visibility changes to ensure timers keep running when navigating away
-    if (!state.activeItem) return;
-
-    const handleVisibilityChange = () => {
-      const activeItemId = state.activeItem;
-      if (!activeItemId) return;
-
-      const item = state.items.find(i => i.id === activeItemId);
-      if (!item?.progress?.sessions) return;
-
-      const activeSession = item.progress.sessions.find(s => !s.endTime);
-      if (!activeSession) return;
-
-      if (document.visibilityState === 'hidden') {
-        // Page is hidden (user navigated away) - save the current time and session state
-        const sessionState = {
-          timestamp: Date.now(),
-          startTime: activeSession.startTime,
-          status: 'active',
-          wasActive: true
-        };
-        
-        console.log('Page hidden, saving session state with timestamp', sessionState);
-        localStorage.setItem(`session_visibility_${activeItemId}`, JSON.stringify(sessionState));
-      } else if (document.visibilityState === 'visible') {
-        // Page is visible again - check if there was an active session
-        const sessionStateStr = localStorage.getItem(`session_visibility_${activeItemId}`);
-        if (sessionStateStr) {
-          try {
-            const sessionState = JSON.parse(sessionStateStr);
-            if (sessionState.wasActive && sessionState.startTime) {
-              console.log('Page visible again, restoring active session');
-              
-              // Don't remove the visibility state yet - it will be handled properly 
-              // when the user explicitly stops the session
-            }
-          } catch (e) {
-            console.error('Error parsing session visibility state:', e);
-          }
-        }
-      }
-    };
-
-    // Register handler for visibility changes
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    // Force a check when the component mounts
-    handleVisibilityChange();
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [state.activeItem, state.items]);
-
   const handleAddItem = async (selectedDate?: Date | null) => {
     setShowAddDialog(true);
     if (selectedDate) {
@@ -567,29 +487,6 @@ export default function App() {
     try {
       const item = state.items.find(item => item.id === id);
       if (!item) return;
-
-      // Check if the session was active when page was hidden
-      const sessionVisibilityStr = localStorage.getItem(`session_visibility_${id}`);
-      if (sessionVisibilityStr) {
-        try {
-          const sessionState = JSON.parse(sessionVisibilityStr);
-          
-          // If this function was called automatically when returning to the app,
-          // we should preserve the session instead of stopping it
-          const isAutoStopOnVisibilityChange = document.visibilityState === 'visible' && 
-                                             sessionState.status === 'active';
-          
-          if (isAutoStopOnVisibilityChange) {
-            console.log('Preventing auto-stop of session that was active when page was hidden');
-            return; // Exit without stopping the session
-          }
-          
-          // Clear the visibility state if we're actually stopping the session
-          localStorage.removeItem(`session_visibility_${id}`);
-        } catch (e) {
-          console.error('Error parsing session visibility state:', e);
-        }
-      }
 
       // First update local state for immediate feedback
       dispatch({ type: 'STOP_TRACKING', payload: id });
