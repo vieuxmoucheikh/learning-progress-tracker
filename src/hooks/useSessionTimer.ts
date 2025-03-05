@@ -29,6 +29,7 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const accumulatedTimeRef = useRef<number>(0);
   const wasResumedRef = useRef<boolean>(false);
+  const hiddenTimestampRef = useRef<number | null>(null);
   
   // Clear any existing interval
   const clearTimerInterval = useCallback(() => {
@@ -224,7 +225,20 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
   // Handle page visibility changes
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === 'hidden') {
+        console.log('Page hidden - storing timestamp');
+        
+        // Store the current timestamp when the page becomes hidden
+        hiddenTimestampRef.current = Date.now();
+        
+        // Store the current elapsed time in localStorage for recovery
+        const currentElapsed = calculateElapsedTime();
+        localStorage.setItem(`sessionHiddenElapsedTime_${itemId}`, currentElapsed.toString());
+        localStorage.setItem(`sessionHiddenTimestamp_${itemId}`, Date.now().toString());
+        
+        // We don't stop the timer when the page is hidden
+        // This allows the timer to continue running in the background
+      } else if (document.visibilityState === 'visible') {
         console.log('Page visible again');
         
         // Check if we should be paused
@@ -232,7 +246,23 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
         const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
         const shouldBePaused = isPausedStr === 'true' || !!pauseTimeStr;
         
-        if (shouldBePaused && !internalPaused) {
+        if (!shouldBePaused && hiddenTimestampRef.current !== null && !internalPaused) {
+          // If the timer was running when the page was hidden, sync the elapsed time
+          const hiddenTime = hiddenTimestampRef.current;
+          const visibleTime = Date.now();
+          const hiddenDuration = visibleTime - hiddenTime;
+          
+          console.log(`Page was hidden for ${hiddenDuration}ms`);
+          
+          // Force an immediate update to sync the timer
+          const currentElapsed = calculateElapsedTime();
+          setElapsedTime(currentElapsed);
+          updateFormattedTime(currentElapsed);
+          setLastUpdateTime(Date.now());
+          
+          // Reset the hidden timestamp
+          hiddenTimestampRef.current = null;
+        } else if (shouldBePaused && !internalPaused) {
           console.log('Found pause markers on visibility change, forcing pause');
           setInternalPaused(true);
         } else if (!shouldBePaused && internalPaused) {
@@ -250,7 +280,7 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [internalPaused, itemId]);
+  }, [internalPaused, itemId, calculateElapsedTime, updateFormattedTime]);
   
   // Handle resuming a session
   const handleResume = useCallback(() => {
