@@ -159,14 +159,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           localStorage.setItem(`sessionPauseTimeDisplay_${item.id}`, formatted);
         }
       }
-    } else {
-      // Ensure we're not paused if we shouldn't be
-      console.log('Session should not be paused, ensuring running state');
-      setIsPausedState(false);
-      setIsPaused(false);
-      
-      // Clear any stale pause display
-      setPausedTime(null);
     }
   }, [item.id, activeSession, setIsPaused]);
 

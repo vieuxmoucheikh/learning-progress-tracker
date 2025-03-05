@@ -81,20 +81,6 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     // Calculate adjusted time
     const adjustedTime = rawDuration - accumulatedTime;
     
-    // Log detailed calculation for debugging
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Time calculation details:', {
-        now: new Date(now).toISOString(),
-        start: new Date(start).toISOString(),
-        rawDuration,
-        accumulatedTime,
-        adjustedTime,
-        nowTimestamp: now,
-        startTimestamp: start,
-        diffMs: now - start
-      });
-    }
-    
     // Safeguard against negative values (can happen due to clock skew)
     if (adjustedTime < 0) {
       console.warn('Calculated negative time:', adjustedTime, 
@@ -187,21 +173,9 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     // Clear any existing interval first
     clearTimerInterval();
     
-    // Before starting a new interval, check if we need to sync with the current time
-    // This is especially important when the page becomes visible again
-    if (document.visibilityState === 'visible') {
-      // Force an immediate update to sync with the current time
-      const currentElapsed = calculateElapsedTime();
-      setElapsedTime(currentElapsed);
-      updateFormattedTime(currentElapsed);
-      setLastUpdateTime(Date.now());
-      console.log('Syncing timer with current time before starting interval:', currentElapsed);
-    }
-    
     // Start a new interval
     intervalRef.current = setInterval(() => {
       if (mountedRef.current) {
-        // Update the timer regardless of page visibility
         const currentElapsed = calculateElapsedTime();
         setElapsedTime(currentElapsed);
         updateFormattedTime(currentElapsed);
@@ -262,15 +236,6 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
     const shouldBePaused = isPausedStr === 'true' || !!pauseTimeStr || externalPaused;
     
-    // Log detailed information about the initial pause state
-    console.log('Initial pause state detection:', { 
-      isPausedFromStorage: isPausedStr === 'true', 
-      isPausedFromSession: externalPaused, 
-      hasPauseTime: !!pauseTimeStr, 
-      shouldBePaused,
-      startTime
-    });
-    
     // Initialize accumulated time
     const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${itemId}`);
     if (accumulatedTimeStr) {
@@ -281,20 +246,6 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
       accumulatedTimeRef.current = 0;
       localStorage.setItem(`sessionAccumulatedTime_${itemId}`, '0');
       console.log('Reset accumulated time to 0');
-    }
-    
-    // Check if we were previously hidden and now visible again
-    const hiddenTimestampStr = localStorage.getItem(`sessionHiddenTimestamp_${itemId}`);
-    if (hiddenTimestampStr && !shouldBePaused) {
-      const hiddenTimestamp = parseInt(hiddenTimestampStr, 10);
-      const now = Date.now();
-      const hiddenDuration = now - hiddenTimestamp;
-      
-      console.log(`Page was previously hidden for approximately ${hiddenDuration}ms`);
-      
-      // Clear the hidden timestamp as we're handling it now
-      localStorage.removeItem(`sessionHiddenTimestamp_${itemId}`);
-      localStorage.removeItem(`sessionHiddenElapsedTime_${itemId}`);
     }
     
     if (shouldBePaused) {
@@ -357,7 +308,6 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
         
         // We don't stop the timer when the page is hidden
         // This allows the timer to continue running in the background
-        console.log('Timer will continue running in the background');
       } else if (document.visibilityState === 'visible') {
         console.log('Page visible again');
         
@@ -365,16 +315,6 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
         const isPausedStr = localStorage.getItem(`sessionIsPaused_${itemId}`);
         const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
         const shouldBePaused = isPausedStr === 'true' || !!pauseTimeStr;
-        
-        // Log detailed information about the pause state for debugging
-        console.log('Visibility change pause state check:', {
-          isPausedStr,
-          pauseTimeStr,
-          shouldBePaused,
-          internalPaused,
-          hiddenTimestamp: hiddenTimestampRef.current,
-          startTimeRef: startTimeRef.current ? new Date(startTimeRef.current).toISOString() : null
-        });
         
         if (!shouldBePaused && hiddenTimestampRef.current !== null && !internalPaused) {
           // If the timer was running when the page was hidden, sync the elapsed time
@@ -385,8 +325,6 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
           console.log(`Page was hidden for ${hiddenDuration}ms`);
           
           // Force an immediate update to sync the timer
-          // No need to adjust the accumulated time since the timer should have been running
-          // in the background while the page was hidden
           const currentElapsed = calculateElapsedTime();
           setElapsedTime(currentElapsed);
           updateFormattedTime(currentElapsed);
@@ -394,13 +332,6 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
           
           // Reset the hidden timestamp
           hiddenTimestampRef.current = null;
-          
-          // Ensure the timer is running by explicitly setting internalPaused to false
-          // This helps prevent race conditions with other effects
-          if (internalPaused) {
-            console.log('Timer was incorrectly paused, forcing resume');
-            setInternalPaused(false);
-          }
         } else if (shouldBePaused && !internalPaused) {
           console.log('Found pause markers on visibility change, forcing pause');
           setInternalPaused(true);
@@ -411,8 +342,7 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
       }
     };
     
-    // Add the event listener with the capture option to ensure it runs before other handlers
-    document.addEventListener('visibilitychange', handleVisibilityChange, { capture: true });
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     
     // Call once on mount to handle cases where the page was already visible
     if (mountedRef.current) {
@@ -420,7 +350,7 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     }
     
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange, { capture: true });
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [internalPaused, itemId, calculateElapsedTime, updateFormattedTime]);
   
