@@ -216,9 +216,7 @@ export interface FlashcardReview {
   user_id: string;
 }
 
-export type PomodoroState = 'idle' | 'active' | 'paused' | 'completed';
-
-export type User = {
+export interface User {
   id: string;
   email: string;
-};
+}
