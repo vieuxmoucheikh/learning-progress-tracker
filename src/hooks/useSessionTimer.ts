@@ -31,6 +31,7 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
   const wasResumedRef = useRef<boolean>(false);
   const hiddenTimestampRef = useRef<number | null>(null);
   const initializedRef = useRef<boolean>(false);
+  const startTimeRef = useRef<number | null>(null);
   
   // Clear any existing interval
   const clearTimerInterval = useCallback(() => {
@@ -41,12 +42,38 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     }
   }, []);
   
+  // Initialize or update the start time reference
+  useEffect(() => {
+    if (startTime) {
+      const parsedStartTime = new Date(startTime).getTime();
+      startTimeRef.current = parsedStartTime;
+      console.log('Set startTimeRef to:', new Date(parsedStartTime).toISOString());
+    } else {
+      startTimeRef.current = null;
+    }
+  }, [startTime]);
+  
+  // Reset accumulated time when starting a new session
+  useEffect(() => {
+    if (isActive && startTime && !initializedRef.current) {
+      // Check if this is a brand new session (not just a component remount)
+      const storedStartTime = localStorage.getItem(`sessionStartTime_${itemId}`);
+      
+      if (!storedStartTime || storedStartTime !== startTime) {
+        console.log('New session detected, resetting accumulated time');
+        accumulatedTimeRef.current = 0;
+        localStorage.setItem(`sessionAccumulatedTime_${itemId}`, '0');
+        localStorage.setItem(`sessionStartTime_${itemId}`, startTime);
+      }
+    }
+  }, [isActive, startTime, itemId]);
+  
   // Helper to calculate the current elapsed time in seconds
   const calculateElapsedTime = useCallback((): number => {
-    if (!startTime) return 0;
+    if (!startTime || !startTimeRef.current) return 0;
     
     const now = Date.now();
-    const start = new Date(startTime).getTime();
+    const start = startTimeRef.current;
     const rawDuration = Math.floor((now - start) / 1000);
     const accumulatedTime = accumulatedTimeRef.current || 0;
     
@@ -189,10 +216,25 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     console.log('Initializing timer state');
     initializedRef.current = true;
     
+    // Store the start time for reference
+    localStorage.setItem(`sessionStartTime_${itemId}`, startTime);
+    
     // Check if we should be paused
     const isPausedStr = localStorage.getItem(`sessionIsPaused_${itemId}`);
     const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${itemId}`);
     const shouldBePaused = isPausedStr === 'true' || !!pauseTimeStr || externalPaused;
+    
+    // Initialize accumulated time
+    const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${itemId}`);
+    if (accumulatedTimeStr) {
+      const accumulatedTime = parseInt(accumulatedTimeStr, 10);
+      accumulatedTimeRef.current = accumulatedTime;
+      console.log('Initialized accumulated time:', accumulatedTime);
+    } else {
+      accumulatedTimeRef.current = 0;
+      localStorage.setItem(`sessionAccumulatedTime_${itemId}`, '0');
+      console.log('Reset accumulated time to 0');
+    }
     
     if (shouldBePaused) {
       console.log('Timer should be paused on initialization');
@@ -210,13 +252,8 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
         const pauseTime = pauseTimeStr ? parseInt(pauseTimeStr, 10) : Date.now();
         const startTimeMs = new Date(startTime).getTime();
         
-        // Get accumulated time
-        const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${itemId}`);
-        const accumulatedTime = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
-        accumulatedTimeRef.current = accumulatedTime;
-        
         // Calculate elapsed time at pause point
-        const elapsedUntilPause = Math.floor((pauseTime - startTimeMs) / 1000) - accumulatedTime;
+        const elapsedUntilPause = Math.floor((pauseTime - startTimeMs) / 1000) - accumulatedTimeRef.current;
         const safeElapsed = Math.max(0, elapsedUntilPause);
         
         setElapsedTime(safeElapsed);
@@ -225,17 +262,6 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
         console.log('Calculated frozen time on init:', safeElapsed);
       }
     } else {
-      // Not paused - initialize accumulated time
-      const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${itemId}`);
-      if (accumulatedTimeStr) {
-        const accumulatedTime = parseInt(accumulatedTimeStr, 10);
-        accumulatedTimeRef.current = accumulatedTime;
-        console.log('Initialized accumulated time:', accumulatedTime);
-      } else {
-        accumulatedTimeRef.current = 0;
-        localStorage.setItem(`sessionAccumulatedTime_${itemId}`, '0');
-      }
-      
       // Force an initial update
       const currentElapsed = calculateElapsedTime();
       setElapsedTime(currentElapsed);
