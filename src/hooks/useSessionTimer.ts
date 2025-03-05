@@ -32,7 +32,6 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
   const hiddenTimestampRef = useRef<number | null>(null);
   const initializedRef = useRef<boolean>(false);
   const startTimeRef = useRef<number | null>(null);
-  const mountedRef = useRef<boolean>(false);
   
   // Clear any existing interval
   const clearTimerInterval = useCallback(() => {
@@ -175,12 +174,10 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     
     // Start a new interval
     intervalRef.current = setInterval(() => {
-      if (mountedRef.current) {
-        const currentElapsed = calculateElapsedTime();
-        setElapsedTime(currentElapsed);
-        updateFormattedTime(currentElapsed);
-        setLastUpdateTime(Date.now());
-      }
+      const currentElapsed = calculateElapsedTime();
+      setElapsedTime(currentElapsed);
+      updateFormattedTime(currentElapsed);
+      setLastUpdateTime(Date.now());
     }, 250);
     
     console.log('Timer interval started');
@@ -214,16 +211,7 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
   
   // Effect to initialize from localStorage when the component mounts
   useEffect(() => {
-    if (!isActive || !startTime) return;
-    
-    // Set the mounted ref to true
-    mountedRef.current = true;
-    
-    // Only initialize once per mount
-    if (initializedRef.current) {
-      console.log('Timer already initialized, skipping initialization');
-      return;
-    }
+    if (!isActive || !startTime || initializedRef.current) return;
     
     console.log('Initializing timer state');
     initializedRef.current = true;
@@ -262,7 +250,7 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
       } else {
         // If no frozen time exists but we should be paused, calculate it
         const pauseTime = pauseTimeStr ? parseInt(pauseTimeStr, 10) : Date.now();
-        const startTimeMs = startTimeRef.current || new Date(startTime).getTime();
+        const startTimeMs = new Date(startTime).getTime();
         
         // Calculate elapsed time at pause point
         const elapsedUntilPause = Math.floor((pauseTime - startTimeMs) / 1000) - accumulatedTimeRef.current;
@@ -280,21 +268,11 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
       updateFormattedTime(currentElapsed);
       console.log('Initialized running timer at:', currentElapsed);
     }
-    
-    // Return cleanup function
-    return () => {
-      mountedRef.current = false;
-      
-      // Don't reset initializedRef here - we want to keep track of whether we've initialized
-      // during this component's lifecycle, not just this effect run
-    };
   }, [isActive, startTime, externalPaused, itemId, calculateElapsedTime, updateFormattedTime, storePauseTime]);
   
   // Handle page visibility changes
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (!mountedRef.current) return;
-      
       if (document.visibilityState === 'hidden') {
         console.log('Page hidden - storing timestamp');
         
@@ -344,10 +322,8 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
-    // Call once on mount to handle cases where the page was already visible
-    if (mountedRef.current) {
-      handleVisibilityChange();
-    }
+    // Call once on mount
+    handleVisibilityChange();
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -400,17 +376,6 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     
     console.log('Timer resumed at:', currentElapsed);
   }, [internalPaused, itemId, startTime, calculateElapsedTime, updateFormattedTime]);
-  
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      // Only clean up the interval, but keep all localStorage state
-      clearTimerInterval();
-      mountedRef.current = false;
-      
-      // Don't reset initializedRef here - we want persistence across unmounts
-    };
-  }, [clearTimerInterval]);
   
   return {
     elapsedTime,
