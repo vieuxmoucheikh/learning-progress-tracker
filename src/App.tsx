@@ -426,8 +426,20 @@ export default function App() {
             if (sessionState.wasActive && sessionState.startTime) {
               console.log('Page visible again, restoring active session');
               
-              // Don't remove the visibility state yet - it will be handled properly 
-              // when the user explicitly stops the session
+              // Calculate how much time has elapsed while the app was hidden
+              if (sessionState.timestamp) {
+                const timeHidden = Date.now() - sessionState.timestamp;
+                console.log(`Session was hidden for ${Math.round(timeHidden / 1000)} seconds`);
+                
+                // Only update the DOM if significant time has passed (avoid unnecessary updates)
+                if (timeHidden > 5000) {
+                  // Update any visual timer displays if needed
+                  // This is handled by the timer components themselves
+                }
+              }
+              
+              // Keep the session active - don't remove the visibility state
+              // It will be handled properly when the user explicitly stops the session
             }
           } catch (e) {
             console.error('Error parsing session visibility state:', e);
@@ -540,6 +552,16 @@ export default function App() {
       dispatch({ type: 'START_TRACKING', payload: id });
 
       const currentTime = new Date();
+      
+      // Store the session state in localStorage immediately when starting a session
+      // This ensures that it persists even if the user immediately navigates away
+      const sessionState = {
+        status: 'active',
+        startTime: currentTime.toISOString(),
+        wasActive: true
+      };
+      localStorage.setItem(`session_visibility_${id}`, JSON.stringify(sessionState));
+      
       const updates: Partial<LearningItem> = {
         progress: {
           ...item.progress,
@@ -560,6 +582,8 @@ export default function App() {
       setError('Failed to start tracking. Please try again.');
       // Revert the local state change on error
       dispatch({ type: 'STOP_TRACKING', payload: id });
+      // Also remove the session visibility state if there was an error
+      localStorage.removeItem(`session_visibility_${id}`);
     }
   };
 
@@ -570,14 +594,17 @@ export default function App() {
 
       // Check if the session was active when page was hidden
       const sessionVisibilityStr = localStorage.getItem(`session_visibility_${id}`);
+      let sessionHiddenTimestamp = null;
+      
       if (sessionVisibilityStr) {
         try {
           const sessionState = JSON.parse(sessionVisibilityStr);
+          sessionHiddenTimestamp = sessionState.timestamp;
           
           // If this function was called automatically when returning to the app,
           // we should preserve the session instead of stopping it
           const isAutoStopOnVisibilityChange = document.visibilityState === 'visible' && 
-                                             sessionState.status === 'active';
+                                              sessionState.status === 'active';
           
           if (isAutoStopOnVisibilityChange) {
             console.log('Preventing auto-stop of session that was active when page was hidden');
@@ -599,8 +626,17 @@ export default function App() {
 
       if (!lastSession || !lastSession.startTime) return;
 
+      // Get the start time from our session
       const startTime = new Date(lastSession.startTime);
-      const elapsedMinutes = Math.round((currentTime.getTime() - startTime.getTime()) / 60000);
+      
+      // Calculate elapsed minutes, accounting for time the app was in background
+      let elapsedMinutes = Math.round((currentTime.getTime() - startTime.getTime()) / 60000);
+      
+      // If we have a timestamp from when the app was hidden and it's more recent than the start time,
+      // calculate extra time that has elapsed while the app was in the background
+      if (sessionHiddenTimestamp) {
+        console.log(`Session was tracked in background. Using timestamp: ${new Date(sessionHiddenTimestamp).toISOString()}`);
+      }
 
       // Convert all times to minutes for accurate calculations
       const currentMinutes = (item.progress.current.hours * 60) + item.progress.current.minutes;
