@@ -14,7 +14,7 @@ import { DashboardTab } from './components/DashboardTab';
 import { ItemsTab } from './components/ItemsTab';
 import { AnalyticsTab } from './components/AnalyticsTab';
 import { Toaster } from "@/components/ui/toaster";
-import { WorkerPomodoroTimer } from './components/pomodoro/WorkerPomodoroTimer';
+import WorkerPomodoroTimer from './components/pomodoro/WorkerPomodoroTimer';
 import { LearningCardsPage } from './pages/LearningCards';
 import { ThemeProvider } from './components/ThemeProvider';
 import { ThemeToggle } from './components/ThemeToggle';

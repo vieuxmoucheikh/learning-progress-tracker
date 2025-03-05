@@ -31,370 +31,213 @@ export const WorkerPomodoroTimer: React.FC<WorkerPomodoroTimerProps> = ({
   const [formattedTime, setFormattedTime] = useState('00:00:00');
   
   // References
-  const workerRef = useRef<Worker | null>(null);
-  const initializedRef = useRef(false);
+  const intervalRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number | null>(null);
+  const pausedAtRef = useRef<number | null>(null);
+  const elapsedBeforePauseRef = useRef<number>(0);
 
-  // Initialize Web Worker
+  // Load initial state from localStorage
   useEffect(() => {
-    // Only create the worker if we're in the browser environment
-    if (typeof window !== 'undefined' && window.Worker) {
-      // Create a new worker
+    if (isActive) {
       try {
-        // Create worker from blob to avoid CORS issues
-        const workerCode = `
-          let intervalId = null;
-          let startTime = null;
-          let pausedAt = null;
-          let elapsedTimeBeforePause = 0;
-          let lastUpdateTime = Date.now();
-          
-          self.addEventListener('message', (event) => {
-            const data = event.data;
-            const now = Date.now();
-            
-            switch (data.command) {
-              case 'start':
-                if (startTime === null) {
-                  startTime = data.startTime || now;
-                  elapsedTimeBeforePause = data.elapsed || 0;
-                  lastUpdateTime = now;
-                  
-                  if (intervalId !== null) {
-                    clearInterval(intervalId);
-                  }
-                  
-                  intervalId = setInterval(() => {
-                    if (pausedAt) return;
-                    
-                    const currentTime = Date.now();
-                    const elapsedSinceStart = Math.floor((currentTime - startTime) / 1000);
-                    const totalElapsed = elapsedTimeBeforePause + elapsedSinceStart;
-                    
-                    self.postMessage({
-                      type: 'tick',
-                      elapsed: totalElapsed,
-                      timestamp: currentTime
-                    });
-                    
-                    if (currentTime - lastUpdateTime > 10000) {
-                      self.postMessage({
-                        type: 'sync',
-                        elapsed: totalElapsed,
-                        timestamp: currentTime
-                      });
-                      lastUpdateTime = currentTime;
-                    }
-                  }, 1000);
-                  
-                  self.postMessage({ 
-                    type: 'started', 
-                    startTime,
-                    elapsed: elapsedTimeBeforePause 
-                  });
-                }
-                break;
-                
-              case 'pause':
-                pausedAt = now;
-                
-                if (startTime) {
-                  const elapsedSinceStart = Math.floor((pausedAt - startTime) / 1000);
-                  elapsedTimeBeforePause += elapsedSinceStart;
-                  startTime = null;
-                }
-                
-                self.postMessage({ 
-                  type: 'paused', 
-                  elapsed: elapsedTimeBeforePause,
-                  timestamp: pausedAt 
-                });
-                break;
-                
-              case 'resume':
-                if (pausedAt) {
-                  startTime = now;
-                  pausedAt = null;
-                  
-                  self.postMessage({ 
-                    type: 'resumed', 
-                    startTime,
-                    elapsed: elapsedTimeBeforePause,
-                    timestamp: now 
-                  });
-                }
-                break;
-                
-              case 'stop':
-                if (intervalId !== null) {
-                  clearInterval(intervalId);
-                  intervalId = null;
-                }
-                
-                let finalElapsed = elapsedTimeBeforePause;
-                if (startTime && !pausedAt) {
-                  const elapsedSinceStart = Math.floor((now - startTime) / 1000);
-                  finalElapsed += elapsedSinceStart;
-                }
-                
-                startTime = null;
-                pausedAt = null;
-                elapsedTimeBeforePause = 0;
-                
-                self.postMessage({ 
-                  type: 'stopped', 
-                  elapsed: finalElapsed,
-                  timestamp: now 
-                });
-                break;
-                
-              case 'sync':
-                let currentElapsed = elapsedTimeBeforePause;
-                if (startTime && !pausedAt) {
-                  const elapsedSinceStart = Math.floor((now - startTime) / 1000);
-                  currentElapsed += elapsedSinceStart;
-                }
-                
-                self.postMessage({
-                  type: 'sync',
-                  elapsed: currentElapsed,
-                  isPaused: !!pausedAt,
-                  startTime,
-                  pausedAt,
-                  timestamp: now
-                });
-                break;
-                
-              case 'adjust':
-                if (data.elapsed !== undefined) {
-                  elapsedTimeBeforePause = data.elapsed;
-                }
-                
-                if (data.startTime) {
-                  startTime = data.startTime;
-                }
-                
-                self.postMessage({
-                  type: 'adjusted',
-                  elapsed: elapsedTimeBeforePause,
-                  startTime,
-                  timestamp: now
-                });
-                break;
-            }
-          });
-          
-          self.postMessage({ type: 'ready', timestamp: Date.now() });
-        `;
+        // Check if we should restore pause state from localStorage
+        const storedIsPaused = localStorage.getItem(`sessionIsPaused_${itemId}`);
+        if (storedIsPaused === 'true') {
+          setIsPaused(true);
+          pausedAtRef.current = Date.now();
+        }
         
-        const blob = new Blob([workerCode], { type: 'application/javascript' });
-        const workerUrl = URL.createObjectURL(blob);
-        workerRef.current = new Worker(workerUrl);
-        
-        // Set up message handler from worker
-        workerRef.current.onmessage = (event) => {
-          const data = event.data;
-          
-          switch (data.type) {
-            case 'ready':
-              console.log('Timer worker is ready');
-              initializedRef.current = true;
-              
-              // Initialize if we're active
-              if (isActive && startTime) {
-                startTimerWorker();
-              }
-              break;
-              
-            case 'tick':
-              setElapsedTime(data.elapsed);
-              setFormattedTime(formatSeconds(data.elapsed));
-              
-              // Update localStorage with current time for persistence
-              try {
-                localStorage.setItem(`sessionCurrentTimeSeconds_${itemId}`, data.elapsed.toString());
-                localStorage.setItem(`sessionCurrentTimeFormatted_${itemId}`, formatSeconds(data.elapsed));
-              } catch (e) {
-                console.error('Error saving time to localStorage:', e);
-              }
-              break;
-              
-            case 'sync':
-              // Handle periodic sync state from worker
-              try {
-                localStorage.setItem(`sessionCurrentTimeSeconds_${itemId}`, data.elapsed.toString());
-                localStorage.setItem(`sessionCurrentTimeFormatted_${itemId}`, formatSeconds(data.elapsed));
-                localStorage.setItem(`sessionLastSyncTime_${itemId}`, data.timestamp.toString());
-              } catch (e) {
-                console.error('Error syncing time to localStorage:', e);
-              }
-              break;
-              
-            case 'paused':
-            case 'resumed':
-            case 'started':
-            case 'stopped':
-            case 'adjusted':
-              console.log(`Timer worker event: ${data.type}`, data);
-              break;
-          }
-        };
-        
-        // Handle worker errors
-        workerRef.current.onerror = (error) => {
-          console.error('Timer worker error:', error);
-        };
-        
-        console.log('Timer worker initialized');
+        // Try to restore elapsed time from localStorage
+        const storedElapsedStr = localStorage.getItem(`sessionCurrentTimeSeconds_${itemId}`);
+        if (storedElapsedStr) {
+          const storedElapsed = parseInt(storedElapsedStr, 10);
+          elapsedBeforePauseRef.current = storedElapsed;
+          setElapsedTime(storedElapsed);
+          setFormattedTime(formatSeconds(storedElapsed));
+        }
       } catch (e) {
-        console.error('Error creating timer worker:', e);
+        console.error('Error restoring timer state from localStorage:', e);
       }
     }
-    
-    // Clean up worker on unmount
-    return () => {
-      if (workerRef.current) {
-        workerRef.current.terminate();
-        workerRef.current = null;
-        console.log('Timer worker terminated');
+  }, [isActive, itemId]);
+  
+  // Start/stop timer based on active state
+  useEffect(() => {
+    const clearExistingInterval = () => {
+      if (intervalRef.current !== null) {
+        window.clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
-  }, [itemId]);
-  
-  // Start the timer worker when session becomes active
-  const startTimerWorker = () => {
-    if (!workerRef.current || !initializedRef.current) return;
     
-    const startTimeMs = startTime ? new Date(startTime).getTime() : Date.now();
-    
-    // Get any previously stored elapsed time
-    let initialElapsed = 0;
-    try {
-      const storedElapsedStr = localStorage.getItem(`sessionCurrentTimeSeconds_${itemId}`);
-      if (storedElapsedStr) {
-        initialElapsed = parseInt(storedElapsedStr, 10);
+    const startTimer = () => {
+      clearExistingInterval();
+      
+      // Initialize start time if not set
+      if (startTimeRef.current === null) {
+        startTimeRef.current = startTime ? new Date(startTime).getTime() : Date.now();
       }
-    } catch (e) {
-      console.error('Error retrieving elapsed time from localStorage:', e);
-    }
+      
+      // Set up interval to update elapsed time
+      intervalRef.current = window.setInterval(() => {
+        if (pausedAtRef.current) {
+          // If paused, don't update elapsed time
+          return;
+        }
+        
+        const now = Date.now();
+        const timeSinceStart = now - startTimeRef.current!;
+        const totalElapsedSeconds = Math.floor(timeSinceStart / 1000) + elapsedBeforePauseRef.current;
+        
+        setElapsedTime(totalElapsedSeconds);
+        setFormattedTime(formatSeconds(totalElapsedSeconds));
+        
+        // Periodically save to localStorage for persistence
+        try {
+          localStorage.setItem(`sessionCurrentTimeSeconds_${itemId}`, totalElapsedSeconds.toString());
+          localStorage.setItem(`sessionCurrentTimeFormatted_${itemId}`, formatSeconds(totalElapsedSeconds));
+          localStorage.setItem(`sessionLastUpdateTime_${itemId}`, now.toString());
+        } catch (e) {
+          console.error('Error saving timer state to localStorage:', e);
+        }
+      }, 1000);
+    };
     
-    // Start the worker
-    workerRef.current.postMessage({
-      command: 'start',
-      startTime: startTimeMs,
-      elapsed: initialElapsed
-    });
+    const stopTimer = () => {
+      clearExistingInterval();
+      
+      // Reset timer state
+      startTimeRef.current = null;
+      pausedAtRef.current = null;
+      elapsedBeforePauseRef.current = 0;
+      
+      // Reset UI state
+      setElapsedTime(0);
+      setFormattedTime('00:00:00');
+      
+      // Clean up localStorage
+      try {
+        localStorage.removeItem(`sessionCurrentTimeSeconds_${itemId}`);
+        localStorage.removeItem(`sessionCurrentTimeFormatted_${itemId}`);
+        localStorage.removeItem(`sessionLastUpdateTime_${itemId}`);
+        localStorage.removeItem(`sessionIsPaused_${itemId}`);
+        localStorage.removeItem(`sessionPauseTime_${itemId}`);
+      } catch (e) {
+        console.error('Error cleaning up localStorage:', e);
+      }
+    };
     
-    console.log(`Started timer worker with startTime: ${new Date(startTimeMs).toISOString()}, elapsed: ${initialElapsed}s`);
-  };
-  
-  // Handle active state changes
-  useEffect(() => {
     if (isActive && startTime) {
-      if (workerRef.current && initializedRef.current) {
-        startTimerWorker();
-      }
+      startTimer();
     } else {
-      // Stop the worker if session is no longer active
-      if (workerRef.current) {
-        workerRef.current.postMessage({ command: 'stop' });
-        console.log('Stopped timer worker due to inactive session');
-      }
+      stopTimer();
     }
-  }, [isActive, startTime]);
+    
+    return clearExistingInterval;
+  }, [isActive, startTime, itemId]);
   
-  // Handle pause/resume state
+  // Handle pause/resume
   useEffect(() => {
-    if (!workerRef.current || !initializedRef.current || !isActive) return;
+    if (!isActive) return;
     
     if (isPaused) {
-      workerRef.current.postMessage({ command: 'pause' });
-      console.log('Paused timer worker');
+      // Pause timer
+      pausedAtRef.current = Date.now();
+      
+      // If we have a start time, calculate elapsed time up to now and store it
+      if (startTimeRef.current !== null) {
+        const pausedElapsedSeconds = Math.floor((pausedAtRef.current - startTimeRef.current) / 1000);
+        elapsedBeforePauseRef.current += pausedElapsedSeconds;
+        startTimeRef.current = null;
+      }
+      
+      // Save pause state to localStorage
+      try {
+        localStorage.setItem(`sessionIsPaused_${itemId}`, 'true');
+        localStorage.setItem(`sessionPauseTime_${itemId}`, pausedAtRef.current.toString());
+        localStorage.setItem(`sessionElapsedBeforePause_${itemId}`, elapsedBeforePauseRef.current.toString());
+      } catch (e) {
+        console.error('Error saving pause state to localStorage:', e);
+      }
     } else {
-      workerRef.current.postMessage({ command: 'resume' });
-      console.log('Resumed timer worker');
+      // Resume timer
+      if (pausedAtRef.current !== null) {
+        // Resume from where we left off
+        startTimeRef.current = Date.now();
+        pausedAtRef.current = null;
+        
+        // Remove pause state from localStorage
+        try {
+          localStorage.setItem(`sessionIsPaused_${itemId}`, 'false');
+          localStorage.removeItem(`sessionPauseTime_${itemId}`);
+        } catch (e) {
+          console.error('Error removing pause state from localStorage:', e);
+        }
+      }
     }
-  }, [isPaused, isActive]);
+  }, [isPaused, isActive, itemId]);
   
   // Handle visibility changes
   useEffect(() => {
-    if (!workerRef.current || !initializedRef.current) return;
+    if (!isActive) return;
     
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        // Page is hidden - save current time
-        console.log('Page hidden, saving current timer state');
-        
-        if (workerRef.current) {
-          workerRef.current.postMessage({ command: 'sync' });
-        }
-        
-        // Save visibility change time to localStorage
+        // Page is hidden - save current state
         try {
           localStorage.setItem(`sessionHiddenTimestamp_${itemId}`, Date.now().toString());
+          localStorage.setItem(`sessionCurrentTimeSeconds_${itemId}`, elapsedTime.toString());
+          localStorage.setItem(`sessionCurrentTimeFormatted_${itemId}`, formattedTime);
+          localStorage.setItem(`sessionIsPaused_${itemId}`, isPaused.toString());
           
-          // Save if the session was active when hidden
-          if (isActive && !isPaused) {
-            localStorage.setItem(`sessionWasActiveOnHide_${itemId}`, 'true');
-            localStorage.setItem(`sessionLastElapsedTime_${itemId}`, elapsedTime.toString());
+          if (isPaused) {
+            localStorage.setItem(`sessionElapsedBeforePause_${itemId}`, elapsedBeforePauseRef.current.toString());
           }
         } catch (e) {
-          console.error('Error saving visibility state to localStorage:', e);
+          console.error('Error saving state on visibility change:', e);
         }
       } else if (document.visibilityState === 'visible') {
-        // Page is visible again - check how long we were away
-        console.log('Page visible again, checking timer state');
-        
+        // Page is visible again - check if we need to adjust time
         try {
           const hiddenTimestampStr = localStorage.getItem(`sessionHiddenTimestamp_${itemId}`);
-          const wasActiveOnHide = localStorage.getItem(`sessionWasActiveOnHide_${itemId}`) === 'true';
-          const lastElapsedTimeStr = localStorage.getItem(`sessionLastElapsedTime_${itemId}`);
           
-          if (hiddenTimestampStr && wasActiveOnHide && lastElapsedTimeStr && isActive && !isPaused) {
+          if (hiddenTimestampStr && !isPaused) {
             const hiddenTimestamp = parseInt(hiddenTimestampStr, 10);
-            const lastElapsedTime = parseInt(lastElapsedTimeStr, 10);
             const timeAwayMs = Date.now() - hiddenTimestamp;
-            const timeAwaySec = Math.floor(timeAwayMs / 1000);
             
-            console.log(`Page was hidden for ${timeAwaySec}s with active timer`);
-            
-            // Sync with worker to adjust for time away
-            if (workerRef.current) {
-              // Ask worker for current state
-              workerRef.current.postMessage({ 
-                command: 'sync'
-              });
+            // Only adjust if we've been away for more than 2 seconds
+            if (timeAwayMs > 2000) {
+              console.log(`Page was hidden for ${timeAwayMs}ms, adjusting timer`);
+              
+              // Adjust our timer to account for time away
+              const timeAwaySec = Math.floor(timeAwayMs / 1000);
+              elapsedBeforePauseRef.current += timeAwaySec;
+              startTimeRef.current = Date.now();
+              
+              // Update UI with adjusted time
+              setElapsedTime(elapsedBeforePauseRef.current);
+              setFormattedTime(formatSeconds(elapsedBeforePauseRef.current));
             }
           }
           
-          // Clear hidden state
+          // Clear hidden timestamp
           localStorage.removeItem(`sessionHiddenTimestamp_${itemId}`);
-          localStorage.removeItem(`sessionWasActiveOnHide_${itemId}`);
         } catch (e) {
           console.error('Error processing visibility change:', e);
         }
       }
     };
     
-    // Register event handlers
+    // Register visibility change event
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
-    // Mobile-specific handlers
+    // Mobile-specific event handlers
     if (typeof window !== 'undefined') {
       window.addEventListener('pagehide', handleVisibilityChange);
       window.addEventListener('pageshow', () => {
         setTimeout(handleVisibilityChange, 0);
       });
-      
-      if ('onfreeze' in document) {
-        document.addEventListener('freeze', handleVisibilityChange);
-        document.addEventListener('resume', () => {
-          setTimeout(handleVisibilityChange, 0);
-        });
-      }
     }
-    
-    // Handle initial visibility check
-    handleVisibilityChange();
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -402,35 +245,13 @@ export const WorkerPomodoroTimer: React.FC<WorkerPomodoroTimerProps> = ({
       if (typeof window !== 'undefined') {
         window.removeEventListener('pagehide', handleVisibilityChange);
         window.removeEventListener('pageshow', handleVisibilityChange);
-        
-        if ('onfreeze' in document) {
-          document.removeEventListener('freeze', handleVisibilityChange);
-          document.removeEventListener('resume', handleVisibilityChange);
-        }
       }
     };
-  }, [isActive, isPaused, itemId, elapsedTime]);
+  }, [isActive, isPaused, itemId, elapsedTime, formattedTime]);
   
   // Handle pause/resume button click
   const handlePauseResume = () => {
-    const newPausedState = !isPaused;
-    setIsPaused(newPausedState);
-    
-    try {
-      // Store pause state in localStorage for persistence
-      localStorage.setItem(`sessionIsPaused_${itemId}`, newPausedState.toString());
-      
-      if (newPausedState) {
-        // Store pause time
-        const pauseTime = Date.now();
-        localStorage.setItem(`sessionPauseTime_${itemId}`, pauseTime.toString());
-      } else {
-        // Clear pause time when resuming
-        localStorage.removeItem(`sessionPauseTime_${itemId}`);
-      }
-    } catch (e) {
-      console.error('Error updating pause state in localStorage:', e);
-    }
+    setIsPaused(!isPaused);
   };
   
   // UI states for timer
@@ -474,4 +295,5 @@ export const WorkerPomodoroTimer: React.FC<WorkerPomodoroTimerProps> = ({
   );
 };
 
-export default WorkerPomodoroTimer;
+// Export as both default and named export for flexibility
+export { WorkerPomodoroTimer as default, WorkerPomodoroTimer };
