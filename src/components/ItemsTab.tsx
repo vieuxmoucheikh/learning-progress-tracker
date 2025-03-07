@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Search, Download, LucideCalendar, CalendarIcon } from 'lucide-react';
+import { Search, Download, LucideCalendar, CalendarIcon, Plus, Filter, BookOpen } from 'lucide-react';
 import LearningItemCard from "./LearningItemCard";
 import { CustomSelect } from "./ui/select";
 import type { Options as Html2PdfOptions } from 'html2pdf.js';
@@ -160,37 +160,86 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4">
+      {/* Header with actions */}
+      <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+            <BookOpen className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+          </div>
+          <h2 className="text-xl font-semibold">Learning Items</h2>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-2"
+            onClick={exportToPdf}
+          >
+            <Download className="h-4 w-4" />
+            Export
+          </Button>
+          <Button 
+            onClick={onAddItem} 
+            size="sm" 
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add Item
+          </Button>
+        </div>
+      </div>
+
+      {/* Search and filters */}
+      <div className="flex flex-col gap-4 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg border border-gray-100 dark:border-gray-800">
         <div className="w-full">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
             <Input
               placeholder="Search items..."
-              className="pl-10 h-12 text-base rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500 w-full"
+              className="pl-10 h-12 text-base rounded-lg border-gray-200 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500 w-full"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
-        <div className="flex gap-4">
-          <CustomSelect
-            value={selectedStatus}
-            onValueChange={setSelectedStatus}
-            items={[
-              { value: 'all', label: 'All Items' },
-              { value: 'not_started', label: 'Not Started' },
-              { value: 'in_progress', label: 'In Progress' },
-              { value: 'completed', label: 'Completed' }
-            ]}
-          />
-          <CustomSelect
-            value={selectedCategoryFilter}
-            onValueChange={setSelectedCategoryFilter}
-            items={categoryOptions}
-          />
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <Label className="text-sm text-gray-500 dark:text-gray-400 mb-1 block">Status</Label>
+            <CustomSelect
+              value={selectedStatus}
+              onValueChange={setSelectedStatus}
+              items={[
+                { value: 'all', label: 'All Items' },
+                { value: 'not_started', label: 'Not Started' },
+                { value: 'in_progress', label: 'In Progress' },
+                { value: 'completed', label: 'Completed' }
+              ]}
+            />
+          </div>
+          <div className="flex-1">
+            <Label className="text-sm text-gray-500 dark:text-gray-400 mb-1 block">Category</Label>
+            <CustomSelect
+              value={selectedCategoryFilter}
+              onValueChange={setSelectedCategoryFilter}
+              items={categoryOptions}
+            />
+          </div>
+        </div>
+        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 pt-2">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            <span>Filtered results: {filteredItems.length} items</span>
+          </div>
+          {filteredItems.length > 0 && (
+            <div>
+              {filteredItems.filter(item => item.completed).length} completed / 
+              {filteredItems.filter(item => !item.completed && item.progress?.current).length} in progress
+            </div>
+          )}
         </div>
       </div>
 
+      {/* Items grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredItems.map((item) => (
           <LearningItemCard 
@@ -206,8 +255,19 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
           />
         ))}
         {filteredItems.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            No items found
+          <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/30 rounded-lg border border-dashed border-gray-200 dark:border-gray-700">
+            <BookOpen className="h-12 w-12 mb-4 text-gray-300 dark:text-gray-600" />
+            <p className="text-lg font-medium">No items found</p>
+            <p className="text-sm mt-1">Try adjusting your search or filters</p>
+            <Button 
+              onClick={onAddItem} 
+              variant="outline" 
+              size="sm" 
+              className="mt-4"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add New Item
+            </Button>
           </div>
         )}
       </div>

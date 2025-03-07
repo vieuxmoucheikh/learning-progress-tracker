@@ -21,7 +21,7 @@ import {
 } from "recharts";
 import { LearningItem } from "@/types";
 import { useMemo } from "react";
-import { Brain, Target, TrendingUp } from "lucide-react";
+import { Brain, Target, TrendingUp, CheckCircle, BookOpen, PieChart as PieChartIcon, BarChart3, Calendar } from "lucide-react";
 import LearningGoals from './LearningGoals';
 import { YearlyActivityStats } from './YearlyActivityStats';
 
@@ -165,60 +165,91 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
   }, [items]);
 
   return (
-    <div className="space-y-8 p-4">
+    <div className="space-y-8">
       {/* Learning Goals */}
-      <LearningGoals items={items} />
+      <Card className="p-6 hover:shadow-md transition-shadow border-l-4 border-indigo-500">
+        <CardHeader className="px-0 pt-0">
+          <CardTitle className="text-xl flex items-center gap-2">
+            <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+              <Target className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+            </div>
+            Learning Goals
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="px-0 pb-0">
+          <LearningGoals items={items} />
+        </CardContent>
+      </Card>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-100 text-blue-600 rounded-lg">
-              <Brain className="h-6 w-6" />
-            </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="p-4 hover:shadow-md transition-shadow border-l-4 border-blue-500">
+          <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-500">Total Learning Time</h3>
-              <p className="text-2xl font-semibold">
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Learning Time</h3>
+              <p className="mt-2 text-3xl font-semibold text-blue-600 dark:text-blue-400">
                 {Math.round(analytics.categoryData.reduce((sum, cat) => sum + cat.value, 0))}h
               </p>
             </div>
+            <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+              <Brain className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+            </div>
           </div>
         </Card>
 
-        <Card className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-green-100 text-green-600 rounded-lg">
-              <Target className="h-6 w-6" />
-            </div>
+        <Card className="p-4 hover:shadow-md transition-shadow border-l-4 border-green-500">
+          <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-500">Completion Rate</h3>
-              <p className="text-2xl font-semibold">
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Completion Rate</h3>
+              <p className="mt-2 text-3xl font-semibold text-green-600 dark:text-green-400">
                 {Math.round((analytics.completionMetrics.completed || 0) / items.length * 100)}%
               </p>
             </div>
+            <div className="p-2 bg-green-50 dark:bg-green-900/30 rounded-lg">
+              <CheckCircle className="w-5 h-5 text-green-500 dark:text-green-400" />
+            </div>
           </div>
         </Card>
 
-        <Card className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-amber-100 text-amber-600 rounded-lg">
-              <TrendingUp className="h-6 w-6" />
-            </div>
+        <Card className="p-4 hover:shadow-md transition-shadow border-l-4 border-amber-500">
+          <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-500">Active Days</h3>
-              <p className="text-2xl font-semibold">
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Days</h3>
+              <p className="mt-2 text-3xl font-semibold text-amber-600 dark:text-amber-400">
                 {analytics.dailyData.filter(d => d.hours > 0).length}/14
               </p>
+            </div>
+            <div className="p-2 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
+              <TrendingUp className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+            </div>
+          </div>
+        </Card>
+        
+        <Card className="p-4 hover:shadow-md transition-shadow border-l-4 border-purple-500">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Categories</h3>
+              <p className="mt-2 text-3xl font-semibold text-purple-600 dark:text-purple-400">
+                {analytics.categoryData.length}
+              </p>
+            </div>
+            <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
+              <BookOpen className="w-5 h-5 text-purple-500 dark:text-purple-400" />
             </div>
           </div>
         </Card>
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Time by Category */}
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-6">Time Spent by Category</h2>
+        <Card className="p-6 hover:shadow-md transition-shadow lg:col-span-2">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+              <PieChartIcon className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+            </div>
+            <h2 className="text-lg font-semibold">Time Spent by Category</h2>
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -247,8 +278,8 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
               </ResponsiveContainer>
             </div>
             <div className="space-y-4">
-              <h3 className="text-sm font-medium text-gray-500">Category Breakdown</h3>
-              <div className="space-y-3">
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Category Breakdown</h3>
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
                 {analytics.categoryData.map((category, index) => (
                   <div key={category.name} className="flex items-center gap-3">
                     <div 
@@ -258,11 +289,11 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center text-sm">
                         <span className="font-medium truncate">{category.name}</span>
-                        <span className="text-gray-500">
+                        <span className="text-gray-500 dark:text-gray-400">
                           {category.value}h ({category.percentage}%)
                         </span>
                       </div>
-                      <div className="mt-1 w-full bg-gray-100 rounded-full h-1.5">
+                      <div className="mt-1 w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
                         <div
                           className="h-1.5 rounded-full transition-all duration-500"
                           style={{
@@ -271,7 +302,7 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
                           }}
                         />
                       </div>
-                      <div className="mt-1 text-xs text-gray-500">
+                      <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         {category.itemCount} items · {Math.round(category.minutes)} minutes
                       </div>
                     </div>
@@ -282,9 +313,41 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
           </div>
         </Card>
 
+        {/* Learning Focus */}
+        <Card className="p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+              <Target className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+            </div>
+            <h2 className="text-lg font-semibold">Learning Focus</h2>
+          </div>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={analytics.focusMetrics}>
+                <PolarGrid />
+                <PolarAngleAxis dataKey="subject" />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                <Radar
+                  name="Learning Focus"
+                  dataKey="value"
+                  stroke="#8884d8"
+                  fill="#8884d8"
+                  fillOpacity={0.6}
+                />
+                <Tooltip />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
         {/* Daily Activity */}
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-6">Daily Activity (Past 14 Days)</h2>
+        <Card className="p-6 hover:shadow-md transition-shadow lg:col-span-2">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="p-1.5 bg-green-50 dark:bg-green-900/30 rounded-lg">
+              <BarChart3 className="w-5 h-5 text-green-500 dark:text-green-400" />
+            </div>
+            <h2 className="text-lg font-semibold">Daily Activity (Past 14 Days)</h2>
+          </div>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={analytics.dailyData}>
@@ -323,8 +386,13 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
         </Card>
 
         {/* Progress by Difficulty */}
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-6">Progress by Difficulty</h2>
+        <Card className="p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="p-1.5 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
+              <TrendingUp className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+            </div>
+            <h2 className="text-lg font-semibold">Progress by Difficulty</h2>
+          </div>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={analytics.difficultyData}>
@@ -347,45 +415,18 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
             </ResponsiveContainer>
           </div>
         </Card>
-
-        {/* Learning Focus */}
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-6">Learning Focus</h2>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={analytics.focusMetrics}>
-                <PolarGrid />
-                <PolarAngleAxis dataKey="subject" />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                <Radar
-                  name="Focus Areas"
-                  dataKey="value"
-                  stroke={COLORS[4]}
-                  fill={COLORS[4]}
-                  fillOpacity={0.6}
-                />
-                <Tooltip />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-
-        {/* Yearly Activity */}
-        <div className="grid gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Learning Insights</CardTitle>
-              <CardDescription>
-                Visualize your learning patterns and progress
-                Track your learning progress throughout the year by category
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <YearlyActivityStats />
-            </CardContent>
-          </Card>
-        </div>
       </div>
+
+      {/* Yearly Activity Heatmap */}
+      <Card className="p-6 hover:shadow-md transition-shadow">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+            <Calendar className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+          </div>
+          <h2 className="text-lg font-semibold">Learning Insights</h2>
+        </div>
+        <YearlyActivityStats />
+      </Card>
     </div>
   );
 }

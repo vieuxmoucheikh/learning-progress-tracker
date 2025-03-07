@@ -4,7 +4,7 @@ import { StreakDisplay } from "./StreakDisplay";
 import { Stats } from "./Stats";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
-import { Plus, BookOpen, CheckCircle, Clock, Target, Calendar as CalendarIcon } from "lucide-react";
+import { Plus, BookOpen, CheckCircle, Clock, Target, Calendar as CalendarIcon, Trophy, ChartBar, User } from "lucide-react";
 import { LearningItem, Session } from "@/types";
 import { Calendar } from "./Calendar";
 import LearningItemCard from './LearningItemCard';
@@ -222,85 +222,118 @@ export function DashboardTab({
   }, [items, selectedDate, getDateStr]);
 
   return (
-    <div className="space-y-4">
-      {/* Stats Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <Card className="p-4 hover:shadow-md transition-shadow">
+    <div className="space-y-6">
+      {/* Stats Cards Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="p-4 hover:shadow-md transition-shadow border-l-4 border-purple-500">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-500">Time Invested Today</h3>
-              <p className="mt-2 text-3xl font-semibold text-purple-600">
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Time Invested Today</h3>
+              <p className="mt-2 text-3xl font-semibold text-purple-600 dark:text-purple-400">
                 {stats.dailyTimeSpentHours}h {stats.dailyTimeSpentMinutes}m
               </p>
             </div>
-            <div className="p-2 bg-purple-50 rounded-lg">
-              <Clock className="w-5 h-5 text-purple-500" />
+            <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
+              <Clock className="w-5 h-5 text-purple-500 dark:text-purple-400" />
             </div>
           </div>
         </Card>
-        <Card className="p-4 hover:shadow-md transition-shadow">
+        
+        <Card className="p-4 hover:shadow-md transition-shadow border-l-4 border-green-500">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-500">Completed Today</h3>
-              <p className="mt-2 text-3xl font-semibold text-green-600">{completedTasks.length}</p>
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Completed Today</h3>
+              <p className="mt-2 text-3xl font-semibold text-green-600 dark:text-green-400">{completedTasks.length}</p>
             </div>
-            <div className="p-2 bg-green-50 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-green-500" />
+            <div className="p-2 bg-green-50 dark:bg-green-900/30 rounded-lg">
+              <CheckCircle className="w-5 h-5 text-green-500 dark:text-green-400" />
+            </div>
+          </div>
+        </Card>
+        
+        <Card className="p-4 hover:shadow-md transition-shadow border-l-4 border-blue-500">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Tasks</h3>
+              <p className="mt-2 text-3xl font-semibold text-blue-600 dark:text-blue-400">{activeTasks.length}</p>
+            </div>
+            <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+              <Target className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+            </div>
+          </div>
+        </Card>
+        
+        <Card className="p-4 hover:shadow-md transition-shadow border-l-4 border-amber-500">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Items</h3>
+              <p className="mt-2 text-3xl font-semibold text-amber-600 dark:text-amber-400">{items.length}</p>
+            </div>
+            <div className="p-2 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
+              <BookOpen className="w-5 h-5 text-amber-500 dark:text-amber-400" />
             </div>
           </div>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Calendar Section */}
-        <Card className="p-4 lg:col-span-1 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-gray-100 rounded-lg">
-                <CalendarIcon className="w-5 h-5 text-gray-600" />
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Left Sidebar - Calendar */}
+        <div className="lg:col-span-1">
+          <Card className="p-4 hover:shadow-md transition-shadow h-full">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                  <CalendarIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                </div>
+                <h2 className="text-lg font-semibold">Calendar</h2>
               </div>
-              <h2 className="text-lg font-semibold">Calendar</h2>
+              <Button onClick={() => onAddItem(selectedDate)} className="gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800">
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Add</span>
+              </Button>
             </div>
-            <Button onClick={() => onAddItem(selectedDate)} className="gap-2 bg-blue-600 hover:bg-blue-700">
-              <Plus className="h-4 w-4" />
-              Add Item
-            </Button>
-          </div>
-          <div className="max-w-sm mx-auto">
-            <Calendar 
-              items={items}
-              onDateSelect={handleDateSelect}
-              selectedDate={selectedDate}
-              onAddItem={onAddItem}
-            />
-          </div>
-        </Card>
+            <div className="max-w-sm mx-auto">
+              <Calendar 
+                items={items}
+                onDateSelect={handleDateSelect}
+                selectedDate={selectedDate}
+                onAddItem={onAddItem}
+              />
+            </div>
+            
+            {/* Streak Display */}
+            <div className="mt-6">
+              <StreakDisplay items={items} />
+            </div>
+          </Card>
+        </div>
 
-        {/* Tasks Section */}
-        <div className="lg:col-span-2 grid gap-4">
+        {/* Main Content - Tasks */}
+        <div className="lg:col-span-3 space-y-6">
           {/* Active Tasks */}
           <Card className="p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-blue-50 rounded-lg">
-                  <Target className="w-5 h-5 text-blue-500" />
+                <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                  <Target className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                 </div>
                 <h2 className="text-lg font-semibold">Today's Goals</h2>
               </div>
-              <span className="px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+              <span className="px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
                 {activeTasks.length} items
               </span>
             </div>
             {activeTasks.length === 0 ? (
               <div className="text-center py-8">
-                <div className="p-3 bg-gray-50 rounded-full inline-block mb-3">
-                  <Target className="h-8 w-8 text-gray-400" />
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3">
+                  <Target className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900">No goals for today</h3>
-                <p className="text-gray-500 mt-1">Add some tasks to get started</p>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">No goals for today</h3>
+                <p className="text-gray-500 dark:text-gray-400 mt-1">Add some tasks to get started</p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {activeTasks.map((item) => (
                   <LearningItemCard
                     key={item.id}
@@ -322,25 +355,25 @@ export function DashboardTab({
           <Card className="p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-green-50 rounded-lg">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
+                <div className="p-1.5 bg-green-50 dark:bg-green-900/30 rounded-lg">
+                  <CheckCircle className="w-5 h-5 text-green-500 dark:text-green-400" />
                 </div>
                 <h2 className="text-lg font-semibold">Completed Today</h2>
               </div>
-              <span className="px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+              <span className="px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300">
                 {completedTasks.length} items
               </span>
             </div>
             {completedTasks.length === 0 ? (
               <div className="text-center py-8">
-                <div className="p-3 bg-gray-50 rounded-full inline-block mb-3">
-                  <CheckCircle className="h-8 w-8 text-gray-400" />
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3">
+                  <CheckCircle className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900">No completed tasks</h3>
-                <p className="text-gray-500 mt-1">Complete some tasks to see them here</p>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">No completed tasks</h3>
+                <p className="text-gray-500 dark:text-gray-400 mt-1">Complete some tasks to see them here</p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {completedTasks.map((item) => (
                   <LearningItemCard
                     key={item.id}

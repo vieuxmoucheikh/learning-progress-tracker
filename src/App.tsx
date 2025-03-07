@@ -5,7 +5,7 @@ import { Insights } from './components/Insights';
 import { LearningInsights } from './components/LearningInsights';
 import { StreakDisplay } from './components/StreakDisplay';
 import { LearningItem, LearningItemFormData } from './types';
-import { Plus } from 'lucide-react';
+import { Plus, LayoutDashboard, BookOpen, BarChart3, Timer, Notebook, Library } from 'lucide-react';
 import { Calendar } from './components/Calendar';
 import { getLearningItems, addLearningItem, updateLearningItem, deleteLearningItem, trackLearningActivity } from './lib/database';
 import { useAuth } from './lib/auth';
@@ -18,6 +18,7 @@ import { PomodoroTimer } from './components/pomodoro/PomodoroTimer';
 import { LearningCardsPage } from './pages/LearningCards';
 import { ThemeProvider } from './components/ThemeProvider';
 import { ThemeToggle } from './components/ThemeToggle';
+import { Button } from '@/components/ui/button';
 
 interface State {
   items: LearningItem[];
@@ -45,6 +46,14 @@ const TAB_OPTIONS = {
   POMODORO: 'pomodoro',
   LEARNING_CARDS: 'learning-cards'
 } as const;
+
+const tabs = [
+  { id: TAB_OPTIONS.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
+  { id: TAB_OPTIONS.ITEMS, label: 'Items', icon: BookOpen },
+  { id: TAB_OPTIONS.ANALYTICS, label: 'Analytics', icon: BarChart3 },
+  { id: TAB_OPTIONS.POMODORO, label: 'Pomodoro', icon: Timer },
+  { id: TAB_OPTIONS.LEARNING_CARDS, label: 'Learning Cards', icon: Notebook },
+];
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -607,76 +616,130 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-background text-foreground">
-        <Toaster />
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <header className="mb-8 relative">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex-1"></div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex-grow text-center">
-                <span className="bg-gradient-to-r from-blue-700 to-indigo-800 dark:from-blue-500 dark:to-indigo-400 bg-clip-text text-transparent">
+      <div className="min-h-screen bg-background text-foreground flex">
+        {/* Vertical Sidebar Navigation */}
+        <aside className="w-16 md:w-64 bg-gradient-to-b from-blue-700 to-blue-900 dark:from-blue-900 dark:to-blue-950 text-white fixed h-full transition-all duration-300 ease-in-out z-10 shadow-lg">
+          <div className="p-4 flex flex-col h-full">
+            <div className="mb-6 flex justify-center md:justify-start items-center">
+              <h1 className="hidden md:block text-xl font-bold">
+                <span className="bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
                   Learning Tracker
                 </span>
               </h1>
-              <div className="flex-1 flex justify-end">
-                <ThemeToggle />
+              <div className="md:hidden flex justify-center w-full">
+                <BookOpen className="h-6 w-6 text-white" />
               </div>
             </div>
-            <p className="text-gray-700 dark:text-gray-400 text-center">Track your learning journey and stay motivated</p>
-          </header>
+            
+            <nav className="flex-1 space-y-2">
+              {tabs.map((tab) => {
+                const isActive = selectedTab === tab.id;
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setSelectedTab(tab.id)}
+                    className={`w-full flex items-center py-3 px-2 md:px-4 rounded-lg transition-all ${
+                      isActive
+                        ? "bg-white/15 text-white"
+                        : "text-white/70 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <Icon className={`w-5 h-5 ${isActive ? "text-white" : "text-white/70"}`} />
+                    <span className="ml-3 hidden md:block">{tab.label}</span>
+                    {isActive && (
+                      <span className="ml-auto hidden md:block">
+                        <div className="h-2 w-2 rounded-full bg-white"></div>
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+            
+            <div className="mt-auto pb-4">
+              <ThemeToggle />
+            </div>
+          </div>
+        </aside>
 
-          <TabNavigation activeTab={selectedTab} onTabChange={setSelectedTab} />
+        {/* Main Content */}
+        <div className="flex-1 ml-16 md:ml-64 transition-all duration-300 ease-in-out">
+          <Toaster />
+          <div className="max-w-7xl mx-auto px-4 py-8">
+            <header className="mb-8 relative">
+              <div className="flex items-center justify-between mb-2">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  {tabs.find(tab => tab.id === selectedTab)?.label || 'Dashboard'}
+                </h1>
+                <div className="flex items-center space-x-2">
+                  {selectedTab === TAB_OPTIONS.DASHBOARD && (
+                    <Button 
+                      onClick={() => handleDashboardAddItem()} 
+                      className="gap-2 bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Item
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <p className="text-gray-700 dark:text-gray-400">
+                Track your learning journey and stay motivated
+              </p>
+            </header>
 
-          {showAddDialog && ( 
-            <AddLearningItem
-              onAdd={handleSubmitItem}
-              onClose={() => setShowAddDialog(false)}
-              isOpen={showAddDialog}
-              selectedDate={selectedDate}
-            />
-          )}
-
-          <main>
-            {selectedTab === TAB_OPTIONS.DASHBOARD && (
-              <DashboardTab
-                items={state.items}
-                onAddItem={handleDashboardAddItem}
-                onUpdate={handleDashboardUpdate}
-                onDateSelect={handleDateSelect}
-                onDelete={handleDeleteItem}
-                onStartTracking={handleStartTracking}
-                onStopTracking={handleStopTracking}
-                onNotesUpdate={handleUpdateNotes}
-                onSessionNoteAdd={handleAddSessionNote}
-                onSetActiveItem={handleSetActiveItem}
+            {showAddDialog && ( 
+              <AddLearningItem
+                onAdd={handleSubmitItem}
+                onClose={() => setShowAddDialog(false)}
+                isOpen={showAddDialog}
+                selectedDate={selectedDate}
               />
             )}
 
-            {selectedTab === TAB_OPTIONS.ITEMS && (
-              <ItemsTab
-                items={state.items}
-                onAddItem={handleItemsAddItem}
-                onUpdate={handleUpdateItem}
-                onDelete={handleDeleteItem}
-                onStartTracking={handleStartTracking}
-                onStopTracking={handleStopTracking}
-                onNotesUpdate={handleUpdateNotes}
-                onSessionNoteAdd={handleAddSessionNote}
-                onSetActiveItem={handleSetActiveItem}
-              />
-            )}
+            <main>
+              {selectedTab === TAB_OPTIONS.DASHBOARD && (
+                <DashboardTab
+                  items={state.items}
+                  onAddItem={handleDashboardAddItem}
+                  onUpdate={handleDashboardUpdate}
+                  onDateSelect={handleDateSelect}
+                  onDelete={handleDeleteItem}
+                  onStartTracking={handleStartTracking}
+                  onStopTracking={handleStopTracking}
+                  onNotesUpdate={handleUpdateNotes}
+                  onSessionNoteAdd={handleAddSessionNote}
+                  onSetActiveItem={handleSetActiveItem}
+                />
+              )}
 
-            {selectedTab === TAB_OPTIONS.ANALYTICS && (
-              <AnalyticsTab items={state.items} />
-            )}
+              {selectedTab === TAB_OPTIONS.ITEMS && (
+                <ItemsTab
+                  items={state.items}
+                  onAddItem={handleItemsAddItem}
+                  onUpdate={handleUpdateItem}
+                  onDelete={handleDeleteItem}
+                  onStartTracking={handleStartTracking}
+                  onStopTracking={handleStopTracking}
+                  onNotesUpdate={handleUpdateNotes}
+                  onSessionNoteAdd={handleAddSessionNote}
+                  onSetActiveItem={handleSetActiveItem}
+                />
+              )}
 
-            {selectedTab === TAB_OPTIONS.POMODORO && (
-              <PomodoroTimer />
-            )}
-            {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
-              <LearningCardsPage />
-            )}
-          </main>
+              {selectedTab === TAB_OPTIONS.ANALYTICS && (
+                <AnalyticsTab items={state.items} />
+              )}
+
+              {selectedTab === TAB_OPTIONS.POMODORO && (
+                <PomodoroTimer />
+              )}
+              {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
+                <LearningCardsPage />
+              )}
+            </main>
+          </div>
         </div>
       </div>
     </ThemeProvider>
