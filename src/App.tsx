@@ -16,7 +16,7 @@ import { AnalyticsTab } from './components/AnalyticsTab';
 import { Toaster } from "@/components/ui/toaster";
 import { PomodoroTimer } from './components/pomodoro/PomodoroTimer';
 import { LearningCardsPage } from './pages/LearningCards';
-import { ThemeProvider } from './components/ThemeProvider';  
+import { ThemeProvider } from './components/ThemeProvider';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 
