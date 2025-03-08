@@ -23,8 +23,8 @@ import { FlashcardsTab } from './components/FlashcardsTab';
 import { createDeck } from './lib/flashcards';
 import { supabase } from './lib/supabase';
 import { toast } from '@/components/ui/use-toast';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ItemsList } from './components/ItemsList';
+import { Badge } from '@/components/ui/badge';
+import { TAB_OPTIONS } from './constants';
 
 interface State {
   items: LearningItem[];
@@ -44,15 +44,6 @@ type Action =
   | { type: 'UPDATE_NOTES'; payload: { id: string; notes: string } }
   | { type: 'ADD_SESSION_NOTE'; payload: { id: string; note: string } }
   | { type: 'SET_ACTIVE_ITEM'; payload: string | null };
-
-const TAB_OPTIONS = {
-  DASHBOARD: 'dashboard',
-  ITEMS: 'items',
-  ANALYTICS: 'analytics',
-  POMODORO: 'pomodoro',
-  LEARNING_CARDS: 'learning-cards',
-  FLASHCARDS: 'flashcards'
-} as const;
 
 const tabs = [
   { id: TAB_OPTIONS.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
@@ -280,7 +271,7 @@ export default function App() {
     notes: {},
     sessionNotes: {},
   });
-  const [selectedTab, setSelectedTab] = useState(TAB_OPTIONS.DASHBOARD);
+  const [selectedTab, setSelectedTab] = useState<string>(TAB_OPTIONS.DASHBOARD);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -713,7 +704,7 @@ export default function App() {
       <div className="md:w-64 flex-shrink-0">
         <TabNavigation 
           activeTab={selectedTab} 
-          onTabChange={setSelectedTab}
+          onTabChange={(tabId: string) => setSelectedTab(tabId)}
           flashcards={flashcardDecks}
           onAddDeck={handleAddFlashcardDeck}
           onStudyDeck={handleStudyFlashcardDeck}
@@ -747,24 +738,42 @@ export default function App() {
               </Button>
             </div>
             
-            <Tabs defaultValue="all">
-              <TabsList>
-                <TabsTrigger value="all" onClick={() => setFilterStatus('all')}>All</TabsTrigger>
-                <TabsTrigger value="active" onClick={() => setFilterStatus('active')}>In Progress</TabsTrigger>
-                <TabsTrigger value="completed" onClick={() => setFilterStatus('completed')}>Completed</TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <div className="flex space-x-2 mb-4">
+              <Button 
+                variant={filterStatus === 'all' ? "default" : "outline"}
+                onClick={() => setFilterStatus('all')}
+                size="sm"
+              >
+                All
+              </Button>
+              <Button 
+                variant={filterStatus === 'active' ? "default" : "outline"}
+                onClick={() => setFilterStatus('active')}
+                size="sm"
+              >
+                In Progress
+              </Button>
+              <Button 
+                variant={filterStatus === 'completed' ? "default" : "outline"}
+                onClick={() => setFilterStatus('completed')}
+                size="sm"
+              >
+                Completed
+              </Button>
+            </div>
             
-            <ItemsList 
-              items={filteredItems}
-              onUpdate={handleUpdateItem}
-              onDelete={handleDeleteItem}
-              onStartTracking={handleStartTracking}
-              onStopTracking={handleStopTracking}
-              onNotesUpdate={handleUpdateNotes}
-              onSetActiveItem={handleSetActiveItem}
-              onSessionNoteAdd={handleAddSessionNote}
-            />
+            <div className="space-y-4">
+              {filteredItems.map(item => (
+                <div key={item.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border">
+                  <div className="flex justify-between">
+                    <h3 className="font-medium">{item.title}</h3>
+                    <Badge variant={item.completed ? "default" : "outline"}>
+                      {item.completed ? "Completed" : "In Progress"}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
         {selectedTab === TAB_OPTIONS.FLASHCARDS && (
