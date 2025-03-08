@@ -224,7 +224,7 @@ export function DashboardTab({
   return (
     <div className="space-y-6">
       {/* Stats Cards Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <Card className="p-4 hover:shadow-md transition-shadow border-l-4 border-purple-500">
           <div className="flex items-start justify-between">
             <div>
@@ -277,9 +277,10 @@ export function DashboardTab({
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Left Sidebar - Calendar */}
-        <div className="lg:col-span-1">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Calendar takes 2 columns on larger screens */}
+        <div className="lg:col-span-2 space-y-4">
+          {/* Calendar component */}
           <Card className="p-4 hover:shadow-md transition-shadow h-full">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -308,10 +309,10 @@ export function DashboardTab({
             </div>
           </Card>
         </div>
-
-        {/* Main Content - Tasks */}
-        <div className="lg:col-span-3 space-y-6">
-          {/* Active Tasks */}
+        
+        {/* Today's goals takes 1 column */}
+        <div className="space-y-4">
+          {/* Today's Goals */}
           <Card className="p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">

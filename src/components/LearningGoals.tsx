@@ -451,7 +451,7 @@ export default function LearningGoals({ items }: Props) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {goals.map(goal => {
           const progress = calculateProgress(goal.category);
           const progressPercentage = Math.min(100, (progress / goal.targetHours) * 100);
