@@ -7,7 +7,7 @@ import { useToast } from './ui/use-toast';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
 import { Plus, Trash2, Play, Clock, BookOpen, Star, PlusCircle, Edit, FileEdit, Library } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { createDeck, getDecks, getDecksSummary } from '../lib/flashcards';
+import { createDeck, getDecks, getDecksSummary, createFlashcard } from '../lib/flashcards';
 import type { FlashcardDeck } from '../types';
 import type { DeckSummary } from '../lib/flashcards';
 import { supabase } from '../lib/supabase';
@@ -35,16 +35,19 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   const [isCreatingDeck, setIsCreatingDeck] = useState(false);
   const [isAddingFlashcard, setIsAddingFlashcard] = useState(false);
   const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ name: '', description: '' });
-  const [deckToDelete, setDeckToDelete] = useState<FlashcardDeck | null>(null);
+  const [deckFormData, setDeckFormData] = useState({ name: '', description: '' });
+  const [flashcardFormData, setFlashcardFormData] = useState({ front: '', back: '' });
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  // Refresh deck summaries whenever decks change
   useEffect(() => {
     loadDeckSummaries();
-  }, []);
+  }, [decks]);
 
   const loadDeckSummaries = async () => {
     try {
+      setIsLoading(true);
       const summariesData = await getDecksSummary();
       setDeckSummaries(summariesData);
     } catch (error) {
@@ -54,6 +57,8 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         description: "Failed to load flashcard decks",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -64,7 +69,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         title: "Success",
         description: `Deck "${deck.name}" has been deleted`,
       });
-      setDeckToDelete(null);
+      await loadDeckSummaries();
     } catch (error) {
       console.error('Error deleting deck:', error);
       toast({
@@ -82,6 +87,59 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   const handleAddFlashcardClick = (deckId: string) => {
     setSelectedDeckId(deckId);
     setIsAddingFlashcard(true);
+  };
+
+  const handleAddFlashcardSubmit = async () => {
+    if (!selectedDeckId) return;
+    
+    if (!flashcardFormData.front.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide content for the front of the flashcard",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!flashcardFormData.back.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide content for the back of the flashcard",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await createFlashcard({
+        deckId: selectedDeckId,
+        front: flashcardFormData.front,
+        back: flashcardFormData.back
+      });
+
+      toast({
+        title: "Success",
+        description: "Flashcard added successfully",
+      });
+      
+      // Reset form and close dialog
+      setFlashcardFormData({ front: '', back: '' });
+      setIsAddingFlashcard(false);
+      setSelectedDeckId(null);
+      
+      // Refresh summaries to update counts
+      await loadDeckSummaries();
+    } catch (error) {
+      console.error('Error adding flashcard:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add flashcard",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getTotalDueCards = () => {
@@ -107,12 +165,14 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           <Button 
             onClick={() => setIsAddingFlashcard(true)} 
             className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+            disabled={isLoading}
           >
             <PlusCircle className="w-4 h-4 mr-2" /> Add Flashcard
           </Button>
           <Button 
             onClick={() => setIsCreatingDeck(true)} 
             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            disabled={isLoading}
           >
             <Library className="w-4 h-4 mr-2" /> Create Deck
           </Button>
@@ -160,41 +220,45 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       </div>
 
       {/* Quick Actions */}
-      <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
-        {decks.map((deck) => (
-          <div 
-            key={`quick-${deck.id}`}
-            className="min-w-[200px] bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-950/50 dark:to-blue-950/50 p-4 rounded-lg border border-blue-100 dark:border-blue-900 flex flex-col"
-          >
-            <h4 className="font-medium text-indigo-800 dark:text-indigo-300 mb-2 truncate">{deck.name}</h4>
-            
-            <div className="flex gap-2 mt-auto">
-              <Button 
-                size="sm" 
-                onClick={() => onStudyDeck(deck.id)}
-                className="flex-1 bg-green-600 hover:bg-green-700 h-8 text-xs"
-              >
-                <Play className="w-3 h-3 mr-1" /> Study
-              </Button>
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={() => handleAddFlashcardClick(deck.id)}
-                className="flex-1 h-8 text-xs"
-              >
-                <Plus className="w-3 h-3 mr-1" /> Add Card
-              </Button>
+      {decks.length > 0 && (
+        <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
+          {decks.map((deck) => (
+            <div 
+              key={`quick-${deck.id}`}
+              className="min-w-[200px] bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-950/50 dark:to-blue-950/50 p-4 rounded-lg border border-blue-100 dark:border-blue-900 flex flex-col"
+            >
+              <h4 className="font-medium text-indigo-800 dark:text-indigo-300 mb-2 truncate">{deck.name}</h4>
+              
+              <div className="flex gap-2 mt-auto">
+                <Button 
+                  size="sm" 
+                  onClick={() => onStudyDeck(deck.id)}
+                  className="flex-1 bg-green-600 hover:bg-green-700 h-8 text-xs"
+                  disabled={isLoading}
+                >
+                  <Play className="w-3 h-3 mr-1" /> Study
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleAddFlashcardClick(deck.id)}
+                  className="flex-1 h-8 text-xs"
+                  disabled={isLoading}
+                >
+                  <Plus className="w-3 h-3 mr-1" /> Add Card
+                </Button>
+              </div>
             </div>
+          ))}
+          <div 
+            onClick={() => !isLoading && setIsCreatingDeck(true)}
+            className={`min-w-[200px] bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/80 transition-colors ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <PlusCircle className="w-6 h-6 text-blue-600 dark:text-blue-400 mb-2" />
+            <p className="font-medium text-gray-600 dark:text-gray-400">New Deck</p>
           </div>
-        ))}
-        <div 
-          onClick={() => setIsCreatingDeck(true)}
-          className="min-w-[200px] bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/80 transition-colors"
-        >
-          <PlusCircle className="w-6 h-6 text-blue-600 dark:text-blue-400 mb-2" />
-          <p className="font-medium text-gray-600 dark:text-gray-400">New Deck</p>
         </div>
-      </div>
+      )}
 
       {/* Decks Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -207,7 +271,12 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                   <CardTitle>{deck.name}</CardTitle>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8"
+                        disabled={isLoading}
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </AlertDialogTrigger>
@@ -254,6 +323,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                 <Button 
                   onClick={() => onStudyDeck(deck.id)}
                   className="bg-green-600 hover:bg-green-700 h-9"
+                  disabled={isLoading}
                 >
                   <Play className="w-4 h-4 mr-1" /> Study
                 </Button>
@@ -261,6 +331,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                   onClick={() => handleEditDeckClick(deck.id)}
                   variant="outline" 
                   className="h-9"
+                  disabled={isLoading}
                 >
                   <Edit className="w-4 h-4 mr-1" /> Edit
                 </Button>
@@ -268,6 +339,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                   onClick={() => handleAddFlashcardClick(deck.id)}
                   variant="outline" 
                   className="h-9"
+                  disabled={isLoading}
                 >
                   <Plus className="w-4 h-4 mr-1" /> Card
                 </Button>
@@ -277,16 +349,18 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         })}
 
         {/* Create New Deck Card */}
-        <Card 
-          onClick={() => setIsCreatingDeck(true)}
-          className="border-dashed cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors flex flex-col items-center justify-center py-10"
-        >
-          <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-full mb-3">
-            <PlusCircle className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-          </div>
-          <p className="text-lg font-semibold text-gray-600 dark:text-gray-400">Create New Deck</p>
-          <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">Organize your flashcards by topics</p>
-        </Card>
+        {decks.length > 0 && (
+          <Card 
+            onClick={() => !isLoading && setIsCreatingDeck(true)}
+            className={`border-dashed cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors flex flex-col items-center justify-center py-10 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-full mb-3">
+              <PlusCircle className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            </div>
+            <p className="text-lg font-semibold text-gray-600 dark:text-gray-400">Create New Deck</p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">Organize your flashcards by topics</p>
+          </Card>
+        )}
       </div>
 
       {decks.length === 0 && (
@@ -297,6 +371,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           <Button 
             onClick={() => setIsCreatingDeck(true)}
             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            disabled={isLoading}
           >
             <Plus className="w-4 h-4 mr-2" /> Create Your First Deck
           </Button>
@@ -304,7 +379,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       )}
 
       {/* Create Deck Dialog */}
-      <Dialog open={isCreatingDeck} onOpenChange={setIsCreatingDeck}>
+      <Dialog open={isCreatingDeck} onOpenChange={(open) => !isLoading && setIsCreatingDeck(open)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Flashcard Deck</DialogTitle>
@@ -317,18 +392,20 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               <label htmlFor="name" className="block text-sm font-medium mb-1">Deck Name</label>
               <Input
                 id="name"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                value={deckFormData.name}
+                onChange={(e) => setDeckFormData(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="Enter deck name"
+                disabled={isLoading}
               />
             </div>
             <div>
               <label htmlFor="description" className="block text-sm font-medium mb-1">Description</label>
               <Textarea
                 id="description"
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                value={deckFormData.description}
+                onChange={(e) => setDeckFormData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Enter deck description"
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -337,15 +414,16 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               variant="outline" 
               onClick={() => {
                 setIsCreatingDeck(false);
-                setFormData({ name: '', description: '' });
+                setDeckFormData({ name: '', description: '' });
               }}
               className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+              disabled={isLoading}
             >
               Cancel
             </Button>
             <Button 
-              onClick={() => {
-                if (!formData.name.trim()) {
+              onClick={async () => {
+                if (!deckFormData.name.trim()) {
                   toast({
                     title: "Error",
                     description: "Please provide a name for the deck",
@@ -353,24 +431,38 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                   });
                   return;
                 }
-                onAddDeck(formData);
-                setIsCreatingDeck(false);
-                setFormData({ name: '', description: '' });
-                toast({
-                  title: "Success",
-                  description: "New deck created successfully",
-                });
+                try {
+                  setIsLoading(true);
+                  await onAddDeck(deckFormData);
+                  setIsCreatingDeck(false);
+                  setDeckFormData({ name: '', description: '' });
+                  toast({
+                    title: "Success",
+                    description: "New deck created successfully",
+                  });
+                  await loadDeckSummaries();
+                } catch (error) {
+                  console.error('Error creating deck:', error);
+                  toast({
+                    title: "Error",
+                    description: "Failed to create deck",
+                    variant: "destructive"
+                  });
+                } finally {
+                  setIsLoading(false);
+                }
               }}
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+              disabled={isLoading}
             >
-              Create Deck
+              {isLoading ? 'Creating...' : 'Create Deck'}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Add Flashcard Dialog */}
-      <Dialog open={isAddingFlashcard} onOpenChange={setIsAddingFlashcard}>
+      <Dialog open={isAddingFlashcard} onOpenChange={(open) => !isLoading && setIsAddingFlashcard(open)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Flashcard</DialogTitle>
@@ -391,6 +483,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                         variant="outline"
                         className={`justify-start px-3 py-6 h-auto ${selectedDeckId === deck.id ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''}`}
                         onClick={() => setSelectedDeckId(deck.id)}
+                        disabled={isLoading}
                       >
                         <div className="text-left">
                           <p className="font-medium">{deck.name}</p>
@@ -412,6 +505,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                         size="sm" 
                         className="h-6 text-xs" 
                         onClick={() => setSelectedDeckId(null)}
+                        disabled={isLoading}
                       >
                         Change Deck
                       </Button>
@@ -420,6 +514,9 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                       id="front"
                       placeholder="Enter the question or concept"
                       className="min-h-[100px]"
+                      value={flashcardFormData.front}
+                      onChange={(e) => setFlashcardFormData(prev => ({ ...prev, front: e.target.value }))}
+                      disabled={isLoading}
                     />
                   </div>
                   <div>
@@ -428,6 +525,9 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                       id="back"
                       placeholder="Enter the answer or explanation"
                       className="min-h-[100px]"
+                      value={flashcardFormData.back}
+                      onChange={(e) => setFlashcardFormData(prev => ({ ...prev, back: e.target.value }))}
+                      disabled={isLoading}
                     />
                   </div>
                 </>
@@ -441,6 +541,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                   setIsAddingFlashcard(false);
                   setIsCreatingDeck(true);
                 }}
+                disabled={isLoading}
               >
                 Create a Deck First
               </Button>
@@ -453,22 +554,17 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               onClick={() => {
                 setIsAddingFlashcard(false);
                 setSelectedDeckId(null);
+                setFlashcardFormData({ front: '', back: '' });
               }}
+              disabled={isLoading}
             >
               Cancel
             </Button>
             <Button 
-              disabled={!selectedDeckId}
-              onClick={() => {
-                toast({
-                  title: "Success",
-                  description: "Flashcard added successfully",
-                });
-                setIsAddingFlashcard(false);
-                setSelectedDeckId(null);
-              }}
+              disabled={!selectedDeckId || isLoading}
+              onClick={handleAddFlashcardSubmit}
             >
-              Add Flashcard
+              {isLoading ? 'Adding...' : 'Add Flashcard'}
             </Button>
           </div>
         </DialogContent>

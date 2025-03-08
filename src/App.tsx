@@ -285,6 +285,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'completed'>('all');
   const [flashcardDecks, setFlashcardDecks] = useState<FlashcardDeck[]>([]);
+  const [flashcardsLoading, setFlashcardsLoading] = useState(false);
 
   const filteredItems = useMemo(() => {
     return state.items
@@ -382,6 +383,31 @@ export default function App() {
       loadPersistedSessions();
     }
   }, [state.loading, state.items]);
+
+  // Load flashcard decks
+  useEffect(() => {
+    const loadFlashcards = async () => {
+      try {
+        setFlashcardsLoading(true);
+        const { data, error } = await supabase
+          .from('flashcard_decks')
+          .select('*');
+        
+        if (error) {
+          console.error('Error loading flashcards:', error);
+          return;
+        }
+        
+        setFlashcardDecks(data || []);
+      } catch (error) {
+        console.error('Error loading flashcards:', error);
+      } finally {
+        setFlashcardsLoading(false);
+      }
+    };
+    
+    loadFlashcards();
+  }, []);
 
   const handleAddItem = async (selectedDate?: Date | null) => {
     setShowAddDialog(true);
@@ -595,10 +621,28 @@ export default function App() {
 
   const handleAddFlashcardDeck = async (data: { name: string; description: string }) => {
     try {
-      const newDeck = await createDeck(data.name, data.description);
-      setFlashcardDecks([newDeck, ...flashcardDecks]);
+      const newDeck = await createDeck({
+        name: data.name,
+        description: data.description
+      });
+      
+      // Update state with the new deck
+      setFlashcardDecks(prev => [...prev, newDeck]);
+      
+      toast({
+        title: "Success",
+        description: "New deck created successfully",
+      });
+      
+      return newDeck;
     } catch (error) {
       console.error('Error creating deck:', error);
+      toast({
+        title: "Error", 
+        description: "Failed to create the deck",
+        variant: "destructive"
+      });
+      throw error;
     }
   };
 
@@ -627,13 +671,26 @@ export default function App() {
 
   const handleDeleteFlashcardDeck = async (deckId: string) => {
     try {
-      await supabase
+      // Delete the deck from database
+      const { error } = await supabase
         .from('flashcard_decks')
         .delete()
         .eq('id', deckId);
-      setFlashcardDecks(flashcardDecks.filter(deck => deck.id !== deckId));
+      
+      if (error) throw error;
+      
+      // Update state
+      setFlashcardDecks(prev => prev.filter(deck => deck.id !== deckId));
+      
+      return true;
     } catch (error) {
       console.error('Error deleting deck:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete the deck",
+        variant: "destructive"
+      });
+      throw error;
     }
   };
 

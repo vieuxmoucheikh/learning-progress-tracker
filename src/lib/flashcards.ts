@@ -2,7 +2,8 @@ import { supabase } from './supabase';
 import type { Flashcard, FlashcardDeck, FlashcardReview } from '../types';
 
 // Deck operations
-export const createDeck = async (name: string, description?: string, tags: string[] = []) => {
+export const createDeck = async (params: { name: string, description?: string, tags?: string[] }) => {
+  const { name, description, tags = [] } = params;
   const { data: userData } = await supabase.auth.getUser();
   if (!userData?.user) {
     throw new Error('User not authenticated');
@@ -78,7 +79,8 @@ export const deleteDeck = async (deckId: string) => {
 };
 
 // Flashcard operations
-export const createFlashcard = async (deckId: string, frontContent: string, backContent: string) => {
+export const createFlashcard = async (params: { deckId: string, front: string, back: string }) => {
+  const { deckId, front, back } = params;
   try {
     // First check if the deck exists and is accessible
     const { data: deck, error: deckError } = await supabase
@@ -101,8 +103,8 @@ export const createFlashcard = async (deckId: string, frontContent: string, back
       .from('flashcards')
       .insert({
         deck_id: deckId,
-        front_content: frontContent,
-        back_content: backContent,
+        front_content: front,
+        back_content: back,
         review_interval: 0,
         ease_factor: 2.5,
         repetitions: 0,
