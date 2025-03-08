@@ -700,9 +700,9 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 text-gray-900 dark:text-gray-100">
+    <div className="flex flex-col md:flex-row h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Mobile Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-50 shadow-lg">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-50 shadow-sm">
         <div className="flex justify-around py-2">
           {[
             { id: TAB_OPTIONS.DASHBOARD, icon: LayoutDashboard, label: 'Home' },
@@ -727,11 +727,9 @@ export default function App() {
       </div>
 
       {/* Desktop Sidebar */}
-      <div className="hidden md:block w-64 bg-gradient-to-b from-blue-700 to-blue-900 dark:from-blue-900 dark:to-blue-950 text-white h-screen shadow-lg overflow-y-auto">
-        <div className="p-5 border-b border-blue-600 dark:border-blue-800">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
-            Learning Tracker
-          </h1>
+      <div className="hidden md:block w-64 bg-blue-700 dark:bg-blue-800 text-white h-screen overflow-y-auto">
+        <div className="p-4 border-b border-blue-600 dark:border-blue-700">
+          <h1 className="text-xl font-bold">Learning Tracker</h1>
         </div>
         <nav className="p-3 space-y-1">
           {[
@@ -763,7 +761,7 @@ export default function App() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto p-5 md:p-8 pb-20 md:pb-8">
+      <div className="flex-1 overflow-auto p-4 md:p-6 pb-20 md:pb-6">
         {selectedTab === TAB_OPTIONS.DASHBOARD && (
           <DashboardTab
             items={filteredItems}
@@ -780,36 +778,33 @@ export default function App() {
         )}
         {selectedTab === TAB_OPTIONS.ITEMS && (
           <div className="space-y-6">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-4">
               <h1 className="text-2xl font-bold">Learning Items</h1>
               <Button 
                 onClick={handleItemsAddItem}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                className="bg-blue-600 hover:bg-blue-700"
               >
                 <Plus className="w-4 h-4 mr-2" /> Add Item
               </Button>
             </div>
             
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-6">
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-4">
               <div className="flex space-x-2 mb-0">
                 <Button 
                   variant={filterStatus === 'all' ? "default" : "outline"}
                   onClick={() => setFilterStatus('all')}
-                  className={filterStatus === 'all' ? 'bg-blue-600 hover:bg-blue-700' : ''}
                 >
                   All
                 </Button>
                 <Button 
                   variant={filterStatus === 'active' ? "default" : "outline"}
                   onClick={() => setFilterStatus('active')}
-                  className={filterStatus === 'active' ? 'bg-amber-600 hover:bg-amber-700' : ''}
                 >
                   In Progress
                 </Button>
                 <Button 
                   variant={filterStatus === 'completed' ? "default" : "outline"}
                   onClick={() => setFilterStatus('completed')}
-                  className={filterStatus === 'completed' ? 'bg-green-600 hover:bg-green-700' : ''}
                 >
                   Completed
                 </Button>
@@ -818,24 +813,24 @@ export default function App() {
             
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {filteredItems.length === 0 ? (
-                <div className="md:col-span-2 lg:col-span-3 text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
+                <div className="md:col-span-2 lg:col-span-3 text-center py-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                   <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium mb-2">No items found</h3>
-                  <p className="text-gray-500 mb-6">Add some learning items to get started</p>
+                  <p className="text-gray-500 mb-4">Add some learning items to get started</p>
                   <Button 
                     onClick={handleItemsAddItem}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                    className="bg-blue-600 hover:bg-blue-700"
                   >
                     <Plus className="w-4 h-4 mr-2" /> Add Item
                   </Button>
                 </div>
               ) : (
                 filteredItems.map(item => (
-                  <Card key={item.id} className="overflow-hidden bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow">
+                  <Card key={item.id} className="overflow-hidden bg-white dark:bg-gray-800 shadow-sm">
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-start">
                         <CardTitle className="text-lg">{item.title}</CardTitle>
-                        <Badge variant={item.completed ? "default" : "outline"} className={item.completed ? "bg-green-100 text-green-800 hover:bg-green-200" : ""}>
+                        <Badge variant={item.completed ? "default" : "outline"}>
                           {item.completed ? "Completed" : "In Progress"}
                         </Badge>
                       </div>
@@ -850,7 +845,6 @@ export default function App() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleDeleteItem(item.id)}
-                          className="text-red-600 border-red-200 hover:bg-red-50 dark:hover:bg-red-900/20"
                         >
                           Delete
                         </Button>
@@ -888,7 +882,18 @@ export default function App() {
             onDeleteDeck={handleDeleteFlashcardDeck}
           />
         )}
-        {/* Other tab content */}
+        {selectedTab === TAB_OPTIONS.ANALYTICS && (
+          <div className="space-y-6">
+            <h1 className="text-2xl font-bold">Analytics</h1>
+            <p>Analytics content goes here</p>
+          </div>
+        )}
+        {selectedTab === TAB_OPTIONS.POMODORO && (
+          <div className="space-y-6">
+            <h1 className="text-2xl font-bold">Pomodoro Timer</h1>
+            <p>Pomodoro timer content goes here</p>
+          </div>
+        )}
       </div>
 
       <Toaster />
