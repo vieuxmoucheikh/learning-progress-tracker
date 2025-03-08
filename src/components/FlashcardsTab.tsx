@@ -36,6 +36,12 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
     setView('study');
   };
 
+  const handleEditDeck = (deckId: string) => {
+    setSelectedDeckId(deckId);
+    onEditDeck(deckId);
+    setView('manage');
+  };
+
   const handleBackToDecks = () => {
     setSelectedDeckId(null);
     setView('decks');
@@ -55,7 +61,7 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
         decks={flashcards}
         onSelectDeck={handleSelectDeck}
         onStudyDeck={handleStudyDeck}
-        onEditDeck={onEditDeck}
+        onEditDeck={handleEditDeck}
         onDeleteDeck={onDeleteDeck}
         onAddDeck={onAddDeck}
       />

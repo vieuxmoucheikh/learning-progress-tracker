@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { FlashcardsTab } from './components/FlashcardsTab';
 import { createDeck } from './lib/flashcards';
 import { supabase } from './lib/supabase';
+import { toast } from '@/components/ui/use-toast';
 
 interface State {
   items: LearningItem[];
@@ -610,11 +611,18 @@ export default function App() {
   };
 
   const handleEditFlashcardDeck = (deckId: string) => {
-    // Navigate to edit view or handle edit mode
-    const deck = flashcardDecks.find(d => d.id === deckId);
-    if (deck) {
-      setSelectedTab(TAB_OPTIONS.FLASHCARDS);
-    }
+    // Navigate to deck editing view
+    console.log(`Editing deck: ${deckId}`);
+    
+    // Show a toast notification for better UX
+    toast({
+      title: "Edit Mode",
+      description: `Now editing flashcard deck`,
+    });
+    
+    // Additional logic for editing would go here
+    // This could include setting state variables to track the current editing deck
+    // and showing a different UI component for editing
   };
 
   const handleDeleteFlashcardDeck = async (deckId: string) => {
