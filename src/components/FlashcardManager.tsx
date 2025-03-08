@@ -67,11 +67,11 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
         return;
       }
 
-      const newCard = await createFlashcard(
-        deckId,
-        formData.front.trim(),
-        formData.back.trim()
-      );
+      const newCard = await createFlashcard({
+        deckId: deckId,
+        front: formData.front.trim(),
+        back: formData.back.trim()
+      });
 
       setCards([newCard, ...cards]);
       setIsCreating(false);
