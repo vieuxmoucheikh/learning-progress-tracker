@@ -5,7 +5,7 @@ import { Textarea } from './ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { useToast } from './ui/use-toast';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
-import { Plus, Trash2, Play, Clock, BookOpen, Star, PlusCircle, Edit, FileEdit, Library } from 'lucide-react';
+import { Plus, Trash2, Play, Clock, BookOpen, Star, PlusCircle, Edit, FileEdit, Library, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { createDeck, getDecks, getDecksSummary, createFlashcard } from '../lib/flashcards';
 import type { FlashcardDeck } from '../types';
@@ -154,6 +154,9 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     return deckSummaries.find(summary => summary.deckId === deckId);
   };
 
+  const hasDueCards = getTotalDueCards() > 0;
+  const hasNewCards = getTotalNotStartedCards() > 0;
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -177,6 +180,29 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             <Library className="w-4 h-4 mr-2" /> Create Deck
           </Button>
         </div>
+      </div>
+
+      {/* Review Alert Messages */}
+      <div className="space-y-4">
+        {hasDueCards && (
+          <Alert variant="default" className="bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
+            <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            <AlertTitle className="text-amber-800 dark:text-amber-300">Cards Due for Review</AlertTitle>
+            <AlertDescription className="text-amber-700 dark:text-amber-400">
+              You have {getTotalDueCards()} cards that need to be reviewed today.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {hasNewCards && (
+          <Alert variant="default" className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
+            <Star className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <AlertTitle className="text-blue-800 dark:text-blue-300">New Cards Available</AlertTitle>
+            <AlertDescription className="text-blue-700 dark:text-blue-400">
+              You have {getTotalNotStartedCards()} new cards to start learning.
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
 
       {/* Dashboard Summary Cards */}
@@ -218,47 +244,6 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       <div className="border-b pb-1 mb-4">
         <h3 className="text-xl font-semibold">Your Flashcard Decks</h3>
       </div>
-
-      {/* Quick Actions */}
-      {decks.length > 0 && (
-        <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
-          {decks.map((deck) => (
-            <div 
-              key={`quick-${deck.id}`}
-              className="min-w-[200px] bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-950/50 dark:to-blue-950/50 p-4 rounded-lg border border-blue-100 dark:border-blue-900 flex flex-col"
-            >
-              <h4 className="font-medium text-indigo-800 dark:text-indigo-300 mb-2 truncate">{deck.name}</h4>
-              
-              <div className="flex gap-2 mt-auto">
-                <Button 
-                  size="sm" 
-                  onClick={() => onStudyDeck(deck.id)}
-                  className="flex-1 bg-green-600 hover:bg-green-700 h-8 text-xs"
-                  disabled={isLoading}
-                >
-                  <Play className="w-3 h-3 mr-1" /> Study
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => handleAddFlashcardClick(deck.id)}
-                  className="flex-1 h-8 text-xs"
-                  disabled={isLoading}
-                >
-                  <Plus className="w-3 h-3 mr-1" /> Add Card
-                </Button>
-              </div>
-            </div>
-          ))}
-          <div 
-            onClick={() => !isLoading && setIsCreatingDeck(true)}
-            className={`min-w-[200px] bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/80 transition-colors ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            <PlusCircle className="w-6 h-6 text-blue-600 dark:text-blue-400 mb-2" />
-            <p className="font-medium text-gray-600 dark:text-gray-400">New Deck</p>
-          </div>
-        </div>
-      )}
 
       {/* Decks Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
