@@ -27,7 +27,7 @@ interface TabNavigationProps {
   activeTab: string;
   onTabChange: (tabId: string) => void;
   flashcards: FlashcardDeck[];
-  onAddDeck: (data: { name: string; description: string }) => void;
+  onAddDeck: () => void;
   onStudyDeck: (deckId: string) => void;
   onEditDeck: (deckId: string) => void;
   onDeleteDeck: (deckId: string) => void;
@@ -42,13 +42,43 @@ export function TabNavigation({
   onEditDeck,
   onDeleteDeck
 }: TabNavigationProps) {
-  const TABS: Tab[] = [
-    { id: 'dashboard', label: 'Dashboard', shortLabel: 'Home', icon: LayoutDashboard },
-    { id: 'items', label: 'Learning Items', shortLabel: 'Items', icon: BookOpen },
-    { id: 'learning-cards', label: 'Learning Cards', shortLabel: 'Cards', icon: Notebook },
-    { id: 'analytics', label: 'Analytics', shortLabel: 'Stats', icon: BarChart3 },
-    { id: 'pomodoro', label: 'Pomodoro', shortLabel: 'Timer', icon: Timer },
-    { id: 'flashcards', label: 'Flashcards', shortLabel: 'Cards', icon: Library }
+  const tabs: Tab[] = [
+    {
+      id: TAB_OPTIONS.DASHBOARD,
+      label: "Dashboard",
+      shortLabel: "Home",
+      icon: LayoutDashboard
+    },
+    {
+      id: TAB_OPTIONS.ITEMS,
+      label: "Learning Items",
+      shortLabel: "Items",
+      icon: BookOpen
+    },
+    {
+      id: TAB_OPTIONS.LEARNING_CARDS,
+      label: "Learning Cards",
+      shortLabel: "Cards",
+      icon: Notebook
+    },
+    {
+      id: TAB_OPTIONS.ANALYTICS,
+      label: "Analytics",
+      shortLabel: "Stats",
+      icon: BarChart3
+    },
+    {
+      id: TAB_OPTIONS.POMODORO,
+      label: "Pomodoro",
+      shortLabel: "Timer",
+      icon: Timer
+    },
+    {
+      id: TAB_OPTIONS.FLASHCARDS,
+      label: "Flashcards",
+      shortLabel: "Flashcards",
+      icon: Library
+    }
   ];
 
   const tabsContainerRef = useRef<HTMLDivElement>(null);
@@ -89,67 +119,55 @@ export function TabNavigation({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Mobile Navigation (Horizontal) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 z-50">
-        <div className="flex justify-around py-2">
-          {TABS.map((tab) => {
+      <nav className="flex justify-center mb-8 w-full bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-700 dark:to-blue-600 p-2 rounded-lg shadow-md">
+        <div 
+          ref={tabsContainerRef}
+          className="flex max-w-2xl w-full overflow-x-auto px-1 hide-scrollbar"
+          style={{ 
+            scrollbarWidth: 'none', 
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch'
+          }}
+        >
+          {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
+            const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
+                ref={isActive ? activeTabRef : null}
                 onClick={() => onTabChange(tab.id)}
-                className={`flex flex-col items-center p-2 rounded transition-colors ${
+                className={cn(
+                  "flex-shrink-0 text-sm font-medium py-2.5 px-3 sm:px-4 flex items-center justify-center gap-1.5 sm:gap-2 transition-all min-w-[72px] sm:min-w-[90px] rounded-lg mx-0.5 relative",
                   isActive
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
-                }`}
+                    ? "bg-white/15 text-white shadow-sm backdrop-blur-sm"
+                    : "text-white/80 hover:text-white hover:bg-white/10 dark:text-white/70 dark:hover:text-white"
+                )}
               >
-                <tab.icon className="w-5 h-5" />
-                <span className="text-xs mt-1">{tab.shortLabel}</span>
+                <Icon className={cn(
+                  "w-4 h-4 flex-shrink-0",
+                  isActive ? "text-white dark:text-white" : "text-white/80 dark:text-white/70"
+                )} />
+                <span className="whitespace-nowrap">{tab.shortLabel}</span>
+                {isActive && (
+                  <span className="absolute bottom-1 left-3 right-3 h-0.5 bg-white rounded-full"></span>
+                )}
               </button>
             );
           })}
         </div>
-      </div>
-
-      {/* Desktop Navigation (Vertical) */}
-      <div className="hidden md:flex flex-col bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 h-full">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-800">
-          <h2 className="font-bold text-xl">Learning App</h2>
-        </div>
-        
-        <nav className="flex-1 p-2 space-y-1">
-          {TABS.map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => onTabChange(tab.id)}
-                className={`flex items-center space-x-3 w-full p-3 rounded-lg transition-colors ${
-                  isActive
-                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
-              >
-                <tab.icon className="w-5 h-5" />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* Content based on active tab */}
-      <div className="hidden md:block flex-1 p-6">
+      </nav>
+      <div className="flex-1 overflow-auto">
         {activeTab === 'flashcards' && (
           <FlashcardsTab 
-            flashcards={flashcards} 
+            flashcards={flashcards}
             onAddDeck={onAddDeck}
             onStudyDeck={onStudyDeck}
             onEditDeck={onEditDeck}
             onDeleteDeck={onDeleteDeck}
           />
         )}
+        {/* Add your other tab content here */}
       </div>
     </div>
   );

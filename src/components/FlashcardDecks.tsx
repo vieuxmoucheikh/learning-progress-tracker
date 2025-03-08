@@ -178,7 +178,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             disabled={isLoading}
           >
             <Library className="w-4 h-4 mr-2" /> Create Deck
-          </Button>
+        </Button>
         </div>
       </div>
 
@@ -300,7 +300,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                         {summary.notStarted} New
                       </Badge>
                     )}
-                  </div>
+              </div>
                 )}
               </CardContent>
               

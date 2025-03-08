@@ -5,7 +5,7 @@ import { Insights } from './components/Insights';
 import { LearningInsights } from './components/LearningInsights';
 import { StreakDisplay } from './components/StreakDisplay';
 import { LearningItem, LearningItemFormData, FlashcardDeck } from '@/types';
-import { Plus, LayoutDashboard, BookOpen, BarChart3, Timer, Notebook, Library, Check, CheckCircle, Clock, Calendar as CalendarIcon } from 'lucide-react';
+import { Plus, LayoutDashboard, BookOpen, BarChart3, Timer, Notebook, Library } from 'lucide-react';
 import { Calendar } from './components/Calendar';
 import { getLearningItems, addLearningItem, updateLearningItem, deleteLearningItem, trackLearningActivity } from './lib/database';
 import { useAuth } from './lib/auth';
@@ -23,9 +23,6 @@ import { FlashcardsTab } from './components/FlashcardsTab';
 import { createDeck } from './lib/flashcards';
 import { supabase } from './lib/supabase';
 import { toast } from '@/components/ui/use-toast';
-import { Badge } from '@/components/ui/badge';
-import { TAB_OPTIONS } from './constants';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 interface State {
   items: LearningItem[];
@@ -45,6 +42,15 @@ type Action =
   | { type: 'UPDATE_NOTES'; payload: { id: string; notes: string } }
   | { type: 'ADD_SESSION_NOTE'; payload: { id: string; note: string } }
   | { type: 'SET_ACTIVE_ITEM'; payload: string | null };
+
+const TAB_OPTIONS = {
+  DASHBOARD: 'dashboard',
+  ITEMS: 'items',
+  ANALYTICS: 'analytics',
+  POMODORO: 'pomodoro',
+  LEARNING_CARDS: 'learning-cards',
+  FLASHCARDS: 'flashcards'
+} as const;
 
 const tabs = [
   { id: TAB_OPTIONS.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
@@ -282,11 +288,28 @@ export default function App() {
   const [flashcardsLoading, setFlashcardsLoading] = useState(false);
 
   const filteredItems = useMemo(() => {
-    if (filterStatus === 'all') return state.items;
-    return state.items.filter(item => {
-      return filterStatus === 'completed' ? item.completed : !item.completed;
-    });
-  }, [state.items, filterStatus]);
+    return state.items
+      .filter(item => {
+        const searchLower = searchQuery.toLowerCase();
+        const matchesSearch =
+          item.title.toLowerCase().includes(searchLower) ||
+          item.category.toLowerCase().includes(searchLower) ||
+          (item.notes?.toLowerCase() || '').includes(searchLower);
+
+        // If a date is selected, only show items from that date
+        const selectedDateStr = selectedDate ? getDateStr(selectedDate) : null;
+        const itemDate = item.date ? getDateStr(new Date(item.date)) : null;
+        const matchesDate = selectedDate ? itemDate === selectedDateStr : true;
+
+        // Filter by status
+        const matchesStatus =
+          filterStatus === 'all' ? true :
+          filterStatus === 'active' ? item.status !== 'completed' && item.status !== 'archived' :
+          filterStatus === 'completed' ? item.status === 'completed' || item.status === 'archived' : true;
+
+        return matchesSearch && matchesDate && matchesStatus;
+      });
+  }, [state.items, searchQuery, filterStatus, selectedDate]);
 
   useEffect(() => {
     let mounted = true;
@@ -700,203 +723,143 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      {/* Mobile Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-50 shadow-sm">
-        <div className="flex justify-around py-2">
-          {[
-            { id: TAB_OPTIONS.DASHBOARD, icon: LayoutDashboard, label: 'Home' },
-            { id: TAB_OPTIONS.ITEMS, icon: BookOpen, label: 'Items' },
-            { id: TAB_OPTIONS.FLASHCARDS, icon: Library, label: 'Cards' },
-            { id: TAB_OPTIONS.ANALYTICS, icon: BarChart3, label: 'Stats' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setSelectedTab(tab.id)}
-              className={`flex flex-col items-center p-2 ${
-                selectedTab === tab.id
-                  ? 'text-blue-600 dark:text-blue-400'
-                  : 'text-gray-500 dark:text-gray-400'
-              }`}
-            >
-              <tab.icon className="h-5 w-5" />
-              <span className="text-xs mt-1">{tab.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Desktop Sidebar */}
-      <div className="hidden md:block w-64 bg-blue-700 dark:bg-blue-800 text-white h-screen overflow-y-auto">
-        <div className="p-4 border-b border-blue-600 dark:border-blue-700">
-          <h1 className="text-xl font-bold">Learning Tracker</h1>
-        </div>
-        <nav className="p-3 space-y-1">
-          {[
-            { id: TAB_OPTIONS.DASHBOARD, icon: LayoutDashboard, label: 'Dashboard' },
-            { id: TAB_OPTIONS.ITEMS, icon: BookOpen, label: 'Learning Items' },
-            { id: TAB_OPTIONS.FLASHCARDS, icon: Library, label: 'Flashcards' },
-            { id: TAB_OPTIONS.ANALYTICS, icon: BarChart3, label: 'Analytics' },
-            { id: TAB_OPTIONS.POMODORO, icon: Timer, label: 'Pomodoro' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setSelectedTab(tab.id)}
-              className={`flex items-center w-full p-3 rounded-lg transition-colors ${
-                selectedTab === tab.id
-                  ? 'bg-white/15 text-white'
-                  : 'text-white/70 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <tab.icon className="h-5 w-5 mr-3" />
-              <span>{tab.label}</span>
-              {selectedTab === tab.id && (
-                <span className="ml-auto">
-                  <div className="h-2 w-2 rounded-full bg-white"></div>
+    <ThemeProvider>
+      <div className="min-h-screen bg-background text-foreground flex">
+        {/* Vertical Sidebar Navigation */}
+        <aside className="w-16 md:w-64 bg-gradient-to-b from-blue-700 to-blue-900 dark:from-blue-900 dark:to-blue-950 text-white fixed h-full transition-all duration-300 ease-in-out z-10 shadow-lg">
+          <div className="p-4 flex flex-col h-full">
+            <div className="mb-6 flex justify-center md:justify-start items-center">
+              <h1 className="hidden md:block text-xl font-bold">
+                <span className="bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+                  Learning Tracker
                 </span>
-              )}
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto p-4 md:p-6 pb-20 md:pb-6">
-        {selectedTab === TAB_OPTIONS.DASHBOARD && (
-          <DashboardTab
-            items={filteredItems}
-            onUpdate={handleDashboardUpdate}
-            onDelete={handleDeleteItem}
-            onStartTracking={handleStartTracking}
-            onStopTracking={handleStopTracking}
-            onNotesUpdate={handleUpdateNotes}
-            onSetActiveItem={handleSetActiveItem}
-            onSessionNoteAdd={handleAddSessionNote}
-            onAddItem={handleDashboardAddItem}
-            onDateSelect={handleDateSelect}
-          />
-        )}
-        {selectedTab === TAB_OPTIONS.ITEMS && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center mb-4">
-              <h1 className="text-2xl font-bold">Learning Items</h1>
-              <Button 
-                onClick={handleItemsAddItem}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                <Plus className="w-4 h-4 mr-2" /> Add Item
-              </Button>
-            </div>
-            
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-4">
-              <div className="flex space-x-2 mb-0">
-                <Button 
-                  variant={filterStatus === 'all' ? "default" : "outline"}
-                  onClick={() => setFilterStatus('all')}
-                >
-                  All
-                </Button>
-                <Button 
-                  variant={filterStatus === 'active' ? "default" : "outline"}
-                  onClick={() => setFilterStatus('active')}
-                >
-                  In Progress
-                </Button>
-                <Button 
-                  variant={filterStatus === 'completed' ? "default" : "outline"}
-                  onClick={() => setFilterStatus('completed')}
-                >
-                  Completed
-                </Button>
+              </h1>
+              <div className="md:hidden flex justify-center w-full">
+                <BookOpen className="h-6 w-6 text-white" />
               </div>
             </div>
             
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filteredItems.length === 0 ? (
-                <div className="md:col-span-2 lg:col-span-3 text-center py-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                  <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No items found</h3>
-                  <p className="text-gray-500 mb-4">Add some learning items to get started</p>
-                  <Button 
-                    onClick={handleItemsAddItem}
-                    className="bg-blue-600 hover:bg-blue-700"
+            <nav className="flex-1 space-y-2">
+              {tabs.map((tab) => {
+                const isActive = selectedTab === tab.id;
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setSelectedTab(tab.id)}
+                    className={`w-full flex items-center py-3 px-2 md:px-4 rounded-lg transition-all ${
+                      isActive
+                        ? "bg-white/15 text-white"
+                        : "text-white/70 hover:text-white hover:bg-white/10"
+                    }`}
                   >
-                    <Plus className="w-4 h-4 mr-2" /> Add Item
-                  </Button>
-                </div>
-              ) : (
-                filteredItems.map(item => (
-                  <Card key={item.id} className="overflow-hidden bg-white dark:bg-gray-800 shadow-sm">
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{item.title}</CardTitle>
-                        <Badge variant={item.completed ? "default" : "outline"}>
-                          {item.completed ? "Completed" : "In Progress"}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{item.category}</p>
-                    </CardHeader>
-                    <CardContent>
-                      {item.notes && (
-                        <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{item.notes}</p>
-                      )}
-                      <div className="flex justify-end mt-4 gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteItem(item.id)}
-                        >
-                          Delete
-                        </Button>
-                        {!item.completed ? (
-                          <Button
-                            size="sm"
-                            onClick={() => handleUpdateItem(item.id, { completed: true })}
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            <CheckCircle className="w-4 h-4 mr-1" /> Complete
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleUpdateItem(item.id, { completed: false })}
-                          >
-                            Reopen
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
+                    <Icon className={`w-5 h-5 ${isActive ? "text-white" : "text-white/70"}`} />
+                    <span className="ml-3 hidden md:block">{tab.label}</span>
+                    {isActive && (
+                      <span className="ml-auto hidden md:block">
+                        <div className="h-2 w-2 rounded-full bg-white"></div>
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+            
+            <div className="mt-auto pb-4">
+              <ThemeToggle />
             </div>
           </div>
-        )}
-        {selectedTab === TAB_OPTIONS.FLASHCARDS && (
-          <FlashcardsTab 
-            flashcards={flashcardDecks} 
-            onAddDeck={handleAddFlashcardDeck}
-            onStudyDeck={handleStudyFlashcardDeck}
-            onEditDeck={handleEditFlashcardDeck}
-            onDeleteDeck={handleDeleteFlashcardDeck}
-          />
-        )}
-        {selectedTab === TAB_OPTIONS.ANALYTICS && (
-          <div className="space-y-6">
-            <h1 className="text-2xl font-bold">Analytics</h1>
-            <p>Analytics content goes here</p>
-          </div>
-        )}
-        {selectedTab === TAB_OPTIONS.POMODORO && (
-          <div className="space-y-6">
-            <h1 className="text-2xl font-bold">Pomodoro Timer</h1>
-            <p>Pomodoro timer content goes here</p>
-          </div>
-        )}
-      </div>
+        </aside>
 
-      <Toaster />
-    </div>
+        {/* Main Content */}
+        <div className="flex-1 ml-16 md:ml-64 transition-all duration-300 ease-in-out">
+          <Toaster />
+          <div className="max-w-7xl mx-auto px-4 py-8">
+            <header className="mb-8 relative">
+              <div className="flex items-center justify-between mb-2">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  {tabs.find(tab => tab.id === selectedTab)?.label || 'Dashboard'}
+                </h1>
+                <div className="flex items-center space-x-2">
+                  {selectedTab === TAB_OPTIONS.DASHBOARD && (
+                    <Button 
+                      onClick={() => handleDashboardAddItem()} 
+                      className="gap-2 bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Item
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <p className="text-gray-700 dark:text-gray-400">
+                Track your learning journey and stay motivated
+              </p>
+            </header>
+
+            {showAddDialog && ( 
+              <AddLearningItem
+                onAdd={handleSubmitItem}
+                onClose={() => setShowAddDialog(false)}
+                isOpen={showAddDialog}
+                selectedDate={selectedDate}
+              />
+            )}
+
+            <main>
+              {selectedTab === TAB_OPTIONS.DASHBOARD && (
+                <DashboardTab
+                  items={state.items}
+                  onAddItem={handleDashboardAddItem}
+                  onUpdate={handleDashboardUpdate}
+                  onDateSelect={handleDateSelect}
+                  onDelete={handleDeleteItem}
+                  onStartTracking={handleStartTracking}
+                  onStopTracking={handleStopTracking}
+                  onNotesUpdate={handleUpdateNotes}
+                  onSessionNoteAdd={handleAddSessionNote}
+                  onSetActiveItem={handleSetActiveItem}
+                />
+              )}
+
+              {selectedTab === TAB_OPTIONS.ITEMS && (
+                <ItemsTab
+                  items={state.items}
+                  onAddItem={handleItemsAddItem}
+                  onUpdate={handleUpdateItem}
+                  onDelete={handleDeleteItem}
+                  onStartTracking={handleStartTracking}
+                  onStopTracking={handleStopTracking}
+                  onNotesUpdate={handleUpdateNotes}
+                  onSessionNoteAdd={handleAddSessionNote}
+                  onSetActiveItem={handleSetActiveItem}
+                />
+              )}
+
+              {selectedTab === TAB_OPTIONS.ANALYTICS && (
+                <AnalyticsTab items={state.items} />
+              )}
+
+              {selectedTab === TAB_OPTIONS.POMODORO && (
+                <PomodoroTimer />
+              )}
+              {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
+                <LearningCardsPage />
+              )}
+
+              {selectedTab === TAB_OPTIONS.FLASHCARDS && (
+                <FlashcardsTab 
+                  flashcards={flashcardDecks}
+                  onAddDeck={handleAddFlashcardDeck}
+                  onStudyDeck={handleStudyFlashcardDeck}
+                  onEditDeck={handleEditFlashcardDeck}
+                  onDeleteDeck={handleDeleteFlashcardDeck}
+                />
+              )}
+            </main>
+          </div>
+        </div>
+      </div>
+    </ThemeProvider>
   );
 }
