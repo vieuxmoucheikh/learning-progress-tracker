@@ -75,6 +75,26 @@ export function DashboardTab({
     }
   };
 
+  // Format review status for display
+  const formatReviewStatus = (status: string) => {
+    switch (status) {
+      case 'due': return 'Due';
+      case 'learning': return 'Learning';
+      case 'complete': return 'Complete';
+      default: return 'None';
+    }
+  };
+
+  // Get badge variant based on review status
+  const getReviewStatusBadge = (status: string) => {
+    switch (status) {
+      case 'due': return 'destructive';
+      case 'learning': return 'secondary';
+      case 'complete': return 'default';
+      default: return 'outline';
+    }
+  };
+
   // Update tasks when items or selectedDate changes
   useEffect(() => {
     if (!selectedDate) return;
@@ -141,7 +161,6 @@ export function DashboardTab({
                 dailyTimeSpent += (session.duration.hours * 60 + session.duration.minutes);
               }
             }
-            // Legacy fallback if duration isn't available
             else {
               try {
                 const startTime = new Date(session.startTime);
@@ -157,106 +176,19 @@ export function DashboardTab({
               }
             }
           }
-          // For active sessions (no endTime) that started on the selected date
-          if (sessionDate === dateStr && !session.endTime) {
-            try {
-              // Check if this session is paused
-              const isPaused = session.status === 'on_hold';
-              
-              // ALWAYS check for centralized time sources first
-              const currentTimeSecondsStr = localStorage.getItem(`sessionCurrentTimeSeconds_${item.id}`);
-              
-              if (currentTimeSecondsStr) {
-                // Use our centralized time source for consistency
-                const currentTimeSeconds = parseInt(currentTimeSecondsStr, 10);
-                const currentTimeMinutes = Math.floor(currentTimeSeconds / 60);
-                
-                // Add to daily time spent
-                dailyTimeSpent += currentTimeMinutes;
-              }
-              else {
-                const startTime = new Date(session.startTime);
-                if (!isNaN(startTime.getTime())) {  // Check if startTime is valid
-                  
-                  if (isPaused) {
-                    // For paused sessions, use the frozen time stored during the pause
-                    const frozenTimeStr = localStorage.getItem(`sessionFrozenTime_${item.id}`);
-                    if (frozenTimeStr) {
-                      // Use seconds directly from frozen time
-                      const frozenSeconds = parseInt(frozenTimeStr, 10);
-                      dailyTimeSpent += Math.floor(frozenSeconds / 60);
-                    } else {
-                      // Fallback: get the pause time from localStorage
-                      const pauseTimeStr = localStorage.getItem(`sessionPauseTime_${item.id}`);
-                      if (pauseTimeStr) {
-                        const pauseTime = new Date(parseInt(pauseTimeStr, 10));
-                        if (!isNaN(pauseTime.getTime())) {
-                          // Calculate minutes until the pause point
-                          const pausedMinutes = Math.floor((pauseTime.getTime() - startTime.getTime()) / (1000 * 60));
-                          
-                          // Get accumulated time (for previous pauses in this session)
-                          const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
-                          const accumulatedSeconds = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
-                          const accumulatedMinutes = Math.floor(accumulatedSeconds / 60);
-                          
-                          // Add paused time minus accumulated time (to avoid double counting)
-                          if (pausedMinutes > accumulatedMinutes) {
-                            dailyTimeSpent += (pausedMinutes - accumulatedMinutes);
-                          }
-                        }
-                      }
-                    }
-                  } else {
-                    // For active sessions, fallback to direct calculation
-                    const now = new Date();
-                    
-                    // Get accumulated time (for previous pauses)
-                    const accumulatedTimeStr = localStorage.getItem(`sessionAccumulatedTime_${item.id}`);
-                    const accumulatedSeconds = accumulatedTimeStr ? parseInt(accumulatedTimeStr, 10) : 0;
-                    const accumulatedMinutes = Math.floor(accumulatedSeconds / 60);
-                    
-                    // Calculate active minutes, adjusting for accumulated pause time
-                    const totalMinutes = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
-                    
-                    // Only count positive time values
-                    if (totalMinutes > accumulatedMinutes) {
-                      dailyTimeSpent += (totalMinutes - accumulatedMinutes);
-                    }
-                  }
-                }
-              }
-            } catch (error) {
-              console.error('Error calculating active session time:', error);
-            }
-          }
         });
       }
     });
 
+    // Convert total minutes to hours and minutes
+    const dailyTimeSpentHours = Math.floor(dailyTimeSpent / 60);
+    const dailyTimeSpentMinutes = dailyTimeSpent % 60;
+
     return {
-      dailyTimeSpentHours: Math.floor(dailyTimeSpent / 60),
-      dailyTimeSpentMinutes: dailyTimeSpent % 60
+      dailyTimeSpentHours,
+      dailyTimeSpentMinutes
     };
   }, [items, selectedDate, getDateStr]);
-
-  // Helper function for flashcard deck status badges
-  const getReviewStatusBadge = (status: string) => {
-    switch (status) {
-      case 'due': return 'destructive';
-      case 'learning': return 'secondary';
-      case 'complete': return 'default';
-      default: return 'outline';
-    }
-  };
-
-  const formatReviewStatus = (status: string) => {
-    switch (status) {
-      case 'due': return 'Due';
-      case 'learning': return 'In Progress';
-      case 'complete': return 'Completed';
-      default: return 'Not Started';
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -284,7 +216,7 @@ export function DashboardTab({
       </header>
 
       {/* Stats Cards Section - Horizontal on all screens */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Card className="p-3 hover:shadow-md transition-shadow border-l-4 border-purple-500">
           <div className="flex items-start justify-between">
             <div>
@@ -336,10 +268,10 @@ export function DashboardTab({
         </Card>
       </div>
 
-      {/* Main Content Grid - Multi-column layout on all screens */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Calendar takes more space */}
-        <Card className="p-4 hover:shadow-md transition-shadow md:col-span-2">
+      {/* Main Content Grid - Always have at least 2 columns, even on mobile */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+        {/* Calendar takes half the screen */}
+        <Card className="p-4 hover:shadow-md transition-shadow col-span-1">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg">
@@ -349,10 +281,9 @@ export function DashboardTab({
             </div>
             <Button onClick={() => onAddItem(selectedDate)} className="gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800">
               <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add</span>
             </Button>
           </div>
-          <div className="w-full max-w-xl mx-auto">
+          <div className="w-full">
             <Calendar 
               items={items}
               onDateSelect={handleDateSelect}
@@ -368,7 +299,7 @@ export function DashboardTab({
         </Card>
 
         {/* Today's Goals */}
-        <Card className="p-4 hover:shadow-md transition-shadow">
+        <Card className="p-4 hover:shadow-md transition-shadow col-span-1">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
@@ -377,19 +308,19 @@ export function DashboardTab({
               <h2 className="text-lg font-semibold">Today's Goals</h2>
             </div>
             <span className="px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
-              {activeTasks.length} items
+              {activeTasks.length}
             </span>
           </div>
           {activeTasks.length === 0 ? (
-            <div className="text-center py-8">
+            <div className="text-center py-6">
               <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3">
-                <Target className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+                <Target className="h-6 w-6 text-gray-400 dark:text-gray-500" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">No goals for today</h3>
-              <p className="text-gray-500 dark:text-gray-400 mt-1">Add some tasks to get started</p>
+              <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">No goals</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Add tasks to get started</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
               {activeTasks.map((item) => (
                 <LearningItemCard
                   key={item.id}
@@ -407,8 +338,8 @@ export function DashboardTab({
           )}
         </Card>
 
-        {/* Flashcards Preview Section - Added to dashboard */}
-        <Card className="p-4 hover:shadow-md transition-shadow md:col-span-2 lg:col-span-1">
+        {/* Flashcards Preview Section */}
+        <Card className="p-4 hover:shadow-md transition-shadow col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
@@ -445,19 +376,19 @@ export function DashboardTab({
                 </div>
               ))
             ) : (
-              <div className="col-span-2 text-center py-8">
+              <div className="col-span-2 text-center py-6">
                 <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3">
-                  <Library className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+                  <Library className="h-6 w-6 text-gray-400 dark:text-gray-500" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">No flashcard decks yet</h3>
-                <p className="text-gray-500 dark:text-gray-400 mt-1">Create a deck to start studying</p>
+                <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">No flashcard decks</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Create a deck to start studying</p>
               </div>
             )}
           </div>
         </Card>
         
         {/* Completed Tasks */}
-        <Card className="p-4 hover:shadow-md transition-shadow md:col-span-2 lg:col-span-1">
+        <Card className="p-4 hover:shadow-md transition-shadow col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-green-50 dark:bg-green-900/30 rounded-lg">
@@ -466,19 +397,19 @@ export function DashboardTab({
               <h2 className="text-lg font-semibold">Completed Today</h2>
             </div>
             <span className="px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300">
-              {completedTasks.length} items
+              {completedTasks.length}
             </span>
           </div>
           {completedTasks.length === 0 ? (
-            <div className="text-center py-8">
+            <div className="text-center py-6">
               <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3">
-                <CheckCircle className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+                <CheckCircle className="h-6 w-6 text-gray-400 dark:text-gray-500" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">No completed tasks</h3>
-              <p className="text-gray-500 dark:text-gray-400 mt-1">Complete some tasks to see them here</p>
+              <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">No completed tasks</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Complete tasks to see them here</p>
             </div>
           ) : (
-            <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
+            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
               {completedTasks.map((item) => (
                 <LearningItemCard
                   key={item.id}
@@ -504,9 +435,7 @@ export function DashboardTab({
             <DialogHeader>
               <DialogTitle>Add Learning Goal</DialogTitle>
             </DialogHeader>
-            <LearningGoals 
-              items={items} 
-            />
+            <LearningGoals items={items} />
           </DialogContent>
         </Dialog>
       )}
