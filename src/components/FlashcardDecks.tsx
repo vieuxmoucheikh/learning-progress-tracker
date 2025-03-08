@@ -5,7 +5,7 @@ import { Textarea } from './ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useToast } from './ui/use-toast';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
-import { Plus, Trash2, Play, AlertCircle, BookOpen, Star, Clock, PlusCircle } from 'lucide-react';
+import { Plus, Trash2, Play, Clock, BookOpen, Star, PlusCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { createDeck, getDecks, getDecksSummary } from '../lib/flashcards';
 import type { FlashcardDeck } from '../types';
@@ -13,28 +13,34 @@ import type { DeckSummary } from '../lib/flashcards';
 import { supabase } from '../lib/supabase';
 
 interface FlashcardDecksProps {
+  decks: FlashcardDeck[];
   onSelectDeck: (deckId: string) => void;
   onStudyDeck: (deckId: string) => void;
+  onEditDeck: (deckId: string) => void;
+  onDeleteDeck: (deckId: string) => void;
+  onAddDeck: () => void;
 }
 
-export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck, onStudyDeck }) => {
-  const [decks, setDecks] = useState<FlashcardDeck[]>([]);
+export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ 
+  decks,
+  onSelectDeck, 
+  onStudyDeck,
+  onEditDeck,
+  onDeleteDeck,
+  onAddDeck
+}) => {
   const [deckSummaries, setDeckSummaries] = useState<DeckSummary[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState({ name: '', description: '' });
   const { toast } = useToast();
 
   useEffect(() => {
-    loadDecks();
+    loadDeckSummaries();
   }, []);
 
-  const loadDecks = async () => {
+  const loadDeckSummaries = async () => {
     try {
-      const [decksData, summariesData] = await Promise.all([
-        getDecks(),
-        getDecksSummary()
-      ]);
-      setDecks(decksData);
+      const summariesData = await getDecksSummary();
       setDeckSummaries(summariesData);
     } catch (error) {
       console.error('Error loading decks:', error);
@@ -58,63 +64,6 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck, on
     return deckSummaries.find(summary => summary.deckId === deckId);
   };
 
-  const handleCreateDeck = async () => {
-    try {
-      if (!formData.name.trim()) {
-        toast({
-          title: "Error",
-          description: "Please provide a name for the deck",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      const newDeck = await createDeck(formData.name.trim(), formData.description.trim());
-      setDecks([newDeck, ...decks]);
-      setIsCreating(false);
-      setFormData({ name: '', description: '' });
-      
-      toast({
-        title: "Success",
-        description: "Deck created successfully",
-      });
-    } catch (error) {
-      console.error('Error creating deck:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create deck",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleDeleteDeck = async (deckId: string) => {
-    try {
-      const { error } = await supabase
-        .from('flashcard_decks')
-        .delete()
-        .eq('id', deckId)
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        throw error;
-      }
-
-      setDecks(decks.filter(deck => deck.id !== deckId));
-      toast({
-        title: "Success",
-        description: "Deck deleted successfully",
-      });
-    } catch (error) {
-      console.error('Error deleting deck:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete deck",
-        variant: "destructive"
-      });
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -122,7 +71,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck, on
           <h2 className="text-3xl font-bold">Your Flashcard Decks</h2>
           <p className="text-gray-600 dark:text-gray-400 mt-1">Manage and study your flashcard collections</p>
         </div>
-        <Button onClick={() => setIsCreating(true)} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+        <Button onClick={onAddDeck} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
           <Plus className="w-4 h-4 mr-2" /> Create Deck
         </Button>
       </div>
@@ -263,6 +212,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck, on
                       <Button 
                         variant="destructive" 
                         size="sm"
+                        onClick={() => onDeleteDeck(deck.id)}
                         className="bg-red-600 hover:bg-red-700 text-white dark:bg-red-700 dark:hover:bg-red-800"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -278,7 +228,6 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck, on
                       <AlertDialogFooter>
                         <AlertDialogCancel className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300">Cancel</AlertDialogCancel>
                         <AlertDialogAction 
-                          onClick={() => handleDeleteDeck(deck.id)}
                           className="bg-red-600 hover:bg-red-700 text-white dark:bg-red-700 dark:hover:bg-red-800"
                         >
                           Delete
@@ -341,7 +290,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ onSelectDeck, on
               Cancel
             </Button>
             <Button 
-              onClick={handleCreateDeck}
+              onClick={() => onAddDeck()}
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
             >
               Create Deck

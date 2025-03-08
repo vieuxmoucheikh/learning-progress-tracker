@@ -216,7 +216,7 @@ export function DashboardTab({
       </header>
 
       {/* Stats Cards Section - Horizontal on all screens */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-4 gap-4 mb-6">
         <Card className="p-3 hover:shadow-md transition-shadow border-l-4 border-purple-500">
           <div className="flex items-start justify-between">
             <div>
@@ -268,10 +268,10 @@ export function DashboardTab({
         </Card>
       </div>
 
-      {/* Main Content Grid - Always have at least 2 columns, even on mobile */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-        {/* Calendar takes half the screen */}
-        <Card className="p-4 hover:shadow-md transition-shadow col-span-1">
+      {/* Main Content Grid - Update this */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Calendar takes exactly half the page */}
+        <Card className="p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg">
@@ -279,7 +279,7 @@ export function DashboardTab({
               </div>
               <h2 className="text-lg font-semibold">Calendar</h2>
             </div>
-            <Button onClick={() => onAddItem(selectedDate)} className="gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800">
+            <Button onClick={() => onAddItem(selectedDate)} className="gap-2 bg-blue-600 hover:bg-blue-700">
               <Plus className="h-4 w-4" />
             </Button>
           </div>
@@ -298,8 +298,8 @@ export function DashboardTab({
           </div>
         </Card>
 
-        {/* Today's Goals */}
-        <Card className="p-4 hover:shadow-md transition-shadow col-span-1">
+        {/* Today's Goals - Takes the other half */}
+        <Card className="p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
@@ -338,7 +338,7 @@ export function DashboardTab({
           )}
         </Card>
 
-        {/* Flashcards Preview Section */}
+        {/* Flashcards and Completed Tasks - Take full width or split evenly on large screens */}
         <Card className="p-4 hover:shadow-md transition-shadow col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -387,7 +387,6 @@ export function DashboardTab({
           </div>
         </Card>
         
-        {/* Completed Tasks */}
         <Card className="p-4 hover:shadow-md transition-shadow col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">

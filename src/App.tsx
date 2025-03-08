@@ -4,7 +4,7 @@ import { Stats } from './components/Stats';
 import { Insights } from './components/Insights';
 import { LearningInsights } from './components/LearningInsights';
 import { StreakDisplay } from './components/StreakDisplay';
-import { LearningItem, LearningItemFormData } from './types';
+import { LearningItem, LearningItemFormData, FlashcardDeck } from '@/types';
 import { Plus, LayoutDashboard, BookOpen, BarChart3, Timer, Notebook, Library } from 'lucide-react';
 import { Calendar } from './components/Calendar';
 import { getLearningItems, addLearningItem, updateLearningItem, deleteLearningItem, trackLearningActivity } from './lib/database';
@@ -19,6 +19,7 @@ import { LearningCardsPage } from './pages/LearningCards';
 import { ThemeProvider } from './components/ThemeProvider';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Button } from '@/components/ui/button';
+import { FlashcardsTab } from './components/FlashcardsTab';
 
 interface State {
   items: LearningItem[];
@@ -44,7 +45,8 @@ const TAB_OPTIONS = {
   ITEMS: 'items',
   ANALYTICS: 'analytics',
   POMODORO: 'pomodoro',
-  LEARNING_CARDS: 'learning-cards'
+  LEARNING_CARDS: 'learning-cards',
+  FLASHCARDS: 'flashcards'
 } as const;
 
 const tabs = [
@@ -53,6 +55,7 @@ const tabs = [
   { id: TAB_OPTIONS.ANALYTICS, label: 'Analytics', icon: BarChart3 },
   { id: TAB_OPTIONS.POMODORO, label: 'Pomodoro', icon: Timer },
   { id: TAB_OPTIONS.LEARNING_CARDS, label: 'Learning Cards', icon: Notebook },
+  { id: TAB_OPTIONS.FLASHCARDS, label: 'Flashcards', icon: Library },
 ];
 
 function reducer(state: State, action: Action): State {
@@ -278,6 +281,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'completed'>('all');
+  const [flashcardDecks, setFlashcardDecks] = useState<FlashcardDeck[]>([]);
 
   const filteredItems = useMemo(() => {
     return state.items
@@ -586,6 +590,22 @@ export default function App() {
     setShowAddDialog(true);
   };
 
+  const handleAddFlashcardDeck = () => {
+    // Implementation of handleAddFlashcardDeck
+  };
+
+  const handleStudyFlashcardDeck = (deckId: string) => {
+    // Implementation of handleStudyFlashcardDeck
+  };
+
+  const handleEditFlashcardDeck = (deckId: string) => {
+    // Implementation of handleEditFlashcardDeck
+  };
+
+  const handleDeleteFlashcardDeck = (deckId: string) => {
+    // Implementation of handleDeleteFlashcardDeck
+  };
+
   if (state.loading) {
     return (
       <ThemeProvider>
@@ -737,6 +757,16 @@ export default function App() {
               )}
               {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
                 <LearningCardsPage />
+              )}
+
+              {selectedTab === TAB_OPTIONS.FLASHCARDS && (
+                <FlashcardsTab 
+                  flashcards={flashcardDecks}
+                  onAddDeck={handleAddFlashcardDeck}
+                  onStudyDeck={handleStudyFlashcardDeck}
+                  onEditDeck={handleEditFlashcardDeck}
+                  onDeleteDeck={handleDeleteFlashcardDeck}
+                />
               )}
             </main>
           </div>

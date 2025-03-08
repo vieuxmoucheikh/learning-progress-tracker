@@ -3,10 +3,25 @@ import { Button } from './ui/button';
 import { FlashcardDecks } from './FlashcardDecks';
 import { FlashcardManager } from './FlashcardManager';
 import { FlashcardStudy } from './FlashcardStudy';
+import { FlashcardDeck } from '@/types';
 
 type View = 'decks' | 'study' | 'manage';
 
-export const FlashcardsTab: React.FC = () => {
+interface FlashcardsTabProps {
+  flashcards: FlashcardDeck[];
+  onAddDeck: () => void;
+  onStudyDeck: (deckId: string) => void;
+  onEditDeck: (deckId: string) => void;
+  onDeleteDeck: (deckId: string) => void;
+}
+
+export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
+  flashcards,
+  onAddDeck,
+  onStudyDeck,
+  onEditDeck,
+  onDeleteDeck
+}) => {
   const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
   const [view, setView] = useState<View>('decks');
 
@@ -36,8 +51,12 @@ export const FlashcardsTab: React.FC = () => {
   if (view === 'decks' || !selectedDeckId) {
     return (
       <FlashcardDecks 
+        decks={flashcards}
         onSelectDeck={handleSelectDeck}
-        onStudyDeck={handleStudyDeck}
+        onStudyDeck={onStudyDeck}
+        onEditDeck={onEditDeck}
+        onDeleteDeck={onDeleteDeck}
+        onAddDeck={onAddDeck}
       />
     );
   }
@@ -61,21 +80,23 @@ export const FlashcardsTab: React.FC = () => {
             </Button>
           </div>
         </div>
-        <div className="p-4">
-          <FlashcardStudy
-            deckId={selectedDeckId}
-            onFinish={handleFinishStudy}
-            onBackToDecks={handleBackToDecks}
-          />
-        </div>
+        <FlashcardStudy
+          deckId={selectedDeckId}
+          onBackToDecks={handleBackToDecks}
+          onFinish={handleFinishStudy}
+        />
       </div>
     );
   }
 
-  return (
-    <FlashcardManager
-      deckId={selectedDeckId}
-      onBackToDecks={handleBackToDecks}
-    />
-  );
+  if (view === 'manage') {
+    return (
+      <FlashcardManager
+        deckId={selectedDeckId}
+        onBackToDecks={handleBackToDecks}
+      />
+    );
+  }
+
+  return null;
 };

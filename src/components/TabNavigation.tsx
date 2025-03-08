@@ -3,62 +3,84 @@ import { BarChart3, BookOpen, LayoutDashboard, Timer, Notebook, Library } from "
 import { cn } from "@/lib/utils";
 import { FlashcardsTab } from './FlashcardsTab';
 import { LucideIcon } from "lucide-react";
+import { Link } from "react-router-dom";
+import { FlashcardDeck } from '@/types';
 
-interface Tab {
+// Define all available tabs
+export const TAB_OPTIONS = {
+  DASHBOARD: "dashboard",
+  ITEMS: "items",
+  ANALYTICS: "analytics",
+  POMODORO: "pomodoro",
+  LEARNING_CARDS: "learning-cards",
+  FLASHCARDS: "flashcards"
+};
+
+type Tab = {
   id: string;
   label: string;
   shortLabel: string;
-  icon: LucideIcon;
-}
+  icon: any;
+};
 
 interface TabNavigationProps {
   activeTab: string;
   onTabChange: (tabId: string) => void;
+  flashcards: FlashcardDeck[];
+  onAddDeck: () => void;
+  onStudyDeck: (deckId: string) => void;
+  onEditDeck: (deckId: string) => void;
+  onDeleteDeck: (deckId: string) => void;
 }
 
-const tabs: Tab[] = [
-  {
-    id: "dashboard",
-    label: "Dashboard",
-    shortLabel: "Home",
-    icon: LayoutDashboard
-  },
-  {
-    id: "items",
-    label: "Learning Items",
-    shortLabel: "Items",
-    icon: BookOpen
-  },
-  {
-    id: "learning-cards",
-    label: "Learning Cards",
-    shortLabel: "Cards",
-    icon: Notebook
-  },
-  {
-    id: "analytics",
-    label: "Analytics",
-    shortLabel: "Stats",
-    icon: BarChart3
-  },
-  {
-    id: "pomodoro",
-    label: "Pomodoro",
-    shortLabel: "Timer",
-    icon: Timer
-  },
-  {
-    id: "flashcards",
-    label: "Flashcards",
-    shortLabel: "Flashcards",
-    icon: Library
-  }
-];
-
-export const TabNavigation: React.FC<TabNavigationProps> = ({
-  activeTab,
+export function TabNavigation({ 
+  activeTab, 
   onTabChange,
-}) => {
+  flashcards,
+  onAddDeck,
+  onStudyDeck,
+  onEditDeck,
+  onDeleteDeck
+}: TabNavigationProps) {
+  const tabs: Tab[] = [
+    {
+      id: TAB_OPTIONS.DASHBOARD,
+      label: "Dashboard",
+      shortLabel: "Home",
+      icon: LayoutDashboard
+    },
+    {
+      id: TAB_OPTIONS.ITEMS,
+      label: "Learning Items",
+      shortLabel: "Items",
+      icon: BookOpen
+    },
+    {
+      id: TAB_OPTIONS.LEARNING_CARDS,
+      label: "Learning Cards",
+      shortLabel: "Cards",
+      icon: Notebook
+    },
+    {
+      id: TAB_OPTIONS.ANALYTICS,
+      label: "Analytics",
+      shortLabel: "Stats",
+      icon: BarChart3
+    },
+    {
+      id: TAB_OPTIONS.POMODORO,
+      label: "Pomodoro",
+      shortLabel: "Timer",
+      icon: Timer
+    },
+    {
+      id: TAB_OPTIONS.FLASHCARDS,
+      label: "Flashcards",
+      shortLabel: "Flashcards",
+      icon: Library
+    }
+  ];
+
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const activeTabRef = useRef<HTMLButtonElement>(null);
 
@@ -136,9 +158,17 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
         </div>
       </nav>
       <div className="flex-1 overflow-auto">
-        {activeTab === 'flashcards' && <FlashcardsTab />}
+        {activeTab === 'flashcards' && (
+          <FlashcardsTab 
+            flashcards={flashcards}
+            onAddDeck={onAddDeck}
+            onStudyDeck={onStudyDeck}
+            onEditDeck={onEditDeck}
+            onDeleteDeck={onDeleteDeck}
+          />
+        )}
         {/* Add your other tab content here */}
       </div>
     </div>
   );
-};
+}
