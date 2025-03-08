@@ -5,7 +5,7 @@ import { Insights } from './components/Insights';
 import { LearningInsights } from './components/LearningInsights';
 import { StreakDisplay } from './components/StreakDisplay';
 import { LearningItem, LearningItemFormData, FlashcardDeck } from '@/types';
-import { Plus, LayoutDashboard, BookOpen, BarChart3, Timer, Notebook, Library } from 'lucide-react';
+import { Plus, LayoutDashboard, BookOpen, BarChart3, Timer, Notebook, Library, Check, CheckCircle, Clock, Calendar as CalendarIcon } from 'lucide-react';
 import { Calendar } from './components/Calendar';
 import { getLearningItems, addLearningItem, updateLearningItem, deleteLearningItem, trackLearningActivity } from './lib/database';
 import { useAuth } from './lib/auth';
@@ -25,6 +25,7 @@ import { supabase } from './lib/supabase';
 import { toast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { TAB_OPTIONS } from './constants';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 interface State {
   items: LearningItem[];
@@ -699,22 +700,70 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      {/* Navigation */}
-      <div className="md:w-64 flex-shrink-0">
-        <TabNavigation 
-          activeTab={selectedTab} 
-          onTabChange={(tabId: string) => setSelectedTab(tabId)}
-          flashcards={flashcardDecks}
-          onAddDeck={handleAddFlashcardDeck}
-          onStudyDeck={handleStudyFlashcardDeck}
-          onEditDeck={handleEditFlashcardDeck}
-          onDeleteDeck={handleDeleteFlashcardDeck}
-        />
+    <div className="flex flex-col md:flex-row h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 text-gray-900 dark:text-gray-100">
+      {/* Mobile Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-50 shadow-lg">
+        <div className="flex justify-around py-2">
+          {[
+            { id: TAB_OPTIONS.DASHBOARD, icon: LayoutDashboard, label: 'Home' },
+            { id: TAB_OPTIONS.ITEMS, icon: BookOpen, label: 'Items' },
+            { id: TAB_OPTIONS.FLASHCARDS, icon: Library, label: 'Cards' },
+            { id: TAB_OPTIONS.ANALYTICS, icon: BarChart3, label: 'Stats' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setSelectedTab(tab.id)}
+              className={`flex flex-col items-center p-2 ${
+                selectedTab === tab.id
+                  ? 'text-blue-600 dark:text-blue-400'
+                  : 'text-gray-500 dark:text-gray-400'
+              }`}
+            >
+              <tab.icon className="h-5 w-5" />
+              <span className="text-xs mt-1">{tab.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Main Content - With bottom padding on mobile for the navigation */}
-      <div className="flex-1 overflow-auto p-4 md:p-6 pb-20 md:pb-6">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block w-64 bg-gradient-to-b from-blue-700 to-blue-900 dark:from-blue-900 dark:to-blue-950 text-white h-screen shadow-lg overflow-y-auto">
+        <div className="p-5 border-b border-blue-600 dark:border-blue-800">
+          <h1 className="text-xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+            Learning Tracker
+          </h1>
+        </div>
+        <nav className="p-3 space-y-1">
+          {[
+            { id: TAB_OPTIONS.DASHBOARD, icon: LayoutDashboard, label: 'Dashboard' },
+            { id: TAB_OPTIONS.ITEMS, icon: BookOpen, label: 'Learning Items' },
+            { id: TAB_OPTIONS.FLASHCARDS, icon: Library, label: 'Flashcards' },
+            { id: TAB_OPTIONS.ANALYTICS, icon: BarChart3, label: 'Analytics' },
+            { id: TAB_OPTIONS.POMODORO, icon: Timer, label: 'Pomodoro' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setSelectedTab(tab.id)}
+              className={`flex items-center w-full p-3 rounded-lg transition-colors ${
+                selectedTab === tab.id
+                  ? 'bg-white/15 text-white'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <tab.icon className="h-5 w-5 mr-3" />
+              <span>{tab.label}</span>
+              {selectedTab === tab.id && (
+                <span className="ml-auto">
+                  <div className="h-2 w-2 rounded-full bg-white"></div>
+                </span>
+              )}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-y-auto p-5 md:p-8 pb-20 md:pb-8">
         {selectedTab === TAB_OPTIONS.DASHBOARD && (
           <DashboardTab
             items={filteredItems}
@@ -731,48 +780,102 @@ export default function App() {
         )}
         {selectedTab === TAB_OPTIONS.ITEMS && (
           <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-bold">Learning Items</h1>
-              <Button onClick={handleItemsAddItem}>
+              <Button 
+                onClick={handleItemsAddItem}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              >
                 <Plus className="w-4 h-4 mr-2" /> Add Item
               </Button>
             </div>
             
-            <div className="flex space-x-2 mb-4">
-              <Button 
-                variant={filterStatus === 'all' ? "default" : "outline"}
-                onClick={() => setFilterStatus('all')}
-                size="sm"
-              >
-                All
-              </Button>
-              <Button 
-                variant={filterStatus === 'active' ? "default" : "outline"}
-                onClick={() => setFilterStatus('active')}
-                size="sm"
-              >
-                In Progress
-              </Button>
-              <Button 
-                variant={filterStatus === 'completed' ? "default" : "outline"}
-                onClick={() => setFilterStatus('completed')}
-                size="sm"
-              >
-                Completed
-              </Button>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-6">
+              <div className="flex space-x-2 mb-0">
+                <Button 
+                  variant={filterStatus === 'all' ? "default" : "outline"}
+                  onClick={() => setFilterStatus('all')}
+                  className={filterStatus === 'all' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                >
+                  All
+                </Button>
+                <Button 
+                  variant={filterStatus === 'active' ? "default" : "outline"}
+                  onClick={() => setFilterStatus('active')}
+                  className={filterStatus === 'active' ? 'bg-amber-600 hover:bg-amber-700' : ''}
+                >
+                  In Progress
+                </Button>
+                <Button 
+                  variant={filterStatus === 'completed' ? "default" : "outline"}
+                  onClick={() => setFilterStatus('completed')}
+                  className={filterStatus === 'completed' ? 'bg-green-600 hover:bg-green-700' : ''}
+                >
+                  Completed
+                </Button>
+              </div>
             </div>
             
-            <div className="space-y-4">
-              {filteredItems.map(item => (
-                <div key={item.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border">
-                  <div className="flex justify-between">
-                    <h3 className="font-medium">{item.title}</h3>
-                    <Badge variant={item.completed ? "default" : "outline"}>
-                      {item.completed ? "Completed" : "In Progress"}
-                    </Badge>
-                  </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {filteredItems.length === 0 ? (
+                <div className="md:col-span-2 lg:col-span-3 text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
+                  <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No items found</h3>
+                  <p className="text-gray-500 mb-6">Add some learning items to get started</p>
+                  <Button 
+                    onClick={handleItemsAddItem}
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                  >
+                    <Plus className="w-4 h-4 mr-2" /> Add Item
+                  </Button>
                 </div>
-              ))}
+              ) : (
+                filteredItems.map(item => (
+                  <Card key={item.id} className="overflow-hidden bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <CardTitle className="text-lg">{item.title}</CardTitle>
+                        <Badge variant={item.completed ? "default" : "outline"} className={item.completed ? "bg-green-100 text-green-800 hover:bg-green-200" : ""}>
+                          {item.completed ? "Completed" : "In Progress"}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{item.category}</p>
+                    </CardHeader>
+                    <CardContent>
+                      {item.notes && (
+                        <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{item.notes}</p>
+                      )}
+                      <div className="flex justify-end mt-4 gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteItem(item.id)}
+                          className="text-red-600 border-red-200 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        >
+                          Delete
+                        </Button>
+                        {!item.completed ? (
+                          <Button
+                            size="sm"
+                            onClick={() => handleUpdateItem(item.id, { completed: true })}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" /> Complete
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleUpdateItem(item.id, { completed: false })}
+                          >
+                            Reopen
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </div>
         )}
@@ -789,7 +892,6 @@ export default function App() {
       </div>
 
       <Toaster />
-      {/* React Dialog and other modals */}
     </div>
   );
 }
