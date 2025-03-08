@@ -18,7 +18,7 @@ interface FlashcardDecksProps {
   onStudyDeck: (deckId: string) => void;
   onEditDeck: (deckId: string) => void;
   onDeleteDeck: (deckId: string) => void;
-  onAddDeck: () => void;
+  onAddDeck: (data: { name: string; description: string }) => void;
 }
 
 export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ 
@@ -71,7 +71,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           <h2 className="text-3xl font-bold">Your Flashcard Decks</h2>
           <p className="text-gray-600 dark:text-gray-400 mt-1">Manage and study your flashcard collections</p>
         </div>
-        <Button onClick={onAddDeck} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+        <Button onClick={() => setIsCreating(true)} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
           <Plus className="w-4 h-4 mr-2" /> Create Deck
         </Button>
       </div>
@@ -290,7 +290,19 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               Cancel
             </Button>
             <Button 
-              onClick={() => onAddDeck()}
+              onClick={() => {
+                if (!formData.name.trim()) {
+                  toast({
+                    title: "Error",
+                    description: "Please provide a name for the deck",
+                    variant: "destructive"
+                  });
+                  return;
+                }
+                onAddDeck(formData);
+                setIsCreating(false);
+                setFormData({ name: '', description: '' });
+              }}
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
             >
               Create Deck

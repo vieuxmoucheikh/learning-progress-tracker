@@ -31,9 +31,6 @@ interface Props {
   onSessionNoteAdd: (id: string, note: string) => void;
   onAddItem: (date?: Date | null) => void;
   onDateSelect: (date: Date) => void;
-  flashcards?: FlashcardDeck[];
-  onFlashcardsSelect?: () => void;
-  onFlashcardDeckSelect?: (id: string) => void;
 }
 
 export function DashboardTab({ 
@@ -46,10 +43,7 @@ export function DashboardTab({
   onSetActiveItem,
   onSessionNoteAdd,
   onAddItem,
-  onDateSelect,
-  flashcards = [],
-  onFlashcardsSelect,
-  onFlashcardDeckSelect
+  onDateSelect
 }: Props) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(() => {
     const today = new Date();
@@ -338,56 +332,8 @@ export function DashboardTab({
           )}
         </Card>
 
-        {/* Flashcards and Completed Tasks - Take full width or split evenly on large screens */}
-        <Card className="p-4 hover:shadow-md transition-shadow col-span-2 lg:col-span-1">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
-                <Library className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-              </div>
-              <h2 className="text-lg font-semibold">Flashcards</h2>
-            </div>
-            <Button 
-              variant="outline" 
-              onClick={() => onFlashcardsSelect && onFlashcardsSelect()}
-              className="text-sm"
-            >
-              View All
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {flashcards && flashcards.length > 0 ? (
-              flashcards.slice(0, 4).map((deck) => (
-                <div 
-                  key={deck.id} 
-                  className="border rounded-lg p-3 hover:shadow-md transition-all cursor-pointer"
-                  onClick={() => onFlashcardDeckSelect && onFlashcardDeckSelect(deck.id)}
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium">{deck.name}</h3>
-                      <p className="text-sm text-muted-foreground">{deck.cards?.length || 0} cards</p>
-                    </div>
-                    <Badge variant={getReviewStatusBadge(deck.reviewStatus || 'none')}>
-                      {formatReviewStatus(deck.reviewStatus || 'none')}
-                    </Badge>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="col-span-2 text-center py-6">
-                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3">
-                  <Library className="h-6 w-6 text-gray-400 dark:text-gray-500" />
-                </div>
-                <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">No flashcard decks</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Create a deck to start studying</p>
-              </div>
-            )}
-          </div>
-        </Card>
-        
-        <Card className="p-4 hover:shadow-md transition-shadow col-span-2 lg:col-span-1">
+        {/* Completed Tasks - Takes full width or split evenly on large screens */}
+        <Card className="p-4 hover:shadow-md transition-shadow col-span-2">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-green-50 dark:bg-green-900/30 rounded-lg">

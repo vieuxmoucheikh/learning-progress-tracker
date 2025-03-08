@@ -20,6 +20,8 @@ import { ThemeProvider } from './components/ThemeProvider';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { FlashcardsTab } from './components/FlashcardsTab';
+import { createDeck } from './lib/flashcards';
+import { supabase } from './lib/supabase';
 
 interface State {
   items: LearningItem[];
@@ -590,20 +592,41 @@ export default function App() {
     setShowAddDialog(true);
   };
 
-  const handleAddFlashcardDeck = () => {
-    // Implementation of handleAddFlashcardDeck
+  const handleAddFlashcardDeck = async (data: { name: string; description: string }) => {
+    try {
+      const newDeck = await createDeck(data.name, data.description);
+      setFlashcardDecks([newDeck, ...flashcardDecks]);
+    } catch (error) {
+      console.error('Error creating deck:', error);
+    }
   };
 
   const handleStudyFlashcardDeck = (deckId: string) => {
-    // Implementation of handleStudyFlashcardDeck
+    // Navigate to study view or handle study mode
+    const deck = flashcardDecks.find(d => d.id === deckId);
+    if (deck) {
+      setSelectedTab(TAB_OPTIONS.FLASHCARDS);
+    }
   };
 
   const handleEditFlashcardDeck = (deckId: string) => {
-    // Implementation of handleEditFlashcardDeck
+    // Navigate to edit view or handle edit mode
+    const deck = flashcardDecks.find(d => d.id === deckId);
+    if (deck) {
+      setSelectedTab(TAB_OPTIONS.FLASHCARDS);
+    }
   };
 
-  const handleDeleteFlashcardDeck = (deckId: string) => {
-    // Implementation of handleDeleteFlashcardDeck
+  const handleDeleteFlashcardDeck = async (deckId: string) => {
+    try {
+      await supabase
+        .from('flashcard_decks')
+        .delete()
+        .eq('id', deckId);
+      setFlashcardDecks(flashcardDecks.filter(deck => deck.id !== deckId));
+    } catch (error) {
+      console.error('Error deleting deck:', error);
+    }
   };
 
   if (state.loading) {
