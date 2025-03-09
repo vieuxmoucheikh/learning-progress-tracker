@@ -222,7 +222,7 @@ export function DashboardTab({
               className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700 dashboard-calendar-button"
               onClick={() => setShowCalendar(!showCalendar)}
             >
-              <CalendarIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <CalendarIcon className="h-4 w-4 text-blue-600 dark:text-blue-400 lucide-calendar" />
               <span className="text-xs font-medium dashboard-calendar-text">
                 {showCalendar ? "Hide Calendar" : "Show Calendar"}
               </span>
@@ -234,7 +234,7 @@ export function DashboardTab({
               className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700 dashboard-goals-button"
               onClick={() => setShowGoals(true)}
             >
-              <Target className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <Target className="h-4 w-4 text-green-600 dark:text-green-400 lucide-target" />
               <span className="text-xs font-medium dashboard-goals-text">
                 Goals
               </span>

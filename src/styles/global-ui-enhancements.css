@@ -655,3 +655,68 @@ button:active,
     font-weight: 700 !important;
   }
 }
+
+/* CORRECTIONS FINALES - PRIORITÉ MAXIMALE */
+@media (max-width: 768px) {
+  /* Restaurer les couleurs spécifiques des icônes pour Calendar (bleu) et Goals (vert) */
+  .dark .md\:hidden .grid.grid-cols-2 button svg.lucide-calendar {
+    color: #60a5fa !important; /* blue-400 pour Calendar */
+  }
+
+  .dark .md\:hidden .grid.grid-cols-2 button svg.lucide-target {
+    color: #4ade80 !important; /* green-400 pour Goals */
+  }
+  
+  /* Assurer uniquement que le texte du bouton est blanc - pas les icônes */
+  .dark .md\:hidden .grid.grid-cols-2 button span {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+    font-weight: 600 !important;
+  }
+  
+  /* Correction pour le contenu des cartes d'apprentissage lors de l'affichage ou édition */
+  /* Pour les dialogues et popups d'édition et de zoom */
+  .dark .dialog-content,
+  .dark [role="dialog"],
+  .dark .prose-dark,
+  .dark .tiptap,
+  .dark .ProseMirror {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+  }
+  
+  /* Pour le contenu rich text en mode édition */
+  .dark [contenteditable="true"],
+  .dark .tiptap {
+    background-color: #1e293b !important; 
+    color: #f1f5f9 !important;
+  }
+  
+  /* Pour les dialogues qui affichent le contenu agrandi */
+  .dark [class*="dialog-content"] *,
+  .dark [role="dialog"] * {
+    color: #f1f5f9 !important;
+  }
+  
+  /* Exception pour les icônes et les éléments qui doivent conserver leurs couleurs */
+  .dark [role="dialog"] svg,
+  .dark [class*="dialog-content"] svg {
+    color: inherit !important;
+  }
+
+  /* Correction pour les titres dans les cartes zoomées (expanded) */
+  .dark [role="dialog"] h1,
+  .dark [role="dialog"] h2,
+  .dark [role="dialog"] h3,
+  .dark [role="dialog"] h4,
+  .dark [role="dialog"] h5,
+  .dark [role="dialog"] h6,
+  .dark [class*="dialog-content"] h1,
+  .dark [class*="dialog-content"] h2,
+  .dark [class*="dialog-content"] h3,
+  .dark [class*="dialog-content"] h4,
+  .dark [class*="dialog-content"] h5,
+  .dark [class*="dialog-content"] h6 {
+    color: #ffffff !important;
+  }
+}

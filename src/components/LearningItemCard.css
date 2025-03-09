@@ -98,4 +98,46 @@
     color: #ffffff !important;
     font-weight: 600;
   }
+
+  /* Correction pour les vues agrandies et les dialogues */
+  .dark [role="dialog"] {
+    background-color: #1e293b !important;
+  }
+
+  .dark [role="dialog"] .prose * {
+    color: #f1f5f9 !important;
+  }
+
+  .dark [role="dialog"] h1,
+  .dark [role="dialog"] h2,
+  .dark [role="dialog"] h3,
+  .dark [role="dialog"] h4,
+  .dark [role="dialog"] h5,
+  .dark [role="dialog"] h6 {
+    color: #ffffff !important;
+    font-weight: 700;
+  }
+
+  /* Correction pour l'éditeur de texte riche */
+  .dark .tiptap,
+  .dark .ProseMirror {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+  }
+
+  .dark .tiptap h1,
+  .dark .tiptap h2,
+  .dark .tiptap h3,
+  .dark .ProseMirror h1,
+  .dark .ProseMirror h2,
+  .dark .ProseMirror h3 {
+    color: #ffffff !important;
+  }
+
+  /* Pour les badges et les étiquettes dans les dialogues */
+  .dark [role="dialog"] .badge,
+  .dark [role="dialog"] [class*="badge"] {
+    color: white !important;
+    background-color: rgba(255, 255, 255, 0.2) !important;
+  }
 }

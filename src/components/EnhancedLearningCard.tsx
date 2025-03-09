@@ -766,27 +766,27 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
       {/* Zoomed View Dialog */}
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto p-6 sm:p-8 bg-white">
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto p-6 sm:p-8 bg-white dark:bg-gray-800">
           <DialogHeader>
             <DialogTitle className={cn(
               "text-2xl font-semibold",
-              "bg-gradient-to-r from-blue-600 to-blue-400",
-              "bg-clip-text text-transparent"
+              "text-gray-800 dark:text-white", // Utilisation de couleurs directes plutôt que gradient
             )}>
               {title}
             </DialogTitle>
           </DialogHeader>
           <div className={cn(
             "prose prose-lg max-w-none mt-6",
-            "prose-headings:font-semibold prose-headings:text-gray-900",
-            "prose-p:text-gray-700 prose-p:leading-relaxed",
-            "prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline",
-            "prose-strong:font-semibold prose-strong:text-gray-900",
-            "prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:rounded",
-            "prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200",
+            "dark:prose-invert", // Ajout de prose-invert pour le mode sombre
+            "prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-white",
+            "prose-p:text-gray-700 dark:prose-p:text-gray-200",
+            "prose-a:text-blue-600 dark:prose-a:text-blue-300",
+            "prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-white",
+            "prose-code:text-blue-600 dark:prose-code:text-blue-300 dark:prose-code:bg-gray-700",
+            "prose-pre:bg-gray-50 dark:prose-pre:bg-gray-700 prose-pre:border dark:prose-pre:border-gray-600",
             "prose-img:rounded-lg prose-img:shadow-lg prose-img:mx-auto",
             "prose-ul:list-disc prose-ol:list-decimal",
-            "prose-li:marker:text-gray-400"
+            "prose-li:marker:text-gray-400 dark:prose-li:marker:text-gray-400"
           )} 
           dangerouslySetInnerHTML={{ __html: content }} 
           />
