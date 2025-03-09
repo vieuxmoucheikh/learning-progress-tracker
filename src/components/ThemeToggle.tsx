@@ -6,22 +6,53 @@ import { cn } from '@/lib/utils';
 
 export function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
-
+  
   return (
     <Button 
-      variant="ghost" 
-      size="icon"
+      variant="outline" 
+      size="sm"
       onClick={toggleTheme}
       className={cn(
-        "h-9 w-9 rounded-full",
-        "hover:bg-gray-100 dark:hover:bg-gray-800",
+        "relative h-9 px-3 rounded-lg border",
+        "bg-white dark:bg-gray-800",
+        "border-gray-200 dark:border-gray-700",
+        "hover:bg-gray-100 dark:hover:bg-gray-700",
         "focus-visible:ring-2 focus-visible:ring-blue-500",
-        "transition-colors"
+        "transition-all duration-200 overflow-hidden"
       )}
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
     >
-      <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:rotate-90 dark:scale-0" />
-      <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      <div className="flex items-center gap-2">
+        <Sun className={cn(
+          "h-4 w-4 transition-all duration-300",
+          theme === 'light' 
+            ? "text-amber-500 scale-100" 
+            : "text-gray-400 scale-90 opacity-70"
+        )} />
+        
+        <span className={cn(
+          "text-xs font-medium transition-all duration-300",
+          theme === 'light' 
+            ? "text-gray-900" 
+            : "text-gray-400"
+        )}>
+          {theme === 'light' ? 'Light' : 'Dark'}
+        </span>
+        
+        <Moon className={cn(
+          "h-4 w-4 transition-all duration-300",
+          theme === 'dark' 
+            ? "text-blue-400 scale-100" 
+            : "text-gray-400 scale-90 opacity-70"
+        )} />
+      </div>
+      
+      <div className={cn(
+        "absolute bottom-0 left-0 h-0.5 bg-gradient-to-r transition-all duration-300",
+        theme === 'light' 
+          ? "from-amber-400 to-amber-500 w-1/2 translate-x-0" 
+          : "from-blue-400 to-indigo-500 w-1/2 translate-x-full"
+      )} />
     </Button>
   );
 }

@@ -53,6 +53,9 @@ export function DashboardTab({
   const [activeTasks, setActiveTasks] = useState<LearningItem[]>([]);
   const [completedTasks, setCompletedTasks] = useState<LearningItem[]>([]);
   const [showGoalDialog, setShowGoalDialog] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [showGoals, setShowGoals] = useState(false);
+  const [streak, setStreak] = useState(0);
 
   // Helper function to get date string in YYYY-MM-DD format
   const getDateStr = (date: Date | string) => {
@@ -115,6 +118,17 @@ export function DashboardTab({
     setActiveTasks(active);
     setCompletedTasks(completed);
   }, [items, selectedDate]);
+
+  // Add this useEffect to calculate the streak
+  useEffect(() => {
+    // Simple streak calculation based on completed items
+    // You can replace this with your actual streak logic
+    const calculateStreak = () => {
+      return completedTasks.length > 0 ? Math.max(1, Math.min(7, completedTasks.length)) : 0;
+    };
+    
+    setStreak(calculateStreak());
+  }, [completedTasks]);
 
   const handleDateSelect = useCallback((date: Date, active: LearningItem[], completed: LearningItem[]) => {
     try {
@@ -186,154 +200,180 @@ export function DashboardTab({
 
   return (
     <div className="space-y-6">
-      {/* Dashboard Header with Add Goal Button */}
-      <header className="mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
-          <div className="flex items-center space-x-2">
+      {/* Mobile Header with Quick Actions */}
+      <div className="md:hidden">
+        <div className="flex flex-col space-y-3">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-bold">Today's Focus</h2>
             <Button 
-              onClick={() => setShowGoalDialog(true)} 
-              className="gap-2 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800"
+              size="sm" 
+              onClick={() => onAddItem(selectedDate)}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm"
             >
-              <Target className="h-4 w-4" />
-              <span className="hidden sm:inline">Add Goal</span>
+              <Plus className="h-4 w-4 mr-1" /> <span className="hidden sm:inline">Add Item</span>
             </Button>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-2">
             <Button 
-              onClick={() => onAddItem(selectedDate)} 
-              className="gap-2 bg-blue-600 hover:bg-blue-700"
+              variant="outline" 
+              size="sm"
+              className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700"
+              onClick={() => setShowCalendar(true)}
             >
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add Item</span>
+              <CalendarIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <span className="text-xs font-medium">Calendar</span>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700"
+              onClick={() => setShowGoals(true)}
+            >
+              <Target className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <span className="text-xs font-medium">Goals</span>
             </Button>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Stats Cards Section - Horizontal on all screens */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        <Card className="p-3 hover:shadow-md transition-shadow border-l-4 border-purple-500">
-          <div className="flex items-start justify-between">
-            <div>
-              <h3 className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Time Invested</h3>
-              <p className="mt-1 text-xl sm:text-3xl font-semibold text-purple-600 dark:text-purple-400">
-                {stats.dailyTimeSpentHours}h {stats.dailyTimeSpentMinutes}m
-              </p>
+      {/* Desktop Header */}
+      <div className="hidden md:flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Dashboard</h2>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-1.5 border-gray-200 dark:border-gray-700"
+            onClick={() => setShowGoals(true)}
+          >
+            <Target className="h-4 w-4" /> Goals
+          </Button>
+          <Button 
+            onClick={() => onAddItem(selectedDate)}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm"
+          >
+            <Plus className="h-4 w-4 mr-1.5" /> Add Item
+          </Button>
+        </div>
+      </div>
+
+      {/* Stats Cards - Responsive Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <Card className="p-3 md:p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border-blue-100 dark:border-blue-900/30 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+              <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
-            <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
-              <Clock className="w-5 h-5 text-purple-500 dark:text-purple-400" />
+            <div>
+              <p className="text-xs text-blue-700 dark:text-blue-300 font-medium">Study Time</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{stats.dailyTimeSpentHours}h {stats.dailyTimeSpentMinutes}m</p>
             </div>
           </div>
         </Card>
-        
-        <Card className="p-3 hover:shadow-md transition-shadow border-l-4 border-green-500">
-          <div className="flex items-start justify-between">
-            <div>
-              <h3 className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Completed</h3>
-              <p className="mt-1 text-xl sm:text-3xl font-semibold text-green-600 dark:text-green-400">{completedTasks.length}</p>
+
+        <Card className="p-3 md:p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 border-green-100 dark:border-green-900/30 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
-            <div className="p-2 bg-green-50 dark:bg-green-900/30 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-green-500 dark:text-green-400" />
+            <div>
+              <p className="text-xs text-green-700 dark:text-green-300 font-medium">Completed</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{completedTasks.length}</p>
             </div>
           </div>
         </Card>
-        
-        <Card className="p-3 hover:shadow-md transition-shadow border-l-4 border-blue-500">
-          <div className="flex items-start justify-between">
-            <div>
-              <h3 className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Active Tasks</h3>
-              <p className="mt-1 text-xl sm:text-3xl font-semibold text-blue-600 dark:text-blue-400">{activeTasks.length}</p>
+
+        <Card className="p-3 md:p-4 bg-gradient-to-br from-purple-50 to-fuchsia-50 dark:from-purple-950/40 dark:to-fuchsia-950/40 border-purple-100 dark:border-purple-900/30 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+              <BookOpen className="h-5 w-5 text-purple-600 dark:text-purple-400" />
             </div>
-            <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-              <Target className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+            <div>
+              <p className="text-xs text-purple-700 dark:text-purple-300 font-medium">In Progress</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{activeTasks.length}</p>
             </div>
           </div>
         </Card>
-        
-        <Card className="p-3 hover:shadow-md transition-shadow border-l-4 border-amber-500">
-          <div className="flex items-start justify-between">
-            <div>
-              <h3 className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Total Items</h3>
-              <p className="mt-1 text-xl sm:text-3xl font-semibold text-amber-600 dark:text-amber-400">{items.length}</p>
+
+        <Card className="p-3 md:p-4 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/40 dark:to-yellow-950/40 border-amber-100 dark:border-amber-900/30 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+              <Trophy className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
-            <div className="p-2 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
-              <BookOpen className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+            <div>
+              <p className="text-xs text-amber-700 dark:text-amber-300 font-medium">Streak</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{streak} days</p>
             </div>
           </div>
         </Card>
       </div>
 
-      {/* Main Content Grid - Update this */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Calendar takes exactly half the page */}
-        <Card className="p-4 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                <CalendarIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-              </div>
-              <h2 className="text-lg font-semibold">Calendar</h2>
+      {/* Main Content - Responsive Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+        {/* Calendar - Hidden on mobile, shown in dialog */}
+        <div className="hidden md:block md:col-span-1">
+          <Card className="p-4 h-full">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Calendar</h3>
             </div>
-            <Button onClick={() => onAddItem(selectedDate)} className="gap-2 bg-blue-600 hover:bg-blue-700">
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="w-full">
             <Calendar 
               items={items}
-              onDateSelect={handleDateSelect}
+              onDateSelect={(date) => {
+                setSelectedDate(date);
+                onDateSelect(date);
+              }}
               selectedDate={selectedDate}
-              onAddItem={onAddItem}
+              onAddItem={() => onAddItem(selectedDate)}
             />
-          </div>
-          
-          {/* Streak Display */}
-          <div className="mt-6">
-            <StreakDisplay items={items} />
-          </div>
-        </Card>
+          </Card>
+        </div>
 
-        {/* Today's Goals - Takes the other half */}
-        <Card className="p-4 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                <Target className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+        {/* Active Tasks - Full width on mobile */}
+        <div className="md:col-span-2">
+          <Card className="p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                  <Clock className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                </div>
+                <h2 className="text-lg font-semibold">Active Tasks</h2>
               </div>
-              <h2 className="text-lg font-semibold">Today's Goals</h2>
+              <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                {activeTasks.length}
+              </Badge>
             </div>
-            <span className="px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
-              {activeTasks.length}
-            </span>
-          </div>
-          {activeTasks.length === 0 ? (
-            <div className="text-center py-6">
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3">
-                <Target className="h-6 w-6 text-gray-400 dark:text-gray-500" />
+            {activeTasks.length === 0 ? (
+              <div className="text-center py-6">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3">
+                  <Clock className="h-6 w-6 text-gray-400 dark:text-gray-500" />
+                </div>
+                <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">No active tasks</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Start tracking a task to see it here</p>
               </div>
-              <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">No goals</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Add tasks to get started</p>
-            </div>
-          ) : (
-            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
-              {activeTasks.map((item) => (
-                <LearningItemCard
-                  key={item.id}
-                  item={item}
-                  onUpdate={onUpdate}
-                  onDelete={onDelete}
-                  onStartTracking={onStartTracking}
-                  onStopTracking={onStopTracking}
-                  onNotesUpdate={onNotesUpdate}
-                  onSetActiveItem={onSetActiveItem}
-                  onSessionNoteAdd={onSessionNoteAdd}
-                />
-              ))}
-            </div>
-          )}
-        </Card>
+            ) : (
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                {activeTasks.map((item) => (
+                  <LearningItemCard
+                    key={item.id}
+                    item={item}
+                    onUpdate={onUpdate}
+                    onDelete={onDelete}
+                    onStartTracking={onStartTracking}
+                    onStopTracking={onStopTracking}
+                    onNotesUpdate={onNotesUpdate}
+                    onSetActiveItem={onSetActiveItem}
+                    onSessionNoteAdd={onSessionNoteAdd}
+                  />
+                ))}
+              </div>
+            )}
+          </Card>
+        </div>
 
-        {/* Completed Tasks - Takes full width or split evenly on large screens */}
-        <Card className="p-4 hover:shadow-md transition-shadow col-span-2">
+        {/* Completed Tasks - Full width on mobile */}
+        <Card className="p-4 hover:shadow-md transition-shadow md:col-span-3">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-green-50 dark:bg-green-900/30 rounded-lg">
@@ -373,17 +413,37 @@ export function DashboardTab({
         </Card>
       </div>
 
-      {/* Add Goal Dialog */}
-      {showGoalDialog && (
-        <Dialog open={showGoalDialog} onOpenChange={setShowGoalDialog}>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Add Learning Goal</DialogTitle>
-            </DialogHeader>
-            <LearningGoals items={items} />
-          </DialogContent>
-        </Dialog>
-      )}
+      {/* Mobile Calendar Dialog */}
+      <Dialog open={showCalendar} onOpenChange={setShowCalendar}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Calendar</DialogTitle>
+          </DialogHeader>
+          <Calendar 
+            items={items}
+            onDateSelect={(date) => {
+              setSelectedDate(date);
+              onDateSelect(date);
+              setShowCalendar(false);
+            }}
+            selectedDate={selectedDate}
+            onAddItem={() => {
+              onAddItem(selectedDate);
+              setShowCalendar(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Goals Dialog */}
+      <Dialog open={showGoals} onOpenChange={setShowGoals}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Learning Goals</DialogTitle>
+          </DialogHeader>
+          <LearningGoals items={items} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
