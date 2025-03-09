@@ -1,15 +1,16 @@
-import { useState, useEffect, useMemo } from "react";
+import * as React from 'react';
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { StreakDisplay } from "./StreakDisplay";
+import { Stats } from "./Stats";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
-import { Plus, BookOpen, CheckCircle, Clock, Target, CalendarIcon, Trophy, Library } from "lucide-react";
-import { LearningItem } from "@/types";
+import { Plus, BookOpen, CheckCircle, Clock, Target, Calendar as CalendarIcon, Trophy, ChartBar, User, Library } from "lucide-react";
+import { LearningItem, Session } from "@/types";
 import { Calendar } from "./Calendar";
 import LearningItemCard from './LearningItemCard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import LearningGoals from './LearningGoals';
-import { getDecks } from '../lib/flashcards';
-import { useNavigate } from 'react-router-dom';
 
 // Add these interfaces to properly type the flashcards
 interface FlashcardDeck {
@@ -51,29 +52,10 @@ export function DashboardTab({
   });
   const [activeTasks, setActiveTasks] = useState<LearningItem[]>([]);
   const [completedTasks, setCompletedTasks] = useState<LearningItem[]>([]);
+  const [showGoalDialog, setShowGoalDialog] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showGoals, setShowGoals] = useState(false);
   const [streak, setStreak] = useState(0);
-  const [flashcardDecks, setFlashcardDecks] = useState<FlashcardDeck[]>([]);
-  const [loadingDecks, setLoadingDecks] = useState(false);
-  const navigate = useNavigate();
-
-  // Load flashcard decks
-  useEffect(() => {
-    const loadFlashcardDecks = async () => {
-      try {
-        setLoadingDecks(true);
-        const decks = await getDecks();
-        setFlashcardDecks(decks);
-      } catch (error) {
-        console.error('Error loading flashcard decks:', error);
-      } finally {
-        setLoadingDecks(false);
-      }
-    };
-
-    loadFlashcardDecks();
-  }, []);
 
   // Helper function to get date string in YYYY-MM-DD format
   const getDateStr = (date: Date | string) => {
@@ -91,7 +73,7 @@ export function DashboardTab({
   };
 
   // Format review status for display
-  const formatReviewStatus = (status: string | undefined) => {
+  const formatReviewStatus = (status: string) => {
     switch (status) {
       case 'due': return 'Due';
       case 'learning': return 'Learning';
@@ -101,12 +83,12 @@ export function DashboardTab({
   };
 
   // Get badge variant based on review status
-  const getReviewStatusBadge = (status: string | undefined) => {
+  const getReviewStatusBadge = (status: string) => {
     switch (status) {
-      case 'due': return 'destructive' as const;
-      case 'learning': return 'secondary' as const;
-      case 'complete': return 'default' as const;
-      default: return 'outline' as const;
+      case 'due': return 'destructive';
+      case 'learning': return 'secondary';
+      case 'complete': return 'default';
+      default: return 'outline';
     }
   };
 
@@ -147,6 +129,20 @@ export function DashboardTab({
     
     setStreak(calculateStreak());
   }, [completedTasks]);
+
+  const handleDateSelect = useCallback((date: Date, active: LearningItem[], completed: LearningItem[]) => {
+    try {
+      const newDate = new Date(date);
+      newDate.setHours(0, 0, 0, 0);
+      
+      setSelectedDate(newDate);
+      setActiveTasks(active);
+      setCompletedTasks(completed);
+      onDateSelect(newDate);
+    } catch (e) {
+      console.error('Error handling date selection:', e);
+    }
+  }, [onDateSelect]);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -208,7 +204,7 @@ export function DashboardTab({
       <div className="md:hidden">
         <div className="flex flex-col space-y-3">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Today's Focus</h2>
+            <h2 className="text-xl font-bold">Today's Focus</h2>
             <Button 
               size="sm" 
               onClick={() => onAddItem(selectedDate)}
@@ -220,23 +216,19 @@ export function DashboardTab({
           
           <div className="grid grid-cols-2 gap-2">
             <Button 
-              variant="default" 
+              variant="outline" 
               size="sm"
-              className="flex justify-center items-center gap-1.5 h-10 bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setShowCalendar(true);
-              }}
+              className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700"
+              onClick={() => setShowCalendar(true)}
             >
-              <CalendarIcon className="h-4 w-4 text-white" />
+              <CalendarIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               <span className="text-xs font-medium">Calendar</span>
             </Button>
             
             <Button 
               variant="outline" 
               size="sm"
-              className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+              className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700"
               onClick={() => setShowGoals(true)}
             >
               <Target className="h-4 w-4 text-green-600 dark:text-green-400" />
@@ -419,134 +411,27 @@ export function DashboardTab({
             </div>
           )}
         </Card>
-
-        {/* Flashcard Decks */}
-        <Card className="p-4 hover:shadow-md transition-shadow md:col-span-3">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
-                <BookOpen className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-              </div>
-              <h2 className="text-lg font-semibold">Your Flashcard Decks</h2>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="flex items-center gap-1.5 border-gray-200 dark:border-gray-700"
-              onClick={() => {
-                // Use window.location for compatibility if navigate is unavailable
-                if (typeof navigate === 'function') {
-                  navigate('/flashcards');
-                } else {
-                  window.location.href = '/flashcards';
-                }
-              }}
-            >
-              <Library className="w-4 h-4 mr-1" />
-              View All
-            </Button>
-          </div>
-          {loadingDecks ? (
-            <div className="text-center py-6">
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3">
-                <BookOpen className="h-6 w-6 text-gray-400 dark:text-gray-500" />
-              </div>
-              <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">Loading decks...</h3>
-            </div>
-          ) : flashcardDecks.length === 0 ? (
-            <div className="text-center py-6">
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3">
-                <BookOpen className="h-6 w-6 text-gray-400 dark:text-gray-500" />
-              </div>
-              <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">No flashcard decks</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Create your first deck to start learning</p>
-              <Button
-                onClick={() => {
-                  if (typeof navigate === 'function') {
-                    navigate('/flashcards');
-                  } else {
-                    window.location.href = '/flashcards';
-                  }
-                }}
-                variant="outline"
-                className="mt-3 bg-white hover:bg-gray-50"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create Deck
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
-              {flashcardDecks.slice(0, 5).map((deck) => (
-                <div 
-                  key={deck.id} 
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/30 cursor-pointer transition-colors"
-                  onClick={() => {
-                    if (typeof navigate === 'function') {
-                      navigate(`/flashcards?deck=${deck.id}`);
-                    } else {
-                      window.location.href = `/flashcards?deck=${deck.id}`;
-                    }
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
-                      <BookOpen className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-medium">{deck.name}</h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{deck.cards?.length || 0} cards</p>
-                    </div>
-                  </div>
-                  <Badge 
-                    variant={getReviewStatusBadge(deck.reviewStatus)} 
-                    className="text-xs font-medium"
-                  >
-                    {formatReviewStatus(deck.reviewStatus)}
-                  </Badge>
-                </div>
-              ))}
-              {flashcardDecks.length > 5 && (
-                <Button
-                  variant="ghost"
-                  className="w-full text-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                  onClick={() => {
-                    if (typeof navigate === 'function') {
-                      navigate('/flashcards');
-                    } else {
-                      window.location.href = '/flashcards';
-                    }
-                  }}
-                >
-                  View all {flashcardDecks.length} decks
-                </Button>
-              )}
-            </div>
-          )}
-        </Card>
       </div>
 
       {/* Mobile Calendar Dialog */}
       <Dialog open={showCalendar} onOpenChange={setShowCalendar}>
-        <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 z-50">
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="text-gray-900 dark:text-white">Calendar</DialogTitle>
+            <DialogTitle>Calendar</DialogTitle>
           </DialogHeader>
-          <div className="max-h-[70vh] overflow-auto">
-            <Calendar 
-              items={items}
-              onDateSelect={(date) => {
-                setSelectedDate(date);
-                onDateSelect(date);
-                setShowCalendar(false);
-              }}
-              selectedDate={selectedDate}
-              onAddItem={() => {
-                onAddItem(selectedDate);
-                setShowCalendar(false);
-              }}
-            />
-          </div>
+          <Calendar 
+            items={items}
+            onDateSelect={(date) => {
+              setSelectedDate(date);
+              onDateSelect(date);
+              setShowCalendar(false);
+            }}
+            selectedDate={selectedDate}
+            onAddItem={() => {
+              onAddItem(selectedDate);
+              setShowCalendar(false);
+            }}
+          />
         </DialogContent>
       </Dialog>
 

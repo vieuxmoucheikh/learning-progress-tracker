@@ -308,78 +308,10 @@ export default function App() {
       
       /* Fix for mobile dark backgrounds in light mode */
       @media (max-width: 768px) {
-        /* Light mode fixes */
         body:not(.dark) .bg-gray-50, 
         body:not(.dark) .bg-gray-100,
-        body:not(.dark) .bg-gray-200,
-        body:not(.dark) [class*="bg-gray-"] {
+        body:not(.dark) .bg-gray-200 {
           background-color: #ffffff !important;
-        }
-        
-        /* Fix text visibility in light mode */
-        body:not(.dark) h1, 
-        body:not(.dark) h2, 
-        body:not(.dark) h3, 
-        body:not(.dark) p, 
-        body:not(.dark) span,
-        body:not(.dark) div {
-          color: #0f172a !important;
-        }
-        
-        /* Exception for text that should remain white (like on buttons) */
-        body:not(.dark) [class*="bg-blue-"] *, 
-        body:not(.dark) [class*="bg-indigo-"] *,
-        body:not(.dark) [class*="bg-purple-"] *,
-        body:not(.dark) [class*="bg-green-"] *,
-        body:not(.dark) .text-white {
-          color: #ffffff !important;
-        }
-        
-        /* Fix card backgrounds */
-        body:not(.dark) .card,
-        body:not(.dark) [class*="card"],
-        body:not(.dark) [role="dialog"] {
-          background-color: #ffffff !important;
-          border-color: #e5e7eb !important;
-        }
-        
-        /* Dark mode specific fixes */
-        .dark h1, .dark h2, .dark h3, .dark p, .dark span, .dark div {
-          color: #f8fafc !important;
-        }
-        
-        .dark input, .dark textarea, .dark select, .dark [contenteditable] {
-          color: #f8fafc !important;
-          background-color: #1e293b !important;
-          border-color: #334155 !important;
-        }
-        
-        /* Learning Cards specific fixes */
-        .dark [id*="learning"], .dark [class*="learning"] {
-          color: #f8fafc !important;
-          background-color: #1e293b !important;
-        }
-        
-        .dark [id*="learning"] *, .dark [class*="learning"] * {
-          color: #f8fafc !important;
-        }
-        
-        /* Flashcard specific fixes */
-        .dark [id*="flashcard"], .dark [class*="flashcard"] {
-          color: #f8fafc !important;
-          background-color: #1e293b !important;
-        }
-        
-        .dark [id*="flashcard"] *, .dark [class*="flashcard"] * {
-          color: #f8fafc !important;
-        }
-        
-        /* Force display for important elements */
-        [class*="flashcard"], [id*="flashcard"],
-        [class*="learning"], [id*="learning"] {
-          display: block !important;
-          visibility: visible !important;
-          opacity: 1 !important;
         }
       }
     `;
@@ -977,18 +909,18 @@ export default function App() {
                 Learning Dashboard
               </h1>
               <div className="flex items-center gap-3">
-                <ThemeToggle />
-                <Button 
+              <ThemeToggle />
+                    <Button 
                   variant="default"
                   size="sm"
                   className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all"
-                  onClick={() => handleDashboardAddItem()} 
-                >
+                      onClick={() => handleDashboardAddItem()} 
+                    >
                   <Plus className="h-4 w-4" /> Add Item
-                </Button>
+                    </Button>
+                </div>
               </div>
-            </div>
-          </header>
+            </header>
 
           <div className="flex flex-col md:flex-row flex-1 h-full gap-4 overflow-hidden">
             <div className="md:w-64 lg:w-72">
@@ -1056,8 +988,8 @@ export default function App() {
                 />
               )}
             </main>
-            </div>
           </div>
+        </div>
         </div>
 
         {/* Add Learning Item Dialog */}

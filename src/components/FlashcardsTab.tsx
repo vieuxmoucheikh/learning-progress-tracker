@@ -5,7 +5,6 @@ import { FlashcardManager } from './FlashcardManager';
 import { FlashcardStudy } from './FlashcardStudy';
 import { FlashcardDeck } from '@/types';
 import { useToast } from './ui/use-toast';
-import { useTheme } from '../components/ThemeProvider';
 
 type View = 'decks' | 'study' | 'manage';
 
@@ -27,7 +26,6 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
   const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
   const [view, setView] = useState<View>('decks');
   const { toast } = useToast();
-  const { isDark } = useTheme();
 
   const handleSelectDeck = (deckId: string) => {
     setSelectedDeckId(deckId);
@@ -72,49 +70,55 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
     // Just making sure the deck ID is properly set
   };
 
-  return (
-    <div className="w-full h-full bg-white dark:bg-gray-800">
-      {view === 'decks' || !selectedDeckId ? (
-        <FlashcardDecks 
-          decks={flashcards}
-          onSelectDeck={handleSelectDeck}
-          onStudyDeck={handleStudyDeck}
-          onEditDeck={handleEditDeck}
-          onDeleteDeck={onDeleteDeck}
-          onAddDeck={onAddDeck}
-        />
-      ) : view === 'study' ? (
-        <div className="h-full">
-          <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={handleBackToDecks}
-                className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-              >
-                Back to Decks
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleManageCards}
-                className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-              >
-                Manage Cards
-              </Button>
-            </div>
+  if (view === 'decks' || !selectedDeckId) {
+    return (
+      <FlashcardDecks 
+        decks={flashcards}
+        onSelectDeck={handleSelectDeck}
+        onStudyDeck={handleStudyDeck}
+        onEditDeck={handleEditDeck}
+        onDeleteDeck={onDeleteDeck}
+        onAddDeck={onAddDeck}
+      />
+    );
+  }
+
+  if (view === 'study') {
+    return (
+      <div className="h-full">
+        <div className="flex justify-between items-center p-4 border-b">
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={handleBackToDecks}
+            >
+              Back to Decks
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleManageCards}
+            >
+              Manage Cards
+            </Button>
           </div>
-          <FlashcardStudy
-            deckId={selectedDeckId}
-            onBackToDecks={handleBackToDecks}
-            onFinish={handleFinishStudy}
-          />
         </div>
-      ) : (
-        <FlashcardManager
+        <FlashcardStudy
           deckId={selectedDeckId}
           onBackToDecks={handleBackToDecks}
+          onFinish={handleFinishStudy}
         />
-      )}
-    </div>
-  );
+      </div>
+    );
+  }
+
+  if (view === 'manage') {
+    return (
+      <FlashcardManager
+        deckId={selectedDeckId}
+        onBackToDecks={handleBackToDecks}
+      />
+    );
+  }
+
+  return null;
 };

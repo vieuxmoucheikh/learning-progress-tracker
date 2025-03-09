@@ -158,7 +158,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   const hasNewCards = getTotalNotStartedCards() > 0;
 
   return (
-    <div className="space-y-6 pb-8 w-full block visible opacity-100">
+    <div className="space-y-6 pb-8">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
@@ -179,7 +179,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             disabled={isLoading}
           >
             <Library className="w-4 h-4 mr-2" /> Create Deck
-          </Button>
+        </Button>
         </div>
       </div>
 
@@ -242,129 +242,111 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         </Card>
       </div>
       
-      {/* Flashcard Decks Section - Ensure visibility */}
-      <div className="border-b pb-1 mb-4 block visible opacity-100">
-        <h3 className="text-xl font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
+      <div className="border-b pb-1 mb-4">
+        <h3 className="text-xl font-semibold flex items-center gap-2">
           <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           Your Flashcard Decks
         </h3>
       </div>
 
-      {/* Decks Grid - Force display */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full block visible opacity-100" style={{display: 'grid !important'}}>
-        {decks.length > 0 ? (
-          decks.map((deck) => {
-            const summary = getDeckSummary(deck.id);
-            return (
-              <Card key={deck.id} className="overflow-hidden border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all block visible opacity-100">
-                <CardHeader className="pb-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/20">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg font-semibold">{deck.name}</CardTitle>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8"
-                          disabled={isLoading}
+      {/* Decks Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {decks.map((deck) => {
+          const summary = getDeckSummary(deck.id);
+          return (
+            <Card key={deck.id} className="overflow-hidden border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all">
+              <CardHeader className="pb-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/20">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-lg font-semibold">{deck.name}</CardTitle>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8"
+                        disabled={isLoading}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Deck</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete "{deck.name}"? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700">
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={() => handleDeleteDeck(deck)} 
+                          className="bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:hover:bg-red-700"
                         >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Deck</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete "{deck.name}"? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700">
-                            Cancel
-                          </AlertDialogCancel>
-                          <AlertDialogAction 
-                            onClick={() => handleDeleteDeck(deck)} 
-                            className="bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:hover:bg-red-700"
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                  <CardDescription className="line-clamp-2">{deck.description}</CardDescription>
-                </CardHeader>
-                
-                <CardContent className="py-3">
-                  {summary && (
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
-                        {summary.totalCards} Total Cards
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+                <CardDescription className="line-clamp-2">{deck.description}</CardDescription>
+              </CardHeader>
+              
+              <CardContent className="py-3">
+                {summary && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                      {summary.totalCards} Total Cards
+                    </Badge>
+                    {summary.dueToday > 0 && (
+                      <Badge variant="outline" className="bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800">
+                        {summary.dueToday} Due
                       </Badge>
-                      {summary.dueToday > 0 && (
-                        <Badge variant="outline" className="bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800">
-                          {summary.dueToday} Due
-                        </Badge>
-                      )}
-                      {summary.notStarted > 0 && (
-                        <Badge variant="outline" className="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800">
-                          {summary.notStarted} New
-                        </Badge>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-                
-                <CardFooter className="pt-2 grid grid-cols-3 gap-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/20">
-                  <Button 
-                    onClick={() => onStudyDeck(deck.id)}
-                    className="bg-green-600 hover:bg-green-700 h-9"
-                    disabled={isLoading}
-                  >
-                    <Play className="w-4 h-4 mr-1" /> Study
-                  </Button>
-                  <Button 
-                    onClick={() => handleEditDeckClick(deck.id)}
-                    variant="outline" 
-                    className="h-9 border-gray-300 dark:border-gray-600"
-                    disabled={isLoading}
-                  >
-                    <Edit className="w-4 h-4 mr-1" /> Edit
-                  </Button>
-                  <Button 
-                    onClick={() => handleAddFlashcardClick(deck.id)}
-                    variant="outline" 
-                    className="h-9 border-gray-300 dark:border-gray-600"
-                    disabled={isLoading}
-                  >
-                    <Plus className="w-4 h-4 mr-1" /> Card
-                  </Button>
-                </CardFooter>
-              </Card>
-            );
-          })
-        ) : (
-          <div className="text-center p-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md col-span-full block visible opacity-100">
-            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-full inline-block mb-4">
-              <BookOpen className="w-12 h-12 text-blue-500 dark:text-blue-400" />
-            </div>
-            <h3 className="text-xl font-medium mb-2 text-gray-900 dark:text-white">No flashcard decks yet</h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-6">Create your first deck to start learning</p>
-            <Button 
-              onClick={() => setIsCreatingDeck(true)}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all"
-              disabled={isLoading}
-            >
-              <Plus className="w-4 h-4 mr-2" /> Create Your First Deck
-            </Button>
-          </div>
-        )}
+                    )}
+                    {summary.notStarted > 0 && (
+                      <Badge variant="outline" className="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800">
+                        {summary.notStarted} New
+                      </Badge>
+                    )}
+              </div>
+                )}
+              </CardContent>
+              
+              <CardFooter className="pt-2 grid grid-cols-3 gap-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/20">
+                <Button 
+                  onClick={() => onStudyDeck(deck.id)}
+                  className="bg-green-600 hover:bg-green-700 h-9"
+                  disabled={isLoading}
+                >
+                  <Play className="w-4 h-4 mr-1" /> Study
+                </Button>
+                <Button 
+                  onClick={() => handleEditDeckClick(deck.id)}
+                  variant="outline" 
+                  className="h-9 border-gray-300 dark:border-gray-600"
+                  disabled={isLoading}
+                >
+                  <Edit className="w-4 h-4 mr-1" /> Edit
+                </Button>
+                <Button 
+                  onClick={() => handleAddFlashcardClick(deck.id)}
+                  variant="outline" 
+                  className="h-9 border-gray-300 dark:border-gray-600"
+                  disabled={isLoading}
+                >
+                  <Plus className="w-4 h-4 mr-1" /> Card
+                </Button>
+              </CardFooter>
+            </Card>
+          );
+        })}
 
         {/* Create New Deck Card */}
         {decks.length > 0 && (
           <Card 
             onClick={() => !isLoading && setIsCreatingDeck(true)}
-            className={`border-dashed cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors flex flex-col items-center justify-center py-10 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''} block visible`}
+            className={`border-dashed cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors flex flex-col items-center justify-center py-10 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-full mb-3">
               <PlusCircle className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -374,6 +356,23 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           </Card>
         )}
       </div>
+
+      {decks.length === 0 && (
+        <div className="text-center p-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md">
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-full inline-block mb-4">
+            <BookOpen className="w-12 h-12 text-blue-500 dark:text-blue-400" />
+          </div>
+          <h3 className="text-xl font-medium mb-2">No flashcard decks yet</h3>
+          <p className="text-gray-500 mb-6">Create your first deck to start learning</p>
+          <Button 
+            onClick={() => setIsCreatingDeck(true)}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all"
+            disabled={isLoading}
+          >
+            <Plus className="w-4 h-4 mr-2" /> Create Your First Deck
+          </Button>
+        </div>
+      )}
 
       {/* Create Deck Dialog */}
       <Dialog open={isCreatingDeck} onOpenChange={(open) => !isLoading && setIsCreatingDeck(open)}>

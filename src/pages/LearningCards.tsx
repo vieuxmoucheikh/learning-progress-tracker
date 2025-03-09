@@ -163,12 +163,12 @@ export const LearningCardsPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="space-y-8">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">Learning Cards</h1>
-            <p className="text-gray-800 dark:text-gray-200 mt-1">Organize and manage your learning notes</p>
+            <p className="text-gray-800 mt-1">Organize and manage your learning notes</p>
           </div>
           <Button 
             onClick={handleCreateCard} 
@@ -182,7 +182,7 @@ export const LearningCardsPage = () => {
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
               <Input
                 type="text"
                 placeholder="Search cards..."
@@ -190,26 +190,26 @@ export const LearningCardsPage = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={cn(
                   "pl-9",
-                  "bg-white dark:bg-gray-900",
-                  "text-gray-900 dark:text-white",
-                  "border-gray-200 dark:border-gray-700",
+                  "bg-white",
+                  "text-gray-900",
+                  "border-gray-200",
                   "focus-visible:ring-2 focus-visible:ring-blue-500",
-                  "placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  "placeholder:text-gray-500"
                 )}
               />
             </div>
 
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className={cn(
-                "bg-white dark:bg-gray-900",
-                "text-gray-900 dark:text-white",
-                "border-gray-200 dark:border-gray-700",
+                "bg-white",
+                "text-gray-900",
+                "border-gray-200",
                 "focus:ring-2 focus:ring-blue-500"
               )}>
-                <Filter className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
+                <Filter className="w-4 h-4 mr-2 text-gray-500" />
                 <SelectValue placeholder="Filter by category" />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700">
+              <SelectContent className="bg-white">
                 <SelectItem value="all">All Categories</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category} value={category}>
@@ -221,15 +221,15 @@ export const LearningCardsPage = () => {
 
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'updated' | 'created' | 'mastered')}>
               <SelectTrigger className={cn(
-                "bg-white dark:bg-gray-900",
-                "text-gray-900 dark:text-white",
-                "border-gray-200 dark:border-gray-700",
+                "bg-white",
+                "text-gray-900",
+                "border-gray-200",
                 "focus:ring-2 focus:ring-blue-500"
               )}>
-                <Clock className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
+                <Clock className="w-4 h-4 mr-2 text-gray-500" />
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700">
+              <SelectContent className="bg-white">
                 <SelectItem value="updated">Last Updated</SelectItem>
                 <SelectItem value="created">Created Date</SelectItem>
                 <SelectItem value="mastered">Mastered First</SelectItem>
