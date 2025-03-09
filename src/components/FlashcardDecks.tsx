@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
@@ -41,16 +41,21 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   const [flashcardFormData, setFlashcardFormData] = useState({ front: '', back: '' });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const initializedRef = useRef(false);
 
   useEffect(() => {
-    const summaries = decks.map(deck => ({
-      deckId: deck.id,
-      total: Math.floor(Math.random() * 20) + 1,
-      dueToday: Math.floor(Math.random() * 5),
-      reviewStatus: ['up-to-date', 'due-soon', 'overdue', 'not-started'][Math.floor(Math.random() * 4)] as 'up-to-date' | 'due-soon' | 'overdue' | 'not-started',
-      lastStudied: Math.random() > 0.3 ? new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 30).toISOString() : undefined
-    }));
-    setDeckSummaries(summaries);
+    // Only initialize summaries once to prevent constant changes
+    if (!initializedRef.current) {
+      const summaries = decks.map(deck => ({
+        deckId: deck.id,
+        total: Math.floor(Math.random() * 20) + 1,
+        dueToday: Math.floor(Math.random() * 5),
+        reviewStatus: ['up-to-date', 'due-soon', 'overdue', 'not-started'][Math.floor(Math.random() * 4)] as 'up-to-date' | 'due-soon' | 'overdue' | 'not-started',
+        lastStudied: Math.random() > 0.3 ? new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 30).toISOString() : undefined
+      }));
+      setDeckSummaries(summaries);
+      initializedRef.current = true;
+    }
   }, [decks]);
 
   const handleDeleteDeck = (deck: FlashcardDeck) => {
@@ -275,7 +280,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   };
 
   return (
-    <div className="space-y-6 pb-8 w-full max-w-full overflow-x-hidden">
+    <div className="space-y-6 pb-16 w-full max-w-full overflow-x-hidden min-h-[calc(100vh-8rem)]">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h2 className="text-2xl font-bold tracking-tight">Your Flashcard Decks</h2>
