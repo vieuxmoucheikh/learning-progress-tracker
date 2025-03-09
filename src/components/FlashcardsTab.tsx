@@ -4,7 +4,6 @@ import { FlashcardDecks } from './FlashcardDecks';
 import { FlashcardManager } from './FlashcardManager';
 import { FlashcardStudy } from './FlashcardStudy';
 import { FlashcardDeck } from '@/types';
-import { useToast } from './ui/use-toast';
 
 type View = 'decks' | 'study' | 'manage';
 
@@ -25,7 +24,6 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
 }) => {
   const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
   const [view, setView] = useState<View>('decks');
-  const { toast } = useToast();
 
   // This function is used when a deck is selected from the decks list
   const handleSelectDeck = (deckId: string) => {
@@ -60,7 +58,7 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
 
   if (view === 'decks' || !selectedDeckId) {
     return (
-      <div className="pb-20 w-full">
+      <div className="w-full">
         <FlashcardDecks 
           decks={flashcards}
           onStudyDeck={handleStudyDeck}
