@@ -219,7 +219,11 @@ export function DashboardTab({
               variant="default" 
               size="sm"
               className="flex justify-center items-center gap-1.5 h-10 bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={() => setShowCalendar(true)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowCalendar(true);
+              }}
             >
               <CalendarIcon className="h-4 w-4 text-white" />
               <span className="text-xs font-medium">Calendar</span>
@@ -415,7 +419,7 @@ export function DashboardTab({
 
       {/* Mobile Calendar Dialog */}
       <Dialog open={showCalendar} onOpenChange={setShowCalendar}>
-        <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700">
+        <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 z-50">
           <DialogHeader>
             <DialogTitle className="text-gray-900 dark:text-white">Calendar</DialogTitle>
           </DialogHeader>

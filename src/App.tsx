@@ -308,6 +308,7 @@ export default function App() {
       
       /* Fix for mobile dark backgrounds in light mode */
       @media (max-width: 768px) {
+        /* Light mode fixes */
         body:not(.dark) .bg-gray-50, 
         body:not(.dark) .bg-gray-100,
         body:not(.dark) .bg-gray-200,
@@ -340,6 +341,45 @@ export default function App() {
         body:not(.dark) [role="dialog"] {
           background-color: #ffffff !important;
           border-color: #e5e7eb !important;
+        }
+        
+        /* Dark mode specific fixes */
+        .dark h1, .dark h2, .dark h3, .dark p, .dark span, .dark div {
+          color: #f8fafc !important;
+        }
+        
+        .dark input, .dark textarea, .dark select, .dark [contenteditable] {
+          color: #f8fafc !important;
+          background-color: #1e293b !important;
+          border-color: #334155 !important;
+        }
+        
+        /* Learning Cards specific fixes */
+        .dark [id*="learning"], .dark [class*="learning"] {
+          color: #f8fafc !important;
+          background-color: #1e293b !important;
+        }
+        
+        .dark [id*="learning"] *, .dark [class*="learning"] * {
+          color: #f8fafc !important;
+        }
+        
+        /* Flashcard specific fixes */
+        .dark [id*="flashcard"], .dark [class*="flashcard"] {
+          color: #f8fafc !important;
+          background-color: #1e293b !important;
+        }
+        
+        .dark [id*="flashcard"] *, .dark [class*="flashcard"] * {
+          color: #f8fafc !important;
+        }
+        
+        /* Force display for important elements */
+        [class*="flashcard"], [id*="flashcard"],
+        [class*="learning"], [id*="learning"] {
+          display: block !important;
+          visibility: visible !important;
+          opacity: 1 !important;
         }
       }
     `;
