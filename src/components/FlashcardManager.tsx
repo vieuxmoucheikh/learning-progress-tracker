@@ -62,29 +62,32 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
   };
 
   const handleCreateCard = async () => {
-    try {
-      if (!formData.front.trim() || !formData.back.trim()) {
-        toast({
-          title: "Error",
-          description: "Please fill in both front and back content",
-          variant: "destructive"
-        });
-        return;
-      }
+    if (!formData.front.trim() || !formData.back.trim()) {
+      toast({
+        title: "Error",
+        description: "Both front and back content are required",
+        variant: "destructive"
+      });
+      return;
+    }
 
+    try {
       const newCard = await createFlashcard({
-        deckId: deckId,
-        front: formData.front.trim(),
-        back: formData.back.trim()
+        deckId,
+        frontContent: formData.front,
+        backContent: formData.back
       });
 
       setCards([newCard, ...cards]);
-      setIsCreating(false);
       setFormData({ front: '', back: '' });
+      setIsCreating(false);
       
-      // Update deck metrics after adding a card
+      // Immediately update deck metrics after adding a card
       if (onUpdateDeckMetrics) {
-        onUpdateDeckMetrics();
+        console.log('Calling onUpdateDeckMetrics after adding flashcard');
+        setTimeout(() => {
+          onUpdateDeckMetrics();
+        }, 100); // Small delay to ensure the database has updated
       }
       
       toast({
@@ -113,9 +116,12 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
 
       setCards(cards.filter(card => card.id !== cardId));
       
-      // Update deck metrics after deleting a card
+      // Immediately update deck metrics after deleting a card
       if (onUpdateDeckMetrics) {
-        onUpdateDeckMetrics();
+        console.log('Calling onUpdateDeckMetrics after deleting flashcard');
+        setTimeout(() => {
+          onUpdateDeckMetrics();
+        }, 100); // Small delay to ensure the database has updated
       }
       
       toast({

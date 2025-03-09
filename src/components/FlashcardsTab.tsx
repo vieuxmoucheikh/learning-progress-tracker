@@ -6,6 +6,7 @@ import { FlashcardStudy } from './FlashcardStudy';
 import { FlashcardDeck } from '@/types';
 import { useToast } from './ui/use-toast';
 import { getDecksSummary } from '@/lib/flashcards';
+import { supabase } from '../lib/supabase';
 
 type View = 'decks' | 'study' | 'manage';
 
@@ -67,31 +68,63 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
 
   // Function to refresh deck metrics after reviews
   const refreshDeckMetrics = async () => {
+    console.log('Refreshing deck metrics...');
     try {
-      console.log('Refreshing deck metrics...'); // Log when the function is called
+      // First, fetch the updated deck summaries
       const summaries = await getDecksSummary();
-      console.log('Fetched summaries:', summaries); // Log the fetched summaries
+      console.log('Fetched summaries:', summaries);
+      
+      // Update the deckSummaries state
       setDeckSummaries(summaries);
       
-      const updatedDecks = localDecks.map(deck => {
-        const summary = summaries.find(s => s.deckId === deck.id);
-        if (summary) {
+      // Then, fetch the latest decks data from the database
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData?.user) {
+        throw new Error('User not authenticated');
+      }
+      
+      const { data: freshDecks, error } = await supabase
+        .from('flashcard_decks')
+        .select('id, name, description, created_at, updated_at, user_id')
+        .eq('user_id', userData.user.id);
+        
+      if (error) throw error;
+      
+      if (freshDecks) {
+        console.log('Fetched fresh decks:', freshDecks);
+        
+        // Map the summaries to the fresh decks
+        const updatedDecks = freshDecks.map(deck => {
+          const summary = summaries.find(s => s.deckId === deck.id);
+          if (summary) {
+            return {
+              ...deck,
+              updated_at: deck.updated_at,
+              summary: {
+                total: summary.total,
+                dueToday: summary.dueToday,
+                reviewStatus: summary.reviewStatus as 'not-started' | 'up-to-date' | 'due-soon' | 'overdue',
+                lastStudied: summary.lastStudied || null,
+                nextDue: summary.nextDue || null
+              }
+            };
+          }
           return {
             ...deck,
+            updated_at: deck.updated_at,
             summary: {
-              total: summary.total,
-              dueToday: summary.dueToday,
-              reviewStatus: summary.reviewStatus as 'not-started' | 'up-to-date' | 'due-soon' | 'overdue',
-              lastStudied: summary.lastStudied || null,
-              nextDue: summary.nextDue || null
+              total: 0,
+              dueToday: 0,
+              reviewStatus: 'not-started' as const,
+              lastStudied: null,
+              nextDue: null
             }
           };
-        }
-        return deck;
-      });
-      
-      console.log('Updated decks:', updatedDecks); // Log the updated decks
-      setLocalDecks(updatedDecks);
+        });
+        
+        console.log('Setting updated decks:', updatedDecks);
+        setLocalDecks(updatedDecks);
+      }
     } catch (error) {
       console.error('Error refreshing deck metrics:', error);
       toast({

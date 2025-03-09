@@ -181,7 +181,9 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
         
         // Update deck metrics after completing the session
         if (onUpdateDeckMetrics) {
-          onUpdateDeckMetrics();
+          setTimeout(() => {
+            onUpdateDeckMetrics();
+          }, 100); // Small delay to ensure the database has updated
         }
         
         if (onFinish) onFinish();

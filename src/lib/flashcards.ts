@@ -78,32 +78,28 @@ export const deleteDeck = async (deckId: string) => {
 };
 
 // Flashcard operations
-export const createFlashcard = async (params: { deckId: string, front: string, back: string }) => {
-  const { deckId, front, back } = params;
+export const createFlashcard = async ({
+  deckId,
+  frontContent,
+  backContent
+}: {
+  deckId: string;
+  frontContent: string;
+  backContent: string;
+}): Promise<any> => {
   try {
-    // First check if the deck exists and is accessible
-    const { data: deck, error: deckError } = await supabase
-      .from('flashcard_decks')
-      .select('id')
-      .eq('id', deckId)
-      .single();
-
-    if (deckError) {
-      console.error('Error checking deck:', deckError);
-      throw deckError;
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData?.user) {
+      throw new Error('User not authenticated');
     }
 
-    if (!deck) {
-      throw new Error('Deck not found');
-    }
-
-    // Create the flashcard with minimal required fields
+    // Insert the new flashcard using raw SQL
     const { data, error } = await supabase
       .from('flashcards')
       .insert({
         deck_id: deckId,
-        front_content: front,
-        back_content: back,
+        front_content: frontContent.trim(),
+        back_content: backContent.trim(),
         review_interval: 0,
         ease_factor: 2.5,
         repetitions: 0,
