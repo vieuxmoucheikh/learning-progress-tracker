@@ -61,8 +61,18 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
     // Set data attribute for components that use it
     if (attribute) {
       root.setAttribute(attribute, theme);
+    } else {
+      // Default attribute for compatibility with various libraries
+      root.setAttribute('data-theme', theme);
     }
 
+    // Apply theme class to body as well for better coverage
+    document.body.classList.remove('light', 'dark');
+    document.body.classList.add(theme);
+
+    // Force update for any components that might not be responding to theme changes
+    document.body.style.colorScheme = theme;
+    
     // Update meta theme-color for mobile browsers
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
@@ -70,6 +80,12 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
         'content',
         theme === 'dark' ? '#0f172a' : '#ffffff'
       );
+    } else {
+      // Create meta tag if it doesn't exist
+      const meta = document.createElement('meta');
+      meta.name = 'theme-color';
+      meta.content = theme === 'dark' ? '#0f172a' : '#ffffff';
+      document.head.appendChild(meta);
     }
 
     // Store the theme preference in localStorage

@@ -287,6 +287,44 @@ export default function App() {
   const [flashcardDecks, setFlashcardDecks] = useState<FlashcardDeck[]>([]);
   const [flashcardsLoading, setFlashcardsLoading] = useState(false);
 
+  // Add global styles to ensure dark mode works consistently
+  useEffect(() => {
+    // Create a style element
+    const style = document.createElement('style');
+    
+    // Add CSS rules to ensure dark mode works properly
+    style.textContent = `
+      /* Force dark mode styles */
+      .dark body, .dark #root, .dark [data-theme="dark"] {
+        background-color: #0f172a !important;
+        color: #f8fafc !important;
+      }
+      
+      /* Force light mode styles */
+      body:not(.dark), #root:not(.dark), [data-theme="light"] {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+      }
+      
+      /* Fix for mobile dark backgrounds in light mode */
+      @media (max-width: 768px) {
+        body:not(.dark) .bg-gray-50, 
+        body:not(.dark) .bg-gray-100,
+        body:not(.dark) .bg-gray-200 {
+          background-color: #ffffff !important;
+        }
+      }
+    `;
+    
+    // Append the style element to the document head
+    document.head.appendChild(style);
+    
+    // Clean up function
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   const filteredItems = useMemo(() => {
     return state.items
       .filter(item => {
@@ -697,8 +735,8 @@ export default function App() {
   if (state.loading) {
     return (
       <ThemeProvider>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-          <div className="container mx-auto px-4 py-4 h-screen flex flex-col">
+        <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+          <div className="container mx-auto px-4 py-4 h-screen flex flex-col bg-white dark:bg-gray-900">
             <header className="mb-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                 <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
@@ -807,8 +845,8 @@ export default function App() {
   if (error) {
     return (
       <ThemeProvider>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-          <div className="container mx-auto px-4 py-4 h-screen flex flex-col">
+        <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+          <div className="container mx-auto px-4 py-4 h-screen flex flex-col bg-white dark:bg-gray-900">
             <header className="mb-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                 <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
@@ -863,8 +901,8 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-        <div className="container mx-auto px-4 py-4 h-screen flex flex-col">
+      <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+        <div className="container mx-auto px-4 py-4 h-screen flex flex-col bg-white dark:bg-gray-900">
           <header className="mb-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
               <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
