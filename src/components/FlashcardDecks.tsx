@@ -364,7 +364,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             {summary.reviewStatus && (
               <Badge variant={getReviewStatusBadge(summary.reviewStatus)} className="text-xs px-2 py-1 rounded-md">
                 {formatReviewStatus(summary.reviewStatus)}
-              </Badge>
+              </Badge> 
             )}
             {summary.nextDue && (
               <Badge variant="outline" className="text-xs px-2 py-1 text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/70 border-gray-200 dark:border-gray-700 rounded-md">
