@@ -326,7 +326,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   };
 
   return (
-    <div className="space-y-6 pb-40 w-full max-w-full overflow-x-hidden min-h-screen mb-24 relative">
+    <div className="flex flex-col w-full max-w-full pb-60 overflow-visible">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h2 className="text-2xl font-bold tracking-tight">Your Flashcard Decks</h2>
@@ -361,11 +361,11 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       </div>
 
       {/* Review Alert Messages */}
-      <div className="space-y-4">
+      <div className="space-y-4 mb-6">
         {hasDueCards && (
           <div className="bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800 animate-fadeIn p-4 rounded-lg">
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
               <div>
                 <h3 className="text-lg font-medium text-amber-800 dark:text-amber-300">Cards Due for Review</h3>
                 <p className="text-sm text-amber-700 dark:text-amber-400">You have {getTotalDueCards()} cards that need to be reviewed today.</p>
@@ -377,7 +377,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         {hasNewCards && (
           <div className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 animate-fadeIn p-4 rounded-lg">
             <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <Star className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
               <div>
                 <h3 className="text-lg font-medium text-blue-800 dark:text-blue-300">New Cards Available</h3>
                 <p className="text-sm text-blue-700 dark:text-blue-400">You have {getTotalNotStartedCards()} new cards to start learning.</p>
@@ -389,13 +389,13 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
 
       <div className="border-b pb-1 mb-4">
         <h3 className="text-xl font-semibold flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
           Your Flashcard Decks
         </h3>
       </div>
 
       {/* Decks Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full mb-8">
         {localDecks.length === 0 ? (
           <div className="col-span-full flex flex-col items-center justify-center py-10 px-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
             <Library className="w-12 h-12 text-gray-400 dark:text-gray-500 mb-4" />
@@ -631,7 +631,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       </Dialog>
       
       {/* Spacer for mobile scrolling */}
-      <div className="h-24 w-full" aria-hidden="true"></div>
+      <div className="h-40 w-full" aria-hidden="true"></div>
     </div>
   );
 };
