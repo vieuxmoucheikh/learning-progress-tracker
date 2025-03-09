@@ -4,6 +4,9 @@ type Theme = 'light' | 'dark';
 
 interface ThemeProviderProps {
   children: React.ReactNode;
+  attribute?: string;
+  defaultTheme?: string;
+  enableSystem?: boolean;
 }
 
 interface ThemeContextType {
@@ -14,7 +17,7 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export function ThemeProvider({ children }: ThemeProviderProps) {
+export function ThemeProvider({ children, attribute, defaultTheme, enableSystem }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
     // Check if theme preference is stored in localStorage
     const storedTheme = localStorage.getItem('theme') as Theme;
