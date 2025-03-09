@@ -200,7 +200,7 @@ export function DashboardTab({
   }, [items, selectedDate, getDateStr]);
 
   return (
-    <div className="space-y-6 dashboard-container dashboard-main">
+    <div className="space-y-6">
       {/* Mobile Header with Quick Actions */}
       <div className="md:hidden">
         <div className="flex flex-col space-y-3">
@@ -215,26 +215,15 @@ export function DashboardTab({
             </Button>
           </div>
           
-          <div className="grid grid-cols-2 gap-2 dashboard-buttons-container">
+          <div className="grid grid-cols-2 gap-2">
             <Button 
               variant="outline" 
               size="sm"
               className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700 dashboard-calendar-button"
               onClick={() => setShowCalendar(!showCalendar)}
-              style={{
-                '--tw-text-opacity': '1',
-                color: 'rgba(255, 255, 255, var(--tw-text-opacity))'
-              } as React.CSSProperties}
             >
               <CalendarIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              <span 
-                className="text-xs font-medium dashboard-calendar-text"
-                style={{
-                  color: 'white',
-                  fontWeight: 700,
-                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
-                }}
-              >
+              <span className="text-xs font-medium dashboard-calendar-text" style={{color: 'white', textShadow: '0 1px 2px rgba(0,0,0,0.4)'}}>
                 {showCalendar ? "Hide Calendar" : "Show Calendar"}
               </span>
             </Button>
@@ -244,20 +233,9 @@ export function DashboardTab({
               size="sm"
               className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700 dashboard-goals-button"
               onClick={() => setShowGoals(true)}
-              style={{
-                '--tw-text-opacity': '1',
-                color: 'rgba(255, 255, 255, var(--tw-text-opacity))'
-              } as React.CSSProperties}
             >
               <Target className="h-4 w-4 text-green-600 dark:text-green-400" />
-              <span 
-                className="text-xs font-medium dashboard-goals-text"
-                style={{
-                  color: 'white',
-                  fontWeight: 700,
-                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
-                }}
-              >
+              <span className="text-xs font-medium dashboard-goals-text" style={{color: 'white', textShadow: '0 1px 2px rgba(0,0,0,0.4)'}}>
                 Goals
               </span>
             </Button>

@@ -397,11 +397,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       "relative overflow-hidden transition-all duration-300 border-2 h-full",
       "hover:shadow-lg hover:shadow-blue-300/50",
       "max-w-3xl mx-auto",
-      "bg-white dark:bg-gray-800",  // Ajout de la classe dark:bg-gray-800 pour assurer un fond foncé
+      "bg-white",
       "sm:rounded-xl",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
       mastered 
-        ? "border-emerald-400 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-900/20 dark:to-gray-800" 
+        ? "border-emerald-400 bg-gradient-to-br from-emerald-50 to-white" 
         : "border-blue-400 hover:border-blue-500",
       isEditing && "border-blue-500 shadow-lg shadow-blue-300/50"
     )}>
@@ -428,13 +428,13 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               ) : (
                 <h3 
                   className={cn(
-                    "text-xl sm:text-2xl font-semibold line-clamp-2",
-                    "text-blue-900 dark:text-white", // Remplacer bg-gradient/bg-clip par text-color direct
+                    "text-xl sm:text-2xl font-semibold line-clamp-2 card-title",
+                    "text-blue-900 dark:text-white", // Direct text color instead of gradient
                     "cursor-pointer"
                   )}
                   style={{
                     color: 'white',
-                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
+                    textShadow: '0 1px 2px rgba(0,0,0,0.3)'
                   }}
                   onClick={() => setShowContent(!showContent)}
                 >
@@ -620,22 +620,23 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             >
               <div 
                 className={cn(
-                  "prose prose-sm sm:prose-base max-w-none dark:prose-invert", // Ajout de dark:prose-invert
+                  "prose prose-sm sm:prose-base max-w-none",
+                  "dark:prose-invert", // Add dark mode inverting for better contrast
                   "prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-white",
-                  "prose-p:text-gray-700 dark:prose-p:text-gray-100",
-                  "prose-a:text-blue-600 dark:prose-a:text-blue-400",
+                  "prose-p:text-gray-700 dark:prose-p:text-gray-200", // Lighter text in dark mode for better visibility
+                  "prose-a:text-blue-600 dark:prose-a:text-blue-300",
                   "prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-white",
                   "prose-code:text-blue-600 dark:prose-code:text-blue-300",
-                  "prose-pre:bg-gray-50 dark:prose-pre:bg-gray-700",
-                  "prose-img:rounded-lg",
+                  "prose-pre:bg-gray-50 dark:prose-pre:bg-gray-800",
+                  "prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto",
                   "prose-ul:list-disc prose-ol:list-decimal",
-                  "prose-li:marker:text-gray-400 dark:prose-li:marker:text-gray-300",
+                  "prose-li:marker:text-gray-400 dark:prose-li:marker:text-gray-400",
                   !isZoomed && "max-h-[300px] overflow-hidden cursor-pointer"
                 )}
                 dangerouslySetInnerHTML={{ __html: content }}
               />
               {!isZoomed && content.length > 300 && (
-                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent dark:from-gray-800 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white dark:from-gray-800 to-transparent pointer-events-none" />
               )}
             </div>
           )}
@@ -643,9 +644,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
         {/* Meta Section */}
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-sm">
-          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300" style={{ color: 'white' }}>
+          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
             <Clock className="w-4 h-4" />
-            <span style={{ color: 'white' }}>Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</span>
+            <span style={{color: 'white'}}>Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</span>
           </div>
 
           <div className="flex flex-wrap gap-2">
