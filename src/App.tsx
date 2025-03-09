@@ -844,102 +844,54 @@ export default function App() {
   if (state.loading) {
     return (
       <ThemeProvider>
-        <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-          <div className="container mx-auto px-4 py-4 h-screen flex flex-col bg-white dark:bg-gray-900">
-            <header className="mb-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Learning Dashboard
-                </h1>
-                <div className="flex items-center gap-3">
-                  <ThemeToggle />
-                  <Button 
-                    variant="default"
-                    size="sm"
-                    className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all"
-                    onClick={() => handleDashboardAddItem()} 
-                  >
-                    <Plus className="h-4 w-4" /> Add Item
-                  </Button>
+        <div className="min-h-screen flex flex-col md:flex-row">
+          <div className="md:w-64">
+            <TabNavigation 
+              activeTab={selectedTab} 
+              onTabChange={setSelectedTab}
+            />
+          </div>
+          <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-gray-900">
+            <div className="container mx-auto py-4 h-full flex flex-col">
+              <header className="mb-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                  <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    Learning Dashboard
+                  </h1>
+                  <div className="flex items-center gap-3">
+                    <ThemeToggle />
+                    <Button 
+                      variant="default"
+                      size="sm"
+                      className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all"
+                      onClick={() => handleDashboardAddItem()} 
+                    >
+                      <Plus className="h-4 w-4" /> Add Item
+                    </Button>
+                  </div>
+                </div>
+              </header>
+
+              <div className="flex-1 overflow-auto">
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p className="text-gray-600 dark:text-gray-400">Chargement...</p>
+                  </div>
                 </div>
               </div>
-            </header>
-
-            <div className="flex flex-col md:flex-row flex-1 h-full gap-4 overflow-hidden">
-              <div className="md:w-64 lg:w-72">
-                <TabNavigation 
-                  activeTab={selectedTab} 
-                  onTabChange={setSelectedTab}
-                />
-              </div>
-
-              <div className="flex-1 overflow-hidden flex flex-col">
-                <main className="flex-1 overflow-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                  {selectedTab === TAB_OPTIONS.DASHBOARD && (
-                    <DashboardTab 
-                      items={state.items}
-                      onUpdate={handleDashboardUpdate}
-                      onDelete={handleDeleteItem}
-                      onStartTracking={handleStartTracking}
-                      onStopTracking={handleStopTracking}
-                      onNotesUpdate={handleUpdateNotes}
-                      onSessionNoteAdd={handleAddSessionNote}
-                      onSetActiveItem={handleSetActiveItem}
-                      onAddItem={handleDashboardAddItem}
-                      onDateSelect={handleDateSelect}
-                    />
-                  )}
-
-                  {selectedTab === TAB_OPTIONS.ITEMS && (
-                    <ItemsTab 
-                      items={state.items}
-                      onUpdate={handleUpdateItem}
-                      onDelete={handleDeleteItem}
-                      onStartTracking={handleStartTracking}
-                      onStopTracking={handleStopTracking}
-                      onNotesUpdate={handleUpdateNotes}
-                      onSessionNoteAdd={handleAddSessionNote}
-                      onSetActiveItem={handleSetActiveItem}
-                      onAddItem={handleItemsAddItem}
-                    />
-                  )}
-
-                  {selectedTab === TAB_OPTIONS.ANALYTICS && (
-                    <AnalyticsTab items={state.items} />
-                  )}
-
-                  {selectedTab === TAB_OPTIONS.POMODORO && (
-                    <PomodoroTimer />
-                  )}
-                  
-                  {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
-                    <LearningCardsPage />
-                  )}
-
-                  {selectedTab === TAB_OPTIONS.FLASHCARDS && (
-                    <FlashcardsTab 
-                      flashcards={flashcardDecks}
-                      onAddDeck={handleAddFlashcardDeck}
-                      onStudyDeck={handleStudyFlashcardDeck}
-                      onEditDeck={handleEditFlashcardDeck}
-                      onDeleteDeck={handleDeleteFlashcardDeck}
-                    />
-                  )}
-                </main>
-              </div>
             </div>
-          </div>
 
-          {/* Add Learning Item Dialog */}
-          {showAddDialog && (
-            <AddLearningItem
-              onAdd={handleSubmitItem}
-              onClose={() => setShowAddDialog(false)}
-              isOpen={showAddDialog}
-              selectedDate={selectedDate}
-            />
-          )}
-          
+            {/* Add Learning Item Dialog */}
+            {showAddDialog && (
+              <AddLearningItem
+                onAdd={handleSubmitItem}
+                onClose={() => setShowAddDialog(false)}
+                isOpen={showAddDialog}
+                selectedDate={selectedDate}
+              />
+            )}
+          </div>
           <Toaster />
         </div>
       </ThemeProvider>
@@ -949,50 +901,59 @@ export default function App() {
   if (error) {
     return (
       <ThemeProvider>
-        <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-          <div className="container mx-auto px-4 py-4 h-screen flex flex-col bg-white dark:bg-gray-900">
-            <header className="mb-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Learning Dashboard
-                </h1>
-                <div className="flex items-center gap-3">
-                  <ThemeToggle />
-                  <Button 
-                    variant="default"
-                    size="sm"
-                    className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all"
-                    onClick={() => handleDashboardAddItem()} 
-                  >
-                    <Plus className="h-4 w-4" /> Add Item
-                  </Button>
-                </div>
-              </div>
-            </header>
-
-            <div className="flex flex-col md:flex-row flex-1 h-full gap-4 overflow-hidden">
-              <div className="md:w-64 lg:w-72">
-                <TabNavigation 
-                  activeTab={selectedTab} 
-                  onTabChange={setSelectedTab}
-                />
-              </div>
-
-              <div className="flex-1 overflow-hidden flex flex-col">
-                <main className="flex-1 overflow-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-          <div className="text-center">
-            <p className="text-red-600 mb-4">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Retry
-            </button>
+        <div className="min-h-screen flex flex-col md:flex-row">
+          <div className="md:w-64">
+            <TabNavigation 
+              activeTab={selectedTab} 
+              onTabChange={setSelectedTab}
+            />
+          </div>
+          <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-gray-900">
+            <div className="container mx-auto px-4 py-4 h-screen flex flex-col bg-white dark:bg-gray-900">
+              <header className="mb-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                  <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    Learning Dashboard
+                  </h1>
+                  <div className="flex items-center gap-3">
+                    <ThemeToggle />
+                    <Button 
+                      variant="default"
+                      size="sm"
+                      className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all"
+                      onClick={() => handleDashboardAddItem()} 
+                    >
+                      <Plus className="h-4 w-4" /> Add Item
+                    </Button>
                   </div>
-                </main>
+                </div>
+              </header>
+
+              <div className="flex flex-col md:flex-row flex-1 h-full gap-4 overflow-hidden">
+                <div className="md:w-64 lg:w-72">
+                  <TabNavigation 
+                    activeTab={selectedTab} 
+                    onTabChange={setSelectedTab}
+                  />
+                </div>
+
+                <div className="flex-1 overflow-hidden flex flex-col">
+                  <main className="flex-1 overflow-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                    <div className="text-center">
+                      <p className="text-red-600 mb-4">{error}</p>
+                      <button
+                        onClick={() => window.location.reload()}
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  </main>
+                </div>
               </div>
             </div>
           </div>
+          <Toaster />
         </div>
       </ThemeProvider>
     );
@@ -1001,13 +962,13 @@ export default function App() {
   return (
     <ThemeProvider defaultTheme="dark">
       <div className="min-h-screen flex flex-col md:flex-row">
-        <div className="md:w-64 bg-primary">
+        <div className="md:w-64">
           <TabNavigation 
             activeTab={selectedTab} 
             onTabChange={setSelectedTab} 
           />
         </div>
-        <div className="flex-1 p-4 overflow-y-auto">
+        <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-gray-900">
           <div className="container mx-auto py-4 h-full flex flex-col">
             <header className="mb-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">

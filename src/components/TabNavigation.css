@@ -15,7 +15,7 @@
 .tab-navigation-item {
   white-space: nowrap;
   transition: all 0.2s ease;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .tab-navigation-item.active {
@@ -33,6 +33,7 @@
     min-height: 100vh;
     padding: 1rem 0;
     width: 100%;
+    background-color: #3b82f6; /* Couleur bleue restaurée (blue-500) */
   }
   
   .tab-navigation-items {
@@ -46,15 +47,19 @@
     text-align: left;
     border-left: 4px solid transparent;
     padding-left: 1rem;
+    color: white;
+    font-weight: 500;
   }
   
   .tab-navigation-item.active {
-    background-color: transparent;
+    background-color: rgba(255, 255, 255, 0.15);
     border-left: 4px solid white;
+    color: white;
+    font-weight: 600;
   }
   
   .tab-navigation-item:hover:not(.active) {
-    background-color: transparent;
+    background-color: rgba(255, 255, 255, 0.1);
     border-left: 4px solid rgba(255, 255, 255, 0.5);
   }
 }
