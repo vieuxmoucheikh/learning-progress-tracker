@@ -52,7 +52,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
     { id: 'learning-cards', label: 'Learning', shortLabel: 'Learn', icon: <Notebook size={20} /> },
   ];
 
-  // Scroll active tab into view when it changes
+  // Scroll active tab into view when it changes or when component loads
   useEffect(() => {
     if (activeTabRef.current && scrollContainerRef.current) {
       const container = scrollContainerRef.current;
@@ -64,12 +64,37 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
       const tabLeft = activeTab.offsetLeft;
       const scrollLeft = tabLeft - (containerWidth / 2) + (tabWidth / 2);
       
-      container.scrollTo({
-        left: scrollLeft,
-        behavior: 'smooth'
+      // Use requestAnimationFrame to ensure smooth scrolling after render
+      requestAnimationFrame(() => {
+        container.scrollTo({
+          left: scrollLeft,
+          behavior: 'smooth'
+        });
       });
     }
   }, [activeTab]);
+  
+  // Add touch events for better mobile scrolling
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (scrollContainerRef.current) {
+      // Store the initial touch position
+      scrollContainerRef.current.dataset.touchStartX = e.touches[0].clientX.toString();
+    }
+  };
+  
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (scrollContainerRef.current && scrollContainerRef.current.dataset.touchStartX) {
+      const touchStartX = parseInt(scrollContainerRef.current.dataset.touchStartX);
+      const currentX = e.touches[0].clientX;
+      const diff = touchStartX - currentX;
+      
+      // Scroll the container
+      scrollContainerRef.current.scrollLeft += diff;
+      
+      // Update the touch start position
+      scrollContainerRef.current.dataset.touchStartX = currentX.toString();
+    }
+  };
 
   return (
     <div className="tab-navigation-container">
@@ -77,7 +102,12 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
         <h2 className="text-white font-bold text-xl hidden md:block">Learning Tracker</h2>
         <h2 className="text-white font-bold text-lg md:hidden">Menu</h2>
       </div>
-      <div className="tab-navigation-items" ref={scrollContainerRef}>
+      <div 
+        className="tab-navigation-items" 
+        ref={scrollContainerRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+      >
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -89,11 +119,18 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
               ${activeTab === tab.id ? 'active' : ''}
               flex items-center gap-3 transition-all
             `}
+            aria-current={activeTab === tab.id ? 'page' : undefined}
           >
             <span className="flex-shrink-0">{tab.icon}</span>
-            <span className="inline">{tab.id === activeTab ? tab.label : tab.shortLabel}</span>
+            <span className="inline text-sm font-medium">{tab.id === activeTab ? tab.label : tab.shortLabel}</span>
           </button>
         ))}
+      </div>
+      <div className="hidden md:block mt-auto mx-4 mb-4">
+        <div className="px-3 py-2 text-xs bg-white bg-opacity-10 rounded text-white text-center">
+          <span className="block opacity-80">Getting Started?</span>
+          <span className="block mt-1 font-semibold">Add your first learning item with the "+ Add Item" button</span>
+        </div>
       </div>
     </div>
   );

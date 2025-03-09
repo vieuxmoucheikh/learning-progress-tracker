@@ -14,21 +14,34 @@
   flex-direction: row;
   overflow-x: auto;
   padding: 0.75rem 0;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: thin; /* Firefox */
+  -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
+  scroll-snap-type: x mandatory; /* Snap scrolling */
+  margin-bottom: 8px;
+  mask-image: linear-gradient(to right, transparent, black 10px, black 90%, transparent); /* Fade effect */
 }
 
 .tab-navigation-items::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Edge */
+  height: 4px; /* Show small scrollbar on Chrome */
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.tab-navigation-items::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
 }
 
 .tab-navigation-item {
   white-space: nowrap;
   transition: all 0.3s ease;
-  color: rgba(255, 255, 255, 0.9);
+  color: white; /* Ensure text is always white for better visibility */
   font-weight: 500;
   border-radius: 0.25rem;
   margin: 0 0.25rem;
   position: relative;
+  scroll-snap-align: center; /* Snap each item to center */
+  min-width: fit-content;
+  padding: 0.75rem 1rem; /* Ensure enough tap area */
 }
 
 .tab-navigation-item.active {
@@ -54,6 +67,35 @@
   transform: translateY(-1px);
 }
 
+/* Add arrow indicators for mobile scroll */
+.tab-navigation-container::before,
+.tab-navigation-container::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.tab-navigation-container::before {
+  left: 5px;
+  transform: translateY(-50%);
+  clip-path: polygon(60% 0%, 30% 50%, 60% 100%, 40% 100%, 10% 50%, 40% 0%);
+}
+
+.tab-navigation-container::after {
+  right: 5px;
+  transform: translateY(-50%);
+  clip-path: polygon(40% 0%, 70% 50%, 40% 100%, 60% 100%, 90% 50%, 60% 0%);
+}
+
 /* Styles pour la navigation desktop */
 @media (min-width: 768px) {
   .tab-navigation-container {
@@ -63,11 +105,18 @@
     border-right: 1px solid rgba(255, 255, 255, 0.1);
   }
   
+  .tab-navigation-container::before,
+  .tab-navigation-container::after {
+    display: none; /* Hide scroll indicators on desktop */
+  }
+  
   .tab-navigation-items {
     display: flex;
     flex-direction: column;
     overflow-x: visible;
+    mask-image: none; /* Remove fade effect on desktop */
     padding: 0;
+    margin-bottom: 0;
   }
   
   .tab-navigation-item {
@@ -80,6 +129,7 @@
     font-weight: 500;
     position: relative;
     overflow: hidden;
+    min-width: 100%;
   }
   
   .tab-navigation-item.active {
