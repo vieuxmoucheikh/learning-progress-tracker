@@ -1,0 +1,30 @@
+/* Styles pour la navigation desktop */
+@media (min-width: 768px) {
+  .tab-navigation-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: transparent;
+  }
+  
+  .tab-navigation-items {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .tab-navigation-item {
+    background-color: transparent;
+    transition: all 0.2s ease;
+  }
+  
+  .tab-navigation-item.active {
+    background-color: #1d4ed8; /* Primary color, adjust based on your theme */
+    border-left: 4px solid white;
+  }
+  
+  .tab-navigation-item:hover:not(.active) {
+    background-color: rgba(29, 78, 216, 0.7); /* Lighter primary color */
+    border-left: 4px solid rgba(255, 255, 255, 0.5);
+  }
+}
