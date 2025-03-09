@@ -1,14 +1,61 @@
-import { useState, useEffect, useRef } from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Textarea } from './ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { Badge } from './ui/badge';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
-import { Plus, Trash2, Edit, Library, BookOpen, Play, Clock, PlusCircle, Star, RefreshCw } from 'lucide-react';
-import { useToast } from './ui/use-toast';
+import { useState, useEffect } from 'react';
+import { 
+  Card, 
+  CardContent, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription 
+} from "@/components/ui/card";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle 
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "@/components/ui/use-toast";
+import { 
+  Clock, 
+  Edit, 
+  Library, 
+  Play, 
+  PlusCircle, 
+  Plus, 
+  RefreshCw, 
+  Star, 
+  BookOpen,
+  Trash2
+} from "lucide-react";
 import { FlashcardDeck } from '@/types';
+import { supabase } from '@/lib/supabase';
+
+interface FlashcardDecksProps {
+  decks: FlashcardDeck[];
+  onSelectDeck?: (deckId: string) => void;
+  onAddDeck: (data: { name: string; description: string }) => void;
+  onStudyDeck: (deckId: string) => void;
+  onEditDeck: (deckId: string) => void;
+  onDeleteDeck: (deckId: string) => void;
+}
 
 interface DeckSummary {
   deckId: string;
@@ -18,86 +65,164 @@ interface DeckSummary {
   lastStudied?: string;
 }
 
-interface FlashcardDecksProps {
-  decks: FlashcardDeck[];
-  onStudyDeck: (deckId: string) => void;
-  onEditDeck: (deckId: string) => void;
-  onDeleteDeck: (deckId: string) => void;
-  onAddDeck: (data: { name: string; description: string }) => void;
-  onSelectDeck?: (deckId: string) => void;
-}
-
-export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ 
+const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ 
   decks,
+  onSelectDeck,
+  onAddDeck,
   onStudyDeck,
   onEditDeck,
-  onDeleteDeck,
-  onAddDeck,
-  onSelectDeck
+  onDeleteDeck
 }) => {
-  const [deckSummaries, setDeckSummaries] = useState<DeckSummary[]>([]);
   const [isCreatingDeck, setIsCreatingDeck] = useState(false);
   const [isAddingFlashcard, setIsAddingFlashcard] = useState(false);
-  const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [deckFormData, setDeckFormData] = useState({ name: '', description: '' });
   const [flashcardFormData, setFlashcardFormData] = useState({ front: '', back: '' });
-  const [isLoading, setIsLoading] = useState(false);
-  const [localDecks, setLocalDecks] = useState<FlashcardDeck[]>(decks);
-  const { toast } = useToast();
-  const initializedRef = useRef(false);
-
+  const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
+  const [deckSummaries, setDeckSummaries] = useState<DeckSummary[]>([]);
+  const [localDecks, setLocalDecks] = useState<FlashcardDeck[]>([]);
+  const [editingDeckId, setEditingDeckId] = useState<string | null>(null);
+  
+  // Initialize local decks from props
   useEffect(() => {
     setLocalDecks(decks);
   }, [decks]);
-
+  
+  // Fetch actual deck summaries from the database
   useEffect(() => {
-    if (!initializedRef.current || localDecks.length !== deckSummaries.length) {
-      const summaries = localDecks.map(deck => ({
-        deckId: deck.id,
-        total: Math.floor(Math.random() * 20) + 1,
-        dueToday: Math.floor(Math.random() * 5),
-        reviewStatus: ['up-to-date', 'due-soon', 'overdue', 'not-started'][Math.floor(Math.random() * 4)] as 'up-to-date' | 'due-soon' | 'overdue' | 'not-started',
-        lastStudied: Math.random() > 0.3 ? new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 30).toISOString() : undefined
-      }));
-      setDeckSummaries(summaries);
-      initializedRef.current = true;
+    const fetchDeckSummaries = async () => {
+      try {
+        setIsLoading(true);
+        
+        // For each deck, fetch its cards and calculate summaries
+        const summaries = await Promise.all(
+          localDecks.map(async (deck) => {
+            // Use raw SQL to get all cards for this deck with their review status
+            const { data: cards, error } = await supabase
+              .from('flashcards')
+              .select('*')
+              .eq('deck_id', deck.id);
+            
+            if (error) throw error;
+            
+            // Calculate metrics
+            const total = cards?.length || 0;
+            
+            // Get cards due today - use UTC date to ensure consistency across timezones
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Filter cards that are due today or earlier
+            const dueCards = cards?.filter(card => {
+              if (!card.next_review_date) return true; // Cards without a review date are always due
+              const nextReview = new Date(card.next_review_date);
+              return nextReview <= today;
+            }) || [];
+            
+            // Get last studied date - find the most recent review date across all cards
+            const lastStudied = cards?.reduce((latest, card) => {
+              if (!card.last_reviewed) return latest;
+              const reviewDate = new Date(card.last_reviewed);
+              return !latest || reviewDate > latest ? reviewDate : latest;
+            }, null as Date | null);
+            
+            // Determine review status based on due cards and their review dates
+            let reviewStatus: 'up-to-date' | 'due-soon' | 'overdue' | 'not-started' = 'up-to-date';
+            
+            if (total === 0) {
+              reviewStatus = 'not-started';
+            } else if (dueCards.length > 0) {
+              reviewStatus = 'due-soon';
+              
+              // Check if any cards are overdue by more than 3 days
+              const threeDaysAgo = new Date();
+              threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+              
+              const overdueCards = dueCards.filter(card => {
+                if (!card.next_review_date) return false; // Skip cards without a review date
+                const nextReview = new Date(card.next_review_date);
+                return nextReview < threeDaysAgo;
+              });
+              
+              if (overdueCards.length > 0) {
+                reviewStatus = 'overdue';
+              }
+            }
+            
+            return {
+              deckId: deck.id,
+              total,
+              dueToday: dueCards.length,
+              reviewStatus,
+              lastStudied: lastStudied ? lastStudied.toISOString() : undefined
+            };
+          })
+        );
+        
+        setDeckSummaries(summaries);
+      } catch (error) {
+        console.error('Error fetching deck summaries:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load deck information",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    if (localDecks.length > 0) {
+      fetchDeckSummaries();
     }
   }, [localDecks]);
-
+  
   const handleCreateDeckSubmit = () => {
     if (!deckFormData.name.trim()) {
       toast({
         title: "Error",
-        description: "Please provide a name for your deck",
+        description: "Please enter a deck name",
         variant: "destructive"
       });
       return;
     }
-
+    
     setIsLoading(true);
     
-    const newDeckId = `deck-${Date.now()}`;
+    // If we're editing an existing deck
+    if (editingDeckId) {
+      const deckToEdit = localDecks.find(d => d.id === editingDeckId);
+      if (deckToEdit) {
+        // Update the deck in the local state first for immediate feedback
+        const updatedDeck = {
+          ...deckToEdit,
+          name: deckFormData.name.trim(),
+          description: deckFormData.description.trim()
+        };
+        
+        // Update the deck object in the localDecks state
+        setLocalDecks(prev => prev.map(d => d.id === editingDeckId ? updatedDeck : d));
+        
+        // Call the parent component's edit handler with the deck ID
+        // The parent component will handle the actual database update
+        onEditDeck(editingDeckId);
+        
+        // Reset form and state
+        setDeckFormData({ name: '', description: '' });
+        setIsCreatingDeck(false);
+        setEditingDeckId(null);
+        setIsLoading(false);
+        
+        toast({
+          title: "Success",
+          description: "Deck updated successfully",
+        });
+        
+        return;
+      }
+    }
     
-    const newDeck: FlashcardDeck = {
-      id: newDeckId,
-      name: deckFormData.name.trim(),
-      description: deckFormData.description.trim(),
-      created_at: new Date().toISOString(),
-      user_id: 'current-user' // Assuming there's a user_id required
-    };
-    
-    setLocalDecks(prev => [...prev, newDeck]);
-    
-    const newSummary: DeckSummary = {
-      deckId: newDeckId,
-      total: 0,
-      dueToday: 0,
-      reviewStatus: 'not-started',
-      lastStudied: undefined
-    };
-    
-    setDeckSummaries(prev => [...prev, newSummary]);
-    
+    // Otherwise, create a new deck
     onAddDeck({
       name: deckFormData.name.trim(),
       description: deckFormData.description.trim()
@@ -126,117 +251,9 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         name: deck.name,
         description: deck.description || ''
       });
+      setEditingDeckId(deckId);
       setIsCreatingDeck(true);
     }
-  };
-
-  const handleAddFlashcardSubmit = () => {
-    if (!flashcardFormData.front.trim() || !flashcardFormData.back.trim()) {
-      toast({
-        title: "Error",
-        description: "Please fill in both front and back of the flashcard",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!selectedDeckId) {
-      toast({
-        title: "Error",
-        description: "Please select a deck",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    
-    setTimeout(() => {
-      setFlashcardFormData({ front: '', back: '' });
-      setIsAddingFlashcard(false);
-      setSelectedDeckId(null);
-      setIsLoading(false);
-      
-      toast({
-        title: "Success",
-        description: "Flashcard added successfully",
-      });
-      
-      const summaries = localDecks.map(deck => ({
-        deckId: deck.id,
-        total: Math.floor(Math.random() * 20) + 1,
-        dueToday: Math.floor(Math.random() * 5),
-        reviewStatus: ['up-to-date', 'due-soon', 'overdue', 'not-started'][Math.floor(Math.random() * 4)] as 'up-to-date' | 'due-soon' | 'overdue' | 'not-started',
-        lastStudied: Math.random() > 0.3 ? new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 30).toISOString() : undefined
-      }));
-      setDeckSummaries(summaries);
-    }, 500);
-  };
-
-  const getTotalDueCards = () => {
-    return deckSummaries.reduce((total, summary) => total + summary.dueToday, 0);
-  };
-
-  const getTotalNotStartedCards = () => {
-    return deckSummaries.reduce((total, summary) => total + summary.total, 0);
-  };
-
-  const getDeckSummary = (deckId: string) => {
-    return deckSummaries.find(summary => summary.deckId === deckId);
-  };
-
-  const hasDueCards = getTotalDueCards() > 0;
-  const hasNewCards = getTotalNotStartedCards() > 0;
-
-  const getReviewStatusBadge = (status: string) => {
-    switch (status) {
-      case 'up-to-date':
-        return 'default';
-      case 'due-soon':
-        return 'secondary';
-      case 'overdue':
-        return 'destructive';
-      case 'not-started':
-        return 'outline';
-      default:
-        return 'default';
-    }
-  };
-
-  const formatReviewStatus = (status: string) => {
-    switch (status) {
-      case 'up-to-date':
-        return 'Up to date';
-      case 'due-soon':
-        return 'Due soon';
-      case 'overdue':
-        return 'Overdue';
-      case 'not-started':
-        return 'Not started';
-      default:
-        return status;
-    }
-  };
-
-  const syncData = () => {
-    setIsLoading(true);
-    
-    setTimeout(() => {
-      const summaries = localDecks.map(deck => ({
-        deckId: deck.id,
-        total: Math.floor(Math.random() * 20) + 1,
-        dueToday: Math.floor(Math.random() * 5),
-        reviewStatus: ['up-to-date', 'due-soon', 'overdue', 'not-started'][Math.floor(Math.random() * 4)] as 'up-to-date' | 'due-soon' | 'overdue' | 'not-started',
-        lastStudied: Math.random() > 0.3 ? new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 30).toISOString() : undefined
-      }));
-      setDeckSummaries(summaries);
-      
-      setIsLoading(false);
-      toast({
-        title: "Sync Complete",
-        description: "Your flashcard data has been synchronized across all devices.",
-      });
-    }, 1000);
   };
 
   const DeckCard = ({ deck, summary }: { deck: FlashcardDeck; summary: DeckSummary }) => {
@@ -327,6 +344,197 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     );
   };
 
+  const getTotalDueCards = () => {
+    return deckSummaries.reduce((total, summary) => total + summary.dueToday, 0);
+  };
+
+  const getTotalNotStartedCards = () => {
+    return deckSummaries.reduce((total, summary) => total + summary.total, 0);
+  };
+
+  const getDeckSummary = (deckId: string) => {
+    return deckSummaries.find(summary => summary.deckId === deckId);
+  };
+
+  const hasDueCards = getTotalDueCards() > 0;
+  const hasNewCards = getTotalNotStartedCards() > 0;
+
+  const getReviewStatusBadge = (status: string) => {
+    switch (status) {
+      case 'up-to-date':
+        return 'default';
+      case 'due-soon':
+        return 'secondary';
+      case 'overdue':
+        return 'destructive';
+      case 'not-started':
+        return 'outline';
+      default:
+        return 'default';
+    }
+  };
+
+  const formatReviewStatus = (status: string) => {
+    switch (status) {
+      case 'up-to-date':
+        return 'Up to date';
+      case 'due-soon':
+        return 'Due soon';
+      case 'overdue':
+        return 'Overdue';
+      case 'not-started':
+        return 'Not started';
+      default:
+        return status;
+    }
+  };
+
+  const syncData = () => {
+    setIsLoading(true);
+    
+    setTimeout(() => {
+      setIsLoading(false);
+      toast({
+        title: "Sync Complete",
+        description: "Your flashcard data has been synchronized across all devices.",
+      });
+    }, 1000);
+  };
+
+  const handleAddFlashcardSubmit = async () => {
+    if (!flashcardFormData.front.trim() || !flashcardFormData.back.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in both front and back of the flashcard",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!selectedDeckId) {
+      toast({
+        title: "Error",
+        description: "Please select a deck",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      // Add flashcard to the database using raw SQL
+      const { data, error } = await supabase
+        .from('flashcards')
+        .insert({
+          deck_id: selectedDeckId,
+          front_content: flashcardFormData.front.trim(),
+          back_content: flashcardFormData.back.trim(),
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      // Reset form state
+      setFlashcardFormData({ front: '', back: '' });
+      setIsAddingFlashcard(false);
+      setSelectedDeckId(null);
+      
+      toast({
+        title: "Success",
+        description: "Flashcard added successfully",
+      });
+      
+      // Refresh deck summaries using the same function as in the useEffect
+      const fetchDeckSummaries = async () => {
+        try {
+          // For each deck, fetch its cards and calculate summaries
+          const summaries = await Promise.all(
+            localDecks.map(async (deck) => {
+              // Use raw SQL to get all cards for this deck with their review status
+              const { data: cards, error } = await supabase
+                .from('flashcards')
+                .select('*')
+                .eq('deck_id', deck.id);
+              
+              if (error) throw error;
+              
+              // Calculate metrics
+              const total = cards?.length || 0;
+              
+              // Get cards due today - use UTC date to ensure consistency across timezones
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              
+              // Filter cards that are due today or earlier
+              const dueCards = cards?.filter(card => {
+                if (!card.next_review_date) return true; // Cards without a review date are always due
+                const nextReview = new Date(card.next_review_date);
+                return nextReview <= today;
+              }) || [];
+              
+              // Get last studied date - find the most recent review date across all cards
+              const lastStudied = cards?.reduce((latest, card) => {
+                if (!card.last_reviewed) return latest;
+                const reviewDate = new Date(card.last_reviewed);
+                return !latest || reviewDate > latest ? reviewDate : latest;
+              }, null as Date | null);
+              
+              // Determine review status based on due cards and their review dates
+              let reviewStatus: 'up-to-date' | 'due-soon' | 'overdue' | 'not-started' = 'up-to-date';
+              
+              if (total === 0) {
+                reviewStatus = 'not-started';
+              } else if (dueCards.length > 0) {
+                reviewStatus = 'due-soon';
+                
+                // Check if any cards are overdue by more than 3 days
+                const threeDaysAgo = new Date();
+                threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+                
+                const overdueCards = dueCards.filter(card => {
+                  if (!card.next_review_date) return false; // Skip cards without a review date
+                  const nextReview = new Date(card.next_review_date);
+                  return nextReview < threeDaysAgo;
+                });
+                
+                if (overdueCards.length > 0) {
+                  reviewStatus = 'overdue';
+                }
+              }
+              
+              return {
+                deckId: deck.id,
+                total,
+                dueToday: dueCards.length,
+                reviewStatus,
+                lastStudied: lastStudied ? lastStudied.toISOString() : undefined
+              };
+            })
+          );
+          
+          setDeckSummaries(summaries);
+        } catch (error) {
+          console.error('Error fetching deck summaries:', error);
+        }
+      };
+      
+      fetchDeckSummaries();
+      
+    } catch (error) {
+      console.error('Error adding flashcard:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add flashcard",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-full">
       {/* Header Section */}
@@ -405,7 +613,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             <p className="text-gray-500 dark:text-gray-400 text-center mb-4">Create your first flashcard deck to start learning</p>
             <Button 
               onClick={() => setIsCreatingDeck(true)} 
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-600 text-white shadow-md"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-600 shadow-md"
             >
               <Plus className="w-4 h-4 mr-2" /> Create Deck
             </Button>
@@ -434,7 +642,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             onClick={() => !isLoading && setIsCreatingDeck(true)}
             className={`border-dashed cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors flex flex-col items-center justify-center py-10 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-full mb-3">
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-full mb-3">
               <PlusCircle className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
             <p className="text-lg font-semibold text-gray-600 dark:text-gray-400">Create New Deck</p>
@@ -626,7 +834,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               onClick={handleAddFlashcardSubmit}
               className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-600 text-white shadow-md"
             >
-              {isLoading ? 'Adding...' : 'Add Flashcard'}
+              Add Flashcard
             </Button>
           </div>
         </DialogContent>
@@ -634,3 +842,5 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     </div>
   );
 };
+
+export default FlashcardDecks;

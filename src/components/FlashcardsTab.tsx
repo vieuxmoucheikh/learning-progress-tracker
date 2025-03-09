@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
-import { FlashcardDecks } from './FlashcardDecks';
+import FlashcardDecks from './FlashcardDecks';
 import { FlashcardManager } from './FlashcardManager';
 import { FlashcardStudy } from './FlashcardStudy';
 import { FlashcardDeck } from '@/types';
@@ -44,13 +44,21 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
     setView('decks');
   };
 
+  // Handle study deck - this is called when the study button is clicked
+  const handleStudyDeck = (deckId: string) => {
+    setSelectedDeckId(deckId);
+    setView('study');
+    // Pass the deckId to the parent's onStudyDeck handler
+    onStudyDeck(deckId);
+  };
+
   return (
     <div className="w-full h-full">
       {view === 'decks' && (
         <FlashcardDecks 
           decks={flashcards}
           onSelectDeck={handleSelectDeck}
-          onStudyDeck={onStudyDeck}
+          onStudyDeck={handleStudyDeck}
           onEditDeck={onEditDeck}
           onDeleteDeck={onDeleteDeck}
           onAddDeck={onAddDeck}

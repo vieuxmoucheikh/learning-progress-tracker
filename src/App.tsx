@@ -684,27 +684,99 @@ export default function App() {
     }
   };
 
-  const handleStudyFlashcardDeck = (deckId: string) => {
-    // Navigate to study view or handle study mode
-    const deck = flashcardDecks.find(d => d.id === deckId);
-    if (deck) {
+  const handleStudyFlashcardDeck = async (deckId: string) => {
+    try {
+      // Find the deck to study
+      const deckToStudy = flashcardDecks.find(d => d.id === deckId);
+      if (!deckToStudy) {
+        toast({
+          title: "Error",
+          description: "Deck not found",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Fetch cards for this deck
+      const { data: cards, error } = await supabase
+        .from('flashcards')
+        .select('*')
+        .eq('deck_id', deckId);
+      
+      if (error) throw error;
+      
+      if (!cards || cards.length === 0) {
+        toast({
+          title: "No Cards",
+          description: "This deck has no cards to study. Add some cards first!",
+        });
+        return;
+      }
+      
+      // Set the selected tab to flashcards to ensure we're in the right view
       setSelectedTab(TAB_OPTIONS.FLASHCARDS);
+      
+      // The FlashcardsTab component will handle the navigation to study mode
+      // We just need to pass the deckId through the onStudyDeck prop
+      toast({
+        title: "Study Mode",
+        description: `Now studying deck: ${deckToStudy.name} (${cards.length} cards)`,
+      });
+    } catch (error) {
+      console.error('Error starting study session:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start study session",
+        variant: "destructive"
+      });
     }
   };
 
-  const handleEditFlashcardDeck = (deckId: string) => {
-    // Navigate to deck editing view
-    console.log(`Editing deck: ${deckId}`);
-    
-    // Show a toast notification for better UX
-    toast({
-      title: "Edit Mode",
-      description: `Now editing flashcard deck`,
-    });
-    
-    // Additional logic for editing would go here
-    // This could include setting state variables to track the current editing deck
-    // and showing a different UI component for editing
+  const handleEditFlashcardDeck = async (deckId: string) => {
+    try {
+      // Find the deck to edit in the current state
+      const deckToEdit = flashcardDecks.find(d => d.id === deckId);
+      if (!deckToEdit) {
+        toast({
+          title: "Error",
+          description: "Deck not found",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Try to update using raw SQL
+      const { error } = await supabase
+        .from('flashcard_decks')
+        .update({
+          name: deckToEdit.name,
+          description: deckToEdit.description || ''
+        })
+        .eq('id', deckId);
+      
+      if (error) throw error;
+      
+      // Update the local state with the updated deck
+      setFlashcardDecks(prev => 
+        prev.map(deck => deck.id === deckId ? {
+          ...deck,
+          name: deckToEdit.name,
+          description: deckToEdit.description
+        } : deck)
+      );
+      
+      toast({
+        title: "Success",
+        description: "Deck updated successfully",
+      });
+    } catch (error) {
+      console.error('Error updating deck:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update the deck",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleDeleteFlashcardDeck = async (deckId: string) => {
@@ -761,11 +833,6 @@ export default function App() {
                 <TabNavigation 
                   activeTab={selectedTab} 
                   onTabChange={setSelectedTab}
-                  flashcards={flashcardDecks}
-                  onAddDeck={handleAddFlashcardDeck}
-                  onStudyDeck={handleStudyFlashcardDeck}
-                  onEditDeck={handleEditFlashcardDeck}
-                  onDeleteDeck={handleDeleteFlashcardDeck}
                 />
               </div>
 
@@ -871,11 +938,6 @@ export default function App() {
                 <TabNavigation 
                   activeTab={selectedTab} 
                   onTabChange={setSelectedTab}
-                  flashcards={flashcardDecks}
-                  onAddDeck={handleAddFlashcardDeck}
-                  onStudyDeck={handleStudyFlashcardDeck}
-                  onEditDeck={handleEditFlashcardDeck}
-                  onDeleteDeck={handleDeleteFlashcardDeck}
                 />
               </div>
 
@@ -927,18 +989,13 @@ export default function App() {
               <TabNavigation 
                 activeTab={selectedTab} 
                 onTabChange={setSelectedTab}
-                flashcards={flashcardDecks}
-                onAddDeck={handleAddFlashcardDeck}
-                onStudyDeck={handleStudyFlashcardDeck}
-                onEditDeck={handleEditFlashcardDeck}
-                onDeleteDeck={handleDeleteFlashcardDeck}
               />
             </div>
 
             <div className="flex-1 overflow-hidden flex flex-col">
               <main className="flex-1 overflow-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
               {selectedTab === TAB_OPTIONS.DASHBOARD && (
-                <DashboardTab
+                <DashboardTab 
                   items={state.items}
                   onUpdate={handleDashboardUpdate}
                   onDelete={handleDeleteItem}
@@ -947,13 +1004,13 @@ export default function App() {
                   onNotesUpdate={handleUpdateNotes}
                   onSessionNoteAdd={handleAddSessionNote}
                   onSetActiveItem={handleSetActiveItem}
-                    onAddItem={handleDashboardAddItem}
-                    onDateSelect={handleDateSelect}
+                  onAddItem={handleDashboardAddItem}
+                  onDateSelect={handleDateSelect}
                 />
               )}
 
               {selectedTab === TAB_OPTIONS.ITEMS && (
-                <ItemsTab
+                <ItemsTab 
                   items={state.items}
                   onUpdate={handleUpdateItem}
                   onDelete={handleDeleteItem}
@@ -962,7 +1019,7 @@ export default function App() {
                   onNotesUpdate={handleUpdateNotes}
                   onSessionNoteAdd={handleAddSessionNote}
                   onSetActiveItem={handleSetActiveItem}
-                    onAddItem={handleItemsAddItem}
+                  onAddItem={handleItemsAddItem}
                 />
               )}
 
