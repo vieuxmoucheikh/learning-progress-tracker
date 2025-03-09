@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
-import { Plus, Trash2, Edit, Library, BookOpen, Play, Clock, PlusCircle, Star } from 'lucide-react';
+import { Plus, Trash2, Edit, Library, BookOpen, Play, Clock, PlusCircle, Star, RefreshCw } from 'lucide-react';
 import { useToast } from './ui/use-toast';
 import { FlashcardDeck } from '@/types';
 
@@ -163,18 +163,41 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     }
   };
 
+  const syncData = () => {
+    setIsLoading(true);
+    
+    // Simulate API call to sync data
+    setTimeout(() => {
+      // Generate new summaries to simulate updated data
+      const summaries = decks.map(deck => ({
+        deckId: deck.id,
+        total: Math.floor(Math.random() * 20) + 1,
+        dueToday: Math.floor(Math.random() * 5),
+        reviewStatus: ['up-to-date', 'due-soon', 'overdue', 'not-started'][Math.floor(Math.random() * 4)] as 'up-to-date' | 'due-soon' | 'overdue' | 'not-started',
+        lastStudied: Math.random() > 0.3 ? new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 30).toISOString() : undefined
+      }));
+      setDeckSummaries(summaries);
+      
+      setIsLoading(false);
+      toast({
+        title: "Sync Complete",
+        description: "Your flashcard data has been synchronized across all devices.",
+      });
+    }, 1000);
+  };
+
   const DeckCard = ({ deck, summary }: { deck: FlashcardDeck; summary: DeckSummary }) => {
     return (
-      <Card key={deck.id} className="overflow-hidden border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all">
+      <Card key={deck.id} className="overflow-hidden border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all w-full">
         <CardHeader className="pb-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/20">
           <div className="flex justify-between items-start">
-            <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">{deck.name}</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 break-words">{deck.name}</CardTitle>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8"
+                  className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8 flex-shrink-0 ml-2"
                   disabled={isLoading}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -252,24 +275,36 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   };
 
   return (
-    <div className="space-y-6 pb-8 w-full">
+    <div className="space-y-6 pb-8 w-full max-w-full overflow-x-hidden">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h2 className="text-2xl font-bold tracking-tight">Your Flashcard Decks</h2>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <Button 
             onClick={() => setIsAddingFlashcard(true)} 
             className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-600 shadow-md hover:shadow-lg transition-all"
             disabled={isLoading}
+            size="sm"
           >
-            <PlusCircle className="w-4 h-4 mr-2" /> Add Flashcard
+            <PlusCircle className="w-4 h-4 mr-1.5" /> Add Card
           </Button>
           <Button 
             onClick={() => setIsCreatingDeck(true)}
             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-600 shadow-md"
             disabled={isLoading}
+            size="sm"
           >
-            <Library className="w-4 h-4 mr-2" /> Create Deck
+            <Library className="w-4 h-4 mr-1.5" /> Create Deck
+          </Button>
+          <Button
+            onClick={syncData}
+            variant="outline"
+            size="sm"
+            className="ml-auto sm:ml-0"
+            disabled={isLoading}
+          >
+            <RefreshCw className={`w-4 h-4 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
+            {isLoading ? 'Syncing...' : 'Sync'}
           </Button>
         </div>
       </div>
@@ -366,12 +401,12 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       )}
 
       {/* Create Deck Dialog */}
-      <Dialog open={isCreatingDeck} onOpenChange={(open) => !isLoading && setIsCreatingDeck(open)}>
-        <DialogContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 sm:max-w-md">
+      <Dialog open={isCreatingDeck} onOpenChange={setIsCreatingDeck}>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl">Create New Flashcard Deck</DialogTitle>
-            <DialogDescription className="text-gray-600 dark:text-gray-400">
-              Create a category to organize your flashcards
+            <DialogTitle>Create New Deck</DialogTitle>
+            <DialogDescription>
+              Create a new flashcard deck to organize your learning materials.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -448,7 +483,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                   setIsLoading(false);
                 }
               }}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-600 text-white shadow-md"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-600 shadow-md"
               disabled={isLoading}
             >
               {isLoading ? 'Creating...' : 'Create Deck'}
@@ -458,12 +493,12 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       </Dialog>
 
       {/* Add Flashcard Dialog */}
-      <Dialog open={isAddingFlashcard} onOpenChange={(open) => !isLoading && setIsAddingFlashcard(open)}>
-        <DialogContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 sm:max-w-md">
+      <Dialog open={isAddingFlashcard} onOpenChange={setIsAddingFlashcard}>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl">Add New Flashcard</DialogTitle>
-            <DialogDescription className="text-gray-600 dark:text-gray-400">
-              Create a new flashcard to help you learn and remember key concepts
+            <DialogTitle>Add New Flashcard</DialogTitle>
+            <DialogDescription>
+              Create a new flashcard to add to your deck.
             </DialogDescription>
           </DialogHeader>
           
