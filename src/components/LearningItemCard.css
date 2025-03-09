@@ -1,6 +1,6 @@
 /* Correctifs pour les cartes d'apprentissage en mode sombre sur mobile */
 @media (max-width: 768px) {
-  /* Couleur de fond et bordure renforcées */
+  /* Couleur de fond et bordure renforcées en mode sombre */
   .dark .learning-item-card,
   .dark [class*="learning-item-card"],
   .dark [class*="learning-card"] {
@@ -9,7 +9,7 @@
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
   }
   
-  /* Titres en blanc pur pour un contraste maximal */
+  /* Titres en blanc pur pour un contraste maximal en mode sombre */
   .dark .learning-item-card h3,
   .dark .learning-item-card [class*="title"],
   .dark [class*="learning-item-card"] h3,
@@ -21,35 +21,67 @@
     font-weight: 700;
   }
   
-  /* Texte principal */
+  /* Assurer la visibilité des titres en mode clair aussi */
+  :root:not(.dark) .learning-item-card h3,
+  :root:not(.dark) .learning-item-card [class*="title"],
+  :root:not(.dark) [class*="learning-item-card"] h3,
+  :root:not(.dark) [class*="learning-item-card"] [class*="title"],
+  :root:not(.dark) [class*="learning-card"] h3,
+  :root:not(.dark) [class*="learning-card"] [class*="title"] {
+    color: #1e293b !important; /* slate-800 pour la lisibilité en mode clair */
+    font-weight: 700;
+  }
+  
+  /* Texte principal en mode sombre */
   .dark .learning-item-card p,
   .dark [class*="learning-item-card"] p,
   .dark [class*="learning-card"] p,
   .dark .learning-item-card div,
   .dark [class*="learning-item-card"] div,
   .dark [class*="learning-card"] div {
-    color: #f1f5f9 !important;
+    color: #f1f5f9 !important; /* slate-100 */
   }
   
-  /* Métadonnées et textes secondaires */
+  /* Texte principal en mode clair */
+  :root:not(.dark) .learning-item-card p,
+  :root:not(.dark) [class*="learning-item-card"] p,
+  :root:not(.dark) [class*="learning-card"] p,
+  :root:not(.dark) .learning-item-card div,
+  :root:not(.dark) [class*="learning-item-card"] div,
+  :root:not(.dark) [class*="learning-card"] div {
+    color: #334155 !important; /* slate-700 */
+  }
+  
+  /* Métadonnées et textes secondaires en mode sombre */
   .dark .learning-item-card [class*="metadata"],
   .dark .learning-item-card [class*="text-gray"],
   .dark [class*="learning-item-card"] [class*="metadata"],
   .dark [class*="learning-item-card"] [class*="text-gray"],
   .dark [class*="learning-card"] [class*="metadata"],
   .dark [class*="learning-card"] [class*="text-gray"] {
-    color: #e2e8f0 !important;
+    color: #e2e8f0 !important; /* slate-200 */
   }
   
-  /* Icônes et SVG */
+  /* Métadonnées et textes secondaires en mode clair */
+  :root:not(.dark) .learning-item-card [class*="metadata"],
+  :root:not(.dark) .learning-item-card [class*="text-gray"],
+  :root:not(.dark) [class*="learning-item-card"] [class*="metadata"],
+  :root:not(.dark) [class*="learning-item-card"] [class*="text-gray"],
+  :root:not(.dark) [class*="learning-card"] [class*="metadata"],
+  :root:not(.dark) [class*="learning-card"] [class*="text-gray"] {
+    color: #475569 !important; /* slate-600 */
+  }
+  
+  /* Ne pas modifier la couleur des icônes SVG */
   .dark .learning-item-card svg,
   .dark [class*="learning-item-card"] svg,
   .dark [class*="learning-card"] svg {
-    color: #ffffff !important;
+    /* Conserver fill: currentColor pour préserver les couleurs originales */
+    color: currentColor !important;
     fill: currentColor !important;
   }
   
-  /* Badges et étiquettes */
+  /* Badges et étiquettes en mode sombre */
   .dark .learning-item-card [class*="tag"],
   .dark .learning-item-card [class*="badge"],
   .dark .learning-item-card [class*="category"],
@@ -65,12 +97,5 @@
     background-color: rgba(255, 255, 255, 0.2) !important;
     color: #ffffff !important;
     font-weight: 600;
-  }
-  
-  /* Forcer la visibilité sur tous les éléments qui pourraient être masqués */
-  .dark .learning-item-card *[style*="color"],
-  .dark [class*="learning-item-card"] *[style*="color"],
-  .dark [class*="learning-card"] *[style*="color"] {
-    color: #ffffff !important;
   }
 }

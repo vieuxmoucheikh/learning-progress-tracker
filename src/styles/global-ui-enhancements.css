@@ -606,3 +606,52 @@ button:active,
     color: #e2e8f0 !important; /* slate-200 pour une bonne lisibilité */
   }
 }
+
+/* CIBLAGE PRÉCIS POUR LE DASHBOARD ET LES LEARNING CARDS */
+@media (max-width: 768px) {
+  /* Correction spécifique pour le texte des boutons "Show Calendar" et "Goals" sans affecter les icônes */
+  .dark .md\:hidden .grid.grid-cols-2 button span {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Ne pas modifier la couleur des SVG (icônes) */
+  .dark .md\:hidden .grid.grid-cols-2 button svg {
+    /* Laisser les couleurs originales des icônes */
+    color: inherit !important;
+    fill: currentColor !important;
+  }
+
+  /* Amélioration des boutons eux-mêmes */
+  .dark .md\:hidden .grid.grid-cols-2 button {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    /* Pas de modification de la couleur du texte au niveau du bouton */
+  }
+
+  /* Pour les cartes d'apprentissage - s'assurer que le texte est visible en mode sombre */
+  .dark .learning-item-card h3,
+  .dark [class*="learning-item-card"] h3,
+  .dark [class*="learning-card"] h3,
+  .dark .learning-item-card [class*="title"],
+  .dark [class*="learning-item-card"] [class*="title"],
+  .dark [class*="learning-card"] [class*="title"] {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    font-weight: 700 !important;
+  }
+
+  /* Pour le mode clair - s'assurer que le texte reste visible */
+  :root:not(.dark) .learning-item-card h3,
+  :root:not(.dark) [class*="learning-item-card"] h3,
+  :root:not(.dark) [class*="learning-card"] h3,
+  :root:not(.dark) .learning-item-card [class*="title"],
+  :root:not(.dark) [class*="learning-item-card"] [class*="title"],
+  :root:not(.dark) [class*="learning-card"] [class*="title"] {
+    color: #1e293b !important; /* slate-800 pour une bonne lisibilité en mode clair */
+    font-weight: 700 !important;
+  }
+}

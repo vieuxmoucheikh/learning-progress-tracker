@@ -223,7 +223,7 @@ export function DashboardTab({
               onClick={() => setShowCalendar(!showCalendar)}
             >
               <CalendarIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-xs font-medium dashboard-calendar-text" style={{color: 'white', textShadow: '0 1px 2px rgba(0,0,0,0.4)'}}>
+              <span className="text-xs font-medium dashboard-calendar-text">
                 {showCalendar ? "Hide Calendar" : "Show Calendar"}
               </span>
             </Button>
@@ -235,7 +235,7 @@ export function DashboardTab({
               onClick={() => setShowGoals(true)}
             >
               <Target className="h-4 w-4 text-green-600 dark:text-green-400" />
-              <span className="text-xs font-medium dashboard-goals-text" style={{color: 'white', textShadow: '0 1px 2px rgba(0,0,0,0.4)'}}>
+              <span className="text-xs font-medium dashboard-goals-text">
                 Goals
               </span>
             </Button>

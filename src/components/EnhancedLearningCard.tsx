@@ -429,13 +429,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 <h3 
                   className={cn(
                     "text-xl sm:text-2xl font-semibold line-clamp-2 card-title",
-                    "text-blue-900 dark:text-white", // Direct text color instead of gradient
-                    "cursor-pointer"
+                    "dark:text-white text-gray-900" // Utiliser les classes Tailwind pour préserver le mode clair
                   )}
-                  style={{
-                    color: 'white',
-                    textShadow: '0 1px 2px rgba(0,0,0,0.3)'
-                  }}
                   onClick={() => setShowContent(!showContent)}
                 >
                   {title}
@@ -621,9 +616,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               <div 
                 className={cn(
                   "prose prose-sm sm:prose-base max-w-none",
-                  "dark:prose-invert", // Add dark mode inverting for better contrast
+                  "dark:prose-invert", // Utiliser prose-invert pour le mode sombre
                   "prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-white",
-                  "prose-p:text-gray-700 dark:prose-p:text-gray-200", // Lighter text in dark mode for better visibility
+                  "prose-p:text-gray-700 dark:prose-p:text-gray-200", 
                   "prose-a:text-blue-600 dark:prose-a:text-blue-300",
                   "prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-white",
                   "prose-code:text-blue-600 dark:prose-code:text-blue-300",
@@ -646,7 +641,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-sm">
           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
             <Clock className="w-4 h-4" />
-            <span style={{color: 'white'}}>Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</span>
+            <span>Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</span>
           </div>
 
           <div className="flex flex-wrap gap-2">
