@@ -968,11 +968,11 @@ export default function App() {
             onTabChange={setSelectedTab} 
           />
         </div>
-        <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-gray-900">
+        <div className="flex-1 p-4 md:p-6 overflow-y-auto bg-white dark:bg-gray-900">
           <div className="container mx-auto py-4 h-full flex flex-col">
-            <header className="mb-4">
+            <header className="mb-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent drop-shadow-sm">
                   Learning Dashboard
                 </h1>
                 <div className="flex items-center gap-3">
@@ -989,7 +989,7 @@ export default function App() {
               </div>
             </header>
 
-            <main className="flex-1 overflow-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+            <main className="flex-1 overflow-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 md:p-6">
               {selectedTab === TAB_OPTIONS.DASHBOARD && (
                 <DashboardTab 
                   items={state.items}

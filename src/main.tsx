@@ -7,6 +7,7 @@ import 'react-day-picker/dist/style.css'
 import { AuthProvider } from './lib/auth'
 import AuthCallback from './pages/auth/callback'
 import Dashboard from './pages/dashboard'
+import './styles/global-ui-enhancements.css'
 
 function Root() {
   return (

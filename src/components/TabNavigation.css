@@ -3,64 +3,124 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: #2563eb; /* Couleur bleue plus foncée (blue-600) */
+  background-color: #1e40af; /* Couleur bleue foncée par défaut */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  position: relative;
+  z-index: 10;
 }
 
 .tab-navigation-items {
   display: flex;
   flex-direction: row;
   overflow-x: auto;
-  padding-bottom: 0.5rem;
+  padding: 0.75rem 0;
+  scrollbar-width: none; /* Firefox */
+}
+
+.tab-navigation-items::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
 }
 
 .tab-navigation-item {
   white-space: nowrap;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  border-radius: 0.25rem;
+  margin: 0 0.25rem;
+  position: relative;
 }
 
 .tab-navigation-item.active {
   color: white;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.tab-navigation-item.active::before {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 2px;
+  background-color: white;
+  border-radius: 1px;
 }
 
 .tab-navigation-item:hover:not(.active) {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
 }
 
 /* Styles pour la navigation desktop */
 @media (min-width: 768px) {
   .tab-navigation-container {
     min-height: 100vh;
-    padding: 1rem 0;
+    padding: 1.5rem 0;
     width: 100%;
-    background-color: #1e40af; /* Couleur bleue encore plus foncée (blue-800) */
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
   }
   
   .tab-navigation-items {
     display: flex;
     flex-direction: column;
     overflow-x: visible;
-    padding-bottom: 0;
+    padding: 0;
   }
   
   .tab-navigation-item {
     text-align: left;
     border-left: 4px solid transparent;
-    padding-left: 1rem;
+    border-radius: 0;
+    margin: 0.25rem 0;
+    padding: 0.75rem 1.25rem;
     color: white;
     font-weight: 500;
+    position: relative;
+    overflow: hidden;
   }
   
   .tab-navigation-item.active {
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(255, 255, 255, 0.12);
     border-left: 4px solid white;
-    color: white;
     font-weight: 600;
+    box-shadow: none;
+  }
+
+  .tab-navigation-item.active::before {
+    content: none;
+  }
+  
+  .tab-navigation-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.05);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .tab-navigation-item:hover::after {
+    transform: scaleX(1);
   }
   
   .tab-navigation-item:hover:not(.active) {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-left: 4px solid rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.05);
+    border-left: 4px solid rgba(255, 255, 255, 0.3);
+    transform: none;
   }
+}
+
+/* Optimisations pour le mode light */
+:root:not(.dark) .tab-navigation-container {
+  background-color: #1e40af; /* Garde le bleu foncé même en mode clair */
+}
+
+:root:not(.dark) .tab-navigation-item {
+  color: white; /* Texte blanc pour contraste en mode clair */
 }
