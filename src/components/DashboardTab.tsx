@@ -244,7 +244,7 @@ export function DashboardTab({
       {showCalendar && (
         <div className="md:hidden">
           <Card className="p-4 w-full hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 calendar-header">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
                   <CalendarIcon className="w-5 h-5 text-blue-500 dark:text-blue-400" />
@@ -353,7 +353,7 @@ export function DashboardTab({
         {/* Calendar - Hidden on mobile, shown in dialog */}
         <div className="hidden md:block md:col-span-1 w-full">
           <Card className="p-4 h-full w-full shadow-sm hover:shadow-md transition-all border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 calendar-header">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
                   <CalendarIcon className="w-5 h-5 text-blue-500 dark:text-blue-400" />
