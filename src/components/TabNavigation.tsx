@@ -86,9 +86,8 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
               flex items-center gap-2 transition-all
             `}
           >
-            {tab.icon}
-            <span className="hidden md:inline">{tab.label}</span>
-            <span className="md:hidden">{tab.shortLabel}</span>
+            <span className="flex-shrink-0">{tab.icon}</span>
+            <span className="md:inline inline">{tab.shortLabel}</span>
           </button>
         ))}
       </div>
