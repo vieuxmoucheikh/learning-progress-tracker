@@ -706,11 +706,11 @@ export default function App() {
                 </h1>
                 <div className="flex items-center gap-3">
                   <ThemeToggle />
-                  <Button
-                    variant="outline"
+                  <Button 
+                    variant="default"
                     size="sm"
-                    className="flex items-center gap-2 border-gray-200 dark:border-gray-700"
-                    onClick={() => handleDashboardAddItem()}
+                    className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all"
+                    onClick={() => handleDashboardAddItem()} 
                   >
                     <Plus className="h-4 w-4" /> Add Item
                   </Button>
@@ -787,6 +787,18 @@ export default function App() {
               </div>
             </div>
           </div>
+
+          {/* Add Learning Item Dialog */}
+          {showAddDialog && (
+            <AddLearningItem
+              onAdd={handleSubmitItem}
+              onClose={() => setShowAddDialog(false)}
+              isOpen={showAddDialog}
+              selectedDate={selectedDate}
+            />
+          )}
+          
+          <Toaster />
         </div>
       </ThemeProvider>
     );
@@ -804,11 +816,11 @@ export default function App() {
                 </h1>
                 <div className="flex items-center gap-3">
                   <ThemeToggle />
-                  <Button
-                    variant="outline"
+                  <Button 
+                    variant="default"
                     size="sm"
-                    className="flex items-center gap-2 border-gray-200 dark:border-gray-700"
-                    onClick={() => handleDashboardAddItem()}
+                    className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all"
+                    onClick={() => handleDashboardAddItem()} 
                   >
                     <Plus className="h-4 w-4" /> Add Item
                   </Button>
@@ -859,18 +871,18 @@ export default function App() {
                 Learning Dashboard
               </h1>
               <div className="flex items-center gap-3">
-              <ThemeToggle />
-                    <Button 
-                  variant="outline"
+                <ThemeToggle />
+                <Button 
+                  variant="default"
                   size="sm"
-                  className="flex items-center gap-2 border-gray-200 dark:border-gray-700"
-                      onClick={() => handleDashboardAddItem()} 
-                    >
+                  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all"
+                  onClick={() => handleDashboardAddItem()} 
+                >
                   <Plus className="h-4 w-4" /> Add Item
-                    </Button>
-                </div>
+                </Button>
               </div>
-            </header>
+            </div>
+          </header>
 
           <div className="flex flex-col md:flex-row flex-1 h-full gap-4 overflow-hidden">
             <div className="md:w-64 lg:w-72">
@@ -941,6 +953,18 @@ export default function App() {
             </div>
           </div>
         </div>
+
+        {/* Add Learning Item Dialog */}
+        {showAddDialog && (
+          <AddLearningItem
+            onAdd={handleSubmitItem}
+            onClose={() => setShowAddDialog(false)}
+            isOpen={showAddDialog}
+            selectedDate={selectedDate}
+          />
+        )}
+        
+        <Toaster />
       </div>
     </ThemeProvider>
   );
