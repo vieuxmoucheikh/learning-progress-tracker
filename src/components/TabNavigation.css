@@ -1,30 +1,60 @@
+/* Styles pour la navigation */
+.tab-navigation-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.tab-navigation-items {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.tab-navigation-item {
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.tab-navigation-item.active {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.tab-navigation-item:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
 /* Styles pour la navigation desktop */
 @media (min-width: 768px) {
   .tab-navigation-container {
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background-color: transparent;
+    padding: 1rem 0;
+    width: 100%;
   }
   
   .tab-navigation-items {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    overflow-x: visible;
+    padding-bottom: 0;
   }
   
   .tab-navigation-item {
-    background-color: transparent;
-    transition: all 0.2s ease;
+    text-align: left;
+    border-left: 4px solid transparent;
+    padding-left: 1rem;
   }
   
   .tab-navigation-item.active {
-    background-color: #1d4ed8; /* Primary color, adjust based on your theme */
+    background-color: transparent;
     border-left: 4px solid white;
   }
   
   .tab-navigation-item:hover:not(.active) {
-    background-color: rgba(29, 78, 216, 0.7); /* Lighter primary color */
+    background-color: transparent;
     border-left: 4px solid rgba(255, 255, 255, 0.5);
   }
 }

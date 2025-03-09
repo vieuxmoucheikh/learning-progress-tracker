@@ -44,12 +44,12 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
   const activeTabRef = useRef<HTMLButtonElement>(null);
   
   const tabs: Tab[] = [
-    { id: 'dashboard', label: 'Dashboard', shortLabel: 'Dashboard', icon: LayoutDashboard },
-    { id: 'items', label: 'All Items', shortLabel: 'Items', icon: BookOpen },
-    { id: 'analytics', label: 'Analytics', shortLabel: 'Stats', icon: BarChart3 },
-    { id: 'pomodoro', label: 'Pomodoro', shortLabel: 'Timer', icon: Timer },
-    { id: 'flashcards', label: 'Flashcards', shortLabel: 'Cards', icon: Library },
-    { id: 'learning-cards', label: 'Learning', shortLabel: 'Learn', icon: Notebook },
+    { id: 'dashboard', label: 'Dashboard', shortLabel: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+    { id: 'items', label: 'All Items', shortLabel: 'Items', icon: <BookOpen size={18} /> },
+    { id: 'analytics', label: 'Analytics', shortLabel: 'Stats', icon: <BarChart3 size={18} /> },
+    { id: 'pomodoro', label: 'Pomodoro', shortLabel: 'Timer', icon: <Timer size={18} /> },
+    { id: 'flashcards', label: 'Flashcards', shortLabel: 'Cards', icon: <Library size={18} /> },
+    { id: 'learning-cards', label: 'Learning', shortLabel: 'Learn', icon: <Notebook size={18} /> },
   ];
 
   // Scroll active tab into view when it changes
@@ -71,30 +71,13 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
     }
   }, [activeTab]);
 
-  const scrollLeft = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({
-        left: -200,
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  const scrollRight = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({
-        left: 200, 
-        behavior: 'smooth'
-      });
-    }
-  };
-
   return (
     <div className="tab-navigation-container">
-      <div className="tab-navigation-items">
+      <div className="tab-navigation-items" ref={scrollContainerRef}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
+            ref={tab.id === activeTab ? activeTabRef : null}
             onClick={() => onTabChange(tab.id)}
             className={`
               px-4 py-3 text-sm md:text-base whitespace-nowrap
@@ -104,10 +87,11 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
             `}
           >
             {tab.icon}
-            {tab.label}
+            <span className="hidden md:inline">{tab.label}</span>
+            <span className="md:hidden">{tab.shortLabel}</span>
           </button>
         ))}
       </div>
     </div>
   );
-}
+};
