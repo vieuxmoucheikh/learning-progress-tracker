@@ -200,9 +200,9 @@ export function DashboardTab({
   }, [items, selectedDate, getDateStr]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 dashboard-container dashboard-main">
       {/* Mobile Header with Quick Actions */}
-      <div className="md:hidden">
+      <div className="md:hidden dashboard-mobile-header">
         <div className="flex flex-col space-y-3">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-bold">Today's Focus</h2>
@@ -215,15 +215,15 @@ export function DashboardTab({
             </Button>
           </div>
           
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 dashboard-buttons-container">
             <Button 
               variant="outline" 
               size="sm"
-              className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700"
+              className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700 dashboard-calendar-button"
               onClick={() => setShowCalendar(!showCalendar)}
             >
               <CalendarIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-xs font-medium">
+              <span className="text-xs font-medium dashboard-calendar-text">
                 {showCalendar ? "Hide Calendar" : "Show Calendar"}
               </span>
             </Button>
@@ -231,11 +231,11 @@ export function DashboardTab({
             <Button 
               variant="outline" 
               size="sm"
-              className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700"
+              className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700 dashboard-goals-button"
               onClick={() => setShowGoals(true)}
             >
               <Target className="h-4 w-4 text-green-600 dark:text-green-400" />
-              <span className="text-xs font-medium">Goals</span>
+              <span className="text-xs font-medium dashboard-goals-text">Goals</span>
             </Button>
           </div>
         </div>

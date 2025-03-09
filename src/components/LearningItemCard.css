@@ -5,8 +5,8 @@
   .dark [class*="learning-item-card"],
   .dark [class*="learning-card"] {
     background-color: #1e293b !important;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4) !important;
   }
   
   /* Titres en blanc pur pour un contraste maximal */
@@ -21,6 +21,15 @@
     font-weight: 700;
   }
   
+  /* Correction CRITICAL - Force la couleur blanche sur TOUS les textes */
+  .dark .learning-item-card *,
+  .dark [class*="learning-item-card"] *,
+  .dark [class*="learning-card"] * {
+    color: white !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
   /* Texte principal */
   .dark .learning-item-card p,
   .dark [class*="learning-item-card"] p,
@@ -29,6 +38,37 @@
   .dark [class*="learning-item-card"] div,
   .dark [class*="learning-card"] div {
     color: #f1f5f9 !important;
+  }
+  
+  /* Exception pour les textes secondaires */
+  .dark .learning-item-card p,
+  .dark .learning-item-card span[class*="text-gray"],
+  .dark .learning-item-card div[class*="text-gray"],
+  .dark [class*="learning-item-card"] p,
+  .dark [class*="learning-item-card"] span[class*="text-gray"],
+  .dark [class*="learning-item-card"] div[class*="text-gray"],
+  .dark [class*="learning-card"] p,
+  .dark [class*="learning-card"] span[class*="text-gray"],
+  .dark [class*="learning-card"] div[class*="text-gray"] {
+    color: #e2e8f0 !important; /* slate-200 */
+  }
+  
+  /* Correction pour les titres des cartes */
+  .dark .learning-item-card h3,
+  .dark .learning-item-card h2,
+  .dark .learning-item-card [class*="title"],
+  .dark .learning-item-card [class*="heading"],
+  .dark [class*="learning-item-card"] h3,
+  .dark [class*="learning-item-card"] h2,
+  .dark [class*="learning-item-card"] [class*="title"],
+  .dark [class*="learning-item-card"] [class*="heading"],
+  .dark [class*="learning-card"] h3,
+  .dark [class*="learning-card"] h2,
+  .dark [class*="learning-card"] [class*="title"],
+  .dark [class*="learning-card"] [class*="heading"] {
+    color: white !important;
+    font-weight: 700 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
   }
   
   /* Métadonnées et textes secondaires */
@@ -43,10 +83,16 @@
   
   /* Icônes et SVG */
   .dark .learning-item-card svg,
+  .dark .learning-item-card svg *,
   .dark [class*="learning-item-card"] svg,
-  .dark [class*="learning-card"] svg {
-    color: #ffffff !important;
+  .dark [class*="learning-item-card"] svg *,
+  .dark [class*="learning-card"] svg,
+  .dark [class*="learning-card"] svg * {
+    color: white !important;
     fill: currentColor !important;
+    stroke: currentColor !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   
   /* Badges et étiquettes */
@@ -67,10 +113,66 @@
     font-weight: 600;
   }
   
+  /* Amélioration des badges et étiquettes */
+  .dark .learning-item-card [class*="badge"],
+  .dark [class*="learning-item-card"] [class*="badge"],
+  .dark [class*="learning-card"] [class*="badge"],
+  .dark .learning-item-card [class*="tag"],
+  .dark [class*="learning-item-card"] [class*="tag"],
+  .dark [class*="learning-card"] [class*="tag"] {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+  }
+  
   /* Forcer la visibilité sur tous les éléments qui pourraient être masqués */
   .dark .learning-item-card *[style*="color"],
   .dark [class*="learning-item-card"] *[style*="color"],
   .dark [class*="learning-card"] *[style*="color"] {
     color: #ffffff !important;
+  }
+  
+  /* Correction pour les boutons */
+  .dark .learning-item-card button,
+  .dark [class*="learning-item-card"] button,
+  .dark [class*="learning-card"] button {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    color: white !important;
+  }
+  
+  .dark .learning-item-card button *,
+  .dark [class*="learning-item-card"] button *,
+  .dark [class*="learning-card"] button * {
+    color: white !important;
+    opacity: 1 !important;
+  }
+}
+
+/* CORRECTION ULTIME - FORCER LES COULEURS POUR TOUS LES TEXTES */
+@media (max-width: 768px) {
+  /* Styles extrêmement spécifiques pour les textes problématiques */
+  .dark [id*="dashboard"] span, 
+  .dark [class*="dashboard"] span,
+  .dark [class*="goal"] span, 
+  .dark [class*="calendar"] span,
+  .dark button span,
+  .dark [role="button"] span,
+  .dark [class*="learning"] [class*="title"],
+  .dark [class*="learning"] h3,
+  .dark [class*="learning"] h2 {
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Force l'utilisation de backgrounds plus contrastés */
+  .dark button[class*="outline"],
+  .dark [class*="learning"] {
+    background-color: #1e293b !important; /* slate-800 */
+    border-color: rgba(255, 255, 255, 0.3) !important;
   }
 }

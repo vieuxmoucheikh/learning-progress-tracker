@@ -67,7 +67,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectTrigger,
+  SelectTrigger, 
   SelectValue,
 } from "@/components/ui/select";
 import { getLearningItems, trackLearningActivity, updateLearningItem } from '@/lib/database';
