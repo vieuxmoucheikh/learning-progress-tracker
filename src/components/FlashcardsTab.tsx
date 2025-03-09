@@ -149,17 +149,19 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
       )}
       {view === 'study' && selectedDeckId && (
         <div className="h-full">
-          <div className="flex justify-between items-center p-4 border-b">
-            <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto mb-2 sm:mb-0">
               <Button
                 variant="outline"
                 onClick={handleBackToDecks}
+                className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 Back to Decks
               </Button>
               <Button
                 variant="outline"
                 onClick={handleManageCards}
+                className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 Manage Cards
               </Button>

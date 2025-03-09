@@ -1051,124 +1051,141 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   return (
     <div className="w-full">
       <Card className={clsx(
-        "relative overflow-hidden transition-all duration-200",
-        "hover:shadow-lg border-l-4",
-        getBorderColorClass()
+        "overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow"
       )}>
         {/* Card Header with gradient background */}
-        <div className="bg-gradient-to-r from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 border-b border-gray-200/80 dark:border-gray-700/80">
-          <div className="p-6">
-            {/* Title Section */}
-            <div className="flex justify-between items-start gap-4 mb-4">
-              <div className="flex-1 space-y-3">
-                {/* Title */}
-                <div>
-                  {isEditing ? (
-                    <div className="flex items-center gap-2">
-                      <Input
-                        value={editedTitle}
-                        onChange={(e) => setEditedTitle(e.target.value)}
-                        className="text-xl font-semibold border-blue-200 focus:ring-blue-500 dark:border-blue-700 dark:bg-gray-800 dark:text-white"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleTitleSave}
-                        className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-900/30"
-                      >
-                        <Save className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setIsEditing(false);
-                          setEditedTitle(item.title);
-                        }}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/30"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 group">
-                      <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{item.title}</h3>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setIsEditing(true)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/50"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Category and Type */}
-                <div className="flex items-center gap-3">
-                  {item.category && (
-                    <div className="flex items-center">
-                      <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100 shadow-sm dark:from-blue-900/30 dark:to-indigo-900/30 dark:text-blue-300 dark:border-blue-800/50">
-                        {item.category}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <Badge 
-                      variant={getStatusBadgeClass().includes('bg-gray-100') ? 'destructive' : getStatusBadgeClass().includes('bg-blue-100') ? 'secondary' : getStatusBadgeClass().includes('bg-green-100') ? 'default' : 'outline'} 
-                      className={clsx(
-                        getStatusBadgeClass(),
-                        "capitalize font-medium",
-                        "shadow-sm"
-                      )}
-                    >
-                      {getStatusText()}
-                    </Badge>
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300">{item.type}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleMarkComplete()}
-                  className={clsx(
-                    "hover:bg-white dark:hover:bg-gray-700 transition-colors rounded-lg shadow-sm",
-                    {
-                      'text-green-500 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300': item.status !== 'completed',
-                      'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400': item.status === 'completed'
-                    }
-                  )}
+        <div className="p-5 space-y-4">
+          {/* Header with Title and Status */}
+          <div className="flex justify-between items-start gap-2">
+            <div className="flex-1 min-w-0">
+              {isEditing ? (
+                <Input
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  className="font-medium text-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700"
+                  autoFocus
+                />
+              ) : (
+                <h3 
+                  className="font-medium text-lg text-gray-900 dark:text-gray-100 truncate cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
+                  onClick={() => setIsEditing(true)}
                 >
-                  <CheckCircle2 className="h-5 w-5" />
+                  {item.title}
+                </h3>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-1">
+              {item.status === 'completed' && (
+                <Badge variant="outline" className="bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800">
+                  Completed
+                </Badge>
+              )}
+              {item.status === 'in_progress' && (
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                  In Progress
+                </Badge>
+              )}
+              {item.status === 'not_started' && (
+                <Badge variant="outline" className="bg-gray-50 text-gray-700 dark:bg-gray-900/50 dark:text-gray-300 border-gray-200 dark:border-gray-700">
+                  Not Started
+                </Badge>
+              )}
+            </div>
+          </div>
+          
+          {/* Edit Mode Buttons */}
+          {isEditing && (
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditedTitle(item.title);
+                }}
+                className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  onUpdate(item.id, { title: editedTitle });
+                  setIsEditing(false);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Save className="h-4 w-4 mr-1" />
+                Save
+              </Button>
+            </div>
+          )}
+          
+          {/* Progress Bar */}
+          <div className="space-y-1">
+            <div className="flex justify-between items-center text-sm">
+              <div className="text-gray-700 dark:text-gray-300 font-medium">Progress</div>
+              <div className="text-gray-700 dark:text-gray-300">{getProgressPercentage()}%</div>
+            </div>
+            <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-blue-600 dark:bg-blue-500 rounded-full"
+                style={{ width: `${getProgressPercentage()}%` }}
+              ></div>
+            </div>
+          </div>
+          
+          {/* Time Tracking */}
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-gray-700 dark:text-gray-300 font-medium flex items-center gap-1.5">
+              <Clock className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+              Time Spent
+            </div>
+            
+            {isTimeEditing ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min="0"
+                  value={editedMinutes}
+                  onChange={(e) => setEditedMinutes(parseInt(e.target.value) || 0)}
+                  className="w-20 h-8 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">min</span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleTimeCancel}
+                  className="h-8 px-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  <X className="h-4 w-4" />
                 </Button>
                 <Button
+                  size="sm"
                   variant="ghost"
-                  size="icon"
-                  onClick={handleDeleteClick}
-                  className="text-red-400 hover:text-red-600 hover:bg-white dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-gray-700 transition-colors rounded-lg shadow-sm"
+                  onClick={handleTimeSave}
+                  className="h-8 px-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                 >
-                  <Trash2 className="h-5 w-5" />
+                  <Save className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
-
-            {/* Time Display */}
-            <div className="space-y-3 mt-6">
-              <div className="flex items-center justify-between">
-                {renderDuration()}
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                  <span className="text-sm text-gray-600 dark:text-gray-300">
-                    {formatDate(item.date)}
-                  </span>
+            ) : (
+              <div className="flex items-center gap-2">
+                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  {formatTime(calculateTotalTimeSpent(item))}
                 </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleTimeEdit}
+                  className="h-7 w-7 p-0 rounded-full text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  <Edit className="h-3.5 w-3.5" />
+                </Button>
               </div>
-            </div>
+            )}
           </div>
         </div>
 

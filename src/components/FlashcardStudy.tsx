@@ -210,8 +210,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
     return (
       <div className="flex flex-col items-center justify-center h-full p-4">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-semibold mb-2">No cards due for review!</h2>
-          <p className="text-gray-600">All caught up! Come back later for more reviews.</p>
+          <h2 className="text-2xl font-semibold mb-2 text-gray-900 dark:text-gray-100">No cards due for review!</h2>
+          <p className="text-gray-700 dark:text-gray-300">All caught up! Come back later for more reviews.</p>
         </div>
         <Button 
           className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -236,7 +236,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Decks
           </Button>
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-700 dark:text-gray-300">
             Card {currentCardIndex + 1} of {cards.length}
           </div>
         </div>
@@ -244,7 +244,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
         <div className="flex-grow flex flex-col">
           <div 
             className={`relative h-96 rounded-xl shadow-lg transition-all duration-500 transform cursor-pointer
-              ${isFlipped ? 'bg-blue-50' : 'bg-white'}`}
+              ${isFlipped ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-800'} border border-gray-200 dark:border-gray-700`}
             style={{ perspective: '1000px' }}
             onClick={() => setIsFlipped(!isFlipped)}
           >
@@ -253,13 +253,13 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
                 ${isFlipped ? 'rotate-y-180 opacity-0' : 'rotate-y-0 opacity-100'}`}
             >
               <div className="h-full flex flex-col">
-                <div className="text-sm text-gray-500 mb-2">Front</div>
+                <div className="text-sm text-gray-700 dark:text-gray-300 mb-2 font-medium">Front</div>
                 <div className="flex-1 overflow-y-auto">
-                  <div className="text-lg">
+                  <div className="text-lg text-gray-900 dark:text-gray-100">
                     {currentCard.front_content}
                   </div>
                 </div>
-                <div className="text-sm text-gray-500 text-center mt-4">
+                <div className="text-sm text-gray-700 dark:text-gray-300 text-center mt-4">
                   Click to flip
                 </div>
               </div>
@@ -270,9 +270,9 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
                 ${isFlipped ? 'rotate-y-0 opacity-100' : 'rotate-y-180 opacity-0'}`}
             >
               <div className="h-full flex flex-col">
-                <div className="text-sm text-gray-500 mb-2">Back</div>
+                <div className="text-sm text-gray-700 dark:text-gray-300 mb-2 font-medium">Back</div>
                 <div className="flex-1 overflow-y-auto">
-                  <div className="text-lg">
+                  <div className="text-lg text-gray-900 dark:text-gray-100">
                     {currentCard.back_content}
                   </div>
                 </div>
@@ -281,7 +281,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
           </div>
 
           <div className={`mt-8 space-y-4 transition-opacity duration-300 ${isFlipped ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <Button
                 className="bg-red-600 hover:bg-red-700 text-white"
                 onClick={() => handleRate(1)}
@@ -329,7 +329,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
         </Progress.Root>
 
         <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-700 dark:text-gray-300">
             <div className="flex justify-between mb-2">
               <span>Session Progress:</span>
               <span>{sessionStats.reviewed} / {sessionStats.total} cards reviewed</span>
