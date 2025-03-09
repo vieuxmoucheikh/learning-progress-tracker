@@ -86,10 +86,11 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
       if (onUpdateDeckMetrics) {
         onUpdateDeckMetrics();
       }
-
+      
       toast({
         title: "Success",
         description: "Flashcard created successfully",
+        variant: "default"
       });
     } catch (error) {
       console.error('Error creating flashcard:', error);
@@ -116,10 +117,11 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
       if (onUpdateDeckMetrics) {
         onUpdateDeckMetrics();
       }
-
+      
       toast({
         title: "Success",
         description: "Flashcard deleted successfully",
+        variant: "default"
       });
     } catch (error) {
       console.error('Error deleting flashcard:', error);
