@@ -60,7 +60,7 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
 
   if (view === 'decks' || !selectedDeckId) {
     return (
-      <div className="pb-60 overflow-y-auto h-full" style={{ paddingBottom: '80vh' }}>
+      <div className="pb-20 w-full">
         <FlashcardDecks 
           decks={flashcards}
           onStudyDeck={handleStudyDeck}
