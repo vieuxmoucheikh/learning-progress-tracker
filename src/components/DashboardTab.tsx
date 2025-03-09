@@ -202,7 +202,7 @@ export function DashboardTab({
   return (
     <div className="space-y-6 dashboard-container dashboard-main">
       {/* Mobile Header with Quick Actions */}
-      <div className="md:hidden dashboard-mobile-header">
+      <div className="md:hidden">
         <div className="flex flex-col space-y-3">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-bold">Today's Focus</h2>
@@ -221,9 +221,20 @@ export function DashboardTab({
               size="sm"
               className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700 dashboard-calendar-button"
               onClick={() => setShowCalendar(!showCalendar)}
+              style={{
+                '--tw-text-opacity': '1',
+                color: 'rgba(255, 255, 255, var(--tw-text-opacity))'
+              } as React.CSSProperties}
             >
               <CalendarIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-xs font-medium dashboard-calendar-text">
+              <span 
+                className="text-xs font-medium dashboard-calendar-text"
+                style={{
+                  color: 'white',
+                  fontWeight: 700,
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
+                }}
+              >
                 {showCalendar ? "Hide Calendar" : "Show Calendar"}
               </span>
             </Button>
@@ -233,9 +244,22 @@ export function DashboardTab({
               size="sm"
               className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700 dashboard-goals-button"
               onClick={() => setShowGoals(true)}
+              style={{
+                '--tw-text-opacity': '1',
+                color: 'rgba(255, 255, 255, var(--tw-text-opacity))'
+              } as React.CSSProperties}
             >
               <Target className="h-4 w-4 text-green-600 dark:text-green-400" />
-              <span className="text-xs font-medium dashboard-goals-text">Goals</span>
+              <span 
+                className="text-xs font-medium dashboard-goals-text"
+                style={{
+                  color: 'white',
+                  fontWeight: 700,
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
+                }}
+              >
+                Goals
+              </span>
             </Button>
           </div>
         </div>

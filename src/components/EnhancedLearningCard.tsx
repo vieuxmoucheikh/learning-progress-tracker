@@ -67,7 +67,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectTrigger, 
+  SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { getLearningItems, trackLearningActivity, updateLearningItem } from '@/lib/database';
@@ -397,11 +397,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       "relative overflow-hidden transition-all duration-300 border-2 h-full",
       "hover:shadow-lg hover:shadow-blue-300/50",
       "max-w-3xl mx-auto",
-      "bg-white",
+      "bg-white dark:bg-gray-800",  // Ajout de la classe dark:bg-gray-800 pour assurer un fond foncé
       "sm:rounded-xl",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
       mastered 
-        ? "border-emerald-400 bg-gradient-to-br from-emerald-50 to-white" 
+        ? "border-emerald-400 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-900/20 dark:to-gray-800" 
         : "border-blue-400 hover:border-blue-500",
       isEditing && "border-blue-500 shadow-lg shadow-blue-300/50"
     )}>
@@ -429,11 +429,13 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 <h3 
                   className={cn(
                     "text-xl sm:text-2xl font-semibold line-clamp-2",
-                    "bg-gradient-to-r from-blue-900 via-blue-700 to-blue-800",
-                    "bg-clip-text text-transparent",
-                    "hover:from-blue-800 hover:via-blue-600 hover:to-blue-700",
+                    "text-blue-900 dark:text-white", // Remplacer bg-gradient/bg-clip par text-color direct
                     "cursor-pointer"
                   )}
+                  style={{
+                    color: 'white',
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
+                  }}
                   onClick={() => setShowContent(!showContent)}
                 >
                   {title}
@@ -618,22 +620,22 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             >
               <div 
                 className={cn(
-                  "prose prose-sm sm:prose-base max-w-none",
-                  "prose-headings:font-semibold prose-headings:text-gray-900",
-                  "prose-p:text-gray-700 prose-p:leading-relaxed",
-                  "prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline",
-                  "prose-strong:font-semibold prose-strong:text-gray-900",
-                  "prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:rounded",
-                  "prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200",
-                  "prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto",
+                  "prose prose-sm sm:prose-base max-w-none dark:prose-invert", // Ajout de dark:prose-invert
+                  "prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-white",
+                  "prose-p:text-gray-700 dark:prose-p:text-gray-100",
+                  "prose-a:text-blue-600 dark:prose-a:text-blue-400",
+                  "prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-white",
+                  "prose-code:text-blue-600 dark:prose-code:text-blue-300",
+                  "prose-pre:bg-gray-50 dark:prose-pre:bg-gray-700",
+                  "prose-img:rounded-lg",
                   "prose-ul:list-disc prose-ol:list-decimal",
-                  "prose-li:marker:text-gray-400",
+                  "prose-li:marker:text-gray-400 dark:prose-li:marker:text-gray-300",
                   !isZoomed && "max-h-[300px] overflow-hidden cursor-pointer"
                 )}
                 dangerouslySetInnerHTML={{ __html: content }}
               />
               {!isZoomed && content.length > 300 && (
-                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent dark:from-gray-800 pointer-events-none" />
               )}
             </div>
           )}
@@ -641,9 +643,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
         {/* Meta Section */}
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-sm">
-          <div className="flex items-center gap-2 text-gray-600">
+          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300" style={{ color: 'white' }}>
             <Clock className="w-4 h-4" />
-            <span>Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</span>
+            <span style={{ color: 'white' }}>Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</span>
           </div>
 
           <div className="flex flex-wrap gap-2">

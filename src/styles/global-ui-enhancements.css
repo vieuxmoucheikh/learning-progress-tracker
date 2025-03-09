@@ -559,75 +559,69 @@ button:active,
   }
 }
 
-/* FIX CRITIQUE: Amélioration maximale pour Dashboard et Learning Cards sur mobile en dark mode */
+/* CORRECTION CRITIQUE POUR LES TEXTES INVISIBLES EN MODE SOMBRE SUR MOBILE */
 @media (max-width: 768px) {
-  /* DASHBOARD: Correction spécifique pour les boutons Calendar et Goals avec !important multiple */
-  .dark button[class*="calendar"],
-  .dark button[class*="calendar"] *,
-  .dark button span[class*="calendar"],
-  .dark [class*="calendar-toggle"],
-  .dark [class*="show-calendar"],
-  .dark [class*="calendar-button"] *,
-  .dark button[class*="goal"],
-  .dark button[class*="goal"] *,
-  .dark [class*="goal"] span,
-  .dark [class*="goals-header"],
-  .dark button:has(span:contains("Calendar")),
-  .dark button:has(span:contains("Goals")),
-  .dark button:has(svg + span) {
+  /* Forcer la visibilité pour TOUS les textes en mode sombre */
+  .dark button,
+  .dark button span,
+  .dark [role="button"],
+  .dark [role="button"] span {
     color: #ffffff !important;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
     opacity: 1 !important;
     visibility: visible !important;
-    font-weight: 700 !important;
-  }
-  
-  /* Sélecteurs extrêmement spécifiques pour les textes des boutons du dashboard */
-  .dark div[class*="dashboard"] button span,
-  .dark div[class*="grid"] button span {
-    color: #ffffff !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-  
-  /* LEARNING CARDS: Correction globale pour les textes dans les cartes d'apprentissage */
-  .dark [class*="learning-card"] *,
-  .dark [class*="learning-item-card"] * {
-    color: #ffffff !important;
-    visibility: visible !important;
-    opacity: 1 !important;
   }
 
-  /* Exception spécifique pour les textes secondaires dans les cartes */
-  .dark [class*="learning-card"] [class*="text-gray"] *,
-  .dark [class*="learning-item-card"] [class*="text-gray"] *,
-  .dark [class*="learning-card"] p,
-  .dark [class*="learning-item-card"] p,
-  .dark [class*="learning-card"] [class*="description"],
-  .dark [class*="learning-item-card"] [class*="description"] {
-    color: #e2e8f0 !important; /* slate-200 pour une lisibilité suffisante */
+  /* Règles extrêmement spécifiques pour les boutons Calendar et Goals */
+  .dark button:has([class*="Calendar"]),
+  .dark button:has([class*="Target"]),
+  .dark button:nth-child(1) span,
+  .dark button:nth-child(2) span,
+  .dark div.grid.grid-cols-2 button span {
+    color: white !important;
+    opacity: 1 !important;
+    font-weight: 700 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+    visibility: visible !important;
+    -webkit-text-fill-color: white !important;
   }
   
-  /* FORCER la visibilité des SVG dans les boutons */
-  .dark [class*="dashboard"] button svg,
-  .dark [class*="dashboard"] button svg *,
-  .dark button[class*="calendar"] svg,
-  .dark button[class*="calendar"] svg *,
-  .dark button[class*="goal"] svg,
-  .dark button[class*="goal"] svg * {
-    color: #ffffff !important;
-    fill: #ffffff !important;
-    stroke: #ffffff !important;
+  /* Force la visibilité des boutons du dashboard */
+  .dark div.md\:hidden button {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  }
+
+  /* LEARNING CARDS - Règles radicales pour l'onglet cartes d'apprentissage */
+  .dark [class*="prose"],
+  .dark [class*="prose"] * {
+    color: white !important;
     opacity: 1 !important;
     visibility: visible !important;
   }
   
-  /* Styles de conteneurs pour ces boutons */
-  .dark button[class*="calendar"],
-  .dark button[class*="goal"],
-  .dark [class*="dashboard"] button[class*="outline"] {
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  /* Tous les éléments de texte dans les cartes de l'onglet learning cards */
+  .dark [class*="learning-card"] span,
+  .dark [class*="learning-card"] p,
+  .dark [class*="learning-card"] div,
+  .dark [class*="learning-card"] h1,
+  .dark [class*="learning-card"] h2,
+  .dark [class*="learning-card"] h3,
+  .dark [class*="learning-card"] h4,
+  .dark [class*="learning-card"] li {
+    color: white !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Pour les textes qui utilisent des classes gradient ou text-transparent */
+  .dark [class*="text-transparent"],
+  .dark [class*="bg-clip-text"],
+  .dark [class*="bg-gradient"] {
+    background-clip: unset !important;
+    -webkit-background-clip: unset !important;
+    -webkit-text-fill-color: white !important;
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
   }
 }
