@@ -68,11 +68,11 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
   // Function to refresh deck metrics after reviews
   const refreshDeckMetrics = async () => {
     try {
-      // Use the getDecksSummary function to get updated deck metrics
+      console.log('Refreshing deck metrics...'); // Log when the function is called
       const summaries = await getDecksSummary();
+      console.log('Fetched summaries:', summaries); // Log the fetched summaries
       setDeckSummaries(summaries);
       
-      // Update the local decks with the new summary information
       const updatedDecks = localDecks.map(deck => {
         const summary = summaries.find(s => s.deckId === deck.id);
         if (summary) {
@@ -90,6 +90,7 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
         return deck;
       });
       
+      console.log('Updated decks:', updatedDecks); // Log the updated decks
       setLocalDecks(updatedDecks);
     } catch (error) {
       console.error('Error refreshing deck metrics:', error);
