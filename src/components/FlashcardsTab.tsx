@@ -85,7 +85,7 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
       
       const { data: freshDecks, error } = await supabase
         .from('flashcard_decks')
-        .select('id, name, description, created_at, updated_at, user_id')
+        .select('id, name, description, created_at, user_id')
         .eq('user_id', userData.user.id);
         
       if (error) throw error;

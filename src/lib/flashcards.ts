@@ -333,7 +333,7 @@ export const getDecksSummary = async () => {
     // First, get all decks for the user
     const { data: decks, error: decksError } = await supabase
       .from('flashcard_decks')
-      .select('id, name, description, created_at, updated_at')
+      .select('id, name, description, created_at')
       .eq('user_id', userData.user.id);
 
     if (decksError) throw decksError;
@@ -397,8 +397,7 @@ export const getDecksSummary = async () => {
         nextDue: summary.next_due,
         lastStudied: summary.last_studied,
         reviewStatus,
-        createdAt: deck.created_at,
-        updatedAt: deck.updated_at
+        createdAt: deck.created_at
       };
     }));
 
