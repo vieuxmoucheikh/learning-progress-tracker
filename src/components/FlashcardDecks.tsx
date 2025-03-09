@@ -40,13 +40,17 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   const [deckFormData, setDeckFormData] = useState({ name: '', description: '' });
   const [flashcardFormData, setFlashcardFormData] = useState({ front: '', back: '' });
   const [isLoading, setIsLoading] = useState(false);
+  const [localDecks, setLocalDecks] = useState<FlashcardDeck[]>(decks);
   const { toast } = useToast();
   const initializedRef = useRef(false);
 
   useEffect(() => {
-    // Only initialize summaries once to prevent constant changes
-    if (!initializedRef.current) {
-      const summaries = decks.map(deck => ({
+    setLocalDecks(decks);
+  }, [decks]);
+
+  useEffect(() => {
+    if (!initializedRef.current || localDecks.length !== deckSummaries.length) {
+      const summaries = localDecks.map(deck => ({
         deckId: deck.id,
         total: Math.floor(Math.random() * 20) + 1,
         dueToday: Math.floor(Math.random() * 5),
@@ -56,7 +60,56 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       setDeckSummaries(summaries);
       initializedRef.current = true;
     }
-  }, [decks]);
+  }, [localDecks]);
+
+  const handleCreateDeckSubmit = () => {
+    if (!deckFormData.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide a name for your deck",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    
+    const newDeckId = `deck-${Date.now()}`;
+    
+    const newDeck: FlashcardDeck = {
+      id: newDeckId,
+      name: deckFormData.name.trim(),
+      description: deckFormData.description.trim(),
+      created_at: new Date().toISOString(),
+      user_id: 'current-user' // Assuming there's a user_id required
+    };
+    
+    setLocalDecks(prev => [...prev, newDeck]);
+    
+    const newSummary: DeckSummary = {
+      deckId: newDeckId,
+      total: 0,
+      dueToday: 0,
+      reviewStatus: 'not-started',
+      lastStudied: undefined
+    };
+    
+    setDeckSummaries(prev => [...prev, newSummary]);
+    
+    onAddDeck({
+      name: deckFormData.name.trim(),
+      description: deckFormData.description.trim()
+    });
+    
+    setDeckFormData({ name: '', description: '' });
+    setIsCreatingDeck(false);
+    setIsLoading(false);
+    
+    toast({
+      title: "Success",
+      description: "Deck created successfully",
+    });
+  };
 
   const handleDeleteDeck = (deck: FlashcardDeck) => {
     setIsLoading(true);
@@ -65,7 +118,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   };
 
   const handleEditDeckClick = (deckId: string) => {
-    const deck = decks.find(d => d.id === deckId);
+    const deck = localDecks.find(d => d.id === deckId);
     if (deck) {
       setDeckFormData({
         name: deck.name,
@@ -96,10 +149,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
 
     setIsLoading(true);
     
-    // In a real app, you would call an API to add the flashcard
-    // For now, we'll just simulate a delay
     setTimeout(() => {
-      // Reset form and close dialog
       setFlashcardFormData({ front: '', back: '' });
       setIsAddingFlashcard(false);
       setSelectedDeckId(null);
@@ -110,8 +160,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         description: "Flashcard added successfully",
       });
       
-      // Refresh summaries to update counts
-      const summaries = decks.map(deck => ({
+      const summaries = localDecks.map(deck => ({
         deckId: deck.id,
         total: Math.floor(Math.random() * 20) + 1,
         dueToday: Math.floor(Math.random() * 5),
@@ -137,7 +186,6 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   const hasDueCards = getTotalDueCards() > 0;
   const hasNewCards = getTotalNotStartedCards() > 0;
 
-  // Helper functions for deck status
   const getReviewStatusBadge = (status: string) => {
     switch (status) {
       case 'up-to-date':
@@ -171,10 +219,8 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   const syncData = () => {
     setIsLoading(true);
     
-    // Simulate API call to sync data
     setTimeout(() => {
-      // Generate new summaries to simulate updated data
-      const summaries = decks.map(deck => ({
+      const summaries = localDecks.map(deck => ({
         deckId: deck.id,
         total: Math.floor(Math.random() * 20) + 1,
         dueToday: Math.floor(Math.random() * 5),
@@ -280,7 +326,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   };
 
   return (
-    <div className="space-y-6 pb-16 w-full max-w-full overflow-x-hidden min-h-[calc(100vh-8rem)]">
+    <div className="space-y-6 pb-32 w-full max-w-full overflow-x-hidden min-h-screen">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h2 className="text-2xl font-bold tracking-tight">Your Flashcard Decks</h2>
@@ -350,7 +396,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
 
       {/* Decks Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-        {decks.length === 0 ? (
+        {localDecks.length === 0 ? (
           <div className="col-span-full flex flex-col items-center justify-center py-10 px-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
             <Library className="w-12 h-12 text-gray-400 dark:text-gray-500 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No flashcard decks yet</h3>
@@ -363,17 +409,24 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             </Button>
           </div>
         ) : (
-          decks.map((deck) => {
-            const summary = getDeckSummary(deck.id);
-            return summary ? (
+          localDecks.map((deck) => {
+            const summary = getDeckSummary(deck.id) || {
+              deckId: deck.id,
+              total: 0,
+              dueToday: 0,
+              reviewStatus: 'not-started' as 'not-started',
+              lastStudied: undefined
+            };
+            
+            return (
               <DeckCard key={deck.id} deck={deck} summary={summary} />
-            ) : null;
+            );
           })
         )}
       </div>
       
       {/* Create New Deck Card */}
-      {decks.length > 0 && (
+      {localDecks.length > 0 && (
         <div className="mt-4">
           <Card 
             onClick={() => !isLoading && setIsCreatingDeck(true)}
@@ -388,7 +441,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         </div>
       )}
 
-      {decks.length === 0 && (
+      {localDecks.length === 0 && (
         <div className="text-center p-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md mt-4">
           <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-full inline-block mb-4">
             <BookOpen className="w-12 h-12 text-blue-500 dark:text-blue-400" />
@@ -415,79 +468,44 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium mb-1">Deck Name</label>
+            <div className="space-y-2">
+              <label htmlFor="name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Deck Name
+              </label>
               <Input
                 id="name"
-                value={deckFormData.name}
-                onChange={(e) => setDeckFormData(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="Enter deck name"
-                disabled={isLoading}
-                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                value={deckFormData.name}
+                onChange={(e) => setDeckFormData({ ...deckFormData, name: e.target.value })}
+                className="w-full"
               />
             </div>
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium mb-1">Description</label>
+            <div className="space-y-2">
+              <label htmlFor="description" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Description (optional)
+              </label>
               <Textarea
                 id="description"
+                placeholder="Enter a description for your deck"
                 value={deckFormData.description}
-                onChange={(e) => setDeckFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Enter deck description"
-                disabled={isLoading}
-                className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                onChange={(e) => setDeckFormData({ ...deckFormData, description: e.target.value })}
+                className="w-full min-h-[100px]"
               />
             </div>
           </div>
-          <div className="flex justify-end space-x-2 mt-4">
-            <Button 
-              variant="outline" 
+          <div className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
               onClick={() => {
-                setIsCreatingDeck(false);
                 setDeckFormData({ name: '', description: '' });
+                setIsCreatingDeck(false);
               }}
-              className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700"
               disabled={isLoading}
             >
               Cancel
             </Button>
-            <Button 
-              onClick={async () => {
-                if (!deckFormData.name.trim()) {
-                  toast({
-                    title: "Error",
-                    description: "Please provide a name for the deck",
-                    variant: "destructive"
-                  });
-                  return;
-                }
-                try {
-                  setIsLoading(true);
-                  await onAddDeck(deckFormData);
-                  setIsCreatingDeck(false);
-                  setDeckFormData({ name: '', description: '' });
-                  toast({
-                    title: "Success",
-                    description: "New deck created successfully",
-                  });
-                  const summaries = decks.map(deck => ({
-                    deckId: deck.id,
-                    total: Math.floor(Math.random() * 20) + 1,
-                    dueToday: Math.floor(Math.random() * 5),
-                    reviewStatus: ['up-to-date', 'due-soon', 'overdue', 'not-started'][Math.floor(Math.random() * 4)] as 'up-to-date' | 'due-soon' | 'overdue' | 'not-started',
-                    lastStudied: Math.random() > 0.3 ? new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 30).toISOString() : undefined
-                  }));
-                  setDeckSummaries(summaries);
-                } catch (error) {
-                  console.error('Error creating deck:', error);
-                  toast({
-                    title: "Error",
-                    description: "Failed to create deck",
-                    variant: "destructive"
-                  });
-                } finally {
-                  setIsLoading(false);
-                }
-              }}
+            <Button
+              onClick={handleCreateDeckSubmit}
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-600 shadow-md"
               disabled={isLoading}
             >
@@ -507,13 +525,13 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             </DialogDescription>
           </DialogHeader>
           
-          {decks.length > 0 ? (
+          {localDecks.length > 0 ? (
             <div className="space-y-4">
               {!selectedDeckId && (
                 <div>
                   <label className="block text-sm font-medium mb-2">Select Deck</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {decks.map(deck => (
+                    {localDecks.map(deck => (
                       <Button 
                         key={deck.id}
                         variant="outline"
