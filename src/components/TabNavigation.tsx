@@ -91,7 +91,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
     <div className="flex flex-col h-full">
       <nav className="relative">
         {/* Desktop Navigation - Vertical - Compact */}
-        <div className="hidden md:flex flex-col items-start gap-1 p-1 bg-gradient-to-br from-indigo-600 via-blue-600 to-blue-500 dark:from-indigo-800 dark:via-blue-700 dark:to-blue-600 rounded-xl shadow-lg mb-4 border border-indigo-400/20 dark:border-indigo-700/30 w-auto h-[calc(100vh-10rem)] overflow-y-auto">
+        <div className="hidden md:flex flex-col items-start gap-1.5 p-1.5 bg-gradient-to-br from-indigo-600 via-blue-600 to-blue-500 dark:from-indigo-800 dark:via-blue-700 dark:to-blue-600 rounded-xl shadow-lg mb-4 border border-indigo-400/20 dark:border-indigo-700/30 w-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -102,7 +102,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
                 ref={isActive ? activeTabRef : null}
                 onClick={() => onTabChange(tab.id)}
                 className={cn(
-                  "w-full text-xs font-medium py-1.5 px-2 flex items-center gap-1.5 transition-all duration-200 rounded-lg group relative overflow-hidden",
+                  "w-full text-xs font-medium py-1.5 px-2.5 flex items-center gap-1.5 transition-all duration-200 rounded-lg group relative overflow-hidden",
                   isActive
                     ? "bg-white/20 text-white shadow-sm backdrop-blur-sm"
                     : "text-white/80 hover:text-white hover:bg-white/10"
@@ -134,7 +134,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-full rounded-r-none bg-gradient-to-r from-indigo-600/90 to-transparent text-white dark:text-white shadow-none border-0 dark:from-indigo-800/90"
+              className="h-full rounded-r-none bg-gradient-to-r from-indigo-600/90 to-transparent text-white shadow-none border-0 dark:from-indigo-800/90"
               onClick={scrollLeft}
             >
               <ChevronLeft className="h-5 w-5" />
@@ -157,15 +157,15 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
                   className={cn(
                     "flex-shrink-0 text-sm font-medium py-2 px-3 flex flex-col items-center justify-center gap-1 transition-all duration-200 min-w-[70px] rounded-lg mx-1 relative group",
                     isActive
-                      ? "bg-white/15 text-white dark:text-white shadow-sm backdrop-blur-sm"
-                      : "text-white dark:text-white hover:text-white hover:bg-white/10"
+                      ? "bg-white/15 text-white shadow-sm backdrop-blur-sm"
+                      : "text-white/80 hover:text-white hover:bg-white/10"
                   )}
                 >
                   <Icon className={cn(
                     "w-4 h-4 transition-transform duration-300",
-                    isActive ? "text-white dark:text-white" : "text-white/80 dark:text-white/80 group-hover:scale-110"
+                    isActive ? "text-white" : "text-white/80 group-hover:scale-110"
                   )} />
-                  <span className="text-xs whitespace-nowrap font-medium text-white dark:text-white">{tab.shortLabel}</span>
+                  <span className="text-xs whitespace-nowrap font-medium">{tab.shortLabel}</span>
                   {isActive && (
                     <span className="absolute bottom-1 left-3 right-3 h-0.5 bg-white rounded-full" />
                   )}
@@ -178,7 +178,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
             <Button 
               variant="ghost" 
               size="icon"
-              className="h-full rounded-l-none bg-gradient-to-l from-blue-600/90 to-transparent text-white dark:text-white shadow-none border-0 dark:from-blue-700/90"
+              className="h-full rounded-l-none bg-gradient-to-l from-blue-600/90 to-transparent text-white shadow-none border-0 dark:from-blue-700/90"
               onClick={scrollRight}
             >
               <ChevronRight className="h-5 w-5" />
