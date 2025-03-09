@@ -200,7 +200,7 @@ export function TabNavigation({
       </nav>
       
       {/* Content for mobile when flashcards tab is selected */}
-      <div className="md:hidden flex-1 overflow-y-auto h-[calc(100vh-120px)] pb-20">
+      <div className="md:hidden flex-1 overflow-y-auto h-[calc(100vh-80px)]">
         {activeTab === 'flashcards' && (
           <FlashcardsTab 
             flashcards={flashcards}

@@ -326,7 +326,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   };
 
   return (
-    <div className="w-full max-w-full pb-20">
+    <div className="w-full max-w-full">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h2 className="text-2xl font-bold tracking-tight">Your Flashcard Decks</h2>
@@ -629,9 +629,6 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           </div>
         </DialogContent>
       </Dialog>
-      
-      {/* Spacer for mobile scrolling */}
-      <div className="h-20 w-full" aria-hidden="true"></div>
     </div>
   );
 };
