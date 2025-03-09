@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { Button } from './ui/button';
 import * as Progress from '@radix-ui/react-progress';
 import { useToast } from './ui/use-toast';
-import { ArrowLeft, Repeat, ThumbsUp, ThumbsDown, Check, Brain } from 'lucide-react';
+import { ArrowLeft, Repeat, ThumbsUp, ThumbsDown, Check } from 'lucide-react';
 import { calculateNextReview, submitReview } from '../lib/flashcards';
 import type { Flashcard } from '../types';
 
@@ -71,7 +71,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
     );
 
     try {
-      const updatedCard = await submitReview(
+      // Update the card in the database
+      await submitReview(
         currentCard.id,
         quality,
         currentCard.interval || 0,
@@ -81,6 +82,19 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
         mastered
       );
 
+      // Update the card in the local state to reflect changes immediately
+      const updatedCards = [...cards];
+      updatedCards[currentCardIndex] = {
+        ...updatedCards[currentCardIndex],
+        last_reviewed: new Date().toISOString(),
+        next_review: mastered ? undefined : new Date(new Date().setDate(new Date().getDate() + interval)).toISOString(),
+        interval: interval,
+        ease_factor: easeFactor,
+        mastered: mastered,
+        repetitions: (currentCard.repetitions || 0) + 1
+      };
+      setCards(updatedCards);
+
       // Update session stats
       setSessionStats(prev => ({
         ...prev,
@@ -88,18 +102,33 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
         mastered: prev.mastered + (mastered ? 1 : 0)
       }));
 
-      // Show feedback toast
-      const feedbackMessages = {
-        1: "Keep practicing! You'll get it next time.",
-        2: "Good progress! Review again in a few days.",
-        3: "Great job! Review again in a month.",
-        4: "Perfect! Card mastered!"
-      };
+      // Show feedback toast with more specific information
+      let feedbackMessage = "";
+      let toastVariant: "default" | "destructive" = "default";
+      
+      switch(quality) {
+        case 1:
+          feedbackMessage = `Hard - Review again in ${interval} days`;
+          toastVariant = "destructive";
+          break;
+        case 2:
+          feedbackMessage = `Good - Review again in ${interval} days`;
+          toastVariant = "default";
+          break;
+        case 3:
+          feedbackMessage = `Easy - Review again in ${interval} days`;
+          toastVariant = "default";
+          break;
+        case 4:
+          feedbackMessage = "Perfect! Card mastered and removed from regular rotation!";
+          toastVariant = "default";
+          break;
+      }
 
       toast({
         title: mastered ? "Card Mastered! " : "Review Submitted",
-        description: feedbackMessages[quality as keyof typeof feedbackMessages],
-        variant: mastered ? "default" : "default"
+        description: feedbackMessage,
+        variant: toastVariant
       });
 
       // Move to next card
@@ -110,9 +139,12 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
         // Session complete
         toast({
           title: "Session Complete! ",
-          description: `You reviewed ${sessionStats.reviewed} cards and mastered ${sessionStats.mastered} cards!`,
+          description: `You reviewed ${sessionStats.reviewed + 1} cards and mastered ${sessionStats.mastered + (mastered ? 1 : 0)} cards!`,
+          variant: "default"
         });
-        await loadCards(); // Reload cards to get new due cards
+        
+        // Reload cards to get new due cards
+        await loadCards(); 
         setCurrentCardIndex(0);
         setIsFlipped(false);
         if (onFinish) onFinish();
@@ -121,7 +153,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
       console.error('Error submitting review:', error);
       toast({
         title: "Error",
-        description: "Failed to submit review",
+        description: "Failed to submit review. Please try again.",
         variant: "destructive"
       });
     }

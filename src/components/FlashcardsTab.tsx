@@ -11,7 +11,7 @@ interface FlashcardsTabProps {
   flashcards: FlashcardDeck[];
   onAddDeck: (data: { name: string; description: string }) => void;
   onStudyDeck: (deckId: string) => void;
-  onEditDeck: (deckId: string) => void;
+  onEditDeck: (deckId: string, data: { name: string; description: string }) => void;
   onDeleteDeck: (deckId: string) => void;
 }
 

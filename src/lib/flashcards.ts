@@ -1,5 +1,4 @@
 import { supabase } from './supabase';
-import type { Flashcard, FlashcardDeck, FlashcardReview } from '../types';
 
 // Deck operations
 export const createDeck = async (params: { name: string, description?: string, tags?: string[] }) => {
@@ -242,9 +241,9 @@ export const calculateNextReview = (
 export const submitReview = async (
   cardId: string,
   quality: number,
-  prevInterval: number,
+  _prevInterval: number,
   newInterval: number,
-  prevEaseFactor: number,
+  _prevEaseFactor: number,
   newEaseFactor: number,
   mastered: boolean
 ) => {
@@ -256,33 +255,38 @@ export const submitReview = async (
     nextReview.setDate(nextReview.getDate() + newInterval);
   }
 
-  // First get the current review count
-  const { data: currentCard, error: getError } = await supabase
-    .from('flashcards')
-    .select('review_count')
-    .eq('id', cardId)
-    .single();
+  try {
+    // First get the current review count
+    const { data: currentCard, error: getError } = await supabase
+      .from('flashcards')
+      .select('review_count, mastered')
+      .eq('id', cardId)
+      .single();
 
-  if (getError) throw getError;
+    if (getError) throw getError;
 
-  // Then update the card with the new review count
-  const { data, error } = await supabase
-    .from('flashcards')
-    .update({
-      last_reviewed: now.toISOString(),
-      next_review: nextReview?.toISOString() || null,
-      review_interval: newInterval,
-      ease_factor: newEaseFactor,
-      repetitions: (prevInterval || 0) + 1,
-      mastered: mastered,
-      review_count: (currentCard?.review_count || 0) + 1
-    })
-    .eq('id', cardId)
-    .select()
-    .single();
+    // Update the card with raw SQL to ensure consistency
+    const { data, error } = await supabase
+      .from('flashcards')
+      .update({
+        last_reviewed: now.toISOString(),
+        next_review: nextReview?.toISOString() || null,
+        review_interval: newInterval,
+        ease_factor: newEaseFactor,
+        repetitions: (currentCard?.review_count || 0) + 1,
+        mastered: mastered,
+        review_count: (currentCard?.review_count || 0) + 1
+      })
+      .eq('id', cardId)
+      .select()
+      .single();
 
-  if (error) throw error;
-  return data;
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error submitting review:', error);
+    throw error;
+  }
 };
 
 export interface DeckSummary {

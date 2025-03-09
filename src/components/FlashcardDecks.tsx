@@ -53,7 +53,7 @@ interface FlashcardDecksProps {
   onSelectDeck?: (deckId: string) => void;
   onAddDeck: (data: { name: string; description: string }) => void;
   onStudyDeck: (deckId: string) => void;
-  onEditDeck: (deckId: string) => void;
+  onEditDeck: (deckId: string, data: { name: string; description: string }) => void;
   onDeleteDeck: (deckId: string) => void;
 }
 
@@ -203,9 +203,11 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         // Update the deck object in the localDecks state
         setLocalDecks(prev => prev.map(d => d.id === editingDeckId ? updatedDeck : d));
         
-        // Call the parent component's edit handler with the deck ID
-        // The parent component will handle the actual database update
-        onEditDeck(editingDeckId);
+        // Call the parent component's edit handler with the deck ID and updated data
+        onEditDeck(editingDeckId, {
+          name: deckFormData.name.trim(),
+          description: deckFormData.description.trim()
+        });
         
         // Reset form and state
         setDeckFormData({ name: '', description: '' });

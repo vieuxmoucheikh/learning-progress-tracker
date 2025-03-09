@@ -732,7 +732,7 @@ export default function App() {
     }
   };
 
-  const handleEditFlashcardDeck = async (deckId: string) => {
+  const handleEditFlashcardDeck = async (deckId: string, deckData: { name: string; description: string }) => {
     try {
       // Find the deck to edit in the current state
       const deckToEdit = flashcardDecks.find(d => d.id === deckId);
@@ -745,25 +745,23 @@ export default function App() {
         return;
       }
       
-      // Try to update using raw SQL
+      // Use raw SQL to update the deck
       const { error } = await supabase
         .from('flashcard_decks')
         .update({
-          name: deckToEdit.name,
-          description: deckToEdit.description || ''
+          name: deckData.name,
+          description: deckData.description || ''
         })
         .eq('id', deckId);
       
       if (error) throw error;
       
-      // Update the local state with the updated deck
-      setFlashcardDecks(prev => 
-        prev.map(deck => deck.id === deckId ? {
-          ...deck,
-          name: deckToEdit.name,
-          description: deckToEdit.description
-        } : deck)
-      );
+      // Refresh the decks list after update
+      const { data: refreshedDecks, error: refreshError } = await supabase
+        .from('flashcard_decks')
+        .select('*');
+      if (refreshError) throw refreshError;
+      setFlashcardDecks(refreshedDecks || []);
       
       toast({
         title: "Success",
