@@ -277,19 +277,19 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
       day.activities.completedTasks.length + 
       day.activities.archivedItems.length;
     
-    if (!day.isCurrentMonth) return 'bg-gray-50 text-gray-400';
-    if (isSelectedDate(day)) return 'bg-blue-500 text-white hover:bg-blue-500';
-    if (day.isToday) return 'bg-blue-100 hover:bg-blue-200';
+    if (!day.isCurrentMonth) return 'bg-gray-50 dark:bg-gray-800/50 text-gray-400 dark:text-gray-500';
+    if (isSelectedDate(day)) return 'bg-blue-500 dark:bg-blue-600 text-white hover:bg-blue-600 dark:hover:bg-blue-700';
+    if (day.isToday) return 'bg-blue-100 dark:bg-blue-900/60 hover:bg-blue-200 dark:hover:bg-blue-800/80';
     
     // Color based on activity
-    if (totalItems === 0 && day.sessions > 0) return 'bg-yellow-100 hover:bg-yellow-200';
-    if (totalItems === 0) return 'hover:bg-gray-100';
+    if (totalItems === 0 && day.sessions > 0) return 'bg-yellow-100 dark:bg-yellow-900/40 hover:bg-yellow-200 dark:hover:bg-yellow-800/60';
+    if (totalItems === 0) return 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700';
     
     // Enhanced color scale based on total items
-    if (totalItems >= 5) return 'bg-green-600 hover:bg-green-700 text-white';
-    if (totalItems >= 3) return 'bg-green-500 hover:bg-green-600 text-white';
-    if (totalItems >= 2) return 'bg-green-400 hover:bg-green-500';
-    return 'bg-green-300 hover:bg-green-400';
+    if (totalItems >= 5) return 'bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-600 text-white';
+    if (totalItems >= 3) return 'bg-green-500 dark:bg-green-600 hover:bg-green-600 dark:hover:bg-green-500 text-white';
+    if (totalItems >= 2) return 'bg-green-400 dark:bg-green-500 hover:bg-green-500 dark:hover:bg-green-400 text-gray-800 dark:text-white';
+    return 'bg-green-300 dark:bg-green-600/50 hover:bg-green-400 dark:hover:bg-green-500/60 text-gray-800 dark:text-white';
   };
 
   const getDayContent = (day: CalendarDay) => {
@@ -297,10 +297,11 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
     const hasCompletedTasks = day.activities.completedTasks.length > 0;
     const hasArchivedTasks = day.activities.archivedItems.length > 0;
     const hasSessions = day.sessions > 0;
+    const totalItems = day.activities.activeItems.length + day.activities.completedTasks.length + day.activities.archivedItems.length;
 
     return (
       <div 
-        className={`relative w-full h-full p-2 ${getActivityColor(day)} rounded-lg transition-colors`}
+        className={`relative w-full h-full flex flex-col justify-between ${getActivityColor(day)} rounded-lg transition-colors`}
         onMouseEnter={(e) => handleDayHover(day, e)}
         onMouseLeave={() => setHoveredDay(null)}
         onTouchStart={(e) => {
@@ -312,21 +313,38 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
           setTimeout(() => setHoveredDay(null), 1500);
         }}
       >
-        <div className="text-sm">{day.date.getDate()}</div>
-        <div className="absolute bottom-1 right-1 flex items-center space-x-1">
-          {hasActiveTasks && (
-            <div className="w-2 h-2 bg-blue-500 rounded-full" title="Active Tasks" />
-          )}
-          {hasCompletedTasks && (
-            <div className="w-2 h-2 bg-green-500 rounded-full" title="Completed Tasks" />
-          )}
-          {hasArchivedTasks && (
-            <div className="w-2 h-2 bg-gray-500 rounded-full" title="Archived Tasks" />
-          )}
-          {hasSessions && !hasActiveTasks && !hasCompletedTasks && !hasArchivedTasks && (
-            <div className="w-2 h-2 bg-yellow-500 rounded-full" title="Has Sessions" />
-          )}
-        </div>
+        <div className="text-sm font-medium p-1.5">{day.date.getDate()}</div>
+        
+        {/* Activity indicators */}
+        {totalItems > 0 && (
+          <div className="absolute bottom-1 right-1 flex flex-wrap justify-end gap-1 max-w-[80%]">
+            {hasActiveTasks && (
+              <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full" title="Active Tasks" />
+            )}
+            {hasCompletedTasks && (
+              <div className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full" title="Completed Tasks" />
+            )}
+            {hasArchivedTasks && (
+              <div className="w-2 h-2 bg-gray-500 dark:bg-gray-400 rounded-full" title="Archived Tasks" />
+            )}
+          </div>
+        )}
+        
+        {/* Session indicator (only show if no tasks) */}
+        {hasSessions && totalItems === 0 && (
+          <div className="absolute bottom-1 right-1">
+            <div className="w-2 h-2 bg-yellow-500 dark:bg-yellow-400 rounded-full" title="Has Sessions" />
+          </div>
+        )}
+        
+        {/* Task count badge for days with multiple tasks */}
+        {totalItems > 1 && (
+          <div className="absolute top-1 right-1">
+            <div className="text-[10px] font-semibold bg-white dark:bg-gray-800 bg-opacity-80 dark:bg-opacity-80 rounded-full w-4 h-4 flex items-center justify-center">
+              {totalItems}
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -420,7 +438,7 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
             {currentMonth}
           </button>
           {isMonthPickerOpen && (
-            <div className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg z-50 grid grid-cols-3 gap-1 p-2 w-48">
+            <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 shadow-lg rounded-lg z-50 grid grid-cols-3 gap-1 p-2 w-48">
               {monthNames.map((month, index) => (
                 <button
                   key={month}
@@ -446,7 +464,7 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
             {currentYear}
           </button>
           {isYearPickerOpen && (
-            <div className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg z-50 grid grid-cols-3 gap-1 p-2 w-48 max-h-48 overflow-y-auto">
+            <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 shadow-lg rounded-lg z-50 grid grid-cols-3 gap-1 p-2 w-48 max-h-48 overflow-y-auto">
               {Array.from({ length: 21 }, (_, i) => currentYear - 10 + i).map(year => (
                 <button
                   key={year}
@@ -494,7 +512,7 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
   }, []);
 
   return (
-    <div className="relative space-y-4">
+    <div className="relative space-y-4 w-full">
       {/* Month and Year Navigation */}
       {renderHeader()}
 
@@ -513,28 +531,28 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="absolute top-full right-0 mt-2 bg-white shadow-lg rounded-lg p-3 z-50 w-64"
+              className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-3 z-50 w-64"
             >
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-green-300 rounded" />
-                  <span>1 task</span>
+                  <div className="w-4 h-4 bg-green-300 dark:bg-green-700 rounded" />
+                  <span className="text-gray-800 dark:text-gray-200">1 task</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-green-400 rounded" />
-                  <span>2 tasks</span>
+                  <div className="w-4 h-4 bg-green-400 dark:bg-green-600 rounded" />
+                  <span className="text-gray-800 dark:text-gray-200">2 tasks</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-green-500 rounded" />
-                  <span>3-4 tasks</span>
+                  <div className="w-4 h-4 bg-green-500 dark:bg-green-500 rounded" />
+                  <span className="text-gray-800 dark:text-gray-200">3-4 tasks</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-green-600 rounded" />
-                  <span>5+ tasks</span>
+                  <div className="w-4 h-4 bg-green-600 dark:bg-green-400 rounded" />
+                  <span className="text-gray-800 dark:text-gray-200">5+ tasks</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-blue-100 rounded" />
-                  <span>Today</span>
+                  <div className="w-4 h-4 bg-blue-100 dark:bg-blue-900/60 rounded" />
+                  <span className="text-gray-800 dark:text-gray-200">Today</span>
                 </div>
               </div>
             </motion.div>
@@ -543,7 +561,7 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
         {onAddItem && (
           <button
             onClick={onAddItem}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Add Item
@@ -552,9 +570,9 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-1 w-full">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-          <div key={day} className="text-center text-sm font-semibold py-2">
+          <div key={day} className="text-center text-sm font-semibold py-2 text-gray-700 dark:text-gray-300">
             {day}
           </div>
         ))}
@@ -570,7 +588,7 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
                   transition={{ duration: 0.2 }}
                   onClick={() => handleDateSelect(day)}
                   className={cn(
-                    "aspect-square w-full min-w-[10px] min-h-[10px] p-1 relative focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg transition-all z-10",
+                    "aspect-square w-full min-w-[24px] min-h-[24px] p-1 relative focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg transition-all z-10",
                     selectedDay && isSelectedDate(day)
                       ? 'ring-2 ring-blue-500'
                       : ''
@@ -588,9 +606,10 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
       {/* Hover Tooltip */}
       {hoveredDay && (hoveredDay.activities.activeItems.length > 0 ||
                      hoveredDay.activities.completedTasks.length > 0 ||
-                     hoveredDay.activities.archivedItems.length > 0) && (
+                     hoveredDay.activities.archivedItems.length > 0 ||
+                     hoveredDay.sessions > 0) && (
         <div 
-          className="fixed z-40 bg-white shadow-lg rounded-lg p-3 w-64 border transform -translate-x-full"
+          className="fixed z-50 bg-white dark:bg-gray-800 shadow-xl rounded-lg p-4 w-72 border border-gray-200 dark:border-gray-700 transform -translate-x-full"
           style={{
             left: `${tooltipPosition.x}px`,
             top: `${tooltipPosition.y}px`,
@@ -598,7 +617,7 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
             overflowY: 'auto'
           }}
         >
-          <div className="text-sm font-semibold mb-2">
+          <div className="text-sm font-semibold mb-2 text-gray-900 dark:text-white">
             {hoveredDay.date.toLocaleDateString('default', { 
               month: 'long', 
               day: 'numeric',
@@ -606,48 +625,55 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
             })}
           </div>
           {hoveredDay.activities.minutes > 0 && (
-            <div className="text-sm text-gray-600 mb-2 flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              Total time: {formatDuration(hoveredDay.activities.minutes)}
+            <div className="text-sm text-gray-600 dark:text-gray-300 mb-3 flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 p-2 rounded-md">
+              <Clock className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+              <span>Total time: <strong>{formatDuration(hoveredDay.activities.minutes)}</strong></span>
             </div>
           )}
           {hoveredDay.activities.activeItems.length > 0 && (
-            <div className="mb-2">
-              <div className="text-xs font-semibold text-blue-500 mb-1 flex items-center gap-1">
-                <div className="w-2 h-2 bg-blue-500 rounded-full" />
+            <div className="mb-3">
+              <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1 flex items-center gap-1">
+                <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full" />
                 Active Tasks ({hoveredDay.activities.activeItems.length}):
               </div>
-              <div className="pl-3 border-l-2 border-blue-100">
+              <div className="pl-3 border-l-2 border-blue-200 dark:border-blue-800">
                 {hoveredDay.activities.activeItems.map(item => (
-                  <div key={item.id} className="text-xs text-gray-600 py-0.5">{item.title}</div>
+                  <div key={item.id} className="text-xs text-gray-700 dark:text-gray-300 py-1">{item.title}</div>
                 ))}
               </div>
             </div>
           )}
           {hoveredDay.activities.completedTasks.length > 0 && (
-            <div className="mb-2">
-              <div className="text-xs font-semibold text-green-500 mb-1 flex items-center gap-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full" />
+            <div className="mb-3">
+              <div className="text-xs font-semibold text-green-600 dark:text-green-400 mb-1 flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full" />
                 Completed ({hoveredDay.activities.completedTasks.length}):
               </div>
-              <div className="pl-3 border-l-2 border-green-100">
+              <div className="pl-3 border-l-2 border-green-200 dark:border-green-800">
                 {hoveredDay.activities.completedTasks.map(item => (
-                  <div key={item.id} className="text-xs text-gray-600 py-0.5">{item.title}</div>
+                  <div key={item.id} className="text-xs text-gray-700 dark:text-gray-300 py-1">{item.title}</div>
                 ))}
               </div>
             </div>
           )}
           {hoveredDay.activities.archivedItems.length > 0 && (
-            <div>
-              <div className="text-xs font-semibold text-gray-500 mb-1 flex items-center gap-1">
-                <div className="w-2 h-2 bg-gray-500 rounded-full" />
+            <div className="mb-3">
+              <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1 flex items-center gap-1">
+                <div className="w-2 h-2 bg-gray-500 dark:bg-gray-400 rounded-full" />
                 Archived ({hoveredDay.activities.archivedItems.length}):
               </div>
-              <div className="pl-3 border-l-2 border-gray-100">
+              <div className="pl-3 border-l-2 border-gray-200 dark:border-gray-700">
                 {hoveredDay.activities.archivedItems.map(item => (
-                  <div key={item.id} className="text-xs text-gray-600 py-0.5">{item.title}</div>
+                  <div key={item.id} className="text-xs text-gray-700 dark:text-gray-300 py-1">{item.title}</div>
                 ))}
               </div>
+            </div>
+          )}
+          {hoveredDay.sessions > 0 && hoveredDay.activities.activeItems.length === 0 && 
+           hoveredDay.activities.completedTasks.length === 0 && hoveredDay.activities.archivedItems.length === 0 && (
+            <div className="text-sm text-gray-600 dark:text-gray-300 mb-2 flex items-center gap-2 bg-yellow-50 dark:bg-yellow-900/30 p-2 rounded-md">
+              <Clock className="w-4 h-4 text-yellow-500 dark:text-yellow-400" />
+              <span>Sessions tracked: <strong>{hoveredDay.sessions}</strong></span>
             </div>
           )}
         </div>

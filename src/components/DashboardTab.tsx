@@ -219,10 +219,12 @@ export function DashboardTab({
               variant="outline" 
               size="sm"
               className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700"
-              onClick={() => setShowCalendar(true)}
+              onClick={() => setShowCalendar(!showCalendar)}
             >
               <CalendarIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-xs font-medium">Calendar</span>
+              <span className="text-xs font-medium">
+                {showCalendar ? "Hide Calendar" : "Show Calendar"}
+              </span>
             </Button>
             
             <Button 
@@ -237,6 +239,42 @@ export function DashboardTab({
           </div>
         </div>
       </div>
+
+      {/* Inline Mobile Calendar */}
+      {showCalendar && (
+        <div className="md:hidden">
+          <Card className="p-4 w-full hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                  <CalendarIcon className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                </div>
+                <h3 className="text-lg font-semibold">Calendar</h3>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                onClick={() => setShowCalendar(false)}
+              >
+                <span className="sr-only">Close</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+              </Button>
+            </div>
+            <div className="w-full">
+              <Calendar 
+                items={items}
+                onDateSelect={(date) => {
+                  setSelectedDate(date);
+                  onDateSelect(date);
+                }}
+                selectedDate={selectedDate}
+                onAddItem={() => onAddItem(selectedDate)}
+              />
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* Desktop Header */}
       <div className="hidden md:flex justify-between items-center">
@@ -314,9 +352,14 @@ export function DashboardTab({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* Calendar - Hidden on mobile, shown in dialog */}
         <div className="hidden md:block md:col-span-1 w-full">
-          <Card className="p-4 h-full w-full">
+          <Card className="p-4 h-full w-full shadow-sm hover:shadow-md transition-all border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Calendar</h3>
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                  <CalendarIcon className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Calendar</h3>
+              </div>
             </div>
             <Calendar 
               items={items}
@@ -332,13 +375,13 @@ export function DashboardTab({
 
         {/* Active Tasks - Full width on mobile, half width on desktop */}
         <div className="md:col-span-1">
-          <Card className="p-4 hover:shadow-md transition-shadow">
+          <Card className="p-4 hover:shadow-md transition-shadow shadow-sm border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
                   <Clock className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                 </div>
-                <h2 className="text-lg font-semibold">Active Tasks</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Active Tasks</h2>
               </div>
               <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
                 {activeTasks.length}
@@ -373,13 +416,13 @@ export function DashboardTab({
         </div>
 
         {/* Completed Tasks - Full width on mobile */}
-        <Card className="p-4 hover:shadow-md transition-shadow md:col-span-2">
+        <Card className="p-4 hover:shadow-md transition-shadow md:col-span-2 shadow-sm border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-green-50 dark:bg-green-900/30 rounded-lg">
                 <CheckCircle className="w-5 h-5 text-green-500 dark:text-green-400" />
               </div>
-              <h2 className="text-lg font-semibold">Completed Today</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Completed Today</h2>
             </div>
             <span className="px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300">
               {completedTasks.length}
@@ -414,7 +457,7 @@ export function DashboardTab({
       </div>
 
       {/* Mobile Calendar Dialog */}
-      <Dialog open={showCalendar} onOpenChange={setShowCalendar}>
+      <Dialog open={false} onOpenChange={setShowCalendar}>
         <DialogContent className="sm:max-w-[90%] w-[95%] max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Calendar</DialogTitle>
