@@ -14,13 +14,13 @@
     --popover-foreground: 222.2 95% 4.9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 100% 0%; /* Darker text for better visibility */
+    --card-foreground: 222.2 95% 4.9%; /* Darker text for better visibility */
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
 
     --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 222.2 90% 11.2%;
+    --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -37,16 +37,16 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 222.2 47.4% 11.2%;
     --foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 222.2 47.4% 11.2%;
     --popover-foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 222.2 47.4% 11.2%;
     --card-foreground: 210 40% 98%;
 
     --border: 217.2 32.6% 17.5%;
@@ -76,6 +76,16 @@
     @apply bg-background text-foreground; 
     font-family: 'Inter', system-ui, -apple-system, sans-serif; /* Police par défaut */
   }
+  
+  /* Ensure proper text contrast in light mode */
+  .light {
+    color-scheme: light;
+  }
+  
+  /* Ensure proper text contrast in dark mode */
+  .dark {
+    color-scheme: dark;
+  }
 }
 
 /* Editor styles */
@@ -87,7 +97,7 @@
   ul,
   ol {
     padding: 0 1rem;
-    color: black; /* Change list color to black */
+    @apply text-foreground; /* Use theme colors instead of hardcoded black */
   }
 
   code {
@@ -174,7 +184,7 @@
 }
 
 .pomodoro-settings {
-  color: #ffffff;
+  @apply text-foreground dark:text-white; /* Use theme colors */
 }
 
 body {
@@ -183,16 +193,52 @@ body {
 
 /* Styles for code blocks in content */
 code {
-  background-color: #f5f5f5;
+  @apply bg-gray-100 dark:bg-gray-800 text-foreground dark:text-gray-200;
   padding: 0.2em 0.4em;
   border-radius: 4px;
   font-family: monospace;
 }
 
 pre {
-  background-color: #f5f5f5;
+  @apply bg-gray-100 dark:bg-gray-800 text-foreground dark:text-gray-200;
   padding: 1em;
   border-radius: 4px;
   overflow: auto;
   font-family: monospace;
+}
+
+/* Fix for mobile light mode */
+@media (max-width: 768px) {
+  .light {
+    background-color: hsl(var(--background));
+  }
+  
+  /* Ensure text is visible in light mode */
+  .light button, 
+  .light input, 
+  .light textarea, 
+  .light select,
+  .light label {
+    @apply text-foreground;
+  }
+}
+
+/* Fix for dark mode consistency */
+.dark .bg-white {
+  @apply bg-gray-800;
+}
+
+.dark .text-black {
+  @apply text-white;
+}
+
+/* Ensure proper contrast for all UI elements */
+.dark input::placeholder,
+.dark textarea::placeholder {
+  @apply text-gray-400;
+}
+
+.light input::placeholder,
+.light textarea::placeholder {
+  @apply text-gray-500;
 }

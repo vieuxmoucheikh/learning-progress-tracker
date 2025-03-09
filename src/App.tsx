@@ -313,6 +313,45 @@ export default function App() {
         body:not(.dark) .bg-gray-200 {
           background-color: #ffffff !important;
         }
+        
+        /* Ensure text is visible on mobile in light mode */
+        body:not(.dark) .text-gray-500,
+        body:not(.dark) .text-gray-600,
+        body:not(.dark) .text-gray-700 {
+          color: #1e293b !important;
+        }
+        
+        /* Ensure cards have proper background in light mode */
+        body:not(.dark) .card,
+        body:not(.dark) .bg-card {
+          background-color: #ffffff !important;
+          border-color: #e2e8f0 !important;
+        }
+      }
+      
+      /* Ensure Learning Insights calendar takes full width */
+      .yearly-activity-heatmap-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+      }
+      
+      .yearly-activity-grid {
+        width: 100% !important;
+        grid-template-columns: repeat(53, minmax(0, 1fr)) !important;
+      }
+      
+      /* Improve navigation menu spacing */
+      @media (min-width: 768px) {
+        .tab-navigation {
+          padding: 0.5rem !important;
+          gap: 0.5rem !important;
+        }
+        
+        .tab-navigation button {
+          padding: 0.5rem 0.75rem !important;
+          font-size: 0.875rem !important;
+        }
       }
     `;
     
@@ -324,30 +363,6 @@ export default function App() {
       document.head.removeChild(style);
     };
   }, []);
-
-  const filteredItems = useMemo(() => {
-    return state.items
-      .filter(item => {
-        const searchLower = searchQuery.toLowerCase();
-        const matchesSearch =
-          item.title.toLowerCase().includes(searchLower) ||
-          item.category.toLowerCase().includes(searchLower) ||
-          (item.notes?.toLowerCase() || '').includes(searchLower);
-
-        // If a date is selected, only show items from that date
-        const selectedDateStr = selectedDate ? getDateStr(selectedDate) : null;
-        const itemDate = item.date ? getDateStr(new Date(item.date)) : null;
-        const matchesDate = selectedDate ? itemDate === selectedDateStr : true;
-
-        // Filter by status
-        const matchesStatus =
-          filterStatus === 'all' ? true :
-          filterStatus === 'active' ? item.status !== 'completed' && item.status !== 'archived' :
-          filterStatus === 'completed' ? item.status === 'completed' || item.status === 'archived' : true;
-
-        return matchesSearch && matchesDate && matchesStatus;
-      });
-  }, [state.items, searchQuery, filterStatus, selectedDate]);
 
   useEffect(() => {
     let mounted = true;
@@ -446,6 +461,30 @@ export default function App() {
     
     loadFlashcards();
   }, []);
+
+  const filteredItems = useMemo(() => {
+    return state.items
+      .filter(item => {
+        const searchLower = searchQuery.toLowerCase();
+        const matchesSearch =
+          item.title.toLowerCase().includes(searchLower) ||
+          item.category.toLowerCase().includes(searchLower) ||
+          (item.notes?.toLowerCase() || '').includes(searchLower);
+
+        // If a date is selected, only show items from that date
+        const selectedDateStr = selectedDate ? getDateStr(selectedDate) : null;
+        const itemDate = item.date ? getDateStr(new Date(item.date)) : null;
+        const matchesDate = selectedDate ? itemDate === selectedDateStr : true;
+
+        // Filter by status
+        const matchesStatus =
+          filterStatus === 'all' ? true :
+          filterStatus === 'active' ? item.status !== 'completed' && item.status !== 'archived' :
+          filterStatus === 'completed' ? item.status === 'completed' || item.status === 'archived' : true;
+
+        return matchesSearch && matchesDate && matchesStatus;
+      });
+  }, [state.items, searchQuery, filterStatus, selectedDate]);
 
   const handleAddItem = async (selectedDate?: Date | null) => {
     setShowAddDialog(true);

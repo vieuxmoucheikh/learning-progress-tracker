@@ -6,7 +6,8 @@ import {
   Timer, 
   BookOpen, 
   Notebook,
-  LayoutDashboard
+  LayoutDashboard,
+  Library
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from './ui/button';
@@ -45,7 +46,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
     { id: 'items', label: 'All Items', shortLabel: 'Items', icon: BookOpen },
     { id: 'analytics', label: 'Analytics', shortLabel: 'Stats', icon: BarChart3 },
     { id: 'pomodoro', label: 'Pomodoro', shortLabel: 'Timer', icon: Timer },
-    { id: 'flashcards', label: 'Flashcards', shortLabel: 'Cards', icon: BookOpen },
+    { id: 'flashcards', label: 'Flashcards', shortLabel: 'Cards', icon: Library },
     { id: 'learning-cards', label: 'Learning', shortLabel: 'Learn', icon: Notebook },
   ];
 
@@ -89,8 +90,8 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
   return (
     <div className="flex flex-col h-full">
       <nav className="relative">
-        {/* Desktop Navigation - Vertical */}
-        <div className="hidden md:flex flex-col items-start gap-3 p-3 bg-gradient-to-br from-indigo-600 via-blue-600 to-blue-500 dark:from-indigo-900 dark:via-blue-800 dark:to-blue-700 rounded-xl shadow-lg mb-4 border border-indigo-400/20 dark:border-indigo-700/30">
+        {/* Desktop Navigation - Vertical - Compact */}
+        <div className="hidden md:flex flex-col items-start gap-2 p-2 bg-gradient-to-br from-indigo-600 via-blue-600 to-blue-500 dark:from-indigo-800 dark:via-blue-700 dark:to-blue-600 rounded-xl shadow-lg mb-4 border border-indigo-400/20 dark:border-indigo-700/30 w-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -101,19 +102,20 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
                 ref={isActive ? activeTabRef : null}
                 onClick={() => onTabChange(tab.id)}
                 className={cn(
-                  "w-full text-sm font-medium py-3 px-4 flex items-center gap-3 transition-all duration-200 rounded-lg group relative overflow-hidden",
+                  "w-full text-xs font-medium py-2 px-3 flex items-center gap-2 transition-all duration-200 rounded-lg group relative overflow-hidden",
                   isActive
                     ? "bg-white/20 text-white shadow-sm backdrop-blur-sm"
                     : "text-white/80 hover:text-white hover:bg-white/10"
                 )}
+                title={tab.label}
               >
                 <div className={cn(
                   "absolute inset-0 opacity-0 bg-gradient-to-r from-white/10 to-transparent transition-opacity duration-300",
                   isActive ? "opacity-100" : "group-hover:opacity-50"
                 )} />
-                <div className="relative z-10 flex items-center gap-3">
+                <div className="relative z-10 flex items-center gap-2">
                   <Icon className={cn(
-                    "w-5 h-5 flex-shrink-0 transition-transform duration-300",
+                    "w-4 h-4 flex-shrink-0 transition-transform duration-300",
                     isActive ? "text-white" : "text-white/80 group-hover:scale-110"
                   )} />
                   <span className="transition-all duration-300">{tab.label}</span>
@@ -132,7 +134,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-full rounded-r-none bg-gradient-to-r from-indigo-600/90 to-transparent text-white shadow-none border-0"
+              className="h-full rounded-r-none bg-gradient-to-r from-indigo-600/90 to-transparent text-white shadow-none border-0 dark:from-indigo-800/90"
               onClick={scrollLeft}
             >
               <ChevronLeft className="h-5 w-5" />
@@ -141,7 +143,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
           
           <div 
             ref={scrollContainerRef}
-            className="flex overflow-x-auto scrollbar-hide py-3 px-10 bg-gradient-to-r from-indigo-600 via-blue-600 to-blue-500 dark:from-indigo-900 dark:via-blue-800 dark:to-blue-700 rounded-xl shadow-lg border border-indigo-400/20 dark:border-indigo-700/30"
+            className="flex overflow-x-auto scrollbar-hide py-3 px-10 bg-gradient-to-r from-indigo-600 via-blue-600 to-blue-500 dark:from-indigo-800 dark:via-blue-700 dark:to-blue-600 rounded-xl shadow-lg border border-indigo-400/20 dark:border-indigo-700/30"
           >
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -153,14 +155,14 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
                   ref={isActive ? activeTabRef : null}
                   onClick={() => onTabChange(tab.id)}
                   className={cn(
-                    "flex-shrink-0 text-sm font-medium py-2.5 px-4 flex flex-col items-center justify-center gap-1.5 transition-all duration-200 min-w-[80px] rounded-lg mx-1.5 relative group",
+                    "flex-shrink-0 text-sm font-medium py-2 px-3 flex flex-col items-center justify-center gap-1 transition-all duration-200 min-w-[70px] rounded-lg mx-1 relative group",
                     isActive
                       ? "bg-white/15 text-white shadow-sm backdrop-blur-sm"
                       : "text-white/80 hover:text-white hover:bg-white/10"
                   )}
                 >
                   <Icon className={cn(
-                    "w-5 h-5 transition-transform duration-300",
+                    "w-4 h-4 transition-transform duration-300",
                     isActive ? "text-white" : "text-white/80 group-hover:scale-110"
                   )} />
                   <span className="text-xs whitespace-nowrap font-medium">{tab.shortLabel}</span>
@@ -176,7 +178,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
             <Button 
               variant="ghost" 
               size="icon"
-              className="h-full rounded-l-none bg-gradient-to-l from-blue-600/90 to-transparent text-white shadow-none border-0"
+              className="h-full rounded-l-none bg-gradient-to-l from-blue-600/90 to-transparent text-white shadow-none border-0 dark:from-blue-700/90"
               onClick={scrollRight}
             >
               <ChevronRight className="h-5 w-5" />
