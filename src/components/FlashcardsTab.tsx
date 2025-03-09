@@ -99,7 +99,6 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
           if (summary) {
             return {
               ...deck,
-              updated_at: deck.updated_at,
               summary: {
                 total: summary.total,
                 dueToday: summary.dueToday,
@@ -111,7 +110,6 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
           }
           return {
             ...deck,
-            updated_at: deck.updated_at,
             summary: {
               total: 0,
               dueToday: 0,
