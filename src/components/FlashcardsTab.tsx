@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import FlashcardDecks from './FlashcardDecks';
 import { FlashcardManager } from './FlashcardManager';
 import { FlashcardStudy } from './FlashcardStudy';
 import { FlashcardDeck } from '@/types';
+import { useToast } from './ui/use-toast';
+import { getDecksSummary } from '@/lib/flashcards';
 
 type View = 'decks' | 'study' | 'manage';
 
@@ -24,6 +26,15 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
 }) => {
   const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
   const [view, setView] = useState<View>('decks');
+  const [localDecks, setLocalDecks] = useState<FlashcardDeck[]>(flashcards);
+  const [deckSummaries, setDeckSummaries] = useState<any[]>([]);
+  const { toast } = useToast();
+
+  // Update local decks when flashcards prop changes
+  useEffect(() => {
+    setLocalDecks(flashcards);
+    refreshDeckMetrics();
+  }, [flashcards]);
 
   // This function is used when a deck is selected from the decks list
   const handleSelectDeck = (deckId: string) => {
@@ -34,6 +45,7 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
   const handleBackToDecks = () => {
     setView('decks');
     setSelectedDeckId(null);
+    refreshDeckMetrics();
   };
 
   const handleManageCards = () => {
@@ -42,6 +54,7 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
 
   const handleFinishStudy = () => {
     setView('decks');
+    refreshDeckMetrics();
   };
 
   // Handle study deck - this is called when the study button is clicked
@@ -52,16 +65,54 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
     onStudyDeck(deckId);
   };
 
+  // Function to refresh deck metrics after reviews
+  const refreshDeckMetrics = async () => {
+    try {
+      // Use the getDecksSummary function to get updated deck metrics
+      const summaries = await getDecksSummary();
+      setDeckSummaries(summaries);
+      
+      // Update the local decks with the new summary information
+      const updatedDecks = localDecks.map(deck => {
+        const summary = summaries.find(s => s.deckId === deck.id);
+        if (summary) {
+          return {
+            ...deck,
+            summary: {
+              total: summary.total,
+              dueToday: summary.dueToday,
+              reviewStatus: summary.reviewStatus as 'not-started' | 'up-to-date' | 'due-soon' | 'overdue',
+              lastStudied: summary.lastStudied || null,
+              nextDue: summary.nextDue || null
+            }
+          };
+        }
+        return deck;
+      });
+      
+      setLocalDecks(updatedDecks);
+    } catch (error) {
+      console.error('Error refreshing deck metrics:', error);
+      toast({
+        title: "Error",
+        description: "Failed to refresh deck metrics",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="w-full h-full">
       {view === 'decks' && (
         <FlashcardDecks 
-          decks={flashcards}
+          decks={localDecks}
           onSelectDeck={handleSelectDeck}
           onStudyDeck={handleStudyDeck}
           onEditDeck={onEditDeck}
           onDeleteDeck={onDeleteDeck}
           onAddDeck={onAddDeck}
+          deckSummaries={deckSummaries}
+          onRefreshMetrics={refreshDeckMetrics}
         />
       )}
       {view === 'study' && selectedDeckId && (
@@ -86,6 +137,7 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
             deckId={selectedDeckId}
             onBackToDecks={handleBackToDecks}
             onFinish={handleFinishStudy}
+            onUpdateDeckMetrics={refreshDeckMetrics}
           />
         </div>
       )}
@@ -93,6 +145,7 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
         <FlashcardManager
           deckId={selectedDeckId}
           onBackToDecks={handleBackToDecks}
+          onUpdateDeckMetrics={refreshDeckMetrics}
         />
       )}
     </div>

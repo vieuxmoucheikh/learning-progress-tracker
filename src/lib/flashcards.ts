@@ -327,56 +327,88 @@ export const submitReview = async (
   }
 };
 
-export interface DeckSummary {
-  deckId: string;
-  deckName: string;
-  totalCards: number;
-  dueToday: number;
-  notStarted: number;
-  mastered: number;
-  dueCards: Array<{ id: string, front_content: string }>;
-  newCards: Array<{ id: string, front_content: string }>;
-}
-
-export const getDecksSummary = async (): Promise<DeckSummary[]> => {
+export const getDecksSummary = async () => {
   const { data: userData } = await supabase.auth.getUser();
   if (!userData?.user) {
     throw new Error('User not authenticated');
   }
 
-  const { data, error } = await supabase
-    .from('flashcard_decks')
-    .select(`
-      id,
-      name,
-      flashcards!inner (
-        id,
-        last_reviewed,
-        next_review,
-        mastered,
-        front_content
-      )
-    `)
-    .eq('user_id', userData.user.id);
+  try {
+    // First, get all decks for the user
+    const { data: decks, error: decksError } = await supabase
+      .from('flashcard_decks')
+      .select('id, name, description, created_at, updated_at')
+      .eq('user_id', userData.user.id);
 
-  if (error) throw error;
+    if (decksError) throw decksError;
+    if (!decks) return [];
 
-  return data.map(deck => {
-    const now = new Date();
-    const dueCards = deck.flashcards.filter(card => 
-      !card.mastered && card.next_review && new Date(card.next_review) <= now
-    );
-    const newCards = deck.flashcards.filter(card => !card.last_reviewed);
+    // For each deck, get summary information about its cards
+    const deckSummaries = await Promise.all(decks.map(async (deck) => {
+      const { data, error } = await supabase
+        .from('flashcards')
+        .select('*')
+        .eq('deck_id', deck.id);
 
-    return {
-      deckId: deck.id,
-      deckName: deck.name,
-      totalCards: deck.flashcards.length,
-      dueToday: dueCards.length,
-      notStarted: newCards.length,
-      mastered: deck.flashcards.filter(card => card.mastered).length,
-      dueCards: dueCards.map(card => ({ id: card.id, front_content: card.front_content })),
-      newCards: newCards.map(card => ({ id: card.id, front_content: card.front_content }))
-    };
-  });
+      if (error) throw error;
+      
+      // Manually calculate the summary since we're using raw SQL approach
+      const now = new Date();
+      const summary = {
+        total: data.length,
+        due_today: data.filter(card => 
+          !card.mastered && 
+          card.next_review && 
+          new Date(card.next_review) <= now
+        ).length,
+        next_due: data
+          .filter(card => 
+            !card.mastered && 
+            card.next_review && 
+            new Date(card.next_review) > now
+          )
+          .sort((a, b) => new Date(a.next_review).getTime() - new Date(b.next_review).getTime())[0]?.next_review || null,
+        last_studied: data
+          .filter(card => card.last_reviewed)
+          .sort((a, b) => new Date(b.last_reviewed).getTime() - new Date(a.last_reviewed).getTime())[0]?.last_reviewed || null
+      };
+      
+      // Determine review status
+      let reviewStatus = 'not-started';
+      if (summary.total > 0) {
+        if (summary.due_today > 0) {
+          reviewStatus = 'due-today';
+        } else if (summary.next_due) {
+          const nextDueDate = new Date(summary.next_due);
+          const today = new Date();
+          const threeDaysFromNow = new Date();
+          threeDaysFromNow.setDate(today.getDate() + 3);
+          
+          if (nextDueDate <= threeDaysFromNow) {
+            reviewStatus = 'due-soon';
+          } else {
+            reviewStatus = 'up-to-date';
+          }
+        }
+      }
+
+      return {
+        deckId: deck.id,
+        name: deck.name,
+        description: deck.description,
+        total: summary.total || 0,
+        dueToday: summary.due_today || 0,
+        nextDue: summary.next_due,
+        lastStudied: summary.last_studied,
+        reviewStatus,
+        createdAt: deck.created_at,
+        updatedAt: deck.updated_at
+      };
+    }));
+
+    return deckSummaries;
+  } catch (error) {
+    console.error('Error getting deck summaries:', error);
+    throw error;
+  }
 };

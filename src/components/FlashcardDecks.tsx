@@ -55,23 +55,28 @@ interface FlashcardDecksProps {
   onStudyDeck: (deckId: string) => void;
   onEditDeck: (deckId: string, data: { name: string; description: string }) => void;
   onDeleteDeck: (deckId: string) => void;
+  deckSummaries?: any[];
+  onRefreshMetrics?: () => void;
 }
 
 interface DeckSummary {
   deckId: string;
   total: number;
   dueToday: number;
-  reviewStatus: 'up-to-date' | 'due-soon' | 'overdue' | 'not-started';
-  lastStudied?: string;
+  reviewStatus: string;
+  lastStudied: string | null;
+  nextDue: string | null;
 }
 
 const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ 
-  decks,
-  onSelectDeck,
-  onAddDeck,
-  onStudyDeck,
-  onEditDeck,
-  onDeleteDeck
+  decks, 
+  onSelectDeck, 
+  onAddDeck, 
+  onStudyDeck, 
+  onEditDeck, 
+  onDeleteDeck,
+  deckSummaries = [],
+  onRefreshMetrics
 }) => {
   const [isCreatingDeck, setIsCreatingDeck] = useState(false);
   const [isAddingFlashcard, setIsAddingFlashcard] = useState(false);
@@ -79,7 +84,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   const [deckFormData, setDeckFormData] = useState({ name: '', description: '' });
   const [flashcardFormData, setFlashcardFormData] = useState({ front: '', back: '' });
   const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
-  const [deckSummaries, setDeckSummaries] = useState<DeckSummary[]>([]);
+  const [deckSummariesState, setDeckSummaries] = useState<DeckSummary[]>([]);
   const [localDecks, setLocalDecks] = useState<FlashcardDeck[]>([]);
   const [editingDeckId, setEditingDeckId] = useState<string | null>(null);
   
@@ -149,12 +154,20 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               }
             }
             
+            // Get next due date - find the earliest review date across all cards
+            const nextDue = cards?.reduce((earliest, card) => {
+              if (!card.next_review_date) return earliest;
+              const nextReview = new Date(card.next_review_date);
+              return !earliest || nextReview < earliest ? nextReview : earliest;
+            }, null as Date | null);
+            
             return {
               deckId: deck.id,
               total,
               dueToday: dueCards.length,
               reviewStatus,
-              lastStudied: lastStudied ? lastStudied.toISOString() : undefined
+              lastStudied: lastStudied ? lastStudied.toISOString() : undefined,
+              nextDue: nextDue ? nextDue.toISOString() : undefined
             };
           })
         );
@@ -177,6 +190,44 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     }
   }, [localDecks]);
   
+  // Get deck summary from deckSummaries prop or calculate it
+  const getDeckSummary = (deckId: string) => {
+    // First check if we have a summary from the deckSummaries prop
+    const summaryFromProps = deckSummaries.find(s => s.deckId === deckId);
+    if (summaryFromProps) {
+      return {
+        deckId: summaryFromProps.deckId,
+        total: summaryFromProps.total || 0,
+        dueToday: summaryFromProps.dueToday || 0,
+        reviewStatus: summaryFromProps.reviewStatus || 'not-started',
+        lastStudied: summaryFromProps.lastStudied || null,
+        nextDue: summaryFromProps.nextDue || null
+      };
+    }
+
+    // Fallback to the existing deck summary calculation
+    const deck = localDecks.find(d => d.id === deckId);
+    if (!deck || !deck.summary) {
+      return {
+        deckId,
+        total: 0,
+        dueToday: 0,
+        reviewStatus: 'not-started',
+        lastStudied: null,
+        nextDue: null
+      };
+    }
+    
+    return {
+      deckId,
+      total: deck.summary.total || 0,
+      dueToday: deck.summary.dueToday || 0,
+      reviewStatus: deck.summary.reviewStatus || 'not-started',
+      lastStudied: deck.summary.lastStudied || null,
+      nextDue: deck.summary.nextDue || null
+    };
+  };
+
   const handleCreateDeckSubmit = () => {
     if (!deckFormData.name.trim()) {
       toast({
@@ -258,7 +309,21 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     }
   };
 
-  const DeckCard = ({ deck, summary }: { deck: FlashcardDeck; summary: DeckSummary }) => {
+  const DeckCard = ({ deck }: { deck: FlashcardDeck }) => {
+    const summary = getDeckSummary(deck.id);
+    
+    const handleEditDeckClick = (deckId: string) => {
+      const deckToEdit = localDecks.find(d => d.id === deckId);
+      if (deckToEdit) {
+        setDeckFormData({
+          name: deckToEdit.name,
+          description: deckToEdit.description || ''
+        });
+        setEditingDeckId(deckId);
+        setIsCreatingDeck(true);
+      }
+    };
+
     return (
       <Card key={deck.id} className="overflow-hidden border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all w-full">
         <CardHeader className="pb-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/20">
@@ -316,10 +381,16 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                 {formatReviewStatus(summary.reviewStatus)}
               </Badge>
             )}
+            {summary.nextDue && (
+              <Badge variant="outline" className="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <Clock className="w-3 h-3 mr-1" />
+                Next review: {new Date(summary.nextDue).toLocaleDateString()}
+              </Badge>
+            )}
             {summary.lastStudied && (
               <Badge variant="outline" className="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <Clock className="w-3 h-3 mr-1" />
-                {new Date(summary.lastStudied).toLocaleDateString()}
+                Last studied: {new Date(summary.lastStudied).toLocaleDateString()}
               </Badge>
             )}
           </div>
@@ -332,6 +403,14 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             onClick={() => handleEditDeckClick(deck.id)}
           >
             <Edit className="w-3.5 h-3.5 mr-1.5" /> Edit
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="flex-1 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
+            onClick={() => onSelectDeck && onSelectDeck(deck.id)}
+          >
+            <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Card
           </Button>
           <Button 
             variant="default" 
@@ -347,15 +426,11 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   };
 
   const getTotalDueCards = () => {
-    return deckSummaries.reduce((total, summary) => total + summary.dueToday, 0);
+    return deckSummariesState.reduce((total, summary) => total + summary.dueToday, 0);
   };
 
   const getTotalNotStartedCards = () => {
-    return deckSummaries.reduce((total, summary) => total + summary.total, 0);
-  };
-
-  const getDeckSummary = (deckId: string) => {
-    return deckSummaries.find(summary => summary.deckId === deckId);
+    return deckSummariesState.reduce((total, summary) => total + summary.total, 0);
   };
 
   const hasDueCards = getTotalDueCards() > 0;
@@ -393,6 +468,10 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
 
   const syncData = () => {
     setIsLoading(true);
+    
+    if (onRefreshMetrics) {
+      onRefreshMetrics();
+    }
     
     setTimeout(() => {
       setIsLoading(false);
@@ -507,12 +586,20 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                 }
               }
               
+              // Get next due date - find the earliest review date across all cards
+              const nextDue = cards?.reduce((earliest, card) => {
+                if (!card.next_review_date) return earliest;
+                const nextReview = new Date(card.next_review_date);
+                return !earliest || nextReview < earliest ? nextReview : earliest;
+              }, null as Date | null);
+              
               return {
                 deckId: deck.id,
                 total,
                 dueToday: dueCards.length,
                 reviewStatus,
-                lastStudied: lastStudied ? lastStudied.toISOString() : undefined
+                lastStudied: lastStudied ? lastStudied.toISOString() : undefined,
+                nextDue: nextDue ? nextDue.toISOString() : undefined
               };
             })
           );
@@ -626,12 +713,13 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               deckId: deck.id,
               total: 0,
               dueToday: 0,
-              reviewStatus: 'not-started' as 'not-started',
-              lastStudied: undefined
+              reviewStatus: 'not-started',
+              lastStudied: undefined,
+              nextDue: undefined
             };
             
             return (
-              <DeckCard key={deck.id} deck={deck} summary={summary} />
+              <DeckCard key={deck.id} deck={deck} />
             );
           })
         )}

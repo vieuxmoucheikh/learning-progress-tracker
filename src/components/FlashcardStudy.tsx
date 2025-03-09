@@ -11,9 +11,15 @@ interface FlashcardStudyProps {
   deckId: string;
   onBackToDecks: () => void;
   onFinish?: () => void;
+  onUpdateDeckMetrics?: () => void;
 }
 
-export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackToDecks, onFinish }) => {
+export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ 
+  deckId, 
+  onBackToDecks, 
+  onFinish,
+  onUpdateDeckMetrics 
+}) => {
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -49,6 +55,11 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
       setCards(dueCards);
       setSessionStats(prev => ({ ...prev, total: dueCards.length }));
       setLoading(false);
+      
+      // Update deck metrics whenever cards are loaded
+      if (onUpdateDeckMetrics) {
+        onUpdateDeckMetrics();
+      }
     } catch (error) {
       console.error('Error loading cards:', error);
       toast({
@@ -150,6 +161,11 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
       if (currentCardIndex < cards.length - 1) {
         setCurrentCardIndex(prev => prev + 1);
         setIsFlipped(false);
+        
+        // Update deck metrics after each review
+        if (onUpdateDeckMetrics) {
+          onUpdateDeckMetrics();
+        }
       } else {
         // Session complete
         toast({
@@ -162,6 +178,12 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
         await loadCards(); 
         setCurrentCardIndex(0);
         setIsFlipped(false);
+        
+        // Update deck metrics after completing the session
+        if (onUpdateDeckMetrics) {
+          onUpdateDeckMetrics();
+        }
+        
         if (onFinish) onFinish();
       }
     } catch (error) {

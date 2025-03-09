@@ -186,7 +186,15 @@ export interface FlashcardDeck {
   name: string;
   description?: string;
   created_at: string;
+  updated_at: string;
   user_id: string;
+  summary?: {
+    total: number;
+    dueToday: number;
+    reviewStatus: 'not-started' | 'up-to-date' | 'due-soon' | 'overdue';
+    lastStudied: string | null;
+    nextDue: string | null;
+  };
 }
 
 export interface Flashcard {

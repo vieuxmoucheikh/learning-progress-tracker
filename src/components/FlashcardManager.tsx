@@ -5,7 +5,7 @@ import { Textarea } from './ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useToast } from './ui/use-toast';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
-import { Plus, Trash2, Play } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { createFlashcard } from '../lib/flashcards';
 import type { Flashcard } from '../types';
 import { supabase } from '../lib/supabase';
@@ -13,9 +13,14 @@ import { supabase } from '../lib/supabase';
 interface FlashcardManagerProps {
   deckId: string;
   onBackToDecks: () => void;
+  onUpdateDeckMetrics?: () => void;
 }
 
-export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBackToDecks }) => {
+export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ 
+  deckId, 
+  onBackToDecks,
+  onUpdateDeckMetrics 
+}) => {
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [filteredCards, setFilteredCards] = useState<Flashcard[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -77,6 +82,11 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
       setIsCreating(false);
       setFormData({ front: '', back: '' });
       
+      // Update deck metrics after adding a card
+      if (onUpdateDeckMetrics) {
+        onUpdateDeckMetrics();
+      }
+
       toast({
         title: "Success",
         description: "Flashcard created successfully",
@@ -96,14 +106,17 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ deckId, onBa
       const { error } = await supabase
         .from('flashcards')
         .delete()
-        .eq('id', cardId)
-        .order('created_at', { ascending: true });
+        .eq('id', cardId);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       setCards(cards.filter(card => card.id !== cardId));
+      
+      // Update deck metrics after deleting a card
+      if (onUpdateDeckMetrics) {
+        onUpdateDeckMetrics();
+      }
+
       toast({
         title: "Success",
         description: "Flashcard deleted successfully",
