@@ -169,15 +169,13 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
           <h2 className="text-xl font-semibold">Learning Items</h2>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex items-center gap-2"
+          <button
             onClick={exportToPdf}
+            className="export-button flex items-center gap-1 px-3 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded text-sm transition-colors"
           >
-            <Download className="h-4 w-4" />
-            Export
-          </Button>
+            <Download size={16} className="dark:text-white" />
+            <span className="dark:text-white">Export</span>
+          </button>
           <Button 
             onClick={onAddItem} 
             size="sm" 

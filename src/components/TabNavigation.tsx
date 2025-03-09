@@ -100,7 +100,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
     <div className="tab-navigation-container">
       <div className="flex justify-center mb-2 mt-1 md:mb-6 md:mt-0">
         <h2 className="text-white font-bold text-xl hidden md:block">Learning Tracker</h2>
-        <h2 className="text-white font-bold text-lg md:hidden">Menu</h2>
+        {/* Suppression du texte "Menu" sur mobile */}
       </div>
       <div 
         className="tab-navigation-items" 
