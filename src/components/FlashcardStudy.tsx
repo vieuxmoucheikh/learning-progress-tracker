@@ -82,16 +82,31 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
         mastered
       );
 
+      // Calculate the next review date
+      const nextReviewDate = mastered ? null : new Date();
+      if (nextReviewDate) {
+        nextReviewDate.setDate(nextReviewDate.getDate() + interval);
+      }
+
+      // Format the next review date for display
+      const formattedDate = nextReviewDate ? 
+        nextReviewDate.toLocaleDateString('en-US', { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        }) : null;
+
       // Update the card in the local state to reflect changes immediately
       const updatedCards = [...cards];
       updatedCards[currentCardIndex] = {
         ...updatedCards[currentCardIndex],
         last_reviewed: new Date().toISOString(),
-        next_review: mastered ? undefined : new Date(new Date().setDate(new Date().getDate() + interval)).toISOString(),
+        next_review: nextReviewDate?.toISOString() || undefined,
         interval: interval,
         ease_factor: easeFactor,
         mastered: mastered,
-        repetitions: (currentCard.repetitions || 0) + 1
+        repetitions: (currentCard.repetitions || 0) + (quality >= 3 ? 1 : 0)
       };
       setCards(updatedCards);
 
@@ -108,15 +123,15 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({ deckId, onBackTo
       
       switch(quality) {
         case 1:
-          feedbackMessage = `Hard - Review again in ${interval} days`;
+          feedbackMessage = `Hard - Next review in ${interval} days (${formattedDate})`;
           toastVariant = "destructive";
           break;
         case 2:
-          feedbackMessage = `Good - Review again in ${interval} days`;
+          feedbackMessage = `Good - Next review in ${interval} days (${formattedDate})`;
           toastVariant = "default";
           break;
         case 3:
-          feedbackMessage = `Easy - Review again in ${interval} days`;
+          feedbackMessage = `Easy - Next review in ${interval} days (${formattedDate})`;
           toastVariant = "default";
           break;
         case 4:

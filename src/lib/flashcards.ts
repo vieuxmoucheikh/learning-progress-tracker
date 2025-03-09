@@ -210,30 +210,68 @@ export const calculateNextReview = (
   let mastered = false;
 
   // Quality ratings:
-  // 1 = Hard (2 days)
-  // 2 = Medium (4 days)
-  // 3 = Easy (1 month)
-  // 4 = Mastered (remove from rotation)
+  // 1 = Hard - shorter interval
+  // 2 = Medium - standard interval
+  // 3 = Easy - longer interval
+  // 4 = Mastered - remove from rotation
 
+  // SM-2 algorithm implementation (modified)
+  if (quality < 3) {
+    // If quality is less than 3 (Hard/Medium), reset repetitions
+    repetitions = 0;
+  } else {
+    // Increment repetitions for Easy/Perfect
+    repetitions += 1;
+  }
+
+  // Calculate new interval based on quality
   switch (quality) {
     case 1: // Hard
-      interval = 2;
-      easeFactor = Math.max(1.3, easeFactor - 0.15);
+      // Reduce the interval but ensure it's at least 1 day
+      interval = Math.max(1, Math.floor(prevInterval * 0.5));
+      // Reduce ease factor but not below 1.3
+      easeFactor = Math.max(1.3, prevEaseFactor - 0.15);
       break;
+      
     case 2: // Medium
-      interval = 4;
+      if (repetitions === 0) {
+        // First time or reset: 3 days
+        interval = 3;
+      } else {
+        // Standard progression: previous interval * ease factor * 0.8 (slightly reduced)
+        interval = Math.ceil(prevInterval * prevEaseFactor * 0.8);
+      }
+      // Keep ease factor the same
+      easeFactor = prevEaseFactor;
       break;
+      
     case 3: // Easy
-      interval = 30; // 1 month
-      easeFactor = easeFactor + 0.15;
+      if (repetitions === 0) {
+        // First time: 5 days
+        interval = 5;
+      } else if (repetitions === 1) {
+        // Second time: 7 days
+        interval = 7;
+      } else {
+        // Standard progression: previous interval * ease factor
+        interval = Math.ceil(prevInterval * prevEaseFactor);
+      }
+      // Increase ease factor
+      easeFactor = prevEaseFactor + 0.15;
       break;
+      
     case 4: // Mastered
       mastered = true;
       break;
   }
 
-  // Increment repetitions
-  repetitions = repetitions + 1;
+  // Cap ease factor to reasonable bounds
+  easeFactor = Math.min(3.0, Math.max(1.3, easeFactor));
+  
+  // Cap interval to reasonable bounds (max 6 months)
+  if (!mastered) {
+    interval = Math.min(180, Math.max(1, interval));
+  }
 
   return { interval, easeFactor, repetitions, mastered };
 };
@@ -256,16 +294,16 @@ export const submitReview = async (
   }
 
   try {
-    // First get the current review count
+    // First get the current review count and card data
     const { data: currentCard, error: getError } = await supabase
       .from('flashcards')
-      .select('review_count, mastered')
+      .select('review_count, mastered, repetitions')
       .eq('id', cardId)
       .single();
 
     if (getError) throw getError;
 
-    // Update the card with raw SQL to ensure consistency
+    // Update the card using Supabase's update method
     const { data, error } = await supabase
       .from('flashcards')
       .update({
@@ -273,7 +311,7 @@ export const submitReview = async (
         next_review: nextReview?.toISOString() || null,
         review_interval: newInterval,
         ease_factor: newEaseFactor,
-        repetitions: (currentCard?.review_count || 0) + 1,
+        repetitions: (currentCard?.repetitions || 0) + (quality >= 3 ? 1 : 0), // Only increment repetitions for Easy/Perfect
         mastered: mastered,
         review_count: (currentCard?.review_count || 0) + 1
       })
