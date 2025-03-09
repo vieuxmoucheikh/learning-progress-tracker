@@ -311,10 +311,10 @@ export function DashboardTab({
       </div>
 
       {/* Main Content - Responsive Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* Calendar - Hidden on mobile, shown in dialog */}
-        <div className="hidden md:block md:col-span-1">
-          <Card className="p-4 h-full">
+        <div className="hidden md:block md:col-span-1 w-full">
+          <Card className="p-4 h-full w-full">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Calendar</h3>
             </div>
@@ -330,8 +330,8 @@ export function DashboardTab({
           </Card>
         </div>
 
-        {/* Active Tasks - Full width on mobile */}
-        <div className="md:col-span-2">
+        {/* Active Tasks - Full width on mobile, half width on desktop */}
+        <div className="md:col-span-1">
           <Card className="p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -373,7 +373,7 @@ export function DashboardTab({
         </div>
 
         {/* Completed Tasks - Full width on mobile */}
-        <Card className="p-4 hover:shadow-md transition-shadow md:col-span-3">
+        <Card className="p-4 hover:shadow-md transition-shadow md:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-green-50 dark:bg-green-900/30 rounded-lg">
@@ -415,23 +415,25 @@ export function DashboardTab({
 
       {/* Mobile Calendar Dialog */}
       <Dialog open={showCalendar} onOpenChange={setShowCalendar}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[90%] w-[95%] max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Calendar</DialogTitle>
           </DialogHeader>
-          <Calendar 
-            items={items}
-            onDateSelect={(date) => {
-              setSelectedDate(date);
-              onDateSelect(date);
-              setShowCalendar(false);
-            }}
-            selectedDate={selectedDate}
-            onAddItem={() => {
-              onAddItem(selectedDate);
-              setShowCalendar(false);
-            }}
-          />
+          <div className="w-full">
+            <Calendar 
+              items={items}
+              onDateSelect={(date) => {
+                setSelectedDate(date);
+                onDateSelect(date);
+                setShowCalendar(false);
+              }}
+              selectedDate={selectedDate}
+              onAddItem={() => {
+                onAddItem(selectedDate);
+                setShowCalendar(false);
+              }}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 

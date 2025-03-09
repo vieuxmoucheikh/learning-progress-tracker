@@ -570,7 +570,7 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
                   transition={{ duration: 0.2 }}
                   onClick={() => handleDateSelect(day)}
                   className={cn(
-                    "aspect-square p-1 relative focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg transition-all z-10",
+                    "aspect-square w-full min-w-[10px] min-h-[10px] p-1 relative focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg transition-all z-10",
                     selectedDay && isSelectedDate(day)
                       ? 'ring-2 ring-blue-500'
                       : ''
