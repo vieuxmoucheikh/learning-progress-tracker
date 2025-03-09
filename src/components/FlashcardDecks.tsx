@@ -77,12 +77,11 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   onRefreshMetrics
 }) => {
   const [isCreatingDeck, setIsCreatingDeck] = useState(false);
-  const [isAddingFlashcard, setIsAddingFlashcard] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [deckFormData, setDeckFormData] = useState({ name: '', description: '' });
   const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
   const [deckSummariesState, setDeckSummaries] = useState<DeckSummary[]>([]);
-  const [localDecks, setLocalDecks] = useState<FlashcardDeck[]>([]);
+  const [localDecks, setLocalDecks] = useState<FlashcardDeck[]>(decks);
   const [isEditingDeck, setIsEditingDeck] = useState(false);
   
   // Initialize local decks from props
@@ -311,7 +310,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     const summary = getDeckSummary(deck.id);
     
     return (
-      <Card key={deck.id} className="overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all w-full bg-white dark:bg-gray-800/90">
+      <Card key={deck.id} className="overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all w-full bg-white dark:bg-gray-800">
         <CardHeader className="pb-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/20">
           <div className="flex justify-between items-start">
             <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 break-words">{deck.name}</CardTitle>
@@ -489,7 +488,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           </Button>
           <Button 
             variant="default" 
-            size="sm" 
+            size="sm"
             onClick={() => {
               setDeckFormData({ name: '', description: '' });
               setSelectedDeckId(null);

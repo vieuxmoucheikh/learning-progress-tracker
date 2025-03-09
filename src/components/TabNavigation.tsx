@@ -91,7 +91,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
     <div className="flex flex-col h-full">
       <nav className="relative">
         {/* Desktop Navigation - Vertical - Compact */}
-        <div className="hidden md:flex flex-col items-start gap-2 p-2 bg-gradient-to-br from-indigo-600 via-blue-600 to-blue-500 dark:from-indigo-800 dark:via-blue-700 dark:to-blue-600 rounded-xl shadow-lg mb-4 border border-indigo-400/20 dark:border-indigo-700/30 w-auto">
+        <div className="hidden md:flex flex-col items-start gap-1.5 p-1.5 bg-gradient-to-br from-indigo-600 via-blue-600 to-blue-500 dark:from-indigo-800 dark:via-blue-700 dark:to-blue-600 rounded-xl shadow-lg mb-4 border border-indigo-400/20 dark:border-indigo-700/30 w-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -102,7 +102,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
                 ref={isActive ? activeTabRef : null}
                 onClick={() => onTabChange(tab.id)}
                 className={cn(
-                  "w-full text-xs font-medium py-2 px-3 flex items-center gap-2 transition-all duration-200 rounded-lg group relative overflow-hidden",
+                  "w-full text-xs font-medium py-1.5 px-2.5 flex items-center gap-1.5 transition-all duration-200 rounded-lg group relative overflow-hidden",
                   isActive
                     ? "bg-white/20 text-white shadow-sm backdrop-blur-sm"
                     : "text-white/80 hover:text-white hover:bg-white/10"
@@ -113,7 +113,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
                   "absolute inset-0 opacity-0 bg-gradient-to-r from-white/10 to-transparent transition-opacity duration-300",
                   isActive ? "opacity-100" : "group-hover:opacity-50"
                 )} />
-                <div className="relative z-10 flex items-center gap-2">
+                <div className="relative z-10 flex items-center gap-1.5">
                   <Icon className={cn(
                     "w-4 h-4 flex-shrink-0 transition-transform duration-300",
                     isActive ? "text-white" : "text-white/80 group-hover:scale-110"

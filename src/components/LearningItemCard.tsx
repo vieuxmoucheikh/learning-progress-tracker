@@ -678,29 +678,29 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               key={session.startTime}
               className={clsx(
                 "border rounded-xl p-5 space-y-4",
-                "bg-gradient-to-br from-white to-gray-50/30",
-                "hover:from-gray-50 hover:to-white transition-all",
+                "bg-gradient-to-br from-white to-gray-50/30 dark:from-gray-900 to-gray-800/30",
+                "hover:from-gray-50 hover:to-white transition-all dark:hover:from-gray-800 dark:hover:to-gray-900",
                 "shadow-sm hover:shadow-md",
                 "relative overflow-hidden",
-                !session.endTime && "border-l-4 border-l-blue-400"
+                !session.endTime && "border-l-4 border-l-blue-400 dark:border-l-blue-500"
               )}
             >
               {/* Session Status Indicator */}
               <div className={clsx(
                 "absolute top-0 right-0 w-24 h-24 -mr-12 -mt-12 transform rotate-45",
-                !session.endTime && session.status === 'in_progress' && "bg-blue-500/10",
-                !session.endTime && session.status === 'on_hold' && "bg-yellow-500/10",
-                session.endTime && "bg-green-500/10"
+                !session.endTime && session.status === 'in_progress' && "bg-blue-500/10 dark:bg-blue-500/20",
+                !session.endTime && session.status === 'on_hold' && "bg-yellow-500/10 dark:bg-yellow-500/20",
+                session.endTime && "bg-green-500/10 dark:bg-green-500/20"
               )} />
 
               {/* Header */}
-              <div className="flex items-center justify-between relative">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={clsx(
                     "font-semibold text-lg",
-                    !session.endTime && session.status === 'in_progress' && "text-blue-600",
-                    !session.endTime && session.status === 'on_hold' && "text-yellow-600",
-                    session.endTime && "text-gray-700"
+                    !session.endTime && session.status === 'in_progress' && "text-blue-600 dark:text-blue-400",
+                    !session.endTime && session.status === 'on_hold' && "text-yellow-600 dark:text-yellow-400",
+                    session.endTime && "text-gray-700 dark:text-gray-300"
                   )}>
                     Session {sessionNumber}
                   </div>
@@ -708,35 +708,35 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     variant={session.endTime ? "secondary" : session.status === 'on_hold' ? "outline" : "default"} 
                     className={clsx(
                       "capitalize font-medium",
-                      !session.endTime && session.status === 'in_progress' && "bg-blue-100 text-blue-700 hover:bg-blue-200",
-                      !session.endTime && session.status === 'on_hold' && "bg-yellow-50 text-yellow-700 border-yellow-200",
-                      session.endTime && "bg-green-50 text-green-700"
+                      !session.endTime && session.status === 'in_progress' && "bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-800/30 dark:text-blue-300",
+                      !session.endTime && session.status === 'on_hold' && "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-800/30 dark:text-yellow-300",
+                      session.endTime && "bg-green-50 text-green-700 dark:bg-green-800/30 dark:text-green-300"
                     )}
                   >
                     {session.endTime ? "Completed" : session.status === 'on_hold' ? "On Hold" : "In Progress"}
                   </Badge>
                 </div>
-                <div className="text-sm font-medium text-gray-600 bg-gray-100/80 px-3 py-1.5 rounded-full shadow-sm">
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100/80 dark:bg-gray-800/80 px-3 py-1.5 rounded-full shadow-sm">
                   {formattedDuration}
                 </div>
               </div>
               
               {/* Timing Information */}
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="space-y-1.5 bg-white/50 rounded-lg p-3 border border-gray-100">
-                  <div className="text-gray-500 flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-blue-500" />
+                <div className="space-y-1.5 bg-white/50 dark:bg-gray-800/50 rounded-lg p-3 border border-gray-100 dark:border-gray-700">
+                  <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-blue-500 dark:text-blue-400" />
                     Started
                   </div>
-                  <div className="font-medium text-gray-700">{startDate.toLocaleString()}</div>
+                  <div className="font-medium text-gray-700 dark:text-gray-300">{startDate.toLocaleString()}</div>
                 </div>
                 {endDate && (
-                  <div className="space-y-1.5 bg-white/50 rounded-lg p-3 border border-gray-100">
-                    <div className="text-gray-500 flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <div className="space-y-1.5 bg-white/50 dark:bg-gray-800/50 rounded-lg p-3 border border-gray-100 dark:border-gray-700">
+                    <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-500 dark:text-green-400" />
                       Ended
                     </div>
-                    <div className="font-medium text-gray-700">{endDate.toLocaleString()}</div>
+                    <div className="font-medium text-gray-700 dark:text-gray-300">{endDate.toLocaleString()}</div>
                   </div>
                 )}
               </div>
@@ -744,8 +744,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               {/* Notes */}
               {(Array.isArray(session.notes) || item.notes) && (
                 <div className="space-y-3 overflow-hidden">
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <StickyNote className="h-4 w-4 text-amber-500" />
+                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                    <StickyNote className="h-4 w-4 text-amber-500 dark:text-amber-400" />
                     Notes
                   </div>
                   <ul className="space-y-2 overflow-hidden">
@@ -754,14 +754,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                         key={noteIndex} 
                         className={clsx(
                           "group relative text-sm p-3 rounded-lg",
-                          "bg-gradient-to-r from-amber-50 to-amber-50/30",
-                          "border border-amber-100/50",
-                          "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors",
+                          "bg-gradient-to-r from-amber-50 to-amber-50/30 dark:from-amber-900 to-amber-800/30",
+                          "border border-amber-100/50 dark:border-amber-800/50",
+                          "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors dark:hover:from-amber-800/50 dark:hover:to-amber-900/50",
                           "overflow-hidden"
                         )}
                       >
                         <div className="pr-8 max-w-full">
-                          <p className="text-gray-700 break-words whitespace-pre-line overflow-hidden">
+                          <p className="text-gray-700 dark:text-gray-300 break-words whitespace-pre-line overflow-hidden">
                             {typeof note === 'string' ? note : note.content}
                           </p>
                         </div>
@@ -769,8 +769,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                           onClick={() => openEditNoteDialog(sessionIndex, noteIndex, typeof note === 'string' ? note : note.content)}
                           className={clsx(
                             "absolute top-2 right-2 p-1.5 rounded-md",
-                            "bg-white/80 hover:bg-white shadow-sm",
-                            "text-gray-500 hover:text-blue-600",
+                            "bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-700 shadow-sm",
+                            "text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400",
                             "transition-all duration-200",
                             "opacity-100 md:opacity-0 md:group-hover:opacity-100"
                           )}
@@ -782,13 +782,13 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     {sessionIndex === 0 && item.notes && (
                       <li className={clsx(
                         "text-sm p-3 rounded-lg",
-                        "bg-gradient-to-r from-amber-50 to-amber-50/30",
-                        "border border-amber-100/50",
-                        "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors",
+                        "bg-gradient-to-r from-amber-50 to-amber-50/30 dark:from-amber-900 to-amber-800/30",
+                        "border border-amber-100/50 dark:border-amber-800/50",
+                        "hover:from-amber-100/50 hover:to-amber-50/50 transition-colors dark:hover:from-amber-800/50 dark:hover:to-amber-900/50",
                         "overflow-hidden"
                       )}>
                         <div className="max-w-full">
-                          <p className="text-gray-700 break-words whitespace-pre-line overflow-hidden">
+                          <p className="text-gray-700 dark:text-gray-300 break-words whitespace-pre-line overflow-hidden">
                             {item.notes}
                           </p>
                         </div>
@@ -866,16 +866,16 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               min="0"
               value={editedMinutes}
               onChange={(e) => setEditedMinutes(Math.max(0, parseInt(e.target.value) || 0))}
-              className="w-20 text-sm border-blue-200 focus:ring-blue-500"
+              className="w-20 text-sm border-blue-200 focus:ring-blue-500 dark:border-blue-700 dark:bg-gray-800 dark:text-white"
             />
-            <span className="text-sm text-gray-600">min</span>
+            <span className="text-sm text-gray-600 dark:text-gray-300">min</span>
           </div>
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
               onClick={handleTimeSave}
-              className="text-green-600 hover:text-green-700 hover:bg-green-50"
+              className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-900/30"
             >
               <Save className="h-4 w-4" />
             </Button>
@@ -883,7 +883,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               variant="ghost"
               size="sm"
               onClick={handleTimeCancel}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/30"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -895,8 +895,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     return (
       <div className="flex items-center gap-2 group">
         <div className="flex items-center gap-1.5">
-          <Clock className="h-4 w-4 text-gray-500" />
-          <span className="text-sm font-medium">
+          <Clock className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+          <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
             {totalCurrentMinutes}m (Total minutes)
           </span>
         </div>
@@ -904,7 +904,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           variant="ghost"
           size="sm"
           onClick={handleTimeEdit}
-          className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50 p-1"
+          className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/50"
         >
           <Edit className="h-3.5 w-3.5" />
         </Button>
@@ -965,43 +965,43 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
   const getBorderColorClass = () => {
     if (!item.status) {
-      return 'border-gray-300';
+      return 'border-gray-300 dark:border-gray-700';
     }
 
     switch (item.status) {
       case 'not_started':
-        return 'border-gray-300';
+        return 'border-gray-300 dark:border-gray-700';
       case 'in_progress':
-        return 'border-blue-400';
+        return 'border-blue-400 dark:border-blue-500';
       case 'completed':
-        return 'border-green-400';
+        return 'border-green-400 dark:border-green-500';
       case 'on_hold':
-        return 'border-yellow-400';
+        return 'border-yellow-400 dark:border-yellow-500';
       case 'archived':
-        return 'border-gray-400';
+        return 'border-gray-400 dark:border-gray-700';
       default:
-        return 'border-gray-300';
+        return 'border-gray-300 dark:border-gray-700';
     }
   };
 
   const getStatusBadgeClass = () => {
     if (!item.status) {
-      return 'bg-gray-100 text-gray-600';
+      return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';
     }
 
     switch (item.status) {
       case 'not_started':
-        return 'bg-gray-100 text-gray-600';
+        return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';
       case 'in_progress':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-blue-100 text-blue-700 dark:bg-blue-800/30 dark:text-blue-300';
       case 'completed':
-        return 'bg-green-100 text-green-700';
+        return 'bg-green-100 text-green-700 dark:bg-green-800/30 dark:text-green-300';
       case 'on_hold':
-        return 'bg-yellow-100 text-yellow-700';
+        return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-800/30 dark:text-yellow-300';
       case 'archived':
-        return 'bg-gray-200 text-gray-700';
+        return 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
       default:
-        return 'bg-gray-100 text-gray-600';
+        return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';
     }
   };
 
@@ -1034,7 +1034,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         getBorderColorClass()
       )}>
         {/* Card Header with gradient background */}
-        <div className="bg-gradient-to-r from-gray-50 via-white to-gray-50 border-b border-gray-200/80">
+        <div className="bg-gradient-to-r from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 border-b border-gray-200/80 dark:border-gray-700/80">
           <div className="p-6">
             {/* Title Section */}
             <div className="flex justify-between items-start gap-4 mb-4">
@@ -1046,13 +1046,13 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                       <Input
                         value={editedTitle}
                         onChange={(e) => setEditedTitle(e.target.value)}
-                        className="text-xl font-semibold border-blue-200 focus:ring-blue-500"
+                        className="text-xl font-semibold border-blue-200 focus:ring-blue-500 dark:border-blue-700 dark:bg-gray-800 dark:text-white"
                       />
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={handleTitleSave}
-                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                        className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-900/30"
                       >
                         <Save className="h-4 w-4" />
                       </Button>
@@ -1063,19 +1063,19 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                           setIsEditing(false);
                           setEditedTitle(item.title);
                         }}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/30"
                       >
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 group">
-                      <h3 className="text-2xl font-bold text-gray-800">{item.title}</h3>
+                      <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{item.title}</h3>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setIsEditing(true)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/50"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -1087,7 +1087,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 <div className="flex items-center gap-3">
                   {item.category && (
                     <div className="flex items-center">
-                      <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100 shadow-sm">
+                      <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100 shadow-sm dark:from-blue-900/30 dark:to-indigo-900/30 dark:text-blue-300 dark:border-blue-800/50">
                         {item.category}
                       </span>
                     </div>
@@ -1103,22 +1103,22 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     >
                       {getStatusText()}
                     </Badge>
-                    <span className="text-sm font-medium text-gray-600">{item.type}</span>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300">{item.type}</span>
                   </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col items-center gap-2 p-2 rounded-lg bg-gray-50/50">
+              <div className="flex flex-col items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => handleMarkComplete()}
                   className={clsx(
-                    "hover:bg-white transition-colors rounded-lg shadow-sm",
+                    "hover:bg-white dark:hover:bg-gray-700 transition-colors rounded-lg shadow-sm",
                     {
-                      'text-green-500 hover:text-green-700': item.status !== 'completed',
-                      'text-gray-400 hover:text-gray-600': item.status === 'completed'
+                      'text-green-500 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300': item.status !== 'completed',
+                      'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400': item.status === 'completed'
                     }
                   )}
                 >
@@ -1128,7 +1128,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                   variant="ghost"
                   size="icon"
                   onClick={handleDeleteClick}
-                  className="text-red-400 hover:text-red-600 hover:bg-white transition-colors rounded-lg shadow-sm"
+                  className="text-red-400 hover:text-red-600 hover:bg-white dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-gray-700 transition-colors rounded-lg shadow-sm"
                 >
                   <Trash2 className="h-5 w-5" />
                 </Button>
@@ -1140,8 +1140,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               <div className="flex items-center justify-between">
                 {renderDuration()}
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">
+                  <Calendar className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <span className="text-sm text-gray-600 dark:text-gray-300">
                     {formatDate(item.date)}
                   </span>
                 </div>
@@ -1151,7 +1151,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         </div>
 
         {/* Timer Controls and Session Info */}
-        <div className="p-6 bg-white">
+        <div className="p-6 bg-white dark:bg-gray-800">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               {activeSession || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime) ? (
@@ -1160,7 +1160,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-2 bg-yellow-50 hover:bg-yellow-100 border-yellow-200 text-yellow-700 shadow-sm"
+                      className="gap-2 bg-yellow-50 hover:bg-yellow-100 border-yellow-200 text-yellow-700 shadow-sm dark:bg-yellow-800/30 dark:hover:bg-yellow-900/30 dark:text-yellow-300"
                       onClick={handlePauseSession}
                     >
                       <Pause className="h-4 w-4" />
@@ -1170,7 +1170,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 shadow-sm"
+                      className="gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 shadow-sm dark:bg-blue-800/30 dark:hover:bg-blue-900/30 dark:text-blue-300"
                       onClick={handleResumeSession}
                     >
                       <Play className="h-4 w-4" />
@@ -1180,7 +1180,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                   <Button
                     variant="outline"
                     size="sm"
-                    className="gap-2 bg-red-50 hover:bg-red-100 border-red-200 text-red-700 shadow-sm"
+                    className="gap-2 bg-red-50 hover:bg-red-100 border-red-200 text-red-700 shadow-sm dark:bg-red-800/30 dark:hover:bg-red-900/30 dark:text-red-300"
                     onClick={handleStopSession}
                   >
                     <StopCircle className="h-4 w-4" />
@@ -1194,7 +1194,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                       variant="default"
                       size="sm"
                       onClick={handleStartSession}
-                      className="gap-2 bg-blue-500 hover:bg-blue-600 text-white shadow-sm"
+                      className="gap-2 bg-blue-500 hover:bg-blue-600 text-white shadow-sm dark:bg-blue-600 dark:hover:bg-blue-700"
                     >
                       <Play className="h-4 w-4" />
                       Start Session
@@ -1206,7 +1206,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
             {(activeSession || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime)) && (
               <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-blue-600">
+                <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
                   {activeSession?.status === 'on_hold' || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime)
                     ? `Session Paused: ${displayTime}`
                     : `Current Session: ${displayTime}`}
@@ -1216,7 +1216,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     variant="ghost"
                     size="sm"
                     onClick={handleOpenNoteDialog}
-                    className="gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200 rounded-lg shadow-sm transition-colors"
+                    className="gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30 border border-blue-200 rounded-lg shadow-sm transition-colors"
                   >
                     <MessageSquare className="h-4 w-4" />
                     Add Note
@@ -1229,13 +1229,13 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           {/* Session History */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="text-lg font-semibold text-gray-800">Session History</h4>
+              <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Session History</h4>
               {item.progress?.sessions?.length > 1 && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowAllSessions(!showAllSessions)}
-                  className="text-blue-600 hover:text-blue-700"
+                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   {showAllSessions ? 'Show Less' : 'Show All'}
                 </Button>
@@ -1249,11 +1249,21 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         <Dialog open={showNoteDialog} onOpenChange={setShowNoteDialog}>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold text-gray-900">
+              <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 Add Session Note
               </DialogTitle>
-              <DialogDescription className="mt-2 text-gray-600">
-                Record your thoughts, progress, or any important points about this learning session.
+              <DialogDescription className="mt-2 text-gray-600 dark:text-gray-300">
+                <div className="space-y-3">
+                  <p>
+                    Record your thoughts, progress, or any important points about this learning session.
+                  </p>
+                  <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-800/30 text-amber-800 dark:text-amber-300 rounded-lg border border-amber-200 dark:border-amber-800/50">
+                    <AlertCircle className="h-5 w-5 text-amber-500 dark:text-amber-400 flex-shrink-0" />
+                    <p className="text-sm">
+                      This action cannot be undone. All sessions and progress will be permanently deleted.
+                    </p>
+                  </div>
+                </div>
               </DialogDescription>
             </DialogHeader>
             <div className="mt-4 space-y-4">
@@ -1261,7 +1271,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 value={sessionNote}
                 onChange={(e) => setSessionNote(e.target.value)}
                 placeholder="What did you learn or accomplish in this session?"
-                className="min-h-[120px] resize-none bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                className="min-h-[120px] resize-none bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-700 focus:ring-blue-500 dark:focus:ring-blue-700"
               />
               <div className="flex justify-end gap-3">
                 <Button
@@ -1273,7 +1283,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 <Button
                   variant="default"
                   onClick={handleAddNoteSubmit}
-                  className="px-4 bg-blue-600 hover:bg-blue-700 text-white gap-2"
+                  className="px-4 bg-blue-600 hover:bg-blue-700 text-white gap-2 dark:bg-blue-600 dark:hover:bg-blue-700"
                   disabled={!sessionNote.trim()}
                 >
                   <MessageSquare className="h-4 w-4" />
@@ -1288,11 +1298,15 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         <Dialog open={showEditNoteDialog} onOpenChange={setShowEditNoteDialog}>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold text-gray-900">
+              <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 Edit Note
               </DialogTitle>
-              <DialogDescription className="mt-2 text-gray-600">
-                Modify your session note below.
+              <DialogDescription className="mt-2 text-gray-600 dark:text-gray-300">
+                <div className="space-y-3">
+                  <p>
+                    Modify your session note below.
+                  </p>
+                </div>
               </DialogDescription>
             </DialogHeader>
             <div className="mt-4 space-y-4">
@@ -1300,7 +1314,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 value={editingNote?.content || ''}
                 onChange={(e) => setEditingNote(prev => prev ? { ...prev, content: e.target.value } : null)}
                 placeholder="Edit your note..."
-                className="min-h-[120px] resize-none bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                className="min-h-[120px] resize-none bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-700 focus:ring-blue-500 dark:focus:ring-blue-700"
               />
               <div className="flex justify-end gap-3">
                 <Button
@@ -1309,14 +1323,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     setShowEditNoteDialog(false);
                     setEditingNote(null);
                   }}
-                  className="px-4 hover:bg-gray-50"
+                  className="px-4 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </Button>
                 <Button
                   variant="default"
                   onClick={handleEditNote}
-                  className="px-4 bg-blue-600 hover:bg-blue-700 text-white gap-2"
+                  className="px-4 bg-blue-600 hover:bg-blue-700 text-white gap-2 dark:bg-blue-600 dark:hover:bg-blue-700"
                   disabled={!editingNote?.content.trim()}
                 >
                   <Pencil className="h-4 w-4" />
@@ -1329,18 +1343,18 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
         {/* Delete Confirmation Dialog */}
         <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <DialogContent className="sm:max-w-md bg-background">
+          <DialogContent className="sm:max-w-md bg-background dark:bg-gray-800">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold text-foreground">
+              <DialogTitle className="text-xl font-semibold text-foreground dark:text-gray-100">
                 Delete Learning Item
               </DialogTitle>
-              <DialogDescription className="mt-3 text-muted-foreground">
+              <DialogDescription className="mt-3 text-muted-foreground dark:text-gray-300">
                 <div className="space-y-3">
                   <p>
-                    Are you sure you want to delete <span className="font-medium text-foreground">"{item.title}"</span>?
+                    Are you sure you want to delete <span className="font-medium text-foreground dark:text-gray-100">"{item.title}"</span>?
                   </p>
-                  <div className="flex items-center gap-2 p-3 bg-amber-50 text-amber-800 rounded-lg border border-amber-200">
-                    <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0" />
+                  <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-800/30 text-amber-800 dark:text-amber-300 rounded-lg border border-amber-200 dark:border-amber-800/50">
+                    <AlertCircle className="h-5 w-5 text-amber-500 dark:text-amber-400 flex-shrink-0" />
                     <p className="text-sm">
                       This action cannot be undone. All sessions and progress will be permanently deleted.
                     </p>
