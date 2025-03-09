@@ -239,6 +239,11 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
           console.log('No pause markers but paused internally, resuming');
           setInternalPaused(false);
         }
+        
+        // Update the last update time to prevent session from being marked as stale
+        if (isActive && startTime) {
+          localStorage.setItem(`sessionLastUpdate_${itemId}`, Date.now().toString());
+        }
       }
     };
     
@@ -250,7 +255,31 @@ export const useSessionTimer = ({ isActive, startTime, externalPaused = false, i
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [internalPaused, itemId]);
+  }, [internalPaused, itemId, isActive, startTime]);
+  
+  // Handle browser refresh/navigation events
+  useEffect(() => {
+    if (!isActive || !startTime) return;
+    
+    const handleBeforeUnload = () => {
+      // If we're active and not paused, save the current state
+      if (!internalPaused) {
+        // Store the current time
+        const currentElapsed = calculateElapsedTime();
+        localStorage.setItem(`sessionFrozenTime_${itemId}`, Math.max(0, currentElapsed).toString());
+        localStorage.setItem(`sessionLastUpdate_${itemId}`, Date.now().toString());
+        
+        // We don't want to pause the session when the user refreshes or navigates away
+        // This ensures the session continues running when they return
+      }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isActive, startTime, internalPaused, itemId, calculateElapsedTime]);
   
   // Handle resuming a session
   const handleResume = useCallback(() => {

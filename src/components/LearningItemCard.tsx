@@ -173,8 +173,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         const lastUpdate = lastUpdateStr ? parseInt(lastUpdateStr, 10) : null;
         const now = Date.now();
         
-        // Check if session is stale (no updates in last 5 minutes)
-        const isStaleSession = lastUpdate && (now - lastUpdate) > 5 * 60 * 1000;
+        // Check if session is stale (no updates in last 24 hours)
+        const isStaleSession = lastUpdate && (now - lastUpdate) > 24 * 60 * 60 * 1000;
         
         const isAlreadyInSessions = item.progress?.sessions?.some(
           s => s.startTime === storedSession.startTime
@@ -216,6 +216,28 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       }
     }
   }, [item.id]);
+
+  // Update the localStorage session data periodically to prevent it from being marked as stale
+  useEffect(() => {
+    if (!activeSession) return;
+    
+    // Update the session data in localStorage every minute
+    const updateInterval = setInterval(() => {
+      localStorage.setItem(`sessionLastUpdate_${item.id}`, Date.now().toString());
+      
+      // Also update the active session data
+      localStorage.setItem(`activeSession_${item.id}`, JSON.stringify({
+        ...activeSession,
+        status: isPausedState ? 'on_hold' : 'in_progress'
+      }));
+      
+      console.log('Updated session last update time:', new Date().toISOString());
+    }, 60000); // Every minute
+    
+    return () => {
+      clearInterval(updateInterval);
+    };
+  }, [activeSession, item.id, isPausedState]);
 
   // Handle session start
   const handleStartSession = useCallback(() => {
