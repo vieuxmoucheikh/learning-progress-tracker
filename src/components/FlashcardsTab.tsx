@@ -31,81 +31,62 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
     setView('manage');
   };
 
-  const handleStudyDeck = (deckId: string) => {
-    setSelectedDeckId(deckId);
-    onStudyDeck(deckId);
-    setView('study');
-  };
-
-  const handleEditDeck = (deckId: string) => {
-    setSelectedDeckId(deckId);
-    onEditDeck(deckId);
-    setView('manage');
-  };
-
   const handleBackToDecks = () => {
-    setSelectedDeckId(null);
     setView('decks');
-  };
-
-  const handleFinishStudy = () => {
-    handleBackToDecks();
+    setSelectedDeckId(null);
   };
 
   const handleManageCards = () => {
     setView('manage');
   };
 
-  if (view === 'decks' || !selectedDeckId) {
-    return (
-      <div className="w-full">
+  const handleFinishStudy = () => {
+    setView('decks');
+  };
+
+  return (
+    <div className="w-full h-full">
+      {view === 'decks' && (
         <FlashcardDecks 
           decks={flashcards}
-          onStudyDeck={handleStudyDeck}
-          onEditDeck={handleEditDeck}
+          onSelectDeck={handleSelectDeck}
+          onStudyDeck={onStudyDeck}
+          onEditDeck={onEditDeck}
           onDeleteDeck={onDeleteDeck}
           onAddDeck={onAddDeck}
         />
-      </div>
-    );
-  }
-
-  if (view === 'study') {
-    return (
-      <div className="h-full">
-        <div className="flex justify-between items-center p-4 border-b">
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleBackToDecks}
-            >
-              Back to Decks
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleManageCards}
-            >
-              Manage Cards
-            </Button>
+      )}
+      {view === 'study' && selectedDeckId && (
+        <div className="h-full">
+          <div className="flex justify-between items-center p-4 border-b">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handleBackToDecks}
+              >
+                Back to Decks
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleManageCards}
+              >
+                Manage Cards
+              </Button>
+            </div>
           </div>
+          <FlashcardStudy
+            deckId={selectedDeckId}
+            onBackToDecks={handleBackToDecks}
+            onFinish={handleFinishStudy}
+          />
         </div>
-        <FlashcardStudy
+      )}
+      {view === 'manage' && selectedDeckId && (
+        <FlashcardManager
           deckId={selectedDeckId}
           onBackToDecks={handleBackToDecks}
-          onFinish={handleFinishStudy}
         />
-      </div>
-    );
-  }
-
-  if (view === 'manage') {
-    return (
-      <FlashcardManager
-        deckId={selectedDeckId}
-        onBackToDecks={handleBackToDecks}
-      />
-    );
-  }
-
-  return null;
+      )}
+    </div>
+  );
 };

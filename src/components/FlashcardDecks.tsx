@@ -24,6 +24,7 @@ interface FlashcardDecksProps {
   onEditDeck: (deckId: string) => void;
   onDeleteDeck: (deckId: string) => void;
   onAddDeck: (data: { name: string; description: string }) => void;
+  onSelectDeck?: (deckId: string) => void;
 }
 
 export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ 
@@ -31,7 +32,8 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   onStudyDeck,
   onEditDeck,
   onDeleteDeck,
-  onAddDeck
+  onAddDeck,
+  onSelectDeck
 }) => {
   const [deckSummaries, setDeckSummaries] = useState<DeckSummary[]>([]);
   const [isCreatingDeck, setIsCreatingDeck] = useState(false);

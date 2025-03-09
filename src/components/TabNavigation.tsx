@@ -1,18 +1,14 @@
-import React, { useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { 
   ChevronRight, 
   ChevronLeft,
-  Home, 
   BarChart3, 
   Timer, 
   BookOpen, 
-  Library,
   Notebook,
   LayoutDashboard
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FlashcardsTab } from './FlashcardsTab';
-import { FlashcardDeck } from '@/types';
 import { Button } from './ui/button';
 
 // Define all available tabs
@@ -34,23 +30,13 @@ type Tab = {
 
 interface TabNavigationProps {
   activeTab: string;
-  onTabChange: (tabId: string) => void;
-  flashcards: FlashcardDeck[];
-  onAddDeck: (data: { name: string; description: string }) => void;
-  onStudyDeck: (deckId: string) => void;
-  onEditDeck: (deckId: string) => void;
-  onDeleteDeck: (deckId: string) => void;
+  onTabChange: (tab: string) => void;
 }
 
-export function TabNavigation({ 
-  activeTab, 
+export const TabNavigation: React.FC<TabNavigationProps> = ({
+  activeTab,
   onTabChange,
-  flashcards,
-  onAddDeck,
-  onStudyDeck,
-  onEditDeck,
-  onDeleteDeck
-}: TabNavigationProps) {
+}) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeTabRef = useRef<HTMLButtonElement>(null);
   
@@ -198,19 +184,6 @@ export function TabNavigation({
           </div>
         </div>
       </nav>
-      
-      {/* Content for mobile when flashcards tab is selected */}
-      <div className="md:hidden flex-1 overflow-y-auto h-[calc(100vh-80px)]">
-        {activeTab === 'flashcards' && (
-          <FlashcardsTab 
-            flashcards={flashcards}
-            onAddDeck={onAddDeck}
-            onStudyDeck={onStudyDeck}
-            onEditDeck={onEditDeck}
-            onDeleteDeck={onDeleteDeck}
-          />
-        )}
-      </div>
     </div>
   );
 }
