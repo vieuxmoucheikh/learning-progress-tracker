@@ -831,14 +831,14 @@ export default function App() {
 
               <div className="flex-1 overflow-hidden flex flex-col">
                 <main className="flex-1 overflow-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                  <div className="text-center">
-                    <p className="text-red-600 mb-4">{error}</p>
-                    <button
-                      onClick={() => window.location.reload()}
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                    >
-                      Retry
-                    </button>
+          <div className="text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Retry
+            </button>
                   </div>
                 </main>
               </div>
@@ -859,18 +859,18 @@ export default function App() {
                 Learning Dashboard
               </h1>
               <div className="flex items-center gap-3">
-                <ThemeToggle />
-                <Button
+              <ThemeToggle />
+                    <Button 
                   variant="outline"
                   size="sm"
                   className="flex items-center gap-2 border-gray-200 dark:border-gray-700"
-                  onClick={() => handleDashboardAddItem()}
-                >
+                      onClick={() => handleDashboardAddItem()} 
+                    >
                   <Plus className="h-4 w-4" /> Add Item
-                </Button>
+                    </Button>
+                </div>
               </div>
-            </div>
-          </header>
+            </header>
 
           <div className="flex flex-col md:flex-row flex-1 h-full gap-4 overflow-hidden">
             <div className="md:w-64 lg:w-72">
@@ -887,57 +887,57 @@ export default function App() {
 
             <div className="flex-1 overflow-hidden flex flex-col">
               <main className="flex-1 overflow-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                {selectedTab === TAB_OPTIONS.DASHBOARD && (
-                  <DashboardTab 
-                    items={state.items}
-                    onUpdate={handleDashboardUpdate}
-                    onDelete={handleDeleteItem}
-                    onStartTracking={handleStartTracking}
-                    onStopTracking={handleStopTracking}
-                    onNotesUpdate={handleUpdateNotes}
-                    onSessionNoteAdd={handleAddSessionNote}
-                    onSetActiveItem={handleSetActiveItem}
+              {selectedTab === TAB_OPTIONS.DASHBOARD && (
+                <DashboardTab
+                  items={state.items}
+                  onUpdate={handleDashboardUpdate}
+                  onDelete={handleDeleteItem}
+                  onStartTracking={handleStartTracking}
+                  onStopTracking={handleStopTracking}
+                  onNotesUpdate={handleUpdateNotes}
+                  onSessionNoteAdd={handleAddSessionNote}
+                  onSetActiveItem={handleSetActiveItem}
                     onAddItem={handleDashboardAddItem}
                     onDateSelect={handleDateSelect}
-                  />
-                )}
+                />
+              )}
 
-                {selectedTab === TAB_OPTIONS.ITEMS && (
-                  <ItemsTab 
-                    items={state.items}
-                    onUpdate={handleUpdateItem}
-                    onDelete={handleDeleteItem}
-                    onStartTracking={handleStartTracking}
-                    onStopTracking={handleStopTracking}
-                    onNotesUpdate={handleUpdateNotes}
-                    onSessionNoteAdd={handleAddSessionNote}
-                    onSetActiveItem={handleSetActiveItem}
+              {selectedTab === TAB_OPTIONS.ITEMS && (
+                <ItemsTab
+                  items={state.items}
+                  onUpdate={handleUpdateItem}
+                  onDelete={handleDeleteItem}
+                  onStartTracking={handleStartTracking}
+                  onStopTracking={handleStopTracking}
+                  onNotesUpdate={handleUpdateNotes}
+                  onSessionNoteAdd={handleAddSessionNote}
+                  onSetActiveItem={handleSetActiveItem}
                     onAddItem={handleItemsAddItem}
-                  />
-                )}
+                />
+              )}
 
-                {selectedTab === TAB_OPTIONS.ANALYTICS && (
-                  <AnalyticsTab items={state.items} />
-                )}
+              {selectedTab === TAB_OPTIONS.ANALYTICS && (
+                <AnalyticsTab items={state.items} />
+              )}
 
-                {selectedTab === TAB_OPTIONS.POMODORO && (
-                  <PomodoroTimer />
-                )}
+              {selectedTab === TAB_OPTIONS.POMODORO && (
+                <PomodoroTimer />
+              )}
                 
-                {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
-                  <LearningCardsPage />
-                )}
+              {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
+                <LearningCardsPage />
+              )}
 
-                {selectedTab === TAB_OPTIONS.FLASHCARDS && (
-                  <FlashcardsTab 
-                    flashcards={flashcardDecks}
-                    onAddDeck={handleAddFlashcardDeck}
-                    onStudyDeck={handleStudyFlashcardDeck}
-                    onEditDeck={handleEditFlashcardDeck}
-                    onDeleteDeck={handleDeleteFlashcardDeck}
-                  />
-                )}
-              </main>
+              {selectedTab === TAB_OPTIONS.FLASHCARDS && (
+                <FlashcardsTab 
+                  flashcards={flashcardDecks}
+                  onAddDeck={handleAddFlashcardDeck}
+                  onStudyDeck={handleStudyFlashcardDeck}
+                  onEditDeck={handleEditFlashcardDeck}
+                  onDeleteDeck={handleDeleteFlashcardDeck}
+                />
+              )}
+            </main>
             </div>
           </div>
         </div>

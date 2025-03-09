@@ -60,7 +60,7 @@ export function TabNavigation({
     { id: 'analytics', label: 'Analytics', shortLabel: 'Stats', icon: BarChart3 },
     { id: 'pomodoro', label: 'Pomodoro', shortLabel: 'Timer', icon: Timer },
     { id: 'flashcards', label: 'Flashcards', shortLabel: 'Cards', icon: BookOpen },
-    { id: 'learning_cards', label: 'Learning', shortLabel: 'Learn', icon: Notebook },
+    { id: 'learning-cards', label: 'Learning', shortLabel: 'Learn', icon: Notebook },
   ];
 
   // Scroll active tab into view when it changes
