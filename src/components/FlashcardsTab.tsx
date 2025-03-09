@@ -27,6 +27,7 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
   const [view, setView] = useState<View>('decks');
   const { toast } = useToast();
 
+  // This function is used when a deck is selected from the decks list
   const handleSelectDeck = (deckId: string) => {
     setSelectedDeckId(deckId);
     setView('manage');
@@ -57,29 +58,17 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
     setView('manage');
   };
 
-  const handleAddFlashcard = (deckId: string) => {
-    if (!deckId) {
-      toast({
-        title: "Error",
-        description: "No deck selected. Please select a deck first.",
-        variant: "destructive"
-      });
-      return;
-    }
-    // We don't need to implement this fully - it's handled by FlashcardDecks component
-    // Just making sure the deck ID is properly set
-  };
-
   if (view === 'decks' || !selectedDeckId) {
     return (
-      <FlashcardDecks 
-        decks={flashcards}
-        onSelectDeck={handleSelectDeck}
-        onStudyDeck={handleStudyDeck}
-        onEditDeck={handleEditDeck}
-        onDeleteDeck={onDeleteDeck}
-        onAddDeck={onAddDeck}
-      />
+      <div className="pb-60 overflow-y-auto h-full" style={{ paddingBottom: '80vh' }}>
+        <FlashcardDecks 
+          decks={flashcards}
+          onStudyDeck={handleStudyDeck}
+          onEditDeck={handleEditDeck}
+          onDeleteDeck={onDeleteDeck}
+          onAddDeck={onAddDeck}
+        />
+      </div>
     );
   }
 
