@@ -204,7 +204,7 @@ export function DashboardTab({
       <div className="md:hidden">
         <div className="flex flex-col space-y-3">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold">Today's Focus</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Today's Focus</h2>
             <Button 
               size="sm" 
               onClick={() => onAddItem(selectedDate)}
@@ -216,19 +216,19 @@ export function DashboardTab({
           
           <div className="grid grid-cols-2 gap-2">
             <Button 
-              variant="outline" 
+              variant="default" 
               size="sm"
-              className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700"
+              className="flex justify-center items-center gap-1.5 h-10 bg-blue-600 hover:bg-blue-700 text-white"
               onClick={() => setShowCalendar(true)}
             >
-              <CalendarIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <CalendarIcon className="h-4 w-4 text-white" />
               <span className="text-xs font-medium">Calendar</span>
             </Button>
             
             <Button 
               variant="outline" 
               size="sm"
-              className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700"
+              className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
               onClick={() => setShowGoals(true)}
             >
               <Target className="h-4 w-4 text-green-600 dark:text-green-400" />
@@ -415,23 +415,25 @@ export function DashboardTab({
 
       {/* Mobile Calendar Dialog */}
       <Dialog open={showCalendar} onOpenChange={setShowCalendar}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle>Calendar</DialogTitle>
+            <DialogTitle className="text-gray-900 dark:text-white">Calendar</DialogTitle>
           </DialogHeader>
-          <Calendar 
-            items={items}
-            onDateSelect={(date) => {
-              setSelectedDate(date);
-              onDateSelect(date);
-              setShowCalendar(false);
-            }}
-            selectedDate={selectedDate}
-            onAddItem={() => {
-              onAddItem(selectedDate);
-              setShowCalendar(false);
-            }}
-          />
+          <div className="max-h-[70vh] overflow-auto">
+            <Calendar 
+              items={items}
+              onDateSelect={(date) => {
+                setSelectedDate(date);
+                onDateSelect(date);
+                setShowCalendar(false);
+              }}
+              selectedDate={selectedDate}
+              onAddItem={() => {
+                onAddItem(selectedDate);
+                setShowCalendar(false);
+              }}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 

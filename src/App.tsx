@@ -310,8 +310,36 @@ export default function App() {
       @media (max-width: 768px) {
         body:not(.dark) .bg-gray-50, 
         body:not(.dark) .bg-gray-100,
-        body:not(.dark) .bg-gray-200 {
+        body:not(.dark) .bg-gray-200,
+        body:not(.dark) [class*="bg-gray-"] {
           background-color: #ffffff !important;
+        }
+        
+        /* Fix text visibility in light mode */
+        body:not(.dark) h1, 
+        body:not(.dark) h2, 
+        body:not(.dark) h3, 
+        body:not(.dark) p, 
+        body:not(.dark) span,
+        body:not(.dark) div {
+          color: #0f172a !important;
+        }
+        
+        /* Exception for text that should remain white (like on buttons) */
+        body:not(.dark) [class*="bg-blue-"] *, 
+        body:not(.dark) [class*="bg-indigo-"] *,
+        body:not(.dark) [class*="bg-purple-"] *,
+        body:not(.dark) [class*="bg-green-"] *,
+        body:not(.dark) .text-white {
+          color: #ffffff !important;
+        }
+        
+        /* Fix card backgrounds */
+        body:not(.dark) .card,
+        body:not(.dark) [class*="card"],
+        body:not(.dark) [role="dialog"] {
+          background-color: #ffffff !important;
+          border-color: #e5e7eb !important;
         }
       }
     `;
