@@ -3,6 +3,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  background-color: #2563eb; /* Couleur bleue plus foncée (blue-600) */
 }
 
 .tab-navigation-items {
@@ -33,7 +34,7 @@
     min-height: 100vh;
     padding: 1rem 0;
     width: 100%;
-    background-color: #3b82f6; /* Couleur bleue restaurée (blue-500) */
+    background-color: #1e40af; /* Couleur bleue encore plus foncée (blue-800) */
   }
   
   .tab-navigation-items {
