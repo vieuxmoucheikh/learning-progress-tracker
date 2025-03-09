@@ -29,9 +29,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
 import { 
   Clock, 
@@ -82,11 +80,10 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   const [isAddingFlashcard, setIsAddingFlashcard] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [deckFormData, setDeckFormData] = useState({ name: '', description: '' });
-  const [flashcardFormData, setFlashcardFormData] = useState({ front: '', back: '' });
   const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
   const [deckSummariesState, setDeckSummaries] = useState<DeckSummary[]>([]);
   const [localDecks, setLocalDecks] = useState<FlashcardDeck[]>([]);
-  const [editingDeckId, setEditingDeckId] = useState<string | null>(null);
+  const [isEditingDeck, setIsEditingDeck] = useState(false);
   
   // Initialize local decks from props
   useEffect(() => {
@@ -190,9 +187,9 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     }
   }, [localDecks]);
   
-  // Get deck summary from deckSummaries prop or calculate it
-  const getDeckSummary = (deckId: string) => {
-    // First check if we have a summary from the deckSummaries prop
+  // Get deck summary from props or local state
+  const getDeckSummary = (deckId: string): DeckSummary => {
+    // First, try to find the summary from the props
     const summaryFromProps = deckSummaries.find(s => s.deckId === deckId);
     if (summaryFromProps) {
       return {
@@ -200,31 +197,32 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         total: summaryFromProps.total || 0,
         dueToday: summaryFromProps.dueToday || 0,
         reviewStatus: summaryFromProps.reviewStatus || 'not-started',
-        lastStudied: summaryFromProps.lastStudied || null,
-        nextDue: summaryFromProps.nextDue || null
+        lastStudied: summaryFromProps.lastStudied,
+        nextDue: summaryFromProps.nextDue
       };
     }
 
-    // Fallback to the existing deck summary calculation
-    const deck = localDecks.find(d => d.id === deckId);
-    if (!deck || !deck.summary) {
+    // If not found in props, try to find in local state
+    const summaryFromState = deckSummariesState.find(s => s.deckId === deckId);
+    if (summaryFromState) {
       return {
-        deckId,
-        total: 0,
-        dueToday: 0,
-        reviewStatus: 'not-started',
-        lastStudied: null,
-        nextDue: null
+        deckId: summaryFromState.deckId,
+        total: summaryFromState.total || 0,
+        dueToday: summaryFromState.dueToday || 0,
+        reviewStatus: summaryFromState.reviewStatus || 'not-started',
+        lastStudied: summaryFromState.lastStudied,
+        nextDue: summaryFromState.nextDue
       };
     }
-    
+
+    // If not found anywhere, return default values
     return {
       deckId,
-      total: deck.summary.total || 0,
-      dueToday: deck.summary.dueToday || 0,
-      reviewStatus: deck.summary.reviewStatus || 'not-started',
-      lastStudied: deck.summary.lastStudied || null,
-      nextDue: deck.summary.nextDue || null
+      total: 0,
+      dueToday: 0,
+      reviewStatus: 'not-started',
+      lastStudied: null,
+      nextDue: null
     };
   };
 
@@ -241,8 +239,8 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     setIsLoading(true);
     
     // If we're editing an existing deck
-    if (editingDeckId) {
-      const deckToEdit = localDecks.find(d => d.id === editingDeckId);
+    if (selectedDeckId) {
+      const deckToEdit = localDecks.find(d => d.id === selectedDeckId);
       if (deckToEdit) {
         // Update the deck in the local state first for immediate feedback
         const updatedDeck = {
@@ -252,10 +250,10 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         };
         
         // Update the deck object in the localDecks state
-        setLocalDecks(prev => prev.map(d => d.id === editingDeckId ? updatedDeck : d));
+        setLocalDecks(prev => prev.map(d => d.id === selectedDeckId ? updatedDeck : d));
         
         // Call the parent component's edit handler with the deck ID and updated data
-        onEditDeck(editingDeckId, {
+        onEditDeck(selectedDeckId, {
           name: deckFormData.name.trim(),
           description: deckFormData.description.trim()
         });
@@ -263,7 +261,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         // Reset form and state
         setDeckFormData({ name: '', description: '' });
         setIsCreatingDeck(false);
-        setEditingDeckId(null);
+        setSelectedDeckId(null);
         setIsLoading(false);
         
         toast({
@@ -297,35 +295,23 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     setIsLoading(false);
   };
 
-  const handleEditDeckClick = (deckId: string) => {
+  const handleEditDeck = (deckId: string) => {
     const deck = localDecks.find(d => d.id === deckId);
     if (deck) {
       setDeckFormData({
         name: deck.name,
         description: deck.description || ''
       });
-      setEditingDeckId(deckId);
-      setIsCreatingDeck(true);
+      setSelectedDeckId(deckId);
+      setIsEditingDeck(true);
     }
   };
 
-  const DeckCard = ({ deck }: { deck: FlashcardDeck }) => {
+  const renderDeckCard = (deck: FlashcardDeck) => {
     const summary = getDeckSummary(deck.id);
     
-    const handleEditDeckClick = (deckId: string) => {
-      const deckToEdit = localDecks.find(d => d.id === deckId);
-      if (deckToEdit) {
-        setDeckFormData({
-          name: deckToEdit.name,
-          description: deckToEdit.description || ''
-        });
-        setEditingDeckId(deckId);
-        setIsCreatingDeck(true);
-      }
-    };
-
     return (
-      <Card key={deck.id} className="overflow-hidden border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all w-full">
+      <Card key={deck.id} className="overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all w-full bg-white dark:bg-gray-800/90">
         <CardHeader className="pb-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/20">
           <div className="flex justify-between items-start">
             <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 break-words">{deck.name}</CardTitle>
@@ -364,50 +350,50 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           <CardDescription className="line-clamp-2 text-gray-600 dark:text-gray-400">{deck.description || 'No description provided'}</CardDescription>
         </CardHeader>
         <CardContent className="pt-4">
-          <div className="grid grid-cols-2 gap-2 mb-4">
-            <div className="flex flex-col items-center justify-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <p className="text-xs text-blue-700 dark:text-blue-400 font-medium">Total Cards</p>
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{summary.total}</p>
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="flex flex-col items-center justify-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 rounded-lg border border-blue-200 dark:border-blue-800/50 shadow-sm">
+              <p className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">Total Cards</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{summary.total}</p>
             </div>
-            <div className="flex flex-col items-center justify-center p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-              <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">Due Today</p>
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{summary.dueToday}</p>
+            <div className="flex flex-col items-center justify-center p-3 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/20 rounded-lg border border-amber-200 dark:border-amber-800/50 shadow-sm">
+              <p className="text-xs text-amber-700 dark:text-amber-300 font-medium mb-1">Due Today</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{summary.dueToday}</p>
             </div>
           </div>
           
-          <div className="flex flex-wrap gap-1 mb-3">
+          <div className="flex flex-wrap gap-2 mb-3">
             {summary.reviewStatus && (
-              <Badge variant={getReviewStatusBadge(summary.reviewStatus)} className="text-xs">
+              <Badge variant={getReviewStatusBadge(summary.reviewStatus)} className="text-xs px-2 py-1 rounded-md">
                 {formatReviewStatus(summary.reviewStatus)}
               </Badge>
             )}
             {summary.nextDue && (
-              <Badge variant="outline" className="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Badge variant="outline" className="text-xs px-2 py-1 text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/70 border-gray-200 dark:border-gray-700 rounded-md">
                 <Clock className="w-3 h-3 mr-1" />
-                Next review: {new Date(summary.nextDue).toLocaleDateString()}
+                Next: {new Date(summary.nextDue).toLocaleDateString()}
               </Badge>
             )}
             {summary.lastStudied && (
-              <Badge variant="outline" className="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Badge variant="outline" className="text-xs px-2 py-1 text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/70 border-gray-200 dark:border-gray-700 rounded-md">
                 <Clock className="w-3 h-3 mr-1" />
-                Last studied: {new Date(summary.lastStudied).toLocaleDateString()}
+                Last: {new Date(summary.lastStudied).toLocaleDateString()}
               </Badge>
             )}
           </div>
         </CardContent>
-        <CardFooter className="pt-0 flex gap-2 flex-wrap">
+        <CardFooter className="pt-0 flex gap-2 flex-wrap bg-gradient-to-b from-transparent to-gray-50 dark:to-gray-800/30">
           <Button 
             variant="outline" 
             size="sm"
-            className="flex-1 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
-            onClick={() => handleEditDeckClick(deck.id)}
+            className="flex-1 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+            onClick={() => handleEditDeck(deck.id)}
           >
             <Edit className="w-3.5 h-3.5 mr-1.5" /> Edit
           </Button>
           <Button 
             variant="outline" 
             size="sm"
-            className="flex-1 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
+            className="flex-1 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
             onClick={() => onSelectDeck && onSelectDeck(deck.id)}
           >
             <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Card
@@ -415,7 +401,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           <Button 
             variant="default" 
             size="sm"
-            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-600 text-white"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm hover:shadow-md transition-all"
             onClick={() => onStudyDeck(deck.id)}
           >
             <Play className="w-3.5 h-3.5 mr-1.5" /> Study
@@ -482,204 +468,132 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     }, 1000);
   };
 
-  const handleAddFlashcardSubmit = async () => {
-    if (!flashcardFormData.front.trim() || !flashcardFormData.back.trim()) {
-      toast({
-        title: "Error",
-        description: "Please fill in both front and back of the flashcard",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!selectedDeckId) {
-      toast({
-        title: "Error",
-        description: "Please select a deck",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    
-    try {
-      // Add flashcard to the database using raw SQL
-      const { data, error } = await supabase
-        .from('flashcards')
-        .insert({
-          deck_id: selectedDeckId,
-          front_content: flashcardFormData.front.trim(),
-          back_content: flashcardFormData.back.trim(),
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single();
-      
-      if (error) throw error;
-      
-      // Reset form state
-      setFlashcardFormData({ front: '', back: '' });
-      setIsAddingFlashcard(false);
-      setSelectedDeckId(null);
-      
-      toast({
-        title: "Success",
-        description: "Flashcard added successfully",
-      });
-      
-      // Refresh deck summaries using the same function as in the useEffect
-      const fetchDeckSummaries = async () => {
-        try {
-          // For each deck, fetch its cards and calculate summaries
-          const summaries = await Promise.all(
-            localDecks.map(async (deck) => {
-              // Use raw SQL to get all cards for this deck with their review status
-              const { data: cards, error } = await supabase
-                .from('flashcards')
-                .select('*')
-                .eq('deck_id', deck.id);
-              
-              if (error) throw error;
-              
-              // Calculate metrics
-              const total = cards?.length || 0;
-              
-              // Get cards due today - use UTC date to ensure consistency across timezones
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
-              
-              // Filter cards that are due today or earlier
-              const dueCards = cards?.filter(card => {
-                if (!card.next_review_date) return true; // Cards without a review date are always due
-                const nextReview = new Date(card.next_review_date);
-                return nextReview <= today;
-              }) || [];
-              
-              // Get last studied date - find the most recent review date across all cards
-              const lastStudied = cards?.reduce((latest, card) => {
-                if (!card.last_reviewed) return latest;
-                const reviewDate = new Date(card.last_reviewed);
-                return !latest || reviewDate > latest ? reviewDate : latest;
-              }, null as Date | null);
-              
-              // Determine review status based on due cards and their review dates
-              let reviewStatus: 'up-to-date' | 'due-soon' | 'overdue' | 'not-started' = 'up-to-date';
-              
-              if (total === 0) {
-                reviewStatus = 'not-started';
-              } else if (dueCards.length > 0) {
-                reviewStatus = 'due-soon';
-                
-                // Check if any cards are overdue by more than 3 days
-                const threeDaysAgo = new Date();
-                threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-                
-                const overdueCards = dueCards.filter(card => {
-                  if (!card.next_review_date) return false; // Skip cards without a review date
-                  const nextReview = new Date(card.next_review_date);
-                  return nextReview < threeDaysAgo;
-                });
-                
-                if (overdueCards.length > 0) {
-                  reviewStatus = 'overdue';
-                }
-              }
-              
-              // Get next due date - find the earliest review date across all cards
-              const nextDue = cards?.reduce((earliest, card) => {
-                if (!card.next_review_date) return earliest;
-                const nextReview = new Date(card.next_review_date);
-                return !earliest || nextReview < earliest ? nextReview : earliest;
-              }, null as Date | null);
-              
-              return {
-                deckId: deck.id,
-                total,
-                dueToday: dueCards.length,
-                reviewStatus,
-                lastStudied: lastStudied ? lastStudied.toISOString() : undefined,
-                nextDue: nextDue ? nextDue.toISOString() : undefined
-              };
-            })
-          );
-          
-          setDeckSummaries(summaries);
-        } catch (error) {
-          console.error('Error fetching deck summaries:', error);
-        }
-      };
-      
-      fetchDeckSummaries();
-      
-    } catch (error) {
-      console.error('Error adding flashcard:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add flashcard",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="w-full max-w-full">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h2 className="text-2xl font-bold tracking-tight">Your Flashcard Decks</h2>
-        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <Library className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          Flashcards
+        </h2>
+        <div className="flex gap-2">
           <Button 
-            onClick={() => setIsAddingFlashcard(true)} 
-            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-600 shadow-md hover:shadow-lg transition-all"
-            disabled={isLoading}
-            size="sm"
-          >
-            <PlusCircle className="w-4 h-4 mr-1.5" /> Add Card
-          </Button>
-          <Button 
-            onClick={() => setIsCreatingDeck(true)}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-600 shadow-md"
-            disabled={isLoading}
-            size="sm"
-          >
-            <Library className="w-4 h-4 mr-1.5" /> Create Deck
-          </Button>
-          <Button
+            variant="outline" 
+            size="sm" 
             onClick={syncData}
-            variant="outline"
-            size="sm"
-            className="ml-auto sm:ml-0"
             disabled={isLoading}
+            className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
           >
-            <RefreshCw className={`w-4 h-4 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
-            {isLoading ? 'Syncing...' : 'Sync'}
+            <RefreshCw className="w-4 h-4 mr-1.5" />
+            Refresh
+          </Button>
+          <Button 
+            variant="default" 
+            size="sm" 
+            onClick={() => {
+              setDeckFormData({ name: '', description: '' });
+              setSelectedDeckId(null);
+              setIsCreatingDeck(true);
+            }}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm hover:shadow-md transition-all"
+          >
+            <PlusCircle className="w-4 h-4 mr-1.5" />
+            Create Deck
           </Button>
         </div>
       </div>
 
+      {/* Create/Edit Deck Dialog */}
+      <Dialog open={isCreatingDeck} onOpenChange={setIsCreatingDeck}>
+        <DialogContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+          <DialogHeader>
+            <DialogTitle>{selectedDeckId ? 'Edit Deck' : 'Create New Deck'}</DialogTitle>
+            <DialogDescription>
+              {selectedDeckId ? 'Update your flashcard deck details.' : 'Create a new flashcard deck to organize your learning.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <label htmlFor="deck-name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Deck Name
+              </label>
+              <Input
+                id="deck-name"
+                value={deckFormData.name}
+                onChange={(e) => setDeckFormData({ ...deckFormData, name: e.target.value })}
+                placeholder="Enter deck name"
+                className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="deck-description" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Description (optional)
+              </label>
+              <Textarea
+                id="deck-description"
+                value={deckFormData.description}
+                onChange={(e) => setDeckFormData({ ...deckFormData, description: e.target.value })}
+                placeholder="Enter deck description"
+                className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 min-h-[100px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setDeckFormData({ name: '', description: '' });
+                setSelectedDeckId(null);
+                setIsCreatingDeck(false);
+              }}
+              className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleCreateDeckSubmit} 
+              disabled={isLoading || !deckFormData.name.trim()}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm hover:shadow-md transition-all"
+            >
+              {isLoading ? 'Saving...' : selectedDeckId ? 'Update Deck' : 'Create Deck'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Review Alert Messages */}
       <div className="space-y-4 mb-6">
         {hasDueCards && (
-          <div className="bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800 animate-fadeIn p-4 rounded-lg">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+          <div className="bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/20 border border-amber-200 dark:border-amber-800/50 shadow-sm p-4 rounded-lg transition-all hover:shadow-md">
+            <div className="flex items-center gap-3">
+              <div className="bg-amber-200 dark:bg-amber-700 rounded-full p-2 flex-shrink-0">
+                <Clock className="h-5 w-5 text-amber-700 dark:text-amber-200" />
+              </div>
               <div>
-                <h3 className="text-lg font-medium text-amber-800 dark:text-amber-300">Cards Due for Review</h3>
-                <p className="text-sm text-amber-700 dark:text-amber-400">You have {getTotalDueCards()} cards that need to be reviewed today.</p>
+                <h3 className="text-lg font-medium text-amber-800 dark:text-amber-200">Cards Due for Review</h3>
+                {getTotalDueCards() === 1 ? (
+                  <p className="text-sm text-amber-700 dark:text-amber-300">You have 1 card that needs to be reviewed today.</p>
+                ) : (
+                  <p className="text-sm text-amber-700 dark:text-amber-300">You have {getTotalDueCards()} cards that need to be reviewed today.</p>
+                )}
               </div>
             </div>
           </div>
         )}
         
         {hasNewCards && (
-          <div className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 animate-fadeIn p-4 rounded-lg">
-            <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+          <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800/50 shadow-sm p-4 rounded-lg transition-all hover:shadow-md">
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-200 dark:bg-blue-700 rounded-full p-2 flex-shrink-0">
+                <Star className="h-5 w-5 text-blue-700 dark:text-blue-200" />
+              </div>
               <div>
-                <h3 className="text-lg font-medium text-blue-800 dark:text-blue-300">New Cards Available</h3>
-                <p className="text-sm text-blue-700 dark:text-blue-400">You have {getTotalNotStartedCards()} new cards to start learning.</p>
+                <h3 className="text-lg font-medium text-blue-800 dark:text-blue-200">New Cards Available</h3>
+                {getTotalNotStartedCards() === 1 ? (
+                  <p className="text-sm text-blue-700 dark:text-blue-300">You have 1 new card to start learning.</p>
+                ) : (
+                  <p className="text-sm text-blue-700 dark:text-blue-300">You have {getTotalNotStartedCards()} new cards to start learning.</p>
+                )}
               </div>
             </div>
           </div>
@@ -688,249 +602,17 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
 
       <div className="border-b pb-1 mb-4">
         <h3 className="text-xl font-semibold flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+          <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           Your Flashcard Decks
         </h3>
       </div>
 
-      {/* Decks Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full mb-8">
-        {localDecks.length === 0 ? (
-          <div className="col-span-full flex flex-col items-center justify-center py-10 px-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
-            <Library className="w-12 h-12 text-gray-400 dark:text-gray-500 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No flashcard decks yet</h3>
-            <p className="text-gray-500 dark:text-gray-400 text-center mb-4">Create your first flashcard deck to start learning</p>
-            <Button 
-              onClick={() => setIsCreatingDeck(true)} 
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-600 shadow-md"
-            >
-              <Plus className="w-4 h-4 mr-2" /> Create Deck
-            </Button>
-          </div>
-        ) : (
-          localDecks.map((deck) => {
-            const summary = getDeckSummary(deck.id) || {
-              deckId: deck.id,
-              total: 0,
-              dueToday: 0,
-              reviewStatus: 'not-started',
-              lastStudied: undefined,
-              nextDue: undefined
-            };
-            
-            return (
-              <DeckCard key={deck.id} deck={deck} />
-            );
-          })
-        )}
+      {/* Deck Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+        {localDecks.map(deck => renderDeckCard(deck))}
       </div>
-      
-      {/* Create New Deck Card */}
-      {localDecks.length > 0 && (
-        <div className="mt-4">
-          <Card 
-            onClick={() => !isLoading && setIsCreatingDeck(true)}
-            className={`border-dashed cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors flex flex-col items-center justify-center py-10 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-full mb-3">
-              <PlusCircle className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <p className="text-lg font-semibold text-gray-600 dark:text-gray-400">Create New Deck</p>
-            <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">Organize your flashcards by topics</p>
-          </Card>
-        </div>
-      )}
-
-      {localDecks.length === 0 && (
-        <div className="text-center p-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md mt-4">
-          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-full inline-block mb-4">
-            <BookOpen className="w-12 h-12 text-blue-500 dark:text-blue-400" />
-          </div>
-          <h3 className="text-xl font-medium mb-2">No flashcard decks yet</h3>
-          <p className="text-gray-500 dark:text-gray-400 text-center mb-4">Create your first deck to start learning</p>
-          <Button 
-            onClick={() => setIsCreatingDeck(true)}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-600 shadow-md"
-            disabled={isLoading}
-          >
-            <Plus className="w-4 h-4 mr-2" /> Create Your First Deck
-          </Button>
-        </div>
-      )}
-
-      {/* Create Deck Dialog */}
-      <Dialog open={isCreatingDeck} onOpenChange={setIsCreatingDeck}>
-        <DialogContent className="sm:max-w-md max-h-[70vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Create New Deck</DialogTitle>
-            <DialogDescription>
-              Create a new flashcard deck to organize your learning materials.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Deck Name
-              </label>
-              <Input
-                id="name"
-                placeholder="Enter deck name"
-                value={deckFormData.name}
-                onChange={(e) => setDeckFormData({ ...deckFormData, name: e.target.value })}
-                className="w-full"
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="description" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Description (optional)
-              </label>
-              <Textarea
-                id="description"
-                placeholder="Enter a description for your deck"
-                value={deckFormData.description}
-                onChange={(e) => setDeckFormData({ ...deckFormData, description: e.target.value })}
-                className="w-full min-h-[100px]"
-              />
-            </div>
-          </div>
-          <div className="flex justify-end gap-2 mt-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setDeckFormData({ name: '', description: '' });
-                setIsCreatingDeck(false);
-              }}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCreateDeckSubmit}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-600 shadow-md"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Creating...' : 'Create Deck'}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Add Flashcard Dialog */}
-      <Dialog open={isAddingFlashcard} onOpenChange={setIsAddingFlashcard}>
-        <DialogContent className="sm:max-w-md max-h-[70vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add New Flashcard</DialogTitle>
-            <DialogDescription>
-              Create a new flashcard to add to your deck.
-            </DialogDescription>
-          </DialogHeader>
-          
-          {localDecks.length > 0 ? (
-            <div className="space-y-4">
-              {!selectedDeckId && (
-                <div>
-                  <label className="block text-sm font-medium mb-2">Select Deck</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {localDecks.map(deck => (
-                      <Button 
-                        key={deck.id}
-                        variant="outline"
-                        className={`justify-start px-3 py-6 h-auto text-left ${selectedDeckId === deck.id ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700'}`}
-                        onClick={() => setSelectedDeckId(deck.id)}
-                        disabled={isLoading}
-                      >
-                        <div className="flex flex-col items-start">
-                          <p className="font-medium">{deck.name}</p>
-                          <p className="text-xs text-gray-500 line-clamp-1">{deck.description}</p>
-                        </div>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {selectedDeckId && (
-                <>
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <label htmlFor="front" className="block text-sm font-medium">Front (Question)</label>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-6 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20" 
-                        onClick={() => setSelectedDeckId(null)}
-                        disabled={isLoading}
-                      >
-                        Change Deck
-                      </Button>
-                    </div>
-                    <Textarea
-                      id="front"
-                      placeholder="Enter the question or concept"
-                      className="min-h-[100px] bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-                      value={flashcardFormData.front}
-                      onChange={(e) => setFlashcardFormData(prev => ({ ...prev, front: e.target.value }))}
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="back" className="block text-sm font-medium mb-1">Back (Answer)</label>
-                    <Textarea
-                      id="back"
-                      placeholder="Enter the answer or explanation"
-                      className="min-h-[100px] bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-                      value={flashcardFormData.back}
-                      onChange={(e) => setFlashcardFormData(prev => ({ ...prev, back: e.target.value }))}
-                      disabled={isLoading}
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-          ) : (
-            <div className="text-center py-6">
-              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-full inline-block mb-3">
-                <Library className="w-6 h-6 text-blue-500 dark:text-blue-400" />
-              </div>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">You need to create a deck first to add flashcards</p>
-              <Button 
-                onClick={() => {
-                  setIsAddingFlashcard(false);
-                  setIsCreatingDeck(true);
-                }}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-600 shadow-md"
-                disabled={isLoading}
-              >
-                Create a Deck First
-              </Button>
-            </div>
-          )}
-          
-          <div className="flex justify-end space-x-2 mt-4">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setIsAddingFlashcard(false);
-                setSelectedDeckId(null);
-                setFlashcardFormData({ front: '', back: '' });
-              }}
-              className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700"
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button 
-              disabled={!selectedDeckId || isLoading}
-              onClick={handleAddFlashcardSubmit}
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-600 text-white shadow-md"
-            >
-              Add Flashcard
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
 
-export default FlashcardDecks;
+export default FlashcardDecks; 
