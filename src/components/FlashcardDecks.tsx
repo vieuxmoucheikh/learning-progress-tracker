@@ -326,7 +326,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   };
 
   return (
-    <div className="space-y-6 pb-32 w-full max-w-full overflow-x-hidden min-h-screen">
+    <div className="space-y-6 pb-40 w-full max-w-full overflow-x-hidden min-h-screen mb-24 relative">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h2 className="text-2xl font-bold tracking-tight">Your Flashcard Decks</h2>
@@ -460,7 +460,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
 
       {/* Create Deck Dialog */}
       <Dialog open={isCreatingDeck} onOpenChange={setIsCreatingDeck}>
-        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Deck</DialogTitle>
             <DialogDescription>
@@ -517,7 +517,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
 
       {/* Add Flashcard Dialog */}
       <Dialog open={isAddingFlashcard} onOpenChange={setIsAddingFlashcard}>
-        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Flashcard</DialogTitle>
             <DialogDescription>
@@ -629,6 +629,9 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Spacer for mobile scrolling */}
+      <div className="h-24 w-full" aria-hidden="true"></div>
     </div>
   );
 };
