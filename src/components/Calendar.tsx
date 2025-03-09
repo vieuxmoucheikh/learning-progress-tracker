@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { LearningItem } from '../types';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CheckCircle2, Clock, Info, ChevronDown, Plus } from 'lucide-react';
+import { Clock, Info, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -228,6 +228,7 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
       if (isNaN(selectedDate.getTime())) return;
       
       setSelectedDay(selectedDate);
+      setHoveredDay(null); // Clear any hover state on selection
       onDateSelect(selectedDate, day.activities.activeItems, day.activities.completedTasks);
     } catch (e) {
       console.error('Error handling date selection:', e);
@@ -300,8 +301,16 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
     return (
       <div 
         className={`relative w-full h-full p-2 ${getActivityColor(day)} rounded-lg transition-colors`}
-        onMouseEnter={(e) => setHoveredDay(day)}
+        onMouseEnter={(e) => handleDayHover(day, e)}
         onMouseLeave={() => setHoveredDay(null)}
+        onTouchStart={(e) => {
+          // For touch devices, show tooltip on touch start
+          handleDayHover(day, e as unknown as React.MouseEvent);
+        }}
+        onTouchEnd={() => {
+          // Clear hover state after a short delay to allow tooltip viewing
+          setTimeout(() => setHoveredDay(null), 1500);
+        }}
       >
         <div className="text-sm">{day.date.getDate()}</div>
         <div className="absolute bottom-1 right-1 flex items-center space-x-1">
@@ -561,11 +570,12 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
                   transition={{ duration: 0.2 }}
                   onClick={() => handleDateSelect(day)}
                   className={cn(
-                    "aspect-square p-1 relative focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg transition-all",
+                    "aspect-square p-1 relative focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg transition-all z-10",
                     selectedDay && isSelectedDate(day)
                       ? 'ring-2 ring-blue-500'
                       : ''
                   )}
+                  style={{ touchAction: "manipulation" }}
                 >
                   {getDayContent(day)}
                 </motion.button>
@@ -580,7 +590,7 @@ const Calendar: React.FC<Props> = ({ items, onDateSelect, selectedDate: external
                      hoveredDay.activities.completedTasks.length > 0 ||
                      hoveredDay.activities.archivedItems.length > 0) && (
         <div 
-          className="fixed z-50 bg-white shadow-lg rounded-lg p-3 w-64 border transform -translate-x-full"
+          className="fixed z-40 bg-white shadow-lg rounded-lg p-3 w-64 border transform -translate-x-full"
           style={{
             left: `${tooltipPosition.x}px`,
             top: `${tooltipPosition.y}px`,
