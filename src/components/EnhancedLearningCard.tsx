@@ -72,6 +72,7 @@ import {
 } from "@/components/ui/select";
 import { getLearningItems, trackLearningActivity, updateLearningItem } from '@/lib/database';
 import { Calendar } from '@/components/ui/calendar';
+import './LearningItemCard.css'; // Nous réutilisons le même fichier CSS
 
 interface EnhancedLearningCardProps extends CardType {
   onSave: (data: Partial<CardType>) => Promise<boolean>;

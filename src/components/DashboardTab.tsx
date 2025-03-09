@@ -11,6 +11,7 @@ import LearningItemCard from './LearningItemCard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import LearningGoals from './LearningGoals';
+import './DashboardTab.css';
 
 // Add these interfaces to properly type the flashcards
 interface FlashcardDeck {

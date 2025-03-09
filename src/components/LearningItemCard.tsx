@@ -41,6 +41,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import './LearningItemCard.css';
 
 interface Props {
   item: LearningItem;

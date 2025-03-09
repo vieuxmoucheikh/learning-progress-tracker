@@ -456,3 +456,105 @@ button:active,
     font-weight: 600;
   }
 }
+
+/* CORRECTIONS CRITIQUES POUR MOBILE EN MODE SOMBRE - PRIORITÉ MAXIMALE */
+@media (max-width: 768px) {
+  /* Correction Dashboard - "Show Calendar" et "Goals" */
+  .dark [class*="dashboard"] [class*="calendar-toggle"],
+  .dark [class*="dashboard"] [class*="show-calendar"],
+  .dark [class*="dashboard"] [class*="goals-header"],
+  .dark [class*="dashboard"] [class*="section-title"] {
+    color: #ffffff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+    font-weight: 700 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Ciblage spécifique pour les boutons de calendrier et objectifs */
+  .dark button[class*="calendar"],
+  .dark [class*="calendar"] button,
+  .dark button[class*="goal"],
+  .dark [class*="goal"] button,
+  .dark [class*="dashboard"] button {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  }
+  
+  /* Force la visibilité du texte dans les boutons */
+  .dark [class*="dashboard"] button *,
+  .dark [class*="calendar"] button *,
+  .dark [class*="goal"] button * {
+    color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* CORRECTION POUR LES CARTES D'APPRENTISSAGE - Renforcement des sélecteurs */
+  .dark [class*="learning-card"],
+  .dark [class*="learning-item-card"] {
+    background-color: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) !important;
+  }
+  
+  /* Force la couleur du texte dans TOUS les éléments des cartes d'apprentissage */
+  .dark [class*="learning-card"] *,
+  .dark [class*="learning-item-card"] * {
+    color: #ffffff !important;
+  }
+  
+  /* Exceptions pour les textes secondaires */
+  .dark [class*="learning-card"] [class*="text-gray"] *,
+  .dark [class*="learning-item-card"] [class*="text-gray"] *,
+  .dark [class*="learning-card"] [class*="description"] *,
+  .dark [class*="learning-item-card"] [class*="description"] *,
+  .dark [class*="learning-card"] p,
+  .dark [class*="learning-item-card"] p {
+    color: #e2e8f0 !important;
+  }
+  
+  /* Sélecteurs extrêmement spécifiques pour les textes problématiques */
+  .dark [id*="dashboard"] [class*="calendar"] span,
+  .dark [id*="dashboard"] [class*="goal"] span,
+  .dark [id*="dashboard"] [class*="calendar"] div,
+  .dark [id*="dashboard"] [class*="goal"] div {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+  }
+  
+  /* Force également la visibilité des icônes SVG */
+  .dark [class*="dashboard"] svg *,
+  .dark [class*="calendar"] svg *,
+  .dark [class*="goal"] svg *,
+  .dark [class*="learning-card"] svg *,
+  .dark [class*="learning-item-card"] svg * {
+    fill: currentColor !important;
+    stroke: currentColor !important;
+    opacity: 1 !important;
+  }
+  
+  /* Surcharge pour les éléments qui pourraient avoir inline styles */
+  .dark [style*="color"] {
+    color: #ffffff !important;
+  }
+  
+  /* Étiquettes et badges avec priorité maximale */
+  .dark [class*="learning-card"] [class*="tag"],
+  .dark [class*="learning-card"] [class*="badge"],
+  .dark [class*="learning-card"] [class*="category"],
+  .dark [class*="learning-card"] [class*="difficulty"],
+  .dark [class*="learning-card"] [class*="status"],
+  .dark [class*="learning-item-card"] [class*="tag"],
+  .dark [class*="learning-item-card"] [class*="badge"],
+  .dark [class*="learning-item-card"] [class*="category"],
+  .dark [class*="learning-item-card"] [class*="difficulty"],
+  .dark [class*="learning-item-card"] [class*="status"] {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    font-weight: 600 !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3) !important;
+  }
+}

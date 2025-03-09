@@ -1,0 +1,76 @@
+/* Correctifs pour les cartes d'apprentissage en mode sombre sur mobile */
+@media (max-width: 768px) {
+  /* Couleur de fond et bordure renforcées */
+  .dark .learning-item-card,
+  .dark [class*="learning-item-card"],
+  .dark [class*="learning-card"] {
+    background-color: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Titres en blanc pur pour un contraste maximal */
+  .dark .learning-item-card h3,
+  .dark .learning-item-card [class*="title"],
+  .dark [class*="learning-item-card"] h3,
+  .dark [class*="learning-item-card"] [class*="title"],
+  .dark [class*="learning-card"] h3,
+  .dark [class*="learning-card"] [class*="title"] {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    font-weight: 700;
+  }
+  
+  /* Texte principal */
+  .dark .learning-item-card p,
+  .dark [class*="learning-item-card"] p,
+  .dark [class*="learning-card"] p,
+  .dark .learning-item-card div,
+  .dark [class*="learning-item-card"] div,
+  .dark [class*="learning-card"] div {
+    color: #f1f5f9 !important;
+  }
+  
+  /* Métadonnées et textes secondaires */
+  .dark .learning-item-card [class*="metadata"],
+  .dark .learning-item-card [class*="text-gray"],
+  .dark [class*="learning-item-card"] [class*="metadata"],
+  .dark [class*="learning-item-card"] [class*="text-gray"],
+  .dark [class*="learning-card"] [class*="metadata"],
+  .dark [class*="learning-card"] [class*="text-gray"] {
+    color: #e2e8f0 !important;
+  }
+  
+  /* Icônes et SVG */
+  .dark .learning-item-card svg,
+  .dark [class*="learning-item-card"] svg,
+  .dark [class*="learning-card"] svg {
+    color: #ffffff !important;
+    fill: currentColor !important;
+  }
+  
+  /* Badges et étiquettes */
+  .dark .learning-item-card [class*="tag"],
+  .dark .learning-item-card [class*="badge"],
+  .dark .learning-item-card [class*="category"],
+  .dark .learning-item-card [class*="difficulty"],
+  .dark [class*="learning-item-card"] [class*="tag"],
+  .dark [class*="learning-item-card"] [class*="badge"],
+  .dark [class*="learning-item-card"] [class*="category"],
+  .dark [class*="learning-item-card"] [class*="difficulty"],
+  .dark [class*="learning-card"] [class*="tag"],
+  .dark [class*="learning-card"] [class*="badge"],
+  .dark [class*="learning-card"] [class*="category"],
+  .dark [class*="learning-card"] [class*="difficulty"] {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+  }
+  
+  /* Forcer la visibilité sur tous les éléments qui pourraient être masqués */
+  .dark .learning-item-card *[style*="color"],
+  .dark [class*="learning-item-card"] *[style*="color"],
+  .dark [class*="learning-card"] *[style*="color"] {
+    color: #ffffff !important;
+  }
+}
