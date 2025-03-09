@@ -362,18 +362,18 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           
           <div className="flex flex-wrap gap-2 mb-3">
             {summary.reviewStatus && (
-              <Badge variant={getReviewStatusBadge(summary.reviewStatus)} className={`text-xs px-2 py-1 rounded-md ${getReviewStatusBadge(summary.reviewStatus) === 'default' ? 'text-gray-900 dark:text-gray-100' : 'text-white'}`}>
+              <Badge variant={getReviewStatusBadge(summary.reviewStatus)} className="text-xs px-2 py-1 rounded-md">
                 {formatReviewStatus(summary.reviewStatus)}
               </Badge>
             )}
             {summary.nextDue && (
-              <Badge variant="outline" className="text-xs px-2 py-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/70 border-gray-200 dark:border-gray-700 rounded-md">
-                <Clock className="w-3 h-3 mr-1" /> 
-                Next: {new Date(summary.nextDue).toLocaleDateString()}
+              <Badge variant="outline" className="text-xs px-2 py-1 text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/70 border-gray-200 dark:border-gray-700 rounded-md">
+                <Clock className="w-3 h-3 mr-1" />
+                Next: {new Date(summary.nextDue).toLocaleDateString()} 
               </Badge>
             )}
             {summary.lastStudied && (
-              <Badge variant="outline" className="text-xs px-2 py-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/70 border-gray-200 dark:border-gray-700 rounded-md">
+              <Badge variant="outline" className="text-xs px-2 py-1 text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/70 border-gray-200 dark:border-gray-700 rounded-md">
                 <Clock className="w-3 h-3 mr-1" />
                 Last: {new Date(summary.lastStudied).toLocaleDateString()}
               </Badge>

@@ -146,7 +146,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
           <Button 
             variant="outline" 
             onClick={onBackToDecks}
-            className="flex items-center gap-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="flex items-center gap-2"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -165,7 +165,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
             Back to Decks 
           </Button>
         </div>
-        <Button onClick={() => setIsCreating(true)} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
+        <Button onClick={() => setIsCreating(true)} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
           <Plus className="w-4 h-4 mr-2" /> Add Flashcard
         </Button>
       </div>
@@ -176,10 +176,10 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
           placeholder="Search flashcards..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700"
+          className="w-full pl-10"
         />
         <svg
-          className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500"
+          className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -197,16 +197,16 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
         {filteredCards.map((card) => (
           <div
             key={card.id}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-md transition-shadow border border-gray-200 dark:border-gray-700"
+            className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
           >
             <div className="flex justify-between items-start mb-4">
               <div className="flex-1">
-                <div className="font-medium mb-2 text-gray-900 dark:text-gray-100">Front:</div>
-                <div className="text-gray-700 dark:text-gray-300 mb-4 whitespace-pre-wrap">
+                <div className="font-medium mb-2">Front:</div>
+                <div className="text-gray-700 mb-4 whitespace-pre-wrap">
                   {card.front_content}
                 </div>
-                <div className="font-medium mb-2 text-gray-900 dark:text-gray-100">Back:</div>
-                <div className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                <div className="font-medium mb-2">Back:</div>
+                <div className="text-gray-700 whitespace-pre-wrap">
                   {card.back_content}
                 </div>
               </div>
@@ -215,12 +215,12 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-red-600 hover:text-red-700 dark:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    className="text-red-600 hover:text-red-700"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+                <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete Flashcard</AlertDialogTitle>
                     <AlertDialogDescription>
@@ -228,10 +228,10 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700">Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() => handleDeleteCard(card.id)}
-                      className="bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
+                      className="bg-red-600 text-white hover:bg-red-700"
                     >
                       Delete
                     </AlertDialogAction>
@@ -241,13 +241,13 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
             </div>
             
             {card.last_reviewed && (
-              <div className="mt-4 text-sm text-gray-700 dark:text-gray-300">
+              <div className="mt-4 text-sm text-gray-600">
                 Last reviewed: {new Date(card.last_reviewed).toLocaleDateString()}
                 {card.mastered && (
-                  <span className="ml-2 text-green-600 dark:text-green-400">(Mastered)</span>
+                  <span className="ml-2 text-green-600">(Mastered)</span>
                 )}
                 {!card.mastered && card.next_review && (
-                  <span className="ml-2 text-blue-600 dark:text-blue-400">
+                  <span className="ml-2 text-blue-600">
                     (Next review: {new Date(card.next_review).toLocaleDateString()})
                   </span>
                 )}
@@ -259,9 +259,9 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
 
       {filteredCards.length === 0 && (
         <div className="text-center py-8">
-          <p className="text-gray-700 dark:text-gray-300 mb-4">No flashcards yet. Create your first card to get started!</p>
+          <p className="text-gray-600 mb-4">No flashcards yet. Create your first card to get started!</p>
           <Button
-            className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+            className="bg-blue-600 text-white hover:bg-blue-700"
             onClick={() => setIsCreating(true)}
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -299,7 +299,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
                 Cancel
               </Button>
               <Button
-                className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+                className="bg-blue-600 text-white hover:bg-blue-700"
                 onClick={handleCreateCard}
                 disabled={!formData.front.trim() || !formData.back.trim()}
               >
