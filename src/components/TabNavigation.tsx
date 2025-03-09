@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import { BarChart3, BookOpen, LayoutDashboard, Timer, Notebook, Library } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FlashcardsTab } from './FlashcardsTab';
@@ -27,7 +27,7 @@ interface TabNavigationProps {
   activeTab: string;
   onTabChange: (tabId: string) => void;
   flashcards: FlashcardDeck[];
-  onAddDeck: (data: { name: string; description: string; }) => Promise<any> | void;
+  onAddDeck: () => void;
   onStudyDeck: (deckId: string) => void;
   onEditDeck: (deckId: string) => void;
   onDeleteDeck: (deckId: string) => void;
@@ -42,66 +42,103 @@ export function TabNavigation({
   onEditDeck,
   onDeleteDeck
 }: TabNavigationProps) {
-  const [showFullLabels, setShowFullLabels] = useState(true);
-  const activeTabRef = useRef<HTMLButtonElement>(null);
+  const tabs: Tab[] = [
+    {
+      id: TAB_OPTIONS.DASHBOARD,
+      label: "Dashboard",
+      shortLabel: "Home",
+      icon: LayoutDashboard
+    },
+    {
+      id: TAB_OPTIONS.ITEMS,
+      label: "Learning Items",
+      shortLabel: "Items",
+      icon: BookOpen
+    },
+    {
+      id: TAB_OPTIONS.LEARNING_CARDS,
+      label: "Learning Cards",
+      shortLabel: "Cards",
+      icon: Notebook
+    },
+    {
+      id: TAB_OPTIONS.ANALYTICS,
+      label: "Analytics",
+      shortLabel: "Stats",
+      icon: BarChart3
+    },
+    {
+      id: TAB_OPTIONS.POMODORO,
+      label: "Pomodoro",
+      shortLabel: "Timer",
+      icon: Timer
+    },
+    {
+      id: TAB_OPTIONS.FLASHCARDS,
+      label: "Flashcards",
+      shortLabel: "Flashcards",
+      icon: Library
+    }
+  ];
+
   const tabsContainerRef = useRef<HTMLDivElement>(null);
-  const [isOverflowing, setIsOverflowing] = useState(false);
+  const activeTabRef = useRef<HTMLButtonElement>(null);
 
-  // Check if tabs are overflowing
+  // Scroll to active tab when it changes
   useEffect(() => {
-    const checkOverflow = () => {
-      if (tabsContainerRef.current) {
-        const isNowOverflowing = 
-          tabsContainerRef.current.scrollWidth > tabsContainerRef.current.clientWidth;
-        setIsOverflowing(isNowOverflowing);
-        setShowFullLabels(window.innerWidth >= 768); // Show full labels on tablets and larger
-      }
-    };
-
-    checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    return () => window.removeEventListener('resize', checkOverflow);
-  }, []);
-
-  // Scroll active tab into view
-  useEffect(() => {
-    if (activeTabRef.current && tabsContainerRef.current) {
+    if (tabsContainerRef.current && activeTabRef.current) {
       const container = tabsContainerRef.current;
-      const activeTab = activeTabRef.current;
+      const activeTabElement = activeTabRef.current;
       
-      // Calculate position to center the active tab
-      const scrollLeft = activeTab.offsetLeft - (container.clientWidth / 2) + (activeTab.clientWidth / 2);
-      container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+      // Calculate the scroll position to center the active tab
+      const scrollLeft = activeTabElement.offsetLeft - (container.offsetWidth / 2) + (activeTabElement.offsetWidth / 2);
+      
+      // Ensure we don't scroll past the beginning
+      const finalScrollLeft = Math.max(0, scrollLeft);
+      
+      // Smooth scroll to the position
+      container.scrollTo({
+        left: finalScrollLeft,
+        behavior: 'smooth'
+      });
     }
   }, [activeTab]);
 
-  // Define the tabs
-  const tabs: Tab[] = [
-    { id: 'dashboard', label: 'Dashboard', shortLabel: 'Dashboard', icon: LayoutDashboard },
-    { id: 'items', label: 'Learning Items', shortLabel: 'Items', icon: BookOpen },
-    { id: 'flashcards', label: 'Flashcards', shortLabel: 'Cards', icon: Library },
-    { id: 'pomodoro', label: 'Pomodoro Timer', shortLabel: 'Timer', icon: Timer },
-    { id: 'analytics', label: 'Analytics', shortLabel: 'Stats', icon: BarChart3 },
-    { id: 'notes', label: 'Study Notes', shortLabel: 'Notes', icon: Notebook },
-  ];
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   return (
     <div className="flex flex-col h-full">
-      <nav className="sticky top-0 z-10 bg-gradient-to-r from-blue-600 to-indigo-600 shadow-md">
+      <nav className="flex justify-center mb-8 w-full bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-700 dark:to-blue-600 p-2 rounded-lg shadow-md">
         <div 
           ref={tabsContainerRef}
-          className="flex overflow-x-auto hide-scrollbar py-1 px-2"
+          className="flex max-w-2xl w-full overflow-x-auto px-1 hide-scrollbar"
+          style={{ 
+            scrollbarWidth: 'none', 
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch'
+          }}
         >
           {tabs.map((tab) => {
-            const Icon = tab.icon;
             const isActive = activeTab === tab.id;
+            const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
                 ref={isActive ? activeTabRef : null}
                 onClick={() => onTabChange(tab.id)}
                 className={cn(
-                  "flex-shrink-0 text-sm font-medium py-2.5 px-3 sm:px-4 flex items-center justify-center gap-1.5 sm:gap-2 transition-all rounded-lg mx-0.5 relative",
+                  "flex-shrink-0 text-sm font-medium py-2.5 px-3 sm:px-4 flex items-center justify-center gap-1.5 sm:gap-2 transition-all min-w-[72px] sm:min-w-[90px] rounded-lg mx-0.5 relative",
                   isActive
                     ? "bg-white/15 text-white shadow-sm backdrop-blur-sm"
                     : "text-white/80 hover:text-white hover:bg-white/10 dark:text-white/70 dark:hover:text-white"
@@ -111,12 +148,7 @@ export function TabNavigation({
                   "w-4 h-4 flex-shrink-0",
                   isActive ? "text-white dark:text-white" : "text-white/80 dark:text-white/70"
                 )} />
-                <span className={cn(
-                  "whitespace-nowrap transition-opacity",
-                  isOverflowing && !showFullLabels ? "hidden sm:inline" : ""
-                )}>
-                  {showFullLabels ? tab.label : tab.shortLabel}
-                </span>
+                <span className="whitespace-nowrap">{tab.shortLabel}</span>
                 {isActive && (
                   <span className="absolute bottom-1 left-3 right-3 h-0.5 bg-white rounded-full"></span>
                 )}

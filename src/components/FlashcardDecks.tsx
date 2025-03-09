@@ -206,37 +206,37 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       </div>
 
       {/* Dashboard Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg sm:text-xl text-blue-600 dark:text-blue-400 flex items-center gap-2">
-              <Library className="w-4 h-4 sm:w-5 sm:h-5" /> Decks
+            <CardTitle className="text-xl text-blue-600 dark:text-blue-400 flex items-center gap-2">
+              <Library className="w-5 h-5" /> Decks
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl sm:text-3xl font-bold">{decks.length}</p>
+            <p className="text-3xl font-bold">{decks.length}</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg sm:text-xl text-blue-600 dark:text-blue-400 flex items-center gap-2">
-              <Clock className="w-4 h-4 sm:w-5 sm:h-5" /> Due Today
+            <CardTitle className="text-xl text-blue-600 dark:text-blue-400 flex items-center gap-2">
+              <Clock className="w-5 h-5" /> Due Today
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl sm:text-3xl font-bold">{getTotalDueCards()}</p>
+            <p className="text-3xl font-bold">{getTotalDueCards()}</p>
           </CardContent>
         </Card>
 
-        <Card className="sm:col-span-2 md:col-span-1">
+        <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg sm:text-xl text-purple-600 dark:text-purple-400 flex items-center gap-2">
-              <Star className="w-4 h-4 sm:w-5 sm:h-5" /> New Cards
+            <CardTitle className="text-xl text-purple-600 dark:text-purple-400 flex items-center gap-2">
+              <Star className="w-5 h-5" /> New Cards
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl sm:text-3xl font-bold">{getTotalNotStartedCards()}</p>
+            <p className="text-3xl font-bold">{getTotalNotStartedCards()}</p>
           </CardContent>
         </Card>
       </div>
@@ -246,14 +246,14 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       </div>
 
       {/* Decks Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {decks.map((deck) => {
           const summary = getDeckSummary(deck.id);
           return (
             <Card key={deck.id} className="overflow-hidden">
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
-                  <CardTitle className="text-base sm:text-lg">{deck.name}</CardTitle>
+                  <CardTitle>{deck.name}</CardTitle>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button 
@@ -265,14 +265,14 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
+                    <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>Delete Deck</AlertDialogTitle>
                         <AlertDialogDescription>
                           Are you sure you want to delete "{deck.name}"? This action cannot be undone.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
-                      <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+                      <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction onClick={() => handleDeleteDeck(deck)} className="bg-red-600 hover:bg-red-700">
                           Delete
@@ -281,52 +281,52 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                     </AlertDialogContent>
                   </AlertDialog>
                 </div>
-                <CardDescription className="line-clamp-2 text-xs sm:text-sm">{deck.description}</CardDescription>
+                <CardDescription className="line-clamp-2">{deck.description}</CardDescription>
               </CardHeader>
               
               <CardContent className="pb-2">
                 {summary && (
                   <div className="flex flex-wrap gap-2 mb-2">
-                    <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 text-xs">
+                    <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
                       {summary.totalCards} Total Cards
                     </Badge>
                     {summary.dueToday > 0 && (
-                      <Badge variant="outline" className="bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 text-xs">
+                      <Badge variant="outline" className="bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800">
                         {summary.dueToday} Due
                       </Badge>
                     )}
                     {summary.notStarted > 0 && (
-                      <Badge variant="outline" className="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 text-xs">
+                      <Badge variant="outline" className="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800">
                         {summary.notStarted} New
                       </Badge>
                     )}
-                  </div>
+              </div>
                 )}
               </CardContent>
               
               <CardFooter className="pt-2 grid grid-cols-3 gap-2">
                 <Button 
                   onClick={() => onStudyDeck(deck.id)}
-                  className="bg-green-600 hover:bg-green-700 h-8 sm:h-9 text-xs sm:text-sm"
+                  className="bg-green-600 hover:bg-green-700 h-9"
                   disabled={isLoading}
                 >
-                  <Play className="w-3 h-3 sm:w-4 sm:h-4 mr-1" /> Study
+                  <Play className="w-4 h-4 mr-1" /> Study
                 </Button>
                 <Button 
                   onClick={() => handleEditDeckClick(deck.id)}
                   variant="outline" 
-                  className="h-8 sm:h-9 text-xs sm:text-sm"
+                  className="h-9"
                   disabled={isLoading}
                 >
-                  <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-1" /> Edit
+                  <Edit className="w-4 h-4 mr-1" /> Edit
                 </Button>
                 <Button 
                   onClick={() => handleAddFlashcardClick(deck.id)}
                   variant="outline" 
-                  className="h-8 sm:h-9 text-xs sm:text-sm"
+                  className="h-9"
                   disabled={isLoading}
                 >
-                  <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" /> Card
+                  <Plus className="w-4 h-4 mr-1" /> Card
                 </Button>
               </CardFooter>
             </Card>
@@ -365,7 +365,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
 
       {/* Create Deck Dialog */}
       <Dialog open={isCreatingDeck} onOpenChange={(open) => !isLoading && setIsCreatingDeck(open)}>
-        <DialogContent className="max-w-[90vw] sm:max-w-lg">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Flashcard Deck</DialogTitle>
             <DialogDescription>
@@ -381,7 +381,6 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                 onChange={(e) => setDeckFormData(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="Enter deck name"
                 disabled={isLoading}
-                className="w-full"
               />
             </div>
             <div>
@@ -392,11 +391,10 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                 onChange={(e) => setDeckFormData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Enter deck description"
                 disabled={isLoading}
-                className="w-full min-h-[80px] sm:min-h-[100px]"
               />
             </div>
           </div>
-          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-2 mt-4">
+          <div className="flex justify-end space-x-2">
             <Button 
               variant="outline" 
               onClick={() => {
@@ -439,7 +437,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                   setIsLoading(false);
                 }
               }}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white w-full sm:w-auto"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
               disabled={isLoading}
             >
               {isLoading ? 'Creating...' : 'Create Deck'}
@@ -450,7 +448,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
 
       {/* Add Flashcard Dialog */}
       <Dialog open={isAddingFlashcard} onOpenChange={(open) => !isLoading && setIsAddingFlashcard(open)}>
-        <DialogContent className="max-w-[90vw] sm:max-w-lg">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Flashcard</DialogTitle>
             <DialogDescription>
@@ -463,17 +461,17 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               {!selectedDeckId && (
                 <div>
                   <label className="block text-sm font-medium mb-2">Select Deck</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[40vh] overflow-y-auto pr-1">
+                  <div className="grid grid-cols-2 gap-2">
                     {decks.map(deck => (
                       <Button 
                         key={deck.id}
                         variant="outline"
-                        className={`justify-start px-3 py-4 sm:py-6 h-auto ${selectedDeckId === deck.id ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                        className={`justify-start px-3 py-6 h-auto ${selectedDeckId === deck.id ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''}`}
                         onClick={() => setSelectedDeckId(deck.id)}
                         disabled={isLoading}
                       >
                         <div className="text-left">
-                          <p className="font-medium text-sm">{deck.name}</p>
+                          <p className="font-medium">{deck.name}</p>
                           <p className="text-xs text-gray-500 line-clamp-1">{deck.description}</p>
                         </div>
                       </Button>
@@ -500,7 +498,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                     <Textarea
                       id="front"
                       placeholder="Enter the question or concept"
-                      className="min-h-[80px] sm:min-h-[100px] w-full"
+                      className="min-h-[100px]"
                       value={flashcardFormData.front}
                       onChange={(e) => setFlashcardFormData(prev => ({ ...prev, front: e.target.value }))}
                       disabled={isLoading}
@@ -511,7 +509,7 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                     <Textarea
                       id="back"
                       placeholder="Enter the answer or explanation"
-                      className="min-h-[80px] sm:min-h-[100px] w-full"
+                      className="min-h-[100px]"
                       value={flashcardFormData.back}
                       onChange={(e) => setFlashcardFormData(prev => ({ ...prev, back: e.target.value }))}
                       disabled={isLoading}
@@ -529,14 +527,13 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                   setIsCreatingDeck(true);
                 }}
                 disabled={isLoading}
-                className="w-full sm:w-auto"
               >
                 Create a Deck First
               </Button>
             </div>
           )}
           
-          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-2 mt-4">
+          <div className="flex justify-end space-x-2">
             <Button 
               variant="outline" 
               onClick={() => {
@@ -545,14 +542,12 @@ export const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                 setFlashcardFormData({ front: '', back: '' });
               }}
               disabled={isLoading}
-              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
             <Button 
               disabled={!selectedDeckId || isLoading}
               onClick={handleAddFlashcardSubmit}
-              className="w-full sm:w-auto"
             >
               {isLoading ? 'Adding...' : 'Add Flashcard'}
             </Button>
