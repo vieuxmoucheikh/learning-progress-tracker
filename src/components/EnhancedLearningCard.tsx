@@ -628,6 +628,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   "prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto",
                   "prose-ul:list-disc prose-ol:list-decimal",
                   "prose-li:marker:text-gray-400 dark:prose-li:marker:text-gray-400",
+                  // Ajout de classes spécifiques pour le contrôle du contenu des cartes maîtrisées
+                  mastered && "mastered-content dark:prose-p:text-gray-900",
                   !isZoomed && "max-h-[300px] overflow-hidden cursor-pointer"
                 )}
                 dangerouslySetInnerHTML={{ __html: content }}
@@ -640,10 +642,14 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         </div>
 
         {/* Meta Section */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-sm">
+        <div className={cn(
+          "flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-sm",
+          // Ajout d'une classe spécifique pour la section meta
+          mastered && "mastered-meta"
+        )}>
           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
             <Clock className="w-4 h-4" />
-            <span>Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</span>
+            <span className="updated-text">Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</span>
           </div>
 
           <div className="flex flex-wrap gap-2">

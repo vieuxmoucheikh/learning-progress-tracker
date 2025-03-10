@@ -140,4 +140,45 @@
     color: white !important;
     background-color: rgba(255, 255, 255, 0.2) !important;
   }
+
+  /* Correction pour le texte descriptif des cartes d'apprentissage en mode sombre sur mobile */
+  /* Assurer la visibilité du texte "Organize and manage your learning notes" */
+  .dark .learning-item-card .organize-text,
+  .dark .learning-item-card .learning-description,
+  .dark .learning-item-card [class*="description"],
+  .dark .learning-item-card [class*="subtitle"],
+  .dark .learning-card .organize-text,
+  .dark .learning-card .learning-description,
+  .dark .learning-card [class*="description"],
+  .dark .learning-card [class*="subtitle"] {
+    color: #f1f5f9 !important; /* slate-100 */
+    font-weight: 500;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Correction pour le contenu des cartes marquées comme maîtrisées */
+  .dark .mastered-card .prose p,
+  .dark .mastered-card .prose li,
+  .dark .mastered-card .prose span,
+  .dark [class*="from-emerald-50"] .prose p,
+  .dark [class*="from-emerald-50"] .prose li,
+  .dark [class*="from-emerald-50"] .prose span,
+  .dark [class*="border-emerald-400"] .prose p,
+  .dark [class*="border-emerald-400"] .prose li,
+  .dark [class*="border-emerald-400"] .prose span {
+    color: #0f172a !important; /* slate-900 */
+    opacity: 1;
+  }
+
+  /* Mise en évidence spéciale pour les textes de mise à jour */
+  .dark .mastered-card .updated-text,
+  .dark [class*="from-emerald-50"] .updated-text,
+  .dark [class*="border-emerald-400"] .updated-text,
+  .dark .mastered-meta span,
+  .dark [class*="from-emerald-50"] [class*="meta"] span,
+  .dark [class*="border-emerald-400"] [class*="meta"] span {
+    color: #0f172a !important; /* slate-900 */
+    font-weight: 600 !important;
+  }
 }

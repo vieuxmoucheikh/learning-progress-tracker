@@ -849,3 +849,76 @@ button:active,
     border-color: #475569 !important;
   }
 }
+
+/* CORRECTIONS FINALES POUR LA VISIBILITÉ DES TEXTES SPÉCIFIQUES SUR MOBILE */
+@media (max-width: 768px) {
+  /* Correction pour le texte "Organize and manage your learning notes" sur les cartes */
+  .dark [class*="learning"] [class*="description"],
+  .dark [class*="learning"] [class*="subtitle"],
+  .dark [class*="organize-text"],
+  .dark [class*="manage-text"],
+  .dark [class*="learning-description"] {
+    color: #f1f5f9 !important; /* slate-100 pour un contraste élevé */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Amélioration drastique du contraste texte/arrière-plan pour les cartes maîtrisées */
+  .dark [class*="mastered-card"] p,
+  .dark [class*="from-emerald-50"] p,
+  .dark [class*="border-emerald-400"] p,
+  .dark [class*="mastered"] p,
+  .dark [class*="mastered-card"] span,
+  .dark [class*="from-emerald-50"] span,
+  .dark [class*="border-emerald-400"] span,
+  .dark [class*="mastered"] span,
+  .dark [class*="mastered-card"] div,
+  .dark [class*="from-emerald-50"] div,
+  .dark [class*="border-emerald-400"] div,
+  .dark [class*="mastered"] div {
+    color: #0f172a !important; /* slate-900 pour assurer la lisibilité sur le fond clair */
+    font-weight: 500 !important; /* Légèrement plus gras pour augmenter le contraste */
+  }
+
+  /* Focus particulier sur le texte "updated minutes ago" dans les cartes maîtrisées */
+  .dark [class*="mastered-card"] [class*="meta"] span,
+  .dark [class*="from-emerald-50"] [class*="meta"] span,
+  .dark [class*="border-emerald-400"] [class*="meta"] span,
+  .dark [class*="mastered"] [class*="Clock"],
+  .dark [class*="mastered"] [class*="updated"],
+  .dark [class*="mastered"] [class*="ago"] {
+    color: #0f172a !important; /* slate-900 */
+    font-weight: 600 !important; /* Gras pour meilleure lisibilité */
+    opacity: 0.9 !important; /* Légèrement plus visible */
+  }
+
+  /* Pour le contenu HTML dans les cartes d'apprentissage maîtrisées */
+  .dark [class*="mastered"] [class*="prose"] p,
+  .dark [class*="mastered"] [class*="prose"] li,
+  .dark [class*="mastered"] [class*="prose"] span,
+  .dark [class*="mastered"] .prose-invert p,
+  .dark [class*="mastered"] .prose-invert li,
+  .dark [class*="mastered"] .prose-invert span,
+  .dark [class*="mastered"] [dangerouslySetInnerHTML] p,
+  .dark [class*="mastered"] [dangerouslySetInnerHTML] li {
+    color: #0f172a !important; /* slate-900 */
+    opacity: 0.95 !important;
+  }
+
+  /* Icônes toujours visibles dans les cartes maîtrisées */
+  .dark [class*="mastered"] svg,
+  .dark [class*="from-emerald-50"] svg,
+  .dark [class*="border-emerald-400"] svg {
+    color: currentColor !important; /* Préserve la couleur d'origine de l'icône */
+    opacity: 1 !important;
+    stroke: currentColor !important;
+  }
+  
+  /* Pour tous les p dans les cartes maîtrisées, sauf ceux ayant une classe de couleur spécifique */
+  .dark [class*="mastered"] p:not([class*="text-"]),
+  .dark [class*="from-emerald-50"] p:not([class*="text-"]),
+  .dark [class*="border-emerald-400"] p:not([class*="text-"]) {
+    color: #0f172a !important;
+  }
+}
