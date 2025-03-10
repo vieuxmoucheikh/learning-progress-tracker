@@ -448,13 +448,13 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowContent(!showContent)}
-                className="h-9 w-9 hover:bg-blue-100 rounded-lg"
+                className="h-9 w-9 hover:bg-blue-100 rounded-lg dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-white"
                 title={showContent ? "Hide content" : "Show content"}
               >
                 {showContent ? (
-                  <EyeOff className="w-5 h-5 text-blue-900" />
+                  <EyeOff className="w-5 h-5 text-blue-900 dark:text-blue-400" />
                 ) : (
-                  <Eye className="w-5 h-5 text-blue-900" />
+                  <Eye className="w-5 h-5 text-blue-900 dark:text-blue-400" />
                 )}
               </Button>
               <Button
@@ -467,23 +467,23 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     setIsEditing(true);
                   }
                 }}
-                className="h-9 w-9 hover:bg-blue-100 rounded-lg"
+                className="h-9 w-9 hover:bg-blue-100 rounded-lg dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-white"
                 title={isEditing ? "Save changes" : "Edit card"}
               >
                 {isEditing ? (
-                  <Save className="w-5 h-5 text-blue-900" />
+                  <Save className="w-5 h-5 text-blue-900 dark:text-blue-400" />
                 ) : (
-                  <Edit className="w-5 h-5 text-blue-900" />
+                  <Edit className="w-5 h-5 text-blue-900 dark:text-blue-400" />
                 )}
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={exportToPdf}
-                className="h-9 w-9 hover:bg-blue-100 rounded-lg"
+                className="h-9 w-9 hover:bg-blue-100 rounded-lg dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-white"
                 title="Export to PDF"
               >
-                <Download className="w-5 h-5 text-blue-900" />
+                <Download className="w-5 h-5 text-blue-900 dark:text-blue-400" />
               </Button>
             </div>
           </div>
@@ -703,7 +703,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
       <CardFooter className={cn(
         "flex justify-between p-4 sm:p-6 gap-4",
-        "bg-gradient-to-b from-transparent via-gray-50/50 to-gray-100/50"
+        "bg-gradient-to-b from-transparent via-gray-50/50 to-gray-100/50 dark:from-transparent dark:via-gray-800/30 dark:to-gray-900/30"
       )}>
         <Button
           variant="ghost"
@@ -711,17 +711,17 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           className={cn(
             "text-sm transition-colors flex-1 sm:flex-none justify-start sm:justify-center",
             mastered 
-              ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50" 
-              : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+              ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/30" 
+              : "text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-green-400 dark:hover:bg-green-900/30"
           )}
           onClick={toggleMastered}
         >
           {mastered ? (
-            <BookmarkCheck className="w-4 h-4 mr-2" />
+            <BookmarkCheck className="w-4 h-4 mr-2 text-emerald-500 dark:text-emerald-400" />
           ) : (
-            <Bookmark className="w-4 h-4 mr-2" />
+            <Bookmark className="w-4 h-4 mr-2 text-emerald-500 dark:text-green-400" />
           )}
-          <span>{mastered ? 'Mastered' : 'Mark as Mastered'}</span>
+          <span className="mastered-text">{mastered ? 'Mastered' : 'Mark as Mastered'}</span>
         </Button>
         
         <Button

@@ -922,3 +922,58 @@ button:active,
     color: #0f172a !important;
   }
 }
+
+/* CORRECTIONS POUR LES PROBLÈMES SPÉCIFIQUES DES LEARNING CARDS SUR MOBILE EN MODE SOMBRE */
+@media (max-width: 768px) {
+  /* Amélioration de la visibilité du texte "Mark as Mastered" */
+  .dark [class*="learning"] button:has(.lucide-bookmark),
+  .dark [class*="learning"] button:has(svg[class*="bookmark"]) {
+    color: #4ade80 !important; /* green-400 pour une bonne visibilité */
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+    font-weight: 500;
+  }
+  
+  /* Amélioration de la visibilité pour le texte déjà mastered */
+  .dark [class*="learning"] button:has(.lucide-bookmark-check),
+  .dark [class*="learning"] button:has(svg[class*="bookmark-check"]) {
+    color: #10b981 !important; /* green-500 pour une meilleure visibilité */
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+    font-weight: 600;
+  }
+
+  /* Amélioration de la visibilité des icônes (hide, edit, download) sur fond sombre */
+  .dark [class*="learning"] button:has(.lucide-eye),
+  .dark [class*="learning"] button:has(.lucide-eye-off),
+  .dark [class*="learning"] button:has(.lucide-edit),
+  .dark [class*="learning"] button:has(.lucide-save),
+  .dark [class*="learning"] button:has(.lucide-download) {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: #f8fafc !important; /* slate-50 */
+  }
+  
+  /* Icônes elles-mêmes */
+  .dark [class*="learning"] .lucide-eye,
+  .dark [class*="learning"] .lucide-eye-off,
+  .dark [class*="learning"] .lucide-edit,
+  .dark [class*="learning"] .lucide-save,
+  .dark [class*="learning"] .lucide-download {
+    color: #60a5fa !important; /* blue-400 pour les rendre plus visibles */
+    stroke-width: 2px !important;
+  }
+
+  /* Pour le texte "Organize and manage your learning notes" */
+  .dark [class*="organize-text"],
+  .dark [class*="manage-text"],
+  .dark [class*="learning-description"],
+  .dark [class*="description"] p,
+  .dark [class*="learning-card"] [class*="introduction"],
+  .dark [class*="learning-card"] p[class*="intro"],
+  .dark [class*="header"] + p {
+    color: #f1f5f9 !important; /* slate-100 pour une excellente lisibilité */
+    opacity: 1 !important;
+    visibility: visible !important;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+}
