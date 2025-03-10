@@ -720,3 +720,67 @@ button:active,
     color: #ffffff !important;
   }
 }
+
+/* CORRECTIONS SPÉCIFIQUES POUR LES PROBLÈMES D'INTERFACE */
+@media (max-width: 768px) {
+  /* Pour les champs d'édition dans les cartes en mode sombre */
+  .dark [contenteditable="true"],
+  .dark .tiptap,
+  .dark .ProseMirror,
+  .dark .tiptap p,
+  .dark .ProseMirror p,
+  .dark .tiptap h1, 
+  .dark .tiptap h2, 
+  .dark .tiptap h3,
+  .dark .ProseMirror h1,
+  .dark .ProseMirror h2,
+  .dark .ProseMirror h3 {
+    color: #f1f5f9 !important; /* slate-100 pour une bonne lisibilité */
+    background-color: #1e293b !important; /* slate-800 pour le fond */
+  }
+  
+  /* Correction pour les textes dans les sélecteurs de catégorie */
+  .dark [role="combobox"],
+  .dark [class*="select-trigger"],
+  .dark select,
+  .dark [role="option"],
+  .dark [class*="command-item"],
+  .dark [class*="select-item"] {
+    color: #f1f5f9 !important; /* slate-100 pour le texte */
+    background-color: #1e293b !important; /* slate-800 pour le fond */
+  }
+  
+  /* Correction pour l'étiquette "Categories" et "New" */
+  .dark [class*="select-group"] div,
+  .dark [class*="command-group"] div {
+    color: #94a3b8 !important; /* slate-400 pour une meilleure lisibilité */
+  }
+
+  /* Correction pour les options sélectionnées */
+  .dark [role="option"][aria-selected="true"],
+  .dark [class*="command-item"][aria-selected="true"],
+  .dark [class*="select-item"][aria-selected="true"] {
+    background-color: #334155 !important; /* slate-700 pour le fond sélectionné */
+    color: #ffffff !important; /* blanc pour le texte */
+  }
+
+  /* Correction pour l'input de recherche dans les selects/combobox */
+  .dark [class*="command-input"] input,
+  .dark [class*="select-group"] input {
+    color: #f1f5f9 !important; /* slate-100 pour le texte */
+    background-color: #1e293b !important; /* slate-800 pour le fond */
+  }
+
+  /* Pour s'assurer que les panels des selects sont visibles en mode sombre */
+  .dark [class*="select-content"],
+  .dark [class*="command"] {
+    background-color: #1e293b !important; /* slate-800 pour le fond */
+    border-color: #475569 !important; /* slate-600 pour la bordure */
+  }
+  
+  /* Correction pour les contenus des dialogues en mode sombre */
+  .dark [role="dialog"] .prose,
+  .dark [role="dialog"] .prose * {
+    color: #f1f5f9 !important; /* slate-100 pour le texte */
+  }
+}

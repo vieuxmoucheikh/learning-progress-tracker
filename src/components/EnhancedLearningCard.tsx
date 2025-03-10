@@ -495,27 +495,27 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               >
                 <SelectTrigger className={cn(
                   "w-full max-w-xs",
-                  "bg-gray-50",
-                  "border-gray-200",
-                  "text-gray-900",
+                  "bg-gray-50 dark:bg-gray-800",
+                  "border-gray-200 dark:border-gray-700",
+                  "text-gray-900 dark:text-gray-100",
                   "focus:ring-2 focus:ring-blue-500",
                   "h-9"
                 )}>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                   <SelectGroup>
-                    <div className="px-2 py-1.5 text-sm font-medium text-gray-500">
+                    <div className="px-2 py-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">
                       Categories
                     </div>
                     {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
+                      <SelectItem key={cat} value={cat} className="text-gray-900 dark:text-gray-100">
                         {cat}
                       </SelectItem>
                     ))}
                     {itemCategory && !categories.includes(itemCategory) && (
-                      <SelectItem value={itemCategory}>
-                        {itemCategory} (New)
+                      <SelectItem value={itemCategory} className="text-gray-900 dark:text-gray-100">
+                        {itemCategory} <span className="text-gray-500 dark:text-gray-400">(New)</span>
                       </SelectItem>
                     )}
                   </SelectGroup>
@@ -527,8 +527,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               variant="secondary" 
               className={cn(
                 "font-medium px-2 py-0.5",
-                "bg-blue-50 text-blue-700 hover:bg-blue-100",
-                "border border-blue-200",
+                "bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300",
+                "border border-blue-200 dark:border-blue-800/50",
                 "rounded-full"
               )}
             >
@@ -552,11 +552,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   onChange={setContent}
                   className={cn(
                     "min-h-[200px] rounded-lg",
-                    "bg-gray-50",
-                    "text-gray-900",
-                    "border border-gray-200",
+                    "bg-gray-50 dark:bg-gray-800",
+                    "text-gray-900 dark:text-gray-100",
+                    "border border-gray-200 dark:border-gray-700",
                     "focus-within:ring-2 focus-within:ring-blue-500",
-                    "prose prose-sm sm:prose-base max-w-none",
+                    "prose prose-sm sm:prose-base max-w-none dark:prose-invert",
                     "overflow-y-auto max-h-[60vh]",
                     "prose-headings:font-semibold prose-headings:text-gray-900",
                     "prose-p:text-gray-700 prose-p:leading-relaxed",
@@ -766,18 +766,18 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
       {/* Zoomed View Dialog */}
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto p-6 sm:p-8 bg-white dark:bg-gray-800">
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto p-6 sm:p-8 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
           <DialogHeader>
             <DialogTitle className={cn(
               "text-2xl font-semibold",
-              "text-gray-800 dark:text-white", // Utilisation de couleurs directes plutôt que gradient
+              "text-gray-800 dark:text-white",
             )}>
               {title}
             </DialogTitle>
           </DialogHeader>
           <div className={cn(
             "prose prose-lg max-w-none mt-6",
-            "dark:prose-invert", // Ajout de prose-invert pour le mode sombre
+            "dark:prose-invert",
             "prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-white",
             "prose-p:text-gray-700 dark:prose-p:text-gray-200",
             "prose-a:text-blue-600 dark:prose-a:text-blue-300",

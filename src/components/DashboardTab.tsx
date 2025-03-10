@@ -4,7 +4,7 @@ import { StreakDisplay } from "./StreakDisplay";
 import { Stats } from "./Stats";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
-import { Plus, BookOpen, CheckCircle, Clock, Target, Calendar as CalendarIcon, Trophy, ChartBar, User, Library } from "lucide-react";
+import { Plus, BookOpen, CheckCircle, Clock, Target, Trophy, ChartBar, User, Library } from "lucide-react";
 import { LearningItem, Session } from "@/types";
 import { Calendar } from "./Calendar";
 import LearningItemCard from './LearningItemCard';
@@ -33,6 +33,29 @@ interface Props {
   onAddItem: (date?: Date | null) => void;
   onDateSelect: (date: Date) => void;
 }
+
+const CalendarIcon = React.forwardRef<SVGSVGElement, React.SVGAttributes<SVGSVGElement> & { width?: number; height?: number; strokeWidth?: number; className?: string; color?: string }>((props, ref) => (
+  <svg
+    ref={ref}
+    xmlns="http://www.w3.org/2000/svg"
+    width={props.width || 24}
+    height={props.height || 24}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={props.color || "currentColor"}
+    strokeWidth={props.strokeWidth || 2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={`lucide-calendar ${props.className || ""}`}
+    {...props}
+  >
+    <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+    <line x1="16" x2="16" y1="2" y2="6"></line>
+    <line x1="8" x2="8" y1="2" y2="6"></line>
+    <line x1="3" x2="21" y1="10" y2="10"></line>
+  </svg>
+));
+CalendarIcon.displayName = 'CalendarIcon';
 
 export function DashboardTab({ 
   items, 
@@ -222,7 +245,11 @@ export function DashboardTab({
               className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700 dashboard-calendar-button"
               onClick={() => setShowCalendar(!showCalendar)}
             >
-              <CalendarIcon className="h-4 w-4 text-blue-600 dark:text-blue-400 lucide-calendar" />
+              <CalendarIcon 
+                className="h-4 w-4 text-blue-600 dark:text-blue-400 lucide-calendar" 
+                fill="none" 
+                strokeWidth={1.5}
+              />
               <span className="text-xs font-medium dashboard-calendar-text">
                 {showCalendar ? "Hide Calendar" : "Show Calendar"}
               </span>
@@ -234,7 +261,11 @@ export function DashboardTab({
               className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700 dashboard-goals-button"
               onClick={() => setShowGoals(true)}
             >
-              <Target className="h-4 w-4 text-green-600 dark:text-green-400 lucide-target" />
+              <Target 
+                className="h-4 w-4 text-green-600 dark:text-green-400 lucide-target"
+                fill="none"
+                strokeWidth={1.5}
+              />
               <span className="text-xs font-medium dashboard-goals-text">
                 Goals
               </span>
@@ -250,7 +281,11 @@ export function DashboardTab({
             <div className="flex items-center justify-between mb-4 calendar-header">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                  <CalendarIcon className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                  <CalendarIcon 
+                    className="w-5 h-5 text-blue-500 dark:text-blue-400"
+                    fill="none"
+                    strokeWidth={1.5} 
+                  />
                 </div>
                 <h3 className="text-lg font-semibold">Calendar</h3>
               </div>
@@ -359,7 +394,11 @@ export function DashboardTab({
             <div className="flex items-center justify-between mb-4 calendar-header">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                  <CalendarIcon className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                  <CalendarIcon 
+                    className="w-5 h-5 text-blue-500 dark:text-blue-400"
+                    fill="none"
+                    strokeWidth={1.5} 
+                  />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Calendar</h3>
               </div>
