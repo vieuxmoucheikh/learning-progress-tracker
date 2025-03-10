@@ -24,3 +24,64 @@
     color: white !important;
   }
 }
+
+/* Améliorations pour le Dashboard en mode clair sur mobile */
+@media (max-width: 768px) {
+  /* Conteneur principal */
+  :root:not(.dark) .dashboard-container,
+  :root:not(.dark) [class*="dashboard"] {
+    background-color: #ffffff !important;
+  }
+  
+  /* Cartes statistiques */
+  :root:not(.dark) [class*="dashboard"] .card {
+    background-color: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
+  }
+  
+  /* Textes et titres */
+  :root:not(.dark) [class*="dashboard"] h1,
+  :root:not(.dark) [class*="dashboard"] h2,
+  :root:not(.dark) [class*="dashboard"] h3,
+  :root:not(.dark) [class*="dashboard"] h4,
+  :root:not(.dark) [class*="dashboard"] [class*="title"],
+  :root:not(.dark) [class*="dashboard"] [class*="heading"] {
+    color: #0f172a !important; /* slate-900 */
+    font-weight: 700;
+  }
+  
+  /* Textes secondaires */
+  :root:not(.dark) [class*="dashboard"] p,
+  :root:not(.dark) [class*="dashboard"] span,
+  :root:not(.dark) [class*="dashboard"] div {
+    color: #334155 !important; /* slate-700 */
+  }
+  
+  /* Icônes */
+  :root:not(.dark) [class*="dashboard"] svg {
+    color: #475569 !important; /* slate-600 */
+  }
+  
+  /* Boutons spécifiques pour "Show Calendar" et "Goals" */
+  :root:not(.dark) .dashboard-calendar-button,
+  :root:not(.dark) .dashboard-goals-button {
+    background-color: #f8fafc !important; /* slate-50 */
+    border-color: #e2e8f0 !important; /* slate-200 */
+  }
+  
+  /* Texte dans les boutons */
+  :root:not(.dark) .dashboard-calendar-text,
+  :root:not(.dark) .dashboard-goals-text {
+    color: #334155 !important; /* slate-700 */
+  }
+  
+  /* Icônes spécifiques */
+  :root:not(.dark) .dashboard-calendar-button .lucide-calendar {
+    color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  :root:not(.dark) .dashboard-goals-button .lucide-target {
+    color: #10b981 !important; /* emerald-500 */
+  }
+}

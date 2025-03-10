@@ -1,0 +1,75 @@
+/* Correctifs pour le mode clair sur mobile */
+
+@media (max-width: 768px) {
+  /* Règle universelle pour les éléments qui pourraient avoir conservé un thème sombre en mode clair */
+  :root:not(.dark) [class*="dark:bg-"],
+  :root:not(.dark) [class*="dark:text-"],
+  :root:not(.dark) [class*="dark:border-"] {
+    background-color: initial !important;
+    color: initial !important;
+    border-color: initial !important;
+  }
+  
+  /* Dialogues, modals et popups */
+  :root:not(.dark) [role="dialog"],
+  :root:not(.dark) [role="alertdialog"],
+  :root:not(.dark) [class*="modal"],
+  :root:not(.dark) [class*="popup"],
+  :root:not(.dark) [class*="drawer"] {
+    background-color: #ffffff !important;
+    color: #0f172a !important; /* slate-900 */
+    border-color: #e2e8f0 !important; /* slate-200 */
+  }
+  
+  /* Headers et titres des modales */
+  :root:not(.dark) [role="dialog"] header,
+  :root:not(.dark) [role="alertdialog"] header,
+  :root:not(.dark) [class*="dialog-header"],
+  :root:not(.dark) [class*="modal-header"] {
+    background-color: #f8fafc !important; /* slate-50 */
+  }
+  
+  /* Corps des modales */
+  :root:not(.dark) [role="dialog"] main,
+  :root:not(.dark) [role="alertdialog"] main,
+  :root:not(.dark) [class*="dialog-body"],
+  :root:not(.dark) [class*="modal-body"] {
+    background-color: #ffffff !important;
+    color: #334155 !important; /* slate-700 */
+  }
+  
+  /* Boutons par défaut */
+  :root:not(.dark) button,
+  :root:not(.dark) [role="button"] {
+    color: #334155 !important; /* slate-700 */
+  }
+  
+  /* Boutons primaires */
+  :root:not(.dark) button[class*="primary"],
+  :root:not(.dark) [role="button"][class*="primary"] {
+    background-color: #2563eb !important; /* blue-600 */
+    color: #ffffff !important;
+  }
+  
+  /* Boutons secondaires */
+  :root:not(.dark) button[class*="secondary"],
+  :root:not(.dark) [role="button"][class*="secondary"] {
+    background-color: #f1f5f9 !important; /* slate-100 */
+    color: #334155 !important; /* slate-700 */
+  }
+  
+  /* Inputs et champs de formulaire */
+  :root:not(.dark) input,
+  :root:not(.dark) textarea,
+  :root:not(.dark) select {
+    background-color: #ffffff !important;
+    color: #0f172a !important; /* slate-900 */
+    border-color: #e2e8f0 !important; /* slate-200 */
+  }
+  
+  /* Placeholder dans les inputs */
+  :root:not(.dark) input::placeholder,
+  :root:not(.dark) textarea::placeholder {
+    color: #94a3b8 !important; /* slate-400 */
+  }
+}

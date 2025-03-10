@@ -1040,3 +1040,117 @@ button:active,
     color: #f8fafc !important; /* slate-50 */
   }
 }
+
+/* AMÉLIORATIONS SPÉCIFIQUES POUR LE MODE CLAIR SUR MOBILE */
+@media (max-width: 768px) {
+  /* Règle de base pour tous les fonds en mode clair */
+  :root:not(.dark) body,
+  :root:not(.dark) div,
+  :root:not(.dark) section,
+  :root:not(.dark) aside {
+    background-color: initial;
+  }
+  
+  /* Force le fond clair pour tous les éléments qui pourraient avoir un fond sombre persistant */
+  :root:not(.dark) [class*="bg-gray-800"],
+  :root:not(.dark) [class*="bg-gray-900"],
+  :root:not(.dark) [class*="bg-slate-800"],
+  :root:not(.dark) [class*="bg-slate-900"],
+  :root:not(.dark) [class*="dark:bg-gray-800"],
+  :root:not(.dark) [class*="dark:bg-gray-900"],
+  :root:not(.dark) [class*="dark:bg-slate-800"],
+  :root:not(.dark) [class*="dark:bg-slate-900"] {
+    background-color: #ffffff !important; /* fond blanc */
+  }
+  
+  /* Correction des cartes d'apprentissage en mode clair */
+  :root:not(.dark) [class*="learning-card"],
+  :root:not(.dark) [class*="learning-item-card"] {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
+  }
+  
+  /* Correction des textes en mode clair - s'assurer qu'ils sont foncés */
+  :root:not(.dark) h1, 
+  :root:not(.dark) h2, 
+  :root:not(.dark) h3, 
+  :root:not(.dark) h4,
+  :root:not(.dark) p,
+  :root:not(.dark) span,
+  :root:not(.dark) div,
+  :root:not(.dark) label,
+  :root:not(.dark) a {
+    color: #1e293b !important; /* slate-800 pour une bonne lisibilité */
+  }
+  
+  /* Exceptions pour les textes secondaires/tertiaires */
+  :root:not(.dark) [class*="text-gray-500"],
+  :root:not(.dark) [class*="text-muted"] {
+    color: #64748b !important; /* slate-500 pour les textes secondaires */
+  }
+  
+  /* S'assurer que les icônes sont visibles en mode clair */
+  :root:not(.dark) svg {
+    color: #334155 !important; /* slate-700 pour les icônes */
+    fill: currentColor !important;
+  }
+  
+  /* Correction pour les backgrounds spécifiques qui peuvent causer problème */
+  :root:not(.dark) [class*="bg-gradient"],
+  :root:not(.dark) [class*="from-"] {
+    background-image: linear-gradient(to right, #f8fafc, #ffffff) !important; /* slate-50 to white */
+  }
+  
+  /* Correction pour les bords */
+  :root:not(.dark) [class*="border-gray-700"],
+  :root:not(.dark) [class*="border-gray-800"],
+  :root:not(.dark) [class*="border-slate-700"],
+  :root:not(.dark) [class*="border-slate-800"] {
+    border-color: #e2e8f0 !important; /* slate-200 */
+  }
+  
+  /* Pour les éléments qui pourraient avoir un fond sombre permanent */
+  :root:not(.dark) [style*="background-color: rgb(31, 41, 55)"],
+  :root:not(.dark) [style*="background-color: rgb(17, 24, 39)"],
+  :root:not(.dark) [style*="background-color:#1f2937"],
+  :root:not(.dark) [style*="background-color:#111827"] {
+    background-color: #ffffff !important;
+  }
+}
+
+/* CORRECTION DES PROBLÈMES DE FOND POUR LES CARTES AVEC GRADIENTS ET LES DIALOGUES */
+@media (max-width: 768px) {
+  /* Cartes avec gradients */
+  :root:not(.dark) [class*="from-gray-900"],
+  :root:not(.dark) [class*="from-slate-900"],
+  :root:not(.dark) [class*="from-gray-800"],
+  :root:not(.dark) [class*="from-slate-800"] {
+    --tw-gradient-from: #f8fafc !important; /* slate-50 */
+    --tw-gradient-to: #ffffff !important;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+  }
+  
+  /* Dialogues et popups */
+  :root:not(.dark) [role="dialog"],
+  :root:not(.dark) [class*="popup"],
+  :root:not(.dark) [class*="modal"],
+  :root:not(.dark) [class*="dialog"] {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+  }
+  
+  /* Tous les éléments à l'intérieur des dialogues */
+  :root:not(.dark) [role="dialog"] *,
+  :root:not(.dark) [class*="dialog-content"] * {
+    color: #1e293b !important;
+  }
+  
+  /* Exceptions pour les textes secondaires dans les dialogues */
+  :root:not(.dark) [role="dialog"] [class*="text-gray-500"],
+  :root:not(.dark) [role="dialog"] [class*="text-muted"],
+  :root:not(.dark) [class*="dialog-content"] [class*="text-gray-500"],
+  :root:not(.dark) [class*="dialog-content"] [class*="text-muted"] {
+    color: #64748b !important; /* slate-500 */
+  }
+}

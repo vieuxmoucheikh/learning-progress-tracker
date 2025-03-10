@@ -285,3 +285,99 @@
     }
   }
 }
+
+/* Améliorations spécifiques pour les cartes en mode clair sur mobile */
+@media (max-width: 768px) {
+  /* Fond, bordures et ombres */
+  :root:not(.dark) .learning-item-card,
+  :root:not(.dark) [class*="learning-item-card"],
+  :root:not(.dark) [class*="learning-card"] {
+    background-color: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
+  }
+  
+  /* En-têtes et titres */
+  :root:not(.dark) .learning-item-card h3,
+  :root:not(.dark) .learning-item-card [class*="title"],
+  :root:not(.dark) [class*="learning-item-card"] h3,
+  :root:not(.dark) [class*="learning-item-card"] [class*="title"],
+  :root:not(.dark) [class*="learning-card"] h3,
+  :root:not(.dark) [class*="learning-card"] [class*="title"] {
+    color: #0f172a !important; /* slate-900 pour un contraste maximal */
+    font-weight: 700 !important;
+  }
+  
+  /* Contenu principal */
+  :root:not(.dark) .learning-item-card p,
+  :root:not(.dark) [class*="learning-item-card"] p,
+  :root:not(.dark) [class*="learning-card"] p,
+  :root:not(.dark) .learning-item-card div,
+  :root:not(.dark) [class*="learning-item-card"] div,
+  :root:not(.dark) [class*="learning-card"] div {
+    color: #334155 !important; /* slate-700 pour la lisibilité */
+  }
+  
+  /* Icônes */
+  :root:not(.dark) .learning-item-card svg,
+  :root:not(.dark) [class*="learning-item-card"] svg,
+  :root:not(.dark) [class*="learning-card"] svg {
+    color: #475569 !important; /* slate-600 */
+    fill: currentColor !important;
+  }
+  
+  /* Badges et étiquettes */
+  :root:not(.dark) .learning-item-card [class*="tag"],
+  :root:not(.dark) .learning-item-card [class*="badge"],
+  :root:not(.dark) .learning-item-card [class*="category"],
+  :root:not(.dark) [class*="learning-item-card"] [class*="tag"],
+  :root:not(.dark) [class*="learning-item-card"] [class*="badge"],
+  :root:not(.dark) [class*="learning-item-card"] [class*="category"],
+  :root:not(.dark) [class*="learning-card"] [class*="tag"],
+  :root:not(.dark) [class*="learning-card"] [class*="badge"],
+  :root:not(.dark) [class*="learning-card"] [class*="category"] {
+    background-color: #f1f5f9 !important; /* slate-100 */
+    color: #334155 !important; /* slate-700 */
+    border-color: #e2e8f0 !important; /* slate-200 */
+  }
+  
+  /* Sections de métadonnées et footer */
+  :root:not(.dark) [class*="learning-card"] [class*="footer"],
+  :root:not(.dark) [class*="learning-item-card"] [class*="footer"],
+  :root:not(.dark) [class*="learning-card"] [class*="meta"],
+  :root:not(.dark) [class*="learning-item-card"] [class*="meta"] {
+    background-color: #f8fafc !important; /* slate-50 */
+    border-color: #e2e8f0 !important; /* slate-200 */
+  }
+  
+  /* Boutons dans le mode clair */
+  :root:not(.dark) [class*="learning-card"] button,
+  :root:not(.dark) [class*="learning-item-card"] button {
+    background-color: #f8fafc !important; /* slate-50 */
+    color: #334155 !important; /* slate-700 */
+    border-color: #e2e8f0 !important; /* slate-200 */
+  }
+  
+  /* Au survol des boutons */
+  :root:not(.dark) [class*="learning-card"] button:hover,
+  :root:not(.dark) [class*="learning-item-card"] button:hover {
+    background-color: #f1f5f9 !important; /* slate-100 */
+  }
+}
+
+/* Correction pour l'éditeur de texte riche et les dialogues en mode clair */
+@media (max-width: 768px) {
+  :root:not(.dark) .tiptap,
+  :root:not(.dark) .ProseMirror {
+    background-color: #ffffff !important;
+    color: #0f172a !important; /* slate-900 */
+  }
+  
+  :root:not(.dark) [role="dialog"] {
+    background-color: #ffffff !important;
+  }
+  
+  :root:not(.dark) [role="dialog"] .prose * {
+    color: #0f172a !important; /* slate-900 */
+  }
+}
