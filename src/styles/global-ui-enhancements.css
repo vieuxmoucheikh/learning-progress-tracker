@@ -784,3 +784,68 @@ button:active,
     color: #f1f5f9 !important; /* slate-100 pour le texte */
   }
 }
+
+/* CORRECTIONS FINALES POUR LES PROBLÈMES D'INTERFACE CRITIQUE */
+/* Correction pour le titre invisible dans les cartes marquées comme maîtrisées */
+.dark [class*="border-emerald-400"] h3,
+.dark [class*="border-emerald-400"] [class*="title"],
+.dark [class*="from-emerald-50"] h3,
+.dark [class*="from-emerald-50"] [class*="title"] {
+  color: #0f172a !important; /* slate-900 pour une meilleure lisibilité sur fond clair */
+  text-shadow: none !important;
+}
+
+/* Correction pour le champ de saisie du titre en mode sombre */
+.dark input[placeholder="Enter title..."],
+.dark input[placeholder*="title"],
+.dark [class*="learning-card"] input[type="text"],
+.dark [class*="learning-item-card"] input[type="text"],
+.dark [class*="sm:text-xl"] {
+  background-color: #1e293b !important; /* slate-800 pour le fond */
+  color: #f8fafc !important; /* slate-50 pour le texte */
+  border-color: #475569 !important; /* slate-600 pour la bordure */
+}
+
+/* Pour assurer que les icônes de Dashboard ne sont pas remplies en mode mobile et sombre */
+@media (max-width: 768px) {
+  .dark .dashboard-calendar-button svg.lucide-calendar,
+  .dark .dashboard-goals-button svg.lucide-target {
+    fill: none !important; /* Force l'absence de remplissage */
+    stroke: currentColor !important; /* Utilise uniquement le contour */
+    stroke-width: 1.5px !important; /* Épaisseur de trait optimale */
+  }
+  
+  /* Pour Calendar, garde seulement le contour bleu */
+  .dark .dashboard-calendar-button svg.lucide-calendar {
+    color: #60a5fa !important; /* blue-400 */
+  }
+  
+  /* Pour Goals, garde seulement le contour vert */
+  .dark .dashboard-goals-button svg.lucide-target {
+    color: #4ade80 !important; /* green-400 */
+  }
+  
+  /* Correction spécifique pour le champ de titre des nouvelles cartes sur mobile */
+  .dark [class*="card-editor"] input,
+  .dark [class*="new-card"] input,
+  .dark [class*="card-form"] input {
+    background-color: #1e293b !important; /* slate-800 pour le fond */
+    color: #f8fafc !important; /* slate-50 pour le texte */
+    border-color: #475569 !important; /* slate-600 pour la bordure */
+  }
+  
+  /* Correction pour le titre de carte mastered en mode sombre sur mobile */
+  .dark [class*="mastered"] h3,
+  .dark [class*="mastered"] [class*="title"] {
+    color: #0f172a !important; /* slate-900 pour assurer la visibilité sur fond clair */
+  }
+  
+  /* Assure que tous les champs de saisie sont visibles en mode sombre mobile */
+  .dark input[type="text"],
+  .dark input[type="search"],
+  .dark input:not([type="checkbox"]):not([type="radio"]) {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #475569 !important;
+  }
+}

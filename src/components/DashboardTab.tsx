@@ -247,8 +247,9 @@ export function DashboardTab({
             >
               <CalendarIcon 
                 className="h-4 w-4 text-blue-600 dark:text-blue-400 lucide-calendar" 
-                fill="none" 
-                strokeWidth={1.5}
+                fill="none"
+                strokeWidth={1.5} 
+                stroke="currentColor"
               />
               <span className="text-xs font-medium dashboard-calendar-text">
                 {showCalendar ? "Hide Calendar" : "Show Calendar"}
@@ -265,6 +266,7 @@ export function DashboardTab({
                 className="h-4 w-4 text-green-600 dark:text-green-400 lucide-target"
                 fill="none"
                 strokeWidth={1.5}
+                stroke="currentColor" 
               />
               <span className="text-xs font-medium dashboard-goals-text">
                 Goals

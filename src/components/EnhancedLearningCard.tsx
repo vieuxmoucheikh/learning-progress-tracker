@@ -397,11 +397,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       "relative overflow-hidden transition-all duration-300 border-2 h-full",
       "hover:shadow-lg hover:shadow-blue-300/50",
       "max-w-3xl mx-auto",
-      "bg-white",
+      mastered ? "bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-50 dark:to-white" : "bg-white dark:bg-gray-800",
       "sm:rounded-xl",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
       mastered 
-        ? "border-emerald-400 bg-gradient-to-br from-emerald-50 to-white" 
+        ? "border-emerald-400 mastered-card" 
         : "border-blue-400 hover:border-blue-500",
       isEditing && "border-blue-500 shadow-lg shadow-blue-300/50"
     )}>
@@ -416,11 +416,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   onChange={(e) => setTitle(e.target.value)}
                   className={cn(
                     "text-lg font-semibold",
-                    "bg-gray-50",
-                    "text-gray-900",
-                    "border-gray-200",
+                    "bg-gray-50 dark:bg-gray-800",
+                    "text-gray-900 dark:text-gray-100",
+                    "border-gray-200 dark:border-gray-600",
                     "focus-visible:ring-2 focus-visible:ring-blue-500",
-                    "placeholder:text-gray-400",
+                    "placeholder:text-gray-400 dark:placeholder:text-gray-500",
                     "w-full sm:text-xl"
                   )}
                   placeholder="Enter title..."
@@ -429,7 +429,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 <h3 
                   className={cn(
                     "text-xl sm:text-2xl font-semibold line-clamp-2 card-title",
-                    "dark:text-white text-gray-900" // Utiliser les classes Tailwind pour préserver le mode clair
+                    "text-gray-900",
+                    // Optimisation pour la visibilité du titre même quand marqué comme maîtrisé
+                    mastered ? "dark:text-gray-900" : "dark:text-white",
                   )}
                   onClick={() => setShowContent(!showContent)}
                 >
