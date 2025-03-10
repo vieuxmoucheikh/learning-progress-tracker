@@ -977,3 +977,66 @@ button:active,
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
   }
 }
+
+/* CORRECTION URGENTE POUR LE TEXTE "ORGANIZE AND MANAGE" EN MODE SOMBRE SUR MOBILE */
+@media (max-width: 768px) {
+  /* Ciblage ultra-spécifique pour le texte d'introduction des cartes d'apprentissage */
+  .dark [class*="learning"] p[class*="text-muted"],
+  .dark [class*="learning"] p[class*="intro"],
+  .dark [class*="learning"] p[class*="description"],
+  .dark [class*="learning"] p[class*="subtitle"],
+  .dark [class*="learning"] p[class*="manage"],
+  .dark [class*="learning"] p[class*="organize"],
+  .dark [class*="learning"] p[class*="muted"],
+  .dark [class*="learning"] p:first-of-type,
+  .dark [class*="learning"] [class*="introduction"],
+  .dark [class*="learning"] [class*="page-description"],
+  .dark [class*="learning"] [role="paragraph"],
+  .dark [class*="learning"] [class*="headline"] + p {
+    color: #f8fafc !important; /* slate-50 pour garantir un contraste maximal */
+    opacity: 1 !important;
+    visibility: visible !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3) !important;
+    font-weight: 500 !important;
+  }
+  
+  /* Règles encore plus spécifiques pour déboguer le problème */
+  .dark [data-testid*="learning"],
+  .dark [id*="learning"],
+  .dark [class*="learning-tab"],
+  .dark [class*="learning-content"] {
+    & p, & div[class*="text"], & span[class*="text"] {
+      color: #f8fafc !important; /* slate-50 */
+    }
+    
+    & [class*="description"],
+    & [class*="intro"],
+    & [class*="subtitle"],
+    & [class*="muted"] {
+      color: #f8fafc !important; /* slate-50 */
+      opacity: 1 !important;
+    }
+  }
+  
+  /* Éviter que les règles pour les cartes mastered n'écrasent ce style */
+  .dark [class*="learning"] p:not([class*="mastered"]):not([class*="emerald"]) {
+    color: #f8fafc !important; /* slate-50 */
+  }
+  
+  /* Assurer une visibilité maximale avec !important multi-niveau */
+  .dark [class*="learning"] p.dark\:text-gray-500,
+  .dark [class*="learning"] .dark\:text-gray-500,
+  .dark [class*="learning"] .dark\:text-gray-400,
+  .dark [class*="learning"] .dark\:text-muted-foreground {
+    color: #f8fafc !important; /* slate-50 */
+  }
+  
+  /* Règle universelle pour déboguer en dernier recours */
+  .dark [class*="learning"] * {
+    color: inherit;
+  }
+  
+  .dark [class*="learning"] p {
+    color: #f8fafc !important; /* slate-50 */
+  }
+}
