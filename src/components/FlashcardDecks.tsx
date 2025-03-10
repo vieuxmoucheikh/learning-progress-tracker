@@ -359,7 +359,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{summary.dueToday}</p>
             </div>
           </div>
-          
+           
           <div className="flex flex-wrap gap-2 mb-3">
             {summary.reviewStatus && (
               <Badge variant={getReviewStatusBadge(summary.reviewStatus)} className="text-xs px-2 py-1 rounded-md">
