@@ -1,0 +1,128 @@
+.rich-content-editor table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.rich-content-editor th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+}
+
+.rich-content-editor td {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+}
+
+.rich-content-editor .ProseMirror {
+  min-height: 150px;
+}
+
+.rich-content-editor .ProseMirror:focus {
+  outline: none;
+}
+
+/* Table styles */
+.rich-content-editor table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  table-layout: fixed;
+}
+
+.rich-content-editor th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+}
+
+.rich-content-editor td {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  vertical-align: top;
+}
+
+/* Editor content styles */
+.rich-content-editor .ProseMirror {
+  min-height: 150px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  white-space: break-spaces;
+  padding: 1rem;
+}
+
+.rich-content-editor .ProseMirror p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Ensure proper list spacing and alignment */
+.rich-content-editor ul,
+.rich-content-editor ol {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.rich-content-editor li {
+  margin: 0.25rem 0;
+}
+
+/* Blockquote styles */
+.rich-content-editor blockquote {
+  margin: 1rem 0;
+  padding-left: 1rem;
+  border-left: 4px solid #e5e7eb;
+  color: #6b7280;
+}
+
+/* Code block styles */
+.rich-content-editor pre {
+  background-color: #f3f4f6;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+}
+
+/* Task list styles */
+.rich-content-editor ul[data-type="taskList"] {
+  list-style: none;
+  padding: 0;
+}
+
+.rich-content-editor ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+/* Ensure editor container takes full height */
+.rich-content-editor .editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Ensure content area scrolls properly */
+.rich-content-editor .editor-content {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Remove focus outline from buttons while maintaining accessibility */
+.rich-content-editor button:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.rich-content-editor button:focus:not(:focus-visible) {
+  outline: none;
+}

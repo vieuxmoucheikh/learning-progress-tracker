@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Learning Platform</title>
+    <!-- Chargement optimisé des styles -->
+    <link rel="stylesheet" href="critical-light-mode-fixes.css" />
+    <link rel="stylesheet" href="dark-mode.css" />
+    <link rel="stylesheet" href="LearningItemCard.css" />
+    <link rel="stylesheet" href="emergency-mobile-fix.css" />
+    <style>
+      /* Styles critiques inlines pour éviter les flashs lors des transitions */
+      :root {
+        --transition-speed: 0.3s;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Arial", sans-serif;
+        transition: background-color var(--transition-speed) ease,
+          color var(--transition-speed) ease;
+      }
+
+      /* État initial pour éviter un flash de mode non désiré */
+      html.transition,
+      html.transition *,
+      html.transition *:before,
+      html.transition *:after {
+        transition: background-color var(--transition-speed) ease,
+          color var(--transition-speed) ease,
+          border-color var(--transition-speed) ease !important;
+        transition-delay: 0 !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <!-- Script pour corriger les problèmes de mode clair et sombre sur mobile -->
+    <script src="/light-mode-fixer.js"></script>
+    <!-- Bouton de basculement mode clair/sombre -->
+    <button
+      id="theme-toggle"
+      aria-label="Basculer entre le mode clair et sombre"
+    >
+      <svg
+        class="light-icon"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 17C14.7614 17 17 14.7614 17 12C17 9.23858 14.7614 7 12 7C9.23858 7 7 9.23858 7 12C7 14.7614 9.23858 17 12 17Z"
+          stroke="currentColor"
+          stroke-width="2"
+        />
+        <path
+          d="M12 1V3M12 21V23M1 12H3M21 12H23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22"
+          stroke="currentColor"
+          stroke-width="2"
+        />
+      </svg>
+      <svg
+        class="dark-icon"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+          stroke="currentColor"
+          stroke-width="2"
+        />
+      </svg>
+    </button>
+
+    <script src="theme-switcher.js"></script>
+  </body>
+</html>

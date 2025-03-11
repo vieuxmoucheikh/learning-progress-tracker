@@ -1,0 +1,124 @@
+/* Styles de base pour les cartes d'apprentissage */
+.learning-item-card {
+  border-radius: 8px;
+  padding: 16px;
+  margin: 12px;
+  width: calc(33.33% - 24px);
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+/* Styles communs indépendants du thème */
+.learning-item-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.learning-item-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.learning-item-description {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.icon-container {
+  height: 40px;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.icon-container svg {
+  height: 24px;
+  width: 24px;
+  transition: fill 0.3s ease;
+}
+
+/* Styles spécifiques au mode clair */
+:root:not(.dark-mode) .learning-item-card {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+:root:not(.dark-mode) .icon-container svg {
+  fill: #333333;
+}
+
+:root:not(.dark-mode) .learning-item-title {
+  color: #333333;
+}
+
+:root:not(.dark-mode) .learning-item-description {
+  color: #666666;
+}
+
+/* Styles spécifiques au mode sombre */
+:root.dark-mode .learning-item-card {
+  background-color: #1e1e1e;
+  border: 1px solid #333333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+:root.dark-mode .icon-container svg {
+  fill: #e0e0e0;
+}
+
+:root.dark-mode .learning-item-title {
+  color: #e0e0e0;
+}
+
+:root.dark-mode .learning-item-description {
+  color: #b0b0b0;
+}
+
+/* Styles pour les boutons d'action */
+.action-button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+:root:not(.dark-mode) .action-button {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+}
+
+:root:not(.dark-mode) .action-button:hover {
+  background-color: #3a80d2;
+}
+
+:root.dark-mode .action-button {
+  background-color: #64b5f6;
+  color: #121212;
+  border: none;
+}
+
+:root.dark-mode .action-button:hover {
+  background-color: #4a90e2;
+}
+
+/* Style pour l'affichage responsive */
+@media (max-width: 1024px) {
+  .learning-item-card {
+    width: calc(50% - 24px);
+  }
+}
+
+@media (max-width: 768px) {
+  .learning-item-card {
+    width: calc(100% - 16px);
+    margin: 8px;
+  }
+}

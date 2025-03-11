@@ -1,0 +1,26 @@
+/* CSS spécifique pour le Dashboard en mode sombre sur mobile */
+@media (max-width: 768px) {
+  /* Correction des problèmes de visibilité pour Show Calendar et Goals */
+  .dark .dashboard-container [class*="calendar-toggle"],
+  .dark .dashboard-container [class*="calendar-button"],
+  .dark .dashboard-container [class*="goals-header"],
+  .dark .dashboard-container [class*="section-header"] {
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    font-weight: 700;
+  }
+  
+  /* Amélioration de la visibilité des boutons */
+  .dark .dashboard-container button,
+  .dark .dashboard-container [role="button"] {
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white !important;
+  }
+  
+  /* S'assurer que le texte dans les boutons est visible */
+  .dark .dashboard-container button *,
+  .dark .dashboard-container [role="button"] * {
+    color: white !important;
+  }
+}

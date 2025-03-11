@@ -1,0 +1,113 @@
+/* Correctifs critiques pour le mode clair sur mobile */
+@media (max-width: 768px) {
+  /* Fond d'application principal - UNIQUEMENT mode clair */
+  html[data-theme="light"]:not([data-theme="dark"]),
+  html[data-theme="light"]:not([data-theme="dark"]) body {
+    --background: 248 250 252 !important; /* slate-50 */
+    background-color: #f8fafc !important;
+  }
+  
+  /* Amélioration de la transition entre modes */
+  html, body, .card, [class*="Card"], [class*="-card"] {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+
+  /* Améliorer la visibilité des cartes d'apprentissage - VERSION RENFORCÉE - UNIQUEMENT mode clair */
+  html[data-theme="light"]:not([data-theme="dark"]) .learning-item-card,
+  html[data-theme="light"]:not([data-theme="dark"]) [class*="learning-item-card"],
+  html[data-theme="light"]:not([data-theme="dark"]) [class*="learning-card"],
+  html[data-theme="light"]:not([data-theme="dark"]) .card,
+  html[data-theme="light"]:not([data-theme="dark"]) div.card,
+  html[data-theme="light"]:not([data-theme="dark"]) div[class*="Card"],
+  html[data-theme="light"]:not([data-theme="dark"]) div[class*="card"],
+  html[data-theme="light"]:not([data-theme="dark"]) .dark\:bg-gray-800,
+  html[data-theme="light"]:not([data-theme="dark"]) .mastered-card,
+  html[data-theme="light"]:not([data-theme="dark"]) div.mastered-card {
+    background-color: #ffffff !important; /* blanc pur */
+    background: #ffffff !important; /* double propriété pour forcer l'override */
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    overflow: hidden; /* Pour éviter les fuites de style */
+  }
+
+  /* Correction pour les éléments avec des classes dark UNIQUEMENT en mode clair */
+  html[data-theme="light"]:not([data-theme="dark"]) .dark\:bg-gray-800,
+  html[data-theme="light"]:not([data-theme="dark"]) .dark\:bg-card {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+  }
+
+  /* PRÉSERVATION DES COULEURS IMPORTANTES DANS LES DEUX MODES */
+  /* Ne jamais modifier la couleur des icônes */
+  svg, [class*="lucide-"], [class*="icon"] {
+    color: currentColor !important;
+  }
+
+  /* Préserver les couleurs des badges dans les deux modes */
+  [class*="badge"].bg-blue-100, 
+  [class*="badge"].bg-green-100, 
+  [class*="badge"].bg-yellow-100,
+  [class*="badge"].bg-red-100 {
+    color: currentColor !important;
+  }
+
+  /* Ne pas modifier les couleurs des boutons spécifiques dans les deux modes */
+  button.bg-blue-500,
+  button.bg-green-500,
+  button.bg-red-500,
+  button.bg-yellow-500,
+  .bg-blue-500,
+  .bg-green-500, 
+  .bg-red-500,
+  .bg-yellow-500 {
+    color: #ffffff !important;
+  }
+
+  /* Corriger spécifiquement les badges colorés en mode clair */
+  html[data-theme="light"]:not([data-theme="dark"]) [class*="bg-blue-100"].text-blue-700,
+  html[data-theme="light"]:not([data-theme="dark"]) [class*="bg-green-100"].text-green-700,
+  html[data-theme="light"]:not([data-theme="dark"]) [class*="bg-yellow-100"].text-yellow-700,
+  html[data-theme="light"]:not([data-theme="dark"]) [class*="bg-red-100"].text-red-700 {
+    color: currentColor !important;
+  }
+  
+  /* Corriger spécifiquement les badges en mode sombre */
+  html[data-theme="dark"] [class*="badge"] {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+/* FIXATEUR DE MODE SOMBRE - Garantir que le mode sombre fonctionne correctement */
+@media (max-width: 768px) {
+  html[data-theme="dark"], 
+  html[data-theme="dark"] body {
+    background-color: #1e293b !important; /* slate-800 */
+    color-scheme: dark !important;
+  }
+  
+  /* Assurer les fonds noirs pour le mode sombre */
+  html[data-theme="dark"] .card,
+  html[data-theme="dark"] [class*="Card"],
+  html[data-theme="dark"] [class*="-card"],
+  html[data-theme="dark"] [class*="card"] {
+    background-color: #1e293b !important; /* slate-800 */
+    background: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  }
+  
+  /* Texte en blanc pour le mode sombre */
+  html[data-theme="dark"] h1,
+  html[data-theme="dark"] h2,
+  html[data-theme="dark"] h3,
+  html[data-theme="dark"] h4,
+  html[data-theme="dark"] h5,
+  html[data-theme="dark"] h6 {
+    color: #f8fafc !important; /* slate-50 */
+  }
+  
+  html[data-theme="dark"] p:not([class*="text-"]),
+  html[data-theme="dark"] span:not([class*="text-"]) {
+    color: #e2e8f0 !important; /* slate-200 */
+  }
+}
