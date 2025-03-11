@@ -1,0 +1,259 @@
+/* Correctifs pour le mode clair sur mobile */
+
+@media (max-width: 768px) {
+  /* Règle universelle pour les éléments qui pourraient avoir conservé un thème sombre en mode clair */
+  :root:not(.dark) [class*="dark:bg-"],
+  :root:not(.dark) [class*="dark:text-"],
+  :root:not(.dark) [class*="dark:border-"] {
+    background-color: initial !important;
+    color: initial !important;
+    border-color: initial !important;
+  }
+  
+  /* Correction pour le menu de navigation */
+  :root:not(.dark) nav,
+  :root:not(.dark) [class*="navigation"],
+  :root:not(.dark) [class*="navbar"],
+  :root:not(.dark) [class*="nav-container"] {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0 !important; /* slate-200 */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  }
+  
+  /* Éléments du menu de navigation */
+  :root:not(.dark) nav a,
+  :root:not(.dark) [class*="navigation"] a,
+  :root:not(.dark) [class*="navbar"] a,
+  :root:not(.dark) [class*="nav-link"],
+  :root:not(.dark) [class*="nav-item"] {
+    color: #64748b !important; /* slate-500 - couleur par défaut */
+  }
+  
+  /* Élément actif du menu */
+  :root:not(.dark) nav a.active,
+  :root:not(.dark) [class*="navigation"] a.active,
+  :root:not(.dark) [class*="navbar"] a.active,
+  :root:not(.dark) [class*="nav-link"].active,
+  :root:not(.dark) [class*="nav-item"].active,
+  :root:not(.dark) [aria-current="page"] {
+    color: #3b82f6 !important; /* blue-500 */
+    background-color: #eff6ff !important; /* blue-50 */
+    font-weight: 600;
+    border-color: #3b82f6 !important; /* blue-500 */
+  }
+
+  /* CORRECTION POUR LES ICÔNES - PRIORITÉ CRITIQUE */
+  
+  /* Définir un style commun pour TOUTES les icônes SVG en mode clair */
+  :root:not(.dark) svg {
+    fill: none !important; /* Par défaut, on supprime tout remplissage */
+    color: #475569 !important; /* slate-600 comme couleur par défaut */
+    stroke: currentColor !important; /* Utiliser la couleur actuelle pour les contours */
+    stroke-width: 1.5 !important; /* Épaisseur standard des traits */
+  }
+  
+  /* Restauration des couleurs d'icônes spécifiques */
+  :root:not(.dark) svg.lucide-calendar {
+    color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  :root:not(.dark) svg.lucide-target {
+    color: #10b981 !important; /* emerald-500 */
+  }
+  
+  :root:not(.dark) svg.lucide-check,
+  :root:not(.dark) svg.lucide-check-circle,
+  :root:not(.dark) svg.lucide-check-circle-2 {
+    color: #10b981 !important; /* emerald-500 */
+  }
+  
+  :root:not(.dark) svg.lucide-bookmark,
+  :root:not(.dark) svg.lucide-bookmark-plus {
+    color: #10b981 !important; /* emerald-500 */
+  }
+  
+  :root:not(.dark) svg.lucide-bookmark-check {
+    color: #059669 !important; /* emerald-600 */
+  }
+  
+  :root:not(.dark) svg.lucide-edit,
+  :root:not(.dark) svg.lucide-pencil {
+    color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  :root:not(.dark) svg.lucide-save {
+    color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  :root:not(.dark) svg.lucide-download {
+    color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  :root:not(.dark) svg.lucide-eye,
+  :root:not(.dark) svg.lucide-eye-off {
+    color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  :root:not(.dark) svg.lucide-trash,
+  :root:not(.dark) svg.lucide-trash-2 {
+    color: #ef4444 !important; /* red-500 */
+  }
+  
+  :root:not(.dark) svg.lucide-clock {
+    color: #64748b !important; /* slate-500 */
+  }
+  
+  :root:not(.dark) svg.lucide-trophy {
+    color: #f59e0b !important; /* amber-500 */
+  }
+  
+  /* Couleurs spéciales pour les boutons d'action avec des icônes */
+  :root:not(.dark) button:has(.lucide-bookmark-check) svg,
+  :root:not(.dark) button:has(.lucide-bookmark-check) * {
+    color: #059669 !important; /* emerald-600 */
+  }
+  
+  :root:not(.dark) button:has(.lucide-bookmark):not(:has(.lucide-bookmark-check)) svg,
+  :root:not(.dark) button:has(.lucide-bookmark):not(:has(.lucide-bookmark-check)) * {
+    color: #10b981 !important; /* emerald-500 */
+  }
+  
+  :root:not(.dark) button:has(.lucide-trash) svg,
+  :root:not(.dark) button:has(.lucide-trash-2) svg,
+  :root:not(.dark) button:has(.lucide-trash) *,
+  :root:not(.dark) button:has(.lucide-trash-2) * {
+    color: #ef4444 !important; /* red-500 */
+  }
+  
+  /* Icônes dans les cartes Dashboard */
+  :root:not(.dark) [class*="dashboard"] svg.lucide-clock {
+    color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  :root:not(.dark) [class*="dashboard"] svg.lucide-check-circle,
+  :root:not(.dark) [class*="dashboard"] svg.lucide-check-circle-2 {
+    color: #10b981 !important; /* emerald-500 */
+  }
+  
+  :root:not(.dark) [class*="dashboard"] svg.lucide-book-open {
+    color: #8b5cf6 !important; /* violet-500 */
+  }
+  
+  :root:not(.dark) [class*="dashboard"] svg.lucide-trophy {
+    color: #f59e0b !important; /* amber-500 */
+  }
+  
+  /* S'assurer que tous les arrière-plans sont correctement réinitialisés */
+  :root:not(.dark) [class*="bg-gray-800"],
+  :root:not(.dark) [class*="bg-gray-900"],
+  :root:not(.dark) [class*="bg-slate-800"],
+  :root:not(.dark) [class*="bg-slate-900"] {
+    background-color: #ffffff !important; /* Réinitialisation à blanc */
+  }
+  
+  /* Textes plus lisibles */
+  :root:not(.dark) p,
+  :root:not(.dark) span,
+  :root:not(.dark) div,
+  :root:not(.dark) h1,
+  :root:not(.dark) h2,
+  :root:not(.dark) h3,
+  :root:not(.dark) h4,
+  :root:not(.dark) a,
+  :root:not(.dark) label,
+  :root:not(.dark) button {
+    color: #0f172a !important; /* slate-900 */
+  }
+  
+  /* Exceptions pour les boutons avec des couleurs spécifiques */
+  :root:not(.dark) button.bg-blue-600,
+  :root:not(.dark) button[class*="primary"],
+  :root:not(.dark) [role="button"].bg-blue-600,
+  :root:not(.dark) [class*="btn-primary"] {
+    background-color: #3b82f6 !important; /* blue-500 */
+    color: #ffffff !important; /* white */
+  }
+  
+  :root:not(.dark) button.bg-red-600,
+  :root:not(.dark) button[class*="destructive"],
+  :root:not(.dark) [role="button"].bg-red-600,
+  :root:not(.dark) [class*="btn-danger"] {
+    background-color: #ef4444 !important; /* red-500 */
+    color: #ffffff !important; /* white */
+  }
+  
+  :root:not(.dark) button.bg-green-600,
+  :root:not(.dark) button[class*="success"],
+  :root:not(.dark) [role="button"].bg-green-600,
+  :root:not(.dark) [class*="btn-success"] {
+    background-color: #10b981 !important; /* emerald-500 */
+    color: #ffffff !important; /* white */
+  }
+
+  /* Dialogues, modals et popups */
+  :root:not(.dark) [role="dialog"],
+  :root:not(.dark) [role="alertdialog"],
+  :root:not(.dark) [class*="modal"],
+  :root:not(.dark) [class*="popup"],
+  :root:not(.dark) [class*="drawer"] {
+    background-color: #ffffff !important;
+    color: #0f172a !important; /* slate-900 */
+    border-color: #e2e8f0 !important; /* slate-200 */
+  }
+  
+  /* Headers et titres des modales */
+  :root:not(.dark) [role="dialog"] header,
+  :root:not(.dark) [role="alertdialog"] header,
+  :root:not(.dark) [class*="dialog-header"],
+  :root:not(.dark) [class*="modal-header"] {
+    background-color: #f8fafc !important; /* slate-50 */
+  }
+  
+  /* Corps des modales */
+  :root:not(.dark) [role="dialog"] main,
+  :root:not(.dark) [role="alertdialog"] main,
+  :root:not(.dark) [class*="dialog-body"],
+  :root:not(.dark) [class*="modal-body"] {
+    background-color: #ffffff !important;
+    color: #334155 !important; /* slate-700 */
+  }
+  
+  /* Inputs et champs de formulaire */
+  :root:not(.dark) input,
+  :root:not(.dark) textarea,
+  :root:not(.dark) select {
+    background-color: #ffffff !important;
+    color: #0f172a !important; /* slate-900 */
+    border-color: #e2e8f0 !important; /* slate-200 */
+  }
+  
+  /* Placeholder dans les inputs */
+  :root:not(.dark) input::placeholder,
+  :root:not(.dark) textarea::placeholder {
+    color: #94a3b8 !important; /* slate-400 */
+  }
+  
+  /* Correction pour les boutons Material Design ou similaires */
+  :root:not(.dark) .MuiButton-root,
+  :root:not(.dark) [class*="MuiButton"] {
+    color: inherit !important;
+    background-color: inherit !important;
+  }
+  
+  /* Préservation des couleurs pour les boutons primaires et secondaires */
+  :root:not(.dark) [class*="btn-primary"],
+  :root:not(.dark) button[class*="primary"],
+  :root:not(.dark) [role="button"][class*="primary"] {
+    background-color: #3b82f6 !important; /* blue-500 */
+    color: #ffffff !important;
+    border-color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  :root:not(.dark) [class*="btn-secondary"],
+  :root:not(.dark) button[class*="secondary"],
+  :root:not(.dark) [role="button"][class*="secondary"] {
+    background-color: #f1f5f9 !important; /* slate-100 */
+    color: #334155 !important; /* slate-700 */
+    border-color: #e2e8f0 !important; /* slate-200 */
+  }
+}

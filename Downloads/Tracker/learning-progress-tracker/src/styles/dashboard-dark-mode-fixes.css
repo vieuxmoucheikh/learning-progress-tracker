@@ -1,0 +1,326 @@
+/* PRÉSERVATION DES STYLES DU DASHBOARD EN MODE SOMBRE SUR MOBILE */
+
+@media (max-width: 768px) {
+  /* IMPORTANT: Ces règles s'appliquent UNIQUEMENT au mode sombre */
+  
+  /* Réinitialisation générale pour le dashboard en mode sombre */
+  html.dark [class*="dashboard"],
+  html.dark [id*="dashboard"],
+  html.dark [data-section="dashboard"] {
+    background-color: #0f172a !important; /* slate-900 */
+  }
+  
+  /* Cartes en fond sombre */
+  html.dark [class*="dashboard"] .card,
+  html.dark [class*="dashboard"] [class*="card"],
+  html.dark [id*="dashboard"] .card,
+  html.dark [id*="dashboard"] [class*="card"] {
+    background: #1e293b !important; /* slate-800 */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4) !important;
+  }
+  
+  /********************************************
+   * SOLUTION URGENTE POUR LES ICÔNES SVG
+   ********************************************/
+   
+  /* Règle maître pour TOUTES les icônes du dashboard */
+  html.dark [class*="dashboard"] svg,
+  html.dark [id*="dashboard"] svg,
+  html.dark [data-section="dashboard"] svg {
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    width: 24px !important;
+    height: 24px !important;
+    overflow: visible !important;
+  }
+  
+  /* Forcer l'absence de remplissage sur les chemins SVG */
+  html.dark [class*="dashboard"] svg *,
+  html.dark [id*="dashboard"] svg *,
+  html.dark [data-section="dashboard"] svg * {
+    fill: none !important;
+  }
+  
+  /* Réglages des couleurs spécifiques pour chaque type d'icône */
+  /* Calendar - Bleu */
+  html.dark svg.lucide-calendar {
+    color: #60a5fa !important; /* blue-400 */
+    stroke: #60a5fa !important;
+  }
+  
+  /* Target/Goals - Vert */
+  html.dark svg.lucide-target {
+    color: #34d399 !important; /* emerald-400 */
+    stroke: #34d399 !important;
+  }
+  
+  /* Clock - Bleu */
+  html.dark svg.lucide-clock {
+    color: #60a5fa !important; /* blue-400 */
+    stroke: #60a5fa !important;
+  }
+  
+  /* Check/Completed - Vert */
+  html.dark svg.lucide-check-circle,
+  html.dark svg.lucide-check-circle-2,
+  html.dark svg.lucide-check {
+    color: #34d399 !important; /* emerald-400 */
+    stroke: #34d399 !important;
+  }
+  
+  /* BookOpen - Violet */
+  html.dark svg.lucide-book-open {
+    color: #a78bfa !important; /* violet-400 */
+    stroke: #a78bfa !important;
+  }
+  
+  /* Trophy - Ambre */
+  html.dark svg.lucide-trophy {
+    color: #fbbf24 !important; /* amber-400 */
+    stroke: #fbbf24 !important;
+  }
+  
+  /* Règles très spécifiques pour les cartes statistiques */
+  /* Carte bleue */
+  html.dark .from-blue-50 svg,
+  html.dark [class*="from-blue-50"] svg,
+  html.dark .bg-blue-100 svg,
+  html.dark [class*="bg-blue-100"] svg {
+    color: #60a5fa !important; /* blue-400 */
+    stroke: #60a5fa !important;
+  }
+  
+  /* Carte verte */
+  html.dark .from-green-50 svg,
+  html.dark [class*="from-green-50"] svg,
+  html.dark .bg-green-100 svg,
+  html.dark [class*="bg-green-100"] svg {
+    color: #34d399 !important; /* emerald-400 */
+    stroke: #34d399 !important;
+  }
+  
+  /* Carte violette */
+  html.dark .from-purple-50 svg,
+  html.dark [class*="from-purple-50"] svg,
+  html.dark .bg-purple-100 svg,
+  html.dark [class*="bg-purple-100"] svg {
+    color: #a78bfa !important; /* violet-400 */
+    stroke: #a78bfa !important;
+  }
+  
+  /* Carte ambre */
+  html.dark .from-amber-50 svg,
+  html.dark [class*="from-amber-50"] svg,
+  html.dark .bg-amber-100 svg,
+  html.dark [class*="bg-amber-100"] svg {
+    color: #fbbf24 !important; /* amber-400 */
+    stroke: #fbbf24 !important;
+  }
+
+  /* Règles spécifiques pour les icônes dans les cartes dashboard */
+  html.dark [class*="dashboard"] .from-blue-50 svg,
+  html.dark [class*="dashboard"] [class*="from-blue-50"] svg {
+    color: #60a5fa !important;
+    stroke: #60a5fa !important;
+  }
+  
+  html.dark [class*="dashboard"] .from-green-50 svg,
+  html.dark [class*="dashboard"] [class*="from-green-50"] svg {
+    color: #34d399 !important;
+    stroke: #34d399 !important;
+  }
+  
+  html.dark [class*="dashboard"] .from-purple-50 svg,
+  html.dark [class*="dashboard"] [class*="from-purple-50"] svg {
+    color: #a78bfa !important;
+    stroke: #a78bfa !important;
+  }
+  
+  html.dark [class*="dashboard"] .from-amber-50 svg,
+  html.dark [class*="dashboard"] [class*="from-amber-50"] svg {
+    color: #fbbf24 !important;
+    stroke: #fbbf24 !important;
+  }
+  
+  /* Fonds circulaires avec les icônes */
+  html.dark [class*="dashboard"] .bg-blue-100 svg,
+  html.dark [class*="dashboard"] [class*="bg-blue-100"] svg {
+    color: #60a5fa !important;
+    stroke: #60a5fa !important;
+  }
+  
+  html.dark [class*="dashboard"] .bg-green-100 svg,
+  html.dark [class*="dashboard"] [class*="bg-green-100"] svg {
+    color: #34d399 !important;
+    stroke: #34d399 !important;
+  }
+  
+  html.dark [class*="dashboard"] .bg-purple-100 svg,
+  html.dark [class*="dashboard"] [class*="bg-purple-100"] svg {
+    color: #a78bfa !important;
+    stroke: #a78bfa !important;
+  }
+  
+  html.dark [class*="dashboard"] .bg-amber-100 svg,
+  html.dark [class*="dashboard"] [class*="bg-amber-100"] svg {
+    color: #fbbf24 !important;
+    stroke: #fbbf24 !important;
+  }
+
+  /* ====== SOLUTION POUR LES ÉLÉMENTS DE CHEMIN SVG ====== */
+  html.dark [class*="dashboard"] svg path,
+  html.dark [id*="dashboard"] svg path {
+    fill: none !important;
+    stroke: inherit !important;
+  }
+
+  /* ====== RÉGLAGE POUR LES ICÔNES À CIRCULATION DE COULEUR ====== */
+  /* Cette approche garantit la visibilité des icônes en forçant l'animation des couleurs */
+  @keyframes pulseStroke {
+    0% { stroke-opacity: 0.85; }
+    50% { stroke-opacity: 1; }
+    100% { stroke-opacity: 0.85; }
+  }
+  
+  html.dark [class*="dashboard"] svg {
+    animation: pulseStroke 2s ease-in-out infinite;
+  }
+  
+  /* ====== CARTES STATISTIQUES EN MODE SOMBRE ====== */
+  /* Carte bleue */
+  html.dark [class*="dashboard"] .from-blue-50,
+  html.dark [class*="dashboard"] [class*="from-blue-50"] {
+    background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%) !important; /* blue-950 à blue-900 */
+    border-color: #1d4ed8 !important; /* blue-700 */
+  }
+  
+  /* Carte verte */
+  html.dark [class*="dashboard"] .from-green-50,
+  html.dark [class*="dashboard"] [class*="from-green-50"] {
+    background: linear-gradient(135deg, #064e3b 0%, #065f46 100%) !important; /* emerald-950 à emerald-900 */
+    border-color: #059669 !important; /* emerald-700 */
+  }
+  
+  /* Carte violette */
+  html.dark [class*="dashboard"] .from-purple-50,
+  html.dark [class*="dashboard"] [class*="from-purple-50"] {
+    background: linear-gradient(135deg, #2e1065 0%, #4c1d95 100%) !important; /* violet-950 à violet-900 */
+    border-color: #7e22ce !important; /* violet-700 */
+  }
+  
+  /* Carte ambre */
+  html.dark [class*="dashboard"] .from-amber-50,
+  html.dark [class*="dashboard"] [class*="from-amber-50"] {
+    background: linear-gradient(135deg, #451a03 0%, #78350f 100%) !important; /* amber-950 à amber-900 */
+    border-color: #b45309 !important; /* amber-700 */
+  }
+  
+  /* FONDS CIRCULAIRES DES ICÔNES */
+  /* Fond bleu pour icône */
+  html.dark [class*="dashboard"] .bg-blue-100,
+  html.dark [class*="dashboard"] [class*="bg-blue-100"] {
+    background-color: #1e3a8a !important; /* blue-900 */
+    color: #60a5fa !important; /* blue-400 */
+  }
+  
+  /* Fond vert pour icône */
+  html.dark [class*="dashboard"] .bg-green-100,
+  html.dark [class*="dashboard"] [class*="bg-green-100"] {
+    background-color: #065f46 !important; /* emerald-900 */
+    color: #34d399 !important; /* emerald-400 */
+  }
+  
+  /* Fond violet pour icône */
+  html.dark [class*="dashboard"] .bg-purple-100,
+  html.dark [class*="dashboard"] [class*="bg-purple-100"] {
+    background-color: #4c1d95 !important; /* violet-900 */
+    color: #a78bfa !important; /* violet-400 */
+  }
+  
+  /* Fond ambre pour icône */
+  html.dark [class*="dashboard"] .bg-amber-100,
+  html.dark [class*="dashboard"] [class*="bg-amber-100"] {
+    background-color: #78350f !important; /* amber-900 */
+    color: #fbbf24 !important; /* amber-400 */
+  }
+  
+  /* TEXTE DANS LES CARTES STATISTIQUES */
+  /* Texte bleu */
+  html.dark [class*="dashboard"] .text-blue-600,
+  html.dark [class*="dashboard"] .text-blue-500,
+  html.dark [class*="dashboard"] [class*="text-blue-"] {
+    color: #60a5fa !important; /* blue-400 */
+  }
+  
+  /* Texte vert */
+  html.dark [class*="dashboard"] .text-green-600,
+  html.dark [class*="dashboard"] .text-green-500,
+  html.dark [class*="dashboard"] [class*="text-green-"] {
+    color: #34d399 !important; /* emerald-400 */
+  }
+  
+  /* Texte violet */
+  html.dark [class*="dashboard"] .text-purple-600,
+  html.dark [class*="dashboard"] .text-purple-500,
+  html.dark [class*="dashboard"] [class*="text-purple-"] {
+    color: #a78bfa !important; /* violet-400 */
+  }
+  
+  /* Texte ambre */
+  html.dark [class*="dashboard"] .text-amber-600,
+  html.dark [class*="dashboard"] .text-amber-500,
+  html.dark [class*="dashboard"] [class*="text-amber-"] {
+    color: #fbbf24 !important; /* amber-400 */
+  }
+  
+  /* CORRECTIFS POUR LES TEXTES */
+  /* Titres */
+  html.dark [class*="dashboard"] h1,
+  html.dark [class*="dashboard"] h2,
+  html.dark [class*="dashboard"] h3,
+  html.dark [class*="dashboard"] h4,
+  html.dark [class*="dashboard"] [class*="heading"],
+  html.dark [class*="dashboard"] [class*="title"] {
+    color: #f8fafc !important; /* slate-50 */
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Textes normaux */
+  html.dark [class*="dashboard"] p,
+  html.dark [class*="dashboard"] span,
+  html.dark [class*="dashboard"] div {
+    color: #e2e8f0 !important; /* slate-200 */
+  }
+  
+  /* Texte secondaire */
+  html.dark [class*="dashboard"] [class*="text-gray-"],
+  html.dark [class*="dashboard"] [class*="text-muted"] {
+    color: #94a3b8 !important; /* slate-400 */
+  }
+
+  /* Correction pour les indicateurs du calendrier en mode sombre */
+  html.dark [class*="dashboard"] [class*="calendar"] [class*="has-session"] div,
+  html.dark [class*="dashboard"] [class*="calendar"] [data-activity="true"] div,
+  html.dark [class*="dashboard"] [class*="calendar"] [class*="indicator-blue"] {
+    background-color: #60a5fa !important; /* blue-400 */
+    opacity: 1 !important;
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+    box-shadow: 0 0 4px rgba(96, 165, 250, 0.6) !important;
+  }
+  
+  html.dark [class*="dashboard"] [class*="calendar"] [class*="has-completed"] div,
+  html.dark [class*="dashboard"] [class*="calendar"] [data-completed="true"] div,
+  html.dark [class*="dashboard"] [class*="calendar"] [class*="indicator-green"] {
+    background-color: #34d399 !important; /* emerald-400 */
+    opacity: 1 !important;
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+    box-shadow: 0 0 4px rgba(52, 211, 153, 0.6) !important;
+  }
+}

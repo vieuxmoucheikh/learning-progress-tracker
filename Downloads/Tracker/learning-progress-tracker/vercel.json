@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "routes": [
+    { "handle": "filesystem" },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "VITE_SUPABASE_URL": "https://sijezgmooisqluablmqb.supabase.co",
+    "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpamV6Z21vb2lzcWx1YWJsbXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzIyNTk1MzIsImV4cCI6MjA0NzgzNTUzMn0.VyluSlRa67dFl_wwc6Kk2jG6HHYYOdQPT2RDTb5py08",
+    "VITE_SITE_URL": "https://learning-progress-tracker.vercel.app"
+  }
+}

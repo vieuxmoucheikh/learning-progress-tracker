@@ -1,0 +1,252 @@
+/* CORRECTIFS CRITIQUES POUR LE DASHBOARD EN MODE CLAIR SUR MOBILE */
+
+@media (max-width: 768px) {
+  /* IMPORTANT: Utilisation de html:not(.dark) pour limiter strictement ces règles au mode clair */
+  
+  /* Réinitialisation générale pour le dashboard */
+  html:not(.dark) [class*="dashboard"],
+  html:not(.dark) [id*="dashboard"],
+  html:not(.dark) [data-section="dashboard"] {
+    background-color: #ffffff !important;
+  }
+  
+  /* Force le fond blanc pour toutes les cartes du dashboard */
+  html:not(.dark) [class*="dashboard"] .card,
+  html:not(.dark) [class*="dashboard"] [class*="card"],
+  html:not(.dark) [id*="dashboard"] .card,
+  html:not(.dark) [id*="dashboard"] [class*="card"] {
+    background: #ffffff !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  }
+  
+  /* CORRECTION STRICTE DES ICÔNES EN MODE CLAIR UNIQUEMENT */
+  html:not(.dark) [class*="dashboard"] svg,
+  html:not(.dark) [id*="dashboard"] svg {
+    fill: none !important;
+    stroke-width: 1.5 !important;
+  }
+  
+  /* ====== ICÔNES SPÉCIFIQUES EN MODE CLAIR EXCLUSIVEMENT ====== */
+  /* Calendar - Bleu */
+  html:not(.dark) [class*="dashboard"] svg.lucide-calendar {
+    color: #3b82f6 !important;
+    stroke: #3b82f6 !important;
+  }
+  
+  /* Target/Goals - Vert */
+  html:not(.dark) [class*="dashboard"] svg.lucide-target {
+    color: #10b981 !important;
+    stroke: #10b981 !important;
+  }
+  
+  /* Clock - Bleu */
+  html:not(.dark) [class*="dashboard"] svg.lucide-clock,
+  html:not(.dark) [class*="dashboard"] .from-blue-50 svg {
+    color: #3b82f6 !important;
+    stroke: #3b82f6 !important;
+  }
+  
+  /* Check/Completed - Vert */
+  html:not(.dark) [class*="dashboard"] svg.lucide-check-circle,
+  html:not(.dark) [class*="dashboard"] svg.lucide-check-circle-2,
+  html:not(.dark) [class*="dashboard"] svg.lucide-check,
+  html:not(.dark) [class*="dashboard"] .from-green-50 svg {
+    color: #10b981 !important;
+    stroke: #10b981 !important;
+  }
+  
+  /* BookOpen - Violet */
+  html:not(.dark) [class*="dashboard"] svg.lucide-book-open,
+  html:not(.dark) [class*="dashboard"] .from-purple-50 svg {
+    color: #8b5cf6 !important;
+    stroke: #8b5cf6 !important;
+  }
+  
+  /* Trophy - Ambre */
+  html:not(.dark) [class*="dashboard"] svg.lucide-trophy,
+  html:not(.dark) [class*="dashboard"] .from-amber-50 svg {
+    color: #f59e0b !important;
+    stroke: #f59e0b !important;
+  }
+  
+  /* CARTES STATISTIQUES AVEC FONDS COLORÉS */
+  /* Carte bleue */
+  html:not(.dark) [class*="dashboard"] .from-blue-50,
+  html:not(.dark) [class*="dashboard"] [class*="from-blue-50"] {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+    border-color: #bfdbfe !important;
+  }
+  
+  /* Carte verte */
+  html:not(.dark) [class*="dashboard"] .from-green-50,
+  html:not(.dark) [class*="dashboard"] [class*="from-green-50"] {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%) !important;
+    border-color: #a7f3d0 !important;
+  }
+  
+  /* Carte violette */
+  html:not(.dark) [class*="dashboard"] .from-purple-50,
+  html:not(.dark) [class*="dashboard"] [class*="from-purple-50"] {
+    background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%) !important;
+    border-color: #ddd6fe !important;
+  }
+  
+  /* Carte ambre */
+  html:not(.dark) [class*="dashboard"] .from-amber-50,
+  html:not(.dark) [class*="dashboard"] [class*="from-amber-50"] {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+    border-color: #fde68a !important;
+  }
+  
+  /* FONDS CIRCULAIRES DES ICÔNES */
+  /* Fond bleu pour icône */
+  html:not(.dark) [class*="dashboard"] .bg-blue-100,
+  html:not(.dark) [class*="dashboard"] [class*="bg-blue-100"] {
+    background-color: #dbeafe !important; /* blue-100 */
+    color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  /* Fond vert pour icône */
+  html:not(.dark) [class*="dashboard"] .bg-green-100,
+  html:not(.dark) [class*="dashboard"] [class*="bg-green-100"] {
+    background-color: #d1fae5 !important; /* green-100 */
+    color: #10b981 !important; /* emerald-500 */
+  }
+  
+  /* Fond violet pour icône */
+  html:not(.dark) [class*="dashboard"] .bg-purple-100,
+  html:not(.dark) [class*="dashboard"] [class*="bg-purple-100"] {
+    background-color: #ede9fe !important; /* purple-100 */
+    color: #8b5cf6 !important; /* violet-500 */
+  }
+  
+  /* Fond ambre pour icône */
+  html:not(.dark) [class*="dashboard"] .bg-amber-100,
+  html:not(.dark) [class*="dashboard"] [class*="bg-amber-100"] {
+    background-color: #fef3c7 !important; /* amber-100 */
+    color: #f59e0b !important; /* amber-500 */
+  }
+  
+  /* TEXTE DANS LES CARTES STATISTIQUES */
+  /* Texte bleu */
+  html:not(.dark) [class*="dashboard"] .text-blue-600,
+  html:not(.dark) [class*="dashboard"] .text-blue-500,
+  html:not(.dark) [class*="dashboard"] [class*="text-blue-"] {
+    color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  /* Texte vert */
+  html:not(.dark) [class*="dashboard"] .text-green-600,
+  html:not(.dark) [class*="dashboard"] .text-green-500,
+  html:not(.dark) [class*="dashboard"] [class*="text-green-"] {
+    color: #10b981 !important; /* emerald-500 */
+  }
+  
+  /* Texte violet */
+  html:not(.dark) [class*="dashboard"] .text-purple-600,
+  html:not(.dark) [class*="dashboard"] .text-purple-500,
+  html:not(.dark) [class*="dashboard"] [class*="text-purple-"] {
+    color: #8b5cf6 !important; /* violet-500 */
+  }
+  
+  /* Texte ambre */
+  html:not(.dark) [class*="dashboard"] .text-amber-600,
+  html:not(.dark) [class*="dashboard"] .text-amber-500,
+  html:not(.dark) [class*="dashboard"] [class*="text-amber-"] {
+    color: #f59e0b !important; /* amber-500 */
+  }
+  
+  /* BOUTONS SPÉCIFIQUES DU DASHBOARD */
+  /* Bouton afficher calendrier */
+  html:not(.dark) .dashboard-calendar-button,
+  html:not(.dark) [class*="calendar-button"] {
+    background: linear-gradient(to bottom, #eff6ff, #dbeafe) !important; /* blue-50 to blue-100 */
+    border: 1px solid #bfdbfe !important; /* blue-200 */
+  }
+  
+  /* Bouton objectifs */
+  html:not(.dark) .dashboard-goals-button,
+  html:not(.dark) [class*="goals-button"] {
+    background: linear-gradient(to bottom, #ecfdf5, #d1fae5) !important; /* emerald-50 to emerald-100 */
+    border: 1px solid #a7f3d0 !important; /* emerald-200 */
+  }
+  
+  /* Texte des boutons */
+  html:not(.dark) .dashboard-calendar-text,
+  html:not(.dark) [class*="calendar-text"] {
+    color: #2563eb !important; /* blue-600 */
+    font-weight: 600;
+  }
+  
+  html:not(.dark) .dashboard-goals-text,
+  html:not(.dark) [class*="goals-text"] {
+    color: #059669 !important; /* emerald-600 */
+    font-weight: 600;
+  }
+  
+  /* CORRECTIFS POUR LES TEXTES */
+  /* Titres */
+  html:not(.dark) [class*="dashboard"] h1,
+  html:not(.dark) [class*="dashboard"] h2,
+  html:not(.dark) [class*="dashboard"] h3,
+  html:not(.dark) [class*="dashboard"] h4,
+  html:not(.dark) [class*="dashboard"] [class*="heading"],
+  html:not(.dark) [class*="dashboard"] [class*="title"] {
+    color: #0f172a !important; /* slate-900 */
+    font-weight: 700;
+  }
+  
+  /* Textes normaux */
+  html:not(.dark) [class*="dashboard"] p,
+  html:not(.dark) [class*="dashboard"] span,
+  html:not(.dark) [class*="dashboard"] div {
+    color: #334155 !important; /* slate-700 */
+  }
+  
+  /* Texte secondaire */
+  html:not(.dark) [class*="dashboard"] [class*="text-gray-"],
+  html:not(.dark) [class*="dashboard"] [class*="text-muted"] {
+    color: #64748b !important; /* slate-500 */
+  }
+  
+  /* ====== CORRECTION DES INDICATEURS DU CALENDRIER ====== */
+  /* Renforcement des indicateurs de couleur du calendrier */
+  
+  /* Indicateur bleu (sessions en cours) */
+  html:not(.dark) [class*="dashboard"] [class*="calendar"] [class*="has-session"] div,
+  html:not(.dark) [class*="dashboard"] [class*="calendar"] [data-session="true"] div,
+  html:not(.dark) [class*="dashboard"] [class*="calendar"] [class*="session-indicator-blue"] {
+    background-color: #3b82f6 !important; /* blue-500 - couleur plus visible */
+    opacity: 1 !important;
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+  }
+  
+  /* Indicateur vert (sessions complétées) */
+  html:not(.dark) [class*="dashboard"] [class*="calendar"] [class*="has-completed"] div,
+  html:not(.dark) [class*="dashboard"] [class*="calendar"] [data-completed="true"] div,
+  html:not(.dark) [class*="dashboard"] [class*="calendar"] [class*="session-indicator-green"] {
+    background-color: #10b981 !important; /* green-500 - couleur plus visible */
+    opacity: 1 !important;
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+  }
+  
+  /* Jour sélectionné sur le calendrier */
+  html:not(.dark) [class*="dashboard"] [class*="calendar"] [aria-selected="true"],
+  html:not(.dark) [class*="dashboard"] [class*="calendar"] [data-selected="true"] {
+    background-color: #eff6ff !important; /* blue-50 */
+    color: #2563eb !important; /* blue-600 */
+    font-weight: 600 !important;
+    border-color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  /* Conteneur général du calendrier */
+  html:not(.dark) [class*="dashboard"] [class*="calendar"] {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important; /* slate-200 */
+  }
+}

@@ -1,0 +1,187 @@
+/* CORRECTIFS SPÉCIFIQUES POUR LES ICÔNES DU DASHBOARD */
+/* Chaque règle cible une icône spécifique avec une haute priorité */
+
+/* ====== CORRECTIFS POUR LES ICÔNES EN MODE SOMBRE ====== */
+@media (max-width: 768px) {
+  /* ====== ICÔNES DES STATISTIQUES ET DES CARTES ====== */
+  /* Icône "Calendar" */
+  html.dark svg.lucide-calendar,
+  html.dark [class*="calendar-icon"],
+  html.dark [class*="dashboard"] [class*="calendar"] svg,
+  html.dark [data-icon="calendar"] svg {
+    stroke: #60a5fa !important;
+    stroke-width: 2px !important;
+    color: #60a5fa !important;
+    fill: none !important;
+    width: 24px !important;
+    height: 24px !important;
+  }
+  
+  /* Icône "Goals / Target" */
+  html.dark svg.lucide-target,
+  html.dark [class*="target-icon"],
+  html.dark [class*="goal-icon"],
+  html.dark [class*="dashboard"] [class*="goal"] svg,
+  html.dark [data-icon="target"] svg {
+    stroke: #34d399 !important;
+    stroke-width: 2px !important;
+    color: #34d399 !important;
+    fill: none !important;
+    width: 24px !important;
+    height: 24px !important;
+  }
+  
+  /* Icône "Study Time / Clock" */
+  html.dark svg.lucide-clock,
+  html.dark [class*="clock-icon"],
+  html.dark [class*="time-icon"],
+  html.dark [class*="dashboard"] [class*="time"] svg,
+  html.dark [data-icon="clock"] svg {
+    stroke: #60a5fa !important;
+    stroke-width: 2px !important;
+    color: #60a5fa !important;
+    fill: none !important;
+    width: 24px !important;
+    height: 24px !important;
+  }
+  
+  /* Icône "Active Tasks / CheckCircle" */
+  html.dark svg.lucide-check-circle,
+  html.dark svg.lucide-check-circle-2,
+  html.dark [class*="tasks-icon"],
+  html.dark [class*="active-tasks-icon"],
+  html.dark [class*="dashboard"] [class*="tasks"] svg,
+  html.dark [data-icon="check-circle"] svg {
+    stroke: #34d399 !important;
+    stroke-width: 2px !important;
+    color: #34d399 !important;
+    fill: none !important;
+    width: 24px !important;
+    height: 24px !important;
+  }
+  
+  /* Icône "Bookmark" */
+  html.dark svg.lucide-book-open,
+  html.dark [class*="book-icon"],
+  html.dark [class*="bookmark-icon"],
+  html.dark [class*="dashboard"] [class*="book"] svg,
+  html.dark [data-icon="book-open"] svg {
+    stroke: #a78bfa !important;
+    stroke-width: 2px !important;
+    color: #a78bfa !important;
+    fill: none !important;
+    width: 24px !important;
+    height: 24px !important;
+  }
+  
+  /* Icône "Trophy" */
+  html.dark svg.lucide-trophy,
+  html.dark [class*="trophy-icon"],
+  html.dark [class*="achievement-icon"],
+  html.dark [class*="dashboard"] [class*="trophy"] svg,
+  html.dark [data-icon="trophy"] svg {
+    stroke: #fbbf24 !important;
+    stroke-width: 2px !important;
+    color: #fbbf24 !important;
+    fill: none !important;
+    width: 24px !important;
+    height: 24px !important;
+  }
+  
+  /* ====== CORRECTION POUR LES CARTES AVEC FOND COLORÉ ====== */
+  /* Carte bleue - tous les svg à l'intérieur */
+  html.dark [class*="dashboard"] .from-blue-50 svg,
+  html.dark [class*="dashboard"] [class*="from-blue"] svg,
+  html.dark [class*="dashboard"] .bg-blue-100 svg,
+  html.dark [class*="dashboard"] [class*="bg-blue"] svg {
+    color: #60a5fa !important;
+    stroke: #60a5fa !important;
+    fill: none !important;
+    stroke-width: 2px !important;
+  }
+  
+  /* Carte verte - tous les svg à l'intérieur */
+  html.dark [class*="dashboard"] .from-green-50 svg,
+  html.dark [class*="dashboard"] [class*="from-green"] svg,
+  html.dark [class*="dashboard"] .bg-green-100 svg,
+  html.dark [class*="dashboard"] [class*="bg-green"] svg {
+    color: #34d399 !important;
+    stroke: #34d399 !important;
+    fill: none !important;
+    stroke-width: 2px !important;
+  }
+  
+  /* Carte violette - tous les svg à l'intérieur */
+  html.dark [class*="dashboard"] .from-purple-50 svg,
+  html.dark [class*="dashboard"] [class*="from-purple"] svg,
+  html.dark [class*="dashboard"] .bg-purple-100 svg,
+  html.dark [class*="dashboard"] [class*="bg-purple"] svg {
+    color: #a78bfa !important;
+    stroke: #a78bfa !important;
+    fill: none !important;
+    stroke-width: 2px !important;
+  }
+  
+  /* Carte ambre - tous les svg à l'intérieur */
+  html.dark [class*="dashboard"] .from-amber-50 svg,
+  html.dark [class*="dashboard"] [class*="from-amber"] svg,
+  html.dark [class*="dashboard"] .bg-amber-100 svg,
+  html.dark [class*="dashboard"] [class*="bg-amber"] svg {
+    color: #fbbf24 !important;
+    stroke: #fbbf24 !important;
+    fill: none !important;
+    stroke-width: 2px !important;
+  }
+}
+
+/* ====== FIXATION DES ICÔNES DANS LES CARTES STATISTIQUES ====== */
+@media (max-width: 768px) {
+  /* Rendre visible toutes les icônes dans le dashboard */
+  html.dark [class*="dashboard"] .bg-blue-100 svg,
+  html.dark [class*="dashboard"] .bg-green-100 svg,
+  html.dark [class*="dashboard"] .bg-purple-100 svg,
+  html.dark [class*="dashboard"] .bg-amber-100 svg {
+    display: inline !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  /* Garantir les couleurs des arrière-plans d'icônes */
+  html.dark [class*="dashboard"] .bg-blue-100,
+  html.dark [class*="dashboard"] [class*="bg-blue-100"] {
+    background-color: rgba(30, 58, 138, 0.8) !important; /* blue-900 */
+    color: #60a5fa !important; /* blue-400 */
+  }
+  
+  html.dark [class*="dashboard"] .bg-green-100,
+  html.dark [class*="dashboard"] [class*="bg-green-100"] {
+    background-color: rgba(6, 78, 59, 0.8) !important; /* green-900 */
+    color: #34d399 !important; /* green-400 */
+  }
+  
+  html.dark [class*="dashboard"] .bg-purple-100,
+  html.dark [class*="dashboard"] [class*="bg-purple-100"] {
+    background-color: rgba(76, 29, 149, 0.8) !important; /* purple-900 */
+    color: #a78bfa !important; /* purple-400 */
+  }
+  
+  html.dark [class*="dashboard"] .bg-amber-100,
+  html.dark [class*="dashboard"] [class*="bg-amber-100"] {
+    background-color: rgba(120, 53, 15, 0.8) !important; /* amber-900 */
+    color: #fbbf24 !important; /* amber-400 */
+  }
+
+  /* Garantir la visibilité des chemins et des traits des SVG */
+  html.dark [class*="dashboard"] svg path,
+  html.dark [class*="dashboard"] svg line,
+  html.dark [class*="dashboard"] svg circle,
+  html.dark [class*="dashboard"] svg rect,
+  html.dark [class*="dashboard"] svg polyline,
+  html.dark [class*="dashboard"] svg polygon {
+    stroke: currentColor !important;
+    stroke-width: inherit !important;
+    fill: none !important;
+  }
+}
