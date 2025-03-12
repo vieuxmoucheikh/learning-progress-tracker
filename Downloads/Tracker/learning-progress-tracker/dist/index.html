@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Learning Progress Tracker</title>
+    <!-- CORRECTIFS CRITIQUES POUR LES ICÔNES EN MODE SOMBRE - ULTRA PRIORITAIRE -->
+    <style>
+      /* Ces styles ont la plus haute priorité possible */
+      .dark svg {
+        fill: none !important;
+        stroke-width: 2px !important;
+      }
+
+      .dark [class*="dashboard"] svg,
+      .dark [id*="dashboard"] svg,
+      .dark [data-section="dashboard"] svg {
+        fill: none !important;
+        stroke-width: 2px !important;
+        color: #f1f5f9 !important;
+        stroke: currentColor !important;
+      }
+
+      /* Icônes bleues */
+      .dark svg.lucide-calendar,
+      .dark svg.lucide-clock,
+      .dark .from-blue-50 svg,
+      .dark .bg-blue-100 svg {
+        color: #60a5fa !important;
+        stroke: #60a5fa !important;
+        fill: none !important;
+      }
+
+      /* Icônes vertes */
+      .dark svg.lucide-target,
+      .dark svg.lucide-check-circle,
+      .dark svg.lucide-check-circle-2,
+      .dark .from-green-50 svg,
+      .dark .bg-green-100 svg {
+        color: #34d399 !important;
+        stroke: #34d399 !important;
+        fill: none !important;
+      }
+
+      /* Icônes violettes */
+      .dark svg.lucide-book-open,
+      .dark .from-purple-50 svg,
+      .dark .bg-purple-100 svg {
+        color: #a78bfa !important;
+        stroke: #a78bfa !important;
+        fill: none !important;
+      }
+
+      /* Icônes ambres */
+      .dark svg.lucide-trophy,
+      .dark .from-amber-50 svg,
+      .dark .bg-amber-100 svg {
+        color: #fbbf24 !important;
+        stroke: #fbbf24 !important;
+        fill: none !important;
+      }
+
+      /* Fonds colorés */
+      .dark .bg-blue-100 {
+        background-color: rgba(30, 58, 138, 0.8) !important;
+      }
+
+      .dark .bg-green-100 {
+        background-color: rgba(6, 78, 59, 0.8) !important;
+      }
+
+      .dark .bg-purple-100 {
+        background-color: rgba(76, 29, 149, 0.8) !important;
+      }
+
+      .dark .bg-amber-100 {
+        background-color: rgba(120, 53, 15, 0.8) !important;
+      }
+
+      /* Force les règles sur tous les éléments enfants des SVG */
+      .dark svg * {
+        fill: none !important;
+      }
+
+      .dark svg path,
+      .dark svg line,
+      .dark svg circle,
+      .dark svg rect,
+      .dark svg polyline,
+      .dark svg polygon {
+        fill: none !important;
+        stroke: inherit !important;
+      }
+    </style>
+    <!-- Script de correction instantanée des icônes - s'exécute immédiatement -->
+    <script>
+      (function () {
+        // Fonction pour corriger toutes les icônes SVG
+        function fixDashboardSVGs() {
+          if (!document.documentElement.classList.contains("dark")) return;
+
+          // Toutes les icônes SVG du dashboard
+          document
+            .querySelectorAll(
+              '[class*="dashboard"] svg, [id*="dashboard"] svg, [data-section="dashboard"] svg'
+            )
+            .forEach((svg) => {
+              svg.style.fill = "none";
+              svg.style.strokeWidth = "2px";
+
+              // Tous les éléments à l'intérieur du SVG
+              svg.querySelectorAll("*").forEach((el) => {
+                el.style.fill = "none";
+              });
+
+              // Déterminer la couleur en fonction de la classe ou du conteneur
+              if (
+                svg.classList.contains("lucide-calendar") ||
+                svg.classList.contains("lucide-clock") ||
+                svg.closest(".from-blue-50") ||
+                svg.closest(".bg-blue-100")
+              ) {
+                svg.style.color = "#60a5fa";
+                svg.style.stroke = "#60a5fa";
+              } else if (
+                svg.classList.contains("lucide-target") ||
+                svg.classList.contains("lucide-check-circle") ||
+                svg.classList.contains("lucide-check-circle-2") ||
+                svg.closest(".from-green-50") ||
+                svg.closest(".bg-green-100")
+              ) {
+                svg.style.color = "#34d399";
+                svg.style.stroke = "#34d399";
+              } else if (
+                svg.classList.contains("lucide-book-open") ||
+                svg.closest(".from-purple-50") ||
+                svg.closest(".bg-purple-100")
+              ) {
+                svg.style.color = "#a78bfa";
+                svg.style.stroke = "#a78bfa";
+              } else if (
+                svg.classList.contains("lucide-trophy") ||
+                svg.closest(".from-amber-50") ||
+                svg.closest(".bg-amber-100")
+              ) {
+                svg.style.color = "#fbbf24";
+                svg.style.stroke = "#fbbf24";
+              }
+            });
+
+          // Corriger les fonds colorés
+          document.querySelectorAll(".dark .bg-blue-100").forEach((el) => {
+            el.style.backgroundColor = "rgba(30, 58, 138, 0.8)";
+          });
+
+          document.querySelectorAll(".dark .bg-green-100").forEach((el) => {
+            el.style.backgroundColor = "rgba(6, 78, 59, 0.8)";
+          });
+
+          document.querySelectorAll(".dark .bg-purple-100").forEach((el) => {
+            el.style.backgroundColor = "rgba(76, 29, 149, 0.8)";
+          });
+
+          document.querySelectorAll(".dark .bg-amber-100").forEach((el) => {
+            el.style.backgroundColor = "rgba(120, 53, 15, 0.8)";
+          });
+        }
+
+        // Exécuter immédiatement et après le chargement du DOM
+        fixDashboardSVGs();
+        document.addEventListener("DOMContentLoaded", fixDashboardSVGs);
+
+        // Exécuter à chaque modification du DOM
+        const observer = new MutationObserver((mutations) => {
+          fixDashboardSVGs();
+        });
+
+        // Lancer l'observation dès que possible
+        document.addEventListener("DOMContentLoaded", () => {
+          observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributeFilter: ["class", "style"],
+          });
+
+          // Surveiller les changements de mode clair/sombre
+          const htmlObserver = new MutationObserver((mutations) => {
+            for (let mutation of mutations) {
+              if (mutation.attributeName === "class") {
+                fixDashboardSVGs();
+              }
+            }
+          });
+
+          htmlObserver.observe(document.documentElement, {
+            attributes: true,
+          });
+
+          // Exécuter périodiquement pour s'assurer que ça reste corrigé
+          setInterval(fixDashboardSVGs, 1000);
+        });
+      })();
+    </script>
+    <script src="/js-fixes.js"></script>
+    <script type="module" crossorigin src="/assets/index-CDtjjxru.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CpS-hEVF.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- Script de correction d'urgence qui s'exécute après le chargement -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Ajouter un élément style avec !important
+        const style = document.createElement("style");
+        style.innerHTML = `
+          /* RÉPARATIONS PRIORITAIRES POUR LES ICÔNES */
+          .dark [class*="dashboard"] svg {
+            fill: none !important;
+            stroke-width: 2px !important;
+          }
+          
+          .dark [class*="dashboard"] svg.lucide-calendar,
+          .dark [class*="dashboard"] svg.lucide-clock {
+            color: #60a5fa !important;
+            stroke: #60a5fa !important;
+          }
+          
+          .dark [class*="dashboard"] svg.lucide-target,
+          .dark [class*="dashboard"] svg.lucide-check-circle,
+          .dark [class*="dashboard"] svg.lucide-check-circle-2 {
+            color: #34d399 !important;
+            stroke: #34d399 !important;
+          }
+          
+          .dark [class*="dashboard"] svg.lucide-book-open {
+            color: #a78bfa !important;
+            stroke: #a78bfa !important;
+          }
+          
+          .dark [class*="dashboard"] svg.lucide-trophy {
+            color: #fbbf24 !important;
+            stroke: #fbbf24 !important;
+          }
+          
+          /* S'assurer que les éléments path ne sont jamais remplis */
+          .dark [class*="dashboard"] svg path {
+            fill: none !important;
+          }
+        `;
+        document.head.appendChild(style);
+
+        // Appliquer des correctifs directement avec JavaScript
+        function applySVGFixes() {
+          if (document.documentElement.classList.contains("dark")) {
+            document
+              .querySelectorAll('[class*="dashboard"] svg')
+              .forEach((icon) => {
+                // Force fill=none avec l'attribut et le style
+                icon.setAttribute("fill", "none");
+                icon.style.fill = "none";
+                icon.style.strokeWidth = "2px";
+
+                // Force également les éléments enfants
+                icon.querySelectorAll("*").forEach((child) => {
+                  child.setAttribute("fill", "none");
+                  child.style.fill = "none";
+                });
+              });
+          }
+        }
+
+        // Exécuter immédiatement puis périodiquement
+        applySVGFixes();
+        setInterval(applySVGFixes, 500);
+      });
+    </script>
+  </body>
+</html>
