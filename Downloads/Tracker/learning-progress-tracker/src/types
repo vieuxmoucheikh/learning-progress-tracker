@@ -1,0 +1,13 @@
+interface LearningItemFormData {
+  title: string;
+  type: 'video' | 'pdf' | 'url' | 'book';
+  current: { hours: number; minutes: number; pages?: number };
+  unit: 'hours' | 'pages' | 'percent';
+  url: string;
+  notes: string;
+  completed: boolean;
+  priority: 'low' | 'medium' | 'high';
+  tags: string[];
+  goal?: { hours: number; minutes: number };
+  total?: { hours: number; minutes: number };
+} 

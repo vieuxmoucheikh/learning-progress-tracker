@@ -1,0 +1,288 @@
+/* CORRECTIFS CRITIQUES POUR LE MODE CLAIR SUR MOBILE */
+/* Ces styles ont une priorité absolue sur tous les autres styles */
+
+@media (max-width: 768px) {
+  /* RÉINITIALISATION COMPLÈTE DU MODE CLAIR UNIQUEMENT */
+  /* Utilisation de html:not(.dark) pour être plus spécifique et éviter les conflits */
+  html:not(.dark) body {
+    background-color: white !important;
+    color: #0f172a !important;
+  }
+  
+  /* Garantir que tous les fonds sombres sont remplacés par du blanc */
+  html:not(.dark) [class*="bg-gray-800"],
+  html:not(.dark) [class*="bg-gray-900"],
+  html:not(.dark) [class*="bg-slate-800"],
+  html:not(.dark) [class*="bg-slate-900"],
+  html:not(.dark) [class*="dark:bg-gray-800"],
+  html:not(.dark) [class*="dark:bg-gray-900"],
+  html:not(.dark) [class*="dark:bg-slate-800"],
+  html:not(.dark) [class*="dark:bg-slate-900"] {
+    background-color: white !important;
+  }
+  
+  /* Forcer la couleur des textes en mode clair uniquement */
+  html:not(.dark) h1, 
+  html:not(.dark) h2, 
+  html:not(.dark) h3, 
+  html:not(.dark) h4, 
+  html:not(.dark) h5,
+  html:not(.dark) p,
+  html:not(.dark) span,
+  html:not(.dark) label,
+  html:not(.dark) a {
+    color: #0f172a !important;
+  }
+  
+  /* Textes secondaires en mode clair uniquement */
+  html:not(.dark) [class*="text-gray-400"],
+  html:not(.dark) [class*="text-gray-500"],
+  html:not(.dark) [class*="text-muted"] {
+    color: #64748b !important;
+  }
+  
+  /* CONTRÔLE STRICT DES ICÔNES SVG EN MODE CLAIR UNIQUEMENT */
+  /* Ne pas appliquer ces règles en mode sombre */
+  html:not(.dark) svg {
+    fill: none !important;
+    stroke-width: 1.5 !important;
+    stroke: #334155 !important;
+    color: #334155 !important;
+  }
+  
+  /* ICÔNES SPÉCIFIQUES - EN MODE CLAIR UNIQUEMENT */
+  /* Bookmark et variants */
+  html:not(.dark) svg.lucide-bookmark:not(.override-light-styles) {
+    color: #10b981 !important;
+    stroke: #10b981 !important;
+  }
+  
+  html:not(.dark) svg.lucide-bookmark-check:not(.override-light-styles) {
+    color: #059669 !important;
+    stroke: #059669 !important;
+  }
+  
+  /* Édition et actions */
+  html:not(.dark) svg.lucide-edit:not(.override-light-styles),
+  html:not(.dark) svg.lucide-pencil:not(.override-light-styles),
+  html:not(.dark) svg.lucide-eye:not(.override-light-styles),
+  html:not(.dark) svg.lucide-eye-off:not(.override-light-styles),
+  html:not(.dark) svg.lucide-download:not(.override-light-styles),
+  html:not(.dark) svg.lucide-save:not(.override-light-styles) {
+    color: #3b82f6 !important;
+    stroke: #3b82f6 !important;
+  }
+  
+  /* Actions destructrices */
+  html:not(.dark) svg.lucide-trash:not(.override-light-styles),
+  html:not(.dark) svg.lucide-trash-2:not(.override-light-styles) {
+    color: #ef4444 !important;
+    stroke: #ef4444 !important;
+  }
+  
+  /* Icônes de statut */
+  html:not(.dark) svg.lucide-check:not(.override-light-styles),
+  html:not(.dark) svg.lucide-check-circle:not(.override-light-styles),
+  html:not(.dark) svg.lucide-check-circle-2:not(.override-light-styles) {
+    color: #10b981 !important;
+    stroke: #10b981 !important;
+  }
+  
+  html:not(.dark) svg.lucide-clock:not(.override-light-styles) {
+    color: #3b82f6 !important;
+    stroke: #3b82f6 !important;
+  }
+  
+  html:not(.dark) svg.lucide-target:not(.override-light-styles) {
+    color: #10b981 !important;
+    stroke: #10b981 !important;
+  }
+  
+  html:not(.dark) svg.lucide-trophy:not(.override-light-styles) {
+    color: #f59e0b !important;
+    stroke: #f59e0b !important;
+  }
+  
+  html:not(.dark) svg.lucide-book-open:not(.override-light-styles) {
+    color: #8b5cf6 !important;
+    stroke: #8b5cf6 !important;
+  }
+  
+  /* Correction pour les cartes en mode clair uniquement */
+  html:not(.dark) [class*="card"] {
+    background-color: white !important;
+    border-color: #e5e7eb !important;
+  }
+  
+  /* Correction pour mastered card qui a un fond spécial */
+  html:not(.dark) [class*="mastered-card"],
+  html:not(.dark) [class*="from-emerald-50"],
+  html:not(.dark) [class*="border-emerald-400"] {
+    background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%) !important;
+    border-color: #34d399 !important;
+  }
+  
+  /* CORRECTION POUR LES BOUTONS EN MODE CLAIR UNIQUEMENT */
+  /* Boutons d'action standards */
+  html:not(.dark) button {
+    background-color: #f8fafc !important;
+    color: #334155 !important;
+    border-color: #e5e7eb !important;
+  }
+  
+  /* Boutons primaires */
+  html:not(.dark) button[class*="primary"],
+  html:not(.dark) [class*="btn-primary"] {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+  }
+  
+  /* Boutons destructifs */
+  html:not(.dark) button[class*="destructive"],
+  html:not(.dark) [class*="btn-danger"] {
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+  }
+  
+  /* Boutons ghost avec icônes */
+  html:not(.dark) button[class*="ghost"] {
+    background-color: transparent !important;
+  }
+  
+  /* Mastered button */
+  html:not(.dark) button:has(svg.lucide-bookmark-check),
+  html:not(.dark) button:has(svg.lucide-bookmark) {
+    color: #059669 !important;
+  }
+  
+  /* Delete button */
+  html:not(.dark) button:has(svg.lucide-trash),
+  html:not(.dark) button:has(svg.lucide-trash-2) {
+    color: #ef4444 !important;
+  }
+  
+  /* BADGES ET ÉTIQUETTES EN MODE CLAIR UNIQUEMENT */
+  html:not(.dark) [class*="badge"],
+  html:not(.dark) [class*="tag"] {
+    background-color: #f1f5f9 !important;
+    color: #334155 !important;
+    border-color: #e2e8f0 !important;
+  }
+  
+  /* Badge de catégorie */
+  html:not(.dark) [class*="category"] {
+    background-color: #eff6ff !important;
+    color: #2563eb !important;
+    border-color: #bfdbfe !important;
+  }
+
+  /* STATISTIQUES DASHBOARD EN MODE CLAIR UNIQUEMENT */
+  /* Cartes statistiques */
+  html:not(.dark) [class*="dashboard"] [class*="from-blue-50"] {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+  }
+
+  html:not(.dark) [class*="dashboard"] [class*="from-green-50"] {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%) !important;
+  }
+
+  html:not(.dark) [class*="dashboard"] [class*="from-purple-50"] {
+    background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%) !important;
+  }
+
+  html:not(.dark) [class*="dashboard"] [class*="from-amber-50"] {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+  }
+
+  /* Couleurs des backgrounds des icônes */
+  html:not(.dark) [class*="dashboard"] [class*="bg-blue-100"] {
+    background-color: #dbeafe !important;
+  }
+
+  html:not(.dark) [class*="dashboard"] [class*="bg-green-100"] {
+    background-color: #d1fae5 !important;
+  }
+
+  html:not(.dark) [class*="dashboard"] [class*="bg-purple-100"] {
+    background-color: #ede9fe !important;
+  }
+
+  html:not(.dark) [class*="dashboard"] [class*="bg-amber-100"] {
+    background-color: #fef3c7 !important;
+  }
+
+  /* CORRECTION POUR LES DIALOGUES ET POPUPS EN MODE CLAIR UNIQUEMENT */
+  html:not(.dark) [role="dialog"],
+  html:not(.dark) [role="alertdialog"],
+  html:not(.dark) [class*="popup"],
+  html:not(.dark) [class*="modal"] {
+    background-color: #ffffff !important;
+  }
+
+  /* Contenu des dialogues */
+  html:not(.dark) [role="dialog"] > *:not(svg):not([role="button"]),
+  html:not(.dark) [role="alertdialog"] > *:not(svg):not([role="button"]) {
+    color: #0f172a !important;
+  }
+
+  /* Exception spécifique pour les icônes dans les dialogues */
+  html:not(.dark) [role="dialog"] svg,
+  html:not(.dark) [role="alertdialog"] svg {
+    /* Pas de style imposé pour ces icônes spécifiques */
+  }
+
+  /* CORRECTIFS POUR LE PROSE CONTENT EN MODE CLAIR UNIQUEMENT */
+  html:not(.dark) .prose h1,
+  html:not(.dark) .prose h2,
+  html:not(.dark) .prose h3,
+  html:not(.dark) .prose h4,
+  html:not(.dark) .prose h5,
+  html:not(.dark) .prose h6 {
+    color: #0f172a !important;
+  }
+
+  html:not(.dark) .prose p,
+  html:not(.dark) .prose li,
+  html:not(.dark) .prose blockquote {
+    color: #334155 !important;
+  }
+
+  /* RÉPARATION DU TEXTE INTRO DANS LES ONGLETS EN MODE CLAIR UNIQUEMENT */
+  html:not(.dark) [class*="learning"] p[class*="text-muted"],
+  html:not(.dark) [class*="learning"] p[class*="intro"],
+  html:not(.dark) [class*="learning"] p[class*="description"],
+  html:not(.dark) [class*="learning"] p[class*="subtitle"],
+  html:not(.dark) [class*="learning"] p:first-of-type {
+    color: #64748b !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Amélioration de la visibilité des indicateurs de couleur sur le calendrier - EXCLUSIVEMENT EN MODE CLAIR */
+  
+  /* Points indicateurs bleus (activités ou sessions en cours) */
+  html:not(.dark) [class*="calendar"] [class*="has-activity"] div,
+  html:not(.dark) [class*="calendar"] [class*="has-session"] div,
+  html:not(.dark) [class*="calendar"] [class*="indicator-blue"],
+  html:not(.dark) [class*="calendar"] [data-activity="true"] div,
+  html:not(.dark) [class*="calendar"] [data-session="true"] div {
+    background-color: #3b82f6 !important; /* blue-500 */
+    opacity: 1 !important;
+    box-shadow: 0 0 0 2px white !important; /* Ajoute un contour blanc */
+    width: 8px !important; /* Taille légèrement plus grande */
+    height: 8px !important;
+    border-radius: 50% !important;
+  }
+  
+  /* Points indicateurs verts (activités terminées) */
+  html:not(.dark) [class*="calendar"] [class*="has-completed"] div,
+  html:not(.dark) [class*="calendar"] [class*="indicator-green"],
+  html:not(.dark) [class*="calendar"] [data-completed="true"] div {
+    background-color: #10b981 !important; /* green-500 */
+    opacity: 1 !important;
+    box-shadow: 0 0 0 2px white !important; /* Ajoute un contour blanc */
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 50% !important;
+  }
+}

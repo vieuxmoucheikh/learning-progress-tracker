@@ -1,0 +1,113 @@
+/* CORRECTION GLOBALE DES ICÔNES SVG EN MODE SOMBRE */
+/* Ce fichier est chargé en dernier pour garantir l'application des styles */
+
+@media (max-width: 768px) {
+  /* RÈGLES GÉNÉRALES POUR TOUTES LES ICÔNES SVG */
+  html.dark svg {
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.5 !important;
+  }
+  
+  /* DASHBOARD ICONS - COULEURS SPÉCIFIQUES */
+  /* Bleu */
+  html.dark [class*="dashboard"] svg.lucide-calendar,
+  html.dark [class*="dashboard"] svg.lucide-clock,
+  html.dark [class*="dashboard"] .from-blue-50 svg,
+  html.dark [class*="dashboard"] [class*="from-blue-50"] svg,
+  html.dark [class*="dashboard"] .bg-blue-100 svg,
+  html.dark [class*="dashboard"] [class*="bg-blue-100"] svg {
+    color: #60a5fa !important; /* blue-400 */
+    stroke: #60a5fa !important;
+  }
+  
+  /* Vert */
+  html.dark [class*="dashboard"] svg.lucide-check,
+  html.dark [class*="dashboard"] svg.lucide-target,
+  html.dark [class*="dashboard"] svg.lucide-check-circle,
+  html.dark [class*="dashboard"] svg.lucide-check-circle-2,
+  html.dark [class*="dashboard"] .from-green-50 svg,
+  html.dark [class*="dashboard"] [class*="from-green-50"] svg,
+  html.dark [class*="dashboard"] .bg-green-100 svg,
+  html.dark [class*="dashboard"] [class*="bg-green-100"] svg {
+    color: #34d399 !important; /* emerald-400 */
+    stroke: #34d399 !important;
+  }
+  
+  /* Violet */
+  html.dark [class*="dashboard"] svg.lucide-book-open,
+  html.dark [class*="dashboard"] .from-purple-50 svg,
+  html.dark [class*="dashboard"] [class*="from-purple-50"] svg,
+  html.dark [class*="dashboard"] .bg-purple-100 svg,
+  html.dark [class*="dashboard"] [class*="bg-purple-100"] svg {
+    color: #a78bfa !important; /* violet-400 */
+    stroke: #a78bfa !important;
+  }
+  
+  /* Ambre */
+  html.dark [class*="dashboard"] svg.lucide-trophy,
+  html.dark [class*="dashboard"] .from-amber-50 svg,
+  html.dark [class*="dashboard"] [class*="from-amber-50"] svg,
+  html.dark [class*="dashboard"] .bg-amber-100 svg,
+  html.dark [class*="dashboard"] [class*="bg-amber-100"] svg {
+    color: #fbbf24 !important; /* amber-400 */
+    stroke: #fbbf24 !important;
+  }
+  
+  /* CORRECTION DU REMPLISSAGE */
+  html.dark svg path,
+  html.dark svg line,
+  html.dark svg rect,
+  html.dark svg circle,
+  html.dark svg polyline,
+  html.dark svg polygon {
+    fill: none !important;
+    stroke: inherit !important;
+  }
+  
+  /* FORCER LE STYLE D'AFFICHAGE CORRECT */
+  html.dark [class*="dashboard"] svg {
+    display: inline-block !important;
+    vertical-align: middle !important;
+  }
+  
+  /* FORCER LES DIMENSIONS */
+  html.dark [class*="dashboard"] .from-blue-50 svg,
+  html.dark [class*="dashboard"] .from-green-50 svg,
+  html.dark [class*="dashboard"] .from-purple-50 svg,
+  html.dark [class*="dashboard"] .from-amber-50 svg,
+  html.dark [class*="dashboard"] .bg-blue-100 svg,
+  html.dark [class*="dashboard"] .bg-green-100 svg,
+  html.dark [class*="dashboard"] .bg-purple-100 svg,
+  html.dark [class*="dashboard"] .bg-amber-100 svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
+  
+  /* FONDS DES ICÔNES - COULEURS PLUS VISIBLES */
+  html.dark [class*="dashboard"] .bg-blue-100,
+  html.dark [class*="dashboard"] [class*="bg-blue-100"] {
+    background-color: #1e3a8a !important; /* blue-800 */
+  }
+  
+  html.dark [class*="dashboard"] .bg-green-100,
+  html.dark [class*="dashboard"] [class*="bg-green-100"] {
+    background-color: #065f46 !important; /* green-800 */
+  }
+  
+  html.dark [class*="dashboard"] .bg-purple-100,
+  html.dark [class*="dashboard"] [class*="bg-purple-100"] {
+    background-color: #5b21b6 !important; /* purple-800 */
+  }
+  
+  html.dark [class*="dashboard"] .bg-amber-100,
+  html.dark [class*="dashboard"] [class*="bg-amber-100"] {
+    background-color: #92400e !important; /* amber-800 */
+  }
+
+  /* HACK DE CONTOURNEMENT POUR CERTAINES ICÔNES */
+  html.dark [class*="dashboard"] svg.difficult-icon {
+    color: white !important;
+    stroke: white !important;
+  }
+}

@@ -1,0 +1,486 @@
+/* CSS spécifique pour le Dashboard en mode sombre sur mobile */
+@media (max-width: 768px) {
+  /* Correction des problèmes de visibilité pour Show Calendar et Goals */
+  .dark .dashboard-container [class*="calendar-toggle"],
+  .dark .dashboard-container [class*="calendar-button"],
+  .dark .dashboard-container [class*="goals-header"],
+  .dark .dashboard-container [class*="section-header"] {
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    font-weight: 700;
+  }
+  
+  /* Amélioration de la visibilité des boutons */
+  .dark .dashboard-container button,
+  .dark .dashboard-container [role="button"] {
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white !important;
+  }
+  
+  /* S'assurer que le texte dans les boutons est visible */
+  .dark .dashboard-container button *,
+  .dark .dashboard-container [role="button"] * {
+    color: white !important;
+  }
+}
+
+/* Améliorations pour le Dashboard en mode clair sur mobile */
+@media (max-width: 768px) {
+  /* Conteneur principal */
+  :root:not(.dark) .dashboard-container,
+  :root:not(.dark) [class*="dashboard"] {
+    background-color: #ffffff !important;
+  }
+  
+  /* Cartes statistiques */
+  :root:not(.dark) [class*="dashboard"] .card {
+    background-color: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
+  }
+  
+  /* Textes et titres */
+  :root:not(.dark) [class*="dashboard"] h1,
+  :root:not(.dark) [class*="dashboard"] h2,
+  :root:not(.dark) [class*="dashboard"] h3,
+  :root:not(.dark) [class*="dashboard"] h4,
+  :root:not(.dark) [class*="dashboard"] [class*="title"],
+  :root:not(.dark) [class*="dashboard"] [class*="heading"] {
+    color: #0f172a !important; /* slate-900 */
+    font-weight: 700;
+  }
+  
+  /* Textes secondaires */
+  :root:not(.dark) [class*="dashboard"] p,
+  :root:not(.dark) [class*="dashboard"] span,
+  :root:not(.dark) [class*="dashboard"] div {
+    color: #334155 !important; /* slate-700 */
+  }
+  
+  /* Icônes */
+  :root:not(.dark) [class*="dashboard"] svg {
+    color: #475569 !important; /* slate-600 */
+  }
+  
+  /* Boutons spécifiques pour "Show Calendar" et "Goals" */
+  :root:not(.dark) .dashboard-calendar-button,
+  :root:not(.dark) .dashboard-goals-button {
+    background-color: #f8fafc !important; /* slate-50 */
+    border-color: #e2e8f0 !important; /* slate-200 */
+  }
+  
+  /* Texte dans les boutons */
+  :root:not(.dark) .dashboard-calendar-text,
+  :root:not(.dark) .dashboard-goals-text {
+    color: #334155 !important; /* slate-700 */
+  }
+  
+  /* Icônes spécifiques */
+  :root:not(.dark) .dashboard-calendar-button .lucide-calendar {
+    color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  :root:not(.dark) .dashboard-goals-button .lucide-target {
+    color: #10b981 !important; /* emerald-500 */
+  }
+  
+  /* AMÉLIORATION DES COULEURS DU DASHBOARD EN MODE CLAIR */
+  @media (max-width: 768px) {
+    /* Restaurer les couleurs originales des icônes dans le Dashboard */
+    :root:not(.dark) [class*="dashboard"] svg {
+      color: currentColor !important; /* Utiliser la couleur définie par le contexte */
+      fill: none !important; /* Préserver la forme originale */
+    }
+    
+    /* Couleurs spécifiques pour les boutons du Dashboard */
+    :root:not(.dark) .dashboard-calendar-button {
+      background: linear-gradient(to bottom, #f0f9ff, #e0f2fe) !important; /* blue-50 to blue-100 */
+      border: 1px solid #bfdbfe !important; /* blue-200 */
+    }
+    
+    :root:not(.dark) .dashboard-goals-button {
+      background: linear-gradient(to bottom, #ecfdf5, #d1fae5) !important; /* emerald-50 to emerald-100 */
+      border: 1px solid #a7f3d0 !important; /* emerald-200 */
+    }
+    
+    /* Icônes des boutons du Dashboard */
+    :root:not(.dark) .dashboard-calendar-button .lucide-calendar {
+      color: #3b82f6 !important; /* blue-500 */
+    }
+    
+    :root:not(.dark) .dashboard-goals-button .lucide-target {
+      color: #10b981 !important; /* emerald-500 */
+    }
+    
+    /* Texte des boutons du Dashboard */
+    :root:not(.dark) .dashboard-calendar-text,
+    :root:not(.dark) .dashboard-goals-text {
+      color: #1e293b !important; /* slate-800 */
+      font-weight: 500;
+    }
+    
+    /* Cartes statistiques avec dégradés de couleurs */
+    :root:not(.dark) [class*="dashboard"] .card {
+      background: #ffffff !important;
+      border: 1px solid rgba(226, 232, 240, 0.8) !important; /* slate-200 */
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    }
+    
+    /* Restaurer les couleurs des dégradés originaux dans les cartes */
+    :root:not(.dark) [class*="dashboard"] [class*="from-blue-50"] {
+      background: linear-gradient(to bottom right, #eff6ff, #e0f2fe) !important; /* blue-50 to blue-100 */
+      border-color: #bfdbfe !important; /* blue-200 */
+    }
+    
+    :root:not(.dark) [class*="dashboard"] [class*="from-green-50"] {
+      background: linear-gradient(to bottom right, #ecfdf5, #d1fae5) !important; /* green-50 to green-100 */
+      border-color: #a7f3d0 !important; /* green-200 */
+    }
+    
+    :root:not(.dark) [class*="dashboard"] [class*="from-purple-50"] {
+      background: linear-gradient(to bottom right, #f5f3ff, #ede9fe) !important; /* purple-50 to purple-100 */
+      border-color: #ddd6fe !important; /* purple-200 */
+    }
+    
+    :root:not(.dark) [class*="dashboard"] [class*="from-amber-50"] {
+      background: linear-gradient(to bottom right, #fffbeb, #fef3c7) !important; /* amber-50 to amber-100 */
+      border-color: #fde68a !important; /* amber-200 */
+    }
+    
+    /* Couleurs des fonds des icônes dans les cartes statistiques */
+    :root:not(.dark) [class*="dashboard"] [class*="bg-blue-100"] {
+      background-color: #dbeafe !important; /* blue-100 */
+    }
+    
+    :root:not(.dark) [class*="dashboard"] [class*="bg-green-100"] {
+      background-color: #d1fae5 !important; /* green-100 */
+    }
+    
+    :root:not(.dark) [class*="dashboard"] [class*="bg-purple-100"] {
+      background-color: #ede9fe !important; /* purple-100 */
+    }
+    
+    :root:not(.dark) [class*="dashboard"] [class*="bg-amber-100"] {
+      background-color: #fef3c7 !important; /* amber-100 */
+    }
+    
+    /* Couleurs des icônes dans les cartes statistiques */
+    :root:not(.dark) [class*="dashboard"] .text-blue-600,
+    :root:not(.dark) [class*="dashboard"] .text-blue-500 {
+      color: #3b82f6 !important; /* blue-500 */
+    }
+    
+    :root:not(.dark) [class*="dashboard"] .text-green-600,
+    :root:not(.dark) [class*="dashboard"] .text-green-500 {
+      color: #10b981 !important; /* emerald-500 */
+    }
+    
+    :root:not(.dark) [class*="dashboard"] .text-purple-600,
+    :root:not(.dark) [class*="dashboard"] .text-purple-500 {
+      color: #8b5cf6 !important; /* violet-500 */
+    }
+    
+    :root:not(.dark) [class*="dashboard"] .text-amber-600,
+    :root:not(.dark) [class*="dashboard"] .text-amber-500 {
+      color: #f59e0b !important; /* amber-500 */
+    }
+  }
+}
+
+/* CORRECTION CRITIQUE DES ICÔNES ET COULEURS DU DASHBOARD EN MODE CLAIR SUR MOBILE */
+@media (max-width: 768px) {
+  /* Réinitialisation générale des couleurs d'icônes */
+  :root:not(.dark) [class*="dashboard"] svg {
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.5px !important;
+  }
+  
+  /* Couleurs spécifiques pour les icônes des cartes statistiques */
+  /* Clock - carte bleue */
+  :root:not(.dark) [class*="dashboard"] .bg-gradient-to-br.from-blue-50 svg.lucide-clock {
+    color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  /* CheckCircle - carte verte */
+  :root:not(.dark) [class*="dashboard"] .bg-gradient-to-br.from-green-50 svg.lucide-check-circle {
+    color: #10b981 !important; /* emerald-500 */
+  }
+  
+  /* BookOpen - carte violette */
+  :root:not(.dark) [class*="dashboard"] .bg-gradient-to-br.from-purple-50 svg.lucide-book-open {
+    color: #8b5cf6 !important; /* violet-500 */
+  }
+  
+  /* Trophy - carte ambre */
+  :root:not(.dark) [class*="dashboard"] .bg-gradient-to-br.from-amber-50 svg.lucide-trophy {
+    color: #f59e0b !important; /* amber-500 */
+  }
+  
+  /* Couleurs pour les icônes des boutons d'action */
+  :root:not(.dark) .dashboard-calendar-button svg.lucide-calendar {
+    color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  :root:not(.dark) .dashboard-goals-button svg.lucide-target {
+    color: #10b981 !important; /* emerald-500 */
+  }
+  
+  /* Arrière-plans spécifiques pour les boutons */
+  :root:not(.dark) .dashboard-calendar-button {
+    background: linear-gradient(to bottom, #eff6ff, #dbeafe) !important; /* blue-50 to blue-100 */
+    border: 1px solid #bfdbfe !important; /* blue-200 */
+  }
+  
+  :root:not(.dark) .dashboard-goals-button {
+    background: linear-gradient(to bottom, #ecfdf5, #d1fae5) !important; /* emerald-50 to emerald-100 */
+    border: 1px solid #a7f3d0 !important; /* emerald-200 */
+  }
+  
+  /* Couleur du texte dans les boutons */
+  :root:not(.dark) .dashboard-calendar-text {
+    color: #2563eb !important; /* blue-600 */
+    font-weight: 600;
+  }
+  
+  :root:not(.dark) .dashboard-goals-text {
+    color: #059669 !important; /* emerald-600 */
+    font-weight: 600;
+  }
+  
+  /* Restauration des couleurs pour les dégradés dans les cartes statistiques */
+  :root:not(.dark) [class*="dashboard"] [class*="from-blue-50"] {
+    background: linear-gradient(to bottom right, #eff6ff, #dbeafe) !important; /* blue-50 to blue-100 */
+    border-color: #bfdbfe !important; /* blue-200 */
+  }
+  
+  :root:not(.dark) [class*="dashboard"] [class*="from-green-50"] {
+    background: linear-gradient(to bottom right, #ecfdf5, #d1fae5) !important; /* green-50 to green-100 */
+    border-color: #a7f3d0 !important; /* green-200 */
+  }
+  
+  :root:not(.dark) [class*="dashboard"] [class*="from-purple-50"] {
+    background: linear-gradient(to bottom right, #f3f4f6, #e5e7eb) !important; /* purple-50 to purple-100 */
+    border-color: #d1d5db !important; /* purple-200 */
+  }
+  
+  :root:not(.dark) [class*="dashboard"] [class*="from-amber-50"] {
+    background: linear-gradient(to bottom right, #fffbeb, #fef3c7) !important; /* amber-50 to amber-100 */
+    border-color: #fde68a !important; /* amber-200 */
+  }
+  
+  /* Texte coloré dans les cartes statistiques */
+  :root:not(.dark) [class*="dashboard"] .text-blue-600,
+  :root:not(.dark) [class*="dashboard"] .text-blue-700,
+  :root:not(.dark) [class*="dashboard"] .dark\:text-blue-300,
+  :root:not(.dark) [class*="dashboard"] .dark\:text-blue-400 {
+    color: #2563eb !important; /* blue-600 */
+  }
+  
+  :root:not(.dark) [class*="dashboard"] .text-green-600,
+  :root:not(.dark) [class*="dashboard"] .text-green-700,
+  :root:not(.dark) [class*="dashboard"] .dark\:text-green-300,
+  :root:not(.dark) [class*="dashboard"] .dark\:text-green-400 {
+    color: #059669 !important; /* emerald-600 */
+  }
+  
+  :root:not(.dark) [class*="dashboard"] .text-purple-600,
+  :root:not(.dark) [class*="dashboard"] .text-purple-700,
+  :root:not(.dark) [class*="dashboard"] .dark\:text-purple-300,
+  :root:not(.dark) [class*="dashboard"] .dark\:text-purple-400 {
+    color: #7c3aed !important; /* violet-600 */
+  }
+  
+  :root:not(.dark) [class*="dashboard"] .text-amber-600,
+  :root:not(.dark) [class*="dashboard"] .text-amber-700,
+  :root:not(.dark) [class*="dashboard"] .dark\:text-amber-300,
+  :root:not(.dark) [class*="dashboard"] .dark\:text-amber-400 {
+    color: #d97706 !important; /* amber-600 */
+  }
+  
+  /* Correction des fonds pour les cartes */
+  :root:not(.dark) [class*="dashboard"] .card,
+  :root:not(.dark) [class*="dashboard"] [class*="card"] {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important; /* slate-200 */
+  }
+  
+  /* Assurer que les titres sont bien lisibles */
+  :root:not(.dark) [class*="dashboard"] h1,
+  :root:not(.dark) [class*="dashboard"] h2,
+  :root:not(.dark) [class*="dashboard"] h3,
+  :root:not(.dark) [class*="dashboard"] h4 {
+    color: #0f172a !important; /* slate-900 */
+    font-weight: 700;
+  }
+}
+
+/* Styles spécifiques pour les icônes du dashboard */
+
+/* ====== MODE SOMBRE - ICÔNES SVG AVEC FORME ET COULEUR ====== */
+.dark .dashboard-icon {
+  stroke-width: 2;
+  fill: none;
+}
+
+/* COULEURS SPÉCIFIQUES PAR TYPE D'ICÔNE */
+.dark .dashboard-card--blue svg,
+.dark .from-blue-50 svg,
+.dark .bg-blue-100 svg,
+.dark svg.lucide-clock {
+  color: #60a5fa !important; /* blue-400 */
+  stroke: #60a5fa !important;
+}
+
+.dark .dashboard-card--green svg,
+.dark .from-green-50 svg,
+.dark .bg-green-100 svg,
+.dark svg.lucide-check-circle,
+.dark svg.lucide-check-circle-2 {
+  color: #34d399 !important; /* emerald-400 */
+  stroke: #34d399 !important;
+}
+
+.dark .dashboard-card--purple svg,
+.dark .from-purple-50 svg,
+.dark .bg-purple-100 svg,
+.dark svg.lucide-book-open {
+  color: #a78bfa !important; /* violet-400 */
+  stroke: #a78bfa !important;
+}
+
+.dark .dashboard-card--amber svg,
+.dark .from-amber-50 svg, 
+.dark .bg-amber-100 svg,
+.dark svg.lucide-trophy {
+  color: #fbbf24 !important; /* amber-400 */
+  stroke: #fbbf24 !important;
+}
+
+/* Force l'application correcte des couleurs et formes sur mobile */
+@media (max-width: 768px) {
+  .dark svg.dashboard-icon {
+    stroke-width: 2 !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    width: 24px !important;
+    height: 24px !important;
+  }
+  
+  /* Garantir la visibilité des icônes */
+  .dark [class*="dashboard"] svg path {
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: inherit !important;
+  }
+}
+
+/* Styles spécifiques pour les icônes du dashboard */
+
+/* STYLES DE BASE POUR TOUTES LES ICÔNES */
+.dashboard-icon {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.5 !important;
+}
+
+/* CLASSES DE COULEUR SPÉCIFIQUES */
+.blue-icon {
+  color: #3b82f6 !important; /* blue-500 pour le mode clair */
+}
+
+.green-icon {
+  color: #10b981 !important; /* emerald-500 pour le mode clair */
+}
+
+.purple-icon {
+  color: #8b5cf6 !important; /* violet-500 pour le mode clair */
+}
+
+.amber-icon {
+  color: #f59e0b !important; /* amber-500 pour le mode clair */
+}
+
+/* AJUSTEMENTS POUR LE MODE SOMBRE */
+.dark .blue-icon {
+  color: #60a5fa !important; /* blue-400 pour le mode sombre */
+}
+
+.dark .green-icon {
+  color: #34d399 !important; /* emerald-400 pour le mode sombre */
+}
+
+.dark .purple-icon {
+  color: #a78bfa !important; /* violet-400 pour le mode sombre */
+}
+
+.dark .amber-icon {
+  color: #fbbf24 !important; /* amber-400 pour le mode sombre */
+}
+
+/* FORCER LES BONNES PROPRIÉTÉS SUR MOBILE */
+@media (max-width: 768px) {
+  /* Mode sombre */
+  .dark .dashboard-icon {
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+  }
+  
+  /* Forcer les dimensions */
+  .dark .dashboard-icon {
+    width: 24px !important;
+    height: 24px !important;
+  }
+  
+  /* Garantir que le contenu SVG est correctement stylé */
+  .dark .dashboard-icon path,
+  .dark .dashboard-icon line,
+  .dark .dashboard-icon circle,
+  .dark .dashboard-icon rect,
+  .dark .dashboard-icon polyline,
+  .dark .dashboard-icon polygon {
+    fill: none !important;
+    stroke: inherit !important;
+    stroke-width: inherit !important;
+  }
+  
+  /* FONDS CIRCULAIRES - MODE SOMBRE */
+  .dark .bg-blue-100,
+  .dark [class*="bg-blue-100"] {
+    background-color: rgba(30, 58, 138, 0.8) !important; /* blue-800 avec transparence */
+  }
+  
+  .dark .bg-green-100,
+  .dark [class*="bg-green-100"] {
+    background-color: rgba(6, 95, 70, 0.8) !important; /* green-800 avec transparence */
+  }
+  
+  .dark .bg-purple-100,
+  .dark [class*="bg-purple-100"] {
+    background-color: rgba(91, 33, 182, 0.8) !important; /* purple-800 avec transparence */
+  }
+  
+  .dark .bg-amber-100,
+  .dark [class*="bg-amber-100"] {
+    background-color: rgba(146, 64, 14, 0.8) !important; /* amber-800 avec transparence */
+  }
+  
+  /* CARTES STATISTIQUES - MODE SOMBRE */
+  .dark .from-blue-50 {
+    background: linear-gradient(135deg, rgba(23, 37, 84, 0.9) 0%, rgba(30, 58, 138, 0.9) 100%) !important;
+  }
+  
+  .dark .from-green-50 {
+    background: linear-gradient(135deg, rgba(6, 78, 59, 0.9) 0%, rgba(6, 95, 70, 0.9) 100%) !important;
+  }
+  
+  .dark .from-purple-50 {
+    background: linear-gradient(135deg, rgba(46, 16, 101, 0.9) 0%, rgba(76, 29, 149, 0.9) 100%) !important;
+  }
+  
+  .dark .from-amber-50 {
+    background: linear-gradient(135deg, rgba(69, 26, 3, 0.9) 0%, rgba(120, 53, 15, 0.9) 100%) !important;
+  }
+}

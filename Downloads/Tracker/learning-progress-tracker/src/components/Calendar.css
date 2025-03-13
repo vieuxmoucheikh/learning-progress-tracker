@@ -1,0 +1,129 @@
+/* Styles spécifiques pour le composant Calendar */
+/* Ces styles visent particulièrement à corriger les problèmes d'indicateurs en mode clair */
+
+@media (max-width: 768px) {
+  /* INDICATEURS DE CALENDRIER EN MODE CLAIR */
+  html:not(.dark) [data-activity="true"] div,
+  html:not(.dark) [class*="calendar"] [class*="has-activity"] div {
+    background-color: #2563eb !important; /* blue-600 */
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 9999px !important; /* rounded-full */
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: absolute !important;
+    bottom: 1px !important;
+    right: 1px !important;
+  }
+  
+  html:not(.dark) [data-completed="true"] div,
+  html:not(.dark) [class*="calendar"] [class*="has-completed"] div {
+    background-color: #10b981 !important; /* green-500 */
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 9999px !important; /* rounded-full */
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: absolute !important;
+    bottom: 1px !important;
+    right: 11px !important; /* Décalé par rapport au premier indicateur */
+  }
+  
+  /* Les indicateurs doivent être visibles sur toutes les cellules de calendrier */
+  html:not(.dark) [class*="calendar"] button div[class*="bg-blue-"],
+  html:not(.dark) [class*="calendar"] button div[class*="bg-green-"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    width: 8px !important;
+    height: 8px !important;
+  }
+  
+  /* Amélioration du contraste pour les jours sélectionnés */
+  html:not(.dark) [class*="calendar"] button[aria-selected="true"],
+  html:not(.dark) [class*="calendar"] div[aria-selected="true"],
+  html:not(.dark) [class*="calendar"] button[data-selected="true"],
+  html:not(.dark) [class*="calendar"] div[data-selected="true"] {
+    background-color: #3b82f6 !important; /* blue-500 */
+    color: white !important;
+    box-shadow: 0 0 0 2px #60a5fa !important; /* blue-400 */
+  }
+  
+  /* Style amélioré pour les jours d'aujourd'hui */
+  html:not(.dark) [class*="calendar"] [class*="isToday"],
+  html:not(.dark) [class*="calendar"] [data-today="true"] {
+    background-color: #bfdbfe !important; /* blue-200 */
+    font-weight: bold !important;
+    color: #1e40af !important; /* blue-800 */
+  }
+  
+  /* Garantir que les boutons de jour sont bien visibles */
+  html:not(.dark) [class*="calendar"] button,
+  html:not(.dark) [class*="calendar"] [role="button"] {
+    background-color: white !important;
+    border: 1px solid #f1f5f9 !important; /* slate-100 */
+  }
+  
+  /* Couleurs spécifiques pour les jours avec activité */
+  html:not(.dark) [class*="calendar"] button:has([data-activity="true"]),
+  html:not(.dark) [class*="calendar"] button:has([data-completed="true"]) {
+    background-color: #f0f9ff !important; /* blue-50 */
+    border-color: #e0f2fe !important; /* blue-100 */
+  }
+  
+  /* Rendre les dates plus lisibles */
+  html:not(.dark) [class*="calendar"] button div,
+  html:not(.dark) [class*="calendar"] [role="button"] div {
+    color: #1e293b !important; /* slate-800 */
+    font-weight: 500 !important;
+  }
+  
+  /* Indicateurs supplémentaires - Petits points colorés */
+  html:not(.dark) [class*="calendar"] [class*="activity-indicator"],
+  html:not(.dark) [class*="calendar"] [class*="session-indicator"] {
+    display: inline-block !important;
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+    margin-right: 2px !important;
+    opacity: 1 !important;
+  }
+  
+  html:not(.dark) [class*="calendar"] [class*="activity-indicator-blue"],
+  html:not(.dark) [class*="calendar"] [class*="session-indicator-blue"] {
+    background-color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  html:not(.dark) [class*="calendar"] [class*="activity-indicator-green"],
+  html:not(.dark) [class*="calendar"] [class*="session-indicator-green"] {
+    background-color: #10b981 !important; /* emerald-500 */
+  }
+  
+  /* Garantir que le tooltip du calendrier est visible */
+  html:not(.dark) [class*="calendar"] [class*="tooltip"],
+  html:not(.dark) [class*="calendar"] [role="tooltip"],
+  html:not(.dark) [class*="calendar"] div[style*="transform: translate"] {
+    background-color: white !important;
+    color: #0f172a !important; /* slate-900 */
+    border: 1px solid #e2e8f0 !important; /* slate-200 */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    z-index: 50 !important;
+  }
+  
+  /* En-tête du calendrier */
+  html:not(.dark) [class*="calendar"] button span,
+  html:not(.dark) [class*="calendar"] [role="button"] span {
+    color: #0f172a !important; /* slate-900 */
+  }
+  
+  /* Jours de semaine */
+  html:not(.dark) [class*="calendar"] [class*="grid-cols-7"] div:not(button):not([role="button"]) {
+    color: #475569 !important; /* slate-600 */
+    font-weight: 600 !important;
+  }
+  
+  /* Semaine courante */
+  html:not(.dark) [class*="calendar"] [class*="isCurrentWeek"],
+  html:not(.dark) [class*="calendar"] [data-current-week="true"] {
+    background-color: #f1f5f9 !important; /* slate-100 */
+  }
+}

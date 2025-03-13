@@ -1,0 +1,45 @@
+/* Corrections d'urgence pour les appareils mobiles - compatible avec les deux modes */
+@media (max-width: 768px) {
+  /* Styles communs indépendants du mode */
+  .learning-item-card {
+    width: calc(100% - 16px) !important;
+    margin: 8px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  .learning-item-info {
+    padding: 10px 0 !important;
+  }
+  
+  /* Styles conditionnels basés sur le mode de thème */
+  :root:not(.dark-mode) .learning-item-card {
+    background-color: #ffffff !important;
+    border: 1px solid #e0e0e0 !important;
+  }
+  
+  :root.dark-mode .learning-item-card {
+    background-color: #252525 !important;
+    border: 1px solid #444444 !important;
+  }
+  
+  /* Ajustements pour les icônes */
+  .icon-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-bottom: 8px !important;
+  }
+  
+  /* Assurer la visibilité correcte du texte */
+  .learning-item-title {
+    font-size: 16px !important;
+    margin-bottom: 6px !important;
+  }
+  
+  /* Transitions fluides pour les changements de mode */
+  * {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+  }
+}
