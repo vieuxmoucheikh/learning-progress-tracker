@@ -1,0 +1,140 @@
+/* SOLUTION D'URGENCE pour les cartes d'apprentissage en mode clair sur mobile */
+
+@media (max-width: 768px) {
+  /* CARTES EN MODE CLAIR - CORRECTIFS CRITIQUES */
+  html[data-theme="light"] .learning-item-card,
+  html[data-theme="light"] [class*="learning-item-card"],
+  html[data-theme="light"] [class*="learning-card"],
+  html:not([data-theme="dark"]) .learning-item-card,
+  html:not([data-theme="dark"]) [class*="learning-item-card"],
+  html:not([data-theme="dark"]) [class*="learning-card"],
+  body:not(.dark-mode) .learning-item-card,
+  body:not(.dark-mode) [class*="learning-item-card"],
+  body:not(.dark-mode) [class*="learning-card"] {
+    background-color: #ffffff !important;
+    border: 2px solid #d1d5db !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12) !important;
+    color: #1f2937 !important;
+    position: relative !important;
+  }
+
+  /* Supercharge les titres des cartes */
+  html[data-theme="light"] .learning-item-card h3,
+  html[data-theme="light"] [class*="learning-item-card"] h3,
+  html[data-theme="light"] [class*="learning-card"] h3,
+  html[data-theme="light"] .learning-item-card [class*="title"],
+  html[data-theme="light"] [class*="learning-item-card"] [class*="title"],
+  html[data-theme="light"] [class*="learning-card"] [class*="title"],
+  html:not([data-theme="dark"]) .learning-item-card h3,
+  html:not([data-theme="dark"]) [class*="learning-item-card"] h3,
+  html:not([data-theme="dark"]) [class*="learning-card"] h3,
+  html:not([data-theme="dark"]) .learning-item-card [class*="title"],
+  html:not([data-theme="dark"]) [class*="learning-item-card"] [class*="title"],
+  html:not([data-theme="dark"]) [class*="learning-card"] [class*="title"] {
+    color: #000000 !important;
+    font-weight: 700 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    text-shadow: none !important;
+  }
+
+  /* Renforcer le texte des cartes */
+  html[data-theme="light"] .learning-item-card p,
+  html[data-theme="light"] [class*="learning-item-card"] p,
+  html[data-theme="light"] [class*="learning-card"] p,
+  html[data-theme="light"] .learning-item-card [class*="text"],
+  html[data-theme="light"] [class*="learning-item-card"] [class*="text"],
+  html[data-theme="light"] [class*="learning-card"] [class*="text"],
+  html[data-theme="light"] .learning-item-card [class*="description"],
+  html[data-theme="light"] [class*="learning-item-card"] [class*="description"],
+  html[data-theme="light"] [class*="learning-card"] [class*="description"],
+  html:not([data-theme="dark"]) .learning-item-card p,
+  html:not([data-theme="dark"]) [class*="learning-item-card"] p,
+  html:not([data-theme="dark"]) [class*="learning-card"] p,
+  html:not([data-theme="dark"]) .learning-item-card [class*="text"],
+  html:not([data-theme="dark"]) [class*="learning-item-card"] [class*="text"],
+  html:not([data-theme="dark"]) [class*="learning-card"] [class*="text"],
+  html:not([data-theme="dark"]) .learning-item-card [class*="description"],
+  html:not([data-theme="dark"]) [class*="learning-item-card"] [class*="description"],
+  html:not([data-theme="dark"]) [class*="learning-card"] [class*="description"] {
+    color: #111827 !important;
+    font-weight: 500 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Corriger les badges avec un contraste élevé */
+  html[data-theme="light"] .learning-item-card [class*="badge"],
+  html[data-theme="light"] [class*="learning-item-card"] [class*="badge"],
+  html[data-theme="light"] [class*="learning-card"] [class*="badge"],
+  html:not([data-theme="dark"]) .learning-item-card [class*="badge"],
+  html:not([data-theme="dark"]) [class*="learning-item-card"] [class*="badge"],
+  html:not([data-theme="dark"]) [class*="learning-card"] [class*="badge"] {
+    background-color: #e5e7eb !important;
+    color: #000000 !important;
+    border: 1px solid #9ca3af !important;
+    font-weight: 600 !important;
+  }
+
+  /* Tous les éléments SVG dans les cartes */
+  html[data-theme="light"] .learning-item-card svg,
+  html[data-theme="light"] [class*="learning-item-card"] svg,
+  html[data-theme="light"] [class*="learning-card"] svg,
+  html:not([data-theme="dark"]) .learning-item-card svg,
+  html:not([data-theme="dark"]) [class*="learning-item-card"] svg,
+  html:not([data-theme="dark"]) [class*="learning-card"] svg {
+    color: #000000 !important;
+    fill: none !important;
+    stroke: #000000 !important;
+    stroke-width: 2px !important;
+  }
+
+  /* Boutons des cartes */
+  html[data-theme="light"] .learning-item-card button,
+  html[data-theme="light"] [class*="learning-item-card"] button,
+  html[data-theme="light"] [class*="learning-card"] button,
+  html:not([data-theme="dark"]) .learning-item-card button,
+  html:not([data-theme="dark"]) [class*="learning-item-card"] button,
+  html:not([data-theme="dark"]) [class*="learning-card"] button {
+    background-color: #f3f4f6 !important;
+    color: #000000 !important;
+    border: 1px solid #9ca3af !important;
+  }
+
+  /* ----- SECTIONS SPÉCIALES ----- */
+  /* Completed Today et Active Tasks */
+  html[data-theme="light"] [class*="completed-today"] h3,
+  html[data-theme="light"] [class*="active-tasks"] h3,
+  html:not([data-theme="dark"]) [class*="completed-today"] h3,
+  html:not([data-theme="dark"]) [class*="active-tasks"] h3 {
+    color: #000000 !important;
+    font-weight: 700 !important;
+  }
+
+  html[data-theme="light"] [class*="completed-today"] .card,
+  html[data-theme="light"] [class*="active-tasks"] .card,
+  html:not([data-theme="dark"]) [class*="completed-today"] .card,
+  html:not([data-theme="dark"]) [class*="active-tasks"] .card {
+    background-color: #ffffff !important;
+    border: 2px solid #d1d5db !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  /* Items tab */
+  html[data-theme="light"] [id*="items-tab"] .card,
+  html:not([data-theme="dark"]) [id*="items-tab"] .card {
+    background-color: #ffffff !important;
+    border: 2px solid #d1d5db !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12) !important;
+  }
+  
+  /* Ajouter un contour noir pour tout texte potentiellement problématique */
+  html[data-theme="light"] .learning-item-card *:not(svg):not(button),
+  html[data-theme="light"] [class*="learning-item-card"] *:not(svg):not(button),
+  html[data-theme="light"] [class*="learning-card"] *:not(svg):not(button),
+  html:not([data-theme="dark"]) .learning-item-card *:not(svg):not(button),
+  html:not([data-theme="dark"]) [class*="learning-item-card"] *:not(svg):not(button),
+  html:not([data-theme="dark"]) [class*="learning-card"] *:not(svg):not(button) {
+    text-shadow: 0 0 0 #000000 !important;
+  }
+}

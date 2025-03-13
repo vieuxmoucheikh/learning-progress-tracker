@@ -21,7 +21,7 @@
       media="(prefers-color-scheme: dark)"
       content="#1e293b"
     />
-    <!-- Style d'urgence pour les cartes en mode clair et sombre sur mobile -->
+    <!-- STYLE ULTRA-PRIORITAIRE pour corriger les cartes en mode clair sur mobile -->
     <style>
       :root {
         color-scheme: light dark;
@@ -161,16 +161,87 @@
           background-color: #ffffff !important;
           border: 1px solid #d1d5db !important;
         }
+
+        /* STYLE CRITIQUE POUR LES CARTES - PRIORITÉ MAX */
+        html[data-theme="light"] .learning-item-card,
+        html[data-theme="light"] [class*="learning-item-card"],
+        html[data-theme="light"] [class*="learning-card"],
+        html[data-theme="light"] .card,
+        html[data-theme="light"] [class*="completed-today"] .card,
+        html[data-theme="light"] [class*="active-tasks"] .card,
+        html[data-theme="light"] [role="tabpanel"] .card,
+        html:not([data-theme="dark"]) .learning-item-card,
+        html:not([data-theme="dark"]) [class*="learning-item-card"],
+        html:not([data-theme="dark"]) [class*="learning-card"],
+        html:not([data-theme="dark"]) .card,
+        html:not([data-theme="dark"]) [class*="completed-today"] .card,
+        html:not([data-theme="dark"]) [class*="active-tasks"] .card,
+        html:not([data-theme="dark"]) [role="tabpanel"] .card {
+          background-color: #ffffff !important;
+          background: #ffffff !important;
+          border: 2px solid #d1d5db !important;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12) !important;
+          color: #1f2937 !important;
+          position: relative;
+        }
+
+        html[data-theme="light"] .card h3,
+        html[data-theme="light"] .card h4,
+        html[data-theme="light"] .card [class*="title"],
+        html[data-theme="light"] .card [class*="heading"],
+        html:not([data-theme="dark"]) .card h3,
+        html:not([data-theme="dark"]) .card h4,
+        html:not([data-theme="dark"]) .card [class*="title"],
+        html:not([data-theme="dark"]) .card [class*="heading"] {
+          color: #000000 !important;
+          font-weight: 700 !important;
+          text-shadow: none !important;
+        }
+
+        html[data-theme="light"] .card p,
+        html[data-theme="light"] .card [class*="text"],
+        html[data-theme="light"] .card [class*="description"],
+        html:not([data-theme="dark"]) .card p,
+        html:not([data-theme="dark"]) .card [class*="text"],
+        html:not([data-theme="dark"]) .card [class*="description"] {
+          color: #111827 !important;
+          font-weight: 500 !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+
+        html[data-theme="light"] .card [class*="badge"],
+        html[data-theme="light"] .card [class*="tag"],
+        html:not([data-theme="dark"]) .card [class*="badge"],
+        html:not([data-theme="dark"]) .card [class*="tag"] {
+          background-color: #e5e7eb !important;
+          color: #000000 !important;
+          border: 1px solid #9ca3af !important;
+          font-weight: 600 !important;
+        }
+
+        html[data-theme="light"] .card svg,
+        html[data-theme="light"] .card [class*="icon"],
+        html:not([data-theme="dark"]) .card svg,
+        html:not([data-theme="dark"]) .card [class*="icon"] {
+          color: #000000 !important;
+          stroke: #000000 !important;
+          stroke-width: 2px !important;
+          fill: none !important;
+        }
       }
     </style>
     <link rel="stylesheet" href="/emergency-mobile-fix.css" />
     <link rel="stylesheet" href="/mobile-light-mode.css" />
+    <link rel="stylesheet" href="/emergency-light-card-fix.css" />
+    <link rel="stylesheet" href="/final-light-mode-fix.css" />
     <script src="/light-mode-fixer.js" defer></script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script src="/fix-light-cards.js" defer></script>
+    <script src="/direct-card-fixer.js" defer></script>
     <!-- Script d'urgence pour corriger les cartes au chargement -->
     <script>
       (function () {
@@ -243,6 +314,173 @@
               applyEmergencyLightModeCardFixes();
             }
           });
+        });
+
+        observer.observe(document.documentElement, { attributes: true });
+      })();
+    </script>
+    <!-- Script d'urgence inline pour application immédiate -->
+    <script>
+      (function () {
+        // Fonction d'urgence pour forcer immédiatement les styles des cartes
+        function emergencyCardFix() {
+          if (window.innerWidth <= 768) {
+            const isLightMode =
+              document.documentElement.getAttribute("data-theme") === "light" ||
+              !document.documentElement.classList.contains("dark");
+
+            if (isLightMode) {
+              console.log("🚨 EMERGENCY CARD FIX APPLIED");
+
+              // Sélecteurs de cartes ultra-génériques
+              const allCardElements = document.querySelectorAll(
+                '.card, [class*="card"], .learning-item-card, [class*="learning-item-card"]'
+              );
+
+              allCardElements.forEach((card) => {
+                // Style de base
+                card.style.backgroundColor = "#ffffff";
+                card.style.border = "2px solid #d1d5db";
+                card.style.color = "#000000";
+
+                // Titres
+                card
+                  .querySelectorAll(
+                    'h3, h4, [class*="title"], [class*="heading"]'
+                  )
+                  .forEach((el) => {
+                    el.style.color = "#000000";
+                    el.style.fontWeight = "bold";
+                  });
+
+                // Texte
+                card
+                  .querySelectorAll(
+                    'p, [class*="text"], [class*="description"]'
+                  )
+                  .forEach((el) => {
+                    el.style.color = "#111827";
+                    el.style.opacity = "1";
+                    el.style.fontWeight = "500";
+                  });
+
+                // Icônes
+                card.querySelectorAll('svg, [class*="icon"]').forEach((el) => {
+                  el.style.color = "#000000";
+                  el.style.stroke = "#000000";
+                });
+              });
+
+              // Sections spécifiques
+              document
+                .querySelectorAll(
+                  '[class*="completed-today"] h3, [class*="active-tasks"] h3'
+                )
+                .forEach((el) => {
+                  el.style.color = "#000000";
+                  el.style.fontWeight = "bold";
+                });
+            }
+          }
+        }
+
+        // Exécuter immédiatement
+        emergencyCardFix();
+
+        // Exécuter après un court délai
+        setTimeout(emergencyCardFix, 500);
+
+        // Exécuter après le chargement
+        window.addEventListener("load", emergencyCardFix);
+      })();
+    </script>
+    <!-- Script pour garantir la visibilité des cartes après le chargement complet -->
+    <script>
+      (function () {
+        function applyFinalFix() {
+          if (window.innerWidth <= 768) {
+            const isLightMode =
+              document.documentElement.getAttribute("data-theme") === "light" ||
+              !document.documentElement.classList.contains("dark");
+
+            if (isLightMode) {
+              // Sélecteurs très ciblés pour tous les types de cartes
+              const cardSelectors = [
+                ".learning-item-card",
+                '[class*="learning-item-card"]',
+                '[class*="learning-card"]',
+                '[class*="dashboard"] .card',
+                '[class*="completed-today"] .card',
+                '[class*="active-tasks"] .card',
+                '[role="tabpanel"][id*="items"] .card',
+                '[id*="items-tab"] .card',
+              ];
+
+              // Appliquer les styles directement en JavaScript
+              document
+                .querySelectorAll(cardSelectors.join(", "))
+                .forEach((card) => {
+                  // Style de base de carte
+                  card.style.backgroundColor = "#ffffff";
+                  card.style.border = "2px solid #94a3b8";
+                  card.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.1)";
+                  card.style.color = "#0f172a";
+                  card.style.position = "relative";
+                  card.style.zIndex = "1";
+
+                  // Style de tous les titres
+                  card
+                    .querySelectorAll(
+                      'h1, h2, h3, h4, [class*="title"], [class*="heading"]'
+                    )
+                    .forEach((title) => {
+                      title.style.color = "#000000";
+                      title.style.fontWeight = "700";
+                      title.style.textShadow = "none";
+                      title.style.opacity = "1";
+                      title.style.visibility = "visible";
+                    });
+
+                  // Style de tous les paragraphes
+                  card
+                    .querySelectorAll(
+                      'p, [class*="text"], [class*="description"]'
+                    )
+                    .forEach((text) => {
+                      text.style.color = "#000000";
+                      text.style.fontWeight = "500";
+                      text.style.opacity = "1";
+                      text.style.visibility = "visible";
+                    });
+                });
+            }
+          }
+        }
+
+        // Exécuter immédiatement
+        applyFinalFix();
+
+        // Exécuter après un court délai
+        setTimeout(applyFinalFix, 500);
+
+        // Exécuter après le chargement complet
+        window.addEventListener("load", () => {
+          applyFinalFix();
+          // Réessayer plusieurs fois après le chargement
+          setTimeout(applyFinalFix, 1000);
+          setTimeout(applyFinalFix, 2000);
+        });
+
+        // Exécuter lors du changement de thème
+        const observer = new MutationObserver((mutations) => {
+          for (const mutation of mutations) {
+            if (
+              mutation.attributeName === "data-theme" ||
+              mutation.attributeName === "class"
+            ) {
+              applyFinalFix();
+            }
+          }
         });
 
         observer.observe(document.documentElement, { attributes: true });
