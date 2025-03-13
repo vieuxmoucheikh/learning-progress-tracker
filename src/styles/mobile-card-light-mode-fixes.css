@@ -1,57 +1,136 @@
 /* Corrections pour les cartes d'apprentissage en mode clair sur mobile */
 
 @media (max-width: 768px) {
-  html[data-theme="light"] .learning-item-card {
-    background-color: #f8f9fa;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  /* Règles générales pour toutes les cartes en mode clair */
+  html[data-theme="light"] .learning-item-card,
+  html[data-theme="light"] [class*="learning-item-card"],
+  html[data-theme="light"] [class*="learning-card"],
+  html[data-theme="light"] .card:has([class*="learning"]),
+  html[data-theme="light"] [role="tabpanel"] .card {
+    background-color: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
   }
 
+  /* Titres avec contraste amélioré */
   html[data-theme="light"] .learning-item-card h3,
-  html[data-theme="light"] .learning-item-card .card-title {
-    color: #111827;
-    font-weight: 600;
+  html[data-theme="light"] .learning-item-card .card-title,
+  html[data-theme="light"] [class*="learning-item-card"] h3,
+  html[data-theme="light"] [class*="learning-item-card"] .card-title,
+  html[data-theme="light"] [class*="learning-card"] h3, 
+  html[data-theme="light"] [class*="learning-card"] .card-title {
+    color: #111827 !important; /* slate-900 */
+    font-weight: 600 !important;
+    text-shadow: none !important;
   }
 
+  /* Texte principal avec contraste amélioré */
   html[data-theme="light"] .learning-item-card p,
-  html[data-theme="light"] .learning-item-card .card-description {
-    color: #374151;
+  html[data-theme="light"] .learning-item-card .card-description,
+  html[data-theme="light"] [class*="learning-item-card"] p,
+  html[data-theme="light"] [class*="learning-item-card"] .card-description,
+  html[data-theme="light"] [class*="learning-card"] p,
+  html[data-theme="light"] [class*="learning-card"] .card-description,
+  html[data-theme="light"] [class*="organize-text"],
+  html[data-theme="light"] [class*="learning-description"] {
+    color: #374151 !important; /* slate-700 */
+    font-weight: 400 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 
+  /* Étiquettes et badges */
   html[data-theme="light"] .learning-item-card .card-tags span,
-  html[data-theme="light"] .learning-item-card .badge {
-    background-color: #e5e7eb;
-    color: #1f2937;
-    border: 1px solid #d1d5db;
+  html[data-theme="light"] .learning-item-card .badge,
+  html[data-theme="light"] [class*="learning-item-card"] [class*="tag"],
+  html[data-theme="light"] [class*="learning-item-card"] [class*="badge"],
+  html[data-theme="light"] [class*="learning-card"] [class*="tag"],
+  html[data-theme="light"] [class*="learning-card"] [class*="badge"] {
+    background-color: #f3f4f6 !important; /* gray-100 */
+    color: #1f2937 !important; /* gray-800 */
+    border: 1px solid #d1d5db !important; /* gray-300 */
+    font-weight: 500 !important;
   }
 
-  html[data-theme="light"] .learning-item-card .card-progress-bar {
-    background-color: #e5e7eb;
+  /* Barre de progression */
+  html[data-theme="light"] .learning-item-card .card-progress-bar,
+  html[data-theme="light"] [class*="learning-item-card"] [class*="progress-bar"],
+  html[data-theme="light"] [class*="learning-card"] [class*="progress-bar"] {
+    background-color: #e5e7eb !important; /* gray-200 */
   }
 
-  html[data-theme="light"] .learning-item-card .card-progress-bar div {
-    background-color: #3b82f6;
+  html[data-theme="light"] .learning-item-card .card-progress-bar div,
+  html[data-theme="light"] [class*="learning-item-card"] [class*="progress-bar"] div,
+  html[data-theme="light"] [class*="learning-card"] [class*="progress-bar"] div {
+    background-color: #3b82f6 !important; /* blue-500 */
   }
 
+  /* Pieds de carte et actions */
   html[data-theme="light"] .learning-item-card .card-footer,
-  html[data-theme="light"] .learning-item-card .card-actions {
-    border-top: 1px solid #e5e7eb;
+  html[data-theme="light"] .learning-item-card .card-actions,
+  html[data-theme="light"] [class*="learning-item-card"] [class*="footer"],
+  html[data-theme="light"] [class*="learning-item-card"] [class*="actions"],
+  html[data-theme="light"] [class*="learning-card"] [class*="footer"],
+  html[data-theme="light"] [class*="learning-card"] [class*="actions"] {
+    border-top: 1px solid #e5e7eb !important; /* gray-200 */
   }
 
+  /* Boutons dans les cartes */
   html[data-theme="light"] .learning-item-card .card-actions button,
-  html[data-theme="light"] .learning-item-card .card-footer button {
-    color: #4b5563;
+  html[data-theme="light"] .learning-item-card .card-footer button,
+  html[data-theme="light"] [class*="learning-item-card"] [class*="actions"] button,
+  html[data-theme="light"] [class*="learning-item-card"] [class*="footer"] button,
+  html[data-theme="light"] [class*="learning-card"] [class*="actions"] button,
+  html[data-theme="light"] [class*="learning-card"] [class*="footer"] button {
+    color: #4b5563 !important; /* gray-600 */
+    background-color: #f9fafb !important; /* gray-50 */
+    border: 1px solid #e5e7eb !important; /* gray-200 */
   }
 
   html[data-theme="light"] .learning-item-card .card-actions button:hover,
-  html[data-theme="light"] .learning-item-card .card-footer button:hover {
-    background-color: #f3f4f6;
-    color: #1f2937;
+  html[data-theme="light"] .learning-item-card .card-footer button:hover,
+  html[data-theme="light"] [class*="learning-item-card"] [class*="actions"] button:hover,
+  html[data-theme="light"] [class*="learning-item-card"] [class*="footer"] button:hover,
+  html[data-theme="light"] [class*="learning-card"] [class*="actions"] button:hover,
+  html[data-theme="light"] [class*="learning-card"] [class*="footer"] button:hover {
+    background-color: #f3f4f6 !important; /* gray-100 */
+    color: #1f2937 !important; /* gray-800 */
   }
 
+  /* Icônes dans les cartes */
   html[data-theme="light"] .learning-item-card .card-icon,
-  html[data-theme="light"] .learning-item-card svg {
-    color: #4b5563;
-    fill: #4b5563;
+  html[data-theme="light"] .learning-item-card svg,
+  html[data-theme="light"] [class*="learning-item-card"] [class*="icon"],
+  html[data-theme="light"] [class*="learning-item-card"] svg,
+  html[data-theme="light"] [class*="learning-card"] [class*="icon"],
+  html[data-theme="light"] [class*="learning-card"] svg {
+    color: #4b5563 !important; /* gray-600 */
+    fill: #4b5563 !important; /* gray-600 */
+    stroke: #4b5563 !important; /* gray-600 */
+  }
+
+  /* Correction pour les cartes "Completed Today" et "Active Tasks" */
+  html[data-theme="light"] [class*="dashboard"] [class*="card"],
+  html[data-theme="light"] [class*="completed-today"],
+  html[data-theme="light"] [class*="active-tasks"] {
+    background-color: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+  }
+
+  /* Texte des titres de section */
+  html[data-theme="light"] [class*="dashboard"] h3,
+  html[data-theme="light"] [class*="dashboard"] [class*="section-title"],
+  html[data-theme="light"] [class*="dashboard"] [class*="heading"] {
+    color: #111827 !important; /* slate-900 */
+    font-weight: 600 !important;
+  }
+
+  /* Items tab spécifique */
+  html[data-theme="light"] [role="tabpanel"][id*="items"] .card,
+  html[data-theme="light"] [role="tabpanel"][id*="items"] [class*="card"],
+  html[data-theme="light"] [role="tabpanel"][aria-labelledby*="items"] .card,
+  html[data-theme="light"] [role="tabpanel"][aria-labelledby*="items"] [class*="card"] {
+    background-color: #ffffff !important;
+    border: 1px solid #d1d5db !important;
   }
 }

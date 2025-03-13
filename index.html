@@ -37,17 +37,46 @@
       }
 
       @media (max-width: 768px) {
-        /* MODE CLAIR */
+        /* MODE CLAIR - AMÉLIORATIONS CRITIQUES */
         html[data-theme="light"] .card,
         html[data-theme="light"] [class*="Card"],
         html[data-theme="light"] [class*="-card"],
         html[data-theme="light"] [class*="card"],
         html[data-theme="light"] .mastered-card,
-        html[data-theme="light"] [class*="learning-item-card"] {
+        html[data-theme="light"] [class*="learning-item-card"],
+        html[data-theme="light"] [class*="active-tasks"] .card,
+        html[data-theme="light"] [class*="completed-today"] .card,
+        html[data-theme="light"] [role="tabpanel"][id*="items"] .card {
           background-color: #ffffff !important;
           background: #ffffff !important;
-          border-color: rgba(0, 0, 0, 0.1) !important;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+          border: 1px solid rgba(0, 0, 0, 0.15) !important;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        /* Styles de texte en mode clair */
+        html[data-theme="light"] .card h3,
+        html[data-theme="light"] .card h4,
+        html[data-theme="light"] .card [class*="title"],
+        html[data-theme="light"] .card [class*="heading"],
+        html[data-theme="light"] [class*="card"] h3,
+        html[data-theme="light"] [class*="card"] h4,
+        html[data-theme="light"] [class*="card"] [class*="title"],
+        html[data-theme="light"] [class*="card"] [class*="heading"] {
+          color: #111827 !important;
+          font-weight: 600 !important;
+        }
+
+        html[data-theme="light"] .card p,
+        html[data-theme="light"] .card [class*="description"],
+        html[data-theme="light"] .card [class*="text"],
+        html[data-theme="light"] [class*="card"] p,
+        html[data-theme="light"] [class*="card"] [class*="description"],
+        html[data-theme="light"] [class*="card"] [class*="text"],
+        html[data-theme="light"] [class*="organize-text"],
+        html[data-theme="light"] [class*="learning-description"] {
+          color: #374151 !important;
+          opacity: 1 !important;
+          visibility: visible !important;
         }
 
         /* MODE SOMBRE */
@@ -78,10 +107,59 @@
           color: #ffffff !important;
         }
 
-        /* Fixer les badges */
-        [class*="badge"] {
+        /* Fixer les badges en mode clair */
+        html[data-theme="light"] [class*="badge"],
+        html[data-theme="light"] [class*="tag"],
+        html[data-theme="light"] .card-tags span {
+          background-color: #f3f4f6 !important;
+          color: #1f2937 !important;
+          border: 1px solid #d1d5db !important;
           opacity: 1 !important;
           visibility: visible !important;
+        }
+
+        /* Icônes en mode clair */
+        html[data-theme="light"] .card svg,
+        html[data-theme="light"] [class*="card"] svg,
+        html[data-theme="light"] .card [class*="icon"],
+        html[data-theme="light"] [class*="card"] [class*="icon"] {
+          color: #4b5563 !important;
+          fill: #4b5563 !important;
+          stroke: #4b5563 !important;
+        }
+
+        /* Améliorations spécifiques pour les sections Completed Today et Active Tasks */
+        html[data-theme="light"] [class*="completed-today"] .card,
+        html[data-theme="light"] [class*="active-tasks"] .card,
+        html:not([data-theme="dark"]) [class*="completed-today"] .card,
+        html:not([data-theme="dark"]) [class*="active-tasks"] .card {
+          background-color: #ffffff !important;
+          border: 1px solid #d1d5db !important;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        html[data-theme="light"] [class*="completed-today"] h3,
+        html[data-theme="light"] [class*="active-tasks"] h3,
+        html:not([data-theme="dark"]) [class*="completed-today"] h3,
+        html:not([data-theme="dark"]) [class*="active-tasks"] h3 {
+          color: #111827 !important;
+          font-weight: 600 !important;
+        }
+
+        html[data-theme="light"] [class*="completed-today"] p,
+        html[data-theme="light"] [class*="active-tasks"] p,
+        html:not([data-theme="dark"]) [class*="completed-today"] p,
+        html:not([data-theme="dark"]) [class*="active-tasks"] p {
+          color: #374151 !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+
+        /* Corrections pour l'onglet Items */
+        html[data-theme="light"] [id*="items-tab"] .card,
+        html:not([data-theme="dark"]) [id*="items-tab"] .card {
+          background-color: #ffffff !important;
+          border: 1px solid #d1d5db !important;
         }
       }
     </style>
@@ -93,5 +171,82 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script src="/fix-light-cards.js" defer></script>
+    <!-- Script d'urgence pour corriger les cartes au chargement -->
+    <script>
+      (function () {
+        // Fonction pour appliquer les correctifs immédiats aux cartes
+        function applyEmergencyLightModeCardFixes() {
+          if (window.innerWidth <= 768) {
+            const isLightMode =
+              document.documentElement.getAttribute("data-theme") === "light" ||
+              !document.documentElement.classList.contains("dark");
+
+            if (isLightMode) {
+              // Sélecteurs pour les sections critiques
+              const criticalSelectors = [
+                '[class*="completed-today"] .card',
+                '[class*="active-tasks"] .card',
+                '[id*="dashboard"] .card',
+                '[id*="items-tab"] .card',
+                ".learning-item-card",
+                '[class*="learning-item-card"]',
+              ];
+
+              document
+                .querySelectorAll(criticalSelectors.join(","))
+                .forEach((card) => {
+                  // Appliquer les styles d'urgence
+                  card.style.backgroundColor = "#ffffff";
+                  card.style.border = "1px solid #d1d5db";
+                  card.style.color = "#374151";
+
+                  // Trouver et corriger tous les éléments textuels
+                  card
+                    .querySelectorAll(
+                      'h3, h4, p, [class*="text"], [class*="title"], [class*="description"]'
+                    )
+                    .forEach((el) => {
+                      el.style.color = el.tagName.toLowerCase().startsWith("h")
+                        ? "#111827"
+                        : "#374151";
+                      el.style.opacity = "1";
+                      el.style.visibility = "visible";
+                    });
+                });
+            }
+          }
+        }
+
+        // Appliquer immédiatement
+        if (document.readyState === "loading") {
+          document.addEventListener(
+            "DOMContentLoaded",
+            applyEmergencyLightModeCardFixes
+          );
+        } else {
+          applyEmergencyLightModeCardFixes();
+        }
+
+        // Réappliquer lors du chargement complet
+        window.addEventListener("load", applyEmergencyLightModeCardFixes);
+
+        // Réappliquer lors des changements
+        window.addEventListener("resize", applyEmergencyLightModeCardFixes);
+
+        // Observer les changements de thème
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (
+              mutation.attributeName === "data-theme" ||
+              mutation.attributeName === "class"
+            ) {
+              applyEmergencyLightModeCardFixes();
+            }
+          });
+        });
+
+        observer.observe(document.documentElement, { attributes: true });
+      })();
+    </script>
   </body>
 </html>

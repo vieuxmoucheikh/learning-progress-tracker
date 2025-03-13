@@ -44,4 +44,109 @@
   html[data-theme="light"] svg {
     color: hsl(var(--foreground));
   }
+
+  /* Améliorations du mode clair sur mobile pour les cartes d'apprentissage */
+
+  /* Styles globaux pour les cartes en mode clair */
+  html[data-theme="light"] .card,
+  html[data-theme="light"] [class*="card"],
+  html:not([data-theme="dark"]) .card,
+  html:not([data-theme="dark"]) [class*="card"] {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08) !important;
+  }
+  
+  /* Styles pour les cartes d'apprentissage */
+  html[data-theme="light"] .learning-item-card,
+  html[data-theme="light"] [class*="learning-item-card"],
+  html[data-theme="light"] [class*="learning-card"],
+  html:not([data-theme="dark"]) .learning-item-card,
+  html:not([data-theme="dark"]) [class*="learning-item-card"],
+  html:not([data-theme="dark"]) [class*="learning-card"] {
+    background-color: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+    color: #374151 !important;
+  }
+  
+  /* Titres des cartes en mode clair */
+  html[data-theme="light"] .card h3,
+  html[data-theme="light"] .card h4,
+  html[data-theme="light"] .card [class*="title"],
+  html[data-theme="light"] .card [class*="heading"],
+  html:not([data-theme="dark"]) .card h3,
+  html:not([data-theme="dark"]) .card h4,
+  html:not([data-theme="dark"]) .card [class*="title"],
+  html:not([data-theme="dark"]) .card [class*="heading"] {
+    color: #111827 !important;
+    font-weight: 600 !important;
+  }
+  
+  /* Paragraphes et descriptions en mode clair */
+  html[data-theme="light"] .card p,
+  html[data-theme="light"] [class*="card"] p,
+  html[data-theme="light"] .card [class*="text"],
+  html[data-theme="light"] [class*="card"] [class*="text"],
+  html[data-theme="light"] .card [class*="description"],
+  html[data-theme="light"] [class*="card"] [class*="description"],
+  html:not([data-theme="dark"]) .card p,
+  html:not([data-theme="dark"]) [class*="card"] p,
+  html:not([data-theme="dark"]) .card [class*="text"],
+  html:not([data-theme="dark"]) [class*="card"] [class*="text"],
+  html:not([data-theme="dark"]) .card [class*="description"],
+  html:not([data-theme="dark"]) [class*="card"] [class*="description"] {
+    color: #374151 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Badges et tags en mode clair */
+  html[data-theme="light"] .card [class*="badge"],
+  html[data-theme="light"] .card [class*="tag"],
+  html[data-theme="light"] [class*="card"] [class*="badge"],
+  html[data-theme="light"] [class*="card"] [class*="tag"],
+  html:not([data-theme="dark"]) .card [class*="badge"],
+  html:not([data-theme="dark"]) .card [class*="tag"],
+  html:not([data-theme="dark"]) [class*="card"] [class*="badge"],
+  html:not([data-theme="dark"]) [class*="card"] [class*="tag"] {
+    background-color: #f3f4f6 !important;
+    color: #1f2937 !important;
+    border: 1px solid #d1d5db !important;
+    font-weight: 500 !important;
+  }
+  
+  /* Icônes en mode clair */
+  html[data-theme="light"] .card svg,
+  html[data-theme="light"] [class*="card"] svg,
+  html:not([data-theme="dark"]) .card svg,
+  html:not([data-theme="dark"]) [class*="card"] svg {
+    color: #4b5563 !important;
+    stroke: #4b5563 !important;
+    fill: none !important;
+  }
+  
+  /* Correction spécifique pour les sections "Completed Today" et "Active Tasks" */
+  html[data-theme="light"] [class*="completed-today"] .card,
+  html[data-theme="light"] [class*="active-tasks"] .card,
+  html:not([data-theme="dark"]) [class*="completed-today"] .card,
+  html:not([data-theme="dark"]) [class*="active-tasks"] .card {
+    background-color: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+  }
+  
+  html[data-theme="light"] [class*="completed-today"] h3,
+  html[data-theme="light"] [class*="active-tasks"] h3,
+  html:not([data-theme="dark"]) [class*="completed-today"] h3,
+  html:not([data-theme="dark"]) [class*="active-tasks"] h3 {
+    color: #111827 !important;
+    font-weight: 600 !important;
+  }
+  
+  /* Onglet Items */
+  html[data-theme="light"] [id*="items-tab"] .card,
+  html:not([data-theme="dark"]) [id*="items-tab"] .card {
+    background-color: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+  }
 }

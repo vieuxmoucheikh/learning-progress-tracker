@@ -75,6 +75,131 @@
   html[data-theme="dark"] [class*="badge"] {
     border-color: rgba(255, 255, 255, 0.1) !important;
   }
+
+  /* Sélecteurs renforcés pour les cartes en mode clair */
+  html[data-theme="light"] .card,
+  html[data-theme="light"] [class*="card"],
+  html[data-theme="light"] .learning-item-card,
+  html[data-theme="light"] [class*="learning-item-card"],
+  html[data-theme="light"] [class*="learning-card"],
+  :root:not(.dark) .card,
+  :root:not(.dark) [class*="card"],
+  :root:not(.dark) .learning-item-card,
+  :root:not(.dark) [class*="learning-item-card"],
+  :root:not(.dark) [class*="learning-card"] {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+    color: #374151 !important;
+  }
+  
+  /* Titres de cartes */
+  html[data-theme="light"] .card h3,
+  html[data-theme="light"] [class*="card"] h3,
+  html[data-theme="light"] .card h4,
+  html[data-theme="light"] [class*="card"] h4,
+  html[data-theme="light"] .card [class*="title"],
+  html[data-theme="light"] [class*="card"] [class*="title"],
+  html[data-theme="light"] .card [class*="heading"],
+  html[data-theme="light"] [class*="card"] [class*="heading"],
+  :root:not(.dark) .card h3,
+  :root:not(.dark) [class*="card"] h3,
+  :root:not(.dark) .card h4,
+  :root:not(.dark) [class*="card"] h4,
+  :root:not(.dark) .card [class*="title"],
+  :root:not(.dark) [class*="card"] [class*="title"],
+  :root:not(.dark) .card [class*="heading"],
+  :root:not(.dark) [class*="card"] [class*="heading"] {
+    color: #111827 !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+  }
+  
+  /* Textes et paragraphes */
+  html[data-theme="light"] .card p,
+  html[data-theme="light"] [class*="card"] p,
+  html[data-theme="light"] .card [class*="text"],
+  html[data-theme="light"] [class*="card"] [class*="text"],
+  html[data-theme="light"] .card [class*="description"],
+  html[data-theme="light"] [class*="card"] [class*="description"],
+  :root:not(.dark) .card p,
+  :root:not(.dark) [class*="card"] p,
+  :root:not(.dark) .card [class*="text"],
+  :root:not(.dark) [class*="card"] [class*="text"],
+  :root:not(.dark) .card [class*="description"],
+  :root:not(.dark) [class*="card"] [class*="description"] {
+    color: #374151 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Badges et tags */
+  html[data-theme="light"] .card [class*="badge"],
+  html[data-theme="light"] [class*="card"] [class*="badge"],
+  html[data-theme="light"] .card [class*="tag"],
+  html[data-theme="light"] [class*="card"] [class*="tag"],
+  :root:not(.dark) .card [class*="badge"],
+  :root:not(.dark) [class*="card"] [class*="badge"],
+  :root:not(.dark) .card [class*="tag"],
+  :root:not(.dark) [class*="card"] [class*="tag"] {
+    background-color: #f3f4f6 !important;
+    color: #1f2937 !important;
+    border: 1px solid #d1d5db !important;
+  }
+  
+  /* Icônes */
+  html[data-theme="light"] .card svg,
+  html[data-theme="light"] [class*="card"] svg,
+  html[data-theme="light"] .card [class*="icon"],
+  html[data-theme="light"] [class*="card"] [class*="icon"],
+  :root:not(.dark) .card svg,
+  :root:not(.dark) [class*="card"] svg,
+  :root:not(.dark) .card [class*="icon"],
+  :root:not(.dark) [class*="card"] [class*="icon"] {
+    color: #4b5563 !important;
+    stroke: #4b5563 !important;
+    fill: none !important;
+  }
+  
+  /* Sections spécifiques - Completed Today et Active Tasks */
+  html[data-theme="light"] [class*="completed-today"],
+  html[data-theme="light"] [class*="active-tasks"],
+  :root:not(.dark) [class*="completed-today"],
+  :root:not(.dark) [class*="active-tasks"] {
+    color: #374151 !important;
+  }
+  
+  html[data-theme="light"] [class*="completed-today"] h3,
+  html[data-theme="light"] [class*="active-tasks"] h3,
+  html[data-theme="light"] [class*="completed-today"] [class*="heading"],
+  html[data-theme="light"] [class*="active-tasks"] [class*="heading"],
+  :root:not(.dark) [class*="completed-today"] h3,
+  :root:not(.dark) [class*="active-tasks"] h3,
+  :root:not(.dark) [class*="completed-today"] [class*="heading"],
+  :root:not(.dark) [class*="active-tasks"] [class*="heading"] {
+    color: #111827 !important;
+    font-weight: 600 !important;
+  }
+  
+  html[data-theme="light"] [class*="completed-today"] .card,
+  html[data-theme="light"] [class*="active-tasks"] .card,
+  :root:not(.dark) [class*="completed-today"] .card,
+  :root:not(.dark) [class*="active-tasks"] .card {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  }
+
+  /* Onglet Items */
+  html[data-theme="light"] [id*="items-tab"],
+  :root:not(.dark) [id*="items-tab"] {
+    color: #374151 !important;
+  }
+  
+  html[data-theme="light"] [id*="items-tab"] .card,
+  :root:not(.dark) [id*="items-tab"] .card {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  }
 }
 
 /* FIXATEUR DE MODE SOMBRE - Garantir que le mode sombre fonctionne correctement */

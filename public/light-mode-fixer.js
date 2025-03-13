@@ -218,3 +218,154 @@
   setTimeout(fixThemeMode, 500);
   setTimeout(fixThemeMode, 1500);
 })();
+
+/**
+ * Script pour améliorer la visibilité des cartes d'apprentissage en mode clair sur mobile
+ */
+(function() {
+  // Vérifier si nous sommes sur mobile
+  const isMobile = window.innerWidth <= 768;
+  
+  // Vérifier si nous sommes en mode clair
+  function isLightMode() {
+    return document.documentElement.getAttribute('data-theme') === 'light' || 
+           !document.documentElement.classList.contains('dark');
+  }
+
+  // Fonction pour corriger les cartes d'apprentissage
+  function fixLearningCards() {
+    if (isMobile && isLightMode()) {
+      console.log('Fixing learning cards in light mode on mobile...');
+      
+      // Sélecteurs pour les différentes cartes d'apprentissage
+      const selectors = [
+        // Cartes d'apprentissage principales
+        '.learning-item-card',
+        '[class*="learning-item-card"]',
+        '[class*="learning-card"]',
+        
+        // Cartes dans les sections spécifiques
+        '[class*="completed-today"] .card',
+        '[class*="active-tasks"] .card',
+        
+        // Cartes dans les onglets spécifiques
+        '[role="tabpanel"][id*="items"] .card',
+        '[id*="items-tab"] .card',
+        '[id*="dashboard"] .card',
+        
+        // Autres cartes potentielles
+        '[data-state="active"] .card'
+      ];
+      
+      // Appliquer les corrections à toutes les cartes correspondantes
+      document.querySelectorAll(selectors.join(', ')).forEach(card => {
+        // Fond blanc et bordures visibles
+        card.style.backgroundColor = '#ffffff';
+        card.style.border = '1px solid #d1d5db';
+        card.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)';
+        
+        // Corriger les titres
+        card.querySelectorAll('h3, h4, [class*="title"], [class*="heading"]').forEach(title => {
+          title.style.color = '#111827';
+          title.style.fontWeight = '600';
+        });
+        
+        // Corriger les paragraphes et descriptions
+        card.querySelectorAll('p, [class*="text"], [class*="description"]').forEach(text => {
+          text.style.color = '#374151';
+          text.style.opacity = '1';
+          text.style.visibility = 'visible';
+        });
+        
+        // Corriger les badges et tags
+        card.querySelectorAll('[class*="badge"], [class*="tag"], .tag').forEach(badge => {
+          badge.style.backgroundColor = '#f3f4f6';
+          badge.style.color = '#1f2937';
+          badge.style.border = '1px solid #d1d5db';
+        });
+        
+        // Corriger les icônes
+        card.querySelectorAll('svg, [class*="icon"]').forEach(icon => {
+          icon.style.color = '#4b5563';
+          icon.style.stroke = '#4b5563';
+        });
+      });
+      
+      // Corriger spécifiquement les sections "Completed Today" et "Active Tasks"
+      document.querySelectorAll('[class*="completed-today"], [class*="active-tasks"]').forEach(section => {
+        section.querySelectorAll('h3, [class*="heading"]').forEach(heading => {
+          heading.style.color = '#111827';
+          heading.style.fontWeight = '600';
+        });
+        
+        section.querySelectorAll('.card, [class*="card"]').forEach(card => {
+          card.style.backgroundColor = '#ffffff';
+          card.style.border = '1px solid #d1d5db';
+          
+          card.querySelectorAll('p, [class*="text"]').forEach(text => {
+            text.style.color = '#374151';
+            text.style.opacity = '1';
+          });
+        });
+      });
+    }
+  }
+
+  // Appliquer les corrections au chargement initial
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fixLearningCards);
+  } else {
+    fixLearningCards();
+  }
+  
+  // Réappliquer lors du chargement complet
+  window.addEventListener('load', fixLearningCards);
+  
+  // Observer les changements de thème
+  const observer = new MutationObserver(mutations => {
+    for (const mutation of mutations) {
+      if (mutation.attributeName === 'data-theme' || mutation.attributeName === 'class') {
+        fixLearningCards();
+      }
+    }
+  });
+  
+  observer.observe(document.documentElement, { attributes: true });
+  
+  // Observer les changements de contenu pour les nouvelles cartes chargées dynamiquement
+  const contentObserver = new MutationObserver(mutations => {
+    for (const mutation of mutations) {
+      if (mutation.addedNodes.length > 0) {
+        fixLearningCards();
+      }
+    }
+  });
+  
+  contentObserver.observe(document.body, { childList: true, subtree: true });
+  
+  // Observer les changements d'onglets
+  document.addEventListener('click', e => {
+    if (e.target.closest('[role="tab"]') || e.target.closest('button')) {
+      // Attendre que le nouvel onglet ou contenu soit chargé
+      setTimeout(fixLearningCards, 100);
+      setTimeout(fixLearningCards, 300);
+    }
+  });
+  
+  // Réappliquer lors du redimensionnement de la fenêtre
+  window.addEventListener('resize', () => {
+    if (window.innerWidth <= 768) {
+      fixLearningCards();
+    }
+  });
+
+  // Appliquer toutes les 500ms pendant 5 secondes pour s'assurer de l'application
+  let attempts = 0;
+  const interval = setInterval(() => {
+    fixLearningCards();
+    attempts++;
+    if (attempts >= 10) {
+      clearInterval(interval);
+    }
+  }, 500);
+})();

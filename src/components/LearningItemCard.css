@@ -309,3 +309,153 @@ html[data-theme="light"] .learning-item-card {
     margin: 8px 0;
   }
 }
+
+/* ========= MODE CLAIR AMÉLIORÉ POUR MOBILE ========= */
+@media (max-width: 768px) {
+  /* Styles de base pour les cartes en mode clair */
+  :root:not(.dark) .learning-item-card,
+  :root:not(.dark) [class*="learning-item-card"],
+  :root:not(.dark) [class*="learning-card"],
+  html[data-theme="light"] .learning-item-card,
+  html[data-theme="light"] [class*="learning-item-card"],
+  html[data-theme="light"] [class*="learning-card"] {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  }
+  
+  /* Titres des cartes en mode clair */
+  :root:not(.dark) .learning-item-card h3,
+  :root:not(.dark) [class*="learning-item-card"] h3,
+  :root:not(.dark) [class*="learning-card"] h3,
+  :root:not(.dark) .learning-item-card [class*="title"],
+  :root:not(.dark) [class*="learning-item-card"] [class*="title"],
+  :root:not(.dark) [class*="learning-card"] [class*="title"],
+  html[data-theme="light"] .learning-item-card h3,
+  html[data-theme="light"] [class*="learning-item-card"] h3,
+  html[data-theme="light"] [class*="learning-card"] h3,
+  html[data-theme="light"] .learning-item-card [class*="title"],
+  html[data-theme="light"] [class*="learning-item-card"] [class*="title"],
+  html[data-theme="light"] [class*="learning-card"] [class*="title"] {
+    color: #111827 !important; /* slate-900 */
+    font-weight: 600 !important;
+  }
+  
+  /* Texte des cartes en mode clair */
+  :root:not(.dark) .learning-item-card p,
+  :root:not(.dark) [class*="learning-item-card"] p,
+  :root:not(.dark) [class*="learning-card"] p,
+  :root:not(.dark) .learning-item-card [class*="text"],
+  :root:not(.dark) [class*="learning-item-card"] [class*="text"],
+  :root:not(.dark) [class*="learning-card"] [class*="text"],
+  :root:not(.dark) .learning-item-card [class*="description"],
+  :root:not(.dark) [class*="learning-item-card"] [class*="description"],
+  :root:not(.dark) [class*="learning-card"] [class*="description"],
+  html[data-theme="light"] .learning-item-card p,
+  html[data-theme="light"] [class*="learning-item-card"] p,
+  html[data-theme="light"] [class*="learning-card"] p,
+  html[data-theme="light"] .learning-item-card [class*="text"],
+  html[data-theme="light"] [class*="learning-item-card"] [class*="text"],
+  html[data-theme="light"] [class*="learning-card"] [class*="text"],
+  html[data-theme="light"] .learning-item-card [class*="description"],
+  html[data-theme="light"] [class*="learning-item-card"] [class*="description"],
+  html[data-theme="light"] [class*="learning-card"] [class*="description"] {
+    color: #374151 !important; /* slate-700 */
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Badges et étiquettes en mode clair */
+  :root:not(.dark) .learning-item-card [class*="badge"],
+  :root:not(.dark) [class*="learning-item-card"] [class*="badge"],
+  :root:not(.dark) [class*="learning-card"] [class*="badge"],
+  :root:not(.dark) .learning-item-card [class*="tag"],
+  :root:not(.dark) [class*="learning-item-card"] [class*="tag"],
+  :root:not(.dark) [class*="learning-card"] [class*="tag"],
+  html[data-theme="light"] .learning-item-card [class*="badge"],
+  html[data-theme="light"] [class*="learning-item-card"] [class*="badge"],
+  html[data-theme="light"] [class*="learning-card"] [class*="badge"],
+  html[data-theme="light"] .learning-item-card [class*="tag"],
+  html[data-theme="light"] [class*="learning-item-card"] [class*="tag"],
+  html[data-theme="light"] [class*="learning-card"] [class*="tag"] {
+    background-color: #f3f4f6 !important; /* gray-100 */
+    color: #1f2937 !important; /* gray-800 */
+    border: 1px solid #d1d5db !important; /* gray-300 */
+    font-weight: 500 !important;
+  }
+  
+  /* Icônes en mode clair */
+  :root:not(.dark) .learning-item-card svg,
+  :root:not(.dark) [class*="learning-item-card"] svg,
+  :root:not(.dark) [class*="learning-card"] svg,
+  :root:not(.dark) .learning-item-card [class*="icon"],
+  :root:not(.dark) [class*="learning-item-card"] [class*="icon"],
+  :root:not(.dark) [class*="learning-card"] [class*="icon"],
+  html[data-theme="light"] .learning-item-card svg,
+  html[data-theme="light"] [class*="learning-item-card"] svg,
+  html[data-theme="light"] [class*="learning-card"] svg,
+  html[data-theme="light"] .learning-item-card [class*="icon"],
+  html[data-theme="light"] [class*="learning-item-card"] [class*="icon"],
+  html[data-theme="light"] [class*="learning-card"] [class*="icon"] {
+    color: #4b5563 !important; /* gray-600 */
+    stroke: #4b5563 !important; /* gray-600 */
+    fill: none !important;
+  }
+  
+  /* Boutons en mode clair */
+  :root:not(.dark) .learning-item-card button,
+  :root:not(.dark) [class*="learning-item-card"] button,
+  :root:not(.dark) [class*="learning-card"] button,
+  html[data-theme="light"] .learning-item-card button,
+  html[data-theme="light"] [class*="learning-item-card"] button,
+  html[data-theme="light"] [class*="learning-card"] button {
+    background-color: #f9fafb !important; /* gray-50 */
+    color: #4b5563 !important; /* gray-600 */
+    border: 1px solid #e5e7eb !important; /* gray-200 */
+  }
+  
+  /* Cartes dans le tableau de bord */
+  :root:not(.dark) [class*="dashboard"] .card,
+  :root:not(.dark) [class*="active-tasks"] .card,
+  :root:not(.dark) [class*="completed-today"] .card,
+  html[data-theme="light"] [class*="dashboard"] .card,
+  html[data-theme="light"] [class*="active-tasks"] .card,
+  html[data-theme="light"] [class*="completed-today"] .card {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08) !important;
+  }
+  
+  /* Texte spécifique aux cartes du tableau de bord */
+  :root:not(.dark) [class*="dashboard"] .card h3,
+  :root:not(.dark) [class*="dashboard"] .card h4,
+  :root:not(.dark) [class*="dashboard"] .card [class*="title"],
+  html[data-theme="light"] [class*="dashboard"] .card h3,
+  html[data-theme="light"] [class*="dashboard"] .card h4,
+  html[data-theme="light"] [class*="dashboard"] .card [class*="title"] {
+    color: #111827 !important; /* slate-900 */
+    font-weight: 600 !important;
+  }
+  
+  :root:not(.dark) [class*="dashboard"] .card p,
+  :root:not(.dark) [class*="dashboard"] .card [class*="text"],
+  :root:not(.dark) [class*="dashboard"] .card [class*="description"],
+  html[data-theme="light"] [class*="dashboard"] .card p,
+  html[data-theme="light"] [class*="dashboard"] .card [class*="text"],
+  html[data-theme="light"] [class*="dashboard"] .card [class*="description"] {
+    color: #374151 !important; /* slate-700 */
+  }
+  
+  /* Améliorations pour "Completed Today" et "Active Tasks" */
+  :root:not(.dark) [class*="completed-today"] h3,
+  :root:not(.dark) [class*="active-tasks"] h3,
+  :root:not(.dark) [class*="completed-today"] [class*="heading"],
+  :root:not(.dark) [class*="active-tasks"] [class*="heading"],
+  html[data-theme="light"] [class*="completed-today"] h3,
+  html[data-theme="light"] [class*="active-tasks"] h3,
+  html[data-theme="light"] [class*="completed-today"] [class*="heading"],
+  html[data-theme="light"] [class*="active-tasks"] [class*="heading"] {
+    color: #111827 !important; /* slate-900 */
+    font-weight: 600 !important;
+  }
+}
