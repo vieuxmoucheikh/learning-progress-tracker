@@ -1,0 +1,140 @@
+/* Correctif d'urgence pour les modes clair et sombre sur mobile */
+@media (max-width: 768px) {
+  /* === MODE CLAIR === */
+  /* Forcer le fond en blanc pour le mode clair UNIQUEMENT */
+  html[data-theme="light"]:not([data-theme="dark"]),
+  html[data-theme="light"]:not([data-theme="dark"]) body,
+  html[data-theme="light"]:not([data-theme="dark"]) #root {
+    background-color: #f8fafc !important; /* slate-50 */
+    color-scheme: light !important;
+  }
+
+  /* Assurer que le contenu principal a également un fond clair */
+  html[data-theme="light"] main,
+  html[data-theme="light"] [role="main"],
+  html[data-theme="light"] [role="tabpanel"],
+  html[data-theme="light"] .app-container {
+    background-color: #f8fafc !important; /* slate-50 */
+  }
+  
+  /* S'assurer que les cartes se démarquent sur fond clair */
+  html[data-theme="light"]:not([data-theme="dark"]) div.card,
+  html[data-theme="light"]:not([data-theme="dark"]) div[class*="Card"],
+  html[data-theme="light"]:not([data-theme="dark"]) div[class*="-card"],
+  html[data-theme="light"]:not([data-theme="dark"]) .card,
+  html[data-theme="light"]:not([data-theme="dark"]) [class*="Card"],
+  html[data-theme="light"]:not([data-theme="dark"]) [class*="-card"],
+  html[data-theme="light"]:not([data-theme="dark"]) [class*="card"],
+  html[data-theme="light"]:not([data-theme="dark"]) .rounded-xl,
+  html[data-theme="light"]:not([data-theme="dark"]) div[class*="learning-item-card"],
+  html[data-theme="light"]:not([data-theme="dark"]) .bg-card,
+  html[data-theme="light"]:not([data-theme="dark"]) .bg-white.dark\:bg-gray-800,
+  html[data-theme="light"]:not([data-theme="dark"]) [class*="mastered-card"] {
+    background-color: #ffffff !important; /* blanc pur */
+    background: #ffffff !important; /* double définition pour override */
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  /* Annuler tous les arrière-plans sombres potentiels UNIQUEMENT en mode clair */
+  html[data-theme="light"] .dark\:bg-gray-800,
+  html[data-theme="light"] .dark\:bg-card,
+  html[data-theme="light"] [class*="dark:bg"] {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+  }
+  
+  /* Meilleure visibilité pour les textes en mode clair */
+  html[data-theme="light"] h1,
+  html[data-theme="light"] h2,
+  html[data-theme="light"] h3,
+  html[data-theme="light"] h4,
+  html[data-theme="light"] h5,
+  html[data-theme="light"] h6 {
+    color: #0f172a !important; /* slate-900 */
+  }
+  
+  html[data-theme="light"] p:not([class*="text-"]),
+  html[data-theme="light"] span:not([class*="text-"]),
+  html[data-theme="light"] div:not([class*="text-"]) {
+    color: #1e293b !important; /* slate-800 */
+  }
+
+  /* PRÉSERVER LES COULEURS DES ICÔNES ET ÉLÉMENTS VISUELS IMPORTANTS */
+  /* Ne pas surcharger les couleurs des icônes */
+  html[data-theme="light"] svg,
+  html[data-theme="light"] [class*="icon"],
+  html[data-theme="light"] [class*="lucide-"] {
+    color: currentColor !important;
+  }
+  
+  /* Préserver les couleurs des badges */
+  html[data-theme="light"] [class*="badge-blue"],
+  html[data-theme="light"] [class*="badge-green"],
+  html[data-theme="light"] [class*="badge-red"],
+  html[data-theme="light"] [class*="badge-yellow"] {
+    color: currentColor !important;
+  }
+
+  /* Annuler le mode sombre pour les éléments enfants des cartes */
+  html[data-theme="light"] .card *,
+  html[data-theme="light"] [class*="Card"] *,
+  html[data-theme="light"] [class*="-card"] * {
+    color-scheme: light !important;
+  }
+
+  /* === MODE SOMBRE === */
+  /* S'assurer que le mode sombre reste intact */
+  html[data-theme="dark"]:not([data-theme="light"]),
+  html[data-theme="dark"]:not([data-theme="light"]) body,
+  html[data-theme="dark"]:not([data-theme="light"]) #root {
+    background-color: #1e293b !important; /* slate-800 */
+    color-scheme: dark !important;
+  }
+  
+  html[data-theme="dark"]:not([data-theme="light"]) .card,
+  html[data-theme="dark"]:not([data-theme="light"]) [class*="Card"],
+  html[data-theme="dark"]:not([data-theme="light"]) [class*="-card"],
+  html[data-theme="dark"]:not([data-theme="light"]) [class*="card"],
+  html[data-theme="dark"]:not([data-theme="light"]) .bg-card,
+  html[data-theme="dark"]:not([data-theme="light"]) div.card {
+    background-color: #1e293b !important; /* slate-800 */
+    background: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  }
+  
+  /* === PRÉSERVATION DES COULEURS IMPORTANTES DANS LES DEUX MODES === */
+  /* Ne pas modifier les couleurs des icônes */
+  svg, [class*="lucide-"], [class*="icon"] {
+    color: currentColor !important;
+    fill: currentColor !important;
+  }
+  
+  /* Préserver les styles de badges et boutons colorés */
+  [class*="bg-blue-"],
+  [class*="bg-green-"],
+  [class*="bg-red-"],
+  [class*="bg-yellow-"],
+  [class*="badge-blue"],
+  [class*="badge-green"],
+  [class*="badge-red"],
+  [class*="badge-yellow"],
+  .preserve-color {
+    color: currentColor !important;
+  }
+
+  /* Garantir une transition fluide entre les modes */
+  html, body, .card, [class*="card"] {
+    transition: background-color 0.3s ease-out, color 0.3s ease-out;
+  }
+  
+  /* Améliorer les interruptions de l'application de styles */
+  html[data-theme="dark"][data-mobile-light="true"] {
+    color-scheme: dark !important;
+  }
+  
+  html[data-theme="light"][data-mobile-dark="true"] {
+    color-scheme: light !important;
+  }
+}

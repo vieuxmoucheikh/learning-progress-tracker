@@ -1,0 +1,57 @@
+/* Corrections pour les cartes d'apprentissage en mode clair sur mobile */
+
+@media (max-width: 768px) {
+  html[data-theme="light"] .learning-item-card {
+    background-color: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  html[data-theme="light"] .learning-item-card h3,
+  html[data-theme="light"] .learning-item-card .card-title {
+    color: #111827;
+    font-weight: 600;
+  }
+
+  html[data-theme="light"] .learning-item-card p,
+  html[data-theme="light"] .learning-item-card .card-description {
+    color: #374151;
+  }
+
+  html[data-theme="light"] .learning-item-card .card-tags span,
+  html[data-theme="light"] .learning-item-card .badge {
+    background-color: #e5e7eb;
+    color: #1f2937;
+    border: 1px solid #d1d5db;
+  }
+
+  html[data-theme="light"] .learning-item-card .card-progress-bar {
+    background-color: #e5e7eb;
+  }
+
+  html[data-theme="light"] .learning-item-card .card-progress-bar div {
+    background-color: #3b82f6;
+  }
+
+  html[data-theme="light"] .learning-item-card .card-footer,
+  html[data-theme="light"] .learning-item-card .card-actions {
+    border-top: 1px solid #e5e7eb;
+  }
+
+  html[data-theme="light"] .learning-item-card .card-actions button,
+  html[data-theme="light"] .learning-item-card .card-footer button {
+    color: #4b5563;
+  }
+
+  html[data-theme="light"] .learning-item-card .card-actions button:hover,
+  html[data-theme="light"] .learning-item-card .card-footer button:hover {
+    background-color: #f3f4f6;
+    color: #1f2937;
+  }
+
+  html[data-theme="light"] .learning-item-card .card-icon,
+  html[data-theme="light"] .learning-item-card svg {
+    color: #4b5563;
+    fill: #4b5563;
+  }
+}

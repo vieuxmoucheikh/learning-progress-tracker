@@ -1,0 +1,311 @@
+/* Correctifs pour les cartes d'apprentissage en mode sombre sur mobile */
+@media (max-width: 768px) {
+  /* Couleur de fond et bordure renforcées en mode sombre */
+  .dark .learning-item-card,
+  .dark [class*="learning-item-card"],
+  .dark [class*="learning-card"] {
+    background-color: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Titres en blanc pur pour un contraste maximal en mode sombre */
+  .dark .learning-item-card h3,
+  .dark .learning-item-card [class*="title"],
+  .dark [class*="learning-item-card"] h3,
+  .dark [class*="learning-item-card"] [class*="title"],
+  .dark [class*="learning-card"] h3,
+  .dark [class*="learning-card"] [class*="title"] {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    font-weight: 700;
+  }
+  
+  /* Assurer la visibilité des titres en mode clair aussi */
+  :root:not(.dark) .learning-item-card h3,
+  :root:not(.dark) .learning-item-card [class*="title"],
+  :root:not(.dark) [class*="learning-item-card"] h3,
+  :root:not(.dark) [class*="learning-item-card"] [class*="title"],
+  :root:not(.dark) [class*="learning-card"] h3,
+  :root:not(.dark) [class*="learning-card"] [class*="title"] {
+    color: #1e293b !important; /* slate-800 pour la lisibilité en mode clair */
+    font-weight: 700;
+  }
+  
+  /* Texte principal en mode sombre */
+  .dark .learning-item-card p,
+  .dark [class*="learning-item-card"] p,
+  .dark [class*="learning-card"] p,
+  .dark .learning-item-card div,
+  .dark [class*="learning-item-card"] div,
+  .dark [class*="learning-card"] div {
+    color: #f1f5f9 !important; /* slate-100 */
+  }
+  
+  /* Texte principal en mode clair */
+  :root:not(.dark) .learning-item-card p,
+  :root:not(.dark) [class*="learning-item-card"] p,
+  :root:not(.dark) [class*="learning-card"] p,
+  :root:not(.dark) .learning-item-card div,
+  :root:not(.dark) [class*="learning-item-card"] div,
+  :root:not(.dark) [class*="learning-card"] div {
+    color: #334155 !important; /* slate-700 */
+  }
+  
+  /* Métadonnées et textes secondaires en mode sombre */
+  .dark .learning-item-card [class*="metadata"],
+  .dark .learning-item-card [class*="text-gray"],
+  .dark [class*="learning-item-card"] [class*="metadata"],
+  .dark [class*="learning-item-card"] [class*="text-gray"],
+  .dark [class*="learning-card"] [class*="metadata"],
+  .dark [class*="learning-card"] [class*="text-gray"] {
+    color: #e2e8f0 !important; /* slate-200 */
+  }
+  
+  /* Métadonnées et textes secondaires en mode clair */
+  :root:not(.dark) .learning-item-card [class*="metadata"],
+  :root:not(.dark) .learning-item-card [class*="text-gray"],
+  :root:not(.dark) [class*="learning-item-card"] [class*="metadata"],
+  :root:not(.dark) [class*="learning-item-card"] [class*="text-gray"],
+  :root:not(.dark) [class*="learning-card"] [class*="metadata"],
+  :root:not(.dark) [class*="learning-card"] [class*="text-gray"] {
+    color: #475569 !important; /* slate-600 */
+  }
+  
+  /* Ne pas modifier la couleur des icônes SVG */
+  .dark .learning-item-card svg,
+  .dark [class*="learning-item-card"] svg,
+  .dark [class*="learning-card"] svg {
+    /* Conserver fill: currentColor pour préserver les couleurs originales */
+    color: currentColor !important;
+    fill: currentColor !important;
+  }
+  
+  /* Badges et étiquettes en mode sombre */
+  .dark .learning-item-card [class*="tag"],
+  .dark .learning-item-card [class*="badge"],
+  .dark .learning-item-card [class*="category"],
+  .dark .learning-item-card [class*="difficulty"],
+  .dark [class*="learning-item-card"] [class*="tag"],
+  .dark [class*="learning-item-card"] [class*="badge"],
+  .dark [class*="learning-item-card"] [class*="category"],
+  .dark [class*="learning-item-card"] [class*="difficulty"],
+  .dark [class*="learning-card"] [class*="tag"],
+  .dark [class*="learning-card"] [class*="badge"],
+  .dark [class*="learning-card"] [class*="category"],
+  .dark [class*="learning-card"] [class*="difficulty"] {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+  }
+
+  /* Correction pour les vues agrandies et les dialogues */
+  .dark [role="dialog"] {
+    background-color: #1e293b !important;
+  }
+
+  .dark [role="dialog"] .prose * {
+    color: #f1f5f9 !important;
+  }
+
+  .dark [role="dialog"] h1,
+  .dark [role="dialog"] h2,
+  .dark [role="dialog"] h3,
+  .dark [role="dialog"] h4,
+  .dark [role="dialog"] h5,
+  .dark [role="dialog"] h6 {
+    color: #ffffff !important;
+    font-weight: 700;
+  }
+
+  /* Correction pour l'éditeur de texte riche */
+  .dark .tiptap,
+  .dark .ProseMirror {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+  }
+
+  .dark .tiptap h1,
+  .dark .tiptap h2,
+  .dark .tiptap h3,
+  .dark .ProseMirror h1,
+  .dark .ProseMirror h2,
+  .dark .ProseMirror h3 {
+    color: #ffffff !important;
+  }
+
+  /* Pour les badges et les étiquettes dans les dialogues */
+  .dark [role="dialog"] .badge,
+  .dark [role="dialog"] [class*="badge"] {
+    color: white !important;
+    background-color: rgba(255, 255, 255, 0.2) !important;
+  }
+
+  /* Correction pour le texte descriptif des cartes d'apprentissage en mode sombre sur mobile */
+  /* Assurer la visibilité du texte "Organize and manage your learning notes" */
+  .dark .learning-item-card .organize-text,
+  .dark .learning-item-card .learning-description,
+  .dark .learning-item-card [class*="description"],
+  .dark .learning-item-card [class*="subtitle"],
+  .dark .learning-card .organize-text,
+  .dark .learning-card .learning-description,
+  .dark .learning-card [class*="description"],
+  .dark .learning-card [class*="subtitle"] {
+    color: #f1f5f9 !important; /* slate-100 */
+    font-weight: 500;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Correction pour le contenu des cartes marquées comme maîtrisées */
+  .dark .mastered-card .prose p,
+  .dark .mastered-card .prose li,
+  .dark .mastered-card .prose span,
+  .dark [class*="from-emerald-50"] .prose p,
+  .dark [class*="from-emerald-50"] .prose li,
+  .dark [class*="from-emerald-50"] .prose span,
+  .dark [class*="border-emerald-400"] .prose p,
+  .dark [class*="border-emerald-400"] .prose li,
+  .dark [class*="border-emerald-400"] .prose span {
+    color: #0f172a !important; /* slate-900 */
+    opacity: 1;
+  }
+
+  /* Mise en évidence spéciale pour les textes de mise à jour */
+  .dark .mastered-card .updated-text,
+  .dark [class*="from-emerald-50"] .updated-text,
+  .dark [class*="border-emerald-400"] .updated-text,
+  .dark .mastered-meta span,
+  .dark [class*="from-emerald-50"] [class*="meta"] span,
+  .dark [class*="border-emerald-400"] [class*="meta"] span {
+    color: #0f172a !important; /* slate-900 */
+    font-weight: 600 !important;
+  }
+
+  /* Amélioration spécifique pour "Organize and manage your learning notes" et les boutons d'actions */
+  /* Le texte descriptif doit être blanc en mode sombre */
+  .dark .organize-text,
+  .dark [class*="organize-text"],
+  .dark [class*="manage-text"],
+  .dark [class*="learning-description"],
+  .dark [class*="description-text"],
+  .dark [class*="intro-text"] {
+    color: #f8fafc !important; /* slate-50 */
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* Rendre le bouton "Mark as Mastered" plus visible */
+  .dark button:has(.lucide-bookmark) span,
+  .dark button:has([class*="bookmark"]:not([class*="bookmark-check"])) span {
+    color: #4ade80 !important; /* green-400 */
+    font-weight: 600;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Couleur plus visible sur l'icône aussi */
+  .dark .lucide-bookmark:not(.lucide-bookmark-check) {
+    color: #4ade80 !important; /* green-400 */
+    stroke-width: 2px;
+  }
+  
+  /* L'icône Mastered doit ressortir */
+  .dark .mastered-text,
+  .dark button:has(.lucide-bookmark-check) span {
+    color: #10b981 !important; /* green-500 */
+    font-weight: 600;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Les icônes d'action doivent être plus visibles */
+  .dark button svg.lucide-eye,
+  .dark button svg.lucide-eye-off,
+  .dark button svg.lucide-edit,
+  .dark button svg.lucide-download,
+  .dark button svg.lucide-save {
+    color: #60a5fa !important; /* blue-400 */
+    stroke-width: 2px;
+  }
+  
+  /* Fond légèrement visible pour les boutons d'action */
+  .dark button:has(svg.lucide-eye),
+  .dark button:has(svg.lucide-eye-off),
+  .dark button:has(svg.lucide-edit),
+  .dark button:has(svg.lucide-download),
+  .dark button:has(svg.lucide-save) {
+    background-color: rgba(30, 58, 138, 0.2) !important; /* blue-900 avec opacité */
+    border: 1px solid rgba(59, 130, 246, 0.3) !important; /* blue-500 avec opacité */
+  }
+  
+  /* S'assurer que les fonds sombres ne rendent pas les icônes invisibles */
+  .dark button svg {
+    fill: none !important;
+  }
+
+  /* Solution d'urgence pour le texte d'intro des learning cards */
+  @media (max-width: 768px) {
+    /* Ciblage direct pour le texte "Organize and manage your learning notes" */
+    .dark .learning-tab-intro,
+    .dark .learning-tab-description,
+    .dark .learning-card-intro,
+    .dark .organize-text,
+    .dark .manage-text,
+    .dark p[class*="text-gray"],
+    .dark p[class*="text-muted"],
+    .dark [class*="learning"] > div > p:first-of-type,
+    .dark [class*="learning"] > p:first-of-type {
+      color: #ffffff !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+      font-weight: 500;
+    }
+    
+    /* Pour les textes dans les en-têtes d'onglet */
+    .dark [class*="learning"] [class*="tab-header"] p,
+    .dark [class*="learning-tab"] [class*="header"] p,
+    .dark [class*="learning"] [class*="header"] + p,
+    .dark [class*="learning"] [class*="heading"] + p {
+      color: #ffffff !important;
+      font-weight: 500;
+    }
+    
+    /* En dernier recours - forcer la visibilité de tous les paragraphes dans l'onglet learning */
+    .dark [role="tabpanel"][id*="learning"] p,
+    .dark [role="tabpanel"][aria-labelledby*="learning"] p,
+    .dark [data-state="active"][role="tabpanel"] p {
+      color: #ffffff !important;
+    }
+    
+    /* Style inline directement pour outrepasser les autres styles */
+    .dark [class*="learning"] p {
+      color: #ffffff !important;
+    }
+  }
+}
+
+/* Améliorations pour le mode clair */
+html[data-theme="light"] .learning-item-card {
+  color: #374151;
+}
+
+/* Améliorations mobile spécifiques */
+@media (max-width: 768px) {
+  .learning-item-card {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .learning-item-card h3 {
+    font-size: 16px;
+    line-height: 1.3;
+  }
+  
+  .learning-item-card p {
+    font-size: 14px;
+    line-height: 1.4;
+    margin: 8px 0;
+  }
+}

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta
+      name="viewport"
+      content="width=device-width, 
+    initial-scale=1.0"
+    />
+    <title>Learning Progress Tracker</title>
+    <!-- Assurer que le mode clair s'applique correctement sur mobile -->
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: light)"
+      content="#f8fafc"
+    />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: dark)"
+      content="#1e293b"
+    />
+    <!-- Style d'urgence pour les cartes en mode clair et sombre sur mobile -->
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+
+      /* Transition fluide entre les modes */
+      html,
+      body,
+      #root,
+      .card,
+      [class*="card"] {
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      @media (max-width: 768px) {
+        /* MODE CLAIR */
+        html[data-theme="light"] .card,
+        html[data-theme="light"] [class*="Card"],
+        html[data-theme="light"] [class*="-card"],
+        html[data-theme="light"] [class*="card"],
+        html[data-theme="light"] .mastered-card,
+        html[data-theme="light"] [class*="learning-item-card"] {
+          background-color: #ffffff !important;
+          background: #ffffff !important;
+          border-color: rgba(0, 0, 0, 0.1) !important;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        /* MODE SOMBRE */
+        html[data-theme="dark"] .card,
+        html[data-theme="dark"] [class*="Card"],
+        html[data-theme="dark"] [class*="-card"],
+        html[data-theme="dark"] [class*="card"] {
+          background-color: #1e293b !important;
+          background: #1e293b !important;
+          border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        /* Préserver les couleurs des éléments importants */
+        svg,
+        [class*="lucide-"],
+        .preserve-color,
+        [class*="bg-blue-"],
+        [class*="bg-green-"],
+        [class*="bg-red-"],
+        [class*="bg-yellow-"] {
+          color: currentColor !important;
+        }
+
+        /* Assurer la bonne coloration des boutons */
+        .bg-blue-500,
+        .bg-green-500,
+        .bg-red-500 {
+          color: #ffffff !important;
+        }
+
+        /* Fixer les badges */
+        [class*="badge"] {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+      }
+    </style>
+    <link rel="stylesheet" href="/emergency-mobile-fix.css" />
+    <link rel="stylesheet" href="/mobile-light-mode.css" />
+    <script src="/light-mode-fixer.js" defer></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script src="/fix-light-cards.js" defer></script>
+  </body>
+</html>
