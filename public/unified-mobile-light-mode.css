@@ -1,0 +1,204 @@
+/**
+ * CORRECTIFS UNIFIÉS POUR LE MODE CLAIR SUR MOBILE
+ * Ce fichier combine toutes les solutions CSS pour garantir la visibilité des cartes
+ */
+
+@media (max-width: 768px) {
+  /* ======== VARIABLES GLOBALES ET STYLES RACINE ======== */
+  html[data-theme="light"],
+  html:not([data-theme="dark"]) {
+    --background: 248 250 252 !important; /* slate-50 */
+    --foreground: 15 23 42 !important; /* slate-900 */
+    --card: 255 255 255 !important; /* white */
+    --card-foreground: 0 0 0 !important; /* black */
+    --border: 226 232 240 !important; /* slate-200 */
+    --ring: 37 99 235 !important; /* blue-600 */
+    
+    background-color: #f8fafc !important; /* slate-50 */
+    color-scheme: light !important;
+  }
+
+  /* ======== STYLES DES CARTES - SÉLECTEUR ULTRA PRIORITAIRE ======== */
+  html[data-theme="light"] .card,
+  html[data-theme="light"] [class*="Card"],
+  html[data-theme="light"] [class*="-card"],
+  html[data-theme="light"] [class*="card"],
+  html[data-theme="light"] .learning-item-card,
+  html[data-theme="light"] [class*="learning-item-card"],
+  html[data-theme="light"] [class*="learning-card"],
+  html:not([data-theme="dark"]) .card,
+  html:not([data-theme="dark"]) [class*="Card"],
+  html:not([data-theme="dark"]) [class*="-card"],
+  html:not([data-theme="dark"]) [class*="card"],
+  html:not([data-theme="dark"]) .learning-item-card,
+  html:not([data-theme="dark"]) [class*="learning-item-card"],
+  html:not([data-theme="dark"]) [class*="learning-card"] {
+    /* FOND ET BORDURES - PRIORITÉ ABSOLUE */
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    border: 2px solid #94a3b8 !important; /* slate-400 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+    
+    /* TEXTE ET POSITION */
+    color: #000000 !important;
+    position: relative !important;
+    z-index: 1 !important;
+    
+    /* ESPACEMENT */
+    padding: 12px !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* ======== TITRES DES CARTES - NOIR PUR ======== */
+  html[data-theme="light"] .card h1,
+  html[data-theme="light"] .card h2,
+  html[data-theme="light"] .card h3,
+  html[data-theme="light"] .card h4,
+  html[data-theme="light"] .card h5,
+  html[data-theme="light"] .card h6,
+  html[data-theme="light"] .card [class*="title"],
+  html[data-theme="light"] .card [class*="heading"],
+  html[data-theme="light"] [class*="card"] h1,
+  html[data-theme="light"] [class*="card"] h2,
+  html[data-theme="light"] [class*="card"] h3,
+  html[data-theme="light"] [class*="card"] h4,
+  html[data-theme="light"] [class*="card"] h5,
+  html[data-theme="light"] [class*="card"] h6,
+  html[data-theme="light"] [class*="card"] [class*="title"],
+  html[data-theme="light"] [class*="card"] [class*="heading"],
+  html:not([data-theme="dark"]) .card h1,
+  html:not([data-theme="dark"]) .card h2,
+  html:not([data-theme="dark"]) .card h3,
+  html:not([data-theme="dark"]) .card h4,
+  html:not([data-theme="dark"]) .card h5,
+  html:not([data-theme="dark"]) .card h6,
+  html:not([data-theme="dark"]) .card [class*="title"],
+  html:not([data-theme="dark"]) .card [class*="heading"],
+  html:not([data-theme="dark"]) [class*="card"] h1,
+  html:not([data-theme="dark"]) [class*="card"] h2,
+  html:not([data-theme="dark"]) [class*="card"] h3,
+  html:not([data-theme="dark"]) [class*="card"] h4,
+  html:not([data-theme="dark"]) [class*="card"] h5,
+  html:not([data-theme="dark"]) [class*="card"] h6,
+  html:not([data-theme="dark"]) [class*="card"] [class*="title"],
+  html:not([data-theme="dark"]) [class*="card"] [class*="heading"] {
+    color: #000000 !important;
+    font-weight: 700 !important;
+    text-shadow: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    font-size: 16px !important;
+    line-height: 1.4 !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* ======== TEXTES ET PARAGRAPHES - NOIR PUR ======== */
+  html[data-theme="light"] .card p,
+  html[data-theme="light"] .card span,
+  html[data-theme="light"] .card [class*="text"],
+  html[data-theme="light"] .card [class*="description"],
+  html[data-theme="light"] [class*="card"] p,
+  html[data-theme="light"] [class*="card"] span,
+  html[data-theme="light"] [class*="card"] [class*="text"],
+  html[data-theme="light"] [class*="card"] [class*="description"],
+  html:not([data-theme="dark"]) .card p,
+  html:not([data-theme="dark"]) .card span,
+  html:not([data-theme="dark"]) .card [class*="text"],
+  html:not([data-theme="dark"]) .card [class*="description"],
+  html:not([data-theme="dark"]) [class*="card"] p,
+  html:not([data-theme="dark"]) [class*="card"] span,
+  html:not([data-theme="dark"]) [class*="card"] [class*="text"],
+  html:not([data-theme="dark"]) [class*="card"] [class*="description"] {
+    color: #000000 !important;
+    font-weight: 500 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    margin: 8px 0 !important;
+    letter-spacing: 0.2px !important;
+  }
+
+  /* ======== BADGES ET TAGS - CONTRASTE ÉLEVÉ ======== */
+  html[data-theme="light"] .card [class*="badge"],
+  html[data-theme="light"] .card [class*="tag"],
+  html[data-theme="light"] [class*="card"] [class*="badge"],
+  html[data-theme="light"] [class*="card"] [class*="tag"],
+  html:not([data-theme="dark"]) .card [class*="badge"],
+  html:not([data-theme="dark"]) .card [class*="tag"],
+  html:not([data-theme="dark"]) [class*="card"] [class*="badge"],
+  html:not([data-theme="dark"]) [class*="card"] [class*="tag"] {
+    background-color: #e5e7eb !important;
+    color: #000000 !important;
+    border: 1px solid #9ca3af !important;
+    font-weight: 600 !important;
+    padding: 2px 8px !important;
+    border-radius: 4px !important;
+    display: inline-block !important;
+    margin: 2px !important;
+  }
+
+  /* ======== SVG ET ICÔNES - NOIR PUR ======== */
+  html[data-theme="light"] .card svg,
+  html[data-theme="light"] [class*="card"] svg,
+  html[data-theme="light"] .card [class*="icon"],
+  html[data-theme="light"] [class*="card"] [class*="icon"],
+  html:not([data-theme="dark"]) .card svg,
+  html:not([data-theme="dark"]) [class*="card"] svg,
+  html:not([data-theme="dark"]) .card [class*="icon"],
+  html:not([data-theme="dark"]) [class*="card"] [class*="icon"] {
+    color: #000000 !important;
+    stroke: #000000 !important;
+    stroke-width: 2px !important;
+    fill: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* ======== SECTIONS SPÉCIFIQUES - TABLEAU DE BORD ======== */
+  /* Sections "Completed Today" et "Active Tasks" */
+  html[data-theme="light"] [class*="completed-today"] h3,
+  html[data-theme="light"] [class*="active-tasks"] h3,
+  html:not([data-theme="dark"]) [class*="completed-today"] h3,
+  html:not([data-theme="dark"]) [class*="active-tasks"] h3 {
+    color: #000000 !important;
+    font-weight: 700 !important;
+    font-size: 18px !important;
+  }
+
+  html[data-theme="light"] [class*="completed-today"] .card,
+  html[data-theme="light"] [class*="active-tasks"] .card,
+  html:not([data-theme="dark"]) [class*="completed-today"] .card,
+  html:not([data-theme="dark"]) [class*="active-tasks"] .card {
+    background-color: #ffffff !important;
+    border: 2px solid #94a3b8 !important;
+  }
+
+  /* Onglet Items */
+  html[data-theme="light"] [id*="items-tab"] .card,
+  html:not([data-theme="dark"]) [id*="items-tab"] .card,
+  html[data-theme="light"] [role="tabpanel"][id*="items"] .card,
+  html:not([data-theme="dark"]) [role="tabpanel"][id*="items"] .card {
+    background-color: #ffffff !important;
+    border: 2px solid #94a3b8 !important;
+  }
+
+  /* ======== CLASSES AVEC PRÉFIXE DARK: - OVERRIDES ======== */
+  html[data-theme="light"] .dark\:bg-gray-800,
+  html[data-theme="light"] .dark\:bg-gray-900,
+  html[data-theme="light"] .dark\:bg-black,
+  html:not([data-theme="dark"]) .dark\:bg-gray-800,
+  html:not([data-theme="dark"]) .dark\:bg-gray-900,
+  html:not([data-theme="dark"]) .dark\:bg-black {
+    background-color: #ffffff !important;
+  }
+
+  html[data-theme="light"] .dark\:text-white,
+  html[data-theme="light"] .dark\:text-gray-100,
+  html[data-theme="light"] .dark\:text-gray-200,
+  html:not([data-theme="dark"]) .dark\:text-white,
+  html:not([data-theme="dark"]) .dark\:text-gray-100,
+  html:not([data-theme="dark"]) .dark\:text-gray-200 {
+    color: #000000 !important;
+  }
+}

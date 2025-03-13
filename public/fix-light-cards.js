@@ -1,212 +1,180 @@
 /**
- * Script amélioré pour la visibilité des cartes d'apprentissage en mode clair sur mobile
+ * FIX POUR CARTES EN MODE CLAIR SUR MOBILE
+ * Applique directement des styles aux cartes pour garantir leur visibilité
  */
 (function() {
-  // Détection de l'environnement mobile et du mode clair
-  const isMobile = window.innerWidth <= 768;
-  
-  function isLightMode() {
-    return document.documentElement.getAttribute('data-theme') === 'light' || 
-           !document.documentElement.classList.contains('dark');
-  }
-  
-  // Fonction principale pour améliorer le contraste des cartes
-  function enhanceCardContrast() {
-    if (isMobile && isLightMode()) {
-      console.log('Applying light mode card fixes for mobile...');
+  // Fonction principale pour fixer les cartes
+  function fixLightModeCards() {
+    // Vérifier si on est sur mobile et en mode clair
+    const isMobile = window.innerWidth <= 768;
+    const isLightMode = document.documentElement.getAttribute('data-theme') === 'light' || 
+                       !document.documentElement.classList.contains('dark');
+    
+    if (isMobile && isLightMode) {
+      console.log("🛠️ Fixing light mode cards on mobile...");
       
-      // Sélecteurs pour cibler tous les types de cartes d'apprentissage
+      // Sélecteurs ciblant toutes les cartes possibles
       const cardSelectors = [
-        '.learning-item-card', 
+        // Cartes d'apprentissage
+        '.learning-item-card',
         '[class*="learning-item-card"]',
         '[class*="learning-card"]',
-        '[class*="dashboard"] .card',
+        
+        // Tous types de cartes
+        '.card', 
+        '[class*="card"]',
+        
+        // Sections spécifiques
         '[class*="completed-today"] .card',
         '[class*="active-tasks"] .card',
-        '[role="tabpanel"][id*="items"] .card',
-        '[role="tabpanel"][aria-labelledby*="items"] .card',
-        // Sélecteurs plus ciblés pour les onglets spécifiques
-        '[data-state="active"][role="tabpanel"] .card',
-        '[id*="dashboard-tab"] .card',
-        '[id*="items-tab"] .card'
+        
+        // Onglets et panneaux
+        '[role="tabpanel"] .card',
+        '[id*="items-tab"] .card',
+        '[id*="dashboard"] .card'
       ];
       
-      // Trouver toutes les cartes avec les sélecteurs combinés
+      // Trouver toutes les cartes avec ces sélecteurs
       const allCards = document.querySelectorAll(cardSelectors.join(', '));
+      console.log(`Found ${allCards.length} cards to fix`);
       
-      // Appliquer les styles améliorés à chaque carte
+      // Appliquer les styles directement à chaque carte
       allCards.forEach(card => {
-        // Styles de base pour la carte
-        Object.assign(card.style, {
-          backgroundColor: '#ffffff',
-          border: '1px solid #d1d5db',
-          boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
-          color: '#374151'
-        });
+        // Style de base - fond blanc et bordure visible
+        card.style.backgroundColor = '#ffffff';
+        card.style.background = '#ffffff';
+        card.style.border = '2px solid #94a3b8'; // slate-400
+        card.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
+        card.style.color = '#000000';
+        card.style.position = 'relative';
+        card.style.zIndex = '1';
         
-        // Améliorer les titres
-        const titles = card.querySelectorAll('h3, h4, .card-title, [class*="title"], [class*="heading"]');
+        // Trouver et styler les titres
+        const titles = card.querySelectorAll('h1, h2, h3, h4, h5, h6, [class*="title"], [class*="heading"]');
         titles.forEach(title => {
-          Object.assign(title.style, {
-            color: '#111827',
-            fontWeight: '600',
-            textShadow: 'none'
-          });
+          title.style.color = '#000000'; // Noir pur
+          title.style.fontWeight = '700';
+          title.style.textShadow = 'none';
+          title.style.opacity = '1';
+          title.style.visibility = 'visible';
         });
         
-        // Améliorer les paragraphes et descriptions
-        const paragraphs = card.querySelectorAll('p, .card-description, [class*="description"], [class*="text"], [class*="organize-text"]');
-        paragraphs.forEach(p => {
-          Object.assign(p.style, {
-            color: '#374151',
-            fontWeight: '400',
-            opacity: '1',
-            visibility: 'visible'
-          });
+        // Trouver et styler les paragraphes et textes
+        const texts = card.querySelectorAll('p, [class*="text"], [class*="description"], div:not([class*="badge"]):not([class*="tag"])');
+        texts.forEach(text => {
+          text.style.color = '#000000'; // Noir pur
+          text.style.opacity = '1';
+          text.style.visibility = 'visible';
+          text.style.fontWeight = '500';
         });
         
-        // Améliorer les badges et tags
-        const badges = card.querySelectorAll('.badge, [class*="badge"], [class*="tag"], .card-tags span');
+        // Trouver et styler les badges et tags
+        const badges = card.querySelectorAll('[class*="badge"], [class*="tag"]');
         badges.forEach(badge => {
-          Object.assign(badge.style, {
-            backgroundColor: '#f3f4f6',
-            color: '#1f2937',
-            border: '1px solid #d1d5db',
-            fontWeight: '500'
-          });
+          badge.style.backgroundColor = '#e5e7eb'; // gray-200
+          badge.style.color = '#000000'; // Noir pur
+          badge.style.border = '1px solid #9ca3af'; // gray-400
+          badge.style.fontWeight = '600';
         });
         
-        // Améliorer les icônes
-        const icons = card.querySelectorAll('svg, [class*="icon"], [class*="lucide"]');
+        // Trouver et styler les SVGs et icônes
+        const icons = card.querySelectorAll('svg, [class*="icon"]');
         icons.forEach(icon => {
-          Object.assign(icon.style, {
-            color: '#4b5563',
-            fill: 'none',
-            stroke: '#4b5563'
-          });
-        });
-        
-        // Améliorer les boutons
-        const buttons = card.querySelectorAll('button, [role="button"]');
-        buttons.forEach(button => {
-          Object.assign(button.style, {
-            color: '#4b5563',
-            backgroundColor: '#f9fafb',
-            border: '1px solid #e5e7eb'
-          });
+          icon.style.color = '#000000'; // Noir pur
+          icon.style.stroke = '#000000'; // Noir pur
+          icon.style.strokeWidth = '2.5px';
+          icon.style.fill = 'none';
         });
       });
-
-      // Ciblage spécifique pour les cases "Completed Today" et "Active Tasks"
-      const dashboardSections = [
+      
+      // Sections spécifiques
+      const sectionSelectors = [
         '[class*="completed-today"]',
-        '[class*="active-tasks"]',
-        '[class*="dashboard"] [class*="section"]'
+        '[class*="active-tasks"]'
       ];
-
-      document.querySelectorAll(dashboardSections.join(', ')).forEach(section => {
-        // Améliorer les titres de section
-        const sectionTitles = section.querySelectorAll('h3, h4, [class*="heading"], [class*="title"]');
+      
+      document.querySelectorAll(sectionSelectors.join(', ')).forEach(section => {
+        // Trouver et styler les titres de section
+        const sectionTitles = section.querySelectorAll('h3, [class*="heading"]');
         sectionTitles.forEach(title => {
-          Object.assign(title.style, {
-            color: '#111827',
-            fontWeight: '600'
-          });
+          title.style.color = '#000000'; // Noir pur
+          title.style.fontWeight = '700';
         });
-
-        // Améliorer les cartes à l'intérieur des sections
+        
+        // Trouver et styler les cartes dans ces sections
         const sectionCards = section.querySelectorAll('.card, [class*="card"]');
         sectionCards.forEach(card => {
-          Object.assign(card.style, {
-            backgroundColor: '#ffffff',
-            border: '1px solid #d1d5db',
-            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)'
-          });
-          
-          // Améliorer le texte dans ces cartes
-          const cardText = card.querySelectorAll('p, [class*="text"], [class*="description"]');
-          cardText.forEach(text => {
-            Object.assign(text.style, {
-              color: '#374151',
-              opacity: '1',
-              visibility: 'visible'
-            });
-          });
+          card.style.backgroundColor = '#ffffff';
+          card.style.border = '2px solid #94a3b8'; // slate-400
+          card.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
         });
       });
-    }
-  }
-  
-  // Fonction pour appliquer les styles au chargement et au changement de thème
-  function setupStyleFixes() {
-    // Appliquer les styles immédiatement
-    enhanceCardContrast();
-    
-    // Observer les changements du DOM pour appliquer les styles aux nouveaux éléments
-    const observer = new MutationObserver(() => {
-      if (isMobile && isLightMode()) {
-        enhanceCardContrast();
-      }
-    });
-    
-    // Observer le document entier pour les changements
-    observer.observe(document.body, { 
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['class', 'data-theme', 'data-state']
-    });
-    
-    // Observer les changements d'attributs sur le document HTML
-    const themeObserver = new MutationObserver(mutations => {
-      mutations.forEach(mutation => {
-        if (mutation.attributeName === 'data-theme' || 
-            mutation.attributeName === 'class') {
-          enhanceCardContrast();
+      
+      // Classes dark: overrides
+      const darkClassElements = document.querySelectorAll('.dark\\:bg-gray-800, .dark\\:bg-black, .dark\\:bg-gray-900');
+      darkClassElements.forEach(el => {
+        if (isLightMode) {
+          el.style.backgroundColor = '#ffffff';
         }
       });
-    });
-    
-    themeObserver.observe(document.documentElement, { attributes: true });
-    
-    // Réappliquer les styles lors du changement de taille d'écran
-    window.addEventListener('resize', () => {
-      if (window.innerWidth <= 768 && isLightMode()) {
-        enhanceCardContrast();
-      }
-    });
-    
-    // Observer les changements d'onglets
-    document.querySelectorAll('[role="tab"]').forEach(tab => {
-      tab.addEventListener('click', () => {
-        // Attendre un peu que l'onglet se charge
-        setTimeout(enhanceCardContrast, 100);
-        setTimeout(enhanceCardContrast, 300);
+      
+      const darkTextElements = document.querySelectorAll('.dark\\:text-white, .dark\\:text-gray-100, .dark\\:text-gray-200');
+      darkTextElements.forEach(el => {
+        if (isLightMode) {
+          el.style.color = '#000000';
+        }
       });
-    });
+    }
   }
   
-  // Initialiser lors du chargement du DOM
+  // Exécuter immédiatement
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupStyleFixes);
+    document.addEventListener('DOMContentLoaded', fixLightModeCards);
   } else {
-    setupStyleFixes();
+    fixLightModeCards();
   }
   
-  // Réappliquer après le chargement complet de la page
+  // Exécuter après le chargement complet
   window.addEventListener('load', () => {
-    enhanceCardContrast();
-    // Ré-appliquer après un court délai pour s'assurer que tout est chargé
-    setTimeout(enhanceCardContrast, 500);
+    fixLightModeCards();
+    // Réessayer plusieurs fois pour s'assurer que tout est correctement appliqué
+    setTimeout(fixLightModeCards, 500);
+    setTimeout(fixLightModeCards, 1000);
+    setTimeout(fixLightModeCards, 2000);
   });
   
-  // Appliquer toutes les 500ms pendant 5 secondes pour s'assurer que ça fonctionne
-  let attempts = 0;
-  const interval = setInterval(() => {
-    enhanceCardContrast();
-    attempts++;
-    if (attempts >= 10) {
-      clearInterval(interval);
+  // Observer les changements de thème
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+      if (mutation.attributeName === 'data-theme' || mutation.attributeName === 'class') {
+        fixLightModeCards();
+      }
+    });
+  });
+  
+  observer.observe(document.documentElement, { attributes: true });
+  
+  // Observer les changements DOM pour les nouvelles cartes
+  const contentObserver = new MutationObserver(() => {
+    const isMobile = window.innerWidth <= 768;
+    const isLightMode = document.documentElement.getAttribute('data-theme') === 'light' || 
+                        !document.documentElement.classList.contains('dark');
+    
+    if (isMobile && isLightMode) {
+      fixLightModeCards();
     }
-  }, 500);
+  });
+  
+  contentObserver.observe(document.body, { childList: true, subtree: true });
+  
+  // Réappliquer sur resize
+  window.addEventListener('resize', fixLightModeCards);
+  
+  // Appliquer lors des changements d'onglets
+  document.addEventListener('click', e => {
+    if (e.target.closest('[role="tab"]') || e.target.closest('button')) {
+      setTimeout(fixLightModeCards, 100);
+      setTimeout(fixLightModeCards, 500);
+    }
+  });
 })();

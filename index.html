@@ -3,11 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta
-      name="viewport"
-      content="width=device-width, 
-    initial-scale=1.0"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Learning Progress Tracker</title>
     <!-- Assurer que le mode clair s'applique correctement sur mobile -->
     <meta name="color-scheme" content="light dark" />
@@ -235,7 +231,9 @@
     <link rel="stylesheet" href="/mobile-light-mode.css" />
     <link rel="stylesheet" href="/emergency-light-card-fix.css" />
     <link rel="stylesheet" href="/final-light-mode-fix.css" />
+    <link rel="stylesheet" href="/unified-mobile-light-mode.css" />
     <script src="/light-mode-fixer.js" defer></script>
+    <script src="/unified-light-mode-fixer.js" defer></script>
   </head>
   <body>
     <div id="root"></div>
@@ -484,6 +482,144 @@
         });
 
         observer.observe(document.documentElement, { attributes: true });
+      })();
+    </script>
+    <!-- Script final d'urgence avec priorité maximale pour les cartes -->
+    <script>
+      (function () {
+        // Fonction pour corriger définitivement les cartes en mode clair sur mobile
+        function ultimateCardFixer() {
+          // Vérifier si on est en mode clair sur mobile
+          if (window.innerWidth <= 768) {
+            const isLightMode =
+              document.documentElement.getAttribute("data-theme") === "light" ||
+              !document.documentElement.classList.contains("dark");
+
+            if (isLightMode) {
+              console.log("📱⚡ CRITICAL CARD FIX ACTIVATED");
+
+              // Sélecteurs pour tous les types de cartes et éléments importants
+              const criticalSelectors = [
+                ".card",
+                '[class*="card"]',
+                ".learning-item-card",
+                '[class*="learning-item-card"]',
+                '[class*="completed-today"] .card',
+                '[class*="active-tasks"] .card',
+                '[role="tabpanel"] .card',
+                '[id*="items-tab"] .card',
+                '[id*="dashboard"] .card',
+                '[class*="learning-card"]',
+              ];
+
+              // Appliquer des styles directs avec priorité maximale
+              document
+                .querySelectorAll(criticalSelectors.join(","))
+                .forEach((card) => {
+                  // Styles de base avec setProperty pour priorité maximale
+                  card.style.setProperty(
+                    "background-color",
+                    "#ffffff",
+                    "important"
+                  );
+                  card.style.setProperty("background", "#ffffff", "important");
+                  card.style.setProperty(
+                    "border",
+                    "2px solid #94a3b8",
+                    "important"
+                  );
+                  card.style.setProperty(
+                    "box-shadow",
+                    "0 4px 8px rgba(0, 0, 0, 0.15)",
+                    "important"
+                  );
+                  card.style.setProperty("color", "#000000", "important");
+                  card.style.setProperty("position", "relative", "important");
+                  card.style.setProperty("z-index", "1", "important");
+
+                  // Titres
+                  card
+                    .querySelectorAll(
+                      'h1, h2, h3, h4, h5, h6, [class*="title"], [class*="heading"]'
+                    )
+                    .forEach((heading) => {
+                      heading.style.setProperty(
+                        "color",
+                        "#000000",
+                        "important"
+                      );
+                      heading.style.setProperty(
+                        "font-weight",
+                        "700",
+                        "important"
+                      );
+                      heading.style.setProperty("opacity", "1", "important");
+                      heading.style.setProperty(
+                        "visibility",
+                        "visible",
+                        "important"
+                      );
+                      heading.style.setProperty(
+                        "text-shadow",
+                        "none",
+                        "important"
+                      );
+                    });
+
+                  // Textes
+                  card
+                    .querySelectorAll(
+                      'p, [class*="text"], [class*="description"]'
+                    )
+                    .forEach((text) => {
+                      text.style.setProperty("color", "#000000", "important");
+                      text.style.setProperty("opacity", "1", "important");
+                      text.style.setProperty(
+                        "visibility",
+                        "visible",
+                        "important"
+                      );
+                    });
+
+                  // Icônes
+                  card
+                    .querySelectorAll('svg, [class*="icon"]')
+                    .forEach((icon) => {
+                      icon.style.setProperty("color", "#000000", "important");
+                      icon.style.setProperty("stroke", "#000000", "important");
+                      icon.style.setProperty(
+                        "stroke-width",
+                        "2.5px",
+                        "important"
+                      );
+                    });
+                });
+            }
+          }
+        }
+
+        // Application immédiate
+        ultimateCardFixer();
+
+        // Application après un délai (pour les contenus dynamiques)
+        setTimeout(ultimateCardFixer, 100);
+        setTimeout(ultimateCardFixer, 500);
+        setTimeout(ultimateCardFixer, 2000);
+
+        // Application après chargement complet
+        window.addEventListener("load", () => {
+          ultimateCardFixer();
+          setTimeout(ultimateCardFixer, 1000);
+        });
+
+        // Surveiller les changements de thème
+        const observer = new MutationObserver(() => ultimateCardFixer());
+        observer.observe(document.documentElement, { attributes: true });
+
+        // Surveiller les clics pour les changements d'onglet
+        document.addEventListener("click", () =>
+          setTimeout(ultimateCardFixer, 300)
+        );
       })();
     </script>
   </body>
