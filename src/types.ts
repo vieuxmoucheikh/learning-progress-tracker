@@ -13,17 +13,20 @@ export interface GoalSession {
 }
 
 export interface Session {
-  id: string;
-  goal_id: string;
-  user_id: string;
+  id?: string;
+  goal_id?: string;
+  user_id?: string;
   date: string;
-  duration: {
+  startTime: string;
+  endTime?: string;
+  duration?: {
     hours: number;
     minutes: number;
   };
-  notes?: string;
-  created_at: string;
-  updated_at: string;
+  notes?: (string | { content: string; timestamp: string })[];
+  created_at?: string;
+  updated_at?: string;
+  status?: 'in_progress' | 'completed' | 'on_hold';
 }
 
 export interface Progress {
@@ -37,23 +40,31 @@ export interface Progress {
 export interface LearningItem {
   id: string;
   title: string;
-  type: 'video' | 'pdf' | 'url' | 'book' | 'course' | 'article';
-  progress: Progress;
-  url?: string;
-  notes?: string;
-  completed: boolean;
-  completed_at?: string | null;
-  archived_at?: string | null;
-  category: string;
-  priority: 'low' | 'medium' | 'high';
-  due_date?: string;
-  tags: string[];
+  description?: string;
+  type: string;
+  category?: string;
   date: string;
-  difficulty: 'easy' | 'medium' | 'hard';
-  status: 'not_started' | 'in_progress' | 'completed' | 'on_hold' | 'archived';
-  rating?: 1 | 2 | 3 | 4 | 5;
-  user_id?: string;
-  lastTimestamp?: number | null;
+  completed?: boolean;
+  url?: string;
+  footerUrl?: string; // Ajouter cette propriété pour stocker l'URL du pied de page
+  priority?: 'low' | 'medium' | 'high';
+  duration?: {
+    hours: number;
+    minutes: number;
+  };
+  progress?: {
+    total?: {
+      hours: number;
+      minutes: number;
+    };
+    current?: {
+      hours: number;
+      minutes: number;
+    };
+    sessions?: Session[];
+  };
+  notes?: string;
+  status?: 'not_started' | 'in_progress' | 'completed' | 'on_hold' | 'archived';
 }
 
 export type LearningItemFormData = Omit<LearningItem, 'id' | 'progress'> & {

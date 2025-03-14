@@ -110,7 +110,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   
   // Ajouter des états pour la section URL du bas
   const [isFooterUrlEditing, setIsFooterUrlEditing] = useState(false);
-  const [editedFooterUrl, setEditedFooterUrl] = useState(item.url || '');
+  const [editedFooterUrl, setEditedFooterUrl] = useState(item.footerUrl || item.url || '');
   const [copyFooterSuccess, setCopyFooterSuccess] = useState(false);
 
   const getActiveSession = () => {
@@ -1068,6 +1068,13 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     }
   }, [item.url]);
 
+  // Fonction pour ouvrir l'URL de pied de page dans un nouvel onglet
+  const handleOpenFooterUrl = useCallback(() => {
+    if (item.footerUrl) {
+      window.open(item.footerUrl, '_blank', 'noopener,noreferrer');
+    }
+  }, [item.footerUrl]);
+
   // Fonction pour copier l'URL dans le presse-papier (pour l'en-tête)
   const handleCopyUrl = useCallback(() => {
     if (item.url) {
@@ -1080,13 +1087,13 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
   // Fonction pour copier l'URL dans le presse-papier (pour le pied de page)
   const handleCopyFooterUrl = useCallback(() => {
-    if (item.url) {
-      navigator.clipboard.writeText(item.url).then(() => {
+    if (item.footerUrl) {
+      navigator.clipboard.writeText(item.footerUrl).then(() => {
         setCopyFooterSuccess(true);
         setTimeout(() => setCopyFooterSuccess(false), 2000);
       });
     }
-  }, [item.url]);
+  }, [item.footerUrl]);
 
   // Fonction pour enregistrer l'URL modifiée (pour l'en-tête)
   const handleUrlSave = useCallback(() => {
@@ -1103,16 +1110,16 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
   // Fonction pour enregistrer l'URL modifiée (pour le pied de page)
   const handleFooterUrlSave = useCallback(() => {
-    if (editedFooterUrl !== item.url) {
+    if (editedFooterUrl !== item.footerUrl) {
       // Modification: Mise à jour de l'URL et synchronisation avec la section du haut
       const newUrl = editedFooterUrl.trim();
-      onUpdate(item.id, { url: newUrl });
+      onUpdate(item.id, { footerUrl: newUrl });
       
       // Ne pas mettre à jour editedUrl ici
       // On laisse l'effet useEffect s'en charger si l'utilisateur navigue
     }
     setIsFooterUrlEditing(false);
-  }, [editedFooterUrl, item.id, item.url, onUpdate]);
+  }, [editedFooterUrl, item.id, item.footerUrl, onUpdate]);
 
   // Synchroniser les URLs lorsque l'élément change
   useEffect(() => {
@@ -1122,9 +1129,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       setEditedUrl(item.url || '');
     }
     if (!isFooterUrlEditing) {
-      setEditedFooterUrl(item.url || '');
+      setEditedFooterUrl(item.footerUrl || '');
     }
-  }, [item.url, isUrlEditing, isFooterUrlEditing]);
+  }, [item.url, item.footerUrl, isUrlEditing, isFooterUrlEditing]);
 
   return (
     <div className="w-full">
@@ -1428,7 +1435,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                         onClick={handleCopyFooterUrl}
                         className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-100 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30"
                         title="Copier le lien"
-                        disabled={!item.url}
+                        disabled={!item.footerUrl}
                       >
                         {copyFooterSuccess ? <CheckCheck className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                       </Button>
@@ -1437,7 +1444,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                         size="sm"
                         onClick={() => {
                           setIsFooterUrlEditing(true);
-                          setEditedFooterUrl(item.url || '');
+                          setEditedFooterUrl(item.footerUrl || '');
                         }}
                         className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-100 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30"
                         title="Modifier le lien"
@@ -1472,7 +1479,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                       size="sm"
                       onClick={() => {
                         setIsFooterUrlEditing(false);
-                        setEditedFooterUrl(item.url || '');
+                        setEditedFooterUrl(item.footerUrl || '');
                       }}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/30"
                     >
@@ -1480,20 +1487,20 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     </Button>
                   </div>
                 </div>
-              ) : item.url ? (
+              ) : item.footerUrl ? (
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-1">
                   <a 
-                    href={item.url} 
+                    href={item.footerUrl} 
                     target="_blank"
                     rel="noopener noreferrer" 
                     className="text-sm text-blue-600 hover:underline dark:text-blue-400 break-all line-clamp-1 flex-1"
                   >
-                    {item.url}
+                    {item.footerUrl}
                   </a>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={handleOpenUrl}
+                    onClick={handleOpenFooterUrl}
                     className="w-full sm:w-auto bg-white hover:bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-300 dark:border-blue-800/50 flex items-center justify-center gap-2"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
@@ -1512,7 +1519,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Session History</h4>
-              {item.progress?.sessions?.length > 1 && (
+              {item.progress?.sessions && item.progress.sessions.length > 1 && (
                 <Button
                   variant="ghost"
                   size="sm"

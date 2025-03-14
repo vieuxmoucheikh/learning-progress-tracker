@@ -32,14 +32,16 @@ export function Stats({ items }: Props) {
   const stats = useMemo(() => {
     // Calculate status distribution
     const statusCounts = items.reduce((acc, item) => {
-      const status = item.status;
+      // Add a null check and set a default value when status is undefined
+      const status = item.status || 'not_started';
       acc[status] = (acc[status] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
     // Calculate priority distribution
     const priorityCounts = items.reduce((acc, item) => {
-      const priority = item.priority;
+      // Add a null check and set a default value when priority is undefined
+      const priority = item.priority || 'medium';
       acc[priority] = (acc[priority] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
@@ -54,12 +56,13 @@ export function Stats({ items }: Props) {
 
     // Calculate total time from all sessions
     const totalMinutes = items.reduce((total, item) => {
-      return total + item.progress.sessions.reduce((sessionTotal, session) => {
+      // Add a null check for item.progress and item.progress.sessions
+      return total + (item.progress?.sessions?.reduce((sessionTotal, session) => {
         if (session.duration) {
           return sessionTotal + (session.duration.hours * 60) + session.duration.minutes;
         }
         return sessionTotal;
-      }, 0);
+      }, 0) || 0);
     }, 0);
 
     const averageTimePerItem = totalItems > 0 ? totalMinutes / totalItems : 0;
