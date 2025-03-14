@@ -25,7 +25,9 @@ import {
   ExternalLink,
   MessageSquare,
   Calendar,
-  Pencil
+  Pencil,
+  Copy,
+  CheckCheck
 } from 'lucide-react';
 // @ts-ignore
 import html2pdf, { Html2PdfOptions, ImageType, JsPdfUnit, JsPdfFormat, JsPdfOrientation } from 'html2pdf.js';
@@ -100,6 +102,9 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [isTimeEditing, setIsTimeEditing] = useState(false);
   const [editedMinutes, setEditedMinutes] = useState(calculateTotalTimeSpent(item));
   const [pausedTime, setPausedTime] = useState<string | null>(null);
+  const [isUrlEditing, setIsUrlEditing] = useState(false);
+  const [editedUrl, setEditedUrl] = useState(item.url || '');
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const getActiveSession = () => {
     if (!item.progress?.sessions) return null;
@@ -1056,6 +1061,24 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     }
   }, [item.url]);
 
+  // Fonction pour copier l'URL dans le presse-papier
+  const handleCopyUrl = useCallback(() => {
+    if (item.url) {
+      navigator.clipboard.writeText(item.url).then(() => {
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+      });
+    }
+  }, [item.url]);
+
+  // Fonction pour enregistrer l'URL modifiée
+  const handleUrlSave = useCallback(() => {
+    if (editedUrl !== item.url) {
+      onUpdate(item.id, { url: editedUrl.trim() });
+    }
+    setIsUrlEditing(false);
+  }, [editedUrl, item.id, item.url, onUpdate]);
+
   return (
     <div className="w-full">
       <Card className={clsx(
@@ -1100,14 +1123,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                       </Button>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 group">
+                    <div className="flex items-center gap-2 group flex-wrap">
                       <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{item.title}</h3>
                       {item.url && (
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={handleOpenUrl}
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30 transition-colors"
+                          className="inline-flex items-center text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30 transition-colors"
                           title="Ouvrir le lien"
                         >
                           <ExternalLink className="h-4 w-4" />
@@ -1126,7 +1149,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 </div>
 
                 {/* Category and Type */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   {item.category && (
                     <div className="flex items-center">
                       <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100 shadow-sm dark:from-blue-900/30 dark:to-indigo-900/30 dark:text-blue-300 dark:border-blue-800/50">
@@ -1134,7 +1157,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                       </span>
                     </div>
                   )}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Badge 
                       variant={getStatusBadgeClass().includes('bg-gray-100') ? 'destructive' : getStatusBadgeClass().includes('bg-blue-100') ? 'secondary' : getStatusBadgeClass().includes('bg-green-100') ? 'default' : 'outline'} 
                       className={clsx(
@@ -1148,13 +1171,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     </Badge>
                     <span className="text-sm font-medium text-gray-600 dark:text-gray-300">{item.type}</span>
                     {item.url && (
-                      <Badge 
-                        variant="outline" 
-                        className="flex items-center gap-1 text-blue-600 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800/50"
+                      <Button
+                        variant="outline"
+                        size="sm" 
+                        className="inline-flex items-center gap-1 text-blue-600 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800/50 h-7 px-2"
+                        onClick={handleOpenUrl}
                       >
                         <ExternalLink className="h-3 w-3" />
-                        Lien
-                      </Badge>
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -1247,17 +1271,100 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
             )}
           </div>
 
-          {/* URL Button (ajout d'un bouton spécifique dans les contrôles si une URL est présente) */}
-          {item.url && (
-            <div className="mt-4 mb-2">
-              <Button
-                variant="outline"
-                className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800/50 flex items-center justify-center gap-2"
-                onClick={handleOpenUrl}
-              >
-                <ExternalLink className="h-4 w-4" />
-                Accéder au lien externe
-              </Button>
+          {/* URL Section with editing functionality */}
+          {(item.url || isUrlEditing) && (
+            <div className="mt-4 mb-4 border border-blue-100 dark:border-blue-800/50 rounded-lg p-3 bg-blue-50/50 dark:bg-blue-900/10">
+              <div className="flex items-center justify-between mb-2">
+                <h5 className="text-sm font-medium text-blue-700 dark:text-blue-300 flex items-center gap-1">
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Lien externe
+                </h5>
+                <div className="flex items-center gap-1">
+                  {!isUrlEditing && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleCopyUrl}
+                        className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-100 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30"
+                        title="Copier le lien"
+                        disabled={!item.url}
+                      >
+                        {copySuccess ? <CheckCheck className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setIsUrlEditing(true);
+                          setEditedUrl(item.url || '');
+                        }}
+                        className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-100 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30"
+                        title="Modifier le lien"
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+              
+              {isUrlEditing ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="url"
+                    value={editedUrl}
+                    onChange={(e) => setEditedUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="flex-1 text-sm border-blue-200 focus:ring-blue-500 dark:border-blue-700 dark:bg-gray-800 dark:text-white"
+                  />
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleUrlSave}
+                      className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-900/30"
+                    >
+                      <Save className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setIsUrlEditing(false);
+                        setEditedUrl(item.url || '');
+                      }}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/30"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ) : item.url ? (
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-1">
+                  <a 
+                    href={item.url} 
+                    target="_blank"
+                    rel="noopener noreferrer" 
+                    className="text-sm text-blue-600 hover:underline dark:text-blue-400 break-all line-clamp-1 flex-1"
+                  >
+                    {item.url}
+                  </a>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleOpenUrl}
+                    className="w-full sm:w-auto bg-white hover:bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-300 dark:border-blue-800/50 flex items-center justify-center gap-2"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    Ouvrir
+                  </Button>
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                  Aucun lien défini
+                </div>
+              )}
             </div>
           )}
 
