@@ -1091,7 +1091,12 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   // Fonction pour enregistrer l'URL modifiée (pour l'en-tête)
   const handleUrlSave = useCallback(() => {
     if (editedUrl !== item.url) {
-      onUpdate(item.id, { url: editedUrl.trim() });
+      // Modification: Mise à jour de l'URL et synchronisation avec la section du bas
+      const newUrl = editedUrl.trim();
+      onUpdate(item.id, { url: newUrl });
+      
+      // Ne pas mettre à jour editedFooterUrl ici
+      // On laisse l'effet useEffect s'en charger si l'utilisateur navigue
     }
     setIsUrlEditing(false);
   }, [editedUrl, item.id, item.url, onUpdate]);
@@ -1099,16 +1104,27 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   // Fonction pour enregistrer l'URL modifiée (pour le pied de page)
   const handleFooterUrlSave = useCallback(() => {
     if (editedFooterUrl !== item.url) {
-      onUpdate(item.id, { url: editedFooterUrl.trim() });
+      // Modification: Mise à jour de l'URL et synchronisation avec la section du haut
+      const newUrl = editedFooterUrl.trim();
+      onUpdate(item.id, { url: newUrl });
+      
+      // Ne pas mettre à jour editedUrl ici
+      // On laisse l'effet useEffect s'en charger si l'utilisateur navigue
     }
     setIsFooterUrlEditing(false);
   }, [editedFooterUrl, item.id, item.url, onUpdate]);
 
   // Synchroniser les URLs lorsque l'élément change
   useEffect(() => {
-    setEditedUrl(item.url || '');
-    setEditedFooterUrl(item.url || '');
-  }, [item.url]);
+    // On met à jour les valeurs éditées uniquement si l'utilisateur n'est pas
+    // actuellement en train de modifier l'une des URLs
+    if (!isUrlEditing) {
+      setEditedUrl(item.url || '');
+    }
+    if (!isFooterUrlEditing) {
+      setEditedFooterUrl(item.url || '');
+    }
+  }, [item.url, isUrlEditing, isFooterUrlEditing]);
 
   return (
     <div className="w-full">
