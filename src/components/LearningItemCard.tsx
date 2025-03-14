@@ -1049,6 +1049,13 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     }
   };
 
+  // Fonction pour ouvrir l'URL dans un nouvel onglet
+  const handleOpenUrl = useCallback(() => {
+    if (item.url) {
+      window.open(item.url, '_blank', 'noopener,noreferrer');
+    }
+  }, [item.url]);
+
   return (
     <div className="w-full">
       <Card className={clsx(
@@ -1095,6 +1102,17 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                   ) : (
                     <div className="flex items-center gap-2 group">
                       <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{item.title}</h3>
+                      {item.url && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleOpenUrl}
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30 transition-colors"
+                          title="Ouvrir le lien"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"
@@ -1129,41 +1147,19 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                       {getStatusText()}
                     </Badge>
                     <span className="text-sm font-medium text-gray-600 dark:text-gray-300">{item.type}</span>
+                    {item.url && (
+                      <Badge 
+                        variant="outline" 
+                        className="flex items-center gap-1 text-blue-600 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800/50"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        Lien
+                      </Badge>
+                    )}
                   </div>
                 </div>
-              </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleMarkComplete()}
-                  className={clsx(
-                    "hover:bg-white dark:hover:bg-gray-700 transition-colors rounded-lg shadow-sm",
-                    {
-                      'text-green-500 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300': item.status !== 'completed',
-                      'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400': item.status === 'completed'
-                    }
-                  )}
-                >
-                  <CheckCircle2 className="h-5 w-5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleDeleteClick}
-                  className="text-red-400 hover:text-red-600 hover:bg-white dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-gray-700 transition-colors rounded-lg shadow-sm"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Time Display */}
-            <div className="space-y-3 mt-6">
-              <div className="flex items-center justify-between">
-                {renderDuration()}
+                {/* Date */}
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                   <span className="text-sm text-gray-600 dark:text-gray-300">
@@ -1250,6 +1246,20 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               </div>
             )}
           </div>
+
+          {/* URL Button (ajout d'un bouton spécifique dans les contrôles si une URL est présente) */}
+          {item.url && (
+            <div className="mt-4 mb-2">
+              <Button
+                variant="outline"
+                className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800/50 flex items-center justify-center gap-2"
+                onClick={handleOpenUrl}
+              >
+                <ExternalLink className="h-4 w-4" />
+                Accéder au lien externe
+              </Button>
+            </div>
+          )}
 
           {/* Session History */}
           <div className="space-y-4">
