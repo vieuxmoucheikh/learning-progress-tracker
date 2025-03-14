@@ -27,7 +27,8 @@ import {
   Calendar,
   Pencil,
   Copy,
-  CheckCheck
+  CheckCheck,
+  Plus
 } from 'lucide-react';
 // @ts-ignore
 import html2pdf, { Html2PdfOptions, ImageType, JsPdfUnit, JsPdfFormat, JsPdfOrientation } from 'html2pdf.js';
@@ -105,6 +106,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [isUrlEditing, setIsUrlEditing] = useState(false);
   const [editedUrl, setEditedUrl] = useState(item.url || '');
   const [copySuccess, setCopySuccess] = useState(false);
+  const [isTitleEditing, setIsTitleEditing] = useState(false);
 
   const getActiveSession = () => {
     if (!item.progress?.sessions) return null;
@@ -544,7 +546,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     if (editedTitle.trim() !== item.title) {
       onUpdate(item.id, { title: editedTitle.trim() });
     }
-    setIsEditing(false);
+    setIsTitleEditing(false);
   };
 
   const handleDeleteClick = () => {
@@ -1095,7 +1097,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               <div className="flex-1 space-y-3">
                 {/* Title */}
                 <div>
-                  {isEditing ? (
+                  {isTitleEditing ? (
                     <div className="flex items-center gap-2">
                       <Input
                         value={editedTitle}
@@ -1114,7 +1116,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                          setIsEditing(false);
+                          setIsTitleEditing(false);
                           setEditedTitle(item.title);
                         }}
                         className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/30"
@@ -1125,28 +1127,120 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                   ) : (
                     <div className="flex items-center gap-2 group flex-wrap">
                       <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{item.title}</h3>
-                      {item.url && (
+                      <div className="flex items-center">
+                        {item.url && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleOpenUrl}
+                            className="inline-flex items-center text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30 transition-colors h-8 px-2"
+                            title="Ouvrir le lien"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={handleOpenUrl}
-                          className="inline-flex items-center text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30 transition-colors"
-                          title="Ouvrir le lien"
+                          onClick={() => setIsTitleEditing(true)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/50 h-8 px-2"
+                          title="Modifier le titre"
                         >
-                          <ExternalLink className="h-4 w-4" />
+                          <Edit className="h-4 w-4" />
                         </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setIsEditing(true)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/50"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                      </div>
                     </div>
                   )}
                 </div>
+
+                {/* URL and Link Management Row - Add this directly after the title */}
+                {(item.url || isUrlEditing) && (
+                  <div className="flex flex-wrap items-center gap-2 mt-1">
+                    {isUrlEditing ? (
+                      <div className="flex items-center gap-2 w-full">
+                        <Input
+                          type="url"
+                          value={editedUrl}
+                          onChange={(e) => setEditedUrl(e.target.value)}
+                          placeholder="https://..."
+                          className="flex-1 text-sm border-blue-200 focus:ring-blue-500 dark:border-blue-700 dark:bg-gray-800 dark:text-white"
+                        />
+                        <div className="flex-shrink-0 flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleUrlSave}
+                            className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-900/30 h-8 w-8 p-0"
+                          >
+                            <Save className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setIsUrlEditing(false);
+                              setEditedUrl(item.url || '');
+                            }}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/30 h-8 w-8 p-0"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : item.url ? (
+                      <>
+                        <a 
+                          href={item.url} 
+                          target="_blank"
+                          rel="noopener noreferrer" 
+                          className="text-sm text-blue-600 hover:underline dark:text-blue-400 break-all line-clamp-1 flex-1 max-w-full"
+                          title={item.url}
+                        >
+                          {item.url}
+                        </a>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleCopyUrl}
+                            className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-100 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30"
+                            title="Copier le lien"
+                          >
+                            {copySuccess ? <CheckCheck className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setIsUrlEditing(true);
+                              setEditedUrl(item.url || '');
+                            }}
+                            className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-100 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30"
+                            title="Modifier le lien"
+                          >
+                            <Edit className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex w-full justify-between">
+                        <span className="text-sm text-gray-500 dark:text-gray-400 italic">
+                          Aucun lien défini
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setIsUrlEditing(true)}
+                          className="h-7 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30"
+                          title="Ajouter un lien"
+                        >
+                          <Plus className="h-3.5 w-3.5 mr-1" />
+                          <span className="text-xs">Ajouter un lien</span>
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Category and Type */}
                 <div className="flex items-center gap-3 flex-wrap">
@@ -1170,14 +1264,15 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                       {getStatusText()}
                     </Badge>
                     <span className="text-sm font-medium text-gray-600 dark:text-gray-300">{item.type}</span>
-                    {item.url && (
+                    {!item.url && !isUrlEditing && (
                       <Button
                         variant="outline"
                         size="sm" 
+                        onClick={() => setIsUrlEditing(true)}
                         className="inline-flex items-center gap-1 text-blue-600 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800/50 h-7 px-2"
-                        onClick={handleOpenUrl}
                       >
-                        <ExternalLink className="h-3 w-3" />
+                        <Plus className="h-3 w-3 mr-1" />
+                        <span className="text-xs">Lien</span>
                       </Button>
                     )}
                   </div>
