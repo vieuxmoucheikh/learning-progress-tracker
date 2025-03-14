@@ -1,0 +1,16 @@
+[project]
+id = "sijezgmooisqluablmqb"
+name = "project"
+organization = ""
+database_url = "postgresql://postgres:3gGl4RQFz3aPCmHc@db.sijezgmooisqluablmqb.supabase.co:5432/postgres"
+
+[api]
+port = 54321
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+port = 54323

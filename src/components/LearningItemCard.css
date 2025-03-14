@@ -1,0 +1,141 @@
+/* Correctifs pour les cartes d'apprentissage en mode sombre sur mobile */
+@media (max-width: 768px) {
+  /* Couleur de fond et bordure renforcées en mode sombre */
+  html[data-theme="dark"] .card,
+  html[data-theme="dark"] [class*="learning-item-card"],
+  html[data-theme="dark"] [class*="learning-card"] {
+    background-color: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Titres en blanc pur pour un contraste maximal en mode sombre */
+  html[data-theme="dark"] .card h3,
+  html[data-theme="dark"] .card [class*="title"],
+  html[data-theme="dark"] [class*="learning-item-card"] h3,
+  html[data-theme="dark"] [class*="learning-item-card"] [class*="title"],
+  html[data-theme="dark"] [class*="learning-card"] h3,
+  html[data-theme="dark"] [class*="learning-card"] [class*="title"] {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    font-weight: 700;
+  }
+  
+  /* Assurer la visibilité des titres en mode clair */
+  html[data-theme="light"] .card h3,
+  html[data-theme="light"] .card [class*="title"],
+  html[data-theme="light"] [class*="learning-item-card"] h3,
+  html[data-theme="light"] [class*="learning-item-card"] [class*="title"],
+  html[data-theme="light"] [class*="learning-card"] h3,
+  html[data-theme="light"] [class*="learning-card"] [class*="title"] {
+    color: #1e293b !important; /* slate-800 pour la lisibilité en mode clair */
+    font-weight: 700;
+  }
+  
+  /* Texte principal en mode sombre */
+  html[data-theme="dark"] .card p,
+  html[data-theme="dark"] [class*="learning-item-card"] p,
+  html[data-theme="dark"] [class*="learning-card"] p {
+    color: #f1f5f9 !important; /* slate-100 */
+  }
+  
+  /* Texte principal en mode clair */
+  html[data-theme="light"] .card p,
+  html[data-theme="light"] [class*="learning-item-card"] p,
+  html[data-theme="light"] [class*="learning-card"] p {
+    color: #334155 !important; /* slate-700 */
+  }
+  
+  /* Métadonnées et textes secondaires en mode sombre */
+  html[data-theme="dark"] .card [class*="metadata"],
+  html[data-theme="dark"] .card [class*="text-gray"],
+  html[data-theme="dark"] [class*="learning-item-card"] [class*="metadata"],
+  html[data-theme="dark"] [class*="learning-item-card"] [class*="text-gray"] {
+    color: #e2e8f0 !important; /* slate-200 */
+  }
+  
+  /* Métadonnées et textes secondaires en mode clair */
+  html[data-theme="light"] .card [class*="metadata"],
+  html[data-theme="light"] .card [class*="text-gray"],
+  html[data-theme="light"] [class*="learning-item-card"] [class*="metadata"],
+  html[data-theme="light"] [class*="learning-item-card"] [class*="text-gray"] {
+    color: #475569 !important; /* slate-600 */
+  }
+  
+  /* PRÉSERVER TOUJOURS LES COULEURS DES ICÔNES */
+  .card svg,
+  [class*="learning-item-card"] svg,
+  [class*="learning-card"] svg,
+  [class*="lucide-"] {
+    color: currentColor !important; /* Utiliser la couleur actuelle */
+    fill: currentColor !important;
+  }
+  
+  /* Styles pour les badges et boutons en mode sombre */
+  html[data-theme="dark"] .badge,
+  html[data-theme="dark"] button[class*="bg-blue-"],
+  html[data-theme="dark"] button[class*="bg-green-"],
+  html[data-theme="dark"] button[class*="bg-red-"],
+  html[data-theme="dark"] button[class*="bg-yellow-"] {
+    color: currentColor !important;
+  }
+
+  /* Styles pour les badges et boutons en mode clair */
+  html[data-theme="light"] .badge,
+  html[data-theme="light"] button[class*="bg-blue-"],
+  html[data-theme="light"] button[class*="bg-green-"],
+  html[data-theme="light"] button[class*="bg-red-"],
+  html[data-theme="light"] button[class*="bg-yellow-"] {
+    color: currentColor !important;
+  }
+  
+  /* Styles spéciaux pour les cartes maîtrisées en mode sombre */
+  html[data-theme="dark"] .mastered-card,
+  html[data-theme="dark"] [class*="from-emerald-50"] {
+    background: linear-gradient(135deg, rgba(6, 78, 59, 0.2) 0%, rgba(20, 83, 45, 0.4) 100%) !important;
+    border: 1px solid rgba(52, 211, 153, 0.3) !important;
+  }
+  
+  /* Styles spéciaux pour les cartes maîtrisées en mode clair */
+  html[data-theme="light"] .mastered-card,
+  html[data-theme="light"] [class*="from-emerald-50"] {
+    background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%) !important;
+    border-color: #6ee7b7 !important; /* emerald-300 */
+  }
+}
+
+/* Styles globaux pour améliorer la visibilité des contenus dans tous les contextes */
+.preserve-colors svg,
+.preserve-colors [class*="lucide-"] {
+  color: currentColor !important;
+}
+
+/* Réglage fin des icônes dans les boutons */
+button svg, 
+[role="button"] svg {
+  color: currentColor !important;
+}
+
+/* Classes utilitaires pour améliorer la visibilité des contenus */
+.text-visible-light {
+  color: #1e293b !important; /* slate-800 */
+}
+
+.text-visible-dark {
+  color: #f1f5f9 !important; /* slate-100 */
+}
+
+/* Classes pour ne pas surcharger les couleurs */
+.preserve-color {
+  color: currentColor !important;
+}
+
+/* Assurer la visibilité des badges dans les deux modes */
+.badge.bg-blue-100 { color: #1e40af !important; } /* blue-800 */
+.badge.bg-green-100 { color: #15803d !important; } /* green-700 */
+.badge.bg-yellow-100 { color: #854d0e !important; } /* yellow-700 */
+.badge.bg-red-100 { color: #b91c1c !important; } /* red-700 */
+html[data-theme="dark"] .badge.dark\:bg-blue-800\/30 { color: #93c5fd !important; } /* blue-300 */
+html[data-theme="dark"] .badge.dark\:bg-green-800\/30 { color: #86efac !important; } /* green-300 */
+html[data-theme="dark"] .badge.dark\:bg-yellow-800\/30 { color: #fde047 !important; } /* yellow-300 */
+html[data-theme="dark"] .badge.dark\:bg-red-800\/30 { color: #fca5a5 !important; } /* red-300 */

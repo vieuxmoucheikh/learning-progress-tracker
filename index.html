@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React + TS</title>
+    <!-- Assurer que le mode clair s'applique correctement sur mobile -->
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: light)"
+      content="#f8fafc"
+    />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: dark)"
+      content="#1e293b"
+    />
+    <!-- Style d'urgence pour les cartes en mode clair sur mobile -->
+    <style>
+      @media (max-width: 768px) {
+        /* Cartes en mode clair */
+        html[data-theme="light"] .card,
+        html[data-theme="light"] [class*="Card"],
+        html[data-theme="light"] [class*="-card"],
+        html[data-theme="light"] [class*="card"],
+        html[data-theme="light"] .dark\:bg-gray-800,
+        html[data-theme="light"] .mastered-card,
+        html[data-theme="light"] [class*="learning-item-card"] {
+          background-color: #ffffff !important;
+          background: #ffffff !important;
+        }
+
+        /* Préserver les couleurs des éléments importants */
+        html[data-theme="light"] svg,
+        html[data-theme="light"] .preserve-color,
+        html[data-theme="light"] [class*="lucide-"],
+        html[data-theme="light"] [class*="bg-blue-"],
+        html[data-theme="light"] [class*="bg-green-"],
+        html[data-theme="light"] [class*="bg-red-"],
+        html[data-theme="light"] [class*="bg-yellow-"] {
+          color: currentColor !portant;
+        }
+
+        /* Assurer que le mode sombre reste intact */
+        html[data-theme="dark"] .card,
+        html[data-theme="dark"] [class*="Card"],
+        html[data-theme="dark"] [class*="-card"],
+        html[data-theme="dark"] [class*="card"] {
+          background-color: #1e293b !important;
+        }
+
+        /* Texte blanc pour les boutons colorés */
+        html[data-theme="light"] .bg-blue-500,
+        html[data-theme="light"] .bg-green-500,
+        html[data-theme="light"] .bg-red-500 {
+          color: #ffffff !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <!-- Script pour corriger les problèmes de mode clair sur mobile -->
+    <script src="/light-mode-fixer.js"></script>
+  </body>
+</html>

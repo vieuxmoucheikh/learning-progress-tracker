@@ -1,0 +1,152 @@
+/* Synchronisation des thèmes pour transitions fluides et cohérence visuelle */
+
+/* Forcer l'application immédiate du mode clair/sombre sans délai */
+html {
+  transition: background-color 0.1s ease-out;
+}
+
+/* Styles de base pour le système de gestion des thèmes */
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* Éviter le flash pendant la transition de thèmes */
+html.theme-transitioning * {
+  transition: none !important;
+}
+
+/* Amélioration des styles pour les icônes et textes */
+html[data-theme="light"] {
+  --card-bg: 255 255 255;
+  --card-border: 226 232 240;
+  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  
+  /* Textes */
+  --text-heading: 15 23 42;
+  --text-body: 51 65 85;
+  --text-muted: 100 116 139;
+  
+  /* Iconographie */
+  --icon-primary: 37 99 235;
+  --icon-success: 16 185 129;
+  --icon-warning: 245 158 11;
+  --icon-danger: 220 38 38;
+  --icon-info: 59 130 246;
+  --icon-muted: 100 116 139;
+  
+  /* Badges et boutons */
+  --badge-bg-blue: 239 246 255;
+  --badge-text-blue: 30 64 175;
+  --badge-bg-green: 236 253 245;
+  --badge-text-green: 5 150 105;
+  --badge-bg-yellow: 254 249 195;
+  --badge-text-yellow: 202 138 4;
+  --badge-bg-red: 254 226 226;
+  --badge-text-red: 185 28 28;
+  
+  /* Boutons */
+  --button-primary-bg: 37 99 235;
+  --button-primary-text: 255 255 255;
+  --button-secondary-bg: 241 245 249;
+  --button-secondary-text: 15 23 42;
+  --button-danger-bg: 220 38 38;
+  --button-danger-text: 255 255 255;
+}
+
+html[data-theme="dark"] {
+  --card-bg: 30 41 59;
+  --card-border: 51 65 85;
+  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  
+  /* Textes */
+  --text-heading: 248 250 252;
+  --text-body: 226 232 240;
+  --text-muted: 148 163 184;
+  
+  /* Iconographie */
+  --icon-primary: 96 165 250;
+  --icon-success: 52 211 153;
+  --icon-warning: 251 191 36;
+  --icon-danger: 248 113 113;
+  --icon-info: 96 165 250;
+  --icon-muted: 148 163 184;
+  
+  /* Badges et boutons */
+  --badge-bg-blue: rgba(59, 130, 246, 0.2);
+  --badge-text-blue: 147 197 253;
+  --badge-bg-green: rgba(16, 185, 129, 0.2);
+  --badge-text-green: 110 231 183;
+  --badge-bg-yellow: rgba(245, 158, 11, 0.2);
+  --badge-text-yellow: 253 224 71;
+  --badge-bg-red: rgba(220, 38, 38, 0.2);
+  --badge-text-red: 252 165 165;
+  
+  /* Boutons */
+  --button-primary-bg: 59 130 246;
+  --button-primary-text: 255 255 255;
+  --button-secondary-bg: 51 65 85;
+  --button-secondary-text: 226 232 240;
+  --button-danger-bg: 220 38 38;
+  --button-danger-text: 255 255 255;
+}
+
+/* Appliquer les styles de base aux composants */
+.card {
+  background-color: rgb(var(--card-bg));
+  border-color: rgb(var(--card-border));
+  box-shadow: var(--card-shadow);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: rgb(var(--text-heading));
+}
+
+p, span:not([class*="text-"]), div:not([class*="text-"]) {
+  color: rgb(var(--text-body));
+}
+
+.text-muted, [class*="text-muted"] {
+  color: rgb(var(--text-muted));
+}
+
+/* Icones par type */
+svg.lucide-check, svg.lucide-check-circle, [class*="success"] svg {
+  color: rgb(var(--icon-success)) !important;
+}
+
+svg.lucide-alert-circle, svg.lucide-alert-triangle, [class*="warning"] svg {
+  color: rgb(var(--icon-warning)) !important;
+}
+
+svg.lucide-x, svg.lucide-x-circle, [class*="danger"] svg {
+  color: rgb(var(--icon-danger)) !important;
+}
+
+svg.lucide-info, [class*="info"] svg {
+  color: rgb(var(--icon-info)) !important;
+}
+
+/* Badges */
+.badge.bg-blue-100, .badge.dark\:bg-blue-800\/30 {
+  background-color: rgb(var(--badge-bg-blue));
+  color: rgb(var(--badge-text-blue));
+}
+
+.badge.bg-green-100, .badge.dark\:bg-green-800\/30 {
+  background-color: rgb(var(--badge-bg-green));
+  color: rgb(var(--badge-text-green));
+}
+
+.badge.bg-yellow-100, .badge.dark\:bg-yellow-800\/30 {
+  background-color: rgb(var(--badge-bg-yellow));
+  color: rgb(var(--badge-text-yellow));
+}
+
+.badge.bg-red-100, .badge.dark\:bg-red-800\/30 {
+  background-color: rgb(var(--badge-bg-red));
+  color: rgb(var(--badge-text-red));
+}

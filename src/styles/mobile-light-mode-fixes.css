@@ -1,0 +1,76 @@
+@media (max-width: 768px) {
+  /* Styles globaux pour assurer que le mode clair sur mobile est correct */
+  html[data-theme="light"] {
+    color-scheme: light;
+  }
+  
+  /* Fond principal pour l'application entière */
+  html[data-theme="light"] body,
+  html[data-theme="light"] #root {
+    background-color: hsl(var(--background));
+  }
+  
+  /* Navigation et en-tête */
+  html[data-theme="light"] .Navigation,
+  html[data-theme="light"] header {
+    background-color: hsl(var(--card));
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  
+  /* Cartes de contenu */
+  html[data-theme="light"] .LearningItemCard {
+    background-color: hsl(var(--card));
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  
+  /* Améliorer la lisibilité du texte */
+  html[data-theme="light"] p,
+  html[data-theme="light"] h1,
+  html[data-theme="light"] h2,
+  html[data-theme="light"] h3,
+  html[data-theme="light"] h4,
+  html[data-theme="light"] h5,
+  html[data-theme="light"] h6 {
+    color: hsl(var(--foreground));
+  }
+  
+  /* Améliorer la visibilité des contrôles et composants interactifs */
+  html[data-theme="light"] .TabNavigation {
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+  }
+  
+  /* Fixer les graphiques et visuels analytiques */
+  html[data-theme="light"] .AnalyticsTab canvas,
+  html[data-theme="light"] .LearningFocusChart,
+  html[data-theme="light"] .YearlyActivityHeatmap {
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+  }
+  
+  /* Composants du tableau de bord */
+  html[data-theme="light"] .DashboardTab .card {
+    background-color: hsl(var(--card));
+  }
+  
+  /* Correctifs pour le mode pomodoro */
+  html[data-theme="light"] .PomodoroTimer {
+    background-color: hsl(var(--card));
+  }
+
+  /* Assurer la cohérence des icônes du tableau de bord */
+  html[data-theme="light"] .DashboardIcons svg {
+    color: hsl(var(--foreground));
+    opacity: 0.9;
+  }
+
+  /* Améliorer les interfaces de flashcards */
+  html[data-theme="light"] .FlashcardsTab,
+  html[data-theme="light"] .FlashcardStudy {
+    background-color: hsl(var(--background));
+  }
+  
+  html[data-theme="light"] .FlashcardDecks .card {
+    background-color: hsl(var(--card));
+  }
+}

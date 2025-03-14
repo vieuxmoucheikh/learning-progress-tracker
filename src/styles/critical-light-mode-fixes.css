@@ -1,0 +1,79 @@
+/* Correctifs critiques pour le mode clair sur mobile */
+@media (max-width: 768px) {
+  /* Fond d'application principal */
+  html[data-theme="light"],
+  html[data-theme="light"] body {
+    --background: 248 250 252 !important; /* slate-50 */
+    background-color: #f8fafc !important;
+  }
+  
+  /* Améliorer la visibilité des cartes d'apprentissage - VERSION RENFORCÉE */
+  html[data-theme="light"] .learning-item-card,
+  html[data-theme="light"] [class*="learning-item-card"],
+  html[data-theme="light"] [class*="learning-card"],
+  html[data-theme="light"] .card,
+  html[data-theme="light"] div.card,
+  html[data-theme="light"] div[class*="Card"],
+  html[data-theme="light"] div[class*="card"] {
+    background-color: #ffffff !important; /* blanc pur */
+    background: #ffffff !important; /* double propriété pour forcer l'override */
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* Header, contenu et pied des cartes en mode clair */
+  html[data-theme="light"] .card > div,
+  html[data-theme="light"] [class*="card"] > div,
+  html[data-theme="light"] .card > div[class*="header"],
+  html[data-theme="light"] .card > div[class*="content"],
+  html[data-theme="light"] .card > div[class*="footer"] {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    background-image: none !important;
+  }
+  
+  /* PRÉSERVER LES COULEURS DES ÉLÉMENTS VISUELS */
+  /* Ces sélecteurs annulent des règles trop génériques qui pourraient causer des problèmes */
+  html[data-theme="light"] .preserve-color,
+  html[data-theme="light"] svg.preserve-color,
+  html[data-theme="light"] button svg,
+  html[data-theme="light"] [role="button"] svg,
+  html[data-theme="light"] .badge svg {
+    color: currentColor !important;
+  }
+
+  /* Assurer la bonne visibilité des badges et étiquettes */
+  html[data-theme="light"] .badge[class*="bg-blue-"],
+  html[data-theme="light"] .badge[class*="bg-green-"],
+  html[data-theme="light"] .badge[class*="bg-red-"],
+  html[data-theme="light"] .badge[class*="bg-yellow-"] {
+    color: currentColor !important;
+  }
+  
+  /* Préserver l'apparence des icônes dans les deux modes */
+  .lucide, 
+  svg[class*="lucide-"],
+  button svg,
+  [role="button"] svg {
+    color: currentColor !important;
+    fill: none !important;
+    stroke-width: 2;
+    stroke: currentColor !important;
+  }
+
+  /* Améliorer l'apparence des boutons colorés en mode clair */
+  html[data-theme="light"] .bg-blue-500,
+  html[data-theme="light"] .bg-blue-600 {
+    color: white !important;
+  }
+
+  html[data-theme="light"] .bg-red-500,
+  html[data-theme="light"] .bg-red-600 {
+    color: white !important;
+  }
+
+  html[data-theme="light"] .bg-green-500,
+  html[data-theme="light"] .bg-green-600 {
+    color: white !important;
+  }
+}
