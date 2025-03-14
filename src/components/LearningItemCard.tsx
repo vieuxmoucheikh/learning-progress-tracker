@@ -107,6 +107,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [editedUrl, setEditedUrl] = useState(item.url || '');
   const [copySuccess, setCopySuccess] = useState(false);
   const [isTitleEditing, setIsTitleEditing] = useState(false);
+  
+  // Ajouter des états pour la section URL du bas
+  const [isFooterUrlEditing, setIsFooterUrlEditing] = useState(false);
+  const [editedFooterUrl, setEditedFooterUrl] = useState(item.url || '');
+  const [copyFooterSuccess, setCopyFooterSuccess] = useState(false);
 
   const getActiveSession = () => {
     if (!item.progress?.sessions) return null;
@@ -1056,14 +1061,14 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     }
   };
 
-  // Fonction pour ouvrir l'URL dans un nouvel onglet
+  // Fonction pour ouvrir l'URL dans un nouvel onglet (commune aux deux sections)
   const handleOpenUrl = useCallback(() => {
     if (item.url) {
       window.open(item.url, '_blank', 'noopener,noreferrer');
     }
   }, [item.url]);
 
-  // Fonction pour copier l'URL dans le presse-papier
+  // Fonction pour copier l'URL dans le presse-papier (pour l'en-tête)
   const handleCopyUrl = useCallback(() => {
     if (item.url) {
       navigator.clipboard.writeText(item.url).then(() => {
@@ -1073,13 +1078,37 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     }
   }, [item.url]);
 
-  // Fonction pour enregistrer l'URL modifiée
+  // Fonction pour copier l'URL dans le presse-papier (pour le pied de page)
+  const handleCopyFooterUrl = useCallback(() => {
+    if (item.url) {
+      navigator.clipboard.writeText(item.url).then(() => {
+        setCopyFooterSuccess(true);
+        setTimeout(() => setCopyFooterSuccess(false), 2000);
+      });
+    }
+  }, [item.url]);
+
+  // Fonction pour enregistrer l'URL modifiée (pour l'en-tête)
   const handleUrlSave = useCallback(() => {
     if (editedUrl !== item.url) {
       onUpdate(item.id, { url: editedUrl.trim() });
     }
     setIsUrlEditing(false);
   }, [editedUrl, item.id, item.url, onUpdate]);
+
+  // Fonction pour enregistrer l'URL modifiée (pour le pied de page)
+  const handleFooterUrlSave = useCallback(() => {
+    if (editedFooterUrl !== item.url) {
+      onUpdate(item.id, { url: editedFooterUrl.trim() });
+    }
+    setIsFooterUrlEditing(false);
+  }, [editedFooterUrl, item.id, item.url, onUpdate]);
+
+  // Synchroniser les URLs lorsque l'élément change
+  useEffect(() => {
+    setEditedUrl(item.url || '');
+    setEditedFooterUrl(item.url || '');
+  }, [item.url]);
 
   return (
     <div className="w-full">
@@ -1367,7 +1396,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           </div>
 
           {/* URL Section with editing functionality */}
-          {(item.url || isUrlEditing) && (
+          {(item.url || isFooterUrlEditing) && (
             <div className="mt-4 mb-4 border border-blue-100 dark:border-blue-800/50 rounded-lg p-3 bg-blue-50/50 dark:bg-blue-900/10">
               <div className="flex items-center justify-between mb-2">
                 <h5 className="text-sm font-medium text-blue-700 dark:text-blue-300 flex items-center gap-1">
@@ -1375,24 +1404,24 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                   Lien externe
                 </h5>
                 <div className="flex items-center gap-1">
-                  {!isUrlEditing && (
+                  {!isFooterUrlEditing && (
                     <>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={handleCopyUrl}
+                        onClick={handleCopyFooterUrl}
                         className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-100 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30"
                         title="Copier le lien"
                         disabled={!item.url}
                       >
-                        {copySuccess ? <CheckCheck className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                        {copyFooterSuccess ? <CheckCheck className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                          setIsUrlEditing(true);
-                          setEditedUrl(item.url || '');
+                          setIsFooterUrlEditing(true);
+                          setEditedFooterUrl(item.url || '');
                         }}
                         className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-100 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30"
                         title="Modifier le lien"
@@ -1404,12 +1433,12 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                 </div>
               </div>
               
-              {isUrlEditing ? (
+              {isFooterUrlEditing ? (
                 <div className="flex items-center gap-2">
                   <Input
                     type="url"
-                    value={editedUrl}
-                    onChange={(e) => setEditedUrl(e.target.value)}
+                    value={editedFooterUrl}
+                    onChange={(e) => setEditedFooterUrl(e.target.value)}
                     placeholder="https://..."
                     className="flex-1 text-sm border-blue-200 focus:ring-blue-500 dark:border-blue-700 dark:bg-gray-800 dark:text-white"
                   />
@@ -1417,7 +1446,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={handleUrlSave}
+                      onClick={handleFooterUrlSave}
                       className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-900/30"
                     >
                       <Save className="h-4 w-4" />
@@ -1426,8 +1455,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        setIsUrlEditing(false);
-                        setEditedUrl(item.url || '');
+                        setIsFooterUrlEditing(false);
+                        setEditedFooterUrl(item.url || '');
                       }}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/30"
                     >
