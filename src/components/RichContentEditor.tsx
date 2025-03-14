@@ -64,8 +64,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
       {/* History Controls */}
       <div className="flex items-center gap-0.5 mr-2">
         <Button
-          size="icon"
-          variant="ghost"
+          variant={'ghost'}
           onClick={() => editor.chain().focus().undo().run()}
           disabled={!editor.can().undo()}
           className="h-8 w-8"
@@ -73,7 +72,6 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
           <Undo2 className="h-4 w-4" />
         </Button>
         <Button
-          size="icon"
           variant="ghost"
           onClick={() => editor.chain().focus().redo().run()}
           disabled={!editor.can().redo()}
@@ -348,65 +346,62 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
   };
 
   return (
-    <div className={cn('border rounded-lg shadow-sm flex flex-col relative', className)} style={{ height: '500px' }}>
-      <div className="flex-1 overflow-y-auto relative">
-        {isEditing && editor && (
-          <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b shadow-sm">
-            <MenuBar editor={editor} />
+      <div className={cn('border rounded-lg shadow-sm flex flex-col relative', className)} style={{ height: '500px' }}>
+        <div className="flex-1 overflow-y-auto relative">
+          {isEditing && editor && (
+            <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b shadow-sm">
+              <MenuBar editor={editor} />
+            </div>
+          )}
+          <div className="relative">
+            <EditorContent
+              editor={editor}
+              className={cn(
+                "prose prose-sm max-w-none p-4",
+                isEditing && 'min-h-[150px] cursor-text',
+                'prose-p:my-2',
+                'prose-ul:my-2 prose-ul:list-disc prose-ul:pl-6',
+                'prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-6',
+                'prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:my-4 prose-blockquote:italic prose-blockquote:text-gray-700 prose-blockquote:bg-blue-50/50',
+                'prose-code:bg-gray-50 prose-code:text-gray-900 prose-code:px-1 prose-code:rounded prose-code:font-mono prose-code:text-sm',
+              )}
+            />
           </div>
-        )}
-        <div className="relative">
-          <EditorContent
-            editor={editor}
-            className={cn(
-              "prose prose-sm max-w-none p-4",
-              isEditing && 'min-h-[150px] cursor-text',
-              'prose-p:my-2',
-              'prose-ul:my-2 prose-ul:list-disc prose-ul:pl-6',
-              'prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-6',
-              'prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:my-4 prose-blockquote:italic prose-blockquote:text-gray-700 prose-blockquote:bg-blue-50/50',
-              'prose-code:bg-gray-50 prose-code:text-gray-900 prose-code:px-1 prose-code:rounded prose-code:font-mono prose-code:text-sm',
+        </div>
+        <div className={cn("flex justify-end p-2 border-t mt-auto bg-white")}>
+          <div className="flex gap-2">
+            {!isEditing && !initialReadOnly && (
+              <Button
+                variant="ghost"
+                onClick={() => setIsEditing(true)}
+                title="Edit content"
+              >
+                <Edit className="h-4 w-4 mr-1" />
+                Edit
+              </Button>
             )}
-          />
+            {isEditing && (
+              <>
+                <Button
+                  variant="ghost"
+                  onClick={handleSave}
+                  title="Save changes"
+                >
+                  <Save className="h-4 w-4 mr-1" />
+                  Save
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={handleCancel}
+                  title="Cancel editing"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Cancel
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </div>
-      <div className={cn("flex justify-end p-2 border-t mt-auto bg-white")}>
-        <div className="flex gap-2">
-          {!isEditing && !initialReadOnly && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsEditing(true)}
-              title="Edit content"
-            >
-              <Edit className="h-4 w-4 mr-1" />
-              Edit
-            </Button>
-          )}
-          {isEditing && (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleSave}
-                title="Save changes"
-              >
-                <Save className="h-4 w-4 mr-1" />
-                Save
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCancel}
-                title="Cancel editing"
-              >
-                <X className="h-4 w-4 mr-1" />
-                Cancel
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
   );
 };

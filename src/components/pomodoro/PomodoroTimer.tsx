@@ -1597,7 +1597,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             <span className="ml-2 text-blue-100">{currentTask || "No task selected"}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="bg-blue-500/30 text-blue-200 border-blue-400/30">
+                            <Badge className="bg-blue-500/30 text-blue-200 border-blue-400/30">
                                 {tasks.length > 0 ? tasks.filter(t => !t.completed).length : 0} active tasks
                             </Badge>
                         </div>
@@ -1626,7 +1626,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                         )}>
                                             {task.text}
                                             {task.completed && task.metrics && task.metrics.completedPomodoros >= (settings?.daily_goal ?? 8) && (
-                                                <Badge variant="secondary" className="ml-2 bg-green-600 text-white">
+                                                <Badge className="ml-2 bg-green-600 text-white">
                                                     <Trophy className="h-3 w-3 mr-1" />
                                                     Completed!
                                                 </Badge>
@@ -1648,8 +1648,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Button
-                                            variant={activeTaskId === task.id ? "default" : "ghost"}
-                                            size="sm"
                                             onClick={() => setTaskActive(task.id)}
                                             className={cn(
                                                 "transition-all duration-200",
@@ -1661,10 +1659,8 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                             {activeTaskId === task.id ? "Active" : "Start"}
                                         </Button>
                                         <Button
-                                            variant="ghost"
-                                            size="sm"
                                             onClick={() => removeTask(task.id)}
-                                            className="bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-red-100"
+                                            className="h-9 px-3 bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-red-100 border border-red-500/30 rounded-md"
                                         >
                                             <X className="h-4 w-4" />
                                         </Button>
@@ -1672,7 +1668,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                 </li>
                             ))}
                     </ul>
-                </div>
+                </div> 
                 <div className="relative mb-8" ref={timerRef}>
                     <TimerDisplay
                         time={time}
@@ -1689,7 +1685,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     name={isActive ? 'pause' : 'start'}
                                     onClick={handleButtonClick}
                                     disabled={!activeTaskId}
-                                    size="lg"
                                     className={cn(
                                         "w-24 transition-all duration-300 shadow-lg rounded-full",
                                         isActive
@@ -1703,7 +1698,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             </TooltipTrigger>
                             <TooltipContent className="bg-blue-600 text-white border-blue-700">
                                 {activeTaskId ? `Space to ${isActive ? 'Pause' : 'Start'}` : 'Select a task first'}
-                            </TooltipContent>
+                            </TooltipContent> 
                         </Tooltip>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -1711,8 +1706,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     name="skip"
                                     onClick={handleButtonClick}
                                     disabled={!activeTaskId || !isActive}
-                                    variant="outline"
-                                    size="lg"
                                     className="border-slate-600/50 hover:border-slate-500 hover:bg-slate-700/50 rounded-full"
                                 >
                                     <SkipForwardIcon className="h-6 w-6" />
@@ -1727,8 +1720,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                 <Button
                                     name="settings"
                                     onClick={() => setSettingsOpen(true)}
-                                    variant="outline"
-                                    size="lg"
                                     className="border-slate-600/50 hover:border-slate-500 hover:bg-slate-700/50 rounded-full"
                                 >
                                     <Settings2Icon className="h-6 w-6" />
@@ -1888,7 +1879,7 @@ function TaskProgress({ task, settings }: { task: Task; settings: PomodoroSettin
                     <span className="ml-2 text-blue-100">{task.text}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30">
+                    <Badge className="bg-blue-500/20 text-blue-200 border-blue-400/30">
                         {metrics.completedPomodoros} pomodoros
                     </Badge>
                 </div>
