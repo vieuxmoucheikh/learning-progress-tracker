@@ -1142,7 +1142,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       <Card className={clsx(
         "relative overflow-hidden transition-all duration-200",
         "hover:shadow-lg border-l-4",
-        "bg-white light:bg-white preserve-colors", // Ajout de la classe preserve-colors
+        "bg-white light:bg-white preserve-colors shadow-md", // Ajout de shadow-md
         getBorderColorClass()
       )}>
         {/* Card Header with gradient background */}
@@ -1384,7 +1384,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-2 bg-yellow-50 hover:bg-yellow-100 border-yellow-200 text-yellow-700 shadow-sm dark:bg-yellow-800/30 dark:hover:bg-yellow-900/30 dark:text-yellow-300 preserve-color"
+                      className="gap-2 bg-yellow-50 hover:bg-yellow-100 border-yellow-200 text-yellow-700 shadow-sm dark:bg-yellow-800/30 dark:hover:bg-yellow-900/30 dark:text-yellow-300 preserve-color font-medium"
                       onClick={handlePauseSession}
                     >
                       <Pause className="h-4 w-4 preserve-color" />
@@ -1394,7 +1394,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 shadow-sm dark:bg-blue-800/30 dark:hover:bg-blue-900/30 dark:text-blue-300 preserve-color"
+                      className="gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 shadow-sm dark:bg-blue-800/30 dark:hover:bg-blue-900/30 dark:text-blue-300 preserve-color font-medium"
                       onClick={handleResumeSession}
                     >
                       <Play className="h-4 w-4 preserve-color" />
@@ -1404,18 +1404,18 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                   <Button
                     variant="outline"
                     size="sm"
-                    className="gap-2 bg-red-50 hover:bg-red-100 border-red-200 text-red-700 shadow-sm dark:bg-red-800/30 dark:hover:bg-red-900/30 dark:text-red-300"
+                    className="gap-2 bg-red-50 hover:bg-red-100 border-red-200 text-red-700 shadow-sm dark:bg-red-800/30 dark:hover:bg-red-900/30 dark:text-red-300 font-medium"
                     onClick={handleStopSession}
                   >
                     <StopCircle className="h-4 w-4" />
                     Stop
                   </Button>
-                  {/* Ajout du bouton Add Note ici pour les sessions actives */}
+                  {/* Bouton Add Note */}
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleOpenNoteDialog}
-                    className="gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 shadow-sm dark:bg-blue-800/30 dark:hover:bg-blue-900/30 dark:text-blue-300"
+                    className="gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 shadow-sm dark:bg-blue-800/30 dark:hover:bg-blue-900/30 dark:text-blue-300 font-medium"
                   >
                     <MessageSquare className="h-4 w-4" />
                     Add Note
@@ -1428,18 +1428,18 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                       variant="default"
                       size="sm"
                       onClick={handleStartSession}
-                      className="gap-2 bg-blue-500 hover:bg-blue-600 text-white shadow-sm dark:bg-blue-600 dark:hover:bg-blue-700"
+                      className="gap-2 bg-blue-500 hover:bg-blue-600 text-white shadow-sm dark:bg-blue-600 dark:hover:bg-blue-700 font-medium"
                     >
                       <Play className="h-4 w-4" />
                       Start Session
                     </Button>
                   )}
-                  {/* Ajout du bouton Add Note pour toutes les cartes */}
+                  {/* Bouton Add Note */}
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleOpenNoteDialog}
-                    className="gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 shadow-sm dark:bg-blue-800/30 dark:hover:bg-blue-900/30 dark:text-blue-300"
+                    className="gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 shadow-sm dark:bg-blue-800/30 dark:hover:bg-blue-900/30 dark:text-blue-300 font-medium"
                   >
                     <MessageSquare className="h-4 w-4" />
                     Add Note
@@ -1450,12 +1450,11 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
 
             {(activeSession || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime)) && (
               <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                <span className="text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full">
                   {activeSession?.status === 'on_hold' || item.progress?.sessions?.some(s => s.status === 'on_hold' && !s.endTime)
                     ? `Session Paused: ${displayTime}`
                     : `Current Session: ${displayTime}`}
                 </span>
-                {/* Suppression du bouton Add Note ici pour éviter la duplication */}
               </div>
             )}
           </div>
@@ -1463,7 +1462,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           {/* Restauration de l'affichage du temps total */}
           <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
             <div className="flex items-center justify-between">
-              <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+                <Clock className="h-4 w-4 mr-2 text-blue-500 dark:text-blue-400" />
                 Total Time
               </h5>
               {renderDuration()}
@@ -1567,16 +1567,19 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
             </div>
           )}
 
-          {/* Session History */}
+          {/* Session History Section avec style amélioré */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Session History</h4>
+            <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center">
+                <BookOpen className="h-5 w-5 mr-2 text-blue-500 dark:text-blue-400" />
+                Session History
+              </h4>
               {item.progress?.sessions && item.progress.sessions.length > 1 && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowAllSessions(!showAllSessions)}
-                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
                 >
                   {showAllSessions ? 'Show Less' : 'Show All'}
                 </Button>
