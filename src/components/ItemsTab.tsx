@@ -1,19 +1,11 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Search, Download, LucideCalendar, CalendarIcon, Plus, Filter, BookOpen } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 import LearningItemCard from "./LearningItemCard";
 import { CustomSelect, SelectOption } from "./ui/select";
-import type { Options as Html2PdfOptions } from 'html2pdf.js';
 import type { LearningItem } from '@/types';
-// @ts-ignore
-import html2pdf from 'html2pdf.js';
-import { cn } from "@/lib/utils";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
 import { clsx } from "clsx";
 
 type StatusFilterType = 'all' | 'active' | 'completed';
@@ -54,7 +46,7 @@ interface ItemsTabProps {
   onSessionNoteAdd: (id: string, note: string) => void;
 }
 
-const ItemsTab: React.FC<ItemsTabProps> = ({
+export function ItemsTab({
   items,
   onAddItem,
   onUpdate,
@@ -64,14 +56,13 @@ const ItemsTab: React.FC<ItemsTabProps> = ({
   onNotesUpdate,
   onSetActiveItem,
   onSessionNoteAdd,
-}) => {
+}: ItemsTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<StatusFilterType>("all");
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Définition de la fonction handleSearchChange qui manquait
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
     setCurrentPage(1); // Reset to first page when search changes
@@ -136,8 +127,6 @@ const ItemsTab: React.FC<ItemsTabProps> = ({
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
-  // ...existing code...
 
   return (
     <div className="space-y-6">
@@ -232,6 +221,7 @@ const ItemsTab: React.FC<ItemsTabProps> = ({
       </div>
     </div>
   );
-};
+}
 
+// S'assurer que le composant est aussi exporté par défaut pour compatibilité
 export default ItemsTab;

@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Importer les corrections pour le mode clair sur mobile après les directives Tailwind */
+@import './styles/mobile-light-mode-fixes.css';
+@import './styles/critical-light-mode-fixes.css';
+@import './styles/global-ui-enhancements.css';
+@import './styles/responsive-fixes.css';
+@import './styles/theme-sync.css';
+@import './components/LearningItemCard.css';
+@import './components/Calendar.css';
+@import './components/StatusBadge.css';
+@import './components/PomodoroTimer.css';
+
 /* Importer les corrections pour le mode clair sur mobile */
 @import '../public/mobile-light-mode.css';
 
