@@ -3,8 +3,7 @@
   /* Fond d'application principal */
   html[data-theme="light"],
   html[data-theme="light"] body {
-    --background: 248 250 252 !important; /* slate-50 */
-    background-color: #f8fafc !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
   }
   
   /* Améliorer la visibilité des cartes d'apprentissage - VERSION RENFORCÉE */
@@ -15,10 +14,21 @@
   html[data-theme="light"] div.card,
   html[data-theme="light"] div[class*="Card"],
   html[data-theme="light"] div[class*="card"] {
-    background-color: #ffffff !important; /* blanc pur */
-    background: #ffffff !important; /* double propriété pour forcer l'override */
-    border-color: rgba(0, 0, 0, 0.1) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  }
+  
+  /* Effet au survol pour les cartes */
+  html[data-theme="light"] .learning-item-card:hover,
+  html[data-theme="light"] [class*="learning-item-card"]:hover,
+  html[data-theme="light"] [class*="learning-card"]:hover,
+  html[data-theme="light"] .card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1) !important;
   }
 
   /* Header, contenu et pied des cartes en mode clair */
@@ -30,6 +40,21 @@
     background-color: #ffffff !important;
     background: #ffffff !important;
     background-image: none !important;
+  }
+
+  /* Amélioration des en-têtes et titres */
+  html[data-theme="light"] h1,
+  html[data-theme="light"] h2,
+  html[data-theme="light"] h3 {
+    color: hsl(222, 95%, 18%) !important;
+    font-weight: 700 !important;
+  }
+  
+  html[data-theme="light"] h4,
+  html[data-theme="light"] h5,
+  html[data-theme="light"] h6 {
+    color: hsl(222, 70%, 30%) !important;
+    font-weight: 600 !important;
   }
   
   /* PRÉSERVER LES COULEURS DES ÉLÉMENTS VISUELS */
@@ -50,6 +75,38 @@
     color: currentColor !important;
   }
   
+  /* Style amélioré pour les badges */
+  html[data-theme="light"] .badge {
+    font-weight: 600 !important;
+    padding: 0.25rem 0.75rem !important;
+    border-radius: 9999px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  html[data-theme="light"] .badge.bg-blue-100 {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+    color: #1e40af !important;
+    border: none !important;
+  }
+  
+  html[data-theme="light"] .badge.bg-green-100 {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%) !important;
+    color: #15803d !important;
+    border: none !important;
+  }
+  
+  html[data-theme="light"] .badge.bg-yellow-100 {
+    background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%) !important;
+    color: #854d0e !important;
+    border: none !important;
+  }
+  
+  html[data-theme="light"] .badge.bg-red-100 {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+    color: #b91c1c !important;
+    border: none !important;
+  }
+  
   /* Préserver l'apparence des icônes dans les deux modes */
   .lucide, 
   svg[class*="lucide-"],
@@ -60,20 +117,91 @@
     stroke-width: 2;
     stroke: currentColor !important;
   }
-
+  
   /* Améliorer l'apparence des boutons colorés en mode clair */
-  html[data-theme="light"] .bg-blue-500,
-  html[data-theme="light"] .bg-blue-600 {
+  html[data-theme="light"] button.bg-blue-500,
+  html[data-theme="light"] button.bg-blue-600,
+  html[data-theme="light"] [class*="primary"] {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3) !important;
     color: white !important;
+    border-radius: 8px !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+  }
+  
+  html[data-theme="light"] button.bg-blue-500:hover,
+  html[data-theme="light"] button.bg-blue-600:hover,
+  html[data-theme="light"] [class*="primary"]:hover {
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4) !important;
+    transform: translateY(-1px) !important;
   }
 
-  html[data-theme="light"] .bg-red-500,
-  html[data-theme="light"] .bg-red-600 {
+  html[data-theme="light"] button.bg-red-500,
+  html[data-theme="light"] button.bg-red-600 {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    box-shadow: 0 2px 10px rgba(220, 38, 38, 0.3) !important;
     color: white !important;
+    border-radius: 8px !important;
   }
 
-  html[data-theme="light"] .bg-green-500,
-  html[data-theme="light"] .bg-green-600 {
+  html[data-theme="light"] button.bg-green-500,
+  html[data-theme="light"] button.bg-green-600 {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3) !important;
     color: white !important;
+    border-radius: 8px !important;
+  }
+  
+  /* Cartes maîtrisées avec style spécial */
+  html[data-theme="light"] .mastered-card,
+  html[data-theme="light"] [class*="from-emerald-50"] {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%) !important;
+    border-color: #6ee7b7 !important;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15) !important;
+  }
+  
+  /* Amélioration des inputs et formulaires */
+  html[data-theme="light"] input,
+  html[data-theme="light"] textarea,
+  html[data-theme="light"] select {
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    padding: 0.5rem 0.75rem !important;
+    background-color: #ffffff !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+  }
+  
+  html[data-theme="light"] input:focus,
+  html[data-theme="light"] textarea:focus,
+  html[data-theme="light"] select:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+    outline: none !important;
+  }
+  
+  /* Navigation améliorée */
+  html[data-theme="light"] .Navigation,
+  html[data-theme="light"] header {
+    background-color: white !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  }
+  
+  /* Amélioration des composants spécifiques */
+  html[data-theme="light"] .TabNavigation {
+    background: linear-gradient(to bottom, #ffffff, #f5f7fa) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+    overflow: hidden !important;
+  }
+  
+  html[data-theme="light"] .Calendar,
+  html[data-theme="light"] .PomodoroTimer,
+  html[data-theme="light"] .LearningGoals {
+    background-color: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
   }
 }

@@ -8,9 +8,10 @@
     const isMobile = window.innerWidth <= 768;
     
     if (isLightMode && isMobile) {
-      // Forcer le fond en clair
-      document.body.style.backgroundColor = '#f8fafc'; // slate-50
-      document.documentElement.style.backgroundColor = '#f8fafc';
+      // Forcer le fond en clair avec un léger dégradé
+      const bgGradient = 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)';
+      document.body.style.background = bgGradient;
+      document.documentElement.style.background = bgGradient;
       
       // Assurer que les cartes ont un fond blanc - VERSION RENFORCÉE
       // Sélecteurs très larges pour attraper toutes les cartes possibles
@@ -33,13 +34,13 @@
       // Sélectionner toutes les cartes
       const cards = document.querySelectorAll(cardSelectors.join(','));
       
-      console.log('Applying light mode fixes to', cards.length, 'cards');
-      
       // Appliquer les styles à chaque carte
       cards.forEach(card => {
         card.style.backgroundColor = '#ffffff';
         card.style.background = '#ffffff';
-        card.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.05)';
+        card.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.08)';
+        card.style.borderRadius = '12px';
+        card.style.border = '1px solid rgba(0, 0, 0, 0.06)';
         
         // Traiter également les enfants directs qui peuvent avoir des backgrounds
         const children = card.children;
@@ -52,6 +53,65 @@
             children[i].style.backgroundImage = 'none';
           }
         }
+      });
+      
+      // Traitement spécial pour les cartes maîtrisées
+      const masteredCards = document.querySelectorAll('.mastered-card, [class*="from-emerald-50"]');
+      masteredCards.forEach(card => {
+        card.style.background = 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)';
+        card.style.borderColor = '#6ee7b7';
+        card.style.boxShadow = '0 4px 15px rgba(16, 185, 129, 0.15)';
+      });
+      
+      // Améliorer les boutons
+      const primaryButtons = document.querySelectorAll('button.bg-blue-500, button.bg-blue-600, [class*="primary"]');
+      primaryButtons.forEach(button => {
+        button.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+        button.style.boxShadow = '0 2px 10px rgba(37, 99, 235, 0.3)';
+        button.style.transform = 'translateY(0)';
+        button.style.transition = 'transform 0.2s, box-shadow 0.2s';
+        button.style.color = '#ffffff';
+      });
+      
+      // Améliorer les badges
+      const badges = document.querySelectorAll('.badge');
+      badges.forEach(badge => {
+        badge.style.fontWeight = '600';
+        badge.style.padding = '0.25rem 0.75rem';
+        badge.style.borderRadius = '9999px';
+        badge.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+      });
+      
+      // Badges bleus
+      const blueBadges = document.querySelectorAll('.badge.bg-blue-100');
+      blueBadges.forEach(badge => {
+        badge.style.background = 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)';
+        badge.style.color = '#1e40af';
+        badge.style.border = 'none';
+      });
+      
+      // Badges verts
+      const greenBadges = document.querySelectorAll('.badge.bg-green-100');
+      greenBadges.forEach(badge => {
+        badge.style.background = 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)';
+        badge.style.color = '#15803d';
+        badge.style.border = 'none';
+      });
+      
+      // Badges jaunes
+      const yellowBadges = document.querySelectorAll('.badge.bg-yellow-100');
+      yellowBadges.forEach(badge => {
+        badge.style.background = 'linear-gradient(135deg, #fef9c3 0%, #fef08a 100%)';
+        badge.style.color = '#854d0e';
+        badge.style.border = 'none';
+      });
+      
+      // Badges rouges
+      const redBadges = document.querySelectorAll('.badge.bg-red-100');
+      redBadges.forEach(badge => {
+        badge.style.background = 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)';
+        badge.style.color = '#b91c1c';
+        badge.style.border = 'none';
       });
       
       // Ajouter une classe spécifique pour activer les corrections CSS
@@ -75,15 +135,6 @@
         icon.style.removeProperty('fill');
       });
 
-      // Préserver les couleurs des badges
-      const coloredBadges = document.querySelectorAll('[class*="bg-blue-"], [class*="bg-green-"], [class*="bg-red-"], [class*="bg-yellow-"]');
-      coloredBadges.forEach(badge => {
-        if (badge.style.color) {
-          badge.dataset.originalColor = badge.style.color;
-        }
-        badge.style.removeProperty('color');
-      });
-
       // Force l'ajout d'une balise style pour corriger tous les cas difficiles
       let styleElement = document.getElementById('emergency-card-fix');
       if (!styleElement) {
@@ -101,6 +152,18 @@
             html[data-theme="light"] [class*="learning-item-card"] {
               background-color: #ffffff !important;
               background: #ffffff !important;
+              border-radius: 12px !important;
+              box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+              border: 1px solid rgba(0, 0, 0, 0.06) !important;
+              transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+            }
+            
+            html[data-theme="light"] .card:hover,
+            html[data-theme="light"] [class*="Card"]:hover,
+            html[data-theme="light"] [class*="-card"]:hover,
+            html[data-theme="light"] [class*="card"]:hover {
+              transform: translateY(-2px) !important;
+              box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1) !important;
             }
             
             html[data-theme="light"] .card > div,
@@ -117,11 +180,77 @@
               color: currentColor !important;
             }
             
-            html[data-theme="light"] [class*="bg-blue-"].text-white,
-            html[data-theme="light"] [class*="bg-green-"].text-white,
-            html[data-theme="light"] [class*="bg-red-"].text-white,
-            html[data-theme="light"] [class*="bg-yellow-"].text-white {
+            /* Boutons principaux */
+            html[data-theme="light"] button.bg-blue-500,
+            html[data-theme="light"] button.bg-blue-600,
+            html[data-theme="light"] [class*="primary"] {
+              background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+              box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3) !important;
               color: #ffffff !important;
+            }
+            
+            /* Cartes maîtrisées avec style spécial */
+            html[data-theme="light"] .mastered-card,
+            html[data-theme="light"] [class*="from-emerald-50"] {
+              background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%) !important;
+              border-color: #6ee7b7 !important;
+              box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15) !important;
+            }
+            
+            /* Badges améliorés */
+            html[data-theme="light"] .badge {
+              font-weight: 600 !important;
+              padding: 0.25rem 0.75rem !important;
+              border-radius: 9999px !important;
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+            }
+            
+            html[data-theme="light"] .badge.bg-blue-100 {
+              background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+              color: #1e40af !important;
+              border: none !important;
+            }
+            
+            html[data-theme="light"] .badge.bg-green-100 {
+              background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%) !important;
+              color: #15803d !important;
+              border: none !important;
+            }
+            
+            html[data-theme="light"] .badge.bg-yellow-100 {
+              background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%) !important;
+              color: #854d0e !important;
+              border: none !important;
+            }
+            
+            html[data-theme="light"] .badge.bg-red-100 {
+              background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+              color: #b91c1c !important;
+              border: none !important;
+            }
+            
+            /* Amélioration des titres */
+            html[data-theme="light"] h1,
+            html[data-theme="light"] h2,
+            html[data-theme="light"] h3 {
+              color: hsl(222, 95%, 18%) !important;
+              font-weight: 700 !important;
+            }
+            
+            /* Style pour les formulaires */
+            html[data-theme="light"] input,
+            html[data-theme="light"] textarea,
+            html[data-theme="light"] select {
+              border: 1px solid rgba(0, 0, 0, 0.1) !important;
+              border-radius: 8px !important;
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+            }
+            
+            html[data-theme="light"] input:focus,
+            html[data-theme="light"] textarea:focus,
+            html[data-theme="light"] select:focus {
+              border-color: #3b82f6 !important;
+              box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
             }
           }
         `;
@@ -130,17 +259,8 @@
     } else if (!isLightMode && isMobile) {
       // Mode sombre sur mobile - s'assurer qu'il est correctement appliqué
       document.documentElement.classList.remove('mobile-light-theme-active');
-      document.body.style.removeProperty('background-color');
-      document.documentElement.style.removeProperty('background-color');
-      
-      // Restaurer les couleurs d'origine pour les badges
-      const coloredBadges = document.querySelectorAll('[data-original-color]');
-      coloredBadges.forEach(badge => {
-        if (badge.dataset.originalColor) {
-          badge.style.color = badge.dataset.originalColor;
-          delete badge.dataset.originalColor;
-        }
-      });
+      document.body.style.removeProperty('background');
+      document.documentElement.style.removeProperty('background');
       
       // Supprimer le style d'urgence
       const styleElement = document.getElementById('emergency-card-fix');

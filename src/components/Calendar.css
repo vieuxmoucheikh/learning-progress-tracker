@@ -1,0 +1,290 @@
+/* Styles améliorés pour le calendrier */
+
+/* Conteneur principal du calendrier */
+.calendar-container {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Améliorations spécifiques pour le mode clair */
+html[data-theme="light"] .calendar-container,
+html[data-theme="light"] [class*="calendar"] {
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* En-tête de calendrier en mode clair */
+html[data-theme="light"] .calendar-header,
+html[data-theme="light"] [class*="calendar-header"] {
+  background: linear-gradient(to right, #f8fafc, #f1f5f9);
+  padding: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Titre du calendrier en mode clair */
+html[data-theme="light"] .calendar-title,
+html[data-theme="light"] [class*="calendar-title"] {
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+/* Boutons de navigation du calendrier en mode clair */
+html[data-theme="light"] .calendar-nav-button,
+html[data-theme="light"] [class*="calendar"] button {
+  background-color: #f8fafc;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  color: #0f172a;
+  transition: all 0.2s ease;
+}
+
+html[data-theme="light"] .calendar-nav-button:hover,
+html[data-theme="light"] [class*="calendar"] button:hover {
+  background-color: #f1f5f9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* En-têtes des jours de la semaine en mode clair */
+html[data-theme="light"] .calendar-weekdays,
+html[data-theme="light"] [class*="calendar"] th {
+  color: #64748b;
+  font-weight: 600;
+  padding: 0.5rem;
+  text-align: center;
+  background-color: #f8fafc;
+}
+
+/* Cellules du calendrier en mode clair */
+html[data-theme="light"] .calendar-day,
+html[data-theme="light"] [class*="calendar"] td {
+  text-align: center;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+/* Jour actuel mis en évidence en mode clair */
+html[data-theme="light"] .calendar-today,
+html[data-theme="light"] [class*="calendar"] [class*="today"] {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+}
+
+/* Jours avec activité en mode clair */
+html[data-theme="light"] .calendar-has-activity,
+html[data-theme="light"] [class*="calendar"] [class*="activity"] {
+  position: relative;
+}
+
+html[data-theme="light"] .calendar-has-activity::after,
+html[data-theme="light"] [class*="calendar"] [class*="activity"]::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #3b82f6;
+}
+
+/* Jours avec beaucoup d'activité en mode clair */
+html[data-theme="light"] .calendar-has-many-activities::after,
+html[data-theme="light"] [class*="calendar"] [class*="many-activities"]::after {
+  background-color: #8b5cf6; /* Violet pour indiquer plus d'activités */
+  width: 8px;
+  height: 8px;
+}
+
+/* Jours sélectionnés en mode clair */
+html[data-theme="light"] .calendar-selected,
+html[data-theme="light"] [class*="calendar"] [class*="selected"] {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+/* Jours désactivés en mode clair */
+html[data-theme="light"] .calendar-disabled,
+html[data-theme="light"] [class*="calendar"] [class*="disabled"] {
+  color: #cbd5e1;
+  background-color: #f8fafc;
+  cursor: not-allowed;
+}
+
+/* Styles pour la zone d'affichage des événements/activités en mode clair */
+html[data-theme="light"] .calendar-events,
+html[data-theme="light"] [class*="calendar"] [class*="events"] {
+  background-color: #ffffff;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+}
+
+html[data-theme="light"] .calendar-event,
+html[data-theme="light"] [class*="calendar"] [class*="event"] {
+  background-color: #f8fafc;
+  border-left: 3px solid #3b82f6;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: 0 6px 6px 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+html[data-theme="light"] .calendar-event:hover,
+html[data-theme="light"] [class*="calendar"] [class*="event"]:hover {
+  background-color: #f1f5f9;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Adaptation pour les appareils mobiles */
+@media (max-width: 768px) {
+  html[data-theme="light"] .calendar-container,
+  html[data-theme="light"] [class*="calendar"] {
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  
+  html[data-theme="light"] .calendar-header,
+  html[data-theme="light"] [class*="calendar-header"] {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 1rem 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  html[data-theme="light"] .calendar-title,
+  html[data-theme="light"] [class*="calendar-title"] {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  
+  html[data-theme="light"] .calendar-nav-button,
+  html[data-theme="light"] [class*="calendar"] button {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Style amélioré pour les jours sur mobile */
+  html[data-theme="light"] [class*="calendar"] [role="gridcell"] button,
+  html[data-theme="light"] [class*="calendar"] td button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-weight: 500;
+  }
+  
+  /* Jour sélectionné plus visible sur mobile */
+  html[data-theme="light"] [class*="calendar"] [role="gridcell"] button[data-state="active"],
+  html[data-theme="light"] [class*="calendar"] td button.selected {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+    font-weight: 700;
+  }
+  
+  /* Correction spécifique pour le calendrier sur les petits écrans */
+  html[data-theme="light"] [class*="calendar"] table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+  }
+  
+  html[data-theme="light"] [class*="calendar"] th,
+  html[data-theme="light"] [class*="calendar"] td {
+    padding: 0.4rem 0;
+    text-align: center;
+  }
+  
+  html[data-theme="light"] [class*="calendar"] th {
+    font-weight: 600;
+    color: #64748b;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+/* Améliorations pour le mode sombre également */
+html[data-theme="dark"] .calendar-container,
+html[data-theme="dark"] [class*="calendar"] {
+  background-color: #1e293b; /* slate-800 */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme="dark"] .calendar-header,
+html[data-theme="dark"] [class*="calendar-header"] {
+  background-color: #0f172a; /* slate-900 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html[data-theme="dark"] .calendar-title,
+html[data-theme="dark"] [class*="calendar-title"] {
+  color: #f8fafc; /* slate-50 */
+}
+
+html[data-theme="dark"] .calendar-nav-button,
+html[data-theme="dark"] [class*="calendar"] button {
+  background-color: #334155; /* slate-700 */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f8fafc; /* slate-50 */
+}
+
+html[data-theme="dark"] .calendar-selected,
+html[data-theme="dark"] [class*="calendar"] [class*="selected"] {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+}
+
+/* Amélioration de l'apparence pour les weekends et jours spéciaux */
+html[data-theme="light"] .calendar-weekend,
+html[data-theme="light"] [class*="calendar"] [class*="weekend"] {
+  color: #ef4444; /* red-500 */
+}
+
+html[data-theme="light"] .calendar-special,
+html[data-theme="light"] [class*="calendar"] [class*="special"] {
+  background-color: #fef3c7; /* amber-100 */
+  color: #92400e; /* amber-800 */
+}
+
+/* Styles pour les indicateurs de productivité en mode clair */
+html[data-theme="light"] .calendar-productivity-high,
+html[data-theme="light"] [class*="calendar"] [class*="productivity-high"] {
+  background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%); /* green-200 to green-300 */
+  color: #166534; /* green-800 */
+}
+
+html[data-theme="light"] .calendar-productivity-medium,
+html[data-theme="light"] [class*="calendar"] [class*="productivity-medium"] {
+  background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%); /* blue-200 to blue-300 */
+  color: #1e40af; /* blue-800 */
+}
+
+html[data-theme="light"] .calendar-productivity-low,
+html[data-theme="light"] [class*="calendar"] [class*="productivity-low"] {
+  background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%); /* orange-200 to orange-300 */
+  color: #9a3412; /* orange-800 */
+}

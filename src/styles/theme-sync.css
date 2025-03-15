@@ -23,10 +23,10 @@ html.theme-transitioning * {
 html[data-theme="light"] {
   --card-bg: 255 255 255;
   --card-border: 226 232 240;
-  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   
   /* Textes */
-  --text-heading: 15 23 42;
+  --text-heading: 222 95 18;
   --text-body: 51 65 85;
   --text-muted: 100 116 139;
   

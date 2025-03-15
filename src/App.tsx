@@ -24,6 +24,15 @@ import { createDeck } from './lib/flashcards';
 import { supabase } from './lib/supabase';
 import { toast } from '@/components/ui/use-toast';
 
+// Importer les fichiers CSS pour les améliorations visuelles
+import './styles/critical-light-mode-fixes.css';
+import './styles/global-ui-enhancements.css';
+import './styles/responsive-fixes.css';
+import './components/LearningItemCard.css';
+import './components/Calendar.css';
+import './components/StatusBadge.css';
+import './components/PomodoroTimer.css';
+
 interface State {
   items: LearningItem[];
   loading: boolean;

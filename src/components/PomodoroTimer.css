@@ -1,0 +1,274 @@
+/* Styles améliorés pour le Timer Pomodoro */
+
+/* Style de base du conteneur */
+.pomodoro-container {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* Améliorations pour le mode clair */
+html[data-theme="light"] .pomodoro-container,
+html[data-theme="light"] [class*="pomodoro"] {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* En-tête du timer en mode clair */
+html[data-theme="light"] .pomodoro-header,
+html[data-theme="light"] [class*="pomodoro-header"] {
+  background: linear-gradient(to right, #f8fafc, #f1f5f9);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 1rem;
+}
+
+/* Titre du timer en mode clair */
+html[data-theme="light"] .pomodoro-title,
+html[data-theme="light"] [class*="pomodoro-title"] {
+  color: #0f172a; /* slate-900 */
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+/* Corps du timer en mode clair */
+html[data-theme="light"] .pomodoro-body,
+html[data-theme="light"] [class*="pomodoro-body"] {
+  padding: 1.5rem;
+}
+
+/* Affichage du temps en mode clair */
+html[data-theme="light"] .pomodoro-display,
+html[data-theme="light"] [class*="pomodoro-display"],
+html[data-theme="light"] [class*="timer-display"] {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #0f172a; /* slate-900 */
+  border-radius: 8px;
+  padding: 1.5rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+  font-variant-numeric: tabular-nums;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Timer en cours en mode clair */
+html[data-theme="light"] .pomodoro-active .pomodoro-display,
+html[data-theme="light"] [class*="pomodoro-active"] [class*="timer-display"] {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af; /* blue-800 */
+  animation: pulse 2s infinite;
+}
+
+/* Timer en pause en mode clair */
+html[data-theme="light"] .pomodoro-paused .pomodoro-display,
+html[data-theme="light"] [class*="pomodoro-paused"] [class*="timer-display"] {
+  background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
+  color: #854d0e; /* yellow-800 */
+}
+
+/* Timer terminé en mode clair */
+html[data-theme="light"] .pomodoro-completed .pomodoro-display,
+html[data-theme="light"] [class*="pomodoro-completed"] [class*="timer-display"] {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #15803d; /* green-700 */
+}
+
+/* Contrôles du timer en mode clair */
+html[data-theme="light"] .pomodoro-controls,
+html[data-theme="light"] [class*="pomodoro-controls"] {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Boutons du timer en mode clair */
+html[data-theme="light"] .pomodoro-button,
+html[data-theme="light"] [class*="pomodoro"] button {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  color: #0f172a; /* slate-900 */
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+html[data-theme="light"] .pomodoro-button:hover,
+html[data-theme="light"] [class*="pomodoro"] button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Bouton de démarrage en mode clair */
+html[data-theme="light"] .pomodoro-start,
+html[data-theme="light"] [class*="pomodoro-start"],
+html[data-theme="light"] [class*="pomodoro"] [class*="start"] {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3);
+}
+
+/* Bouton de pause en mode clair */
+html[data-theme="light"] .pomodoro-pause,
+html[data-theme="light"] [class*="pomodoro-pause"],
+html[data-theme="light"] [class*="pomodoro"] [class*="pause"] {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+}
+
+/* Bouton de réinitialisation en mode clair */
+html[data-theme="light"] .pomodoro-reset,
+html[data-theme="light"] [class*="pomodoro-reset"],
+html[data-theme="light"] [class*="pomodoro"] [class*="reset"] {
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  color: white;
+  box-shadow: 0 2px 10px rgba(225, 29, 72, 0.3);
+}
+
+/* Animation de pulsation pour le timer actif */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* Sélecteur de mode en mode clair */
+html[data-theme="light"] .pomodoro-mode-selector,
+html[data-theme="light"] [class*="pomodoro-mode-selector"] {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+html[data-theme="light"] .pomodoro-mode-button,
+html[data-theme="light"] [class*="pomodoro-mode-button"] {
+  background-color: #f1f5f9; /* slate-100 */
+  color: #475569; /* slate-600 */
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+html[data-theme="light"] .pomodoro-mode-button.active,
+html[data-theme="light"] [class*="pomodoro-mode-button"][aria-selected="true"] {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+}
+
+/* Statistiques en mode clair */
+html[data-theme="light"] .pomodoro-stats,
+html[data-theme="light"] [class*="pomodoro-stats"] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme="light"] .pomodoro-stat,
+html[data-theme="light"] [class*="pomodoro-stat"] {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme="light"] .pomodoro-stat-value,
+html[data-theme="light"] [class*="pomodoro-stat-value"] {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a; /* slate-900 */
+  margin-bottom: 0.25rem;
+}
+
+html[data-theme="light"] .pomodoro-stat-label,
+html[data-theme="light"] [class*="pomodoro-stat-label"] {
+  font-size: 0.75rem;
+  color: #64748b; /* slate-500 */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Adaptations pour les appareils mobiles */
+@media (max-width: 768px) {
+  html[data-theme="light"] .pomodoro-container,
+  html[data-theme="light"] [class*="pomodoro"] {
+    border-radius: 16px;
+    margin-bottom: 1rem;
+  }
+  
+  html[data-theme="light"] .pomodoro-display,
+  html[data-theme="light"] [class*="timer-display"] {
+    font-size: 2rem;
+    padding: 1.25rem;
+  }
+  
+  html[data-theme="light"] .pomodoro-controls,
+  html[data-theme="light"] [class*="pomodoro-controls"] {
+    flex-wrap: wrap;
+  }
+  
+  html[data-theme="light"] .pomodoro-button,
+  html[data-theme="light"] [class*="pomodoro"] button {
+    flex: 1 0 auto;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  html[data-theme="light"] .pomodoro-stats,
+  html[data-theme="light"] [class*="pomodoro-stats"] {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Améliorations pour le mode sombre */
+html[data-theme="dark"] .pomodoro-container,
+html[data-theme="dark"] [class*="pomodoro"] {
+  background-color: #1e293b; /* slate-800 */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme="dark"] .pomodoro-header,
+html[data-theme="dark"] [class*="pomodoro-header"] {
+  background-color: #0f172a; /* slate-900 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+html[data-theme="dark"] .pomodoro-title,
+html[data-theme="dark"] [class*="pomodoro-title"] {
+  color: #f8fafc; /* slate-50 */
+}
+
+html[data-theme="dark"] .pomodoro-display,
+html[data-theme="dark"] [class*="timer-display"] {
+  background-color: #334155; /* slate-700 */
+  color: #f8fafc; /* slate-50 */
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme="dark"] .pomodoro-button,
+html[data-theme="dark"] [class*="pomodoro"] button {
+  background-color: #334155; /* slate-700 */
+  color: #f8fafc; /* slate-50 */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}

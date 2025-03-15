@@ -22,7 +22,7 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -72,23 +72,32 @@
 
   /* Variables plus claires et distinctes pour le mode clair */
   :root[data-theme="light"] {
-    --background: 248 250 252; /* slate-50 - fond plus clair */
-    --foreground: 15 23 42; /* slate-900 - texte plus foncé */
+    --background: 210 40% 98%; /* Fond plus clair et légèrement bleuté */
+    --foreground: 222.2 95% 4.9%; /* Texte très foncé pour contraste */
     
-    --card: 255 255 255; /* white - cartes en blanc pur */
-    --card-foreground: 15 23 42; /* slate-900 - texte de carte foncé */
+    --card: 0 0% 100%; /* Cartes en blanc pur */
+    --card-foreground: 222.2 95% 4.9%; /* Texte foncé sur cartes */
     
-    --border: 226 232 240; /* slate-200 - bordures plus visibles */
-    --input: 248 250 252; /* slate-50 - fond d'input légèrement teinté */
+    --border: 214.3 31.8% 91.4%; /* Bordures légères mais visibles */
+    --input: 210 40% 98%; /* Fond d'input légèrement teinté */
     
-    /* Couleurs primaires plus vives pour meilleure visibilité */
-    --primary: 37 99 235; /* blue-600 */
-    --primary-foreground: 255 255 255; /* white */
+    /* Couleurs primaires plus vives */
+    --primary: 221.2 83.2% 53.3%; /* Bleu vif */
+    --primary-foreground: 0 0% 100%; /* Texte blanc sur primaire */
     
-    --secondary: 241 245 249; /* slate-100 */
-    --secondary-foreground: 30 58 138; /* blue-800 */
+    --secondary: 213 100% 96%; /* Bleu très clair */
+    --secondary-foreground: 217 91% 30%; /* Bleu foncé pour contraste */
     
-    --ring: 59 130 246; /* blue-500 */
+    --accent: 262 83% 58%; /* Violet accent */
+    --accent-foreground: 0 0% 100%; /* Blanc sur accent */
+    
+    --muted: 210 40% 96.1%; /* Gris bleuté clair */
+    --muted-foreground: 215.4 16.3% 46.9%; /* Gris moyen */
+    
+    --destructive: 0 84.2% 60.2%; /* Rouge vif */
+    --destructive-foreground: 0 0% 100%; /* Blanc sur destructive */
+    
+    --ring: 221.2 83.2% 53.3%; /* Anneau de focus bleu */
   }
 }
 

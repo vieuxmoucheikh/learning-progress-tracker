@@ -139,3 +139,199 @@ html[data-theme="dark"] .badge.dark\:bg-blue-800\/30 { color: #93c5fd !important
 html[data-theme="dark"] .badge.dark\:bg-green-800\/30 { color: #86efac !important; } /* green-300 */
 html[data-theme="dark"] .badge.dark\:bg-yellow-800\/30 { color: #fde047 !important; } /* yellow-300 */
 html[data-theme="dark"] .badge.dark\:bg-red-800\/30 { color: #fca5a5 !important; } /* red-300 */
+
+/* Styles améliorés pour les cartes d'apprentissage */
+
+/* Styles de base pour toutes les cartes */
+.learning-item-card,
+[class*="learning-item-card"],
+[class*="learning-card"] {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+/* Effet au survol pour toutes les cartes */
+.learning-item-card:hover,
+[class*="learning-item-card"]:hover,
+[class*="learning-card"]:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Styles spécifiques pour le mode clair */
+@media (min-width: 769px) {
+  /* Styles pour bureau - mode clair */
+  html[data-theme="light"] .card,
+  html[data-theme="light"] [class*="learning-item-card"],
+  html[data-theme="light"] [class*="learning-card"] {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+  }
+  
+  html[data-theme="light"] .card h3,
+  html[data-theme="light"] .card [class*="title"],
+  html[data-theme="light"] [class*="learning-item-card"] h3,
+  html[data-theme="light"] [class*="learning-item-card"] [class*="title"],
+  html[data-theme="light"] [class*="learning-card"] h3,
+  html[data-theme="light"] [class*="learning-card"] [class*="title"] {
+    color: #0f172a !important;
+    font-weight: 700;
+  }
+  
+  /* Texte principal en mode clair */
+  html[data-theme="light"] .card p,
+  html[data-theme="light"] [class*="learning-item-card"] p,
+  html[data-theme="light"] [class*="learning-card"] p {
+    color: #334155 !important;
+  }
+  
+  /* Métadonnées et textes secondaires en mode clair */
+  html[data-theme="light"] .card [class*="metadata"],
+  html[data-theme="light"] .card [class*="text-gray"],
+  html[data-theme="light"] [class*="learning-item-card"] [class*="metadata"],
+  html[data-theme="light"] [class*="learning-item-card"] [class*="text-gray"] {
+    color: #475569 !important;
+  }
+}
+
+/* Styles spécifiques pour mobile */
+@media (max-width: 768px) {
+  /* Styles pour mobile - mode clair */
+  html[data-theme="light"] .card,
+  html[data-theme="light"] [class*="learning-item-card"],
+  html[data-theme="light"] [class*="learning-card"] {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    margin-bottom: 1rem;
+  }
+  
+  html[data-theme="light"] .card h3,
+  html[data-theme="light"] [class*="learning-item-card"] h3,
+  html[data-theme="light"] [class*="learning-card"] h3,
+  html[data-theme="light"] .card [class*="title"],
+  html[data-theme="light"] [class*="learning-item-card"] [class*="title"],
+  html[data-theme="light"] [class*="learning-card"] [class*="title"] {
+    color: #0f172a !important;
+    font-weight: 700;
+    font-size: 1.25rem;
+  }
+  
+  /* Badges améliorés en mode clair */
+  html[data-theme="light"] .badge {
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Couleurs spécifiques pour les badges en mode clair */
+  html[data-theme="light"] .badge.bg-blue-100 {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1e40af;
+    border: none;
+  }
+  
+  html[data-theme="light"] .badge.bg-green-100 {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    color: #15803d;
+    border: none;
+  }
+  
+  html[data-theme="light"] .badge.bg-yellow-100 {
+    background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
+    color: #854d0e;
+    border: none;
+  }
+  
+  html[data-theme="light"] .badge.bg-red-100 {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #b91c1c;
+    border: none;
+  }
+  
+  /* Styles spéciaux pour les cartes maîtrisées */
+  html[data-theme="light"] .mastered-card,
+  html[data-theme="light"] [class*="from-emerald-50"] {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%) !important;
+    border-color: #6ee7b7 !important;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15) !important;
+  }
+  
+  /* Boutons améliorés avec dégradés */
+  html[data-theme="light"] button.bg-blue-500,
+  html[data-theme="light"] button.bg-blue-600 {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3);
+    border-radius: 8px;
+  }
+  
+  html[data-theme="light"] button.bg-green-500,
+  html[data-theme="light"] button.bg-green-600 {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+    border-radius: 8px;
+  }
+  
+  html[data-theme="light"] button.bg-red-500,
+  html[data-theme="light"] button.bg-red-600 {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 2px 10px rgba(220, 38, 38, 0.3);
+    border-radius: 8px;
+  }
+}
+
+/* Styles pour différents statuts d'apprentissage en mode clair */
+html[data-theme="light"] [class*="status-not_started"] {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  color: #334155;
+}
+
+html[data-theme="light"] [class*="status-in_progress"] {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+}
+
+html[data-theme="light"] [class*="status-completed"] {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #15803d;
+}
+
+html[data-theme="light"] [class*="status-on_hold"] {
+  background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
+  color: #854d0e;
+}
+
+html[data-theme="light"] [class*="status-archived"] {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #64748b;
+}
+
+/* Styles pour les priorités en mode clair */
+html[data-theme="light"] [class*="priority-high"] {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #b91c1c;
+}
+
+html[data-theme="light"] [class*="priority-medium"] {
+  background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
+  color: #854d0e;
+}
+
+html[data-theme="light"] [class*="priority-low"] {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+}
+
+/* Préservation des couleurs d'icônes et éléments visuels */
+.preserve-colors svg,
+button svg, 
+[role="button"] svg {
+  color: currentColor !important;
+}
