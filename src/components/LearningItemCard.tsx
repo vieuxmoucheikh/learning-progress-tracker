@@ -1134,7 +1134,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   }, [item.url, item.footerUrl, isUrlEditing, isFooterUrlEditing]);
 
   return (
-    <div className="w-full">
+    <div className="learning-item-card w-full">
       <Card className={clsx(
         "relative overflow-hidden transition-all duration-200",
         "hover:shadow-lg border-l-4",
@@ -1144,7 +1144,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         {/* Card Header with gradient background */}
         <div className="bg-gradient-to-r from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 light:from-white light:via-white light:to-white light:bg-white border-b border-gray-200/80 dark:border-gray-700/80">
           <div className="p-6">
-            {/* Title Section */}
+            {/* Title Section with Action Buttons */}
             <div className="flex justify-between items-start gap-4 mb-4">
               <div className="flex-1 space-y-3">
                 {/* Title */}
@@ -1338,6 +1338,34 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                   </span>
                 </div>
               </div>
+              
+              {/* Action Buttons - Added this section */}
+              <div className="flex flex-col gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleToggleComplete}
+                  className={clsx(
+                    "gap-1 h-8 w-8 p-0 flex items-center justify-center",
+                    item.completed 
+                      ? "bg-green-50 text-green-600 border-green-200 hover:bg-green-100 hover:text-green-700 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800/30"
+                      : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-700/30"
+                  )}
+                  title={item.completed ? "Mark as incomplete" : "Mark as complete"}
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDeleteClick}
+                  className="gap-1 h-8 w-8 p-0 flex items-center justify-center bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800/30"
+                  title="Delete item"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -1378,9 +1406,19 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     <StopCircle className="h-4 w-4" />
                     Stop
                   </Button>
+                  {/* Ajout du bouton Add Note ici pour les sessions actives */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleOpenNoteDialog}
+                    className="gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 shadow-sm dark:bg-blue-800/30 dark:hover:bg-blue-900/30 dark:text-blue-300"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    Add Note
+                  </Button>
                 </div>
               ) : (
-                <div>
+                <div className="flex gap-2">
                   {!item.completed && (
                     <Button
                       variant="default"
@@ -1392,6 +1430,16 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                       Start Session
                     </Button>
                   )}
+                  {/* Ajout du bouton Add Note pour toutes les cartes */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleOpenNoteDialog}
+                    className="gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 shadow-sm dark:bg-blue-800/30 dark:hover:bg-blue-900/30 dark:text-blue-300"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    Add Note
+                  </Button>
                 </div>
               )}
             </div>
@@ -1403,17 +1451,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                     ? `Session Paused: ${displayTime}`
                     : `Current Session: ${displayTime}`}
                 </span>
-                {activeSession?.status !== 'on_hold' && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleOpenNoteDialog}
-                    className="gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30 border border-blue-200 rounded-lg shadow-sm transition-colors"
-                  >
-                    <MessageSquare className="h-4 w-4" />
-                    Add Note
-                  </Button>
-                )}
+                {/* Suppression du bouton Add Note ici pour éviter la duplication */}
               </div>
             )}
           </div>
@@ -1671,6 +1709,17 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           </DialogContent>
         </Dialog>
       </Card>
+        
+      {/* Barre de progression */}
+      <div className="progress-bar">
+        <div 
+          className="progress-fill" 
+          style={{ width: `${getProgressPercentage()}%` }}
+        ></div>
+      </div>
+      <div className="progress-text">
+        {getProgressPercentage()}% Terminé
+      </div>
     </div>
   );
 };
