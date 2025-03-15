@@ -285,6 +285,82 @@ html[data-theme="dark"] .badge.dark\:bg-red-800\/30 { color: #fca5a5 !important;
     box-shadow: 0 2px 10px rgba(220, 38, 38, 0.3);
     border-radius: 8px;
   }
+  
+  /* Fixation spécifique pour les icônes sur mobile qui perdent leur couleur */
+  button svg,
+  [role="button"] svg,
+  .icon svg,
+  [class*="lucide-"] {
+    color: currentColor !important;
+    fill: currentColor !important;
+    stroke: currentColor !important;
+    stroke-width: 2px !important;
+  }
+  
+  /* Force les styles d'icônes pour chaque type de bouton */
+  button.bg-blue-50 svg, 
+  button.bg-blue-100 svg,
+  button[class*="bg-blue"] svg,
+  [class*="text-blue"] svg {
+    color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  button.bg-green-50 svg,
+  button.bg-green-100 svg,
+  button[class*="bg-green"] svg,
+  [class*="text-green"] svg {
+    color: #10b981 !important; /* green-500 */
+  }
+  
+  button.bg-red-50 svg,
+  button.bg-red-100 svg, 
+  button[class*="bg-red"] svg,
+  [class*="text-red"] svg {
+    color: #ef4444 !important; /* red-500 */
+  }
+  
+  button.bg-yellow-50 svg,
+  button.bg-yellow-100 svg,
+  button[class*="bg-yellow"] svg,
+  [class*="text-yellow"] svg {
+    color: #f59e0b !important; /* amber-500 */
+  }
+  
+  /* Pause et Play buttons spécifiquement */
+  [class*="lucide-pause"] {
+    color: #f59e0b !important; /* amber-500 */
+  }
+  
+  [class*="lucide-play"] {
+    color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  [class*="lucide-stop-circle"] {
+    color: #ef4444 !important; /* red-500 */
+  }
+  
+  /* Force la préservation dans les badges également */
+  .badge svg,
+  .badge [class*="lucide-"] {
+    color: inherit !important;
+  }
+  
+  /* Forcer l'utilisation de couleurs spécifiques dans les sessions */
+  .text-blue-600 svg, .text-blue-400 svg, .text-blue-500 svg {
+    color: #3b82f6 !important; /* blue-500 */
+  }
+  
+  .text-green-600 svg, .text-green-400 svg, .text-green-500 svg {
+    color: #10b981 !important; /* green-500 */
+  }
+  
+  .text-yellow-600 svg, .text-yellow-400 svg, .text-yellow-500 svg {
+    color: #f59e0b !important; /* amber-500 */
+  }
+  
+  .text-red-600 svg, .text-red-400 svg, .text-red-500 svg {
+    color: #ef4444 !important; /* red-500 */
+  }
 }
 
 /* Styles pour différents statuts d'apprentissage en mode clair */
@@ -334,35 +410,14 @@ html[data-theme="light"] [class*="priority-low"] {
 button svg, 
 [role="button"] svg {
   color: currentColor !important;
+  fill: currentColor !important;
 }
 
-/* Styles pour la barre de progression */
+/* Suppression des styles liés à la barre de progression */
 .learning-item-card {
   position: relative;
   width: 100%;
   margin-bottom: 1.5rem;
-}
-
-.progress-bar {
-  height: 6px;
-  background-color: #e2e8f0;
-  border-radius: 3px;
-  overflow: hidden;
-  margin-top: 0.5rem;
-  width: 100%;
-}
-
-.progress-fill {
-  height: 100%;
-  background-color: #3b82f6;
-  transition: width 0.3s ease;
-}
-
-.progress-text {
-  text-align: right;
-  font-size: 0.75rem;
-  color: #64748b;
-  margin-top: 0.25rem;
 }
 
 /* Assurons-nous que les boutons d'action sont toujours visibles */

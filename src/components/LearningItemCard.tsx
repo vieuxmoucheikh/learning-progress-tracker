@@ -605,7 +605,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     });
   };
 
+  // Suppression des méthodes inutilisées liées à la progression
   const calculateProgress = useCallback(() => {
+    // Cette fonction peut être supprimée, mais je la laisse commentée pour référence
+    // car d'autres parties du code pourraient y faire référence
     if (!item.progress?.total) return 0;
     
     const totalSpentMinutes = calculateTotalTimeSpent(item);
@@ -613,17 +616,18 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     
     if (totalTargetMinutes === 0) return 0;
     return Math.min(Math.round((totalSpentMinutes / totalTargetMinutes) * 100), 100);
-  }, [item.progress?.total, calculateTotalTimeSpent]);
+  }, [item.progress?.total]);
 
-  const getProgressPercentage = () => {
-    if (!item.progress?.total) return 0;
-    
-    const totalSpentMinutes = calculateTotalTimeSpent(item);
-    const totalTargetMinutes = item.progress.total.minutes;
-    
-    if (totalTargetMinutes === 0) return 0;
-    return Math.min(Math.round((totalSpentMinutes / totalTargetMinutes) * 100), 100);
-  };
+  // Suppression de la fonction getProgressPercentage qui n'est plus nécessaire
+  // const getProgressPercentage = () => {
+  //   if (!item.progress?.total) return 0;
+  //   
+  //   const totalSpentMinutes = calculateTotalTimeSpent(item);
+  //   const totalTargetMinutes = item.progress.total.minutes;
+  //   
+  //   if (totalTargetMinutes === 0) return 0;
+  //   return Math.min(Math.round((totalSpentMinutes / totalTargetMinutes) * 100), 100);
+  // };
 
   const formatDuration = (duration: Time | undefined) => {
     if (!duration) return '0m';
@@ -1709,18 +1713,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           </DialogContent>
         </Dialog>
       </Card>
-        
-      {/* Barre de progression */}
-      <div className="progress-bar">
-        <div 
-          className="progress-fill" 
-          style={{ width: `${getProgressPercentage()}%` }}
-        ></div>
-      </div>
-      <div className="progress-text">
-        {getProgressPercentage()}% Terminé
-      </div>
-    </div>
+  </div>
   );
 };
 

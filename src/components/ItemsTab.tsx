@@ -16,6 +16,30 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { clsx } from "clsx";
 
+type StatusFilterType = 'all' | 'active' | 'completed';
+
+interface StatusFilterProps {
+  selectedStatus: StatusFilterType;
+  onChange: (status: StatusFilterType) => void;
+}
+
+const StatusFilter: React.FC<StatusFilterProps> = ({ selectedStatus, onChange }) => {
+  return (
+    <div className="flex items-center">
+      <CustomSelect
+        value={selectedStatus}
+        onValueChange={(value) => onChange(value as StatusFilterType)}
+        options={[
+          { value: 'all', label: 'All Items' },
+          { value: 'active', label: 'Active' },
+          { value: 'completed', label: 'Completed' }
+        ]}
+        className="w-[140px]"
+      />
+    </div>
+  );
+};
+
 interface ItemsTabProps {
   items: LearningItem[];
   onAddItem: () => void;
@@ -40,15 +64,16 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
   onSessionNoteAdd,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [filterStatus, setFilterStatus] = useState<StatusFilterType>("all");
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState("all");
-  const [newGoal, setNewGoal] = useState({
-    title: '',
-    targetDate: '',
-    targetHours: 0,
-    category: '',
-    priority: 'medium' as const,
-  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Définition de la fonction handleSearchChange qui manquait
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1); // Reset to first page when search changes
+  };
 
   // Extract unique categories from items
   const categoryOptions = useMemo(() => {
@@ -76,10 +101,9 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
         (item.category.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesStatus =
-        selectedStatus === "all" || 
-        (selectedStatus === "completed" && item.completed) ||
-        (selectedStatus === "not_started" && !item.completed && !item.progress?.current) ||
-        (selectedStatus === "in_progress" && !item.completed && item.progress?.current);
+        filterStatus === "all" || 
+        (filterStatus === "completed" && item.completed) ||
+        (filterStatus === "active" && !item.completed);
 
       const matchesCategory =
         selectedCategoryFilter === "all" ||
@@ -87,7 +111,14 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
 
       return matchesSearch && matchesStatus && matchesCategory;
     });
-  }, [items, searchQuery, selectedStatus, selectedCategoryFilter]);
+  }, [items, searchQuery, filterStatus, selectedCategoryFilter]);
+
+  // Pagination
+  const pageCount = Math.ceil(filteredItems.length / itemsPerPage);
+  const currentItems = filteredItems.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const exportToPdf = useCallback(() => {
     const element = document.createElement('div');
@@ -219,12 +250,36 @@ export const ItemsTab: React.FC<ItemsTabProps> = ({
           </div>
         )}
         
-        {filteredItems.length > 0 && (
+        {filteredItems.length > 0 && pageCount > 1 && (
           <div className="pagination-controls flex justify-center mt-6">
-            {/* ...existing code... */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                Page {currentPage} of {pageCount}
+              </span>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(Math.min(pageCount, currentPage + 1))}
+                disabled={currentPage === pageCount}
+              >
+                Next
+              </Button>
+            </div>
           </div>
         )}
       </div>
     </div>
   );
 };
+
+export default ItemsTab;
