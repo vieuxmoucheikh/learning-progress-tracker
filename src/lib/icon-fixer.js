@@ -1,131 +1,251 @@
 /**
- * SCRIPT DE CORRECTION D'ICÔNES SVG POUR LES LEARNING ITEM CARDS
+ * SCRIPT DE CORRECTION D'URGENCE POUR LES ICÔNES SVG
  * 
- * Ce script applique des corrections directement au DOM pour les icônes SVG
- * dans les cartes d'items d'apprentissage.
+ * Ce script applique des corrections directement au DOM pour toutes les icônes
+ * avec une attention particulière pour les learning item cards.
  */
 
 export function fixSvgIcons() {
-  function fixIcons() {
-    // On ne s'exécute que si nous sommes en mode sombre
-    if (document.documentElement.getAttribute('data-theme') !== 'dark') {
-      return;
+  // Styles inline pour assurer la priorité maximale
+  const emergencyStyles = `
+    /* Styles inline d'urgence pour SVG */
+    .learning-item-card svg, 
+    .item-wrapper svg,
+    .card svg,
+    svg[data-lucide] {
+      fill: none !important;
+      stroke: currentColor !important;
+      stroke-width: 2.5px !important;
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
     }
     
-    // Sélectionner toutes les icônes SVG dans les learning item cards
-    const cardSvgs = document.querySelectorAll('.learning-item-card svg, .item-wrapper svg');
+    .learning-item-card svg *, 
+    .item-wrapper svg *,
+    .card svg *,
+    svg[data-lucide] * {
+      fill: none !important;
+      stroke: inherit !important;
+    }
     
-    // Appliquer les corrections à chaque SVG
-    cardSvgs.forEach(svg => {
-      // Réinitialiser les attributs de style de base
-      svg.setAttribute('fill', 'none');
-      svg.setAttribute('stroke', 'currentColor');
-      svg.setAttribute('stroke-width', '2.5');
-      svg.setAttribute('stroke-linecap', 'round');
-      svg.setAttribute('stroke-linejoin', 'round');
+    .text-red-500 svg, .text-red-600 svg, [class*="text-red-"] svg {
+      stroke: #ef4444 !important;
+    }
+    
+    .text-blue-500 svg, .text-blue-600 svg, [class*="text-blue-"] svg {
+      stroke: #3b82f6 !important;
+    }
+    
+    .text-green-500 svg, .text-green-600 svg, [class*="text-green-"] svg {
+      stroke: #22c55e !important;
+    }
+    
+    .text-yellow-500 svg, .text-yellow-600 svg, [class*="text-yellow-"] svg {
+      stroke: #facc15 !important;
+    }
+    
+    svg[data-lucide="Trophy"], .lucide-trophy {
+      stroke: #facc15 !important;
+    }
+    
+    svg[data-lucide="Trophy"] path[fill="currentColor"], 
+    .lucide-trophy path[fill="currentColor"] {
+      fill: #facc15 !important;
+    }
+  `;
+
+  // Créer et injecter un élément style pour les styles d'urgence
+  function injectEmergencyStyles() {
+    // Supprimer tout style d'urgence existant
+    const existingStyle = document.getElementById('svg-emergency-styles');
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+    
+    // Créer un nouveau style
+    const style = document.createElement('style');
+    style.id = 'svg-emergency-styles';
+    style.innerHTML = emergencyStyles;
+    document.head.appendChild(style);
+  }
+
+  function fixIcons() {
+    // Cibler toutes les icônes SVG dans l'application
+    const allSvgs = document.querySelectorAll('svg');
+    
+    allSvgs.forEach(svg => {
+      // Ajouter un attribut pour marquer que nous avons traité cette icône
+      svg.setAttribute('data-emergency-fix', 'true');
       
-      // Réinitialiser tous les chemins à l'intérieur du SVG
-      const paths = svg.querySelectorAll('path, line, polyline, circle, rect, polygon');
-      paths.forEach(path => {
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke', 'inherit');
+      // Fixer les attributs directement
+      svg.style.fill = 'none';
+      svg.style.stroke = 'currentColor';
+      svg.style.strokeWidth = '2.5px';
+      svg.style.strokeLinecap = 'round';
+      svg.style.strokeLinejoin = 'round';
+      
+      // Fixer tous les éléments enfants
+      const allPaths = svg.querySelectorAll('path, line, circle, rect, polyline, polygon');
+      allPaths.forEach(path => {
+        path.style.fill = 'none';
+        path.style.stroke = 'inherit';
       });
       
-      // Cas spécial pour l'icône Trophy
+      // Cas spécial pour Trophy
       if (svg.getAttribute('data-lucide') === 'Trophy') {
+        svg.style.stroke = '#facc15';
+        const paths = svg.querySelectorAll('path');
         paths.forEach(path => {
           if (path.getAttribute('fill') === 'currentColor') {
-            path.setAttribute('fill', '#facc15');
+            path.style.fill = '#facc15';
           } else {
-            path.setAttribute('fill', 'none');
+            path.style.fill = 'none';
           }
         });
       }
       
-      // Forcer un repaint de l'icône
+      // Forcer un repaint
       const display = svg.style.display;
       svg.style.display = 'none';
-      void svg.offsetHeight; // Force reflow
+      void svg.offsetHeight; // force reflow
       svg.style.display = display;
     });
     
-    // Corrections spécifiques pour les icônes avec des couleurs spéciales
-    fixColoredIcons();
+    // Appliquer des corrections spécifiques aux cards
+    fixCardIcons();
   }
   
-  function fixColoredIcons() {
-    // Identifier les boutons colorés et appliquer les bonnes couleurs
-    const redButtons = document.querySelectorAll('.learning-item-card .text-red-500 svg, .learning-item-card .text-red-600 svg, .learning-item-card [class*="text-red-"] svg');
-    redButtons.forEach(svg => {
-      svg.setAttribute('stroke', '#ef4444');
-      svg.setAttribute('fill', 'none');
-    });
+  function fixCardIcons() {
+    // Cibler spécifiquement les SVG dans les learning item cards
+    const cardIcons = document.querySelectorAll('.learning-item-card svg, .item-wrapper svg, .card svg');
     
-    const greenButtons = document.querySelectorAll('.learning-item-card .text-green-500 svg, .learning-item-card .text-green-600 svg, .learning-item-card [class*="text-green-"] svg');
-    greenButtons.forEach(svg => {
-      svg.setAttribute('stroke', '#22c55e');
-      svg.setAttribute('fill', 'none');
-    });
-    
-    const blueButtons = document.querySelectorAll('.learning-item-card .text-blue-500 svg, .learning-item-card .text-blue-600 svg, .learning-item-card [class*="text-blue-"] svg');
-    blueButtons.forEach(svg => {
-      svg.setAttribute('stroke', '#3b82f6');
-      svg.setAttribute('fill', 'none');
-    });
-    
-    const yellowButtons = document.querySelectorAll('.learning-item-card .text-yellow-500 svg, .learning-item-card .text-yellow-600 svg, .learning-item-card [class*="text-yellow-"] svg');
-    yellowButtons.forEach(svg => {
-      svg.setAttribute('stroke', '#facc15');
-      svg.setAttribute('fill', 'none');
-    });
-    
-    // Correction spécifique pour les trophées
-    const trophyIcons = document.querySelectorAll('.learning-item-card svg[data-lucide="Trophy"]');
-    trophyIcons.forEach(svg => {
-      svg.setAttribute('stroke', '#facc15');
-      const paths = svg.querySelectorAll('path');
-      paths.forEach(path => {
-        if (path.getAttribute('fill') === 'currentColor') {
-          path.setAttribute('fill', '#facc15');
-        } else {
-          path.setAttribute('fill', 'none');
+    cardIcons.forEach(svg => {
+      // Appliquer directement les styles via l'attribut style (priorité plus élevée)
+      svg.setAttribute('style', 'fill: none !important; stroke: currentColor !important; stroke-width: 2.5px !important; stroke-linecap: round !important; stroke-linejoin: round !important;');
+      
+      // Gérer les couleurs des icônes
+      const parentEl = svg.closest('[class*="text-"]');
+      if (parentEl) {
+        if (parentEl.className.includes('text-red')) {
+          svg.style.stroke = '#ef4444';
+        } else if (parentEl.className.includes('text-blue')) {
+          svg.style.stroke = '#3b82f6';
+        } else if (parentEl.className.includes('text-green')) {
+          svg.style.stroke = '#22c55e';
+        } else if (parentEl.className.includes('text-yellow')) {
+          svg.style.stroke = '#facc15';
         }
+      }
+      
+      // Tous les éléments enfants doivent hériter du style stroke mais pas de fill
+      const allChildren = svg.querySelectorAll('*');
+      allChildren.forEach(child => {
+        child.setAttribute('style', 'fill: none !important; stroke: inherit !important;');
       });
     });
   }
   
-  // Application immédiate
-  fixIcons();
+  // Fonction pour recréer les icônes problématiques
+  function recreateIcons() {
+    // Trouver toutes les icônes dans les learning item cards
+    const cardIcons = document.querySelectorAll('.learning-item-card svg, .item-wrapper svg');
+    
+    cardIcons.forEach(svg => {
+      // Sauvegarder les informations de l'icône
+      const parent = svg.parentNode;
+      const iconType = svg.getAttribute('data-lucide');
+      const classes = svg.getAttribute('class');
+      
+      // Recréer l'élément SVG
+      if (iconType && parent) {
+        // Clone le nœud pour préserver tous les attributs
+        const newSvg = svg.cloneNode(true);
+        
+        // Appliquer les styles corrects
+        newSvg.setAttribute('style', 'fill: none !important; stroke: currentColor !important; stroke-width: 2.5px !important; stroke-linecap: round !important; stroke-linejoin: round !important;');
+        
+        // Remplacer l'ancien SVG par le nouveau
+        parent.replaceChild(newSvg, svg);
+        
+        // Appliquer des styles spécifiques aux enfants
+        const allChildren = newSvg.querySelectorAll('*');
+        allChildren.forEach(child => {
+          child.setAttribute('style', 'fill: none !important; stroke: inherit !important;');
+        });
+      }
+    });
+  }
   
-  // Surveiller les modifications du DOM pour corriger les nouvelles icônes
+  // Injecter les styles d'urgence
+  injectEmergencyStyles();
+  
+  // Appliquer les corrections immédiatement
+  fixIcons();
+  recreateIcons();
+  
+  // Créer un observer pour surveiller les modifications du DOM
   const observer = new MutationObserver(mutations => {
     let shouldFix = false;
+    let shouldRecreate = false;
     
     mutations.forEach(mutation => {
+      // Si des nœuds sont ajoutés, vérifier s'il y a des SVG
       if (mutation.addedNodes.length) {
-        shouldFix = true;
+        mutation.addedNodes.forEach(node => {
+          // Vérifier si c'est un élément DOM et s'il contient ou est un SVG
+          if (node.nodeType === 1) { // ELEMENT_NODE
+            if (node.tagName === 'SVG' || node.querySelector('svg')) {
+              shouldFix = true;
+              
+              // Si c'est dans une card, on le recrée aussi
+              if (node.closest('.learning-item-card') || node.closest('.item-wrapper')) {
+                shouldRecreate = true;
+              }
+            }
+          }
+        });
+      }
+      
+      // Vérifier si un attribut a été modifié
+      if (mutation.type === 'attributes') {
+        const target = mutation.target;
+        if (target.tagName === 'SVG' || target.closest('svg')) {
+          shouldFix = true;
+          
+          // Si c'est dans une card, on le recrée aussi
+          if (target.closest('.learning-item-card') || target.closest('.item-wrapper')) {
+            shouldRecreate = true;
+          }
+        }
       }
     });
     
+    // Appliquer les corrections si nécessaire
     if (shouldFix) {
       fixIcons();
     }
+    
+    if (shouldRecreate) {
+      recreateIcons();
+    }
   });
   
-  // Observer tout le document
+  // Observer tout le document pour les modifications
   observer.observe(document.body, {
     childList: true,
-    subtree: true
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['class', 'style', 'data-lucide']
   });
   
-  // Réappliquer périodiquement pour s'assurer que toutes les icônes sont corrigées
-  const interval = setInterval(fixIcons, 1000);
-  
-  // Observer les changements de thème
+  // Surveiller aussi les changements de thème
   const themeObserver = new MutationObserver(mutations => {
     mutations.forEach(mutation => {
       if (mutation.attributeName === 'data-theme') {
+        // Réinjecter les styles et réappliquer toutes les corrections
+        injectEmergencyStyles();
         fixIcons();
+        recreateIcons();
       }
     });
   });
@@ -135,10 +255,21 @@ export function fixSvgIcons() {
     attributeFilter: ['data-theme']
   });
   
-  // Fournir une fonction de nettoyage
+  // Réappliquer périodiquement pour s'assurer que tout fonctionne
+  const interval = setInterval(() => {
+    fixIcons();
+    recreateIcons();
+  }, 2000);
+  
+  // Fonction de nettoyage
   return () => {
     observer.disconnect();
     themeObserver.disconnect();
     clearInterval(interval);
+    
+    const style = document.getElementById('svg-emergency-styles');
+    if (style) {
+      style.remove();
+    }
   };
 }

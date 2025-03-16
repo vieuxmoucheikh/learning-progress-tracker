@@ -1409,3 +1409,135 @@ html[data-theme="dark"] .learning-item-card [class*="text-yellow-"] svg {
   display: inline-block !important;
   visibility: visible !important;
 }
+
+/**
+ * CORRECTIFS D'ICÔNES SVG POUR LES LEARNING ITEM CARDS
+ */
+
+/* Correctifs de base pour tous les SVG dans les learning item cards */
+.learning-item-card svg,
+.item-wrapper svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+
+/* Correctifs pour les SVG dans les boutons */
+.learning-item-card button svg,
+.item-wrapper button svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+}
+
+/* Correctifs pour les icônes Lucide */
+.learning-item-card [data-lucide],
+.item-wrapper [data-lucide],
+.learning-item-card .lucide,
+.item-wrapper .lucide {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+}
+
+/* Correctifs pour les chemins à l'intérieur des SVG */
+.learning-item-card svg * {
+  fill: none !important;
+  stroke: inherit !important;
+}
+
+/* Correctifs spécifiques pour les icônes courantes */
+.learning-item-card svg[data-lucide="Edit"],
+.learning-item-card svg[data-lucide="Save"],
+.learning-item-card svg[data-lucide="Trash2"],
+.learning-item-card svg[data-lucide="Clock"],
+.learning-item-card svg[data-lucide="Check"],
+.learning-item-card svg[data-lucide="X"],
+.learning-item-card svg[data-lucide="Play"],
+.learning-item-card svg[data-lucide="Pause"],
+.learning-item-card svg[data-lucide="Plus"],
+.learning-item-card svg[data-lucide="Link"],
+.learning-item-card svg[data-lucide="ExternalLink"],
+.learning-item-card svg[data-lucide="Download"],
+.learning-item-card svg[data-lucide="Eye"],
+.learning-item-card svg[data-lucide="EyeOff"],
+.learning-item-card svg[data-lucide="Bookmark"],
+.learning-item-card svg[data-lucide="BookmarkCheck"] {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5px !important;
+}
+
+/* Traitement spécial pour Trophy */
+.learning-item-card svg[data-lucide="Trophy"],
+.learning-item-card .lucide-trophy {
+  stroke: #facc15 !important;
+  stroke-width: 2.5px !important;
+}
+
+.learning-item-card svg[data-lucide="Trophy"] path[fill="currentColor"],
+.learning-item-card .lucide-trophy path[fill="currentColor"] {
+  fill: #facc15 !important;
+}
+
+/* Correctifs pour les icônes colorées */
+.learning-item-card .text-red-500 svg,
+.learning-item-card .text-red-600 svg,
+.learning-item-card button.text-red-500 svg,
+.learning-item-card button.text-red-600 svg,
+.learning-item-card [class*="text-red-"] svg {
+  stroke: #ef4444 !important;
+}
+
+.learning-item-card .text-blue-500 svg,
+.learning-item-card .text-blue-600 svg,
+.learning-item-card button.text-blue-500 svg,
+.learning-item-card button.text-blue-600 svg,
+.learning-item-card [class*="text-blue-"] svg {
+  stroke: #3b82f6 !important;
+}
+
+.learning-item-card .text-green-500 svg,
+.learning-item-card .text-green-600 svg,
+.learning-item-card button.text-green-500 svg,
+.learning-item-card button.text-green-600 svg,
+.learning-item-card [class*="text-green-"] svg {
+  stroke: #22c55e !important;
+}
+
+.learning-item-card .text-yellow-500 svg,
+.learning-item-card .text-yellow-600 svg,
+.learning-item-card button.text-yellow-500 svg,
+.learning-item-card button.text-yellow-600 svg,
+.learning-item-card [class*="text-yellow-"] svg {
+  stroke: #facc15 !important;
+}
+
+/* Mode sombre - Styles renforcés */
+html[data-theme="dark"] .learning-item-card svg,
+html[data-theme="dark"] .item-wrapper svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5px !important;
+  /* Ajouter un léger effet de glow pour améliorer la visibilité */
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.7)) !important;
+}
+
+html[data-theme="dark"] .learning-item-card svg *,
+html[data-theme="dark"] .item-wrapper svg * {
+  fill: none !important;
+  stroke: inherit !important;
+}
+
+/* Forcer un repaint pour toutes les icônes SVG */
+@keyframes forceRepaint {
+  0% { opacity: 0.99; }
+  100% { opacity: 1; }
+}
+
+.learning-item-card svg,
+.item-wrapper svg {
+  animation: forceRepaint 0.01s forwards !important;
+}
