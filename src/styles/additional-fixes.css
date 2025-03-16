@@ -28,6 +28,36 @@ header [class*="text-xl"] {
   pointer-events: none !important;
 }
 
+/* Ciblage ultra-spécifique pour supprimer "Learning Progress" près du menu */
+.md\:ml-64 h1,
+.md\:ml-64 h2,
+body > div > div > div:first-child h1,
+body > div > div > div:first-child h2,
+body > div > div > div > h1,
+body > div > div > div > h2,
+[class*="sidebar"] + div h1,
+[class*="sidebar"] + div h2,
+[class*="sidebar"] ~ div h1,
+[class*="sidebar"] ~ div h2,
+[class*="navigation"] + div h1,
+[class*="navigation"] + div h2,
+[class*="navigation"] ~ div h1,
+[class*="navigation"] ~ div h2,
+.tab-navigation-container + div h1,
+.tab-navigation-container ~ div h1,
+.tab-navigation-container + div h2,
+.tab-navigation-container ~ div h2 {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  pointer-events: none !important;
+}
+
 /* Assurer que les titres de page ne puissent pas contenir "Learning Progress" ou "Learning Dashboard" */
 :root [class*="learning"],
 :root [class*="Learning"],
@@ -60,13 +90,22 @@ main > div:first-child:not([class*="grid"]):not([class*="flex"]) {
 /* Améliorations spécifiques pour le mode desktop */
 @media (min-width: 768px) {
   /* Forcer l'affichage du message "Nouveau ici ?" en desktop */
-  .getting-started-tip-container {
+  .getting-started-tip-container,
+  div[class*="tip-container"],
+  [class*="guidance"],
+  [class*="help-text"],
+  [class*="new-user"] {
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    width: auto !important;
+    position: relative !important;
+    pointer-events: auto !important;
+    z-index: 5 !important;
     margin-top: auto !important;
     margin-bottom: 1.25rem !important;
     padding: 0 1.25rem !important;
-    visibility: visible !important;
-    opacity: 1 !important;
   }
   
   .getting-started-tip {
@@ -96,6 +135,33 @@ main > div:first-child:not([class*="grid"]):not([class*="flex"]) {
     background: linear-gradient(to right, #3b82f6, #60a5fa) !important;
     border-radius: 1px !important;
     opacity: 0.7 !important;
+  }
+  
+  /* Animation subtile pour attirer l'attention */
+  .getting-started-tip {
+    animation: gentle-pulse 3s infinite alternate ease-in-out !important;
+  }
+  
+  @keyframes gentle-pulse {
+    0% {
+      transform: translateY(0);
+      box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    }
+    100% {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 6px 16px rgba(0, 0, 0, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    }
+  }
+
+  /* Désactivation de l'animation pour les utilisateurs qui préfèrent réduire les mouvements */
+  @media (prefers-reduced-motion: reduce) {
+    .getting-started-tip {
+      animation: none !important;
+    }
   }
   
   .tip-heading, .tip-text {
@@ -140,6 +206,13 @@ header > div,
   justify-content: flex-end !important;
   align-items: center !important;
   width: 100% !important;
+}
+
+/* Élégant espace vide au lieu du titre */
+header::before {
+  content: "";
+  flex: 1;
+  display: block;
 }
 
 /* Recentrer le container principal pour compenser l'espace vide du titre supprimé */
@@ -187,6 +260,12 @@ main {
       0 4px 12px rgba(0, 0, 0, 0.15) !important,
       0 0 0 1px rgba(255, 255, 255, 0.1) inset !important;
   }
+  
+  /* Masquer les indicateurs de défilement qui peuvent apparaître entre les tabs */
+  .tab-navigation-container::before,
+  .tab-navigation-container::after {
+    display: none !important;
+  }
 }
 
 /* Styles généraux pour l'amélioration visuelle */
@@ -205,13 +284,6 @@ button:active,
   transform: translateY(1px) !important;
 }
 
-/* Élégant espace vide au lieu du titre */
-header::before {
-  content: "";
-  flex: 1;
-  display: block;
-}
-
 /* Redimensionner les conteneurs après la suppression du titre */
 @media (min-width: 768px) {
   .md\:p-6 {
@@ -220,5 +292,91 @@ header::before {
   
   header.mb-6 {
     margin-bottom: 1rem !important;
+  }
+}
+
+/* Correctifs spécifiques pour les onglets mobile en mode sombre */
+.dark .tab-navigation-item {
+  color: rgba(255, 255, 255, 0.9) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .tab-navigation-item.active {
+  color: #ffffff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Correctifs pour les onglets mobile en mode clair */
+:root:not(.dark) .tab-navigation-item {
+  color: rgba(255, 255, 255, 0.9) !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2) !important;
+}
+
+:root:not(.dark) .tab-navigation-item.active {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Correction pour l'espacement en mode desktop */
+@media (min-width: 768px) {
+  .tab-navigation-item {
+    margin: 0.35rem 0.85rem !important;
+    padding: 0.85rem 1.1rem !important;
+  }
+  
+  /* S'assurer que les onglets Desktop ont la bonne taille et forme */
+  .tab-navigation-item {
+    border-radius: 12px !important;
+    background-color: transparent !important;
+  }
+  
+  .tab-navigation-item.active {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+  }
+  
+  .tab-navigation-item.active::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -0.85rem !important;
+    height: 100% !important;
+    width: 4px !important;
+    background: linear-gradient(to bottom, #fbbf24, #f59e0b) !important;
+    border-radius: 0 4px 4px 0 !important;
+    box-shadow: 2px 0 6px rgba(251, 191, 36, 0.4) !important;
+  }
+}
+
+/* Améliorer la visibilité des icônes dans les onglets */
+.tab-navigation-item svg,
+.tab-navigation-item .nav-icon,
+.nav-icon svg {
+  color: currentColor !important;
+  opacity: 1 !important;
+}
+
+/* Animation d'apparition des onglets du menu */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tab-navigation-item {
+  animation: fadeSlideIn 0.5s ease forwards;
+  animation-delay: calc(var(--item-index, 0) * 0.1s);
+  opacity: 0;
+}
+
+/* Désactiver l'animation si l'utilisateur préfère réduire les mouvements */
+@media (prefers-reduced-motion: reduce) {
+  .tab-navigation-item {
+    animation: none !important;
+    opacity: 1 !important;
   }
 }
