@@ -87,3 +87,89 @@ header {
   width: 100% !important;
   gap: 1rem !important;
 }
+
+/* Styles spécifiques pour s'assurer que le message "Nouveau ici?" reste visible */
+.getting-started-tip-container {
+  display: none;
+  margin-top: auto;
+  margin-bottom: 1.25rem;
+  padding: 0 1.25rem;
+  position: relative;
+  z-index: 5;
+}
+
+.getting-started-tip {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.08));
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 12px;
+  padding: 1.15rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+}
+
+.getting-started-tip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, #3b82f6, #60a5fa);
+  border-radius: 1px;
+  opacity: 0.7;
+}
+
+.tip-heading, .tip-text {
+  font-size: revert !important;
+  height: auto !important;
+  width: auto !important;
+  line-height: normal !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  position: static !important;
+  overflow: visible !important;
+  clip: auto !important;
+  pointer-events: auto !important;
+}
+
+/* Styles pour desktop: forcer l'affichage du message "Nouveau ici?" */
+@media (min-width: 768px) {
+  .getting-started-tip-container {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Animation subtile pour attirer l'attention */
+  .getting-started-tip {
+    animation: gentle-pulse 3s infinite alternate ease-in-out;
+  }
+  
+  @keyframes gentle-pulse {
+    0% {
+      transform: translateY(0);
+      box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    }
+    100% {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 6px 16px rgba(0, 0, 0, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    }
+  }
+  
+  /* Désactivation de l'animation pour les utilisateurs qui préfèrent réduire les mouvements */
+  @media (prefers-reduced-motion: reduce) {
+    .getting-started-tip {
+      animation: none !important;
+    }
+  }
+}
