@@ -1,0 +1,176 @@
+/**
+ * CORRECTIF D'URGENCE POUR LES ICÔNES SVG DANS LES LEARNING ITEM CARDS
+ * Ce fichier corrige spécifiquement les problèmes d'affichage des icônes SVG
+ * dans les cartes d'items d'apprentissage en mode sombre.
+ */
+
+/* RESET UNIVERSEL POUR TOUTES LES ICÔNES LUCIDE */
+svg[data-lucide],
+.lucide,
+[class*="lucide-"] {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  stroke-opacity: 1 !important;
+  display: inline-block !important;
+  visibility: visible !important;
+}
+
+/* RESET POUR TOUS LES CHEMINS SVG */
+svg[data-lucide] *,
+svg[data-lucide] path,
+svg[data-lucide] line,
+svg[data-lucide] circle,
+svg[data-lucide] rect,
+svg[data-lucide] polyline,
+svg[data-lucide] polygon {
+  fill: none !important;
+  stroke: inherit !important;
+}
+
+/* CORRECTIF SPÉCIFIQUE POUR LES LEARNING ITEM CARDS */
+.learning-item-card svg[data-lucide],
+.learning-item-card .lucide,
+.learning-item-card [class*="lucide-"],
+.item-wrapper svg[data-lucide],
+.item-wrapper .lucide,
+.item-wrapper [class*="lucide-"] {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5px !important;
+  visibility: visible !important;
+  stroke-opacity: 1 !important;
+}
+
+/* CIBLAGE ULTRA-SPÉCIFIQUE POUR LES ACTIONS COURANTES */
+.learning-item-card svg[data-lucide="Edit"],
+.learning-item-card svg[data-lucide="Save"],
+.learning-item-card svg[data-lucide="Trash2"],
+.learning-item-card svg[data-lucide="Clock"],
+.learning-item-card svg[data-lucide="Check"],
+.learning-item-card svg[data-lucide="X"],
+.learning-item-card svg[data-lucide="Play"],
+.learning-item-card svg[data-lucide="Pause"],
+.learning-item-card svg[data-lucide="Link"],
+.learning-item-card svg[data-lucide="ExternalLink"],
+.learning-item-card svg[data-lucide="Download"],
+.learning-item-card svg[data-lucide="Eye"],
+.learning-item-card svg[data-lucide="EyeOff"] {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+
+/* TRAITEMENT SPÉCIAL POUR L'ICÔNE DE SIGNET */
+.learning-item-card svg[data-lucide="Bookmark"],
+.learning-item-card svg[data-lucide="BookmarkCheck"] {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5px !important;
+}
+
+/* TRAITEMENT SPÉCIAL POUR L'ICÔNE DE TROPHÉE */
+.learning-item-card svg[data-lucide="Trophy"] {
+  fill: none !important;
+  stroke: #facc15 !important;
+  stroke-width: 2.5px !important;
+}
+
+.learning-item-card svg[data-lucide="Trophy"] path[fill="currentColor"] {
+  fill: #facc15 !important;
+}
+
+/* SPÉCIFIQUE AUX BOUTONS */
+.learning-item-card button svg,
+.item-wrapper button svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5px !important;
+}
+
+/* RÈGLES DE COULEUR */
+.learning-item-card .text-red-500 svg,
+.learning-item-card .text-red-600 svg,
+.learning-item-card [class*="text-red-"] svg,
+.learning-item-card svg.text-red-500,
+.learning-item-card svg.text-red-600 {
+  stroke: #ef4444 !important;
+  fill: none !important;
+}
+
+.learning-item-card .text-green-500 svg,
+.learning-item-card .text-green-600 svg,
+.learning-item-card [class*="text-green-"] svg,
+.learning-item-card svg.text-green-500,
+.learning-item-card svg.text-green-600 {
+  stroke: #22c55e !important;
+  fill: none !important;
+}
+
+.learning-item-card .text-blue-500 svg,
+.learning-item-card .text-blue-600 svg,
+.learning-item-card [class*="text-blue-"] svg,
+.learning-item-card svg.text-blue-500,
+.learning-item-card svg.text-blue-600 {
+  stroke: #3b82f6 !important;
+  fill: none !important;
+}
+
+.learning-item-card .text-yellow-500 svg,
+.learning-item-card .text-yellow-600 svg,
+.learning-item-card [class*="text-yellow-"] svg,
+.learning-item-card svg.text-yellow-500,
+.learning-item-card svg.text-yellow-600 {
+  stroke: #facc15 !important;
+  fill: none !important;
+}
+
+/* DÉFINITION DE BOUTONS SPÉCIFIQUES */
+.learning-item-card button[title="Edit card"] svg,
+.learning-item-card button[title="Save changes"] svg,
+.learning-item-card button[title="Delete item"] svg,
+.learning-item-card button[title="Mark as complete"] svg,
+.learning-item-card button[title="Mark as incomplete"] svg,
+.learning-item-card button[title="Export to PDF"] svg,
+.learning-item-card button[title="Hide content"] svg,
+.learning-item-card button[title="Show content"] svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5px !important;
+}
+
+/* ANIMATION POUR FORCER LE RENDU */
+@keyframes forceIconRender {
+  0% { opacity: 0.99; }
+  100% { opacity: 1; }
+}
+
+.learning-item-card svg,
+.item-wrapper svg {
+  animation: forceIconRender 0.01s forwards !important;
+}
+
+/* FALLBACK POUR TOUT TYPE D'ICÔNE DANS LES LEARNING ITEM CARDS */
+.learning-item-card svg,
+.item-wrapper svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  display: inline-block !important;
+  visibility: visible !important;
+}
+
+/* MODE SOMBRE - SPÉCIFICITÉ TRÈS ÉLEVÉE */
+html[data-theme="dark"] .learning-item-card svg,
+html[data-theme="dark"] .item-wrapper svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5px !important;
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.5)) !important;
+}

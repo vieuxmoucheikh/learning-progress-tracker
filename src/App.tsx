@@ -479,6 +479,12 @@ export default function App() {
     loadFlashcards();
   }, []);
 
+  // Initialiser le correctif d'icônes
+  useEffect(() => {
+    const cleanup = fixSvgIcons();
+    return cleanup;
+  }, []);
+
   const filteredItems = useMemo(() => {
     return state.items
       .filter(item => {
