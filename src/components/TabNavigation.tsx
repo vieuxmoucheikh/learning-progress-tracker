@@ -57,14 +57,14 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
       label: 'Dashboard', 
       shortLabel: 'Dashboard', 
       icon: <LayoutDashboard size={20} />,
-      description: 'Vue d\'ensemble de vos activités d\'apprentissage'
+      description: 'Vue d\'ensemble de vos activités'
     },
     { 
       id: 'items', 
       label: 'All Items', 
       shortLabel: 'Items', 
       icon: <BookOpen size={20} />,
-      description: 'Liste de toutes vos ressources d\'apprentissage'
+      description: 'Liste de toutes vos ressources'
     },
     { 
       id: 'analytics', 
@@ -89,10 +89,10 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
     },
     { 
       id: 'learning-cards', 
-      label: 'Learning', 
-      shortLabel: 'Learn', 
+      label: 'Study Cards', 
+      shortLabel: 'Study', 
       icon: <GraduationCap size={20} />,
-      description: 'Vos cartes d\'apprentissage'
+      description: 'Vos cartes d\'étude'
     },
   ];
 

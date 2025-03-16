@@ -64,7 +64,7 @@ const TAB_OPTIONS = {
   ITEMS: 'items',
   ANALYTICS: 'analytics',
   POMODORO: 'pomodoro',
-  LEARNING_CARDS: 'learning-cards',
+  STUDY_CARDS: 'learning-cards',   // On garde l'ID pour compatibilité mais change la référence
   FLASHCARDS: 'flashcards'
 } as const;
 
@@ -73,7 +73,7 @@ const tabs = [
   { id: TAB_OPTIONS.ITEMS, label: 'Items', icon: BookOpen },
   { id: TAB_OPTIONS.ANALYTICS, label: 'Analytics', icon: BarChart3 },
   { id: TAB_OPTIONS.POMODORO, label: 'Pomodoro', icon: Timer },
-  { id: TAB_OPTIONS.LEARNING_CARDS, label: 'Learning Cards', icon: Notebook },
+  { id: TAB_OPTIONS.STUDY_CARDS, label: 'Study Cards', icon: Notebook },
   { id: TAB_OPTIONS.FLASHCARDS, label: 'Flashcards', icon: Library },
 ];
 
@@ -1077,7 +1077,7 @@ export default function App() {
                 <PomodoroTimer />
               )}
               
-              {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
+              {selectedTab === TAB_OPTIONS.STUDY_CARDS && (
                 <LearningCardsPage />
               )}
 

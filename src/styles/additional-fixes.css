@@ -26,6 +26,57 @@ h1[class*="text-transparent"],
   padding: 0 !important;
 }
 
+/* Supprimer radicalement toute mention de "Learning Dashboard" ou "Learning Progress" */
+h1,
+h1 *,
+h2.text-2xl,
+h2.text-3xl,
+h2[class*="bg-gradient"],
+span[class*="text-transparent"],
+div[class*="text-transparent"],
+[class*="heading"],
+[class*="title"]:not(h3):not([class*="card-title"]):not([class*="item-title"]),
+[class*="dashboard-title"],
+[class*="page-title"],
+[class*="app-name"],
+[class*="app-title"],
+header [class*="text-2xl"],
+header [class*="text-3xl"],
+header [class*="text-xl"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  pointer-events: none !important;
+}
+
+/* Assurer que les titres de page ne puissent pas contenir "Learning Progress" ou "Learning Dashboard" */
+:root [class*="learning"],
+:root [class*="Learning"],
+:root [class*="LEARNING"],
+:root [class*="dashboard-header"],
+:root [class*="app-header"] {
+  font-size: 0 !important;
+}
+
+/* Mais garder le contenu des cartes d'apprentissage (learning cards) visible */
+[class*="learning-card"] *,
+[class*="learning-item"] *,
+[class*="learning-content"] * {
+  font-size: revert !important;
+}
+
+/* Assurez-vous que tout texte potentiellement comprenant "Learning Progress" est caché */
+header div:first-child,
+nav + div > div:first-child,
+main > div:first-child:not([class*="grid"]):not([class*="flex"]) {
+  font-size: 0 !important;
+}
+
 /* Forcer l'affichage du message "Nouveau ici ?" en desktop */
 @media (min-width: 768px) {
   .getting-started-tip-container {
@@ -251,4 +302,27 @@ button:hover,
 button:active, 
 [role="button"]:active {
   transform: translateY(1px) !important;
+}
+
+/* Élégant espace vide au lieu du titre */
+header::before {
+  content: "";
+  flex: 1;
+  display: block;
+}
+
+/* Recentrer le container principal pour compenser l'espace vide du titre supprimé */
+main {
+  margin-top: 0.5rem !important;
+}
+
+/* Redimensionner les conteneurs après la suppression du titre */
+@media (min-width: 768px) {
+  .md\:p-6 {
+    padding-top: 1rem !important;
+  }
+  
+  header.mb-6 {
+    margin-bottom: 1rem !important;
+  }
 }
