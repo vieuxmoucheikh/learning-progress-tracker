@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { 
   BarChart3, 
   Timer, 
@@ -40,6 +40,16 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeTabRef = useRef<HTMLButtonElement>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   const tabs: Tab[] = [
     { 
@@ -92,21 +102,23 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
       const container = scrollContainerRef.current;
       const activeTab = activeTabRef.current;
       
-      // Calculate position to center the active tab
-      const containerWidth = container.offsetWidth;
-      const tabWidth = activeTab.offsetWidth;
-      const tabLeft = activeTab.offsetLeft;
-      const scrollLeft = tabLeft - (containerWidth / 2) + (tabWidth / 2);
-      
-      // Use requestAnimationFrame to ensure smooth scrolling after render
-      requestAnimationFrame(() => {
-        container.scrollTo({
-          left: scrollLeft,
-          behavior: 'smooth'
+      if (isMobile) {
+        // Calculate position to center the active tab
+        const containerWidth = container.offsetWidth;
+        const tabWidth = activeTab.offsetWidth;
+        const tabLeft = activeTab.offsetLeft;
+        const scrollLeft = tabLeft - (containerWidth / 2) + (tabWidth / 2);
+        
+        // Use requestAnimationFrame to ensure smooth scrolling after render
+        requestAnimationFrame(() => {
+          container.scrollTo({
+            left: scrollLeft,
+            behavior: 'smooth'
+          });
         });
-      });
+      }
     }
-  }, [activeTab]);
+  }, [activeTab, isMobile]);
   
   // Add touch events for better mobile scrolling
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -145,7 +157,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         role="tablist"
-        aria-orientation="horizontal"
+        aria-orientation={isMobile ? "horizontal" : "vertical"}
         aria-label="Navigation principale"
       >
         {tabs.map((tab, index) => (
@@ -167,7 +179,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
           >
             <span className="nav-icon">{tab.icon}</span>
             <span className="nav-text">
-              {window.innerWidth < 768 ? tab.shortLabel : tab.label}
+              {isMobile ? tab.shortLabel : tab.label}
             </span>
           </button>
         ))}

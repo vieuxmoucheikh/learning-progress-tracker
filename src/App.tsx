@@ -1046,9 +1046,7 @@ export default function App() {
           <div className="container mx-auto py-4 h-full flex flex-col">
             <header className="mb-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent drop-shadow-sm">
-                  Learning Dashboard
-                </h1>
+                <div></div>
                 <div className="flex items-center gap-3">
                   <ThemeToggle />
                   <Button 
