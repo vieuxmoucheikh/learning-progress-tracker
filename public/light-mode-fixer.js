@@ -296,3 +296,130 @@
   setTimeout(fixLightMode, 1500);
   setTimeout(fixLightMode, 3000);
 })();
+
+/**
+ * Script pour résoudre les problèmes de transition entre les modes clair et sombre
+ */
+
+(function() {
+  // Fonction pour synchroniser les attributs data-theme et class
+  function syncThemeAttributes() {
+    const htmlElement = document.documentElement;
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    
+    // Ajouter la classe de transition pour désactiver les animations
+    htmlElement.classList.add('theme-transitioning');
+    
+    // Synchroniser data-theme et class
+    htmlElement.setAttribute('data-theme', currentTheme);
+    
+    if (currentTheme === 'dark') {
+      htmlElement.classList.add('dark');
+      htmlElement.classList.remove('light');
+    } else {
+      htmlElement.classList.remove('dark');
+      htmlElement.classList.add('light');
+    }
+    
+    // Forcer une réinitialisation des styles calculés
+    void htmlElement.offsetWidth;
+    
+    // Réappliquer les styles spécifiques au thème
+    document.body.style.backgroundColor = currentTheme === 'dark' ? '#0f172a' : '#ffffff';
+    document.body.style.color = currentTheme === 'dark' ? '#f8fafc' : '#0f172a';
+    
+    // Nettoyer les styles spécifiques aux cartes qui peuvent persister
+    cleanupPersistentStyles(currentTheme);
+    
+    // Retirer la classe de transition après un court délai
+    setTimeout(() => {
+      htmlElement.classList.remove('theme-transitioning');
+    }, 100);
+  }
+  
+  // Fonction pour nettoyer les styles persistants
+  function cleanupPersistentStyles(currentTheme) {
+    // Sélecteurs qui peuvent causer des problèmes lors du changement de thème
+    const problematicSelectors = [
+      '.learning-item-card .card',
+      '.learning-item-card .card > div:first-child',
+      '.learning-item-card .card > div:last-child',
+      '.learning-item-card button[title="Mark as complete"]',
+      '.learning-item-card button[title="Mark as incomplete"]',
+      '.learning-item-card .border.rounded-xl',
+      '.bg-white',
+      '.bg-gray-800'
+    ];
+    
+    // Fonction pour réappliquer les styles corrects selon le thème
+    problematicSelectors.forEach(selector => {
+      const elements = document.querySelectorAll(selector);
+      elements.forEach(el => {
+        // Forcer le recalcul du style
+        el.style.cssText = el.style.cssText;
+      });
+    });
+    
+    // Cibler spécifiquement les bordures colorées des cartes
+    const learningCards = document.querySelectorAll('.learning-item-card .card');
+    learningCards.forEach(card => {
+      // Réinitialiser les styles de bordure pour forcer l'application des CSS
+      if (currentTheme === 'light') {
+        if (card.classList.contains('status-in_progress') || 
+            card.classList.contains('border-l-blue-400')) {
+          card.style.borderLeft = '8px solid #3b82f6';
+        } else if (card.classList.contains('status-completed') || 
+                  card.classList.contains('border-l-green-400')) {
+          card.style.borderLeft = '8px solid #10b981';
+        } else if (card.classList.contains('status-on_hold') || 
+                  card.classList.contains('border-l-yellow-400')) {
+          card.style.borderLeft = '8px solid #f59e0b';
+        } else {
+          card.style.borderLeft = '8px solid #64748b';
+        }
+      } else {
+        // Styles pour le mode sombre
+        if (card.classList.contains('status-in_progress') || 
+            card.classList.contains('border-l-blue-400')) {
+          card.style.borderLeft = '8px solid #2563eb';
+        } else if (card.classList.contains('status-completed') || 
+                  card.classList.contains('border-l-green-400')) {
+          card.style.borderLeft = '8px solid #059669';
+        } else if (card.classList.contains('status-on_hold') || 
+                  card.classList.contains('border-l-yellow-400')) {
+          card.style.borderLeft = '8px solid #d97706';
+        } else {
+          card.style.borderLeft = '8px solid #475569';
+        }
+      }
+    });
+  }
+
+  // Exécuter au chargement
+  syncThemeAttributes();
+  
+  // Observer les changements de thème
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === 'data-theme' || 
+          mutation.attributeName === 'class') {
+        syncThemeAttributes();
+      }
+    });
+  });
+  
+  observer.observe(document.documentElement, { 
+    attributes: true,
+    attributeFilter: ['data-theme', 'class']
+  });
+  
+  // S'exécuter aussi quand le stockage local change
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'theme') {
+      syncThemeAttributes();
+    }
+  });
+  
+  // Exporter la fonction pour qu'elle puisse être appelée manuellement
+  window.syncThemeAttributes = syncThemeAttributes;
+})();
