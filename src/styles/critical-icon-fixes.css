@@ -1,0 +1,148 @@
+/**
+ * CORRECTIFS CRITIQUES POUR LES FONDS ET TEXTES EN MODE SOMBRE
+ * Ce fichier contient des correctifs à très haute priorité pour résoudre 
+ * les problèmes de fond blanc et de texte en mode sombre.
+ */
+
+/* CORRECTIFS POUR LES SECTIONS DE TEMPS TOTAL ET STATISTIQUES */
+html[data-theme="dark"] body .learning-item-card .mb-4.p-4.bg-gray-50,
+html[data-theme="dark"] body .learning-item-card .mb-4.p-4.bg-gray-100,
+html[data-theme="dark"] body .learning-item-card .mb-4.p-4.bg-white,
+html[data-theme="dark"] body .learning-item-card div.p-4.bg-gray-50,
+html[data-theme="dark"] body .learning-item-card div.p-4.bg-gray-100,
+html[data-theme="dark"] body .learning-item-card div.p-4.bg-white,
+html[data-theme="dark"] body .item-wrapper .mb-4.p-4.bg-gray-50,
+html[data-theme="dark"] body .item-wrapper .mb-4.p-4.bg-gray-100,
+html[data-theme="dark"] body .item-wrapper .mb-4.p-4.bg-white,
+html[data-theme="dark"] body .item-wrapper div.p-4.bg-gray-50,
+html[data-theme="dark"] body .item-wrapper div.p-4.bg-gray-100,
+html[data-theme="dark"] body .item-wrapper div.p-4.bg-white,
+html[data-theme="dark"] body div[class*="total-time"],
+html[data-theme="dark"] body div[class*="total-minutes"],
+html[data-theme="dark"] body div[class*="bg-white"],
+html[data-theme="dark"] body div[class*="bg-gray-50"],
+html[data-theme="dark"] body div[class*="bg-gray-100"] {
+  background-color: #0f172a !important;
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+  border-radius: 0.5rem !important;
+}
+
+/* TEXTES À L'INTÉRIEUR DES SECTIONS DE TEMPS */
+html[data-theme="dark"] body .learning-item-card .mb-4.p-4.bg-gray-50 *,
+html[data-theme="dark"] body .learning-item-card .mb-4.p-4.bg-gray-100 *,
+html[data-theme="dark"] body .learning-item-card .mb-4.p-4.bg-white *,
+html[data-theme="dark"] body .learning-item-card div.p-4.bg-gray-50 *,
+html[data-theme="dark"] body .learning-item-card div.p-4.bg-gray-100 *,
+html[data-theme="dark"] body .learning-item-card div.p-4.bg-white *,
+html[data-theme="dark"] body .item-wrapper .mb-4.p-4.bg-gray-50 *,
+html[data-theme="dark"] body .item-wrapper .mb-4.p-4.bg-gray-100 *,
+html[data-theme="dark"] body .item-wrapper .mb-4.p-4.bg-white *,
+html[data-theme="dark"] body .item-wrapper div.p-4.bg-gray-50 *,
+html[data-theme="dark"] body .item-wrapper div.p-4.bg-gray-100 *,
+html[data-theme="dark"] body .item-wrapper div.p-4.bg-white *,
+html[data-theme="dark"] body div[class*="total-time"] *,
+html[data-theme="dark"] body div[class*="total-minutes"] *,
+html[data-theme="dark"] body .time-display *,
+html[data-theme="dark"] body .stats-display * {
+  color: #f1f5f9 !important;
+}
+
+/* ARRIÈRE-PLANS BLANCS DANS LES CARTES */
+html[data-theme="dark"] body .learning-item-card .bg-white,
+html[data-theme="dark"] body .learning-item-card div.bg-white,
+html[data-theme="dark"] body .learning-item-card [class*="bg-white"],
+html[data-theme="dark"] body .item-wrapper .bg-white,
+html[data-theme="dark"] body .item-wrapper div.bg-white,
+html[data-theme="dark"] body .item-wrapper [class*="bg-white"],
+html[data-theme="dark"] body .card .bg-white,
+html[data-theme="dark"] body .card div.bg-white,
+html[data-theme="dark"] body .card [class*="bg-white"] {
+  background-color: #1e293b !important;
+  background: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+/* CONTRASTE AMÉLIORÉ POUR LE TEXTE EN MODE SOMBRE */
+html[data-theme="dark"] body .text-gray-500,
+html[data-theme="dark"] body .text-gray-600,
+html[data-theme="dark"] body .text-gray-700,
+html[data-theme="dark"] body .text-gray-800,
+html[data-theme="dark"] body .text-gray-900 {
+  color: #f1f5f9 !important;
+}
+
+/* ÉLÉMENTS DE FORMULAIRE DANS LES SECTIONS DE TEMPS */
+html[data-theme="dark"] body input[type="number"],
+html[data-theme="dark"] body input[type="text"],
+html[data-theme="dark"] body input[type="time"],
+html[data-theme="dark"] body .time-input,
+html[data-theme="dark"] body [class*="input"] {
+  background-color: #334155 !important;
+  color: #f8fafc !important;
+  border-color: #475569 !important;
+}
+
+/* SÉLECTEURS POUR DES COMPOSANTS SPÉCIFIQUES */
+html[data-theme="dark"] body .total-time-display,
+html[data-theme="dark"] body .total-minutes-display,
+html[data-theme="dark"] body .time-counter,
+html[data-theme="dark"] body .time-tracker,
+html[data-theme="dark"] body .time-display,
+html[data-theme="dark"] body .stats-display,
+html[data-theme="dark"] body .time-section,
+html[data-theme="dark"] body .timer-section,
+html[data-theme="dark"] body [class*="timer-"],
+html[data-theme="dark"] body [class*="time-"],
+html[data-theme="dark"] body [class*="counter-"] {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+/* CORRECTIF INLINE POUR LES AFFICHAGES AVEC STYLE INLINE */
+html[data-theme="dark"] body [style*="background-color: white"],
+html[data-theme="dark"] body [style*="background-color: #fff"],
+html[data-theme="dark"] body [style*="background-color: #ffffff"],
+html[data-theme="dark"] body [style*="background: white"],
+html[data-theme="dark"] body [style*="background: #fff"],
+html[data-theme="dark"] body [style*="background: #ffffff"] {
+  background-color: #1e293b !important;
+  background: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+/* CORRECTIF POUR LES CLASSES DYNAMIQUES / GÉNÉRÉES */
+html[data-theme="dark"] body *[class^="bg-white"],
+html[data-theme="dark"] body *[class*=" bg-white"],
+html[data-theme="dark"] body *[class^="bg-gray-50"],
+html[data-theme="dark"] body *[class*=" bg-gray-50"],
+html[data-theme="dark"] body *[class^="bg-gray-100"],
+html[data-theme="dark"] body *[class*=" bg-gray-100"] {
+  background-color: #1e293b !important;
+  background: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+/* CORRECTION DE CONTRASTE POUR TOUS LES TEXTES À L'INTÉRIEUR D'UN FOND BLANC/GRIS EN MODE SOMBRE */
+html[data-theme="dark"] body .bg-white *,
+html[data-theme="dark"] body .bg-gray-50 *,
+html[data-theme="dark"] body .bg-gray-100 *,
+html[data-theme="dark"] body [class*="bg-white"] *,
+html[data-theme="dark"] body [class*="bg-gray-50"] *,
+html[data-theme="dark"] body [class*="bg-gray-100"] * {
+  color: #f8fafc !important;
+}
+
+/* CORRECTION SPÉCIFIQUE POUR LES SECTIONS DE STATISTIQUES AVEC DES BORDS ARRONDIS */
+html[data-theme="dark"] body .rounded-lg.p-4.bg-white,
+html[data-theme="dark"] body .rounded-lg.p-4.bg-gray-50,
+html[data-theme="dark"] body .rounded-lg.p-4.bg-gray-100,
+html[data-theme="dark"] body .rounded-xl.p-4.bg-white,
+html[data-theme="dark"] body .rounded-xl.p-4.bg-gray-50,
+html[data-theme="dark"] body .rounded-xl.p-4.bg-gray-100 {
+  background-color: #0f172a !important;
+  background: #0f172a !important;
+  border: 1px solid #334155 !important;
+}
