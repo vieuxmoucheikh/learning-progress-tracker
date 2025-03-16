@@ -248,7 +248,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       // Then update the learning item
       const updatedItem = await updateLearningItem(id, {
         completed: true,
-        completed_at: new Date('2025-01-02T23:43:13+01:00').toISOString(),
+        status: 'completed' as const // Utiliser status au lieu de completed_at
       });
 
       if (!updatedItem) {

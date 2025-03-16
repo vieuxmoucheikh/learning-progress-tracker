@@ -542,9 +542,10 @@ export default function App() {
       const item = state.items.find(item => item.id === id);
       if (!item) return;
 
-      // If marking as completed
+      // Si marking as completed
       if (updates.completed && !item.completed) {
-        updates.completed_at = new Date('2025-01-03T11:07:05+01:00').toISOString();
+        // Modifier cette partie pour utiliser uniquement les propriétés existantes 
+        // et enlever completed_at qui n'existe pas dans l'interface
         updates.status = 'completed' as const;
         
         // Track learning activity when completing an item
@@ -660,7 +661,7 @@ export default function App() {
       // Only update completion status if it's newly completed
       if (completed && !item.completed) {
         updates.completed = true;
-        updates.completed_at = currentTime.toISOString();
+        // Suppression de la propriété 'completed_at' qui n'existe pas dans le type Partial<LearningItem>
         updates.status = 'completed' as const;
       }
 
