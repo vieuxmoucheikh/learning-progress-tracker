@@ -61,7 +61,7 @@ export function Stats({ items }: Props) {
         if (session.duration) {
           return sessionTotal + (session.duration.hours * 60) + session.duration.minutes;
         }
-        return sessionTotal;
+        return sessionTotal; 
       }, 0) || 0);
     }, 0);
 
