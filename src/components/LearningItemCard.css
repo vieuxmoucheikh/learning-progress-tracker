@@ -1285,3 +1285,139 @@ html.dark body .item-wrapper [style*="background: #ffffff"] {
   background: #1e293b !important;
   color: #f8fafc !important;
 }
+
+/**
+ * STYLES POUR LES LEARNING ITEM CARDS
+ * Ce fichier inclut des améliorations spécifiques pour les icônes dans les cartes
+ */
+
+/* Styles de base pour les icônes dans les cartes */
+.learning-item-card svg,
+.item-wrapper svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Mode sombre - Améliorations pour les icônes */
+html[data-theme="dark"] .learning-item-card svg,
+html[data-theme="dark"] .item-wrapper svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5px !important;
+  /* Effet d'ombre pour meilleure visibilité */
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.7)) !important;
+}
+
+/* Icônes spécifiques */
+html[data-theme="dark"] .learning-item-card svg[data-lucide="Edit"],
+html[data-theme="dark"] .item-wrapper svg[data-lucide="Edit"] {
+  stroke: #60a5fa !important; /* blue-400 */
+  fill: none !important;
+}
+
+html[data-theme="dark"] .learning-item-card svg[data-lucide="Save"],
+html[data-theme="dark"] .item-wrapper svg[data-lucide="Save"] {
+  stroke: #60a5fa !important; /* blue-400 */
+  fill: none !important;
+}
+
+html[data-theme="dark"] .learning-item-card svg[data-lucide="Trash2"],
+html[data-theme="dark"] .item-wrapper svg[data-lucide="Trash2"] {
+  stroke: #f87171 !important; /* red-400 */
+  fill: none !important;
+}
+
+html[data-theme="dark"] .learning-item-card svg[data-lucide="Clock"],
+html[data-theme="dark"] .item-wrapper svg[data-lucide="Clock"] {
+  stroke: #94a3b8 !important; /* slate-400 */
+  fill: none !important;
+}
+
+html[data-theme="dark"] .learning-item-card svg[data-lucide="Eye"],
+html[data-theme="dark"] .learning-item-card svg[data-lucide="EyeOff"],
+html[data-theme="dark"] .item-wrapper svg[data-lucide="Eye"],
+html[data-theme="dark"] .item-wrapper svg[data-lucide="EyeOff"] {
+  stroke: #60a5fa !important; /* blue-400 */
+  fill: none !important;
+}
+
+html[data-theme="dark"] .learning-item-card svg[data-lucide="Download"],
+html[data-theme="dark"] .item-wrapper svg[data-lucide="Download"] {
+  stroke: #60a5fa !important; /* blue-400 */
+  fill: none !important;
+}
+
+html[data-theme="dark"] .learning-item-card svg[data-lucide="Bookmark"],
+html[data-theme="dark"] .learning-item-card svg[data-lucide="BookmarkCheck"],
+html[data-theme="dark"] .item-wrapper svg[data-lucide="Bookmark"],
+html[data-theme="dark"] .item-wrapper svg[data-lucide="BookmarkCheck"] {
+  stroke: #4ade80 !important; /* green-400 */
+  fill: none !important;
+}
+
+/* Cas spécial pour l'icône trophy */
+html[data-theme="dark"] .learning-item-card svg[data-lucide="Trophy"],
+html[data-theme="dark"] .item-wrapper svg[data-lucide="Trophy"] {
+  stroke: #fbbf24 !important; /* yellow-400 */
+  fill: none !important;
+}
+
+html[data-theme="dark"] .learning-item-card svg[data-lucide="Trophy"] path[fill="currentColor"],
+html[data-theme="dark"] .item-wrapper svg[data-lucide="Trophy"] path[fill="currentColor"] {
+  fill: #fbbf24 !important; /* yellow-400 */
+}
+
+/* Icônes dans les boutons colorés */
+html[data-theme="dark"] .learning-item-card button.text-red-500 svg,
+html[data-theme="dark"] .learning-item-card button.text-red-600 svg,
+html[data-theme="dark"] .learning-item-card [class*="text-red-"] svg {
+  stroke: #f87171 !important; /* red-400 */
+  fill: none !important;
+}
+
+html[data-theme="dark"] .learning-item-card button.text-green-500 svg,
+html[data-theme="dark"] .learning-item-card button.text-green-600 svg,
+html[data-theme="dark"] .learning-item-card [class*="text-green-"] svg {
+  stroke: #4ade80 !important; /* green-400 */
+  fill: none !important;
+}
+
+html[data-theme="dark"] .learning-item-card button.text-blue-500 svg,
+html[data-theme="dark"] .learning-item-card button.text-blue-600 svg,
+html[data-theme="dark"] .learning-item-card [class*="text-blue-"] svg {
+  stroke: #60a5fa !important; /* blue-400 */
+  fill: none !important;
+}
+
+html[data-theme="dark"] .learning-item-card button.text-yellow-500 svg,
+html[data-theme="dark"] .learning-item-card button.text-yellow-600 svg,
+html[data-theme="dark"] .learning-item-card [class*="text-yellow-"] svg {
+  stroke: #fbbf24 !important; /* yellow-400 */
+  fill: none !important;
+}
+
+/* Animation subtile au survol des boutons avec icônes */
+html[data-theme="dark"] .learning-item-card button:hover svg,
+html[data-theme="dark"] .item-wrapper button:hover svg {
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.9)) !important;
+  transform: scale(1.1) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Forcer la visibilité des icônes en mode sombre */
+html[data-theme="dark"] .learning-item-card svg,
+html[data-theme="dark"] .item-wrapper svg {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Support pour les appareils mobiles */
+@media (max-width: 768px) {
+  html[data-theme="dark"] .learning-item-card svg,
+  html[data-theme="dark"] .item-wrapper svg {
+    stroke-width: 3px !important; /* Épaisseur accrue pour meilleure visibilité sur mobile */
+  }
+}
