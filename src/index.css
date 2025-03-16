@@ -1,5 +1,12 @@
-/* Importer toutes les feuilles de style en premier */
-@import './styles/force-critical-styles.css'; /* Nouveau fichier sans dépendances circulaires */
+/* Importer les feuilles de style essentielles avant Tailwind */
+@import './styles/direct-styles-fix.css'; /* Nouveau fichier style sans dépendances */
+
+/* Directives Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Importer les autres feuilles de style après Tailwind */
 @import './styles/mobile-light-mode-fixes.css';
 @import './styles/critical-light-mode-fixes.css';
 @import './styles/responsive-fixes.css';
@@ -11,13 +18,7 @@
 @import './components/StatusBadge.css';
 @import './components/PomodoroTimer.css';
 @import '../public/mobile-light-mode.css';
-/* Importer global-ui-enhancements.css en dernier pour éviter les problèmes */
 @import './styles/global-ui-enhancements.css';
-
-/* Ensuite, les directives Tailwind */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 @layer base {
   :root {
