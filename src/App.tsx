@@ -23,19 +23,17 @@ import { FlashcardsTab } from './components/FlashcardsTab';
 import { createDeck } from './lib/flashcards';
 import { supabase } from './lib/supabase';
 import { toast } from '@/components/ui/use-toast';
-import { fixSvgIcons } from './lib/icon-fixer'; // Import le script de correction d'icônes
 
 // Importer les fichiers CSS pour les améliorations visuelles
 import './styles/critical-light-mode-fixes.css';
 import './styles/global-ui-enhancements.css';
+import './styles/responsive-fixes.css';
 import './styles/card-fixes.css';
 import './styles/universal-card-borders.css';
 import './styles/critical-card-borders.css'; // Ajout du fichier de correctifs critiques pour les bordures
 import './styles/icon-fixes.css'; // Ajout du fichier de correctifs pour les icônes
 import './styles/icon-override.css';
 import './styles/critical-icon-fixes.css'; // Ajout du nouveau fichier de correctifs critiques
-import './styles/svg-icon-fixes.css'; // Ajout du fichier de correctifs spécifiques pour les SVG
-import './styles/svg-icon-emergency-fix.css'; // AJOUT DU CORRECTIF D'URGENCE POUR LES ICÔNES SVG
 import './components/LearningItemCard.css';
 import './components/Calendar.css';
 import './components/StatusBadge.css';
@@ -477,12 +475,6 @@ export default function App() {
     };
     
     loadFlashcards();
-  }, []);
-
-  // Initialiser le correctif d'icônes
-  useEffect(() => {
-    const cleanup = fixSvgIcons();
-    return cleanup;
   }, []);
 
   const filteredItems = useMemo(() => {
