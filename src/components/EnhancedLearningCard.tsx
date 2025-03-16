@@ -394,16 +394,18 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
   return (
     <Card className={cn(
-      "relative overflow-hidden transition-all duration-300 border-2 h-full",
+      "relative overflow-hidden transition-all duration-300 border-2",
       "hover:shadow-lg hover:shadow-blue-300/50",
       "max-w-3xl mx-auto",
+      "transform-gpu",
       mastered ? "bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-50 dark:to-white" : "bg-white dark:bg-gray-800",
       "sm:rounded-xl",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
       mastered 
         ? "border-emerald-400 mastered-card" 
-        : "border-blue-400 hover:border-blue-500",
-      isEditing && "border-blue-500 shadow-lg shadow-blue-300/50"
+        : isEditing 
+          ? "border-blue-500 shadow-md shadow-blue-300/50"
+          : "border-blue-400 hover:border-blue-500 shadow-md",
     )}>
       <CardHeader className="space-y-4 pb-4 px-4 sm:px-6">
         {/* Title Section */}

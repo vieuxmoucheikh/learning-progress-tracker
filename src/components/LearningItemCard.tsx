@@ -1006,7 +1006,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     if (!item.status) {
       return 'border-gray-300 dark:border-gray-700';
     }
-
+  
     switch (item.status) {
       case 'not_started':
         return 'border-gray-300 dark:border-gray-700';
@@ -1143,7 +1143,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
         "relative overflow-hidden transition-all duration-200",
         "hover:shadow-lg border-l-4",
         "bg-white light:bg-white preserve-colors shadow-md", // Ajout de shadow-md
-        getBorderColorClass()
+        getBorderColorClass(),
+        item.priority === 'high' && "high-priority-card", 
+        item.priority === 'medium' && "medium-priority-card",
+        item.priority === 'low' && "low-priority-card"
       )}>
         {/* Card Header with gradient background */}
         <div className="bg-gradient-to-r from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 light:from-white light:via-white light:to-white light:bg-white border-b border-gray-200/80 dark:border-gray-700/80">
