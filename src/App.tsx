@@ -25,7 +25,9 @@ import { supabase } from './lib/supabase';
 import { toast } from '@/components/ui/use-toast';
 
 // Importer les fichiers CSS pour les améliorations visuelles
+import './styles/theme-sync.css';  // S'assurer que ce fichier est importé en premier
 import './styles/critical-light-mode-fixes.css';
+import './styles/mobile-light-mode-fixes.css';
 import './styles/global-ui-enhancements.css';
 import './styles/responsive-fixes.css';
 import './components/LearningItemCard.css';
@@ -471,6 +473,25 @@ export default function App() {
     loadFlashcards();
   }, []);
 
+  // Résolution du problème d'affichage
+  useEffect(() => {
+    // S'assurer que le DOM est correctement initialisé
+    document.body.classList.remove('theme-transitioning');
+    
+    // Forcer un rafraîchissement du thème
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    document.documentElement.classList.toggle('dark', currentTheme === 'dark');
+    document.documentElement.classList.toggle('light', currentTheme === 'light');
+    
+    // Forcer le re-rendu après un court délai
+    const timer = setTimeout(() => {
+      setSelectedTab(prev => prev); // Astuce pour forcer un re-rendu
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   const filteredItems = useMemo(() => {
     return state.items
       .filter(item => {
@@ -852,12 +873,13 @@ export default function App() {
 
   if (state.loading) {
     return (
-      <ThemeProvider>
+      <ThemeProvider defaultTheme="system">
         <div className="min-h-screen flex flex-col md:flex-row">
           <div className="md:w-64">
             <TabNavigation 
               activeTab={selectedTab} 
               onTabChange={setSelectedTab}
+              tabs={tabs}
             />
           </div>
           <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-gray-900">
@@ -969,12 +991,13 @@ export default function App() {
   }
 
   return (
-    <ThemeProvider defaultTheme="dark">
+    <ThemeProvider defaultTheme="system">
       <div className="min-h-screen flex flex-col md:flex-row">
         <div className="md:w-64">
           <TabNavigation 
             activeTab={selectedTab} 
-            onTabChange={setSelectedTab} 
+            onTabChange={setSelectedTab}
+            tabs={tabs}
           />
         </div>
         <div className="flex-1 p-4 md:p-6 overflow-y-auto bg-white dark:bg-gray-900">
@@ -999,7 +1022,8 @@ export default function App() {
             </header>
 
             <main className="flex-1 overflow-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 md:p-6">
-              {selectedTab === TAB_OPTIONS.DASHBOARD && (
+              {/* Utilisation d'un fallback pour assurer qu'un contenu est toujours affiché */}
+              {selectedTab === TAB_OPTIONS.DASHBOARD ? (
                 <DashboardTab 
                   items={state.items}
                   onUpdate={handleDashboardUpdate}
@@ -1012,9 +1036,7 @@ export default function App() {
                   onAddItem={handleDashboardAddItem}
                   onDateSelect={handleDateSelect}
                 />
-              )}
-
-              {selectedTab === TAB_OPTIONS.ITEMS && (
+              ) : selectedTab === TAB_OPTIONS.ITEMS ? (
                 <ItemsTab 
                   items={state.items}
                   onUpdate={handleUpdateItem}
@@ -1026,21 +1048,13 @@ export default function App() {
                   onSetActiveItem={handleSetActiveItem}
                   onAddItem={handleItemsAddItem}
                 />
-              )}
-
-              {selectedTab === TAB_OPTIONS.ANALYTICS && (
+              ) : selectedTab === TAB_OPTIONS.ANALYTICS ? (
                 <AnalyticsTab items={state.items} />
-              )}
-
-              {selectedTab === TAB_OPTIONS.POMODORO && (
+              ) : selectedTab === TAB_OPTIONS.POMODORO ? (
                 <PomodoroTimer />
-              )}
-              
-              {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
+              ) : selectedTab === TAB_OPTIONS.LEARNING_CARDS ? (
                 <LearningCardsPage />
-              )}
-
-              {selectedTab === TAB_OPTIONS.FLASHCARDS && (
+              ) : selectedTab === TAB_OPTIONS.FLASHCARDS ? (
                 <FlashcardsTab 
                   flashcards={flashcardDecks}
                   onAddDeck={handleAddFlashcardDeck}
@@ -1048,6 +1062,11 @@ export default function App() {
                   onEditDeck={handleEditFlashcardDeck}
                   onDeleteDeck={handleDeleteFlashcardDeck}
                 />
+              ) : (
+                // Fallback si aucun onglet ne correspond
+                <div className="flex items-center justify-center h-64">
+                  <p className="text-gray-500 dark:text-gray-400">Sélectionnez un onglet pour afficher son contenu</p>
+                </div>
               )}
             </main>
           </div>
