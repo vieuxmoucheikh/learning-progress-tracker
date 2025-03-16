@@ -34,7 +34,6 @@ import './styles/critical-card-borders.css'; // Ajout du fichier de correctifs c
 import './styles/icon-fixes.css'; // Ajout du fichier de correctifs pour les icônes
 import './styles/icon-override.css';
 import './styles/critical-icon-fixes.css'; // Ajout du nouveau fichier de correctifs critiques
-import './styles/additional-fixes.css'; // Correctifs supplémentaires
 import './components/LearningItemCard.css';
 import './components/Calendar.css';
 import './components/StatusBadge.css';
