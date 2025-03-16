@@ -23,6 +23,9 @@ export function applyDarkModeFixesRuntime() {
   // CORRECTIF 3: CONTRASTE DE TEXTE
   fixTextContrast();
 
+  // CORRECTIF 4: CARTES D'APPRENTISSAGE
+  fixLearningCards();
+
   // Configuration de l'observateur pour continuer à appliquer les correctifs
   setupMutationObserver();
 }
@@ -147,6 +150,109 @@ function fixTextContrast() {
   });
 }
 
+// Corrige spécifiquement les cartes d'apprentissage
+function fixLearningCards() {
+  // Cibler les cartes d'apprentissage
+  const learningCardSelectors = [
+    '.learning-item-card',
+    '.item-wrapper',
+    '[class*="learning-item"]'
+  ];
+
+  // Appliquer des correctifs spécifiques à chaque carte
+  learningCardSelectors.forEach(selector => {
+    document.querySelectorAll(selector).forEach(card => {
+      // Corriger les sections de temps
+      card.querySelectorAll('[class*="total-time"], [class*="total-minutes"], [class*="time-display"], .time-display, .stats-display').forEach(element => {
+        element.style.backgroundColor = '#0f172a';
+        element.style.color = '#f8fafc';
+        element.style.borderColor = '#334155';
+        element.style.borderRadius = '0.5rem';
+        element.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.1)';
+        
+        // Corriger les textes à l'intérieur
+        Array.from(element.querySelectorAll('*')).forEach(child => {
+          if (child.tagName !== 'SVG') {
+            child.style.color = '#f8fafc';
+          }
+        });
+      });
+      
+      // Corriger spécifiquement les icônes dans les cartes
+      card.querySelectorAll('svg').forEach(svg => {
+        svg.style.fill = 'none';
+        svg.style.strokeWidth = '2.5px';
+        svg.style.strokeLinecap = 'round';
+        svg.style.strokeLinejoin = 'round';
+        svg.style.filter = 'drop-shadow(0 0 2px rgba(255, 255, 255, 0.7))';
+        svg.style.opacity = '1';
+        svg.style.visibility = 'visible';
+        
+        // Appliquer des styles basés sur l'icône spécifique
+        const iconType = svg.getAttribute('data-lucide');
+        if (iconType) {
+          switch (iconType) {
+            case 'Edit':
+            case 'Save':
+            case 'Eye':
+            case 'EyeOff':
+              svg.style.stroke = '#60a5fa';
+              break;
+            case 'Trash2':
+              svg.style.stroke = '#f87171';
+              break;
+            case 'Play':
+            case 'Check':
+              svg.style.stroke = '#4ade80';
+              break;
+            case 'Pause':
+              svg.style.stroke = '#facc15';
+              break;
+            case 'Trophy':
+              svg.style.stroke = '#fbbf24';
+              // Cas spécial pour l'icône Trophy qui a besoin de remplissage
+              const fillPath = svg.querySelector('path[fill="currentColor"]');
+              if (fillPath) {
+                fillPath.style.fill = '#fbbf24';
+              }
+              break;
+            case 'Clock':
+              svg.style.stroke = '#94a3b8';
+              break;
+            default:
+              // Valeur par défaut
+              svg.style.stroke = 'currentColor';
+          }
+        }
+        
+        // Réinitialisation de tous les chemins et formes
+        Array.from(svg.querySelectorAll('path, line, circle, rect, polyline, polygon')).forEach(path => {
+          // Ne pas toucher aux chemins spéciaux qui doivent avoir un remplissage
+          if (path.getAttribute('fill') !== 'currentColor') {
+            path.setAttribute('fill', 'none');
+            path.style.fill = 'none';
+          }
+        });
+      });
+      
+      // Corriger les sections avec des fonds blancs
+      card.querySelectorAll('.p-4.bg-white, .p-4.bg-gray-50, .p-4.bg-gray-100, div[class*="bg-white"], div[class*="bg-gray-50"], div[class*="bg-gray-100"]').forEach(element => {
+        element.style.backgroundColor = '#1e293b';
+        element.style.color = '#f8fafc';
+        element.style.border = '1px solid #334155';
+        element.style.borderRadius = '0.5rem';
+        
+        // Corriger les textes à l'intérieur
+        Array.from(element.querySelectorAll('*')).forEach(child => {
+          if (child.tagName !== 'SVG') {
+            child.style.color = '#f8fafc';
+          }
+        });
+      });
+    });
+  });
+}
+
 // Configure un observateur de mutations pour appliquer les correctifs aux nouveaux éléments
 function setupMutationObserver() {
   // Créer un observateur qui surveille les modifications du DOM
@@ -165,6 +271,7 @@ function setupMutationObserver() {
       fixWhiteBackgrounds();
       fixSvgIcons();
       fixTextContrast();
+      fixLearningCards();
     }
   });
   

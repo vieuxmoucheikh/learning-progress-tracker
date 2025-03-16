@@ -37,6 +37,7 @@ import './styles/critical-icon-fixes.css'; // Ajout du nouveau fichier de correc
 import './styles/critical-darkmode-force.css'; // Ajout du fichier de forçage ultime
 import './styles/svg-icon-fixes.css';
 import './styles/svg-icon-emergency-fix.css';
+import './styles/learning-card-darkmode-fix.css'; // Nouvel import pour les correctifs spécifiques aux cartes
 import './components/LearningItemCard.css';
 import './components/Calendar.css';
 import './components/StatusBadge.css';
