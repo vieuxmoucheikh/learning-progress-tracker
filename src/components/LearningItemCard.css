@@ -643,3 +643,267 @@ html[data-theme="dark"] .learning-item-card button {
     flex-wrap: wrap;
   }
 }
+
+/* Améliorations spécifiques pour le mode mobile clair */
+@media (max-width: 768px) {
+  /* Styles généraux pour les cartes en mode clair sur mobile */
+  html[data-theme="light"] .learning-item-card,
+  html[data-theme="light"] .card {
+    border-radius: 16px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+    background-color: #ffffff;
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  /* Effet de survol amélioré */
+  html[data-theme="light"] .learning-item-card:hover,
+  html[data-theme="light"] .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Styles pour l'en-tête des cartes en mode clair sur mobile */
+  html[data-theme="light"] .learning-item-card .card > div:first-child {
+    background: linear-gradient(120deg, #f8faff 0%, #f0f5ff 100%);
+    border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+    padding: 16px;
+  }
+
+  /* Amélioration des titres en mode clair sur mobile */
+  html[data-theme="light"] .learning-item-card h3,
+  html[data-theme="light"] .card h3 {
+    color: #1e40af;
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+
+  /* Corps de la carte en mode clair sur mobile */
+  html[data-theme="light"] .learning-item-card .card > div:last-child {
+    background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
+    padding: 16px;
+  }
+
+  /* Amélioration des sessions de la carte en mode clair sur mobile */
+  html[data-theme="light"] .learning-item-card .border.rounded-xl {
+    border: 2px solid rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04);
+    background: linear-gradient(135deg, #f8faff 0%, #f0f7ff 100%);
+    margin-bottom: 12px;
+    padding: 12px;
+    transition: all 0.3s ease;
+  }
+
+  /* Effet de survol des sessions */
+  html[data-theme="light"] .learning-item-card .border.rounded-xl:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+  }
+
+  /* Sessions actives */
+  html[data-theme="light"] .learning-item-card .border.rounded-xl.border-l-blue-400 {
+    border-left: 4px solid #3b82f6;
+    background: linear-gradient(135deg, #f0f7ff 0%, #e6f0ff 100%);
+  }
+
+  /* Sessions en pause */
+  html[data-theme="light"] .learning-item-card .border.rounded-xl:has([class*="status-on_hold"]) {
+    border-left: 4px solid #f59e0b;
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  }
+
+  /* Sessions terminées */
+  html[data-theme="light"] .learning-item-card .border.rounded-xl:has([class*="status-completed"]) {
+    border-left: 4px solid #10b981;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  }
+
+  /* Amélioration des badges en mode clair sur mobile */
+  html[data-theme="light"] .learning-item-card .badge {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.7rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Amélioration de l'icône de suppression */
+  html[data-theme="light"] .learning-item-card button[title="Delete item"] {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    box-shadow: 0 2px 4px rgba(185, 28, 28, 0.1);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+  }
+
+  html[data-theme="light"] .learning-item-card button[title="Delete item"]:hover {
+    background: #fecaca;
+    color: #991b1b;
+    box-shadow: 0 3px 6px rgba(185, 28, 28, 0.15);
+  }
+
+  /* Amélioration du bouton de complétion */
+  html[data-theme="light"] .learning-item-card button[title="Mark as complete"],
+  html[data-theme="light"] .learning-item-card button[title="Mark as incomplete"] {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+  }
+
+  html[data-theme="light"] .learning-item-card button[title="Mark as complete"] {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #dcfce7;
+    box-shadow: 0 2px 4px rgba(22, 163, 74, 0.1);
+  }
+
+  html[data-theme="light"] .learning-item-card button[title="Mark as incomplete"] {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #86efac;
+    box-shadow: 0 2px 4px rgba(22, 163, 74, 0.15);
+  }
+
+  /* Amélioration des boutons de session */
+  html[data-theme="light"] .learning-item-card button[class*="bg-blue-50"] {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.15);
+    font-weight: 600;
+  }
+
+  html[data-theme="light"] .learning-item-card button[class*="bg-yellow-50"] {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #b45309;
+    border: 1px solid #fcd34d;
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.15);
+    font-weight: 600;
+  }
+
+  html[data-theme="light"] .learning-item-card button[class*="bg-red-50"] {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15);
+    font-weight: 600;
+  }
+
+  /* Amélioration de la section de temps total */
+  html[data-theme="light"] .learning-item-card .mb-4.p-4.bg-gray-50 {
+    background: linear-gradient(135deg, #f0f7ff 0%, #e6f0ff 100%);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Timer actif */
+  html[data-theme="light"] .learning-item-card span:has([class*="Session:"]) {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.15);
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 999px;
+  }
+
+  /* Timer en pause */
+  html[data-theme="light"] .learning-item-card span:has([class*="Paused:"]) {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #b45309;
+    border: 1px solid #fcd34d;
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.15);
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 999px;
+  }
+
+  /* Section URL externe */
+  html[data-theme="light"] .learning-item-card div[class*="border-blue-100"] {
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, #f0f7ff 0%, #e6f0ff 100%);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Titre de l'historique des sessions */
+  html[data-theme="light"] .learning-item-card .space-y-4 > div > h4 {
+    color: #1e40af;
+    border-bottom: 2px solid #3b82f6;
+    padding-bottom: 8px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Notes dans les sessions */
+  html[data-theme="light"] .learning-item-card [class*="from-amber-50"] {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);
+  }
+
+  /* Lisibilité du texte */
+  html[data-theme="light"] .learning-item-card p {
+    color: #334155;
+    line-height: 1.6;
+  }
+
+  /* Texte secondaire */
+  html[data-theme="light"] .learning-item-card [class*="text-gray-500"],
+  html[data-theme="light"] .learning-item-card [class*="text-gray-600"] {
+    color: #475569;
+  }
+  
+  /* Icônes d'horloge et de session */
+  html[data-theme="light"] .learning-item-card .text-blue-500:not(button),
+  html[data-theme="light"] .learning-item-card .text-blue-400:not(button) {
+    color: #2563eb;
+  }
+  
+  /* Correction de tous les boutons pour s'assurer qu'ils sont bien visibles */
+  html[data-theme="light"] .learning-item-card button {
+    min-height: 36px;
+    min-width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+  
+  /* Bouton Start Session spécifiquement */
+  html[data-theme="light"] .learning-item-card button[class*="bg-blue-500"] {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+    font-weight: 600;
+    padding: 0 16px;
+    height: 40px;
+    border-radius: 8px;
+  }
+}
