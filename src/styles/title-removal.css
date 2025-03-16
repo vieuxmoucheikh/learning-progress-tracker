@@ -1,0 +1,89 @@
+/* Suppression radicale des titres "Learning Progress / Learning Dashboard" */
+
+/* Ciblage général de tous les titres potentiels */
+h1, 
+h1 *, 
+h2.text-2xl, 
+h2.text-3xl, 
+h2[class*="bg-gradient"],
+span[class*="text-transparent"],
+div[class*="text-transparent"],
+[class*="heading"],
+[class*="title"]:not(h3):not([class*="card-title"]):not([class*="item-title"]),
+[class*="dashboard-title"],
+[class*="page-title"],
+[class*="app-name"],
+[class*="app-title"] {
+  font-size: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  line-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  outline: none !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Ciblage spécifique du texte "Learning Progress" */
+[class*="learning"],
+[class*="Learning"],
+[class*="progress"],
+[class*="Progress"],
+[class*="dashboard-header"],
+[class*="app-header"],
+div:has(> div > h1),
+div:has(> h1),
+div:has(> h2[class*="gradient"]),
+div:has(> span[class*="text-transparent"]) {
+  font-size: 0 !important;
+}
+
+/* Mais préserver le contenu des cartes d'apprentissage */
+[class*="learning-card"] *,
+[class*="learning-item"] *,
+[class*="learning-content"] *,
+[class*="card-body"] *,
+[class*="card-header"] * {
+  font-size: revert !important;
+  height: auto !important;
+  width: auto !important;
+  position: static !important;
+  visibility: visible !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Style spécifique pour les éléments à droite du menu de navigation */
+.tab-navigation-container + div h1,
+.tab-navigation-container ~ div h1,
+.md\:w-64 + div h1,
+.md\:w-64 ~ div h1,
+[class*="sidebar"] + div h1,
+[class*="sidebar"] ~ div h1,
+[class*="navigation"] + div h1,
+[class*="navigation"] ~ div h1 {
+  display: none !important;
+}
+
+/* Remplir l'espace avec une élégante marge */
+header::before {
+  content: "";
+  display: block;
+  flex: 1;
+}
+
+/* Ajustement pour l'alignement des boutons */
+header {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  width: 100% !important;
+  gap: 1rem !important;
+}

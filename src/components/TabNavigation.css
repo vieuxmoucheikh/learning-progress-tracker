@@ -259,6 +259,8 @@
   
   .getting-started-tip-container {
     display: block;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   
   /* Fond d'animation subtil */
@@ -422,6 +424,8 @@
   margin-top: auto;
   margin-bottom: 1.25rem;
   padding: 0 1.25rem;
+  position: relative;
+  z-index: 5;
 }
 
 .getting-started-tip {
