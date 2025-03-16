@@ -348,3 +348,32 @@ pre {
   overflow: hidden !important;
   margin-bottom: 32px !important;
 }
+
+/* Correctifs globaux pour garantir un affichage correct */
+@media (max-width: 767px) {
+  /* Assurer que la navigation mobile s'affiche correctement */
+  .tab-navigation-container {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    will-change: transform;
+  }
+  
+  /* Éviter les débordements horizontaux */
+  body, html {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  /* Forcer le bon affichage de tous les éléments dans la barre de navigation */
+  .tab-navigation-items > * {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Désactiver temporairement les animations qui pourraient causer des problèmes */
+  .tab-navigation-item {
+    animation: none !important;
+    transition: background-color 0.2s ease !important;
+  }
+}

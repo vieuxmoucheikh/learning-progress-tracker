@@ -223,8 +223,67 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
     }
   }, [activeTab, isMobile]);
 
+  // Améliorer le comportement de défilement pour les éléments hors écran
+  useEffect(() => {
+    if (activeTabRef.current && scrollContainerRef.current && isMobile) {
+      // Utiliser scrollIntoView avec des options optimales pour la visibilité
+      setTimeout(() => {
+        try {
+          activeTabRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'center'
+          });
+        } catch (e) {
+          console.log('Fallback to manual scrolling');
+          const container = scrollContainerRef.current;
+          const activeTab = activeTabRef.current;
+          
+          if (container && activeTab) {
+            const containerWidth = container.offsetWidth;
+            const tabLeft = activeTab.offsetLeft;
+            const tabWidth = activeTab.offsetWidth;
+            
+            container.scrollLeft = tabLeft - (containerWidth / 2) + (tabWidth / 2);
+          }
+        }
+      }, 100);
+    }
+  }, [activeTab, isMobile]);
+
+  // Vérification supplémentaire pour s'assurer que tous les éléments sont visibles
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (scrollContainerRef.current) {
+        const hasOverflow = scrollContainerRef.current.scrollWidth > scrollContainerRef.current.clientWidth;
+        const container = scrollContainerRef.current.parentElement;
+        
+        if (container) {
+          if (hasOverflow) {
+            container.classList.add('has-scroll-indicators');
+          } else {
+            container.classList.remove('has-scroll-indicators');
+          }
+        }
+      }
+    };
+
+    // Vérifier au chargement et au redimensionnement
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    
+    // Configuration pour les mobiles
+    if (isMobile) {
+      document.documentElement.style.setProperty('--mobile-nav-padding', '1rem');
+    }
+    
+    return () => {
+      window.removeEventListener('resize', checkOverflow);
+    };
+  }, [isMobile]);
+
   return (
-    <div className={`tab-navigation-container ${hasOverflow ? 'has-scroll-indicators' : ''}`}>
+    <div className="tab-navigation-container">
       {/* Logo ou branding - icône uniquement */}
       <div className="mobile-logo-container">
         <div className="mobile-logo">
@@ -243,7 +302,9 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
         style={{ 
           overflowX: 'auto', 
           WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'none'
+          scrollbarWidth: 'none',
+          paddingLeft: isMobile ? 'var(--mobile-nav-padding, 0.5rem)' : undefined,
+          paddingRight: isMobile ? 'var(--mobile-nav-padding, 0.5rem)' : undefined
         }}
       >
         {tabs.map((tab, index) => (
@@ -254,30 +315,31 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
             className={`
               tab-navigation-item
               ${activeTab === tab.id ? 'active' : ''}
-              flex items-center gap-2 transition-all
+              flex items-center gap-2 transition-colors
             `}
             style={{ 
               '--item-index': index,
-              flexShrink: 0, // Empêche l'élément de se rétrécir
-              // Sur mobile, utiliser des labels courts
-              ...(isMobile && { transform: tab.id === activeTab ? 'scale(1)' : 'scale(0.98)' })
+              flexShrink: 0,
+              // Éviter les transformations qui peuvent causer des problèmes
+              transform: 'none',
+              opacity: 1
             } as React.CSSProperties}
             aria-current={activeTab === tab.id ? 'page' : undefined}
             role="tab"
             aria-selected={activeTab === tab.id}
             aria-label={tab.description || tab.label}
             title={tab.description}
-          >
+          ></button>
             <span className="nav-icon">{tab.icon}</span>
             <span className="nav-text">
-              {isMobile ? tab.shortLabel || tab.label.substring(0, 6) : tab.label}
+              {isMobile ? (tab.shortLabel || tab.label.slice(0, 6)) : tab.label}
             </span>
           </button>
         ))}
       </div>
       
       {/* Message d'aide au bas du menu en version desktop */}
-      <div className="getting-started-tip-container">
+      <div className="getting-started-tip-container"></div>
         <div className="getting-started-tip">
           <span className="tip-heading">Nouveau ici ?</span>
           <span className="tip-text">

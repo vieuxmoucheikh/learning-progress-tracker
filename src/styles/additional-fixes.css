@@ -72,14 +72,12 @@ header [class*="text-xl"] {
     position: sticky !important;
     top: 0 !important;
     z-index: 100 !important;
-    padding-bottom: 0.5rem !important;
+    padding-bottom: 0.75rem !important;
     width: 100% !important;
     background: linear-gradient(165deg, #0f172a 0%, #1e293b 60%, #3b82f6 100%) !important;
-    box-shadow: 
-      0 4px 15px rgba(0, 0, 0, 0.25),
-      0 2px 6px rgba(0, 0, 0, 0.2),
-      inset 0 -1px 1px rgba(255, 255, 255, 0.05) !important;
-    overflow-x: hidden !important; /* Prévenir le dépassement horizontal */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25) !important;
+    overflow: visible !important; /* Changé de overflow-x: hidden à visible */
+    min-height: 110px !important; /* S'assurer qu'il y a assez d'espace pour tout le contenu */
   }
   
   /* Animation d'entrée du menu */
@@ -100,8 +98,8 @@ header [class*="text-xl"] {
   
   /* Ajustement des éléments du menu */
   .tab-navigation-items {
-    padding: 0.5rem 0.75rem !important;
-    width: calc(100% - 0.5rem) !important; /* Légèrement moins large pour éviter les dépassements */
+    padding: 0.5rem !important;
+    width: 100% !important; /* Largeur complète */
     overflow-x: auto !important;
     display: flex !important;
     flex-wrap: nowrap !important;
@@ -109,9 +107,16 @@ header [class*="text-xl"] {
     -webkit-overflow-scrolling: touch !important;
     scrollbar-width: none !important;
     margin: 0 !important;
-    margin-left: 0.25rem !important; /* Centrer légèrement */
-    margin-right: 0.25rem !important;
     scroll-behavior: smooth !important;
+    gap: 0.25rem !important; /* Ajouter un espacement entre les éléments */
+    
+    /* Force la visibilité complète */
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+    
+    /* Assurer que le conteneur ne disparaît pas */
+    min-height: 48px !important;
+    max-width: 100% !important;
   }
   
   /* S'assurer que les items de navigation ont une taille appropriée */
@@ -123,33 +128,34 @@ header [class*="text-xl"] {
       0 1px 2px rgba(0, 0, 0, 0.1),
       inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    transition: transform 0.2s, box-shadow 0.2s !important;
-    padding: 0.6rem 0.75rem !important; /* Taille encore plus réduite */
-    margin: 0 0.175rem !important; /* Espacement encore plus réduit */
-    flex: 0 0 auto !important; /* Ne pas rétrécir ni grandir */
-    min-width: auto !important; /* Laisser la taille s'adapter au contenu */
+    transition: background-color 0.2s ease !important; /* Uniquement transition sur la couleur */
+    padding: 0.65rem 0.8rem !important;
+    margin: 0 !important; /* Supprime les marges et utilise gap à la place */
+    flex: 0 0 auto !important;
+    min-width: auto !important;
     width: auto !important;
-    transform: scale(0.98) !important; /* Légèrement plus petit pour tout faire tenir */
+    transform: none !important; /* Enlever la transformation scale qui peut causer des problèmes */
+    
+    /* Assurer que tous les éléments sont visibles */
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative !important;
   }
   
   .tab-navigation-item.active {
-    transform: scale(1) !important; /* Taille normale pour l'élément actif */
-    box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.2),
-      0 2px 4px rgba(0, 0, 0, 0.15),
-      inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
+    transform: none !important; /* Ne pas utiliser translateY() ou scale() */
     background: rgba(255, 255, 255, 0.15) !important;
     border-color: rgba(255, 255, 255, 0.18) !important;
   }
   
   /* Optimiser l'affichage du texte dans les onglets */
   .tab-navigation-item .nav-text {
-    font-size: 0.7rem !important; /* Texte encore plus petit */
+    font-size: 0.7rem !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     max-width: 100% !important;
-    letter-spacing: -0.01em !important; /* Espacement négatif pour économiser de l'espace */
+    letter-spacing: normal !important; /* Espacement normal pour meilleure lisibilité */
   }
   
   /* Optimiser l'affichage des icônes */
@@ -205,6 +211,74 @@ header [class*="text-xl"] {
     opacity: 0.8 !important;
     display: block !important;
   }
+  
+  /* Faciliter la visualisation avec un arrière-plan coloré */
+  .tab-navigation-container.has-scroll-indicators::before,
+  .tab-navigation-container.has-scroll-indicators::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 52px !important;
+    width: 32px !important;
+    height: 40px !important;
+    z-index: 30 !important;
+    pointer-events: none !important;
+    opacity: 0.9 !important;
+    display: block !important;
+  }
+  
+  .tab-navigation-container.has-scroll-indicators::before {
+    left: 0 !important;
+    background: linear-gradient(to right, rgba(15, 23, 42, 0.95), transparent) !important;
+  }
+  
+  .tab-navigation-container.has-scroll-indicators::after {
+    right: 0 !important;
+    background: linear-gradient(to left, rgba(15, 23, 42, 0.95), transparent) !important;
+  }
+}
+
+/* Correction urgente pour les problèmes de disposition sur mobile */
+@media (max-width: 767px) {
+  /* Assurer que rien n'est masqué ou tronqué */
+  .tab-navigation-container,
+  .tab-navigation-items {
+    max-width: 100vw !important;
+    overflow-x: auto !important;
+  }
+  
+  /* Supprimer les transformations qui pourraient causer des problèmes */
+  .tab-navigation-item,
+  .tab-navigation-item.active {
+    transform: none !important;
+    transform-origin: center !important;
+    
+    /* S'assurer que la taille est définie de manière absolue */
+    height: auto !important;
+    min-height: 40px !important;
+    
+    /* Utiliser des dimensions fixes pour éviter les fluctuations */
+    padding: 0.6rem 0.75rem !important;
+  }
+  
+  /* Assurer que la navigation s'affiche toujours correctement */
+  .md\:w-64 {
+    min-height: 110px !important;
+    height: auto !important;
+  }
+  
+  /* Forcer l'affichage correct des éléments */
+  .tab-navigation-item .nav-icon,
+  .tab-navigation-item .nav-text {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Style distinctif pour savoir quel élément est actif */
+  .tab-navigation-item.active {
+    background-color: rgba(59, 130, 246, 0.25) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+  }
 }
 
 /* Correction pour les appareils très petits (iPhone SE, etc.) */
@@ -215,11 +289,11 @@ header [class*="text-xl"] {
     box-shadow: 
       0 2px 4px rgba(0, 0, 0, 0.12),
       inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
-    transform: scale(0.95) !important; /* Encore plus petit */
+    transform: none !important; /* Encore plus petit */
   }
   
   .tab-navigation-item.active {
-    transform: scale(0.97) !important; /* Un peu plus grand que les autres mais toujours compact */
+    transform: none !important; /* Un peu plus grand que les autres mais toujours compact */
   }
   
   .tab-navigation-item .nav-text {
@@ -238,13 +312,14 @@ header [class*="text-xl"] {
   }
   
   .mobile-logo {
-    width: 38px !important;
-    height: 38px !important;
+    width: 36px !important;
+    height: 36px !important;
   }
   
   /* Faire tenir plus d'éléments en ajustant davantage la navigation */
   .tab-navigation-items {
-    padding: 0.4rem 0.5rem !important;
+    padding: 0.5rem 0.4rem !important;
+    overflow-x: auto !important;
   }
 }
 

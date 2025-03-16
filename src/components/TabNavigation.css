@@ -343,12 +343,12 @@
     content: '';
     position: absolute;
     top: 52px;
-    width: 40px; /* Plus large pour être plus visible */
-    height: 32px;
+    width: 30px; /* Réduit légèrement pour éviter de masquer trop de contenu */
+    height: 40px; /* Plus haut pour être plus visible */
     z-index: 30;
     pointer-events: none;
-    opacity: 0.8; /* Plus visible */
-    display: block !important; /* Forcer l'affichage */
+    opacity: 0.85; /* Plus visible */
+    display: block !important;
   }
   
   .tab-navigation-container::before {
@@ -363,87 +363,48 @@
   
   /* Ajustements pour garantir que le menu est bien visible */
   .tab-navigation-items {
-    padding: 0.65rem 0.75rem; /* Plus d'espace horizontalement */
-    padding-left: 0.85rem !important; /* Plus d'espace au début */
-    padding-right: 0.85rem !important; /* Plus d'espace à la fin */
-    mask-image: none;
-    width: 100%;
+    padding: 0.65rem 0.5rem;
+    width: 100% !important; /* Assurer que la largeur est complète */
     justify-content: flex-start;
     overflow-x: auto !important;
+    scroll-padding: 0 0.5rem; /* Ajouter un padding de défilement pour éviter les bords */
+    -webkit-overflow-scrolling: touch;
+    /* Supprimer le mask-image qui pourrait causer des problèmes */
+    mask-image: none;
+    -webkit-mask-image: none;
+    scroll-snap-type: x proximity; /* Défilement plus naturel */
   }
   
+  /* Rendre le menu plus visible et optimisé pour mobile */
+  .tab-navigation-container {
+    background: linear-gradient(165deg, #0f172a 0%, #1e293b 60%, #3b82f6 100%) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25) !important;
+    overflow: visible !important; /* Assurer que rien n'est coupé */
+    padding-bottom: 0.75rem !important; /* Plus d'espace en bas */
+  }
+  
+  /* Optimiser la taille des éléments sans les réduire excessivement */
   .tab-navigation-item {
-    padding: 0.6rem 0.8rem; /* Taille légèrement réduite */
-    border-radius: 10px;
-    margin: 0 0.25rem;
-    background-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease !important;
-    flex-shrink: 0; /* Empêche les éléments de rétrécir */
-    min-width: max-content; /* Garantit que le contenu définit la largeur minimale */
-    max-width: none; /* Empêche la limitation de largeur */
-    transform: scale(0.98); /* Légèrement plus petit pour mieux tenir */
-  }
-  
-  .tab-navigation-item.active {
-    transform: scale(1); /* Taille normale pour l'élément actif */
-  }
-  
-  /* Réduire encore plus la taille du texte et des icônes pour économiser de l'espace */
-  .nav-text {
-    font-size: 0.7rem; /* Texte encore plus petit pour les très petits écrans */
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
-    font-weight: 600 !important;
-  }
-  
-  .nav-icon {
-    width: 16px; /* Icône encore plus petite */
-    height: 16px;
-  }
-  
-  /* Optimiser le logo pour libérer de l'espace */
-  .mobile-logo-container {
-    padding: 0.6rem 0;
-  }
-  
-  .mobile-logo {
-    width: 42px; /* Logo un peu plus petit */
-    height: 42px;
+    padding: 0.65rem 0.75rem !important;
+    margin: 0 0.25rem !important;
+    transform: none !important; /* Ne pas réduire l'échelle qui peut causer des problèmes */
+    flex: 0 0 auto !important;
+    min-width: min-content !important;
+    white-space: nowrap !important;
+    user-select: none !important; /* Éviter la sélection de texte accidentelle */
   }
   
   /* Correction spécifique pour les très petits écrans */
   @media (max-width: 375px) {
     .tab-navigation-items {
-      padding: 0.5rem 0.6rem; /* Encore moins d'espace vertical pour gagner de la place */
+      padding: 0.5rem 0.6rem;
+      justify-content: space-between !important; /* Distribuer l'espace également */
     }
     
     .tab-navigation-item {
-      padding: 0.5rem 0.65rem !important; /* Encore plus compact */
+      padding: 0.5rem 0.65rem !important;
       margin: 0 0.15rem !important;
-      transform: scale(0.95); /* Encore plus petit */
-    }
-    
-    .tab-navigation-item.active {
-      transform: scale(0.98); /* Un peu plus grand que les autres mais toujours compact */
-    }
-    
-    .nav-text {
-      font-size: 0.65rem !important; /* Texte encore plus petit */
-    }
-    
-    .nav-icon {
-      width: 14px !important; /* Icône encore plus petite */
-      height: 14px !important;
-    }
-    
-    .mobile-logo-container {
-      padding: 0.4rem 0;
-    }
-    
-    .mobile-logo {
-      width: 38px;
-      height: 38px;
+      transform: none !important; /* Ne pas utiliser scale() qui peut causer des problèmes */
     }
   }
 }
