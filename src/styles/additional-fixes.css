@@ -28,36 +28,6 @@ header [class*="text-xl"] {
   pointer-events: none !important;
 }
 
-/* Ciblage ultra-spécifique pour supprimer "Learning Progress" près du menu */
-.md\:ml-64 h1,
-.md\:ml-64 h2,
-body > div > div > div:first-child h1,
-body > div > div > div:first-child h2,
-body > div > div > div > h1,
-body > div > div > div > h2,
-[class*="sidebar"] + div h1,
-[class*="sidebar"] + div h2,
-[class*="sidebar"] ~ div h1,
-[class*="sidebar"] ~ div h2,
-[class*="navigation"] + div h1,
-[class*="navigation"] + div h2,
-[class*="navigation"] ~ div h1,
-[class*="navigation"] ~ div h2,
-.tab-navigation-container + div h1,
-.tab-navigation-container ~ div h1,
-.tab-navigation-container + div h2,
-.tab-navigation-container ~ div h2 {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  opacity: 0 !important;
-  overflow: hidden !important;
-  position: absolute !important;
-  pointer-events: none !important;
-}
-
 /* Assurer que les titres de page ne puissent pas contenir "Learning Progress" ou "Learning Dashboard" */
 :root [class*="learning"],
 :root [class*="Learning"],
@@ -148,58 +118,6 @@ main > div:first-child:not([class*="grid"]):not([class*="flex"]) {
     color: white !important;
     font-weight: 500 !important;
     line-height: 1.4 !important;
-  }
-  
-  /* S'assurer que l'élément est toujours visible, même avec d'autres styles */
-  .getting-started-tip-container,
-  div[class*="tip-container"],
-  [class*="guidance"],
-  [class*="help-text"],
-  [class*="new-user"] {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    height: auto !important;
-    width: auto !important;
-    position: relative !important;
-    pointer-events: auto !important;
-    z-index: 5 !important;
-  }
-  
-  /* Animation subtile pour attirer l'attention */
-  .getting-started-tip {
-    animation: gentle-pulse 3s infinite alternate ease-in-out !important;
-  }
-  
-  @keyframes gentle-pulse {
-    0% {
-      transform: translateY(0);
-      box-shadow: 
-        0 4px 12px rgba(0, 0, 0, 0.15),
-        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-    }
-    100% {
-      transform: translateY(-2px);
-      box-shadow: 
-        0 6px 16px rgba(0, 0, 0, 0.2),
-        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-    }
-  }
-
-  /* Désactivation de l'animation pour les utilisateurs qui préfèrent réduire les mouvements */
-  @media (prefers-reduced-motion: reduce) {
-    .getting-started-tip {
-      animation: none !important;
-    }
-  }
-  
-  /* Ajustement pour que le contenu principal ignore l'espace du titre supprimé */
-  .md\:p-6 {
-    padding-top: 1rem !important;
-  }
-  
-  header.mb-6 {
-    margin-bottom: 1rem !important;
   }
 }
 
