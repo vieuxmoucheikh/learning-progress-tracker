@@ -34,22 +34,10 @@ import './styles/critical-card-borders.css'; // Ajout du fichier de correctifs c
 import './styles/icon-fixes.css'; // Ajout du fichier de correctifs pour les icônes
 import './styles/icon-override.css';
 import './styles/critical-icon-fixes.css'; // Ajout du nouveau fichier de correctifs critiques
-import './styles/critical-darkmode-force.css'; // Ajout du fichier de forçage ultime
-import './styles/svg-icon-fixes.css';
-import './styles/svg-icon-emergency-fix.css';
-import './styles/learning-card-darkmode-fix.css'; // Nouvel import pour les correctifs spécifiques aux cartes
-import './styles/emergency-darkmode.css'; // Ajout du nouveau fichier de correctifs d'urgence
 import './components/LearningItemCard.css';
 import './components/Calendar.css';
 import './components/StatusBadge.css';
 import './components/PomodoroTimer.css';
-
-// Importer le correcteur système avec une annotation de type pour éviter l'erreur TypeScript
-// @ts-ignore - Ignorer l'erreur de type pour ce module sans définition
-import { applyDarkModeFixesRuntime } from './lib/icon-fixer';
-
-// Importer le composant d'initialisation des correctifs de mode sombre
-import InitDarkModeFix from './components/InitDarkModeFix';
 
 interface State {
   items: LearningItem[];
@@ -121,7 +109,7 @@ function reducer(state: State, action: Action): State {
         const hasActiveOrPausedSession = item.progress?.sessions?.some(
           s => !s.endTime && (s.status === 'in_progress' || s.status === 'on_hold')
         );
-
+        
         if (!hasActiveOrPausedSession) {
           localStorage.removeItem(`activeSession_${item.id}`);
           localStorage.removeItem(`sessionLastUpdate_${item.id}`);
@@ -335,7 +323,7 @@ export default function App() {
       
       /* Fix for mobile dark backgrounds in light mode */
       @media (max-width: 768px) {
-        body:not(.dark) .bg-gray-50,
+        body:not(.dark) .bg-gray-50, 
         body:not(.dark) .bg-gray-100,
         body:not(.dark) .bg-gray-200 {
           background-color: #ffffff !important;
@@ -362,6 +350,7 @@ export default function App() {
         max-width: 100% !important;
         overflow-x: hidden !important;
       }
+      
       .yearly-activity-grid {
         width: 100% !important;
         grid-template-columns: repeat(53, minmax(0, 1fr)) !important;
@@ -373,6 +362,7 @@ export default function App() {
           padding: 0.5rem !important;
           gap: 0.5rem !important;
         }
+        
         .tab-navigation button {
           padding: 0.5rem 0.75rem !important;
           font-size: 0.875rem !important;
@@ -422,49 +412,6 @@ export default function App() {
     };
   }, [user]);
 
-  // Appliquer le correcteur système quand le thème change
-  useEffect(() => {
-    // Fonction pour appliquer les correctifs
-    const applyFixes = () => {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      if (currentTheme === 'dark' && typeof applyDarkModeFixesRuntime === 'function') {
-        setTimeout(() => {
-          applyDarkModeFixesRuntime();
-        }, 100); // Petit délai pour laisser le DOM se mettre à jour
-      }
-    };
-
-    // Observer les changements d'attribut sur html pour détecter les changements de thème
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (
-          mutation.type === 'attributes' &&
-          mutation.attributeName === 'data-theme'
-        ) {
-          applyFixes();
-        }
-      });
-    });
-
-    // Démarrer l'observation
-    observer.observe(document.documentElement, { attributes: true });
-
-    // Appliquer les correctifs immédiatement
-    applyFixes();
-
-    // Nettoyer l'observateur quand le composant est démonté
-    return () => observer.disconnect();
-  }, []);
-
-  // Appliquer les correctifs après le rendu initial du composant
-  useEffect(() => {
-    if (!state.loading && typeof applyDarkModeFixesRuntime === 'function') {
-      setTimeout(() => {
-        applyDarkModeFixesRuntime();
-      }, 500); // Délai plus long pour assurer que tout est rendu
-    }
-  }, [state.loading, selectedTab]);
-
   useEffect(() => {
     const activeItem = state.activeItem;
     if (!activeItem) return;
@@ -513,7 +460,7 @@ export default function App() {
         const { data, error } = await supabase
           .from('flashcard_decks')
           .select('*');
-
+        
         if (error) {
           console.error('Error loading flashcards:', error);
           return;
@@ -526,7 +473,7 @@ export default function App() {
         setFlashcardsLoading(false);
       }
     };
-
+    
     loadFlashcards();
   }, []);
 
@@ -771,7 +718,7 @@ export default function App() {
         name: data.name,
         description: data.description
       });
-
+      
       // Update state with the new deck
       setFlashcardDecks(prev => [...prev, newDeck]);
       
@@ -779,12 +726,12 @@ export default function App() {
         title: "Success",
         description: "New deck created successfully",
       });
-
+      
       return newDeck;
     } catch (error) {
       console.error('Error creating deck:', error);
       toast({
-        title: "Error",
+        title: "Error", 
         description: "Failed to create the deck",
         variant: "destructive"
       });
@@ -810,7 +757,7 @@ export default function App() {
         .from('flashcards')
         .select('*')
         .eq('deck_id', deckId);
-
+      
       if (error) throw error;
       
       if (!cards || cards.length === 0) {
@@ -861,7 +808,7 @@ export default function App() {
           description: deckData.description || ''
         })
         .eq('id', deckId);
-
+      
       if (error) throw error;
       
       // Refresh the decks list after update
@@ -892,7 +839,7 @@ export default function App() {
         .from('flashcard_decks')
         .delete()
         .eq('id', deckId);
-
+      
       if (error) throw error;
       
       // Update state
@@ -910,41 +857,6 @@ export default function App() {
     }
   };
 
-  // Ajouter un effet supplémentaire pour appliquer les correctifs lors des mises à jour d'items
-  useEffect(() => {
-    // Appliquer les correctifs lorsque les items sont mis à jour
-    if (state.items.length > 0 && typeof applyDarkModeFixesRuntime === 'function') {
-      setTimeout(() => {
-        applyDarkModeFixesRuntime();
-      }, 300);
-    }
-  }, [state.items]);
-
-  // Correctif supplémentaire pour les éléments chargés de manière asynchrone
-  useEffect(() => {
-    // Observer les changements dans le DOM pour appliquer les correctifs au besoin
-    const targetNode = document.getElementById('root');
-    const config = { childList: true, subtree: true };
-    
-    const callback = (mutationsList) => {
-      // Appliquer les correctifs uniquement si nous sommes en mode sombre
-      if (document.documentElement.getAttribute('data-theme') === 'dark' && 
-          typeof applyDarkModeFixesRuntime === 'function') {
-        applyDarkModeFixesRuntime();
-      }
-    };
-    
-    const observer = new MutationObserver(callback);
-    
-    if (targetNode) {
-      observer.observe(targetNode, config);
-    }
-    
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
   if (state.loading) {
     return (
       <ThemeProvider>
@@ -952,7 +864,7 @@ export default function App() {
           <div className="md:w-64">
             <TabNavigation 
               activeTab={selectedTab} 
-              onTabChange={setSelectedTab} 
+              onTabChange={setSelectedTab}
             />
           </div>
           <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-gray-900">
@@ -965,7 +877,7 @@ export default function App() {
                   <div className="flex items-center gap-3">
                     <ThemeToggle />
                     <Button 
-                      variant="default" 
+                      variant="default"
                       size="sm"
                       className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all"
                       onClick={() => handleDashboardAddItem()} 
@@ -974,7 +886,7 @@ export default function App() {
                     </Button>
                   </div>
                 </div>
-              </header>      
+              </header>
 
               <div className="flex-1 overflow-auto">
                 <div className="h-full flex items-center justify-center">
@@ -1009,7 +921,7 @@ export default function App() {
           <div className="md:w-64">
             <TabNavigation 
               activeTab={selectedTab} 
-              onTabChange={setSelectedTab} 
+              onTabChange={setSelectedTab}
             />
           </div>
           <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-gray-900">
@@ -1022,7 +934,7 @@ export default function App() {
                   <div className="flex items-center gap-3">
                     <ThemeToggle />
                     <Button 
-                      variant="default" 
+                      variant="default"
                       size="sm"
                       className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all"
                       onClick={() => handleDashboardAddItem()} 
@@ -1037,7 +949,7 @@ export default function App() {
                 <div className="md:w-64 lg:w-72">
                   <TabNavigation 
                     activeTab={selectedTab} 
-                    onTabChange={setSelectedTab} 
+                    onTabChange={setSelectedTab}
                   />
                 </div>
 
@@ -1065,7 +977,6 @@ export default function App() {
 
   return (
     <ThemeProvider defaultTheme="dark">
-      <InitDarkModeFix /> {/* Ajout du composant d'initialisation des correctifs */}
       <div className="min-h-screen flex flex-col md:flex-row">
         <div className="md:w-64">
           <TabNavigation 
@@ -1083,7 +994,7 @@ export default function App() {
                 <div className="flex items-center gap-3">
                   <ThemeToggle />
                   <Button 
-                    variant="default" 
+                    variant="default"
                     size="sm"
                     className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all"
                     onClick={() => handleDashboardAddItem()} 
