@@ -25,10 +25,7 @@ import { supabase } from './lib/supabase';
 import { toast } from '@/components/ui/use-toast';
 
 // Importer les fichiers CSS pour les améliorations visuelles
-import './styles/theme-sync.css';  // S'assurer que ce fichier est importé en premier
 import './styles/critical-light-mode-fixes.css';
-import './styles/mobile-light-mode-fixes.css';
-import './styles/card-fixes.css'; // Assurez-vous d'importer ce fichier pour les améliorations de cartes
 import './styles/global-ui-enhancements.css';
 import './styles/responsive-fixes.css';
 import './components/LearningItemCard.css';

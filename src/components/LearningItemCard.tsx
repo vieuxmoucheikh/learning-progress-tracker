@@ -1141,23 +1141,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     <div className="learning-item-card w-full">
       <Card className={clsx(
         "relative overflow-hidden transition-all duration-200",
-        "hover:shadow-lg",
+        "hover:shadow-lg border-l-4",
         "bg-white light:bg-white preserve-colors shadow-md", // Ajout de shadow-md
-        getBorderColorClass(),
-        // Classe supplémentaire pour s'assurer que la bordure est appliquée
-        "card-with-border border-3 border-solid"
-      )}
-      // Ajouter des styles inline pour s'assurer que les bordures sont toujours visibles
-      style={{
-        borderWidth: '3px',
-        borderStyle: 'solid',
-        borderRadius: '18px',
-        borderLeftWidth: '10px',
-        overflow: 'hidden',
-        position: 'relative',
-        marginBottom: '32px'
-      }}
-      >
+        getBorderColorClass()
+      )}>
         {/* Card Header with gradient background */}
         <div className="bg-gradient-to-r from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 light:from-white light:via-white light:to-white light:bg-white border-b border-gray-200/80 dark:border-gray-700/80">
           <div className="p-6">
@@ -1739,20 +1726,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           </DialogContent>
         </Dialog>
       </Card>
-      
-      {/* Balises avec styles de cartes pour appliquer le CSS plus ciblé */}
-      <style jsx>{`
-        .learning-item-card .card {
-          border-width: 3px !important;
-          border-style: solid !important;
-          border-left-width: 10px !important;
-          border-radius: 18px !important;
-          overflow: hidden !important;
-          position: relative !important;
-          margin-bottom: 32px !important;
-        }
-      `}</style>
-    </div>
+  </div>
   );
 };
 
