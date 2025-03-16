@@ -713,3 +713,108 @@ html[data-theme="light"] div.rounded-xl {
   border-color: rgba(203, 213, 225, 0.5) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
 }
+
+/* SUPER IMPORTANT - CORRECTIFS POUR LES CARTES EN MODE CLAIR SUR MOBILE */
+
+/* Styles extrêmement spécifiques pour les cartes principales */
+html[data-theme="light"] div.learning-item-card > div.card,
+html[data-theme="light"] div.item-wrapper > div.card,
+html[data-theme="light"] div.learning-item-card > div > div.card,
+html[data-theme="light"] div[class*="item"] > div.card {
+  border: 3px solid #cbd5e1 !important;
+  border-left-width: 8px !important;
+  border-radius: 18px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+  margin-bottom: 32px !important;
+  background-color: #ffffff !important;
+}
+
+/* Variations selon le statut - version ultra spécifique */
+/* Non commencé */
+html[data-theme="light"] div.learning-item-card > div.card.border-l-gray-300,
+html[data-theme="light"] div.item-wrapper > div.card.border-l-gray-300 {
+  border-color: #cbd5e1 !important;
+  border-left-color: #94a3b8 !important;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+}
+
+/* En cours */
+html[data-theme="light"] div.learning-item-card > div.card.border-l-blue-400,
+html[data-theme="light"] div.item-wrapper > div.card.border-l-blue-400 {
+  border-color: #bfdbfe !important;
+  border-left-color: #3b82f6 !important;
+  background: linear-gradient(135deg, #f0f7ff 0%, #e6f0ff 100%) !important;
+}
+
+/* Terminé */
+html[data-theme="light"] div.learning-item-card > div.card.border-l-green-400,
+html[data-theme="light"] div.item-wrapper > div.card.border-l-green-400 {
+  border-color: #bbf7d0 !important;
+  border-left-color: #22c55e !important;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%) !important;
+}
+
+/* En pause */
+html[data-theme="light"] div.learning-item-card > div.card.border-l-yellow-400,
+html[data-theme="light"] div.item-wrapper > div.card.border-l-yellow-400 {
+  border-color: #fde68a !important;
+  border-left-color: #facc15 !important;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+}
+
+/* Archivé */
+html[data-theme="light"] div.learning-item-card > div.card.border-l-gray-400,
+html[data-theme="light"] div.item-wrapper > div.card.border-l-gray-400 {
+  border-color: #e2e8f0 !important;
+  border-left-color: #64748b !important;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+}
+
+/* Styles pour les en-têtes de carte */
+html[data-theme="light"] div.learning-item-card > div.card > div:first-child,
+html[data-theme="light"] div.item-wrapper > div.card > div:first-child {
+  border-bottom: 2px solid rgba(59, 130, 246, 0.2) !important;
+  padding: 24px !important;
+}
+
+/* En-têtes spécifiques selon le statut */
+/* Non commencé */
+html[data-theme="light"] div.learning-item-card > div.card.border-l-gray-300 > div:first-child,
+html[data-theme="light"] div.item-wrapper > div.card.border-l-gray-300 > div:first-child {
+  background: linear-gradient(120deg, #f8fafc 0%, #f1f5f9 100%) !important;
+}
+
+/* En cours */
+html[data-theme="light"] div.learning-item-card > div.card.border-l-blue-400 > div:first-child,
+html[data-theme="light"] div.item-wrapper > div.card.border-l-blue-400 > div:first-child {
+  background: linear-gradient(120deg, #eff6ff 0%, #dbeafe 100%) !important;
+}
+
+/* Terminé */
+html[data-theme="light"] div.learning-item-card > div.card.border-l-green-400 > div:first-child,
+html[data-theme="light"] div.item-wrapper > div.card.border-l-green-400 > div:first-child {
+  background: linear-gradient(120deg, #f0fdf4 0%, #dcfce7 100%) !important;
+}
+
+/* En pause */
+html[data-theme="light"] div.learning-item-card > div.card.border-l-yellow-400 > div:first-child,
+html[data-theme="light"] div.item-wrapper > div.card.border-l-yellow-400 > div:first-child {
+  background: linear-gradient(120deg, #fffbeb 0%, #fef3c7 100%) !important;
+}
+
+/* Archivé */
+html[data-theme="light"] div.learning-item-card > div.card.border-l-gray-400 > div:first-child,
+html[data-theme="light"] div.item-wrapper > div.card.border-l-gray-400 > div:first-child {
+  background: linear-gradient(120deg, #f8fafc 0%, #f1f5f9 100%) !important;
+}
+
+/* Styler le corps des cartes */
+html[data-theme="light"] div.learning-item-card > div.card > div:last-child,
+html[data-theme="light"] div.item-wrapper > div.card > div:last-child {
+  background-color: #ffffff !important;
+  padding: 24px !important;
+}
+
+/* Garantir que les styles existants pour les cartes sont préservés */
+/* ...existing code... */

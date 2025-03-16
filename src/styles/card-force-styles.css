@@ -1,0 +1,54 @@
+/* Styles forcés pour les cartes - fichier supplémentaire pour s'assurer que les styles sont bien appliqués */
+
+/* Appliquer des styles directement aux cartes via leur id */
+html[data-theme="light"] .learning-item-card [id*="card"],
+html[data-theme="light"] .item-wrapper [id*="card"] {
+  border: 3px solid #cbd5e1 !important;
+  border-left-width: 8px !important;
+  border-left-color: #3b82f6 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+  margin-bottom: 32px !important;
+}
+
+/* Styles basés sur les attributs de données pour cibler les cartes */
+html[data-theme="light"] [data-type="learning-item"],
+html[data-theme="light"] [data-component="learning-card"] {
+  border: 3px solid #cbd5e1 !important;
+  border-left-width: 8px !important;
+  border-left-color: #3b82f6 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+  margin-bottom: 32px !important;
+}
+
+/* Styles inline pour garantir l'application */
+.force-card-style {
+  border: 3px solid #cbd5e1 !important;
+  border-left-width: 8px !important;
+  border-left-color: #3b82f6 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+  margin-bottom: 32px !important;
+}
+
+/* Ajout d'un script pour appliquer dynamiquement les styles */
+@keyframes applyCardStyles {
+  to {
+    border: 3px solid #cbd5e1;
+    border-left-width: 8px;
+    border-left-color: #3b82f6;
+    border-radius: 18px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+}
+
+html[data-theme="light"] .learning-item-card > .card,
+html[data-theme="light"] .item-wrapper > .card {
+  animation: applyCardStyles 0.1s forwards;
+}

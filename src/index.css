@@ -9,6 +9,7 @@
 @import './styles/responsive-fixes.css';
 @import './styles/theme-sync.css';
 @import './styles/card-fixes.css';
+@import './styles/card-force-styles.css'; /* Nouveau fichier de styles forcés */
 @import './components/LearningItemCard.css';
 @import './components/Calendar.css';
 @import './components/StatusBadge.css';
@@ -334,4 +335,16 @@ pre {
   html[data-theme="light"] span:not([class*="icon"]) {
     color: #334155 !important; /* slate-700 */
   }
+}
+
+/* Styles globaux pour forcer l'apparence des cartes */
+.learning-item-card > .card,
+.item-wrapper > .card {
+  border: 3px solid #cbd5e1 !important;
+  border-left-width: 8px !important;
+  border-left-color: #3b82f6 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+  margin-bottom: 32px !important;
 }

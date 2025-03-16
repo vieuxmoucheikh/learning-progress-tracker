@@ -19,6 +19,21 @@
     <link rel="preload" href="%PUBLIC_URL%/mobile-light-mode.css" as="style" />
     <link rel="stylesheet" href="%PUBLIC_URL%/mobile-light-mode.css" />
 
+    <!-- Styles inline critiques pour les cartes -->
+    <style>
+      /* Styles immédiats pour les cartes */
+      .learning-item-card > .card,
+      .item-wrapper > .card {
+        border: 3px solid #cbd5e1 !important;
+        border-left-width: 8px !important;
+        border-left-color: #3b82f6 !important;
+        border-radius: 18px !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+        overflow: hidden !important;
+        margin-bottom: 32px !important;
+      }
+    </style>
+
     <!-- Meta pour améliorer l'affichage sur mobile -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta
@@ -64,6 +79,9 @@
 
     <!-- Script de correction du mode clair, chargé de manière critique -->
     <script src="%PUBLIC_URL%/light-mode-fixer.js"></script>
+
+    <!-- Script d'application des styles pour les cartes -->
+    <script src="%PUBLIC_URL%/card-styler.js"></script>
 
     <!-- Script de détection préliminaire du thème -->
     <script>

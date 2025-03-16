@@ -1434,16 +1434,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                       Start Session
                     </Button>
                   )}
-                  {/* Bouton Add Note */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleOpenNoteDialog}
-                    className="gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 shadow-sm dark:bg-blue-800/30 dark:hover:bg-blue-900/30 dark:text-blue-300 font-medium"
-                  >
-                    <MessageSquare className="h-4 w-4" />
-                    Add Note
-                  </Button>
                 </div>
               )}
             </div>
