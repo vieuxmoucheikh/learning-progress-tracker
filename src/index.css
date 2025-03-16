@@ -8,6 +8,7 @@
 @import './styles/global-ui-enhancements.css';
 @import './styles/responsive-fixes.css';
 @import './styles/theme-sync.css';
+@import './styles/card-fixes.css';
 @import './components/LearningItemCard.css';
 @import './components/Calendar.css';
 @import './components/StatusBadge.css';

@@ -1,0 +1,408 @@
+/* Améliorations pour les cartes d'apprentissage sur mobile en mode clair */
+
+@media (max-width: 768px) {
+  /* Styles généraux pour toutes les cartes en mode clair */
+  html[data-theme="light"] .learning-item-card,
+  html[data-theme="light"] .card,
+  html[data-theme="light"] [class*="learning-item-card"],
+  html[data-theme="light"] [class*="learning-card"] {
+    border-radius: 16px !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
+    border-width: 3px !important;
+    margin-bottom: 24px !important;
+    overflow: hidden !important;
+    transform-origin: center top !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  }
+
+  /* Animation au survol des cartes */
+  html[data-theme="light"] .learning-item-card:hover,
+  html[data-theme="light"] .card:hover {
+    transform: translateY(-6px) !important;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  /* NOUVELLES RÈGLES: Correction pour la carte principale qui englobe tout */
+  html[data-theme="light"] .learning-item-card > .card {
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    border-left-width: 6px !important;
+    border-color: #bfdbfe !important;
+    border-left-color: #3b82f6 !important;
+    background: #ffffff !important;
+  }
+
+  /* Variation des bordures pour les cartes principales basées sur le statut */
+  /* Non commencé */
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-gray-300"],
+  html[data-theme="light"] .learning-item-card > .card[class*="border-gray-300"] {
+    border-color: #cbd5e1 !important;
+    border-left-color: #94a3b8 !important;
+    border-left-width: 6px !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  }
+
+  /* En cours */
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-blue-400"],
+  html[data-theme="light"] .learning-item-card > .card[class*="border-blue-400"] {
+    border-color: #bfdbfe !important;
+    border-left-color: #3b82f6 !important;
+    border-left-width: 6px !important;
+    background: linear-gradient(135deg, #f0f7ff 0%, #e6f0ff 100%) !important;
+  }
+
+  /* Terminé */
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-green-400"],
+  html[data-theme="light"] .learning-item-card > .card[class*="border-green-400"] {
+    border-color: #bbf7d0 !important;
+    border-left-color: #22c55e !important;
+    border-left-width: 6px !important;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%) !important;
+  }
+
+  /* En pause */
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-yellow-400"],
+  html[data-theme="light"] .learning-item-card > .card[class*="border-yellow-400"] {
+    border-color: #fde68a !important;
+    border-left-color: #facc15 !important;
+    border-left-width: 6px !important;
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+  }
+
+  /* Archivé */
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-gray-400"],
+  html[data-theme="light"] .learning-item-card > .card[class*="border-gray-400"] {
+    border-color: #e2e8f0 !important;
+    border-left-color: #64748b !important;
+    border-left-width: 6px !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    opacity: 0.95;
+  }
+
+  /* Bordures colorées basées sur le statut - anciens sélecteurs conservés pour compatibilité */
+  /* Non commencé */
+  html[data-theme="light"] .learning-item-card .card[class*="border-gray-300"],
+  html[data-theme="light"] .learning-item-card .card[class*="border-l-gray-300"] {
+    border-color: #cbd5e1 !important;
+    border-left-color: #94a3b8 !important;
+    border-left-width: 6px !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  }
+
+  /* En cours */
+  html[data-theme="light"] .learning-item-card .card[class*="border-blue-400"],
+  html[data-theme="light"] .learning-item-card .card[class*="border-l-blue-400"] {
+    border-color: #bfdbfe !important;
+    border-left-color: #3b82f6 !important;
+    border-left-width: 6px !important;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+  }
+
+  /* Terminé */
+  html[data-theme="light"] .learning-item-card .card[class*="border-green-400"],
+  html[data-theme="light"] .learning-item-card .card[class*="border-l-green-400"] {
+    border-color: #bbf7d0 !important;
+    border-left-color: #22c55e !important;
+    border-left-width: 6px !important;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%) !important;
+  }
+
+  /* En pause */
+  html[data-theme="light"] .learning-item-card .card[class*="border-yellow-400"],
+  html[data-theme="light"] .learning-item-card .card[class*="border-l-yellow-400"] {
+    border-color: #fde68a !important;
+    border-left-color: #facc15 !important;
+    border-left-width: 6px !important;
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+  }
+
+  /* Archivé */
+  html[data-theme="light"] .learning-item-card .card[class*="border-gray-400"],
+  html[data-theme="light"] .learning-item-card .card[class*="border-l-gray-400"] {
+    border-color: #e2e8f0 !important;
+    border-left-color: #64748b !important;
+    border-left-width: 6px !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    opacity: 0.85;
+  }
+
+  /* Style pour les sessions dans les cartes */
+  html[data-theme="light"] .learning-item-card .border.rounded-xl {
+    border: 2px solid rgba(59, 130, 246, 0.3) !important;
+    border-radius: 12px !important;
+    margin-bottom: 16px !important;
+    padding: 16px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+  }
+
+  /* Session active */
+  html[data-theme="light"] .learning-item-card .border.rounded-xl.border-l-blue-400 {
+    border-color: rgba(59, 130, 246, 0.3) !important;
+    border-left: 5px solid #3b82f6 !important;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+  }
+
+  /* Session en pause */
+  html[data-theme="light"] .learning-item-card .border.rounded-xl:has([class*="on_hold"]) {
+    border-color: rgba(245, 158, 11, 0.3) !important;
+    border-left: 5px solid #f59e0b !important;
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+  }
+
+  /* Session terminée */
+  html[data-theme="light"] .learning-item-card .border.rounded-xl:has([class*="completed"]) {
+    border-color: rgba(34, 197, 94, 0.3) !important;
+    border-left: 5px solid #22c55e !important;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%) !important;
+  }
+
+  /* Effet de survol des sessions */
+  html[data-theme="light"] .learning-item-card .border.rounded-xl:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08) !important;
+    transform: translateY(-3px) !important;
+  }
+
+  /* Espacement visuel entre cartes */
+  html[data-theme="light"] .grid-items-wrapper > div + div {
+    margin-top: 32px !important;
+  }
+
+  /* Section spécifique du timer dans la carte */
+  html[data-theme="light"] .learning-item-card .mb-4.p-4.bg-gray-50 {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border: 1px solid #dbeafe !important;
+    border-radius: 12px !important;
+    padding: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  /* Section URL externe */
+  html[data-theme="light"] .learning-item-card div[class*="border-blue-100"] {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+    border: 1px solid #93c5fd !important;
+    border-radius: 12px !important;
+    padding: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  /* Entête de carte avec dégradé élégant - MISE À JOUR */
+  html[data-theme="light"] .learning-item-card .card > div:first-child {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.2) !important;
+    padding: 20px !important;
+    position: relative !important;
+  }
+
+  /* Style supplémentaire pour l'en-tête selon le statut de la carte */
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-gray-300"] > div:first-child {
+    background: linear-gradient(120deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-blue-400"] > div:first-child {
+    background: linear-gradient(120deg, #eff6ff 0%, #dbeafe 100%) !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-green-400"] > div:first-child {
+    background: linear-gradient(120deg, #f0fdf4 0%, #dcfce7 100%) !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-yellow-400"] > div:first-child {
+    background: linear-gradient(120deg, #fffbeb 0%, #fef3c7 100%) !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-gray-400"] > div:first-child {
+    background: linear-gradient(120deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  }
+
+  /* Bordure interne pour renforcer l'aspect visuel */
+  html[data-theme="light"] .learning-item-card > .card > div:last-child {
+    position: relative !important;
+    border-top: none !important;
+    background: #ffffff !important;
+  }
+
+  /* Ajouter un indicateur de statut en haut à droite de chaque carte */
+  html[data-theme="light"] .learning-item-card > .card::before {
+    content: "";
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 24px !important;
+    height: 24px !important;
+    border-top-right-radius: 15px !important;
+    z-index: 2 !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-gray-300"]::before {
+    background-color: #94a3b8 !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-blue-400"]::before {
+    background-color: #3b82f6 !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-green-400"]::before {
+    background-color: #22c55e !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-yellow-400"]::before {
+    background-color: #facc15 !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-gray-400"]::before {
+    background-color: #64748b !important;
+  }
+
+  /* Titres des cartes en gras et colorés */
+  html[data-theme="light"] .learning-item-card h3,
+  html[data-theme="light"] .card h3 {
+    color: #1e40af !important;
+    font-weight: 700 !important;
+    font-size: 1.4rem !important;
+    margin-bottom: 10px !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  /* Adaptation de la couleur du titre en fonction du statut */
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-gray-300"] h3 {
+    color: #334155 !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-blue-400"] h3 {
+    color: #1e40af !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-green-400"] h3 {
+    color: #166534 !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-yellow-400"] h3 {
+    color: #854d0e !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-gray-400"] h3 {
+    color: #475569 !important;
+  }
+
+  /* Amélioration des badges de statut */
+  html[data-theme="light"] .learning-item-card .badge {
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    font-size: 0.7rem !important;
+    padding: 0.35rem 0.75rem !important;
+    border-radius: 999px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Amélioration de l'icône de suppression */
+  html[data-theme="light"] .learning-item-card button[title="Delete item"] {
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+    border: 2px solid #fecaca !important;
+    box-shadow: 0 2px 4px rgba(185, 28, 28, 0.1) !important;
+    width: 44px !important;
+    height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+  }
+
+  /* Amélioration du bouton de complétion */
+  html[data-theme="light"] .learning-item-card button[title="Mark as complete"],
+  html[data-theme="light"] .learning-item-card button[title="Mark as incomplete"] {
+    width: 44px !important;
+    height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+  }
+
+  html[data-theme="light"] .learning-item-card button[title="Mark as complete"] {
+    background: #f0fdf4 !important;
+    color: #16a34a !important;
+    border: 2px solid #dcfce7 !important;
+    box-shadow: 0 2px 4px rgba(22, 163, 74, 0.1) !important;
+  }
+
+  html[data-theme="light"] .learning-item-card button[title="Mark as incomplete"] {
+    background: #dcfce7 !important;
+    color: #15803d !important;
+    border: 2px solid #86efac !important;
+    box-shadow: 0 2px 4px rgba(22, 163, 74, 0.15) !important;
+  }
+
+  /* Amélioration des boutons d'action */
+  html[data-theme="light"] .learning-item-card button {
+    min-height: 40px !important;
+    min-width: 40px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+  }
+
+  /* Bouton Start Session spécifiquement */
+  html[data-theme="light"] .learning-item-card button[class*="bg-blue-500"] {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3) !important;
+    font-weight: 600 !important;
+    padding: 0 16px !important;
+    height: 44px !important;
+  }
+
+  /* Améliorations pour la lisibilité des textes */
+  html[data-theme="light"] .learning-item-card p,
+  html[data-theme="light"] .card p {
+    color: #334155 !important;
+    line-height: 1.6 !important;
+  }
+}
+
+/* Ajout de styles pour la vue bureau également afin d'assurer la cohérence */
+@media (min-width: 769px) {
+  /* Styles généraux pour la carte principale */
+  html[data-theme="light"] .learning-item-card > .card {
+    border: 1px solid rgba(59, 130, 246, 0.2) !important;
+    border-left-width: 4px !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* Variation selon le statut */
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-gray-300"] {
+    border-color: #cbd5e1 !important;
+    border-left-color: #94a3b8 !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-blue-400"] {
+    border-color: #bfdbfe !important;
+    border-left-color: #3b82f6 !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-green-400"] {
+    border-color: #bbf7d0 !important;
+    border-left-color: #22c55e !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-yellow-400"] {
+    border-color: #fde68a !important;
+    border-left-color: #facc15 !important;
+  }
+
+  html[data-theme="light"] .learning-item-card > .card[class*="border-l-gray-400"] {
+    border-color: #e2e8f0 !important;
+    border-left-color: #64748b !important;
+  }
+}

@@ -28,6 +28,7 @@ import { toast } from '@/components/ui/use-toast';
 import './styles/critical-light-mode-fixes.css';
 import './styles/global-ui-enhancements.css';
 import './styles/responsive-fixes.css';
+import './styles/card-fixes.css'; // Ajout du nouveau fichier de corrections
 import './components/LearningItemCard.css';
 import './components/Calendar.css';
 import './components/StatusBadge.css';
