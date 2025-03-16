@@ -1,0 +1,167 @@
+/**
+ * CORRECTIF D'URGENCE MAXIMAL POUR LE MODE SOMBRE - VERSION DE SECOURS ULTIME
+ * Ce fichier impose violemment les styles corrects pour tous les éléments problématiques
+ */
+
+/* RESET COMPLET POUR SVG */
+html[data-theme="dark"] body svg,
+html[data-theme="dark"] body *[data-lucide],
+html[data-theme="dark"] body *.lucide,
+html[data-theme="dark"] body *[class*="lucide-"] {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  stroke-opacity: 1 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.7)) !important;
+}
+
+/* RESET POUR LES CHEMINS À L'INTÉRIEUR DES SVG */
+html[data-theme="dark"] body svg *,
+html[data-theme="dark"] body svg path,
+html[data-theme="dark"] body svg line,
+html[data-theme="dark"] body svg circle,
+html[data-theme="dark"] body svg rect,
+html[data-theme="dark"] body svg polyline,
+html[data-theme="dark"] body svg polygon {
+  fill: none !important;
+  stroke: inherit !important;
+}
+
+/* CORRECTIF SYSTÉMATIQUE POUR LES SECTIONS TEMPS ET STATS */
+html[data-theme="dark"] body div.p-4.bg-white,
+html[data-theme="dark"] body div.p-4.bg-gray-50,
+html[data-theme="dark"] body div.p-4.bg-gray-100,
+html[data-theme="dark"] body div.mb-4.p-4.bg-white,
+html[data-theme="dark"] body div.mb-4.p-4.bg-gray-50,
+html[data-theme="dark"] body div.mb-4.p-4.bg-gray-100,
+html[data-theme="dark"] body div[class*="total-time"],
+html[data-theme="dark"] body div[class*="total-minutes"],
+html[data-theme="dark"] body div[class*="time-display"],
+html[data-theme="dark"] body div[class*="time-counter"],
+html[data-theme="dark"] body div[class*="time-tracker"],
+html[data-theme="dark"] body div[class*="stats-display"] {
+  background-color: #0f172a !important;
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* TEXTES À L'INTÉRIEUR DES SECTIONS CORRIGÉES */
+html[data-theme="dark"] body div.p-4.bg-white *:not(svg),
+html[data-theme="dark"] body div.p-4.bg-gray-50 *:not(svg),
+html[data-theme="dark"] body div.p-4.bg-gray-100 *:not(svg),
+html[data-theme="dark"] body div.mb-4.p-4.bg-white *:not(svg),
+html[data-theme="dark"] body div.mb-4.p-4.bg-gray-50 *:not(svg),
+html[data-theme="dark"] body div.mb-4.p-4.bg-gray-100 *:not(svg),
+html[data-theme="dark"] body div[class*="total-time"] *:not(svg),
+html[data-theme="dark"] body div[class*="total-minutes"] *:not(svg),
+html[data-theme="dark"] body div[class*="time-display"] *:not(svg),
+html[data-theme="dark"] body div[class*="time-counter"] *:not(svg),
+html[data-theme="dark"] body div[class*="time-tracker"] *:not(svg),
+html[data-theme="dark"] body div[class*="stats-display"] *:not(svg) {
+  color: #f8fafc !important;
+}
+
+/* TOUT CE QUI A UN FOND BLANC */
+html[data-theme="dark"] body .bg-white,
+html[data-theme="dark"] body .bg-gray-50,
+html[data-theme="dark"] body .bg-gray-100,
+html[data-theme="dark"] body *[class*="bg-white"],
+html[data-theme="dark"] body *[class*="bg-gray-50"],
+html[data-theme="dark"] body *[class*="bg-gray-100"] {
+  background-color: #0f172a !important;
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+/* CORRECTIF SPÉCIFIQUE POUR LES ICÔNES DANS LES CARTES */
+html[data-theme="dark"] body .learning-item-card svg,
+html[data-theme="dark"] body .item-wrapper svg,
+html[data-theme="dark"] body .card svg {
+  stroke-width: 2.5px !important;
+  fill: none !important;
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7)) !important;
+}
+
+/* ANIMATION POUR FORCER LE RENDU */
+@keyframes forceRender {
+  0% { opacity: 0.999; }
+  100% { opacity: 1; }
+}
+
+html[data-theme="dark"] body svg,
+html[data-theme="dark"] body *[class*="bg-white"],
+html[data-theme="dark"] body *[class*="bg-gray-50"],
+html[data-theme="dark"] body *[class*="bg-gray-100"],
+html[data-theme="dark"] body *[class*="time-"],
+html[data-theme="dark"] body *[class*="total-"] {
+  animation: forceRender 0.01s forwards !important;
+}
+
+/* COULEURS SPÉCIFIQUES POUR LES ICÔNES */
+html[data-theme="dark"] body svg[data-lucide="Edit"],
+html[data-theme="dark"] body svg[data-lucide="Save"],
+html[data-theme="dark"] body svg[data-lucide="Eye"],
+html[data-theme="dark"] body svg[data-lucide="EyeOff"],
+html[data-theme="dark"] body svg[data-lucide="Download"] {
+  stroke: #60a5fa !important;
+  color: #60a5fa !important;
+}
+
+html[data-theme="dark"] body svg[data-lucide="Trash2"],
+html[data-theme="dark"] body svg[data-lucide="X"] {
+  stroke: #f87171 !important;
+  color: #f87171 !important;
+}
+
+html[data-theme="dark"] body svg[data-lucide="Play"],
+html[data-theme="dark"] body svg[data-lucide="Check"],
+html[data-theme="dark"] body svg[data-lucide="Bookmark"],
+html[data-theme="dark"] body svg[data-lucide="BookmarkCheck"] {
+  stroke: #4ade80 !important;
+  color: #4ade80 !important;
+}
+
+html[data-theme="dark"] body svg[data-lucide="Pause"] {
+  stroke: #facc15 !important;
+  color: #facc15 !important;
+}
+
+html[data-theme="dark"] body svg[data-lucide="Trophy"] {
+  stroke: #fbbf24 !important;
+  color: #fbbf24 !important;
+}
+
+html[data-theme="dark"] body svg[data-lucide="Trophy"] path[fill="currentColor"] {
+  fill: #fbbf24 !important;
+}
+
+/* CORRECTIF POUR LES STYLES INLINE */
+html[data-theme="dark"] body [style*="background-color: white"],
+html[data-theme="dark"] body [style*="background-color: #fff"],
+html[data-theme="dark"] body [style*="background-color: #ffffff"],
+html[data-theme="dark"] body [style*="background: white"],
+html[data-theme="dark"] body [style*="background: #fff"],
+html[data-theme="dark"] body [style*="background: #ffffff"] {
+  background-color: #0f172a !important;
+  background: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+/* VERSION MOBILE */
+@media (max-width: 768px) {
+  html[data-theme="dark"] body svg,
+  html[data-theme="dark"] body .learning-item-card svg,
+  html[data-theme="dark"] body .item-wrapper svg,
+  html[data-theme="dark"] body button svg {
+    stroke-width: 3px !important;
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.7)) !important;
+  }
+}

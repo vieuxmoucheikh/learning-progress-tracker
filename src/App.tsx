@@ -38,6 +38,7 @@ import './styles/critical-darkmode-force.css'; // Ajout du fichier de forçage u
 import './styles/svg-icon-fixes.css';
 import './styles/svg-icon-emergency-fix.css';
 import './styles/learning-card-darkmode-fix.css'; // Nouvel import pour les correctifs spécifiques aux cartes
+import './styles/emergency-darkmode.css'; // Ajout du nouveau fichier de correctifs d'urgence
 import './components/LearningItemCard.css';
 import './components/Calendar.css';
 import './components/StatusBadge.css';
@@ -46,6 +47,9 @@ import './components/PomodoroTimer.css';
 // Importer le correcteur système avec une annotation de type pour éviter l'erreur TypeScript
 // @ts-ignore - Ignorer l'erreur de type pour ce module sans définition
 import { applyDarkModeFixesRuntime } from './lib/icon-fixer';
+
+// Importer le composant d'initialisation des correctifs de mode sombre
+import InitDarkModeFix from './components/InitDarkModeFix';
 
 interface State {
   items: LearningItem[];
@@ -1061,6 +1065,7 @@ export default function App() {
 
   return (
     <ThemeProvider defaultTheme="dark">
+      <InitDarkModeFix /> {/* Ajout du composant d'initialisation des correctifs */}
       <div className="min-h-screen flex flex-col md:flex-row">
         <div className="md:w-64">
           <TabNavigation 
