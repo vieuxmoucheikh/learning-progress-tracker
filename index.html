@@ -1,108 +1,69 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="/favicon.ico" />
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React + TS</title>
+    <!-- Assurer que le mode clair s'applique correctement sur mobile -->
+    <meta name="color-scheme" content="light dark" />
     <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
+      name="theme-color"
+      media="(prefers-color-scheme: light)"
+      content="#f8fafc"
     />
-    <meta name="theme-color" content="#000000" />
     <meta
-      name="description"
-      content="Application de suivi d'apprentissage - Organisez et suivez vos études et projets"
+      name="theme-color"
+      media="(prefers-color-scheme: dark)"
+      content="#1e293b"
     />
-    <link rel="apple-touch-icon" href="/logo192.png" />
-    <link rel="manifest" href="/manifest.json" />
-
-    <!-- Préchargement des CSS critiques pour éviter le flash de contenu non stylisé -->
-    <link rel="preload" href="/mobile-light-mode.css" as="style" />
-    <link rel="stylesheet" href="/mobile-light-mode.css" />
-
-    <!-- Meta pour améliorer l'affichage sur mobile -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
-    <meta name="format-detection" content="telephone=no" />
-
-    <!-- Préchargement du script de correction du mode clair -->
-    <link rel="preload" href="/light-mode-fixer.js" as="script" />
-
-    <title>Learning Tracker</title>
-
-    <!-- Police système optimisée -->
+    <!-- Style d'urgence pour les cartes en mode clair sur mobile -->
     <style>
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-          "Segoe UI Symbol";
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        text-rendering: optimizeLegibility;
-        font-feature-settings: "kern";
-      }
+      @media (max-width: 768px) {
+        /* Cartes en mode clair */
+        html[data-theme="light"] .card,
+        html[data-theme="light"] [class*="Card"],
+        html[data-theme="light"] [class*="-card"],
+        html[data-theme="light"] [class*="card"],
+        html[data-theme="light"] .dark\:bg-gray-800,
+        html[data-theme="light"] .mastered-card,
+        html[data-theme="light"] [class*="learning-item-card"] {
+          background-color: #ffffff !important;
+          background: #ffffff !important;
+        }
 
-      /* Fix pour éviter le flash en mode clair/sombre */
-      html.theme-transitioning * {
-        transition: none !important;
-      }
+        /* Préserver les couleurs des éléments importants */
+        html[data-theme="light"] svg,
+        html[data-theme="light"] .preserve-color,
+        html[data-theme="light"] [class*="lucide-"],
+        html[data-theme="light"] [class*="bg-blue-"],
+        html[data-theme="light"] [class*="bg-green-"],
+        html[data-theme="light"] [class*="bg-red-"],
+        html[data-theme="light"] [class*="bg-yellow-"] {
+          color: currentColor !important;
+        }
 
-      /* Script de détection préliminaire du thème pour éviter le flash */
-      :root {
-        color-scheme: light dark;
-      }
+        /* Assurer que le mode sombre reste intact */
+        html[data-theme="dark"] .card,
+        html[data-theme="dark"] [class*="Card"],
+        html[data-theme="dark"] [class*="-card"],
+        html[data-theme="dark"] [class*="card"] {
+          background-color: #1e293b !important;
+        }
 
-      /* S'assurer que le fond est toujours correctement défini */
-      html[data-theme="light"] body {
-        background-color: #f8fafc !important;
-        color: #0f172a !important;
-      }
-
-      html[data-theme="dark"] body {
-        background-color: #0f172a !important;
-        color: #f8fafc !important;
-      }
-
-      /* S'assurer que le contenu est toujours visible */
-      #root {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
+        /* Texte blanc pour les boutons colorés */
+        html[data-theme="light"] .bg-blue-500,
+        html[data-theme="light"] .bg-green-500,
+        html[data-theme="light"] .bg-red-500 {
+          color: #ffffff !important;
+        }
       }
     </style>
   </head>
   <body>
-    <noscript
-      >Vous avez besoin d'activer JavaScript pour exécuter cette
-      application.</noscript
-    >
     <div id="root"></div>
-
-    <!-- Script de correction du mode clair, chargé de manière critique -->
-    <script src="/light-mode-fixer.js"></script>
-
-    <!-- Script de détection préliminaire du thème -->
-    <script>
-      (function () {
-        // Essayer de détecter le thème préféré
-        const storedTheme = localStorage.getItem("theme");
-        const prefersDark = window.matchMedia(
-          "(prefers-color-scheme: dark)"
-        ).matches;
-        const theme = storedTheme || (prefersDark ? "dark" : "light");
-
-        // Appliquer immédiatement pour éviter le flash
-        document.documentElement.setAttribute("data-theme", theme);
-        document.documentElement.classList.add(theme);
-
-        // S'assurer que le document est visible
-        document.documentElement.style.visibility = "visible";
-      })();
-    </script>
-
-    <!-- Script pour fixer les problèmes de rendu -->
     <script type="module" src="/src/main.tsx"></script>
+    <!-- Script pour corriger les problèmes de mode clair sur mobile -->
+    <script src="/light-mode-fixer.js"></script>
   </body>
 </html>
