@@ -34,7 +34,6 @@ import './styles/critical-card-borders.css'; // Ajout du fichier de correctifs c
 import './styles/icon-fixes.css'; // Ajout du fichier de correctifs pour les icônes
 import './styles/icon-override.css';
 import './styles/critical-icon-fixes.css'; // Ajout du nouveau fichier de correctifs critiques
-import './styles/additional-fixes.css'; // Ajout du nouveau fichier de correctifs
 import './components/LearningItemCard.css';
 import './components/Calendar.css';
 import './components/StatusBadge.css';
@@ -916,23 +915,6 @@ export default function App() {
     }
   };
 
-  // Ajout d'une fonction pour gérer la transition entre les onglets
-  const handleTabChange = (tab: string) => {
-    // Animation de transition lors du changement d'onglet
-    const mainElement = document.querySelector('main');
-    if (mainElement) {
-      mainElement.style.opacity = '0';
-      setTimeout(() => {
-        setSelectedTab(tab);
-        setTimeout(() => {
-          mainElement.style.opacity = '1';
-        }, 50);
-      }, 150);
-    } else {
-      setSelectedTab(tab);
-    }
-  };
-
   // Loading state render function
   if (state.loading) {
     return (
@@ -1041,7 +1023,7 @@ export default function App() {
         <div className="md:w-64">
           <TabNavigation 
             activeTab={selectedTab} 
-            onTabChange={handleTabChange} // Utilisation de la nouvelle fonction
+            onTabChange={setSelectedTab} 
           />
         </div>
         <div className="flex-1 p-4 md:p-6 overflow-y-auto bg-white dark:bg-gray-900">

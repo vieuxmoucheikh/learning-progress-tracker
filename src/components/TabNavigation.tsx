@@ -41,7 +41,6 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeTabRef = useRef<HTMLButtonElement>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [hasOverflow, setHasOverflow] = useState(false);
   
   useEffect(() => {
     const handleResize = () => {
@@ -108,8 +107,6 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
         const containerWidth = container.offsetWidth;
         const tabWidth = activeTab.offsetWidth;
         const tabLeft = activeTab.offsetLeft;
-        
-        // Scroll centered instead of offsetting by half the container
         const scrollLeft = tabLeft - (containerWidth / 2) + (tabWidth / 2);
         
         // Use requestAnimationFrame to ensure smooth scrolling after render
@@ -123,25 +120,6 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
     }
   }, [activeTab, isMobile]);
   
-  // Initial scroll check for mobile - s'assurer que tous les éléments sont visibles
-  useEffect(() => {
-    if (isMobile && scrollContainerRef.current) {
-      // Force un rafraîchissement du scroll pour s'assurer que tout est visible
-      const container = scrollContainerRef.current;
-      
-      // Vérifie si le contenu dépasse et ajuste si nécessaire
-      requestAnimationFrame(() => {
-        if (container.scrollWidth > container.clientWidth) {
-          // S'assure que les flèches de défilement sont visibles
-          const tabNavContainer = container.parentElement;
-          if (tabNavContainer) {
-            tabNavContainer.classList.add('has-overflow');
-          }
-        }
-      });
-    }
-  }, [isMobile]);
-
   // Add touch events for better mobile scrolling
   const handleTouchStart = (e: React.TouchEvent) => {
     if (scrollContainerRef.current) {
@@ -164,124 +142,6 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
     }
   };
 
-  // Vérifier si la navigation a un dépassement horizontal
-  useEffect(() => {
-    if (scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const hasHorizontalOverflow = container.scrollWidth > container.clientWidth;
-      setHasOverflow(hasHorizontalOverflow);
-      
-      if (hasHorizontalOverflow) {
-        // Ajouter une classe pour indiquer le dépassement
-        container.classList.add('has-overflow');
-        
-        // S'assurer que les indicateurs de défilement sont visibles
-        const parent = container.parentElement;
-        if (parent) {
-          parent.classList.add('has-scroll-indicators');
-        }
-      } else {
-        container.classList.remove('has-overflow');
-        const parent = container.parentElement;
-        if (parent) {
-          parent.classList.remove('has-scroll-indicators');
-        }
-      }
-    }
-  }, [tabs, isMobile]);
-
-  // Scroll to center active tab when it changes
-  useEffect(() => {
-    if (activeTabRef.current && scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const activeTab = activeTabRef.current;
-      
-      if (isMobile) {
-        // Calculate position to center the active tab
-        const containerWidth = container.offsetWidth;
-        const tabWidth = activeTab.offsetWidth;
-        const tabLeft = activeTab.offsetLeft;
-        
-        // Scroll centered
-        const scrollLeft = tabLeft - (containerWidth / 2) + (tabWidth / 2);
-        
-        // Use scroll into view for better browser support
-        activeTab.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest',
-          inline: 'center'
-        });
-        
-        // Backup method in case scrollIntoView isn't fully supported
-        setTimeout(() => {
-          container.scrollTo({
-            left: scrollLeft,
-            behavior: 'smooth'
-          });
-        }, 100);
-      }
-    }
-  }, [activeTab, isMobile]);
-
-  // Améliorer le comportement de défilement pour les éléments hors écran
-  useEffect(() => {
-    if (activeTabRef.current && scrollContainerRef.current && isMobile) {
-      // Utiliser scrollIntoView avec des options optimales pour la visibilité
-      setTimeout(() => {
-        try {
-          activeTabRef.current?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'nearest',
-            inline: 'center'
-          });
-        } catch (e) {
-          console.log('Fallback to manual scrolling');
-          const container = scrollContainerRef.current;
-          const activeTab = activeTabRef.current;
-          
-          if (container && activeTab) {
-            const containerWidth = container.offsetWidth;
-            const tabLeft = activeTab.offsetLeft;
-            const tabWidth = activeTab.offsetWidth;
-            
-            container.scrollLeft = tabLeft - (containerWidth / 2) + (tabWidth / 2);
-          }
-        }
-      }, 100);
-    }
-  }, [activeTab, isMobile]);
-
-  // Vérification supplémentaire pour s'assurer que tous les éléments sont visibles
-  useEffect(() => {
-    const checkOverflow = () => {
-      if (scrollContainerRef.current) {
-        const hasOverflow = scrollContainerRef.current.scrollWidth > scrollContainerRef.current.clientWidth;
-        const container = scrollContainerRef.current.parentElement;
-        
-        if (container) {
-          if (hasOverflow) {
-            container.classList.add('has-scroll-indicators');
-          } else {
-            container.classList.remove('has-scroll-indicators');
-          }
-        }
-      }
-    };
-
-    // Vérifier au chargement et au redimensionnement
-    checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    
-    // Configuration pour les mobiles
-    if (isMobile) {
-      document.documentElement.style.setProperty('--mobile-nav-padding', '1rem');
-    }
-    
-    return () => {
-      window.removeEventListener('resize', checkOverflow);
-    };
-  }, [isMobile]);
-
   return (
     <div className="tab-navigation-container">
       {/* Logo ou branding - icône uniquement */}
@@ -299,13 +159,6 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
         role="tablist"
         aria-orientation={isMobile ? "horizontal" : "vertical"}
         aria-label="Navigation principale"
-        style={{ 
-          overflowX: 'auto', 
-          WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'none',
-          paddingLeft: isMobile ? 'var(--mobile-nav-padding, 0.5rem)' : undefined,
-          paddingRight: isMobile ? 'var(--mobile-nav-padding, 0.5rem)' : undefined
-        }}
       >
         {tabs.map((tab, index) => (
           <button
@@ -315,15 +168,9 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
             className={`
               tab-navigation-item
               ${activeTab === tab.id ? 'active' : ''}
-              flex items-center gap-2 transition-colors
+              flex items-center gap-2 transition-all
             `}
-            style={{ 
-              '--item-index': index,
-              flexShrink: 0,
-              // Éviter les transformations qui peuvent causer des problèmes
-              transform: 'none',
-              opacity: 1
-            } as React.CSSProperties}
+            style={{ '--item-index': index } as React.CSSProperties}
             aria-current={activeTab === tab.id ? 'page' : undefined}
             role="tab"
             aria-selected={activeTab === tab.id}
@@ -332,7 +179,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
           >
             <span className="nav-icon">{tab.icon}</span>
             <span className="nav-text">
-              {isMobile ? (tab.shortLabel || tab.label.slice(0, 6)) : tab.label}
+              {isMobile ? tab.shortLabel : tab.label}
             </span>
           </button>
         ))}

@@ -1,24 +1,22 @@
-/* Importer les feuilles de style essentielles avant Tailwind */
-@import './styles/direct-styles-fix.css'; /* Nouveau fichier style sans dépendances */
-
-/* Directives Tailwind */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Importer les autres feuilles de style après Tailwind */
+/* Importer les corrections pour le mode clair sur mobile après les directives Tailwind */
 @import './styles/mobile-light-mode-fixes.css';
 @import './styles/critical-light-mode-fixes.css';
+@import './styles/global-ui-enhancements.css';
 @import './styles/responsive-fixes.css';
 @import './styles/theme-sync.css';
 @import './styles/card-fixes.css';
-@import './styles/card-force-styles.css';
+@import './styles/card-force-styles.css'; /* Nouveau fichier de styles forcés */
 @import './components/LearningItemCard.css';
 @import './components/Calendar.css';
 @import './components/StatusBadge.css';
 @import './components/PomodoroTimer.css';
+
+/* Importer les corrections pour le mode clair sur mobile */
 @import '../public/mobile-light-mode.css';
-@import './styles/global-ui-enhancements.css';
 
 @layer base {
   :root {
@@ -349,33 +347,4 @@ pre {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
   overflow: hidden !important;
   margin-bottom: 32px !important;
-}
-
-/* Correctifs globaux pour garantir un affichage correct */
-@media (max-width: 767px) {
-  /* Assurer que la navigation mobile s'affiche correctement */
-  .tab-navigation-container {
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    transform: translateZ(0);
-    will-change: transform;
-  }
-  
-  /* Éviter les débordements horizontaux */
-  body, html {
-    max-width: 100vw;
-    overflow-x: hidden;
-  }
-  
-  /* Forcer le bon affichage de tous les éléments dans la barre de navigation */
-  .tab-navigation-items > * {
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-  
-  /* Désactiver temporairement les animations qui pourraient causer des problèmes */
-  .tab-navigation-item {
-    animation: none !important;
-    transition: background-color 0.2s ease !important;
-  }
 }

@@ -19,21 +19,9 @@
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15), transparent 40%),
-    radial-gradient(circle at 80% 80%, rgba(29, 78, 216, 0.15), transparent 40%);
+    radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.12), transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(29, 78, 216, 0.12), transparent 40%);
   z-index: -1;
-  animation: subtleShimmer 8s ease-in-out infinite alternate;
-}
-
-@keyframes subtleShimmer {
-  0% {
-    opacity: 0.5;
-    background-position: 0% 0%;
-  }
-  100% {
-    opacity: 0.8;
-    background-position: 100% 100%;
-  }
 }
 
 /* Logo pour mobile */
@@ -85,13 +73,9 @@
   padding: 0.75rem 0.5rem;
   scrollbar-width: none; /* Masquer scrollbar Firefox */
   -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
-  scroll-snap-type: x proximity; /* Changé à proximity pour un défilement plus naturel */
+  scroll-snap-type: x mandatory; /* Snap scrolling */
   position: relative;
-  mask-image: none; /* Supprimé le fade effect qui peut masquer des éléments */
-  width: 100%; /* Assurer que la largeur est complète */
-  scroll-behavior: smooth; /* Défilement fluide */
-  padding-left: 0.75rem !important; /* Plus d'espace pour éviter que les éléments soient coupés */
-  padding-right: 0.75rem !important;
+  mask-image: linear-gradient(to right, transparent, black 10px, black 90%, transparent); /* Fade effect */
 }
 
 .tab-navigation-items::-webkit-scrollbar {
@@ -107,9 +91,9 @@
   border-radius: 12px; /* Coins plus arrondis pour un design moderne */
   margin: 0 0.25rem;
   position: relative;
-  scroll-snap-align: start; /* Changé à start pour un meilleur comportement de défilement */
+  scroll-snap-align: center;
   min-width: max-content;
-  padding: 0.75rem 1rem; /* Légèrement réduit pour mobile */
+  padding: 0.85rem 1.15rem; /* Dimensions plus confortables */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   display: flex;
@@ -118,10 +102,6 @@
   letter-spacing: 0.01em;
   overflow: hidden; /* Contient le pseudo-élément */
   border: 1px solid rgba(255, 255, 255, 0.08);
-  animation: slideInWithFade 0.5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
-  animation-delay: calc(var(--item-index, 0) * 0.08s);
-  opacity: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.1);
 }
 
 /* Effet de superposition sur les onglets */
@@ -149,8 +129,7 @@
   background-color: rgba(255, 255, 255, 0.15);
   box-shadow: 
     0 4px 15px -3px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.15) inset,
-    0 2px 10px rgba(0, 0, 0, 0.1);
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset;
   border-color: rgba(255, 255, 255, 0.2);
 }
 
@@ -343,12 +322,11 @@
     content: '';
     position: absolute;
     top: 52px;
-    width: 30px; /* Réduit légèrement pour éviter de masquer trop de contenu */
-    height: 40px; /* Plus haut pour être plus visible */
+    width: 32px;
+    height: 32px;
     z-index: 30;
     pointer-events: none;
-    opacity: 0.85; /* Plus visible */
-    display: block !important;
+    opacity: 0.7;
   }
   
   .tab-navigation-container::before {
@@ -364,73 +342,80 @@
   /* Ajustements pour garantir que le menu est bien visible */
   .tab-navigation-items {
     padding: 0.65rem 0.5rem;
-    width: 100% !important; /* Assurer que la largeur est complète */
-    justify-content: flex-start;
-    overflow-x: auto !important;
-    scroll-padding: 0 0.5rem; /* Ajouter un padding de défilement pour éviter les bords */
-    -webkit-overflow-scrolling: touch;
-    /* Supprimer le mask-image qui pourrait causer des problèmes */
     mask-image: none;
-    -webkit-mask-image: none;
-    scroll-snap-type: x proximity; /* Défilement plus naturel */
   }
   
-  /* Rendre le menu plus visible et optimisé pour mobile */
-  .tab-navigation-container {
-    background: linear-gradient(165deg, #0f172a 0%, #1e293b 60%, #3b82f6 100%) !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25) !important;
-    overflow: visible !important; /* Assurer que rien n'est coupé */
-    padding-bottom: 0.75rem !important; /* Plus d'espace en bas */
-  }
-  
-  /* Optimiser la taille des éléments sans les réduire excessivement */
   .tab-navigation-item {
-    padding: 0.65rem 0.75rem !important;
-    margin: 0 0.25rem !important;
-    transform: none !important; /* Ne pas réduire l'échelle qui peut causer des problèmes */
-    flex: 0 0 auto !important;
-    min-width: min-content !important;
-    white-space: nowrap !important;
-    user-select: none !important; /* Éviter la sélection de texte accidentelle */
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    margin: 0 0.35rem;
+    background-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
-  /* Correction spécifique pour les très petits écrans */
-  @media (max-width: 375px) {
-    .tab-navigation-items {
-      padding: 0.5rem 0.6rem;
-      justify-content: space-between !important; /* Distribuer l'espace également */
+  .tab-navigation-item.active {
+    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.15),
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  }
+  
+  .nav-text {
+    font-size: 0.8rem;
+  }
+  
+  /* Optimiser le logo sur mobile */
+  .mobile-logo-container {
+    padding: 0.75rem 0;
+  }
+  
+  .mobile-logo {
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.15),
+      0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  
+  /* Animation de l'icône du logo sur mobile */
+  @keyframes pulseGlow {
+    0% {
+      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
     }
-    
-    .tab-navigation-item {
-      padding: 0.5rem 0.65rem !important;
-      margin: 0 0.15rem !important;
-      transform: none !important; /* Ne pas utiliser scale() qui peut causer des problèmes */
+    50% {
+      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
     }
+    100% {
+      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
+    }
+  }
+  
+  .logo-icon {
+    animation: pulseGlow 3s ease-in-out infinite;
   }
 }
 
 /* Optimisations pour le mode light */
 :root:not(.dark) .tab-navigation-container {
-  background: linear-gradient(165deg, #818cf8 0%, #3b82f6 100%) !important; /* Gradient plus vif et moderne */
+  background: linear-gradient(165deg, #6366f1 0%, #3b82f6 100%); /* Gradient plus vif et moderne */
   box-shadow: 0 4px 20px rgba(37, 99, 235, 0.15);
 }
 
 :root:not(.dark) .tab-navigation-container::before {
   background: 
-    radial-gradient(circle at 20% 20%, rgba(224, 242, 254, 0.25), transparent 40%),
-    radial-gradient(circle at 80% 80%, rgba(29, 78, 216, 0.15), transparent 40%);
+    radial-gradient(circle at 20% 20%, rgba(224, 242, 254, 0.15), transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(29, 78, 216, 0.1), transparent 40%);
 }
 
 :root:not(.dark) .tab-navigation-item {
-  color: white !important; /* Plus de contraste en mode clair */
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  color: rgba(255, 255, 255, 0.95); /* Plus de contraste en mode clair */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 :root:not(.dark) .tab-navigation-item.active {
   box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.3) inset !important;
+    0 4px 12px rgba(37, 99, 235, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
 }
 
 :root:not(.dark) .tab-navigation-item.active::after {
@@ -463,15 +448,10 @@
   }
 }
 
-@keyframes slideInWithFade {
-  from {
-    opacity: 0;
-    transform: translateY(12px) translateX(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) translateX(0);
-  }
+.tab-navigation-item {
+  animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  animation-delay: calc(var(--item-index, 0) * 0.07s);
+  opacity: 0;
 }
 
 /* Personnalisation du "Getting Started" */
@@ -509,28 +489,12 @@
   opacity: 0.7;
 }
 
-.getting-started-tip::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0) 100%);
-  transform: translateX(-100%);
-  transition: transform 0.5s ease;
-}
-
 .getting-started-tip:hover {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1));
   transform: translateY(-2px);
   box-shadow: 
     0 6px 20px rgba(0, 0, 0, 0.2),
     0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-}
-
-.getting-started-tip:hover::after {
-  transform: translateX(100%);
 }
 
 .tip-heading {
@@ -615,7 +579,6 @@
        (min-resolution: 192dpi) and (min-width: 1200px) {
   .tab-navigation-container {
     padding: 2rem 0 1.5rem;
-    background: linear-gradient(180deg, #0f172a 0%, #1e293b 30%, #3b82f6 100%) !important;
   }
   
   .mobile-logo {
@@ -632,26 +595,6 @@
   .tab-navigation-item {
     margin: 0.5rem 1.25rem;
     padding: 1rem 1.25rem;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-    box-shadow: 
-      0 2px 8px rgba(0, 0, 0, 0.15),
-      0 1px 2px rgba(0, 0, 0, 0.1),
-      inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
-  }
-  
-  .tab-navigation-item:hover:not(.active) {
-    transform: translateY(-2px) !important;
-    box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.2),
-      0 2px 4px rgba(0, 0, 0, 0.1),
-      inset 0 1px 2px rgba(255, 255, 255, 0.15) !important;
-  }
-  
-  .tab-navigation-item.active {
-    box-shadow: 
-      0 6px 16px rgba(0, 0, 0, 0.25),
-      0 3px 6px rgba(0, 0, 0, 0.15),
-      inset 0 1px 2px rgba(255, 255, 255, 0.15) !important;
   }
   
   .nav-text {
