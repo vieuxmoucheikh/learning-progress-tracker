@@ -89,6 +89,9 @@
   position: relative;
   mask-image: none; /* Supprimé le fade effect qui peut masquer des éléments */
   width: 100%; /* Assurer que la largeur est complète */
+  scroll-behavior: smooth; /* Défilement fluide */
+  padding-left: 0.75rem !important; /* Plus d'espace pour éviter que les éléments soient coupés */
+  padding-right: 0.75rem !important;
 }
 
 .tab-navigation-items::-webkit-scrollbar {
@@ -340,11 +343,11 @@
     content: '';
     position: absolute;
     top: 52px;
-    width: 32px;
+    width: 40px; /* Plus large pour être plus visible */
     height: 32px;
     z-index: 30;
     pointer-events: none;
-    opacity: 0.7;
+    opacity: 0.8; /* Plus visible */
     display: block !important; /* Forcer l'affichage */
   }
   
@@ -360,7 +363,9 @@
   
   /* Ajustements pour garantir que le menu est bien visible */
   .tab-navigation-items {
-    padding: 0.65rem 0.5rem;
+    padding: 0.65rem 0.75rem; /* Plus d'espace horizontalement */
+    padding-left: 0.85rem !important; /* Plus d'espace au début */
+    padding-right: 0.85rem !important; /* Plus d'espace à la fin */
     mask-image: none;
     width: 100%;
     justify-content: flex-start;
@@ -368,74 +373,78 @@
   }
   
   .tab-navigation-item {
-    padding: 0.65rem 0.85rem; /* Réduit la taille pour mieux tenir sur mobile */
+    padding: 0.6rem 0.8rem; /* Taille légèrement réduite */
     border-radius: 10px;
     margin: 0 0.25rem;
     background-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 
-      0 2px 5px rgba(0, 0, 0, 0.15),
-      0 1px 2px rgba(0, 0, 0, 0.1),
-      inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.1);
     transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease !important;
     flex-shrink: 0; /* Empêche les éléments de rétrécir */
+    min-width: max-content; /* Garantit que le contenu définit la largeur minimale */
+    max-width: none; /* Empêche la limitation de largeur */
+    transform: scale(0.98); /* Légèrement plus petit pour mieux tenir */
   }
   
   .tab-navigation-item.active {
-    background-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.15),
-      0 2px 4px rgba(0, 0, 0, 0.1),
-      inset 0 1px 2px rgba(255, 255, 255, 0.2);
-    transform: translateY(-1px);
+    transform: scale(1); /* Taille normale pour l'élément actif */
   }
   
-  .tab-navigation-item:active {
-    transform: scale(0.96) !important;
-    box-shadow: 
-      0 1px 3px rgba(0, 0, 0, 0.12),
-      inset 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Réduire la taille du texte et des icônes pour économiser de l'espace */
+  /* Réduire encore plus la taille du texte et des icônes pour économiser de l'espace */
   .nav-text {
-    font-size: 0.75rem; /* Texte plus petit */
+    font-size: 0.7rem; /* Texte encore plus petit pour les très petits écrans */
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
     font-weight: 600 !important;
   }
   
   .nav-icon {
-    width: 18px; /* Icône un peu plus petite */
-    height: 18px;
+    width: 16px; /* Icône encore plus petite */
+    height: 16px;
   }
   
-  /* Optimiser le logo sur mobile */
+  /* Optimiser le logo pour libérer de l'espace */
   .mobile-logo-container {
-    padding: 0.75rem 0;
+    padding: 0.6rem 0;
   }
   
   .mobile-logo {
-    box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.15),
-      0 0 0 1px rgba(255, 255, 255, 0.15) inset;
-    background: rgba(255, 255, 255, 0.12);
+    width: 42px; /* Logo un peu plus petit */
+    height: 42px;
   }
   
-  /* Animation de l'icône du logo sur mobile */
-  @keyframes pulseGlow {
-    0% {
-      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
+  /* Correction spécifique pour les très petits écrans */
+  @media (max-width: 375px) {
+    .tab-navigation-items {
+      padding: 0.5rem 0.6rem; /* Encore moins d'espace vertical pour gagner de la place */
     }
-    50% {
-      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
+    
+    .tab-navigation-item {
+      padding: 0.5rem 0.65rem !important; /* Encore plus compact */
+      margin: 0 0.15rem !important;
+      transform: scale(0.95); /* Encore plus petit */
     }
-    100% {
-      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
+    
+    .tab-navigation-item.active {
+      transform: scale(0.98); /* Un peu plus grand que les autres mais toujours compact */
     }
-  }
-  
-  .logo-icon {
-    animation: pulseGlow 3s ease-in-out infinite;
+    
+    .nav-text {
+      font-size: 0.65rem !important; /* Texte encore plus petit */
+    }
+    
+    .nav-icon {
+      width: 14px !important; /* Icône encore plus petite */
+      height: 14px !important;
+    }
+    
+    .mobile-logo-container {
+      padding: 0.4rem 0;
+    }
+    
+    .mobile-logo {
+      width: 38px;
+      height: 38px;
+    }
   }
 }
 

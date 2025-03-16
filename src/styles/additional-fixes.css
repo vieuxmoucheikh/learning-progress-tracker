@@ -101,7 +101,7 @@ header [class*="text-xl"] {
   /* Ajustement des éléments du menu */
   .tab-navigation-items {
     padding: 0.5rem 0.75rem !important;
-    width: 100% !important;
+    width: calc(100% - 0.5rem) !important; /* Légèrement moins large pour éviter les dépassements */
     overflow-x: auto !important;
     display: flex !important;
     flex-wrap: nowrap !important;
@@ -109,6 +109,9 @@ header [class*="text-xl"] {
     -webkit-overflow-scrolling: touch !important;
     scrollbar-width: none !important;
     margin: 0 !important;
+    margin-left: 0.25rem !important; /* Centrer légèrement */
+    margin-right: 0.25rem !important;
+    scroll-behavior: smooth !important;
   }
   
   /* S'assurer que les items de navigation ont une taille appropriée */
@@ -121,15 +124,16 @@ header [class*="text-xl"] {
       inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     transition: transform 0.2s, box-shadow 0.2s !important;
-    padding: 0.65rem 0.85rem !important; /* Taille réduite */
-    margin: 0 0.2rem !important; /* Espacement réduit */
+    padding: 0.6rem 0.75rem !important; /* Taille encore plus réduite */
+    margin: 0 0.175rem !important; /* Espacement encore plus réduit */
     flex: 0 0 auto !important; /* Ne pas rétrécir ni grandir */
     min-width: auto !important; /* Laisser la taille s'adapter au contenu */
     width: auto !important;
+    transform: scale(0.98) !important; /* Légèrement plus petit pour tout faire tenir */
   }
   
   .tab-navigation-item.active {
-    transform: translateY(-1px) !important;
+    transform: scale(1) !important; /* Taille normale pour l'élément actif */
     box-shadow: 
       0 4px 12px rgba(0, 0, 0, 0.2),
       0 2px 4px rgba(0, 0, 0, 0.15),
@@ -140,18 +144,31 @@ header [class*="text-xl"] {
   
   /* Optimiser l'affichage du texte dans les onglets */
   .tab-navigation-item .nav-text {
-    font-size: 0.75rem !important;
+    font-size: 0.7rem !important; /* Texte encore plus petit */
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     max-width: 100% !important;
+    letter-spacing: -0.01em !important; /* Espacement négatif pour économiser de l'espace */
   }
   
   /* Optimiser l'affichage des icônes */
   .tab-navigation-item .nav-icon {
     flex-shrink: 0 !important;
-    width: 18px !important;
-    height: 18px !important;
+    width: 16px !important;
+    height: 16px !important;
+    margin-right: 0.3rem !important; /* Moins d'espace entre l'icône et le texte */
+  }
+  
+  /* Optimiser la taille du logo pour économiser de l'espace vertical */
+  .mobile-logo-container {
+    padding: 0.5rem 0 !important;
+    margin-bottom: 0.25rem !important;
+  }
+  
+  .mobile-logo {
+    width: 42px !important;
+    height: 42px !important;
   }
   
   /* S'assurer que le conteneur principal ne déborde pas */
@@ -159,25 +176,75 @@ header [class*="text-xl"] {
     overflow-x: hidden !important;
     width: 100% !important;
   }
+  
+  /* Indicateurs visuels de défilement pour indiquer qu'il y a plus de contenu */
+  .tab-navigation-container:after {
+    content: '' !important;
+    position: absolute !important;
+    top: 52px !important;
+    right: 0 !important;
+    width: 40px !important;
+    height: 32px !important;
+    background: linear-gradient(to left, rgba(15, 23, 42, 0.95), transparent) !important;
+    z-index: 30 !important;
+    pointer-events: none !important;
+    opacity: 0.8 !important;
+    display: block !important;
+  }
+  
+  .tab-navigation-container:before {
+    content: '' !important;
+    position: absolute !important;
+    top: 52px !important;
+    left: 0 !important;
+    width: 40px !important;
+    height: 32px !important;
+    background: linear-gradient(to right, rgba(15, 23, 42, 0.95), transparent) !important;
+    z-index: 30 !important;
+    pointer-events: none !important;
+    opacity: 0.8 !important;
+    display: block !important;
+  }
 }
 
 /* Correction pour les appareils très petits (iPhone SE, etc.) */
 @media (max-width: 375px) {
   .tab-navigation-item {
-    padding: 0.6rem 0.7rem !important;
-    margin: 0 0.15rem !important;
+    padding: 0.5rem 0.65rem !important; /* Taille encore plus réduite */
+    margin: 0 0.125rem !important; /* Espacement encore plus réduit */
     box-shadow: 
       0 2px 4px rgba(0, 0, 0, 0.12),
       inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
+    transform: scale(0.95) !important; /* Encore plus petit */
+  }
+  
+  .tab-navigation-item.active {
+    transform: scale(0.97) !important; /* Un peu plus grand que les autres mais toujours compact */
   }
   
   .tab-navigation-item .nav-text {
-    font-size: 0.7rem !important;
+    font-size: 0.65rem !important; /* Texte encore plus petit */
+    letter-spacing: -0.02em !important; /* Espacement encore plus réduit */
   }
   
   .tab-navigation-item .nav-icon {
-    width: 16px !important;
-    height: 16px !important;
+    width: 14px !important; /* Icône encore plus petite */
+    height: 14px !important;
+    margin-right: 0.25rem !important; /* Encore moins d'espace */
+  }
+  
+  .mobile-logo-container {
+    padding: 0.4rem 0 !important;
+  }
+  
+  .mobile-logo {
+    width: 38px !important;
+    height: 38px !important;
+  }
+  
+  /* Faire tenir plus d'éléments en ajustant davantage la navigation */
+  .tab-navigation-items {
+    padding: 0.4rem 0.5rem !important;
   }
 }
 

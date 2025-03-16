@@ -41,6 +41,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeTabRef = useRef<HTMLButtonElement>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [hasOverflow, setHasOverflow] = useState(false);
   
   useEffect(() => {
     const handleResize = () => {
@@ -163,8 +164,67 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
     }
   };
 
+  // Vérifier si la navigation a un dépassement horizontal
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const hasHorizontalOverflow = container.scrollWidth > container.clientWidth;
+      setHasOverflow(hasHorizontalOverflow);
+      
+      if (hasHorizontalOverflow) {
+        // Ajouter une classe pour indiquer le dépassement
+        container.classList.add('has-overflow');
+        
+        // S'assurer que les indicateurs de défilement sont visibles
+        const parent = container.parentElement;
+        if (parent) {
+          parent.classList.add('has-scroll-indicators');
+        }
+      } else {
+        container.classList.remove('has-overflow');
+        const parent = container.parentElement;
+        if (parent) {
+          parent.classList.remove('has-scroll-indicators');
+        }
+      }
+    }
+  }, [tabs, isMobile]);
+
+  // Scroll to center active tab when it changes
+  useEffect(() => {
+    if (activeTabRef.current && scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const activeTab = activeTabRef.current;
+      
+      if (isMobile) {
+        // Calculate position to center the active tab
+        const containerWidth = container.offsetWidth;
+        const tabWidth = activeTab.offsetWidth;
+        const tabLeft = activeTab.offsetLeft;
+        
+        // Scroll centered
+        const scrollLeft = tabLeft - (containerWidth / 2) + (tabWidth / 2);
+        
+        // Use scroll into view for better browser support
+        activeTab.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'center'
+        });
+        
+        // Backup method in case scrollIntoView isn't fully supported
+        setTimeout(() => {
+          container.scrollTo({
+            left: scrollLeft,
+            behavior: 'smooth'
+          });
+        }, 100);
+      }
+    }
+  }, [activeTab, isMobile]);
+
   return (
-    <div className="tab-navigation-container">
+    <div className={`tab-navigation-container ${hasOverflow ? 'has-scroll-indicators' : ''}`}>
       {/* Logo ou branding - icône uniquement */}
       <div className="mobile-logo-container">
         <div className="mobile-logo">
@@ -180,7 +240,11 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
         role="tablist"
         aria-orientation={isMobile ? "horizontal" : "vertical"}
         aria-label="Navigation principale"
-        style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}
+        style={{ 
+          overflowX: 'auto', 
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none'
+        }}
       >
         {tabs.map((tab, index) => (
           <button
@@ -194,7 +258,9 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
             `}
             style={{ 
               '--item-index': index,
-              flexShrink: 0 // Empêche l'élément de se rétrécir
+              flexShrink: 0, // Empêche l'élément de se rétrécir
+              // Sur mobile, utiliser des labels courts
+              ...(isMobile && { transform: tab.id === activeTab ? 'scale(1)' : 'scale(0.98)' })
             } as React.CSSProperties}
             aria-current={activeTab === tab.id ? 'page' : undefined}
             role="tab"
@@ -204,7 +270,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
           >
             <span className="nav-icon">{tab.icon}</span>
             <span className="nav-text">
-              {isMobile ? tab.shortLabel : tab.label}
+              {isMobile ? tab.shortLabel || tab.label.substring(0, 6) : tab.label}
             </span>
           </button>
         ))}
