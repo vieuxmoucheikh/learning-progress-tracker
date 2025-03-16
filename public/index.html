@@ -29,6 +29,52 @@
 
     <!-- Préchargement du script de correction du mode clair -->
     <link rel="preload" href="%PUBLIC_URL%/light-mode-fixer.js" as="script" />
+    <link rel="preload" href="%PUBLIC_URL%/border-enforcer.js" as="script" />
+
+    <!-- Styles inline pour les bordures de carte -->
+    <style>
+      /* Styles critiques pour les bordures qui doivent être appliqués immédiatement */
+      .learning-item-card .card {
+        border-width: 3px !important;
+        border-style: solid !important;
+        border-left-width: 10px !important;
+        border-radius: 18px !important;
+        overflow: hidden !important;
+        position: relative !important;
+        margin-bottom: 32px !important;
+      }
+
+      /* Mode clair */
+      html[data-theme="light"] .learning-item-card .card {
+        border-color: #e2e8f0 !important;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
+        background: linear-gradient(
+          135deg,
+          #ffffff 0%,
+          #f8fafc 100%
+        ) !important;
+      }
+
+      /* Mode sombre */
+      html[data-theme="dark"] .learning-item-card .card {
+        border-color: #1e293b !important;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25) !important;
+        background: linear-gradient(
+          135deg,
+          #0f172a 0%,
+          #1e293b 100%
+        ) !important;
+      }
+
+      /* Sessions dans l'historique */
+      .learning-item-card .border.rounded-xl {
+        border: 2px solid rgba(226, 232, 240, 0.8) !important;
+        border-radius: 12px !important;
+        padding: 16px !important;
+        margin-bottom: 16px !important;
+        position: relative !important;
+      }
+    </style>
 
     <title>Learning Tracker</title>
 
@@ -64,6 +110,9 @@
 
     <!-- Script de correction du mode clair, chargé de manière critique -->
     <script src="%PUBLIC_URL%/light-mode-fixer.js"></script>
+
+    <!-- Script pour forcer l'application des bordures -->
+    <script src="%PUBLIC_URL%/border-enforcer.js"></script>
 
     <!-- Script de détection préliminaire du thème -->
     <script>
