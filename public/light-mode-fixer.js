@@ -299,6 +299,7 @@
 
 /**
  * Script pour résoudre les problèmes de transition entre les modes clair et sombre
+ * et fixer les styles des cartes d'apprentissage
  */
 
 (function() {
@@ -331,6 +332,9 @@
     // Nettoyer les styles spécifiques aux cartes qui peuvent persister
     cleanupPersistentStyles(currentTheme);
     
+    // Appliquer directement les styles CSS pour les cartes et boutons
+    fixLearningCardStyles(currentTheme);
+    
     // Retirer la classe de transition après un court délai
     setTimeout(() => {
       htmlElement.classList.remove('theme-transitioning');
@@ -346,6 +350,7 @@
       '.learning-item-card .card > div:last-child',
       '.learning-item-card button[title="Mark as complete"]',
       '.learning-item-card button[title="Mark as incomplete"]',
+      '.learning-item-card button[title="Delete item"]',
       '.learning-item-card .border.rounded-xl',
       '.bg-white',
       '.bg-gray-800'
@@ -359,40 +364,104 @@
         el.style.cssText = el.style.cssText;
       });
     });
-    
-    // Cibler spécifiquement les bordures colorées des cartes
-    const learningCards = document.querySelectorAll('.learning-item-card .card');
-    learningCards.forEach(card => {
-      // Réinitialiser les styles de bordure pour forcer l'application des CSS
-      if (currentTheme === 'light') {
-        if (card.classList.contains('status-in_progress') || 
-            card.classList.contains('border-l-blue-400')) {
+  }
+
+  // Fonction pour appliquer directement des styles CSS aux cartes d'apprentissage
+  function fixLearningCardStyles(currentTheme) {
+    if (currentTheme === 'light') {
+      // Sélectionner tous les boutons de suppression
+      const deleteButtons = document.querySelectorAll('.learning-item-card button[title="Delete item"]');
+      deleteButtons.forEach(button => {
+        button.style.backgroundColor = '#fee2e2';
+        button.style.color = '#b91c1c';
+        button.style.border = '2px solid #fca5a5';
+        button.style.borderRadius = '8px';
+        button.style.minWidth = '40px';
+        button.style.minHeight = '40px';
+        button.style.padding = '0';
+        button.style.display = 'flex';
+        button.style.alignItems = 'center';
+        button.style.justifyContent = 'center';
+        button.style.boxShadow = '0 4px 6px rgba(239, 68, 68, 0.25)';
+        
+        // Trouver l'icône SVG à l'intérieur du bouton
+        const svg = button.querySelector('svg');
+        if (svg) {
+          svg.style.width = '24px';
+          svg.style.height = '24px';
+          svg.style.color = '#dc2626';
+          svg.style.strokeWidth = '2.5px';
+        }
+      });
+      
+      // Sélectionner tous les boutons de complétion
+      const completeButtons = document.querySelectorAll('.learning-item-card button[title="Mark as complete"], .learning-item-card button[title="Mark as incomplete"]');
+      completeButtons.forEach(button => {
+        button.style.backgroundColor = '#dcfce7';
+        button.style.color = '#15803d';
+        button.style.border = '2px solid #bbf7d0';
+        button.style.borderRadius = '12px';
+        button.style.minWidth = '40px';
+        button.style.minHeight = '40px';
+        button.style.padding = '0';
+        button.style.display = 'flex';
+        button.style.alignItems = 'center';
+        button.style.justifyContent = 'center';
+        
+        // Trouver l'icône SVG à l'intérieur du bouton
+        const svg = button.querySelector('svg');
+        if (svg) {
+          svg.style.width = '24px';
+          svg.style.height = '24px';
+          svg.style.color = '#15803d';
+          svg.style.strokeWidth = '2px';
+        }
+      });
+      
+      // Sélectionner toutes les cartes principales
+      const cards = document.querySelectorAll('.learning-item-card .card');
+      cards.forEach(card => {
+        card.style.border = '3px solid #e2e8f0';
+        card.style.borderRadius = '16px';
+        card.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.1)';
+        card.style.marginBottom = '32px';
+        card.style.backgroundColor = '#ffffff';
+        
+        // Détecter le statut et appliquer la couleur de bordure appropriée
+        if (card.classList.contains('status-in_progress') || card.classList.contains('border-l-blue-400')) {
           card.style.borderLeft = '8px solid #3b82f6';
-        } else if (card.classList.contains('status-completed') || 
-                  card.classList.contains('border-l-green-400')) {
+        } else if (card.classList.contains('status-completed') || card.classList.contains('border-l-green-400')) {
           card.style.borderLeft = '8px solid #10b981';
-        } else if (card.classList.contains('status-on_hold') || 
-                  card.classList.contains('border-l-yellow-400')) {
+        } else if (card.classList.contains('status-on_hold') || card.classList.contains('border-l-yellow-400')) {
           card.style.borderLeft = '8px solid #f59e0b';
         } else {
           card.style.borderLeft = '8px solid #64748b';
         }
-      } else {
-        // Styles pour le mode sombre
-        if (card.classList.contains('status-in_progress') || 
-            card.classList.contains('border-l-blue-400')) {
-          card.style.borderLeft = '8px solid #2563eb';
-        } else if (card.classList.contains('status-completed') || 
-                  card.classList.contains('border-l-green-400')) {
-          card.style.borderLeft = '8px solid #059669';
-        } else if (card.classList.contains('status-on_hold') || 
-                  card.classList.contains('border-l-yellow-400')) {
-          card.style.borderLeft = '8px solid #d97706';
-        } else {
-          card.style.borderLeft = '8px solid #475569';
+      });
+      
+      // Sélectionner tous les conteneurs de session
+      const sessions = document.querySelectorAll('.learning-item-card .border.rounded-xl');
+      sessions.forEach(session => {
+        session.style.border = '2px solid rgba(226, 232, 240, 0.8)';
+        session.style.borderRadius = '12px';
+        session.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.05)';
+        session.style.padding = '16px';
+        session.style.marginBottom = '16px';
+        session.style.backgroundColor = '#ffffff';
+        
+        // Détecter le statut et appliquer la couleur de bordure appropriée
+        if (session.classList.contains('border-l-blue-400')) {
+          session.style.borderLeft = '6px solid #3b82f6';
+          session.style.background = 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)';
+        } else if (session.querySelector('[class*="on_hold"]')) {
+          session.style.borderLeft = '6px solid #f59e0b';
+          session.style.background = 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)';
+        } else if (session.querySelector('[class*="completed"]')) {
+          session.style.borderLeft = '6px solid #10b981';
+          session.style.background = 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)';
         }
-      }
-    });
+      });
+    }
   }
 
   // Exécuter au chargement
@@ -418,6 +487,52 @@
     if (event.key === 'theme') {
       syncThemeAttributes();
     }
+  });
+  
+  // Observation des modifications du DOM pour réappliquer les styles lorsque de nouvelles cartes sont ajoutées
+  const domObserver = new MutationObserver((mutations) => {
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    if (currentTheme === 'light') {
+      mutations.forEach(mutation => {
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+          // Vérifier si les mutations concernent des cartes d'apprentissage
+          const hasLearningCards = Array.from(mutation.addedNodes).some(node => {
+            if (node.nodeType === 1) { // Element node
+              const element = node as Element;
+              return element.querySelector && (
+                element.querySelector('.learning-item-card') !== null ||
+                element.classList && element.classList.contains('learning-item-card')
+              );
+            }
+            return false;
+          });
+          
+          if (hasLearningCards) {
+            // Réappliquer les styles aux cartes si des cartes ont été ajoutées
+            setTimeout(() => fixLearningCardStyles(currentTheme), 100);
+          }
+        }
+      });
+    }
+  });
+  
+  // Observer le corps du document pour détecter les nouvelles cartes
+  domObserver.observe(document.body, { 
+    childList: true,
+    subtree: true
+  });
+  
+  // Réappliquer les styles lors d'un redimensionnement de la fenêtre
+  window.addEventListener('resize', () => {
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    fixLearningCardStyles(currentTheme);
+  });
+  
+  // Appliquer les styles spécifiques après le chargement complet
+  window.addEventListener('load', () => {
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    setTimeout(() => fixLearningCardStyles(currentTheme), 500);
+    setTimeout(() => fixLearningCardStyles(currentTheme), 1000); // Répéter pour s'assurer que cela prend effet
   });
   
   // Exporter la fonction pour qu'elle puisse être appelée manuellement

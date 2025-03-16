@@ -28,6 +28,7 @@ import { toast } from '@/components/ui/use-toast';
 import './styles/theme-sync.css';  // S'assurer que ce fichier est importé en premier
 import './styles/critical-light-mode-fixes.css';
 import './styles/mobile-light-mode-fixes.css';
+import './styles/card-fixes.css'; // Ajouter ce nouvel import de priorité élevée
 import './styles/global-ui-enhancements.css';
 import './styles/responsive-fixes.css';
 import './components/LearningItemCard.css';
