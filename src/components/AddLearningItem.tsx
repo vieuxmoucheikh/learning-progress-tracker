@@ -42,8 +42,8 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
   };
 
   const [formData, setFormData] = useState<LearningItemFormData>(() => {
-    const date = selectedDate ? new Date(selectedDate) : new Date();
-    date.setHours(0, 0, 0, 0);
+    const date = selectedDate ? new Date (selectedDate) : new Date();
+    date.setHours(0, 0, 0, 0); 
     return {
       ...initialFormData,
       date: getAdjustedDateStr(date)
