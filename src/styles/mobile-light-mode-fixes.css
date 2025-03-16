@@ -129,7 +129,7 @@
     font-weight: 600;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.8rem; /* padding réduit */
     transition: all 0.2s ease;
     border: none;
   }
@@ -138,6 +138,16 @@
     background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     box-shadow: 0 6px 15px rgba(37, 99, 235, 0.35);
     transform: translateY(-1px);
+  }
+  
+  /* Corrections spécifiques pour les boutons */
+  html[data-theme="light"] button {
+    padding: 0px 8px !important; /* padding réduit globalement */
+  }
+  
+  /* Pour les boutons qui contiennent des icônes, assurer qu'ils ont un padding minimal */
+  html[data-theme="light"] button svg {
+    margin: 0 1px !important; /* marges internes réduites */
   }
   
   /* Style spécial pour les badges */
@@ -235,6 +245,7 @@
     background-color: #ffffff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     transition: all 0.2s ease;
+    padding: 0.4rem 0.6rem;
   }
   
   html[data-theme="light"] [class*="select-trigger"]:focus {
@@ -301,6 +312,7 @@
     border: 1px solid #cbd5e1;
     background-color: #ffffff;
     transition: all 0.2s ease;
+    padding: 0 8px !important;
   }
   
   html[data-theme="light"] .pagination-controls button:hover:not(:disabled) {
@@ -316,5 +328,17 @@
   html[data-theme="light"] .pagination-controls span {
     font-weight: 500;
     color: #1e293b;
+  }
+  
+  /* Spécifications pour les boutons de suppression */
+  html[data-theme="light"] button[title="Delete item"] {
+    background-color: #fee2e2 !important; /* red-100 */
+    color: #b91c1c !important; /* red-700 */
+    border: 2px solid #fca5a5 !important; /* red-300 - plus visible */
+  }
+  
+  html[data-theme="light"] button[title="Delete item"] svg {
+    color: #dc2626 !important; /* red-600 - plus visible */
+    stroke-width: 2.5px !important; /* trait plus épais */
   }
 }
