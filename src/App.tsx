@@ -34,7 +34,6 @@ import './styles/critical-card-borders.css'; // Ajout du fichier de correctifs c
 import './styles/icon-fixes.css'; // Ajout du fichier de correctifs pour les icônes
 import './styles/icon-override.css';
 import './styles/critical-icon-fixes.css'; // Ajout du nouveau fichier de correctifs critiques
-import './styles/additional-fixes.css'; // Ajout du nouveau fichier de correctifs
 import './components/LearningItemCard.css';
 import './components/Calendar.css';
 import './components/StatusBadge.css';
@@ -64,7 +63,7 @@ const TAB_OPTIONS = {
   ITEMS: 'items',
   ANALYTICS: 'analytics',
   POMODORO: 'pomodoro',
-  STUDY_CARDS: 'learning-cards',   // On garde l'ID pour compatibilité mais change la référence
+  LEARNING_CARDS: 'learning-cards',
   FLASHCARDS: 'flashcards'
 } as const;
 
@@ -73,7 +72,7 @@ const tabs = [
   { id: TAB_OPTIONS.ITEMS, label: 'Items', icon: BookOpen },
   { id: TAB_OPTIONS.ANALYTICS, label: 'Analytics', icon: BarChart3 },
   { id: TAB_OPTIONS.POMODORO, label: 'Pomodoro', icon: Timer },
-  { id: TAB_OPTIONS.STUDY_CARDS, label: 'Study Cards', icon: Notebook },
+  { id: TAB_OPTIONS.LEARNING_CARDS, label: 'Learning Cards', icon: Notebook },
   { id: TAB_OPTIONS.FLASHCARDS, label: 'Flashcards', icon: Library },
 ];
 
@@ -916,7 +915,7 @@ export default function App() {
     }
   };
 
-  // La fonction de rendu avec les corrections
+  // Loading state render function
   if (state.loading) {
     return (
       <ThemeProvider>
@@ -969,6 +968,7 @@ export default function App() {
     );
   }
 
+  // Error state render function
   if (error) {
     return (
       <ThemeProvider>
@@ -995,25 +995,28 @@ export default function App() {
                 </div>
               </header>
 
-              <main className="flex-1 overflow-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                <div className="text-center">
-                  <p className="text-red-600 mb-4">{error}</p>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                  >
-                    Retry
-                  </button>
+              <div className="flex-1 overflow-auto">
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-red-600 mb-4">{error}</p>
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                    >
+                      Retry
+                    </button>
+                  </div>
                 </div>
-              </main>
+              </div>
             </div>
+            <Toaster />
           </div>
-          <Toaster />
         </div>
       </ThemeProvider>
     );
   }
 
+  // Main app render
   return (
     <ThemeProvider defaultTheme="dark">
       <div className="min-h-screen flex flex-col md:flex-row">
@@ -1077,7 +1080,7 @@ export default function App() {
                 <PomodoroTimer />
               )}
               
-              {selectedTab === TAB_OPTIONS.STUDY_CARDS && (
+              {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
                 <LearningCardsPage />
               )}
 

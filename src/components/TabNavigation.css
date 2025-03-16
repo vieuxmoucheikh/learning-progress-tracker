@@ -49,6 +49,7 @@
   -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
   scroll-snap-type: x mandatory; /* Snap scrolling */
   position: relative;
+  mask-image: linear-gradient(to right, transparent, black 10px, black 90%, transparent); /* Fade effect */
 }
 
 .tab-navigation-items::-webkit-scrollbar {
@@ -272,11 +273,6 @@
   .nav-text {
     font-size: 0.75rem;
   }
-
-  /* Cacher le message d'aide sur mobile */
-  .getting-started-tip-container {
-    display: none;
-  }
 }
 
 /* Optimisations pour le mode light */
@@ -307,6 +303,7 @@
 
 /* Personnalisation du "Getting Started" */
 .getting-started-tip-container {
+  display: none;
   margin-top: auto;
   margin-bottom: 1rem;
   padding: 0 1rem;
