@@ -1,0 +1,97 @@
+/* CORRECTIFS POUR LES AFFICHAGES DE TEMPS ET STATISTIQUES EN MODE SOMBRE */
+html[data-theme="dark"] .learning-item-card .time-display,
+html[data-theme="dark"] .learning-item-card .stats-display,
+html[data-theme="dark"] .learning-item-card [class*="total-time"],
+html[data-theme="dark"] .learning-item-card [class*="total-minutes"],
+html[data-theme="dark"] .learning-item-card .p-4.bg-gray-50,
+html[data-theme="dark"] .learning-item-card .bg-white,
+html[data-theme="dark"] .learning-item-card [class*="time-counter"],
+html[data-theme="dark"] .learning-item-card [class*="time-tracker"],
+html[data-theme="dark"] .item-wrapper .time-display,
+html[data-theme="dark"] .item-wrapper [class*="total-time"],
+html[data-theme="dark"] .item-wrapper [class*="total-minutes"] {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+/* Correction pour les éléments de saisie dans les indicateurs de temps */
+html[data-theme="dark"] .learning-item-card input[type="number"],
+html[data-theme="dark"] .learning-item-card input[type="text"],
+html[data-theme="dark"] .learning-item-card .time-input,
+html[data-theme="dark"] .item-wrapper input[type="number"],
+html[data-theme="dark"] .item-wrapper input[type="text"],
+html[data-theme="dark"] .item-wrapper .time-input {
+  background-color: #334155 !important;
+  color: #f8fafc !important;
+  border-color: #475569 !important;
+}
+
+/* Correction pour les sections avec des statistiques ou des graphiques */
+html[data-theme="dark"] .learning-item-card .stats-section,
+html[data-theme="dark"] .learning-item-card .chart-section,
+html[data-theme="dark"] .learning-item-card .p-4.bg-gray-50,
+html[data-theme="dark"] .learning-item-card .p-4.bg-gray-100,
+html[data-theme="dark"] .learning-item-card [class*="bg-gray-"],
+html[data-theme="dark"] .item-wrapper .stats-section,
+html[data-theme="dark"] .item-wrapper .chart-section,
+html[data-theme="dark"] .item-wrapper .p-4.bg-gray-50,
+html[data-theme="dark"] .item-wrapper .p-4.bg-gray-100,
+html[data-theme="dark"] .item-wrapper [class*="bg-gray-"] {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+/* Correction spécifique pour les éléments avec fond blanc explicite */
+html[data-theme="dark"] [class*="bg-white"],
+html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] div.bg-white {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+/* Correction pour la section du temps total et des minutes totales */
+html[data-theme="dark"] [class*="mb-4 p-4 bg-gray-50"],
+html[data-theme="dark"] [class*="mb-4 p-4 bg-gray-100"],
+html[data-theme="dark"] [class*="mb-4 p-4 bg-white"],
+html[data-theme="dark"] .p-4.bg-gray-50,
+html[data-theme="dark"] .p-4.bg-gray-100,
+html[data-theme="dark"] .p-4.bg-white {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+  border-radius: 0.5rem !important;
+}
+
+/* Correction pour les textes dans ces sections */
+html[data-theme="dark"] .learning-item-card .time-display *,
+html[data-theme="dark"] .learning-item-card .stats-display *,
+html[data-theme="dark"] .learning-item-card [class*="total-time"] *,
+html[data-theme="dark"] .learning-item-card [class*="total-minutes"] *,
+html[data-theme="dark"] .learning-item-card .p-4.bg-gray-50 *,
+html[data-theme="dark"] .learning-item-card .bg-white *,
+html[data-theme="dark"] .item-wrapper .time-display *,
+html[data-theme="dark"] .item-wrapper [class*="total-time"] *,
+html[data-theme="dark"] .item-wrapper [class*="total-minutes"] * {
+  color: #f1f5f9 !important;
+}
+
+/* Pour assurer que le texte est bien visible sur les fonds sombres */
+html[data-theme="dark"] .text-gray-500,
+html[data-theme="dark"] .text-gray-600,
+html[data-theme="dark"] .text-gray-700,
+html[data-theme="dark"] .text-gray-800,
+html[data-theme="dark"] .text-gray-900 {
+  color: #e2e8f0 !important;
+}
+
+/* Assure-toi que les titres sont visibles */
+html[data-theme="dark"] h1, 
+html[data-theme="dark"] h2, 
+html[data-theme="dark"] h3, 
+html[data-theme="dark"] h4, 
+html[data-theme="dark"] h5, 
+html[data-theme="dark"] h6 {
+  color: #f8fafc !important;
+}

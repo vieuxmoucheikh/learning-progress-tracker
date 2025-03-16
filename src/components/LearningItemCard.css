@@ -1186,3 +1186,102 @@ html[data-theme="dark"] .learning-item-card .card[class*="border-yellow-500"] {
 .low-priority-card:hover {
   box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3) !important;
 }
+
+/* Fix for total time and total minutes display in dark mode */
+.dark .learning-item-card .time-display,
+.dark .learning-item-card .stats-display,
+.dark .learning-item-card .bg-gray-50,
+.dark .learning-item-card .bg-gray-100,
+.dark .learning-item-card .bg-white,
+.dark .learning-item-card [class*="total-time"],
+.dark .learning-item-card [class*="total-minutes"],
+.dark .item-wrapper .time-display,
+.dark .item-wrapper .stats-display,
+.dark .item-wrapper .bg-gray-50,
+.dark .item-wrapper .bg-gray-100,
+.dark .item-wrapper .bg-white,
+.dark .item-wrapper [class*="total-time"],
+.dark .item-wrapper [class*="total-minutes"] {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+/* Fix for time sections with padding and specific background */
+.dark .learning-item-card .p-4.bg-gray-50,
+.dark .learning-item-card .p-4.bg-gray-100,
+.dark .learning-item-card .p-4.bg-white,
+.dark .item-wrapper .p-4.bg-gray-50,
+.dark .item-wrapper .p-4.bg-gray-100,
+.dark .item-wrapper .p-4.bg-white {
+  background-color: #0f172a !important;
+  border: 1px solid #334155 !important;
+  border-radius: 0.5rem !important;
+}
+
+/* Ensure text colors in these sections are visible */
+.dark .learning-item-card .time-display *,
+.dark .learning-item-card .stats-display *,
+.dark .learning-item-card .p-4.bg-gray-50 *,
+.dark .learning-item-card .p-4.bg-gray-100 *,
+.dark .learning-item-card .p-4.bg-white *,
+.dark .learning-item-card [class*="total-time"] *,
+.dark .learning-item-card [class*="total-minutes"] *,
+.dark .item-wrapper .time-display *,
+.dark .item-wrapper .stats-display *,
+.dark .item-wrapper .p-4.bg-gray-50 *,
+.dark .item-wrapper .p-4.bg-gray-100 *,
+.dark .item-wrapper .p-4.bg-white *,
+.dark .item-wrapper [class*="total-time"] *,
+.dark .item-wrapper [class*="total-minutes"] * {
+  color: #f1f5f9 !important;
+}
+
+/* Fix for headings to ensure they're visible in dark mode */
+.dark .learning-item-card h1,
+.dark .learning-item-card h2, 
+.dark .learning-item-card h3, 
+.dark .learning-item-card h4,
+.dark .item-wrapper h1,
+.dark .item-wrapper h2, 
+.dark .item-wrapper h3, 
+.dark .item-wrapper h4 {
+  color: #f8fafc !important;
+}
+
+/* Fix specifically for the time counter in the timer section */
+.dark .learning-item-card .timer-section,
+.dark .learning-item-card .time-counter,
+.dark .learning-item-card .time-tracker,
+.dark .item-wrapper .timer-section,
+.dark .item-wrapper .time-counter,
+.dark .item-wrapper .time-tracker {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+/* Higher specificity selectors for the most problematic elements */
+html.dark body .learning-item-card .p-4.bg-gray-50,
+html.dark body .learning-item-card .p-4.bg-gray-100,
+html.dark body .learning-item-card .p-4.bg-white,
+html.dark body .item-wrapper .p-4.bg-gray-50,
+html.dark body .item-wrapper .p-4.bg-gray-100,
+html.dark body .item-wrapper .p-4.bg-white {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+/* Fix for any elements specifically using white background directly */
+html.dark body .learning-item-card [style*="background-color: white"],
+html.dark body .learning-item-card [style*="background-color: #ffffff"],
+html.dark body .learning-item-card [style*="background: white"],
+html.dark body .learning-item-card [style*="background: #ffffff"],
+html.dark body .item-wrapper [style*="background-color: white"],
+html.dark body .item-wrapper [style*="background-color: #ffffff"],
+html.dark body .item-wrapper [style*="background: white"],
+html.dark body .item-wrapper [style*="background: #ffffff"] {
+  background-color: #1e293b !important;
+  background: #1e293b !important;
+  color: #f8fafc !important;
+}
