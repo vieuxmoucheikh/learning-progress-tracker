@@ -63,7 +63,7 @@ export function Stats({ items }: Props) {
         }
         return sessionTotal; 
       }, 0) || 0);
-    }, 0);
+    }, 0); 
 
     const averageTimePerItem = totalItems > 0 ? totalMinutes / totalItems : 0;
 
