@@ -3,51 +3,50 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: #1e40af; /* Couleur bleue foncée par défaut */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); /* Gradient moderne */
+  box-shadow: 0 4px 20px -1px rgba(0, 0, 0, 0.2);
   position: relative;
   z-index: 10;
+  overflow: hidden;
 }
 
 .tab-navigation-items {
   display: flex;
   flex-direction: row;
   overflow-x: auto;
-  padding: 0.75rem 0;
-  scrollbar-width: thin; /* Firefox */
+  padding: 1rem 0.5rem;
+  scrollbar-width: none; /* Masquer scrollbar Firefox */
   -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
   scroll-snap-type: x mandatory; /* Snap scrolling */
-  margin-bottom: 8px;
+  position: relative;
   mask-image: linear-gradient(to right, transparent, black 10px, black 90%, transparent); /* Fade effect */
 }
 
 .tab-navigation-items::-webkit-scrollbar {
-  height: 4px; /* Show small scrollbar on Chrome */
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.tab-navigation-items::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 2px;
+  display: none; /* Masquer scrollbar Chrome */
 }
 
 .tab-navigation-item {
   white-space: nowrap;
-  transition: all 0.3s ease;
-  color: white; /* Ensure text is always white for better visibility */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: rgba(255, 255, 255, 0.8); /* Légèrement transparent pour effet de profondeur */
   font-weight: 500;
-  border-radius: 0.25rem;
+  border-radius: 0.5rem; /* Coins plus arrondis */
   margin: 0 0.25rem;
   position: relative;
   scroll-snap-align: center; /* Snap each item to center */
   min-width: fit-content;
   padding: 0.75rem 1rem; /* Ensure enough tap area */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .tab-navigation-item.active {
   color: white;
   background-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  font-weight: 600;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .tab-navigation-item.active::before {
@@ -67,42 +66,33 @@
   transform: translateY(-1px);
 }
 
-/* Add arrow indicators for mobile scroll */
+/* Effet d'animation pour les icônes */
+.tab-navigation-item svg {
+  transition: transform 0.3s ease;
+}
+
+.tab-navigation-item:hover svg {
+  transform: scale(1.1);
+}
+
+.tab-navigation-item.active svg {
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+}
+
+/* Enlever les indicateurs de défilement */
 .tab-navigation-container::before,
 .tab-navigation-container::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: 20px;
-  height: 20px;
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.tab-navigation-container::before {
-  left: 5px;
-  transform: translateY(-50%);
-  clip-path: polygon(60% 0%, 30% 50%, 60% 100%, 40% 100%, 10% 50%, 40% 0%);
-}
-
-.tab-navigation-container::after {
-  right: 5px;
-  transform: translateY(-50%);
-  clip-path: polygon(40% 0%, 70% 50%, 40% 100%, 60% 100%, 90% 50%, 60% 0%);
+  display: none;
 }
 
 /* Styles pour la navigation desktop */
 @media (min-width: 768px) {
   .tab-navigation-container {
     min-height: 100vh;
-    padding: 1.5rem 0;
+    padding: 2rem 0 1rem;
     width: 100%;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%); /* Gradient vertical */
   }
   
   .tab-navigation-container::before,
@@ -117,60 +107,119 @@
     mask-image: none; /* Remove fade effect on desktop */
     padding: 0;
     margin-bottom: 0;
+    margin-top: 1rem;
   }
   
   .tab-navigation-item {
     text-align: left;
-    border-left: 4px solid transparent;
     border-radius: 0;
-    margin: 0.25rem 0;
-    padding: 0.75rem 1.25rem;
-    color: white;
+    margin: 0.25rem 1rem;
+    padding: 0.75rem 1rem;
+    color: rgba(255, 255, 255, 0.8);
     font-weight: 500;
     position: relative;
-    overflow: hidden;
     min-width: 100%;
+    border-radius: 8px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
   
   .tab-navigation-item.active {
     background-color: rgba(255, 255, 255, 0.12);
-    border-left: 4px solid white;
+    border-left: none;
     font-weight: 600;
-    box-shadow: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: none;
   }
 
   .tab-navigation-item.active::before {
     content: none;
   }
   
-  .tab-navigation-item::after {
+  .tab-navigation-item.active::after {
     content: '';
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background-color: rgba(255, 255, 255, 0.05);
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
+    top: 0;
+    left: -1rem;
+    height: 100%;
+    width: 4px;
+    background: linear-gradient(to bottom, #fbbf24, #f59e0b); /* Gradient doré */
+    border-radius: 0 2px 2px 0;
   }
-  
-  .tab-navigation-item:hover::after {
-    transform: scaleX(1);
-  }
-  
+
   .tab-navigation-item:hover:not(.active) {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-left: 4px solid rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.07);
     transform: none;
+  }
+  
+  /* Effet de focus pour l'accessibilité */
+  .tab-navigation-item:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
+  }
+  
+  /* Animation des icônes en desktop */
+  .tab-navigation-item svg {
+    margin-right: 0.75rem;
+  }
+
+  /* Fond d'animation subtil */
+  .tab-navigation-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at top right, rgba(96, 165, 250, 0.2), transparent 60%);
+    z-index: -1;
+  }
+
+  /* Ombre pour une profondeur d'effet */
+  .tab-navigation-container {
+    box-shadow: -6px 0 20px rgba(0, 0, 0, 0.2) inset;
   }
 }
 
 /* Optimisations pour le mode light */
 :root:not(.dark) .tab-navigation-container {
-  background-color: #1e40af; /* Garde le bleu foncé même en mode clair */
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); /* Gradient plus doux en mode clair */
 }
 
 :root:not(.dark) .tab-navigation-item {
-  color: white; /* Texte blanc pour contraste en mode clair */
+  color: rgba(255, 255, 255, 0.9); /* Plus de contraste en mode clair */
+}
+
+/* Animation du menu au chargement de la page */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tab-navigation-item {
+  animation: slideIn 0.3s ease forwards;
+  animation-delay: calc(var(--item-index, 0) * 0.05s);
+}
+
+/* Personnalisation du "Getting Started" */
+.getting-started-tip {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.getting-started-tip:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
 }

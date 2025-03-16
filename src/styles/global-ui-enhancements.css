@@ -1240,3 +1240,42 @@ button svg,
   stroke: currentColor !important;
   stroke-width: 2px !important;
 }
+
+/* AMÉLIORATIONS DE LA NAVIGATION */
+/* Effet de focus bien visible pour l'accessibilité */
+.tab-navigation-item:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
+}
+
+/* Animation des icônes du menu de navigation */
+.tab-navigation-item svg {
+  transform-origin: center;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.tab-navigation-item.active svg {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+}
+
+/* Amélioration de la lisibilité du texte dans la navigation */
+.tab-navigation-item span {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.tab-navigation-item.active span {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Amélioration de l'accessibilité et du contraste */
+@media (prefers-reduced-motion: reduce) {
+  .tab-navigation-item {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .tab-navigation-item svg {
+    transition: none !important;
+  }
+}

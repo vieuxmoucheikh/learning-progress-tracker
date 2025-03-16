@@ -252,6 +252,52 @@
   }
 }
 
+/* AMÉLIORATIONS DE LA NAVIGATION RESPONSIVE */
+@media (max-width: 768px) {
+  /* Navigation */
+  .tab-navigation-container {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  }
+  
+  .tab-navigation-items {
+    justify-content: flex-start;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .tab-navigation-items::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+  
+  /* Empêcher les éléments de navigation de devenir trop petits */
+  .tab-navigation-item {
+    padding: 0.6rem 1rem;
+    min-width: auto;
+  }
+  
+  /* Garantir que le texte reste visible même sur petits écrans */
+  .tab-navigation-item span {
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+}
+
+/* Corrections pour les grands écrans */
+@media (min-width: 1400px) {
+  .tab-navigation-container {
+    padding-top: 2.5rem;
+  }
+  
+  .tab-navigation-item {
+    margin: 0.35rem 1.5rem;
+    padding: 0.85rem 1.2rem;
+  }
+  
+  .tab-navigation-item span {
+    font-size: 1rem;
+  }
+}
+
 /* POLISSAGE VISUEL FINAL */
 @media (max-width: 768px) {
   /* Animation subtile d'apparition pour les cartes */

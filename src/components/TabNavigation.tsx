@@ -8,7 +8,9 @@ import {
   BookOpen, 
   Notebook,
   LayoutDashboard,
-  Library
+  Library,
+  Brain,
+  GraduationCap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from './ui/button';
@@ -28,7 +30,8 @@ type Tab = {
   id: string;
   label: string;
   shortLabel: string;
-  icon: any;
+  icon: React.ReactNode;
+  description?: string; // Description optionnelle pour l'accessibilité
 };
 
 interface TabNavigationProps {
@@ -44,12 +47,48 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
   const activeTabRef = useRef<HTMLButtonElement>(null);
   
   const tabs: Tab[] = [
-    { id: 'dashboard', label: 'Dashboard', shortLabel: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-    { id: 'items', label: 'All Items', shortLabel: 'Items', icon: <BookOpen size={20} /> },
-    { id: 'analytics', label: 'Analytics', shortLabel: 'Stats', icon: <BarChart3 size={20} /> },
-    { id: 'pomodoro', label: 'Pomodoro', shortLabel: 'Timer', icon: <Timer size={20} /> },
-    { id: 'flashcards', label: 'Flashcards', shortLabel: 'Cards', icon: <Library size={20} /> },
-    { id: 'learning-cards', label: 'Learning', shortLabel: 'Learn', icon: <Notebook size={20} /> },
+    { 
+      id: 'dashboard', 
+      label: 'Dashboard', 
+      shortLabel: 'Dashboard', 
+      icon: <LayoutDashboard size={20} />,
+      description: 'Vue d\'ensemble de vos activités d\'apprentissage'
+    },
+    { 
+      id: 'items', 
+      label: 'All Items', 
+      shortLabel: 'Items', 
+      icon: <BookOpen size={20} />,
+      description: 'Liste de toutes vos ressources d\'apprentissage'
+    },
+    { 
+      id: 'analytics', 
+      label: 'Analytics', 
+      shortLabel: 'Stats', 
+      icon: <BarChart3 size={20} />,
+      description: 'Visualisation de votre progression'
+    },
+    { 
+      id: 'pomodoro', 
+      label: 'Pomodoro', 
+      shortLabel: 'Timer', 
+      icon: <Timer size={20} />,
+      description: 'Technique de gestion du temps'
+    },
+    { 
+      id: 'flashcards', 
+      label: 'Flashcards', 
+      shortLabel: 'Cards', 
+      icon: <Library size={20} />,
+      description: 'Vos cartes mémoire'
+    },
+    { 
+      id: 'learning-cards', 
+      label: 'Learning', 
+      shortLabel: 'Learn', 
+      icon: <GraduationCap size={20} />,
+      description: 'Vos cartes d\'apprentissage'
+    },
   ];
 
   // Scroll active tab into view when it changes or when component loads
@@ -98,38 +137,54 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
 
   return (
     <div className="tab-navigation-container">
-      <div className="flex justify-center mb-2 mt-1 md:mb-6 md:mt-0">
-        <h2 className="text-white font-bold text-xl hidden md:block">Learning Tracker</h2>
-        {/* Suppression du texte "Menu" sur mobile */}
+      {/* Logo ou branding - supprimer le texte Learning Tracker */}
+      <div className="flex justify-center items-center mt-1 mb-2 md:mt-0">
+        <div className="p-2 rounded-full bg-white/10 md:hidden">
+          <Brain className="w-6 h-6 text-white" />
+        </div>
       </div>
+      
       <div 
         className="tab-navigation-items" 
         ref={scrollContainerRef}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
+        role="tablist"
+        aria-orientation="horizontal"
+        aria-label="Navigation principale"
       >
-        {tabs.map((tab) => (
+        {tabs.map((tab, index) => (
           <button
             key={tab.id}
             ref={tab.id === activeTab ? activeTabRef : null}
             onClick={() => onTabChange(tab.id)}
             className={`
-              px-4 py-3 text-sm md:text-base whitespace-nowrap
               tab-navigation-item
               ${activeTab === tab.id ? 'active' : ''}
-              flex items-center gap-3 transition-all
+              flex items-center gap-2 transition-all
             `}
+            style={{ '--item-index': index } as React.CSSProperties}
             aria-current={activeTab === tab.id ? 'page' : undefined}
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            aria-label={tab.description || tab.label}
+            title={tab.description}
           >
             <span className="flex-shrink-0">{tab.icon}</span>
-            <span className="inline text-sm font-medium">{tab.id === activeTab ? tab.label : tab.shortLabel}</span>
+            <span className="inline text-sm font-medium md:font-semibold">
+              {tab.id === activeTab ? tab.label : tab.shortLabel}
+            </span>
           </button>
         ))}
       </div>
+      
+      {/* Message d'aide au bas du menu en version desktop */}
       <div className="hidden md:block mt-auto mx-4 mb-4">
-        <div className="px-3 py-2 text-xs bg-white bg-opacity-10 rounded text-white text-center">
-          <span className="block opacity-80">Getting Started?</span>
-          <span className="block mt-1 font-semibold">Add your first learning item with the "+ Add Item" button</span>
+        <div className="px-3 py-2 text-xs getting-started-tip">
+          <span className="block font-medium text-white/80">Nouveau ici ?</span>
+          <span className="block mt-1 font-semibold text-white">
+            Commencez par ajouter un élément avec "Add Item"
+          </span>
         </div>
       </div>
     </div>

@@ -380,6 +380,53 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    // Create a style element
+    const style = document.createElement('style');
+    style.textContent = `
+      /* ...existing code... */
+      
+      /* Amélioration de l'espace disponible pour la navigation */
+      @media (min-width: 768px) {
+        .tab-navigation {
+          padding: 0 !important;
+          gap: 0 !important;
+        }
+        
+        .tab-navigation-container {
+          min-height: 100vh;
+          height: 100%;
+          overflow-y: auto;
+          scrollbar-width: none;
+        }
+        
+        .tab-navigation-container::-webkit-scrollbar {
+          display: none;
+        }
+      }
+      
+      /* Amélioration de la navigation mobile */
+      @media (max-width: 767px) {
+        .tab-navigation-container {
+          position: sticky;
+          top: 0;
+          z-index: 40;
+          padding-bottom: 0.5rem;
+        }
+      }
+      
+      /* ...existing code... */
+    `;
+    
+    // Append the style element to the document head
+    document.head.appendChild(style);
+    
+    // Clean up function
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
+  useEffect(() => {
     let mounted = true;
 
     async function loadItems() {
