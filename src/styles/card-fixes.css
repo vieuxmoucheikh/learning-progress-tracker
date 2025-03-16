@@ -1157,3 +1157,386 @@ html[data-theme="dark"] .item-wrapper .card[class*="border-yellow-500"] {
 }
 
 /* ...existing code... */
+
+/* CORRECTIFS UNIVERSELS POUR TOUS LES ENVIRONNEMENTS */
+/* Ces styles s'appliquent à tous les modes (clair/sombre) et tous les appareils */
+
+/* Sélecteurs universels pour les cartes */
+.learning-item-card > .card,
+.learning-item-card > div > .card,
+.item-wrapper > .card,
+.card.border-l-4,
+[class*="card-container"] > .card,
+.learning-item-card .card:first-child {
+  border-width: 2px !important;
+  border-left-width: 12px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+  overflow: hidden !important;
+  position: relative !important;
+  margin-bottom: 24px !important;
+  transform-origin: center top !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* Animation universelle au survol */
+.learning-item-card > .card:hover,
+.learning-item-card > div > .card:hover,
+.item-wrapper > .card:hover,
+.card.border-l-4:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Bordures spécifiques par statut - Universelles */
+/* Not Started */
+.learning-item-card > .card[class*="border-gray-300"],
+.learning-item-card > div > .card[class*="border-gray-300"],
+.item-wrapper > .card[class*="border-gray-300"],
+.card[class*="border-l-gray-300"] {
+  border-color: #64748b !important;
+  border-left-color: #334155 !important;
+}
+
+/* In Progress */
+.learning-item-card > .card[class*="border-blue-400"],
+.learning-item-card > div > .card[class*="border-blue-400"],
+.item-wrapper > .card[class*="border-blue-400"],
+.card[class*="border-l-blue-400"] {
+  border-color: #60a5fa !important;
+  border-left-color: #2563eb !important;
+}
+
+/* Completed */
+.learning-item-card > .card[class*="border-green-400"],
+.learning-item-card > div > .card[class*="border-green-400"],
+.item-wrapper > .card[class*="border-green-400"],
+.card[class*="border-l-green-400"] {
+  border-color: #4ade80 !important;
+  border-left-color: #16a34a !important;
+}
+
+/* On Hold */
+.learning-item-card > .card[class*="border-yellow-400"],
+.learning-item-card > div > .card[class*="border-yellow-400"],
+.item-wrapper > .card[class*="border-yellow-400"],
+.card[class*="border-l-yellow-400"] {
+  border-color: #facc15 !important;
+  border-left-color: #ca8a04 !important;
+}
+
+/* Archived */
+.learning-item-card > .card[class*="border-gray-400"],
+.learning-item-card > div > .card[class*="border-gray-400"],
+.item-wrapper > .card[class*="border-gray-400"],
+.card[class*="border-l-gray-400"] {
+  border-color: #94a3b8 !important;
+  border-left-color: #475569 !important;
+}
+
+/* Mode sombre - Bordures plus contrastées */
+html[data-theme="dark"] .learning-item-card > .card[class*="border-gray-700"],
+html[data-theme="dark"] .learning-item-card > div > .card[class*="border-gray-700"],
+html[data-theme="dark"] .item-wrapper .card[class*="border-gray-700"] {
+  border-color: #475569 !important;
+  border-left-color: #94a3b8 !important;
+}
+
+html[data-theme="dark"] .learning-item-card > .card[class*="border-blue-500"],
+html[data-theme="dark"] .learning-item-card > div > .card[class*="border-blue-500"],
+html[data-theme="dark"] .item-wrapper .card[class*="border-blue-500"] {
+  border-color: #3b82f6 !important;
+  border-left-color: #60a5fa !important;
+}
+
+html[data-theme="dark"] .learning-item-card > .card[class*="border-green-500"],
+html[data-theme="dark"] .learning-item-card > div > .card[class*="border-green-500"],
+html[data-theme="dark"] .item-wrapper .card[class*="border-green-500"] {
+  border-color: #22c55e !important;
+  border-left-color: #4ade80 !important;
+}
+
+html[data-theme="dark"] .learning-item-card > .card[class*="border-yellow-500"],
+html[data-theme="dark"] .learning-item-card > div > .card[class*="border-yellow-500"],
+html[data-theme="dark"] .item-wrapper .card[class*="border-yellow-500"] {
+  border-color: #eab308 !important;
+  border-left-color: #fde047 !important;
+}
+
+/* Ajout de coins colorés pour une meilleure identification visuelle */
+.learning-item-card > .card::before,
+.learning-item-card > div > .card::before,
+.item-wrapper > .card::before,
+.card.border-l-4::before {
+  content: "";
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 5px !important;
+  z-index: 10 !important;
+}
+
+.learning-item-card > .card::after,
+.learning-item-card > div > .card::after,
+.item-wrapper > .card::after,
+.card.border-l-4::after {
+  content: "";
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  width: 24px !important;
+  height: 24px !important;
+  z-index: 10 !important;
+  border-bottom-left-radius: 8px !important;
+}
+
+/* Couleurs pour les marqueurs visuels par statut */
+/* Not Started */
+.learning-item-card > .card[class*="border-gray-300"]::before,
+.learning-item-card > div > .card[class*="border-gray-300"]::before,
+.item-wrapper > .card[class*="border-gray-300"]::before,
+.card[class*="border-l-gray-300"]::before {
+  background-color: #64748b !important;
+}
+
+.learning-item-card > .card[class*="border-gray-300"]::after,
+.learning-item-card > div > .card[class*="border-gray-300"]::after,
+.item-wrapper > .card[class*="border-gray-300"]::after,
+.card[class*="border-l-gray-300"]::after {
+  background-color: #334155 !important;
+}
+
+/* In Progress */
+.learning-item-card > .card[class*="border-blue-400"]::before,
+.learning-item-card > div > .card[class*="border-blue-400"]::before,
+.item-wrapper > .card[class*="border-blue-400"]::before,
+.card[class*="border-l-blue-400"]::before {
+  background-color: #60a5fa !important;
+}
+
+.learning-item-card > .card[class*="border-blue-400"]::after,
+.learning-item-card > div > .card[class*="border-blue-400"]::after,
+.item-wrapper > .card[class*="border-blue-400"]::after,
+.card[class*="border-l-blue-400"]::after {
+  background-color: #2563eb !important;
+}
+
+/* Completed */
+.learning-item-card > .card[class*="border-green-400"]::before,
+.learning-item-card > div > .card[class*="border-green-400"]::before,
+.item-wrapper > .card[class*="border-green-400"]::before,
+.card[class*="border-l-green-400"]::before {
+  background-color: #4ade80 !important;
+}
+
+.learning-item-card > .card[class*="border-green-400"]::after,
+.learning-item-card > div > .card[class*="border-green-400"]::after,
+.item-wrapper > .card[class*="border-green-400"]::after,
+.card[class*="border-l-green-400"]::after {
+  background-color: #16a34a !important;
+}
+
+/* On Hold */
+.learning-item-card > .card[class*="border-yellow-400"]::before,
+.learning-item-card > div > .card[class*="border-yellow-400"]::before,
+.item-wrapper > .card[class*="border-yellow-400"]::before,
+.card[class*="border-l-yellow-400"]::before {
+  background-color: #facc15 !important;
+}
+
+.learning-item-card > .card[class*="border-yellow-400"]::after,
+.learning-item-card > div > .card[class*="border-yellow-400"]::after,
+.item-wrapper > .card[class*="border-yellow-400"]::after,
+.card[class*="border-l-yellow-400"]::after {
+  background-color: #ca8a04 !important;
+}
+
+/* Archived */
+.learning-item-card > .card[class*="border-gray-400"]::before,
+.learning-item-card > div > .card[class*="border-gray-400"]::before,
+.item-wrapper > .card[class*="border-gray-400"]::before,
+.card[class*="border-l-gray-400"]::before {
+  background-color: #94a3b8 !important;
+}
+
+.learning-item-card > .card[class*="border-gray-400"]::after,
+.learning-item-card > div > .card[class*="border-gray-400"]::after,
+.item-wrapper > .card[class*="border-gray-400"]::after,
+.card[class*="border-l-gray-400"]::after {
+  background-color: #475569 !important;
+}
+
+/* Mode sombre - Ajustements pour les marqueurs visuels */
+html[data-theme="dark"] .learning-item-card > .card[class*="border-gray-700"]::before,
+html[data-theme="dark"] .learning-item-card > div > .card[class*="border-gray-700"]::before,
+html[data-theme="dark"] .item-wrapper .card[class*="border-gray-700"]::before {
+  background-color: #64748b !important;
+}
+
+html[data-theme="dark"] .learning-item-card > .card[class*="border-gray-700"]::after,
+html[data-theme="dark"] .learning-item-card > div > .card[class*="border-gray-700"]::after,
+html[data-theme="dark"] .item-wrapper .card[class*="border-gray-700"]::after {
+  background-color: #94a3b8 !important;
+}
+
+html[data-theme="dark"] .learning-item-card > .card[class*="border-blue-500"]::before,
+html[data-theme="dark"] .learning-item-card > div > .card[class*="border-blue-500"]::before,
+html[data-theme="dark"] .item-wrapper .card[class*="border-blue-500"]::before {
+  background-color: #3b82f6 !important;
+}
+
+html[data-theme="dark"] .learning-item-card > .card[class*="border-blue-500"]::after,
+html[data-theme="dark"] .learning-item-card > div > .card[class*="border-blue-500"]::after,
+html[data-theme="dark"] .item-wrapper .card[class*="border-blue-500"]::after {
+  background-color: #60a5fa !important;
+}
+
+html[data-theme="dark"] .learning-item-card > .card[class*="border-green-500"]::before,
+html[data-theme="dark"] .learning-item-card > div > .card[class*="border-green-500"]::before,
+html[data-theme="dark"] .item-wrapper .card[class*="border-green-500"]::before {
+  background-color: #22c55e !important;
+}
+
+html[data-theme="dark"] .learning-item-card > .card[class*="border-green-500"]::after,
+html[data-theme="dark"] .learning-item-card > div > .card[class*="border-green-500"]::after,
+html[data-theme="dark"] .item-wrapper .card[class*="border-green-500"]::after {
+  background-color: #4ade80 !important;
+}
+
+html[data-theme="dark"] .learning-item-card > .card[class*="border-yellow-500"]::before,
+html[data-theme="dark"] .learning-item-card > div > .card[class*="border-yellow-500"]::before,
+html[data-theme="dark"] .item-wrapper .card[class*="border-yellow-500"]::before {
+  background-color: #eab308 !important;
+}
+
+html[data-theme="dark"] .learning-item-card > .card[class*="border-yellow-500"]::after,
+html[data-theme="dark"] .learning-item-card > div > .card[class*="border-yellow-500"]::after,
+html[data-theme="dark"] .item-wrapper .card[class*="border-yellow-500"]::after {
+  background-color: #fde047 !important;
+}
+
+/* Styles pour les priorités - Universels */
+.high-priority-card {
+  position: relative !important;
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25) !important;
+  border-bottom: 4px solid #ef4444 !important;
+}
+
+.high-priority-card:hover {
+  box-shadow: 0 15px 30px rgba(239, 68, 68, 0.35) !important;
+}
+
+.medium-priority-card {
+  position: relative !important;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.25) !important;
+  border-bottom: 4px solid #f59e0b !important;
+}
+
+.medium-priority-card:hover {
+  box-shadow: 0 15px 30px rgba(245, 158, 11, 0.35) !important;
+}
+
+.low-priority-card {
+  position: relative !important;
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25) !important;
+  border-bottom: 4px solid #3b82f6 !important;
+}
+
+.low-priority-card:hover {
+  box-shadow: 0 15px 30px rgba(59, 130, 246, 0.35) !important;
+}
+
+/* Ajout d'un liseret brillant pour rendre les bordures plus distinctes */
+.learning-item-card > .card::before {
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Styles spécifiques pour les arrière-plans de carte - Mode clair */
+html[data-theme="light"] .learning-item-card > .card {
+  background: white !important;
+}
+
+html[data-theme="light"] .learning-item-card > .card[class*="border-gray-300"] {
+  background: linear-gradient(145deg, #f8fafc 0%, #ffffff 100%) !important;
+}
+
+html[data-theme="light"] .learning-item-card > .card[class*="border-blue-400"] {
+  background: linear-gradient(145deg, #eff6ff 0%, #ffffff 100%) !important;
+}
+
+html[data-theme="light"] .learning-item-card > .card[class*="border-green-400"] {
+  background: linear-gradient(145deg, #f0fdf4 0%, #ffffff 100%) !important;
+}
+
+html[data-theme="light"] .learning-item-card > .card[class*="border-yellow-400"] {
+  background: linear-gradient(145deg, #fef9c3 0%, #ffffff 100%) !important;
+}
+
+html[data-theme="light"] .learning-item-card > .card[class*="border-gray-400"] {
+  background: linear-gradient(145deg, #f1f5f9 0%, #ffffff 100%) !important;
+}
+
+/* Styles spécifiques pour les arrière-plans de carte - Mode sombre */
+html[data-theme="dark"] .learning-item-card > .card {
+  background: #1e293b !important;
+}
+
+html[data-theme="dark"] .learning-item-card > .card[class*="border-gray-700"] {
+  background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%) !important;
+}
+
+html[data-theme="dark"] .learning-item-card > .card[class*="border-blue-500"] {
+  background: linear-gradient(145deg, #1e3a8a 0%, #1e293b 100%) !important;
+}
+
+html[data-theme="dark"] .learning-item-card > .card[class*="border-green-500"] {
+  background: linear-gradient(145deg, #14532d 0%, #1e293b 100%) !important;
+}
+
+html[data-theme="dark"] .learning-item-card > .card[class*="border-yellow-500"] {
+  background: linear-gradient(145deg, #713f12 0%, #1e293b 100%) !important;
+}
+
+/* Styles universels pour les sessions */
+.learning-item-card .border.rounded-xl,
+.item-wrapper .border.rounded-xl {
+  border: 2px solid !important;
+  border-radius: 8px !important;
+  margin-bottom: 12px !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.learning-item-card .border.rounded-xl:hover,
+.item-wrapper .border.rounded-xl:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Mode clair - Sessions */
+html[data-theme="light"] .learning-item-card .border.rounded-xl {
+  border-color: rgba(203, 213, 225, 0.8) !important;
+  background: #ffffff !important;
+}
+
+html[data-theme="light"] .learning-item-card .border.rounded-xl.border-l-blue-400 {
+  border-color: #bfdbfe !important;
+  border-left: 4px solid #3b82f6 !important;
+  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%) !important;
+}
+
+/* Mode sombre - Sessions */
+html[data-theme="dark"] .learning-item-card .border.rounded-xl {
+  border-color: rgba(51, 65, 85, 0.8) !important;
+  background: #0f172a !important;
+}
+
+html[data-theme="dark"] .learning-item-card .border.rounded-xl.border-l-blue-400 {
+  border-color: #1e40af !important;
+  border-left: 4px solid #3b82f6 !important;
+  background: linear-gradient(135deg, #1e40af 0%, #0f172a 100%) !important;
+}
+
+/* ...existing code... */

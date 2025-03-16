@@ -29,6 +29,7 @@ import './styles/critical-light-mode-fixes.css';
 import './styles/global-ui-enhancements.css';
 import './styles/responsive-fixes.css';
 import './styles/card-fixes.css'; // Ajout du nouveau fichier de corrections
+import './styles/universal-card-borders.css'; // Nouveau fichier pour les bordures universelles
 import './components/LearningItemCard.css';
 import './components/Calendar.css';
 import './components/StatusBadge.css';
