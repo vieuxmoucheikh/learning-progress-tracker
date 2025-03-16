@@ -4,7 +4,7 @@
  * lorsqu'elles sont visualisées en mode sombre sur mobile.
  */
 
-/* Styles globaux pour toutes les icônes */
+/* Styles globaux pour toutes les icônes SVG */
 html[data-theme="dark"] svg, 
 html[data-theme="dark"] svg path, 
 html[data-theme="dark"] svg line, 
@@ -14,34 +14,47 @@ html[data-theme="dark"] svg rect {
   stroke-width: inherit !important;
   stroke-linecap: round !important;
   stroke-linejoin: round !important;
-  fill: none !important; /* Empêche le remplissage des icônes */
   shape-rendering: geometricPrecision !important;
 }
 
-/* Styles spécifiques pour les icônes dans les cartes */
+/* Force le style de ligne correct pour les icônes Lucide */
+html[data-theme="dark"] [data-lucide],
+html[data-theme="dark"] .lucide,
+html[data-theme="dark"] [class*="lucide-"] {
+  stroke-width: 2px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+/* Styles spécifiques pour les icônes dans les cartes d'apprentissage */
 html[data-theme="dark"] .card svg,
 html[data-theme="dark"] .learning-item-card svg,
 html[data-theme="dark"] .item-wrapper svg {
-  color: currentColor !important;
-  stroke: currentColor !important;
   fill: none !important;
-  stroke-width: 2 !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
 }
 
-/* Corrections spécifiques pour chaque type d'icône couramment utilisée */
-html[data-theme="dark"] .card svg[data-lucide="Edit"],
-html[data-theme="dark"] .card svg[data-lucide="Save"],
-html[data-theme="dark"] .card svg[data-lucide="Trash2"],
-html[data-theme="dark"] .card svg[data-lucide="Clock"],
-html[data-theme="dark"] .card svg[data-lucide="Check"],
-html[data-theme="dark"] .card svg[data-lucide="X"],
-html[data-theme="dark"] .card svg[data-lucide="Play"],
-html[data-theme="dark"] .card svg[data-lucide="Pause"],
-html[data-theme="dark"] .card svg[data-lucide="Plus"],
-html[data-theme="dark"] .card svg[data-lucide="Link"],
-html[data-theme="dark"] .card svg[data-lucide="ExternalLink"] {
+/* Ciblage spécifique des icônes courantes dans les cartes */
+html[data-theme="dark"] svg[data-lucide="Edit"],
+html[data-theme="dark"] svg[data-lucide="Save"],
+html[data-theme="dark"] svg[data-lucide="Trash2"],
+html[data-theme="dark"] svg[data-lucide="Clock"],
+html[data-theme="dark"] svg[data-lucide="Check"],
+html[data-theme="dark"] svg[data-lucide="X"],
+html[data-theme="dark"] svg[data-lucide="Play"],
+html[data-theme="dark"] svg[data-lucide="Pause"],
+html[data-theme="dark"] svg[data-lucide="Plus"],
+html[data-theme="dark"] svg[data-lucide="Link"],
+html[data-theme="dark"] svg[data-lucide="ExternalLink"],
+html[data-theme="dark"] svg[data-lucide="Download"],
+html[data-theme="dark"] svg[data-lucide="Eye"],
+html[data-theme="dark"] svg[data-lucide="EyeOff"],
+html[data-theme="dark"] svg[data-lucide="Bookmark"],
+html[data-theme="dark"] svg[data-lucide="BookmarkCheck"] {
   fill: none !important;
   stroke: currentColor !important;
+  stroke-width: 2px !important;
 }
 
 /* Correctifs spécifiques pour les boutons contenant des icônes */
@@ -50,40 +63,51 @@ html[data-theme="dark"] .learning-item-card button svg,
 html[data-theme="dark"] .item-wrapper button svg {
   fill: none !important;
   stroke: currentColor !important;
-  stroke-width: 2 !important;
+  stroke-width: 2px !important;
 }
 
 /* Correctifs pour les couleurs spécifiques */
 html[data-theme="dark"] .card button.text-red-600 svg,
-html[data-theme="dark"] .learning-item-card button.text-red-600 svg {
+html[data-theme="dark"] .learning-item-card button.text-red-600 svg,
+html[data-theme="dark"] svg.text-red-600,
+html[data-theme="dark"] [class*="text-red-"] svg {
   stroke: #ef4444 !important;
   fill: none !important;
 }
 
 html[data-theme="dark"] .card button.text-green-600 svg,
-html[data-theme="dark"] .learning-item-card button.text-green-600 svg {
+html[data-theme="dark"] .learning-item-card button.text-green-600 svg,
+html[data-theme="dark"] svg.text-green-600, 
+html[data-theme="dark"] [class*="text-green-"] svg {
   stroke: #22c55e !important;
   fill: none !important;
 }
 
 html[data-theme="dark"] .card button.text-blue-600 svg,
-html[data-theme="dark"] .learning-item-card button.text-blue-600 svg {
+html[data-theme="dark"] .learning-item-card button.text-blue-600 svg,
+html[data-theme="dark"] svg.text-blue-600,
+html[data-theme="dark"] [class*="text-blue-"] svg {
   stroke: #3b82f6 !important;
   fill: none !important;
 }
 
 html[data-theme="dark"] .card button.text-yellow-600 svg,
-html[data-theme="dark"] .learning-item-card button.text-yellow-600 svg {
+html[data-theme="dark"] .learning-item-card button.text-yellow-600 svg,
+html[data-theme="dark"] svg.text-yellow-600,
+html[data-theme="dark"] [class*="text-yellow-"] svg {
   stroke: #facc15 !important;
   fill: none !important;
 }
 
-/* Correctifs spécifiques pour les icônes dans les éléments d'état/statut */
-html[data-theme="dark"] .badge svg,
-html[data-theme="dark"] .status-badge svg,
-html[data-theme="dark"] [class*="status-"] svg {
+/* Exception pour l'icône Trophy qui doit avoir un remplissage partiel */
+html[data-theme="dark"] svg[data-lucide="Trophy"] {
   fill: none !important;
-  stroke: currentColor !important;
+  stroke: #facc15 !important;
+  stroke-width: 2px !important;
+}
+
+html[data-theme="dark"] svg[data-lucide="Trophy"] path[fill="currentColor"] {
+  fill: #facc15 !important;
 }
 
 /* Correction pour les icônes en mode mobile */
@@ -91,45 +115,17 @@ html[data-theme="dark"] [class*="status-"] svg {
   html[data-theme="dark"] .card svg,
   html[data-theme="dark"] .learning-item-card svg,
   html[data-theme="dark"] .item-wrapper svg {
-    stroke-width: 2.5 !important; /* Légèrement plus épais pour meilleure visibilité sur mobile */
+    stroke-width: 2.5px !important; /* Légèrement plus épais pour meilleure visibilité sur mobile */
   }
 }
 
-/* Correctifs spécifiques pour certaines icônes qui doivent avoir du remplissage */
-html[data-theme="dark"] svg[data-lucide="Trophy"] .fill-part,
-html[data-theme="dark"] svg[data-lucide="Award"] .fill-part {
-  fill: currentColor !important;
-}
-
-/* Couleurs préservées spécifiquement pour certaines icônes */
-html[data-theme="dark"] svg.text-blue-500,
-html[data-theme="dark"] svg.text-blue-400 {
-  stroke: #3b82f6 !important;
-  color: #3b82f6 !important;
-}
-
-html[data-theme="dark"] svg.text-green-500,
-html[data-theme="dark"] svg.text-green-400 {
-  stroke: #22c55e !important;
-  color: #22c55e !important;
-}
-
-html[data-theme="dark"] svg.text-yellow-500,
-html[data-theme="dark"] svg.text-yellow-400 {
-  stroke: #facc15 !important;
-  color: #facc15 !important;
-}
-
-html[data-theme="dark"] svg.text-red-500,
-html[data-theme="dark"] svg.text-red-400 {
-  stroke: #ef4444 !important;
-  color: #ef4444 !important;
-}
-
-/* Assurer que les icônes dans le badge de statut sont visibles */
-.badge svg {
-  stroke-width: 2.5 !important;
-  height: 0.875rem !important;
-  width: 0.875rem !important;
-  margin-right: 0.25rem !important;
+/* Règle universelle pour s'assurer que les icônes Lucide conservent leur apparence */
+.lucide, 
+[data-lucide], 
+svg[class*="lucide-"] {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
 }

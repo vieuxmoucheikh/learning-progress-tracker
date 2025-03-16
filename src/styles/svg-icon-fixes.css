@@ -1,0 +1,129 @@
+/**
+ * CORRECTIFS ULTRA-SPÉCIFIQUES POUR LES ICÔNES SVG
+ * Ce fichier applique des corrections hautement spécifiques pour garantir
+ * l'affichage correct des icônes SVG dans tous les contextes.
+ */
+
+/* Styles universels pour les SVG Lucide */
+.lucide,
+[data-lucide],
+[class*="lucide-"] {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  vector-effect: non-scaling-stroke !important;
+}
+
+/* MODE SOMBRE - PRIORITÉ MAXIMALE */
+html[data-theme="dark"] body svg,
+html[data-theme="dark"] body .lucide,
+html[data-theme="dark"] body [data-lucide],
+html[data-theme="dark"] body [class*="lucide-"] {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+
+/* CARTES D'APPRENTISSAGE - ICÔNES SPÉCIFIQUES */
+html[data-theme="dark"] body .learning-item-card .lucide-edit,
+html[data-theme="dark"] body .learning-item-card [data-lucide="Edit"],
+html[data-theme="dark"] body .learning-item-card svg[data-lucide="Edit"] {
+  fill: none !important;
+  stroke: #60a5fa !important; /* blue-400 */
+  stroke-width: 2px !important;
+}
+
+html[data-theme="dark"] body .learning-item-card .lucide-save,
+html[data-theme="dark"] body .learning-item-card [data-lucide="Save"],
+html[data-theme="dark"] body .learning-item-card svg[data-lucide="Save"] {
+  fill: none !important;
+  stroke: #60a5fa !important; /* blue-400 */
+  stroke-width: 2px !important;
+}
+
+html[data-theme="dark"] body .learning-item-card .lucide-trash-2,
+html[data-theme="dark"] body .learning-item-card [data-lucide="Trash2"],
+html[data-theme="dark"] body .learning-item-card svg[data-lucide="Trash2"] {
+  fill: none !important;
+  stroke: #f87171 !important; /* red-400 */
+  stroke-width: 2px !important;
+}
+
+html[data-theme="dark"] body .learning-item-card .lucide-download,
+html[data-theme="dark"] body .learning-item-card [data-lucide="Download"],
+html[data-theme="dark"] body .learning-item-card svg[data-lucide="Download"] {
+  fill: none !important;
+  stroke: #60a5fa !important; /* blue-400 */
+  stroke-width: 2px !important;
+}
+
+html[data-theme="dark"] body .learning-item-card .lucide-eye,
+html[data-theme="dark"] body .learning-item-card [data-lucide="Eye"],
+html[data-theme="dark"] body .learning-item-card svg[data-lucide="Eye"],
+html[data-theme="dark"] body .learning-item-card .lucide-eye-off,
+html[data-theme="dark"] body .learning-item-card [data-lucide="EyeOff"],
+html[data-theme="dark"] body .learning-item-card svg[data-lucide="EyeOff"] {
+  fill: none !important;
+  stroke: #60a5fa !important; /* blue-400 */
+  stroke-width: 2px !important;
+}
+
+html[data-theme="dark"] body .learning-item-card .lucide-bookmark,
+html[data-theme="dark"] body .learning-item-card [data-lucide="Bookmark"],
+html[data-theme="dark"] body .learning-item-card svg[data-lucide="Bookmark"] {
+  fill: none !important;
+  stroke: #4ade80 !important; /* green-400 */
+  stroke-width: 2px !important;
+}
+
+html[data-theme="dark"] body .learning-item-card .lucide-bookmark-check,
+html[data-theme="dark"] body .learning-item-card [data-lucide="BookmarkCheck"],
+html[data-theme="dark"] body .learning-item-card svg[data-lucide="BookmarkCheck"] {
+  fill: none !important;
+  stroke: #4ade80 !important; /* green-400 */
+  stroke-width: 2px !important;
+}
+
+html[data-theme="dark"] body .learning-item-card .lucide-clock,
+html[data-theme="dark"] body .learning-item-card [data-lucide="Clock"],
+html[data-theme="dark"] body .learning-item-card svg[data-lucide="Clock"] {
+  fill: none !important;
+  stroke: #94a3b8 !important; /* slate-400 */
+  stroke-width: 2px !important;
+}
+
+html[data-theme="dark"] body .learning-item-card .lucide-trophy,
+html[data-theme="dark"] body .learning-item-card [data-lucide="Trophy"],
+html[data-theme="dark"] body .learning-item-card svg[data-lucide="Trophy"] {
+  stroke: #facc15 !important; /* yellow-400 */
+  stroke-width: 2px !important;
+}
+
+/* Gestion spéciale pour l'icône Trophy qui a besoin d'un remplissage partiel */
+html[data-theme="dark"] body svg[data-lucide="Trophy"] path[fill="currentColor"] {
+  fill: #facc15 !important; /* yellow-400 */
+}
+
+/* Pour les badges de statut */
+html[data-theme="dark"] body .badge svg,
+html[data-theme="dark"] body .status-badge svg,
+html[data-theme="dark"] body [class*="status-"] svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5px !important;
+}
+
+/* Règle pour s'assurer que les SVG sans attribut lucide sont aussi stylisés correctement */
+html[data-theme="dark"] body button svg:not([data-lucide]),
+html[data-theme="dark"] body .card svg:not([data-lucide]),
+html[data-theme="dark"] body .learning-item-card svg:not([data-lucide]) {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
