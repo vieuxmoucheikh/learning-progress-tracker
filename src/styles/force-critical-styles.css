@@ -1,0 +1,101 @@
+/* Force Critical Styles - Sans dépendances circulaires */
+
+/* Styles pour le mode sombre - sans utiliser @apply */
+.dark .text-gray-300,
+.dark .text-gray-400,
+.dark .text-gray-500 {
+  color: #e2e8f0 !important; /* slate-200 */
+}
+
+.dark h1, 
+.dark h2, 
+.dark h3, 
+.dark h4 {
+  color: #f8fafc !important; /* slate-50 */
+}
+
+/* Correction du texte dans le Dashboard (Calendrier et Objectifs) */
+.dark [class*="calendar-toggle"],
+.dark [class*="goals-header"],
+.dark [class*="calendar-header"],
+.dark [class*="filter-label"],
+.dark button[class*="export"],
+.dark [class*="export-button"],
+.dark [class*="filter-dropdown"] button,
+.dark [class*="filter"] button,
+.dark [class*="filter"] span,
+.dark [class*="filter-text"],
+.dark [class*="placeholder"],
+.dark [class*="select-text"],
+.dark [class*="dropdown-text"] {
+  color: #f1f5f9 !important; /* slate-100 */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Placeholders en mode sombre */
+.dark input::placeholder,
+.dark textarea::placeholder,
+.dark select::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Dashboard éléments en mode sombre sur mobile */
+@media (max-width: 768px) {
+  .dark [class*="dashboard"] [class*="calendar-toggle"],
+  .dark [class*="dashboard"] [class*="show-calendar"],
+  .dark [class*="dashboard"] [class*="calendar-button"],
+  .dark [class*="dashboard"] [class*="goals-header"],
+  .dark [class*="dashboard"] [class*="goals-title"],
+  .dark [class*="dashboard"] [class*="section-title"],
+  .dark [class*="dashboard"] [class*="section-header"],
+  .dark [class*="dashboard"] button span {
+    color: #ffffff !important; /* Blanc pur */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    font-weight: 600;
+  }
+  
+  /* Assurer la visibilité des icônes dans le Dashboard */
+  .dark [class*="dashboard"] svg,
+  .dark [class*="calendar"] svg,
+  .dark [class*="goals"] svg {
+    color: #ffffff !important;
+    opacity: 1;
+  }
+  
+  /* Amélioration des textes dans les cartes d'apprentissage */
+  .dark [class*="learning-card"] p,
+  .dark [class*="learning-card"] span,
+  .dark [class*="learning-card"] div,
+  .dark [class*="learning-item-card"] p,
+  .dark [class*="learning-item-card"] span,
+  .dark [class*="learning-item-card"] div {
+    color: #e2e8f0 !important; /* slate-200 */
+  }
+  
+  /* Étiquettes et badges en mode sombre */
+  .dark [class*="learning-card"] [class*="category"],
+  .dark [class*="learning-card"] [class*="difficulty"],
+  .dark [class*="learning-card"] [class*="tag"],
+  .dark [class*="learning-item-card"] [class*="category"],
+  .dark [class*="learning-item-card"] [class*="difficulty"],
+  .dark [class*="learning-item-card"] [class*="tag"] {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+  }
+}
+
+/* Contenu riche (prose) en mode sombre */
+.dark .prose p,
+.dark .prose h1, 
+.dark .prose h2, 
+.dark .prose h3,
+.dark .prose strong,
+.dark .prose em,
+.dark .prose blockquote,
+.dark .prose ul,
+.dark .prose ol,
+.dark .prose li {
+  color: #f1f5f9 !important; /* slate-100 */
+}

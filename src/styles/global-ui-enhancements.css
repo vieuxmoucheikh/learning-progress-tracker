@@ -144,6 +144,26 @@ button:active,
   --text-tertiary: #cbd5e0;
 }
 
+/* IMPORTANT: Remplacement des règles @apply par des styles directs */
+.dark .text-gray-300 {
+  color: var(--text-secondary) !important;
+}
+
+.dark .text-gray-400 {
+  color: var(--text-secondary) !important;
+}
+
+.dark .text-gray-500 {
+  color: var(--text-secondary) !important;
+}
+
+.dark h1, 
+.dark h2, 
+.dark h3, 
+.dark h4 {
+  color: var(--text-primary) !important;
+}
+
 .dark .text-gray-300,
 .dark .text-gray-400,
 .dark .text-gray-500 {
@@ -392,7 +412,7 @@ button:active,
 .dark [class*="dashboard"] [class*="calendar-toggle"],
 .dark [class*="show-calendar"],
 .dark [class*="calendar-button"] {
-  /* Remplacement de @apply avec des valeurs CSS directes */
+  /* Remplacement des @apply avec des valeurs CSS directes */
   color: #f1f5f9 !important; /* équivalent à text-gray-100 */
   font-weight: 600;
 }
