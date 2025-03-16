@@ -1,19 +1,14 @@
 import React from 'react';
 import { useRef, useEffect } from "react";
 import { 
-  ChevronRight, 
-  ChevronLeft,
   BarChart3, 
   Timer, 
   BookOpen, 
-  Notebook,
   LayoutDashboard,
   Library,
-  Brain,
-  GraduationCap
+  GraduationCap,
+  Brain
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from './ui/button';
 import './TabNavigation.css';
 
 // Define all available tabs
@@ -137,10 +132,10 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
 
   return (
     <div className="tab-navigation-container">
-      {/* Logo ou branding - supprimer le texte Learning Tracker */}
-      <div className="flex justify-center items-center mt-1 mb-2 md:mt-0">
-        <div className="p-2 rounded-full bg-white/10 md:hidden">
-          <Brain className="w-6 h-6 text-white" />
+      {/* Logo ou branding - icône uniquement */}
+      <div className="mobile-logo-container">
+        <div className="mobile-logo">
+          <Brain className="logo-icon" />
         </div>
       </div>
       
@@ -170,19 +165,19 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
             aria-label={tab.description || tab.label}
             title={tab.description}
           >
-            <span className="flex-shrink-0">{tab.icon}</span>
-            <span className="inline text-sm font-medium md:font-semibold">
-              {tab.id === activeTab ? tab.label : tab.shortLabel}
+            <span className="nav-icon">{tab.icon}</span>
+            <span className="nav-text">
+              {window.innerWidth < 768 ? tab.shortLabel : tab.label}
             </span>
           </button>
         ))}
       </div>
       
       {/* Message d'aide au bas du menu en version desktop */}
-      <div className="hidden md:block mt-auto mx-4 mb-4">
-        <div className="px-3 py-2 text-xs getting-started-tip">
-          <span className="block font-medium text-white/80">Nouveau ici ?</span>
-          <span className="block mt-1 font-semibold text-white">
+      <div className="getting-started-tip-container">
+        <div className="getting-started-tip">
+          <span className="tip-heading">Nouveau ici ?</span>
+          <span className="tip-text">
             Commencez par ajouter un élément avec "Add Item"
           </span>
         </div>

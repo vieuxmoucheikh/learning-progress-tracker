@@ -10,11 +10,41 @@
   overflow: hidden;
 }
 
+/* Logo pour mobile */
+.mobile-logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.75rem 0;
+}
+
+.mobile-logo {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.logo-icon {
+  width: 24px;
+  height: 24px;
+  color: white;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Container des onglets avec défilement horizontal */
 .tab-navigation-items {
   display: flex;
   flex-direction: row;
   overflow-x: auto;
-  padding: 1rem 0.5rem;
+  padding: 0.75rem 0.5rem;
   scrollbar-width: none; /* Masquer scrollbar Firefox */
   -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
   scroll-snap-type: x mandatory; /* Snap scrolling */
@@ -26,6 +56,7 @@
   display: none; /* Masquer scrollbar Chrome */
 }
 
+/* Style des onglets */
 .tab-navigation-item {
   white-space: nowrap;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -35,10 +66,13 @@
   margin: 0 0.25rem;
   position: relative;
   scroll-snap-align: center; /* Snap each item to center */
-  min-width: fit-content;
+  min-width: max-content;
   padding: 0.75rem 1rem; /* Ensure enough tap area */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .tab-navigation-item.active {
@@ -66,17 +100,28 @@
   transform: translateY(-1px);
 }
 
-/* Effet d'animation pour les icônes */
-.tab-navigation-item svg {
+/* Styles pour icônes et texte dans les onglets */
+.nav-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: transform 0.3s ease;
 }
 
-.tab-navigation-item:hover svg {
+.nav-text {
+  font-size: 0.875rem;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.tab-navigation-item:hover .nav-icon,
+.tab-navigation-item.active .nav-icon {
   transform: scale(1.1);
 }
 
-.tab-navigation-item.active svg {
-  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+.tab-navigation-item.active .nav-icon {
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
 }
 
 /* Enlever les indicateurs de défilement */
@@ -89,19 +134,28 @@
 @media (min-width: 768px) {
   .tab-navigation-container {
     min-height: 100vh;
-    padding: 2rem 0 1rem;
+    padding: 1.5rem 0 1rem;
     width: 100%;
     border-right: 1px solid rgba(255, 255, 255, 0.08);
     background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%); /* Gradient vertical */
+    box-shadow: -6px 0 20px rgba(0, 0, 0, 0.2) inset;
   }
   
-  .tab-navigation-container::before,
-  .tab-navigation-container::after {
-    display: none; /* Hide scroll indicators on desktop */
+  .mobile-logo-container {
+    padding: 0.5rem 0 1.5rem;
+  }
+  
+  .mobile-logo {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .logo-icon {
+    width: 28px;
+    height: 28px;
   }
   
   .tab-navigation-items {
-    display: flex;
     flex-direction: column;
     overflow-x: visible;
     mask-image: none; /* Remove fade effect on desktop */
@@ -122,6 +176,7 @@
     border-radius: 8px;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+    transform: none !important;
   }
   
   .tab-navigation-item.active {
@@ -129,7 +184,7 @@
     border-left: none;
     font-weight: 600;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transform: none;
+    transform: none !important;
   }
 
   .tab-navigation-item.active::before {
@@ -149,20 +204,22 @@
 
   .tab-navigation-item:hover:not(.active) {
     background-color: rgba(255, 255, 255, 0.07);
-    transform: none;
+    transform: none !important;
   }
   
-  /* Effet de focus pour l'accessibilité */
-  .tab-navigation-item:focus-visible {
-    outline: 2px solid white;
-    outline-offset: 2px;
+  .nav-icon {
+    margin-right: 0.5rem;
   }
   
-  /* Animation des icônes en desktop */
-  .tab-navigation-item svg {
-    margin-right: 0.75rem;
+  .nav-text {
+    font-size: 0.9375rem;
+    font-weight: 500;
   }
-
+  
+  .getting-started-tip-container {
+    display: block;
+  }
+  
   /* Fond d'animation subtil */
   .tab-navigation-container::after {
     content: '';
@@ -174,10 +231,47 @@
     background: radial-gradient(circle at top right, rgba(96, 165, 250, 0.2), transparent 60%);
     z-index: -1;
   }
+}
 
-  /* Ombre pour une profondeur d'effet */
-  .tab-navigation-container {
-    box-shadow: -6px 0 20px rgba(0, 0, 0, 0.2) inset;
+/* Optimisations spécifiques pour mobile */
+@media (max-width: 767px) {
+  /* Assurer que les scroll indicators sont visibles */
+  .tab-navigation-container::before,
+  .tab-navigation-container::after {
+    content: '';
+    position: absolute;
+    top: 52px;
+    width: 24px;
+    height: 24px;
+    z-index: 30;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  
+  .tab-navigation-container::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(30, 58, 138, 0.9), transparent);
+  }
+  
+  .tab-navigation-container::after {
+    right: 0;
+    background: linear-gradient(to left, rgba(30, 58, 138, 0.9), transparent);
+  }
+  
+  /* Ajustements pour garantir que le menu est bien visible */
+  .tab-navigation-items {
+    padding: 0.5rem;
+    mask-image: none;
+  }
+  
+  .tab-navigation-item {
+    padding: 0.625rem 0.875rem;
+    min-width: auto;
+    flex-shrink: 0;
+  }
+  
+  .nav-text {
+    font-size: 0.75rem;
   }
 }
 
@@ -208,6 +302,13 @@
 }
 
 /* Personnalisation du "Getting Started" */
+.getting-started-tip-container {
+  display: none;
+  margin-top: auto;
+  margin-bottom: 1rem;
+  padding: 0 1rem;
+}
+
 .getting-started-tip {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(4px);
@@ -222,4 +323,36 @@
 .getting-started-tip:hover {
   background: rgba(255, 255, 255, 0.15);
   transform: translateY(-2px);
+}
+
+.tip-heading {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.25rem;
+}
+
+.tip-text {
+  display: block;
+  font-size: 0.8rem;
+  color: white;
+  font-weight: 500;
+}
+
+/* Accessibilité */
+.tab-navigation-item:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-navigation-item {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .tab-navigation-item svg,
+  .nav-icon {
+    transition: none !important;
+  }
 }

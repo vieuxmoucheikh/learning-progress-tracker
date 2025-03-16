@@ -411,6 +411,17 @@ export default function App() {
           top: 0;
           z-index: 40;
           padding-bottom: 0.5rem;
+          width: 100%;
+        }
+        
+        /* Corriger la hauteur du conteneur principal pour éviter le dépassement */
+        .min-h-screen {
+          min-height: calc(100vh - 60px);
+        }
+        
+        /* S'assurer que le contenu est bien positionné sous le menu fixe */
+        .flex-1 {
+          padding-top: 0.5rem;
         }
       }
       
