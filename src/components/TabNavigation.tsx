@@ -329,7 +329,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
             aria-selected={activeTab === tab.id}
             aria-label={tab.description || tab.label}
             title={tab.description}
-          ></button>
+          >
             <span className="nav-icon">{tab.icon}</span>
             <span className="nav-text">
               {isMobile ? (tab.shortLabel || tab.label.slice(0, 6)) : tab.label}
@@ -339,7 +339,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
       </div>
       
       {/* Message d'aide au bas du menu en version desktop */}
-      <div className="getting-started-tip-container"></div>
+      <div className="getting-started-tip-container">
         <div className="getting-started-tip">
           <span className="tip-heading">Nouveau ici ?</span>
           <span className="tip-text">

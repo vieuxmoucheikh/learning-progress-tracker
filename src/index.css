@@ -1,22 +1,21 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Importer les corrections pour le mode clair sur mobile après les directives Tailwind */
+/* Importer toutes les feuilles de style en premier */
 @import './styles/mobile-light-mode-fixes.css';
 @import './styles/critical-light-mode-fixes.css';
 @import './styles/global-ui-enhancements.css';
 @import './styles/responsive-fixes.css';
 @import './styles/theme-sync.css';
 @import './styles/card-fixes.css';
-@import './styles/card-force-styles.css'; /* Nouveau fichier de styles forcés */
+@import './styles/card-force-styles.css';
 @import './components/LearningItemCard.css';
 @import './components/Calendar.css';
 @import './components/StatusBadge.css';
 @import './components/PomodoroTimer.css';
-
-/* Importer les corrections pour le mode clair sur mobile */
 @import '../public/mobile-light-mode.css';
+
+/* Ensuite, les directives Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
   :root {
