@@ -1141,7 +1141,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     <div className="learning-item-card w-full">
       <Card className={clsx(
         "relative overflow-hidden transition-all duration-300",
-        "hover:shadow-xl border-l-4",
+        "hover:shadow-xl border-l-4 super-visible-card", // Ajout de la classe super-visible-card
         "bg-white light:bg-white preserve-colors shadow-md",
         getBorderColorClass(),
         item.priority === 'high' && "high-priority-card", 

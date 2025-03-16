@@ -1,0 +1,366 @@
+/**
+ * CORRECTIFS CRITIQUES POUR BORDURES ULTRA-VISIBLES
+ * Styles à très haute priorité qui s'appliquent dans TOUS les contextes
+ */
+
+/* Sélecteurs à priorité maximale pour toute carte */
+html body .card,
+html body div.card,
+html body .learning-item-card .card,
+html body .learning-item-card > .card,
+html body .learning-item-card > div > .card,
+html body .item-wrapper > .card,
+html body [class*="card-container"] > .card,
+html body div[class*="learning-card"],
+html body div.card.border-l-4 {
+  /* Bordures extrêmement visibles */
+  border-width: 3px !important;
+  border-style: solid !important;
+  border-left-width: 18px !important;
+  border-radius: 12px !important;
+  /* Ajout d'un contour supplémentaire */
+  outline: 1px solid rgba(0, 0, 0, 0.2) !important;
+  outline-offset: -1px !important;
+  /* Ombre très prononcée */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.1) !important;
+  /* Autres propriétés importantes */
+  overflow: hidden !important;
+  position: relative !important;
+  margin-bottom: 28px !important;
+  /* Transitions fluides */
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
+}
+
+/* Animation au survol avec transformation physique */
+html body .card:hover,
+html body div.card:hover,
+html body .learning-item-card .card:hover,
+html body .learning-item-card > .card:hover,
+html body .learning-item-card > div > .card:hover,
+html body .item-wrapper > .card:hover,
+html body [class*="card-container"] > .card:hover,
+html body div[class*="learning-card"]:hover,
+html body div.card.border-l-4:hover {
+  transform: translateY(-8px) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* INDICATEURS VISUELS ULTRA-VISIBLES */
+/* Barre supérieure */
+html body .card::before,
+html body div.card::before,
+html body .learning-item-card .card::before,
+html body .learning-item-card > .card::before,
+html body .learning-item-card > div > .card::before,
+html body .item-wrapper > .card::before,
+html body [class*="card-container"] > .card::before,
+html body div[class*="learning-card"]::before,
+html body div.card.border-l-4::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 8px !important;
+  z-index: 10 !important;
+}
+
+/* Coin distinctif */
+html body .card::after,
+html body div.card::after,
+html body .learning-item-card .card::after,
+html body .learning-item-card > .card::after,
+html body .learning-item-card > div > .card::after,
+html body .item-wrapper > .card::after,
+html body [class*="card-container"] > .card::after,
+html body div[class*="learning-card"]::after,
+html body div.card.border-l-4::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  width: 32px !important;
+  height: 32px !important;
+  z-index: 10 !important;
+  border-bottom-left-radius: 12px !important;
+}
+
+/* COULEURS PAR STATUT - VERSION ULTRA-CONTRASTÉE */
+/* Not Started - Gris */
+html body .card[class*="border-gray-300"],
+html body .card[class*="border-gray-700"],
+html body .card[class*="border-l-gray-300"],
+html body .learning-item-card > .card[class*="border-gray-300"],
+html body .learning-item-card > div > .card[class*="border-gray-300"],
+html body .item-wrapper > .card[class*="border-gray-300"] {
+  border-color: #64748b !important;
+  border-left-color: #334155 !important;
+  /* Renforcement visuel avec un gradient */
+  background: linear-gradient(145deg, #f1f5f9 0%, #ffffff 100%) !important;
+}
+
+html body .card[class*="border-gray-300"]::before,
+html body .card[class*="border-gray-700"]::before,
+html body .card[class*="border-l-gray-300"]::before,
+html body .learning-item-card > .card[class*="border-gray-300"]::before,
+html body .learning-item-card > div > .card[class*="border-gray-300"]::before,
+html body .item-wrapper > .card[class*="border-gray-300"]::before {
+  background: #64748b !important;
+}
+
+html body .card[class*="border-gray-300"]::after,
+html body .card[class*="border-gray-700"]::after,
+html body .card[class*="border-l-gray-300"]::after,
+html body .learning-item-card > .card[class*="border-gray-300"]::after,
+html body .learning-item-card > div > .card[class*="border-gray-300"]::after,
+html body .item-wrapper > .card[class*="border-gray-300"]::after {
+  background: #334155 !important;
+}
+
+/* In Progress - Bleu */
+html body .card[class*="border-blue-400"],
+html body .card[class*="border-blue-500"],
+html body .card[class*="border-l-blue-400"],
+html body .learning-item-card > .card[class*="border-blue-400"],
+html body .learning-item-card > div > .card[class*="border-blue-400"],
+html body .item-wrapper > .card[class*="border-blue-400"] {
+  border-color: #3b82f6 !important;
+  border-left-color: #1d4ed8 !important;
+  background: linear-gradient(145deg, #eff6ff 0%, #ffffff 100%) !important;
+}
+
+html body .card[class*="border-blue-400"]::before,
+html body .card[class*="border-blue-500"]::before,
+html body .card[class*="border-l-blue-400"]::before,
+html body .learning-item-card > .card[class*="border-blue-400"]::before,
+html body .learning-item-card > div > .card[class*="border-blue-400"]::before,
+html body .item-wrapper > .card[class*="border-blue-400"]::before {
+  background: #3b82f6 !important;
+}
+
+html body .card[class*="border-blue-400"]::after,
+html body .card[class*="border-blue-500"]::after,
+html body .card[class*="border-l-blue-400"]::after,
+html body .learning-item-card > .card[class*="border-blue-400"]::after,
+html body .learning-item-card > div > .card[class*="border-blue-400"]::after,
+html body .item-wrapper > .card[class*="border-blue-400"]::after {
+  background: #1d4ed8 !important;
+}
+
+/* Completed - Vert */
+html body .card[class*="border-green-400"],
+html body .card[class*="border-green-500"],
+html body .card[class*="border-l-green-400"],
+html body .learning-item-card > .card[class*="border-green-400"],
+html body .learning-item-card > div > .card[class*="border-green-400"],
+html body .item-wrapper > .card[class*="border-green-400"] {
+  border-color: #22c55e !important;
+  border-left-color: #15803d !important;
+  background: linear-gradient(145deg, #f0fdf4 0%, #ffffff 100%) !important;
+}
+
+html body .card[class*="border-green-400"]::before,
+html body .card[class*="border-green-500"]::before,
+html body .card[class*="border-l-green-400"]::before,
+html body .learning-item-card > .card[class*="border-green-400"]::before,
+html body .learning-item-card > div > .card[class*="border-green-400"]::before,
+html body .item-wrapper > .card[class*="border-green-400"]::before {
+  background: #22c55e !important;
+}
+
+html body .card[class*="border-green-400"]::after,
+html body .card[class*="border-green-500"]::after,
+html body .card[class*="border-l-green-400"]::after,
+html body .learning-item-card > .card[class*="border-green-400"]::after,
+html body .learning-item-card > div > .card[class*="border-green-400"]::after,
+html body .item-wrapper > .card[class*="border-green-400"]::after {
+  background: #15803d !important;
+}
+
+/* On Hold - Jaune */
+html body .card[class*="border-yellow-400"],
+html body .card[class*="border-yellow-500"],
+html body .card[class*="border-l-yellow-400"],
+html body .learning-item-card > .card[class*="border-yellow-400"],
+html body .learning-item-card > div > .card[class*="border-yellow-400"],
+html body .item-wrapper > .card[class*="border-yellow-400"] {
+  border-color: #facc15 !important;
+  border-left-color: #ca8a04 !important;
+  background: linear-gradient(145deg, #fef9c3 0%, #ffffff 100%) !important;
+}
+
+html body .card[class*="border-yellow-400"]::before,
+html body .card[class*="border-yellow-500"]::before,
+html body .card[class*="border-l-yellow-400"]::before,
+html body .learning-item-card > .card[class*="border-yellow-400"]::before,
+html body .learning-item-card > div > .card[class*="border-yellow-400"]::before,
+html body .item-wrapper > .card[class*="border-yellow-400"]::before {
+  background: #facc15 !important;
+}
+
+html body .card[class*="border-yellow-400"]::after,
+html body .card[class*="border-yellow-500"]::after,
+html body .card[class*="border-l-yellow-400"]::after,
+html body .learning-item-card > .card[class*="border-yellow-400"]::after,
+html body .learning-item-card > div > .card[class*="border-yellow-400"]::after,
+html body .item-wrapper > .card[class*="border-yellow-400"]::after {
+  background: #ca8a04 !important;
+}
+
+/* Archived - Gris foncé */
+html body .card[class*="border-gray-400"],
+html body .card[class*="border-l-gray-400"],
+html body .learning-item-card > .card[class*="border-gray-400"],
+html body .learning-item-card > div > .card[class*="border-gray-400"],
+html body .item-wrapper > .card[class*="border-gray-400"] {
+  border-color: #94a3b8 !important;
+  border-left-color: #475569 !important;
+  background: linear-gradient(145deg, #f1f5f9 0%, #ffffff 100%) !important;
+}
+
+html body .card[class*="border-gray-400"]::before,
+html body .card[class*="border-l-gray-400"]::before,
+html body .learning-item-card > .card[class*="border-gray-400"]::before,
+html body .learning-item-card > div > .card[class*="border-gray-400"]::before,
+html body .item-wrapper > .card[class*="border-gray-400"]::before {
+  background: #94a3b8 !important;
+}
+
+html body .card[class*="border-gray-400"]::after,
+html body .card[class*="border-l-gray-400"]::after,
+html body .learning-item-card > .card[class*="border-gray-400"]::after,
+html body .learning-item-card > div > .card[class*="border-gray-400"]::after,
+html body .item-wrapper > .card[class*="border-gray-400"]::after {
+  background: #475569 !important;
+}
+
+/* MODE SOMBRE - STYLES RENFORCÉS */
+html[data-theme="dark"] body .card,
+html[data-theme="dark"] body div.card,
+html[data-theme="dark"] body .learning-item-card .card,
+html[data-theme="dark"] body .learning-item-card > .card,
+html[data-theme="dark"] body .learning-item-card > div > .card,
+html[data-theme="dark"] body .item-wrapper > .card {
+  /* Des bordures plus visibles en mode sombre */
+  border-width: 3px !important;
+  border-left-width: 18px !important;
+  /* Un contour blanc subtil */
+  outline: 1px solid rgba(255, 255, 255, 0.2) !important;
+  /* Ombres plus prononcées pour le mode sombre */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Couleurs spécifiques au mode sombre */
+html[data-theme="dark"] body .card[class*="border-gray-700"],
+html[data-theme="dark"] body .learning-item-card > .card[class*="border-gray-700"],
+html[data-theme="dark"] body .learning-item-card > div > .card[class*="border-gray-700"] {
+  border-color: #334155 !important;
+  border-left-color: #94a3b8 !important;
+  background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%) !important;
+}
+
+html[data-theme="dark"] body .card[class*="border-blue-500"],
+html[data-theme="dark"] body .learning-item-card > .card[class*="border-blue-500"],
+html[data-theme="dark"] body .learning-item-card > div > .card[class*="border-blue-500"] {
+  border-color: #1e40af !important;
+  border-left-color: #60a5fa !important;
+  background: linear-gradient(145deg, #1e3a8a 0%, #1e293b 100%) !important;
+}
+
+html[data-theme="dark"] body .card[class*="border-green-500"],
+html[data-theme="dark"] body .learning-item-card > .card[class*="border-green-500"],
+html[data-theme="dark"] body .learning-item-card > div > .card[class*="border-green-500"] {
+  border-color: #166534 !important;
+  border-left-color: #4ade80 !important;
+  background: linear-gradient(145deg, #14532d 0%, #1e293b 100%) !important;
+}
+
+html[data-theme="dark"] body .card[class*="border-yellow-500"],
+html[data-theme="dark"] body .learning-item-card > .card[class*="border-yellow-500"],
+html[data-theme="dark"] body .learning-item-card > div > .card[class*="border-yellow-500"] {
+  border-color: #854d0e !important;
+  border-left-color: #facc15 !important;
+  background: linear-gradient(145deg, #713f12 0%, #1e293b 100%) !important;
+}
+
+/* PRIORITÉ DES CARTES - STYLES ULTRA-DISTINCTIFS */
+html body .high-priority-card {
+  border-top: 6px solid #ef4444 !important;
+  border-bottom: 6px solid #ef4444 !important;
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3), 0 0 0 1px rgba(239, 68, 68, 0.2) !important;
+}
+
+html body .high-priority-card:hover {
+  box-shadow: 0 20px 40px rgba(239, 68, 68, 0.4), 0 0 0 1px rgba(239, 68, 68, 0.2) !important;
+}
+
+html body .medium-priority-card {
+  border-top: 6px solid #f59e0b !important;
+  border-bottom: 6px solid #f59e0b !important;
+  box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3), 0 0 0 1px rgba(245, 158, 11, 0.2) !important;
+}
+
+html body .medium-priority-card:hover {
+  box-shadow: 0 20px 40px rgba(245, 158, 11, 0.4), 0 0 0 1px rgba(245, 158, 11, 0.2) !important;
+}
+
+html body .low-priority-card {
+  border-top: 6px solid #3b82f6 !important;
+  border-bottom: 6px solid #3b82f6 !important;
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.2) !important;
+}
+
+html body .low-priority-card:hover {
+  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4), 0 0 0 1px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* SESSIONS - STYLES ULTRA-DISTINCTIFS */
+html body .border.rounded-xl,
+html body .learning-item-card .border.rounded-xl,
+html body .item-wrapper .border.rounded-xl {
+  border-width: 2px !important;
+  border-style: solid !important;
+  border-radius: 10px !important;
+  margin-bottom: 16px !important;
+  padding: 10px !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+  overflow: hidden !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+html body .border.rounded-xl:hover,
+html body .learning-item-card .border.rounded-xl:hover,
+html body .item-wrapper .border.rounded-xl:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* SESSIONS - MODE CLAIR */
+html[data-theme="light"] body .border.rounded-xl,
+html[data-theme="light"] body .learning-item-card .border.rounded-xl {
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  background: #ffffff !important;
+}
+
+html[data-theme="light"] body .border.rounded-xl.border-l-blue-400,
+html[data-theme="light"] body .learning-item-card .border.rounded-xl.border-l-blue-400 {
+  border-color: #bfdbfe !important;
+  border-left-width: 6px !important;
+  border-left-color: #3b82f6 !important;
+  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%) !important;
+}
+
+/* SESSIONS - MODE SOMBRE */
+html[data-theme="dark"] body .border.rounded-xl,
+html[data-theme="dark"] body .learning-item-card .border.rounded-xl {
+  border-color: rgba(59, 130, 246, 0.3) !important;
+  background: #1e293b !important;
+}
+
+html[data-theme="dark"] body .border.rounded-xl.border-l-blue-400,
+html[data-theme="dark"] body .learning-item-card .border.rounded-xl.border-l-blue-400 {
+  border-color: #1e40af !important;
+  border-left-width: 6px !important;
+  border-left-color: #3b82f6 !important;
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%) !important;
+}
