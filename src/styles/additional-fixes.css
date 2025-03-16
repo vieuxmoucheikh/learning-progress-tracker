@@ -1,0 +1,180 @@
+/* Correctifs supplémentaires pour garantir l'application des modifications */
+
+/* Supprimer radicalement toute mention de "Learning Dashboard" ou "Learning Progress" */
+h1,
+h1 *,
+h2.text-2xl,
+h2.text-3xl,
+h2[class*="bg-gradient"],
+span[class*="text-transparent"],
+div[class*="text-transparent"],
+[class*="heading"],
+[class*="title"]:not(h3):not([class*="card-title"]):not([class*="item-title"]),
+[class*="dashboard-title"],
+[class*="page-title"],
+[class*="app-name"],
+[class*="app-title"],
+header [class*="text-2xl"],
+header [class*="text-3xl"],
+header [class*="text-xl"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  pointer-events: none !important;
+}
+
+/* Amélioration significative de l'apparence du menu */
+.tab-navigation-container {
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+/* Forcer l'affichage du message "Nouveau ici ?" en desktop */
+@media (min-width: 768px) {
+  .getting-started-tip-container,
+  div[class*="tip-container"],
+  [class*="guidance"],
+  [class*="help-text"],
+  [class*="new-user"] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    width: auto !important;
+    position: relative !important;
+    pointer-events: auto !important;
+    z-index: 5 !important;
+    margin-top: auto !important;
+    margin-bottom: 1.25rem !important;
+    padding: 0 1.25rem !important;
+  }
+}
+
+/* Ajustement fin du conteneur du menu */
+.md\:w-64 {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 16rem !important;
+}
+
+.md\:w-64 .tab-navigation-container {
+  flex: 1 !important;
+}
+
+/* Améliorations spécifiques pour la navigation mobile */
+@media (max-width: 767px) {
+  .tab-navigation-container {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+    padding-bottom: 0.5rem !important;
+    width: 100% !important;
+    background: linear-gradient(165deg, #0f172a 0%, #1e293b 60%, #3b82f6 100%) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25) !important;
+  }
+  
+  /* Animation d'entrée du menu */
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .tab-navigation-container {
+    animation: fadeInDown 0.3s ease-out forwards;
+  }
+  
+  /* Ajustement des éléments du menu */
+  .tab-navigation-items {
+    padding: 0.5rem 0.75rem !important;
+  }
+  
+  .tab-navigation-item {
+    border-radius: 10px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+  }
+  
+  .tab-navigation-item.active {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+  }
+}
+
+/* Optimisations pour le mode light */
+:root:not(.dark) .tab-navigation-container {
+  box-shadow: 0 3px 15px rgba(30, 64, 175, 0.15) !important;
+}
+
+:root:not(.dark) .tab-navigation-item {
+  box-shadow: 0 2px 5px rgba(30, 64, 175, 0.1) !important;
+}
+
+:root:not(.dark) .tab-navigation-item.active {
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.15) !important;
+}
+
+/* Optimisations pour les écrans haute résolution */
+@media (min-resolution: 192dpi) {
+  .tab-navigation-container {
+    background-image: linear-gradient(165deg, #0b1120 0%, #1e293b 50%, #3b82f6 100%) !important;
+  }
+  
+  .tab-navigation-item {
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+  }
+  
+  .mobile-logo {
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+  }
+}
+
+/* Améliorations pour les transitions entre les pages/onglets */
+main {
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+  animation-delay: 0.1s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Amélioration du message d'aide en bas du menu */
+.getting-started-tip {
+  transition: transform 0.3s, box-shadow 0.3s !important;
+}
+
+.getting-started-tip:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.15) inset !important;
+}
+
+/* ACCESSIBILITÉ */
+@media (prefers-reduced-motion: reduce) {
+  .tab-navigation-container,
+  .tab-navigation-item,
+  .mobile-logo,
+  .getting-started-tip,
+  main {
+    animation: none !important;
+    transition: none !important;
+  }
+}
