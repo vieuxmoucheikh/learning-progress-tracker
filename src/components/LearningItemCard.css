@@ -1017,3 +1017,172 @@ html[data-theme="dark"] .learning-item-card .card {
 .learning-item-card .card[class*="border-gray-400"]::before {
   background-color: #94a3b8;
 }
+
+/* NOUVELLES RÈGLES DE BORDURES RENFORCÉES - Beaucoup plus distinctives */
+.learning-item-card .card {
+  border-width: 1px !important;
+  border-left-width: 8px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+  overflow: hidden !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
+  margin-bottom: 20px !important;
+}
+
+/* Not Started - Gris distinctif avec bordure plus visible */
+.learning-item-card .card[class*="border-gray-300"] {
+  border-color: #cbd5e1 !important;
+  border-left-color: #64748b !important;
+  background: linear-gradient(to right, rgba(241, 245, 249, 0.5) 0%, white 20%) !important;
+}
+
+/* In Progress - Bleu vif avec effet plus prononcé */
+.learning-item-card .card[class*="border-blue-400"] {
+  border-color: #bfdbfe !important;
+  border-left-color: #2563eb !important; /* Bleu plus vif */
+  background: linear-gradient(to right, rgba(219, 234, 254, 0.5) 0%, white 20%) !important;
+}
+
+/* Completed - Vert vif bien distinct */
+.learning-item-card .card[class*="border-green-400"] {
+  border-color: #bbf7d0 !important;
+  border-left-color: #16a34a !important; /* Vert plus vif */
+  background: linear-gradient(to right, rgba(220, 252, 231, 0.5) 0%, white 20%) !important;
+}
+
+/* On Hold - Jaune ambré distinctif */
+.learning-item-card .card[class*="border-yellow-400"] {
+  border-color: #fde68a !important;
+  border-left-color: #d97706 !important; /* Orange ambré plus vif */
+  background: linear-gradient(to right, rgba(254, 240, 138, 0.5) 0%, white 20%) !important;
+}
+
+/* Archived - Gris sombre distinctif */
+.learning-item-card .card[class*="border-gray-400"] {
+  border-color: #e2e8f0 !important;
+  border-left-color: #475569 !important; /* Gris plus sombre */
+  background: linear-gradient(to right, rgba(226, 232, 240, 0.5) 0%, white 20%) !important;
+  opacity: 0.95;
+}
+
+/* Effet de survol avec transitions des cartes - Plus prononcé */
+.learning-item-card .card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Effets spécifiques pour chaque statut au survol - Plus prononcé */
+.learning-item-card .card[class*="border-gray-300"]:hover {
+  box-shadow: 0 10px 25px rgba(100, 116, 139, 0.2), 0 0 0 1px rgba(100, 116, 139, 0.15) !important;
+  border-left-color: #475569 !important;
+}
+
+.learning-item-card .card[class*="border-blue-400"]:hover {
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25), 0 0 0 1px rgba(37, 99, 235, 0.15) !important;
+  border-left-color: #1d4ed8 !important;
+}
+
+.learning-item-card .card[class*="border-green-400"]:hover {
+  box-shadow: 0 10px 25px rgba(22, 163, 74, 0.25), 0 0 0 1px rgba(22, 163, 74, 0.15) !important;
+  border-left-color: #15803d !important;
+}
+
+.learning-item-card .card[class*="border-yellow-400"]:hover {
+  box-shadow: 0 10px 25px rgba(217, 119, 6, 0.25), 0 0 0 1px rgba(217, 119, 6, 0.15) !important;
+  border-left-color: #b45309 !important;
+}
+
+.learning-item-card .card[class*="border-gray-400"]:hover {
+  box-shadow: 0 10px 25px rgba(71, 85, 105, 0.25), 0 0 0 1px rgba(71, 85, 105, 0.15) !important;
+  border-left-color: #334155 !important;
+}
+
+/* Indicateur visuel amélioré indiquant le statut de la carte (en haut à droite) */
+.learning-item-card .card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  border-bottom-left-radius: 8px;
+  z-index: 10;
+}
+
+.learning-item-card .card[class*="border-gray-300"]::after {
+  background-color: #64748b;
+}
+
+.learning-item-card .card[class*="border-blue-400"]::after {
+  background-color: #2563eb;
+}
+
+.learning-item-card .card[class*="border-green-400"]::after {
+  background-color: #16a34a;
+}
+
+.learning-item-card .card[class*="border-yellow-400"]::after {
+  background-color: #d97706;
+}
+
+.learning-item-card .card[class*="border-gray-400"]::after {
+  background-color: #475569;
+}
+
+/* Mode sombre - Adaptation des bordures et indicateurs pour meilleure visibilité */
+html[data-theme="dark"] .learning-item-card .card {
+  border-width: 1px !important;
+  border-left-width: 8px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+}
+
+html[data-theme="dark"] .learning-item-card .card[class*="border-gray-700"] {
+  border-color: #334155 !important;
+  border-left-color: #94a3b8 !important;
+  background: linear-gradient(to right, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 1) 20%) !important;
+}
+
+html[data-theme="dark"] .learning-item-card .card[class*="border-blue-500"] {
+  border-color: #1e40af !important;
+  border-left-color: #3b82f6 !important;
+  background: linear-gradient(to right, rgba(30, 58, 138, 0.7) 0%, rgba(15, 23, 42, 1) 20%) !important;
+}
+
+html[data-theme="dark"] .learning-item-card .card[class*="border-green-500"] {
+  border-color: #166534 !important;
+  border-left-color: #22c55e !important;
+  background: linear-gradient(to right, rgba(20, 83, 45, 0.7) 0%, rgba(15, 23, 42, 1) 20%) !important;
+}
+
+html[data-theme="dark"] .learning-item-card .card[class*="border-yellow-500"] {
+  border-color: #854d0e !important;
+  border-left-color: #facc15 !important;
+  background: linear-gradient(to right, rgba(113, 63, 18, 0.7) 0%, rgba(15, 23, 42, 1) 20%) !important;
+}
+
+/* Styles de priorité améliorés avec bordures distinctives */
+.high-priority-card {
+  box-shadow: 0 5px 20px rgba(239, 68, 68, 0.25) !important;
+  border-top: 3px solid #ef4444 !important;
+}
+
+.high-priority-card:hover {
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3) !important;
+}
+
+.medium-priority-card {
+  box-shadow: 0 5px 20px rgba(245, 158, 11, 0.25) !important;
+  border-top: 3px solid #f59e0b !important;
+}
+
+.medium-priority-card:hover {
+  box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3) !important;
+}
+
+.low-priority-card {
+  box-shadow: 0 5px 20px rgba(59, 130, 246, 0.25) !important;
+  border-top: 3px solid #3b82f6 !important;
+}
+
+.low-priority-card:hover {
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3) !important;
+}
