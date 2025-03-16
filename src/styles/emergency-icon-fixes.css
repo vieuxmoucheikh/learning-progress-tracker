@@ -1,0 +1,330 @@
+/**
+ * CORRECTIFS D'URGENCE POUR LES ICÔNES
+ * Solution de dernier recours qui remplace complètement le rendu des icônes problématiques
+ * par une combinaison d'approches pour garantir leur visibilité
+ */
+
+/* REMPLACEMENT COMPLET DES ICÔNES */
+html[data-theme="dark"] [data-lucide],
+html[data-theme="dark"] button svg,
+html[data-theme="dark"] .card svg,
+html[data-theme="dark"] .learning-item-card svg,
+html[data-theme="dark"] .item-wrapper svg {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5px !important;
+  fill: transparent !important;
+  width: 1em !important;
+  height: 1em !important;
+  vertical-align: middle !important;
+  overflow: visible !important;
+  /* Techniques de forçage du rendu */
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  -webkit-font-smoothing: antialiased !important;
+  will-change: transform !important;
+  /* Effet de brillance */
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.4)) !important;
+}
+
+/* ICÔNES ULTRA-CRITIQUES AVEC REMPLACEMENT TEXTUEL */
+/* Chaque icône critique a un caractère Unicode de secours */
+
+/* Icône de lecture (PLAY) */
+html[data-theme="dark"] [data-lucide="Play"] {
+  stroke: #3b82f6 !important;
+  color: #3b82f6 !important;
+}
+
+html[data-theme="dark"] [data-lucide="Play"]::before {
+  content: "▶" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  font-size: 12px !important;
+  color: #3b82f6 !important;
+  opacity: 0.9 !important;
+  z-index: 3 !important;
+}
+
+/* Icône de pause (PAUSE) */
+html[data-theme="dark"] [data-lucide="Pause"] {
+  stroke: #f59e0b !important;
+  color: #f59e0b !important;
+}
+
+html[data-theme="dark"] [data-lucide="Pause"]::before {
+  content: "⏸" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  font-size: 12px !important;
+  color: #f59e0b !important;
+  opacity: 0.9 !important;
+  z-index: 3 !important;
+}
+
+/* Icône d'arrêt (X) */
+html[data-theme="dark"] [data-lucide="X"] {
+  stroke: #ef4444 !important;
+  color: #ef4444 !important;
+}
+
+html[data-theme="dark"] [data-lucide="X"]::before {
+  content: "✕" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  font-size: 14px !important;
+  color: #ef4444 !important;
+  opacity: 0.9 !important;
+  z-index: 3 !important;
+  font-weight: bold !important;
+}
+
+/* Icône de suppression (TRASH2) */
+html[data-theme="dark"] [data-lucide="Trash2"] {
+  stroke: #ef4444 !important;
+  color: #ef4444 !important;
+}
+
+html[data-theme="dark"] [data-lucide="Trash2"]::before {
+  content: "🗑️" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  font-size: 12px !important;
+  color: #ef4444 !important;
+  opacity: 0.9 !important;
+  z-index: 3 !important;
+}
+
+/* Icône d'édition (EDIT) */
+html[data-theme="dark"] [data-lucide="Edit"] {
+  stroke: #3b82f6 !important;
+  color: #3b82f6 !important;
+}
+
+html[data-theme="dark"] [data-lucide="Edit"]::before {
+  content: "✎" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  font-size: 12px !important;
+  color: #3b82f6 !important;
+  opacity: 0.9 !important;
+  z-index: 3 !important;
+  font-weight: bold !important;
+}
+
+/* Icône de sauvegarde (SAVE) */
+html[data-theme="dark"] [data-lucide="Save"] {
+  stroke: #3b82f6 !important;
+  color: #3b82f6 !important;
+}
+
+html[data-theme="dark"] [data-lucide="Save"]::before {
+  content: "💾" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  font-size: 12px !important;
+  color: #3b82f6 !important;
+  opacity: 0.9 !important;
+  z-index: 3 !important;
+}
+
+/* Icône de validation (CHECK) */
+html[data-theme="dark"] [data-lucide="Check"] {
+  stroke: #22c55e !important;
+  color: #22c55e !important;
+}
+
+html[data-theme="dark"] [data-lucide="Check"]::before {
+  content: "✓" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  font-size: 14px !important;
+  color: #22c55e !important;
+  opacity: 0.9 !important;
+  z-index: 3 !important;
+  font-weight: bold !important;
+}
+
+/* Icône de livre (BOOKOPEN) */
+html[data-theme="dark"] [data-lucide="BookOpen"] {
+  stroke: currentColor !important;
+}
+
+html[data-theme="dark"] [data-lucide="BookOpen"]::before {
+  content: "📖" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  font-size: 12px !important;
+  opacity: 0.9 !important;
+  z-index: 3 !important;
+}
+
+/* Icône de notes (FILE, FILEEDIT) */
+html[data-theme="dark"] [data-lucide="File"],
+html[data-theme="dark"] [data-lucide="FileEdit"] {
+  stroke: currentColor !important;
+}
+
+html[data-theme="dark"] [data-lucide="File"]::before,
+html[data-theme="dark"] [data-lucide="FileEdit"]::before {
+  content: "📝" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  font-size: 12px !important;
+  opacity: 0.9 !important;
+  z-index: 3 !important;
+}
+
+/* TAILLE AJUSTÉE POUR MOBILE */
+@media (max-width: 768px) {
+  html[data-theme="dark"] [data-lucide],
+  html[data-theme="dark"] button svg,
+  html[data-theme="dark"] .card svg,
+  html[data-theme="dark"] .learning-item-card svg {
+    stroke-width: 4px !important;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.6)) !important;
+    margin: 0 !important;
+  }
+  
+  html[data-theme="dark"] button.icon-button svg,
+  html[data-theme="dark"] button.start-button svg,
+  html[data-theme="dark"] button.stop-button svg,
+  html[data-theme="dark"] button.pause-button svg,
+  html[data-theme="dark"] button.resume-button svg {
+    stroke-width: 4px !important;
+  }
+  
+  /* Ajuster la taille des emoji de secours pour mobile */
+  html[data-theme="dark"] [data-lucide="Play"]::before,
+  html[data-theme="dark"] [data-lucide="Pause"]::before,
+  html[data-theme="dark"] [data-lucide="X"]::before,
+  html[data-theme="dark"] [data-lucide="Trash2"]::before,
+  html[data-theme="dark"] [data-lucide="Edit"]::before,
+  html[data-theme="dark"] [data-lucide="Save"]::before,
+  html[data-theme="dark"] [data-lucide="Check"]::before,
+  html[data-theme="dark"] [data-lucide="BookOpen"]::before,
+  html[data-theme="dark"] [data-lucide="File"]::before,
+  html[data-theme="dark"] [data-lucide="FileEdit"]::before {
+    font-size: 14px !important;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.8) !important;
+  }
+}
+
+/* TECHNIQUE POUR FORCER LE RENDU DES ICÔNES */
+@keyframes force-icon-redraw {
+  0% { transform: translateZ(0) scale(0.99999); }
+  100% { transform: translateZ(0) scale(1); }
+}
+
+html[data-theme="dark"] [data-lucide] {
+  animation: force-icon-redraw 0.1ms forwards !important;
+  animation-iteration-count: infinite !important;
+}
+
+/* SOLUTION NUCLÉAIRE POUR LES BOUTONS AVEC ICÔNES */
+html[data-theme="dark"] button svg {
+  width: 1.25em !important;
+  height: 1.25em !important;
+  margin-right: 0.25em !important;
+  display: inline-block !important;
+  vertical-align: text-bottom !important;
+}
+
+/* Hack complet pour garantir la visibilité des icônes dans les boutons */
+html[data-theme="dark"] button.start-button::before {
+  content: "▶️ " !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  margin-right: 4px !important;
+}
+
+html[data-theme="dark"] button.pause-button::before {
+  content: "⏸️ " !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  margin-right: 4px !important;
+}
+
+html[data-theme="dark"] button.resume-button::before {
+  content: "▶️ " !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  margin-right: 4px !important;
+}
+
+html[data-theme="dark"] button.stop-button::before {
+  content: "⏹️ " !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  margin-right: 4px !important;
+}
+
+/* CLASSES UTILITAIRES POUR REMPLACER DIRECTEMENT LES ICÔNES SI NÉCESSAIRE */
+.icon-play::before {
+  content: "▶️" !important;
+}
+
+.icon-pause::before {
+  content: "⏸️" !important;
+}
+
+.icon-stop::before {
+  content: "⏹️" !important;
+}
+
+.icon-trash::before {
+  content: "🗑️" !important;
+}
+
+.icon-edit::before {
+  content: "✎" !important;
+}
+
+.icon-check::before {
+  content: "✓" !important;
+}
+
+.icon-book::before {
+  content: "📖" !important;
+}
+
+.icon-note::before {
+  content: "📝" !important;
+}
+
+/* SUPPRESSION DES STYLES QUI POURRAIENT INTERFÉRER */
+html[data-theme="dark"] svg path,
+html[data-theme="dark"] svg line,
+html[data-theme="dark"] svg polyline,
+html[data-theme="dark"] svg rect,
+html[data-theme="dark"] svg circle,
+html[data-theme="dark"] svg polygon {
+  fill: none !important;
+  stroke-width: inherit !important;
+  stroke: currentColor !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
