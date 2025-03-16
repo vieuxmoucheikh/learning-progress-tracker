@@ -32,9 +32,6 @@ import './styles/card-fixes.css';
 import './styles/universal-card-borders.css';
 import './styles/critical-card-borders.css'; // Ajout du fichier de correctifs critiques pour les bordures
 import './styles/icon-fixes.css'; // Ajout du fichier de correctifs pour les icônes
-import './styles/critical-icon-fixes.css'; // Ajout du correctif critique pour les icônes
-import './styles/icon-override.css'; // Ajout du fichier de remplacement des icônes
-import './styles/emergency-icon-fixes.css'; // Solution nucléaire pour les icônes
 import './components/LearningItemCard.css';
 import './components/Calendar.css';
 import './components/StatusBadge.css';
