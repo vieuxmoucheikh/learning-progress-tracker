@@ -85,9 +85,10 @@
   padding: 0.75rem 0.5rem;
   scrollbar-width: none; /* Masquer scrollbar Firefox */
   -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
-  scroll-snap-type: x mandatory; /* Snap scrolling */
+  scroll-snap-type: x proximity; /* Changé à proximity pour un défilement plus naturel */
   position: relative;
-  mask-image: linear-gradient(to right, transparent, black 10px, black 90%, transparent); /* Fade effect */
+  mask-image: none; /* Supprimé le fade effect qui peut masquer des éléments */
+  width: 100%; /* Assurer que la largeur est complète */
 }
 
 .tab-navigation-items::-webkit-scrollbar {
@@ -103,9 +104,9 @@
   border-radius: 12px; /* Coins plus arrondis pour un design moderne */
   margin: 0 0.25rem;
   position: relative;
-  scroll-snap-align: center;
+  scroll-snap-align: start; /* Changé à start pour un meilleur comportement de défilement */
   min-width: max-content;
-  padding: 0.85rem 1.15rem; /* Dimensions plus confortables */
+  padding: 0.75rem 1rem; /* Légèrement réduit pour mobile */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   display: flex;
@@ -117,6 +118,7 @@
   animation: slideInWithFade 0.5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
   animation-delay: calc(var(--item-index, 0) * 0.08s);
   opacity: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.1);
 }
 
 /* Effet de superposition sur les onglets */
@@ -144,7 +146,8 @@
   background-color: rgba(255, 255, 255, 0.15);
   box-shadow: 
     0 4px 15px -3px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+    0 2px 10px rgba(0, 0, 0, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
 }
 
@@ -342,6 +345,7 @@
     z-index: 30;
     pointer-events: none;
     opacity: 0.7;
+    display: block !important; /* Forcer l'affichage */
   }
   
   .tab-navigation-container::before {
@@ -358,33 +362,51 @@
   .tab-navigation-items {
     padding: 0.65rem 0.5rem;
     mask-image: none;
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto !important;
   }
   
   .tab-navigation-item {
-    padding: 0.75rem 1rem;
-    border-radius: 12px;
-    margin: 0 0.35rem;
+    padding: 0.65rem 0.85rem; /* Réduit la taille pour mieux tenir sur mobile */
+    border-radius: 10px;
+    margin: 0 0.25rem;
     background-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 
+      0 2px 5px rgba(0, 0, 0, 0.15),
+      0 1px 2px rgba(0, 0, 0, 0.1),
+      inset 0 1px 1px rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.1);
     transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease !important;
+    flex-shrink: 0; /* Empêche les éléments de rétrécir */
   }
   
   .tab-navigation-item.active {
     background-color: rgba(255, 255, 255, 0.15);
     box-shadow: 
       0 4px 12px rgba(0, 0, 0, 0.15),
-      0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+      0 2px 4px rgba(0, 0, 0, 0.1),
+      inset 0 1px 2px rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
   }
   
   .tab-navigation-item:active {
     transform: scale(0.96) !important;
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.12),
+      inset 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   
+  /* Réduire la taille du texte et des icônes pour économiser de l'espace */
   .nav-text {
-    font-size: 0.8rem;
+    font-size: 0.75rem; /* Texte plus petit */
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
     font-weight: 600 !important;
+  }
+  
+  .nav-icon {
+    width: 18px; /* Icône un peu plus petite */
+    height: 18px;
   }
   
   /* Optimiser le logo sur mobile */
@@ -437,7 +459,7 @@
 
 :root:not(.dark) .tab-navigation-item.active {
   box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.2) !important,
+    0 4px 12px rgba(0, 0, 0, 0.2),
     0 0 0 1px rgba(255, 255, 255, 0.3) inset !important;
 }
 
@@ -641,18 +663,25 @@
     margin: 0.5rem 1.25rem;
     padding: 1rem 1.25rem;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.15),
+      0 1px 2px rgba(0, 0, 0, 0.1),
+      inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
   }
   
   .tab-navigation-item:hover:not(.active) {
     transform: translateY(-2px) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.2),
+      0 2px 4px rgba(0, 0, 0, 0.1),
+      inset 0 1px 2px rgba(255, 255, 255, 0.15) !important;
   }
   
   .tab-navigation-item.active {
     box-shadow: 
-      0 6px 16px rgba(0, 0, 0, 0.25) !important,
-      0 0 0 1px rgba(255, 255, 255, 0.15) inset !important;
+      0 6px 16px rgba(0, 0, 0, 0.25),
+      0 3px 6px rgba(0, 0, 0, 0.15),
+      inset 0 1px 2px rgba(255, 255, 255, 0.15) !important;
   }
   
   .nav-text {

@@ -75,7 +75,11 @@ header [class*="text-xl"] {
     padding-bottom: 0.5rem !important;
     width: 100% !important;
     background: linear-gradient(165deg, #0f172a 0%, #1e293b 60%, #3b82f6 100%) !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25) !important;
+    box-shadow: 
+      0 4px 15px rgba(0, 0, 0, 0.25),
+      0 2px 6px rgba(0, 0, 0, 0.2),
+      inset 0 -1px 1px rgba(255, 255, 255, 0.05) !important;
+    overflow-x: hidden !important; /* Prévenir le dépassement horizontal */
   }
   
   /* Animation d'entrée du menu */
@@ -97,35 +101,106 @@ header [class*="text-xl"] {
   /* Ajustement des éléments du menu */
   .tab-navigation-items {
     padding: 0.5rem 0.75rem !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    margin: 0 !important;
   }
   
+  /* S'assurer que les items de navigation ont une taille appropriée */
   .tab-navigation-item {
     border-radius: 10px !important;
     background: rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 
+      0 2px 5px rgba(0, 0, 0, 0.15),
+      0 1px 2px rgba(0, 0, 0, 0.1),
+      inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     transition: transform 0.2s, box-shadow 0.2s !important;
+    padding: 0.65rem 0.85rem !important; /* Taille réduite */
+    margin: 0 0.2rem !important; /* Espacement réduit */
+    flex: 0 0 auto !important; /* Ne pas rétrécir ni grandir */
+    min-width: auto !important; /* Laisser la taille s'adapter au contenu */
+    width: auto !important;
   }
   
   .tab-navigation-item.active {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.2),
+      0 2px 4px rgba(0, 0, 0, 0.15),
+      inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
     background: rgba(255, 255, 255, 0.15) !important;
     border-color: rgba(255, 255, 255, 0.18) !important;
+  }
+  
+  /* Optimiser l'affichage du texte dans les onglets */
+  .tab-navigation-item .nav-text {
+    font-size: 0.75rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+  }
+  
+  /* Optimiser l'affichage des icônes */
+  .tab-navigation-item .nav-icon {
+    flex-shrink: 0 !important;
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  /* S'assurer que le conteneur principal ne déborde pas */
+  .md\:flex-row {
+    overflow-x: hidden !important;
+    width: 100% !important;
+  }
+}
+
+/* Correction pour les appareils très petits (iPhone SE, etc.) */
+@media (max-width: 375px) {
+  .tab-navigation-item {
+    padding: 0.6rem 0.7rem !important;
+    margin: 0 0.15rem !important;
+    box-shadow: 
+      0 2px 4px rgba(0, 0, 0, 0.12),
+      inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
+  }
+  
+  .tab-navigation-item .nav-text {
+    font-size: 0.7rem !important;
+  }
+  
+  .tab-navigation-item .nav-icon {
+    width: 16px !important;
+    height: 16px !important;
   }
 }
 
 /* Optimisations pour le mode light */
 :root:not(.dark) .tab-navigation-container {
-  box-shadow: 0 3px 15px rgba(30, 64, 175, 0.15) !important;
+  box-shadow: 
+    0 3px 15px rgba(30, 64, 175, 0.15),
+    0 1px 5px rgba(30, 64, 175, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
 }
 
 :root:not(.dark) .tab-navigation-item {
-  box-shadow: 0 2px 5px rgba(30, 64, 175, 0.1) !important;
+  box-shadow: 
+    0 2px 5px rgba(30, 64, 175, 0.1),
+    0 1px 3px rgba(30, 64, 175, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
 }
 
 :root:not(.dark) .tab-navigation-item.active {
-  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.15) !important;
+  box-shadow: 
+    0 4px 12px rgba(30, 64, 175, 0.15),
+    0 2px 5px rgba(30, 64, 175, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
 }
 
 /* Optimisations pour les écrans haute résolution */
@@ -160,11 +235,18 @@ main {
 /* Amélioration du message d'aide en bas du menu */
 .getting-started-tip {
   transition: transform 0.3s, box-shadow 0.3s !important;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 2px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05) !important;
 }
 
 .getting-started-tip:hover {
   transform: translateY(-2px) !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.15) inset !important;
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.25),
+    0 3px 10px rgba(0, 0, 0, 0.15),
+    inset 0 1px 2px rgba(255, 255, 255, 0.15) !important;
 }
 
 /* ACCESSIBILITÉ */

@@ -107,6 +107,8 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
         const containerWidth = container.offsetWidth;
         const tabWidth = activeTab.offsetWidth;
         const tabLeft = activeTab.offsetLeft;
+        
+        // Scroll centered instead of offsetting by half the container
         const scrollLeft = tabLeft - (containerWidth / 2) + (tabWidth / 2);
         
         // Use requestAnimationFrame to ensure smooth scrolling after render
@@ -120,6 +122,25 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
     }
   }, [activeTab, isMobile]);
   
+  // Initial scroll check for mobile - s'assurer que tous les éléments sont visibles
+  useEffect(() => {
+    if (isMobile && scrollContainerRef.current) {
+      // Force un rafraîchissement du scroll pour s'assurer que tout est visible
+      const container = scrollContainerRef.current;
+      
+      // Vérifie si le contenu dépasse et ajuste si nécessaire
+      requestAnimationFrame(() => {
+        if (container.scrollWidth > container.clientWidth) {
+          // S'assure que les flèches de défilement sont visibles
+          const tabNavContainer = container.parentElement;
+          if (tabNavContainer) {
+            tabNavContainer.classList.add('has-overflow');
+          }
+        }
+      });
+    }
+  }, [isMobile]);
+
   // Add touch events for better mobile scrolling
   const handleTouchStart = (e: React.TouchEvent) => {
     if (scrollContainerRef.current) {
@@ -159,6 +180,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
         role="tablist"
         aria-orientation={isMobile ? "horizontal" : "vertical"}
         aria-label="Navigation principale"
+        style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}
       >
         {tabs.map((tab, index) => (
           <button
@@ -170,7 +192,10 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
               ${activeTab === tab.id ? 'active' : ''}
               flex items-center gap-2 transition-all
             `}
-            style={{ '--item-index': index } as React.CSSProperties}
+            style={{ 
+              '--item-index': index,
+              flexShrink: 0 // Empêche l'élément de se rétrécir
+            } as React.CSSProperties}
             aria-current={activeTab === tab.id ? 'page' : undefined}
             role="tab"
             aria-selected={activeTab === tab.id}
