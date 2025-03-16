@@ -1,0 +1,178 @@
+/**
+ * CORRECTIFS CRITIQUES POUR LES ICÔNES
+ * Styles à très haute priorité pour corriger les icônes sur tous les appareils
+ */
+
+/* Réinitialisation forcée de toutes les icônes SVG - Sélecteurs de haute priorité */
+html[data-theme="dark"] body svg,
+html[data-theme="dark"] body button svg,
+html[data-theme="dark"] body .card svg,
+html[data-theme="dark"] body .learning-item-card svg,
+html[data-theme="dark"] body .item-wrapper svg,
+html[data-theme="dark"] body .badge svg {
+  fill: none !important;
+  stroke-width: 2 !important;
+  stroke: currentColor !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  shape-rendering: geometricPrecision !important;
+  overflow: visible !important;
+}
+
+/* Styles forcés pour les éléments de chemin spécifiques dans SVG */
+html[data-theme="dark"] body svg *,
+html[data-theme="dark"] body svg path,
+html[data-theme="dark"] body svg line,
+html[data-theme="dark"] body svg polyline,
+html[data-theme="dark"] body svg circle,
+html[data-theme="dark"] body svg rect {
+  fill: none !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  vector-effect: non-scaling-stroke !important;
+}
+
+/* Fixation pour les icônes spécifiques qui présentent souvent des problèmes */
+html[data-theme="dark"] body svg[data-lucide="Edit"],
+html[data-theme="dark"] body svg[data-lucide="Save"],
+html[data-theme="dark"] body svg[data-lucide="Trash2"],
+html[data-theme="dark"] body svg[data-lucide="Clock"],
+html[data-theme="dark"] body svg[data-lucide="Check"],
+html[data-theme="dark"] body svg[data-lucide="X"],
+html[data-theme="dark"] body svg[data-lucide="Play"],
+html[data-theme="dark"] body svg[data-lucide="Pause"],
+html[data-theme="dark"] body svg[data-lucide="Plus"],
+html[data-theme="dark"] body svg[data-lucide="Link"],
+html[data-theme="dark"] body svg[data-lucide="ExternalLink"],
+html[data-theme="dark"] body svg[data-lucide="ArrowRight"],
+html[data-theme="dark"] body svg[data-lucide="Calendar"],
+html[data-theme="dark"] body svg[data-lucide="BookOpen"] {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5 !important;
+}
+
+/* Correction spécifique pour les icônes dans des conteneurs spécifiques */
+html[data-theme="dark"] body .card button svg,
+html[data-theme="dark"] body .learning-item-card button svg,
+html[data-theme="dark"] body .item-wrapper button svg,
+html[data-theme="dark"] body [class*="item"] button svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5 !important;
+  /* Force re-render to fix fill issues */
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  -webkit-font-smoothing: subpixel-antialiased !important;
+}
+
+/* Correctifs spécifiques pour les boutons colorés */
+html[data-theme="dark"] body button.text-red-500 svg,
+html[data-theme="dark"] body button.text-red-600 svg,
+html[data-theme="dark"] body button[class*="text-red-"] svg {
+  stroke: #ef4444 !important;
+  fill: none !important;
+  color: #ef4444 !important;
+}
+
+html[data-theme="dark"] body button.text-green-500 svg,
+html[data-theme="dark"] body button.text-green-600 svg,
+html[data-theme="dark"] body button[class*="text-green-"] svg {
+  stroke: #22c55e !important;
+  fill: none !important;
+  color: #22c55e !important;
+}
+
+html[data-theme="dark"] body button.text-blue-500 svg,
+html[data-theme="dark"] body button.text-blue-600 svg, 
+html[data-theme="dark"] body button[class*="text-blue-"] svg {
+  stroke: #3b82f6 !important;
+  fill: none !important;
+  color: #3b82f6 !important;
+}
+
+html[data-theme="dark"] body button.text-yellow-500 svg,
+html[data-theme="dark"] body button.text-yellow-600 svg,
+html[data-theme="dark"] body button[class*="text-yellow-"] svg {
+  stroke: #facc15 !important;
+  fill: none !important;
+  color: #facc15 !important;
+}
+
+/* Fixer les icônes dans les badges et statuts */
+html[data-theme="dark"] body .badge svg,
+html[data-theme="dark"] body .status-badge svg,
+html[data-theme="dark"] body [class*="status-"] svg,
+html[data-theme="dark"] body [class*="badge"] svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5 !important;
+  height: 0.875rem !important;
+  width: 0.875rem !important;
+}
+
+/* Styles spécifiques pour mobile - version agressive */
+@media (max-width: 768px) {
+  html[data-theme="dark"] body .card svg,
+  html[data-theme="dark"] body .learning-item-card svg,
+  html[data-theme="dark"] body .item-wrapper svg,
+  html[data-theme="dark"] body button svg {
+    stroke-width: 3 !important; /* Plus épais pour une meilleure visibilité */
+    transform: translateZ(0) !important; /* Force GPU rendering */
+  }
+  
+  /* Forcer la création d'un nouveau contexte de rendu */
+  html[data-theme="dark"] body .card,
+  html[data-theme="dark"] body .learning-item-card,
+  html[data-theme="dark"] body .item-wrapper {
+    transform: translateZ(0) !important;
+    backface-visibility: hidden !important;
+    -webkit-font-smoothing: antialiased !important;
+  }
+  
+  /* Surcharger les couleurs spécifiques pour le mobile */
+  html[data-theme="dark"] body button svg {
+    stroke: currentColor !important;
+    fill: none !important;
+  }
+}
+
+/* Styles spécifiques pour des cas particuliers nécessitant du remplissage */
+html[data-theme="dark"] body svg[data-lucide="Trophy"] path.fill-part,
+html[data-theme="dark"] body svg[data-lucide="Award"] path.fill-part,
+html[data-theme="dark"] body svg[data-lucide="Award"] circle.fill-part {
+  fill: currentColor !important;
+}
+
+/* Correctif pour les cases à cocher et les boutons radio */
+html[data-theme="dark"] body input[type="checkbox"] + svg,
+html[data-theme="dark"] body input[type="radio"] + svg {
+  fill: currentColor !important;
+  stroke: none !important;
+}
+
+/* Animation pour forcer le rendu des icônes lors du chargement */
+@keyframes force-redraw {
+  0% { opacity: 0.99; }
+  100% { opacity: 1; }
+}
+
+html[data-theme="dark"] body svg {
+  animation: force-redraw 0.1s forwards;
+}
+
+/* Correctifs spécifiques pour les boutons de session (Play, Pause, Stop) */
+html[data-theme="dark"] body button.icon-button svg,
+html[data-theme="dark"] body button.start-button svg,
+html[data-theme="dark"] body button.pause-button svg,
+html[data-theme="dark"] body button.resume-button svg,
+html[data-theme="dark"] body button.stop-button svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5 !important;
+}
+
+/* Assurer que les icônes ont la bonne couleur même en hover */
+html[data-theme="dark"] body button:hover svg {
+  fill: none !important;
+}
