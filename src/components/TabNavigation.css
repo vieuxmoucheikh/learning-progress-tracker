@@ -38,6 +38,7 @@
   padding: 1rem 0;
   margin-bottom: 0.5rem;
   position: relative;
+  flex-direction: column;
 }
 
 .mobile-logo {
@@ -229,7 +230,9 @@
   }
   
   .mobile-logo-container {
-    padding: 0.5rem 0 2rem;
+    padding: 1.5rem 0 1rem;
+    align-items: center;
+    flex-direction: column;
   }
   
   .mobile-logo {
@@ -301,6 +304,16 @@
   }
   
   .getting-started-tip-container {
+    display: block;
+  }
+
+  /* Affichage du titre sur desktop */
+  .app-title {
+    display: block;
+  }
+  
+  /* Affichage du bouton de déconnexion sur desktop */
+  .sign-out-container {
     display: block;
   }
 }
@@ -443,6 +456,16 @@
   
   --menu-glow-primary: rgba(224, 242, 254, 0.15);
   --menu-glow-secondary: rgba(224, 231, 255, 0.15);
+
+  --sign-out-bg: rgba(255, 255, 255, 0.1);
+  --sign-out-text: rgba(255, 255, 255, 0.9);
+  --sign-out-border: rgba(255, 255, 255, 0.15);
+  --sign-out-shadow: rgba(0, 0, 0, 0.1);
+  --sign-out-hover-bg: rgba(255, 255, 255, 0.2);
+  --sign-out-hover-text: white;
+  --sign-out-hover-border: rgba(255, 255, 255, 0.25);
+  --sign-out-hover-shadow: rgba(0, 0, 0, 0.2);
+  --sign-out-active-shadow: rgba(0, 0, 0, 0.15);
 }
 
 /* Mode sombre - Variables de couleurs personnalisées */
@@ -489,6 +512,16 @@
   
   --menu-glow-primary: rgba(56, 189, 248, 0.08);
   --menu-glow-secondary: rgba(29, 78, 216, 0.08);
+
+  --sign-out-bg: rgba(255, 255, 255, 0.07);
+  --sign-out-text: rgba(255, 255, 255, 0.8);
+  --sign-out-border: rgba(255, 255, 255, 0.1);
+  --sign-out-shadow: rgba(0, 0, 0, 0.1);
+  --sign-out-hover-bg: rgba(255, 255, 255, 0.12);
+  --sign-out-hover-text: white;
+  --sign-out-hover-border: rgba(255, 255, 255, 0.15);
+  --sign-out-hover-shadow: rgba(0, 0, 0, 0.15);
+  --sign-out-active-shadow: rgba(0, 0, 0, 0.1);
 }
 
 /* Accessibilité et préférences utilisateur */
@@ -584,4 +617,91 @@
     margin-bottom: 1.5rem;
     padding: 0 1.5rem;
   }
+
+  .app-title h1 {
+    font-size: 1.4rem;
+    letter-spacing: 0.03em;
+  }
+  
+  .sign-out-button {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* Style pour le titre de l'application */
+.app-title {
+  margin-top: 0.75rem;
+  text-align: center;
+  display: none;
+}
+
+.app-title h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--logo-color, white);
+  margin: 0;
+  letter-spacing: 0.02em;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.75));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.app-title h1::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
+}
+
+/* Style pour le bouton de déconnexion */
+.sign-out-container {
+  padding: 0 1.25rem 1.25rem;
+  margin-top: 0.5rem;
+  display: none;
+}
+
+.sign-out-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem;
+  border-radius: 8px;
+  background-color: var(--sign-out-bg, rgba(255, 255, 255, 0.07));
+  color: var(--sign-out-text, rgba(255, 255, 255, 0.8));
+  border: 1px solid var(--sign-out-border, rgba(255, 255, 255, 0.1));
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px var(--sign-out-shadow, rgba(0, 0, 0, 0.1));
+}
+
+.sign-out-button:hover {
+  background-color: var(--sign-out-hover-bg, rgba(255, 255, 255, 0.12));
+  color: var(--sign-out-hover-text, white);
+  border-color: var(--sign-out-hover-border, rgba(255, 255, 255, 0.15));
+  box-shadow: 0 3px 6px var(--sign-out-hover-shadow, rgba(0, 0, 0, 0.15));
+}
+
+.sign-out-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px var(--sign-out-active-shadow, rgba(0, 0, 0, 0.1));
+}
+
+.sign-out-icon {
+  stroke-width: 2px;
+  transition: transform 0.2s ease;
+}
+
+.sign-out-button:hover .sign-out-icon {
+  transform: translateX(2px);
 }

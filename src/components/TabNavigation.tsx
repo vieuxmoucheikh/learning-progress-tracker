@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Brain, LayoutDashboard, Activity, FlaskConical, FlameKindling, Clock, List } from 'lucide-react';
+import { Brain, LayoutDashboard, Activity, FlaskConical, FlameKindling, Clock, List, LogOut } from 'lucide-react';
 import './TabNavigation.css';
 
 export const TAB_OPTIONS = {
@@ -111,12 +111,23 @@ export const TabNavigation: React.FC<TabNavProps> = ({ activeTab, onTabChange })
     }
   };
 
+  // Fonction fictive pour la déconnexion (à implémenter selon votre système d'authentification)
+  const handleSignOut = () => {
+    console.log("User signing out...");
+    // Implémentez ici votre logique de déconnexion
+  };
+
   return (
     <div className="tab-navigation-container">
       <div className="mobile-logo-container">
         <div className="mobile-logo">
           <Brain className="logo-icon" />
         </div>
+        {!isMobile && (
+          <div className="app-title">
+            <h1>Learning Progress</h1>
+          </div>
+        )}
       </div>
       
       <div 
@@ -163,6 +174,16 @@ export const TabNavigation: React.FC<TabNavProps> = ({ activeTab, onTabChange })
           </span>
         </div>
       </div>
+      
+      {/* Bouton de déconnexion en bas du menu */}
+      {!isMobile && (
+        <div className="sign-out-container">
+          <button onClick={handleSignOut} className="sign-out-button">
+            <LogOut size={18} className="sign-out-icon" />
+            <span>Sign Out</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };
