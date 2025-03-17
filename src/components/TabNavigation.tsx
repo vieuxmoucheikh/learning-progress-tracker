@@ -48,14 +48,14 @@ export const TabNavigation: React.FC<TabNavProps> = ({ activeTab, onTabChange })
     {
       id: TAB_OPTIONS.FLASHCARDS,
       label: 'Flashcards',
-      shortLabel: 'Cards',
+      shortLabel: 'Flash',
       icon: <FlaskConical size={20} />,
       description: 'Pratiquez avec des cartes mémoire'
     },
     {
       id: TAB_OPTIONS.LEARNING_CARDS,
       label: 'Learning Cards',
-      shortLabel: 'Cards',
+      shortLabel: 'Learn',
       icon: <FlameKindling size={20} />,
       description: 'Consultez vos fiches d\'apprentissage'
     },
