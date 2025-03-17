@@ -1284,36 +1284,108 @@ button svg,
 .min-h-screen.flex.flex-col.md\:flex-row {
   background: var(--app-bg, #f8fafc);
   min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
 }
 
 .dark .min-h-screen.flex.flex-col.md\:flex-row {
   background: var(--app-bg-dark, #0f172a);
 }
 
-/* Amélioration du conteneur principal */
+/* Amélioration du conteneur principal avec transitions fluides */
 .flex-1.p-4.md\:p-6.overflow-y-auto {
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, border-radius 0.3s ease, box-shadow 0.3s ease;
   border-radius: 0;
+  background-color: var(--content-bg, #ffffff);
+  position: relative;
+  z-index: 10;
 }
 
+/* Effet subtil de transition entre les onglets */
+.fade-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Optimisations pour les grands écrans */
+@media (min-width: 1280px) {
+  .flex-1.p-4.md\:p-6.overflow-y-auto {
+    max-width: calc(100% - 240px);
+    margin-left: -1.75rem;
+  }
+}
+
+/* Personnalisation avancée pour desktop */
 @media (min-width: 768px) {
   .flex-1.p-4.md\:p-6.overflow-y-auto {
-    border-top-left-radius: 1.5rem;
-    border-bottom-left-radius: 1.5rem;
+    border-top-left-radius: 1.75rem;
+    border-bottom-left-radius: 1.75rem;
     margin-left: -1.5rem;
     padding-left: 2.5rem !important;
     box-shadow: -10px 0 20px rgba(0, 0, 0, 0.05);
     position: relative;
     z-index: 20;
+    overflow-y: auto;
+    max-height: 100vh;
+  }
+  
+  /* Amélioration du scroll pour le contenu */
+  .flex-1.p-4.md\:p-6.overflow-y-auto::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .flex-1.p-4.md\:p-6.overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .flex-1.p-4.md\:p-6.overflow-y-auto::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  
+  .dark .flex-1.p-4.md\:p-6.overflow-y-auto::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .flex-1.p-4.md\:p-6.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+  
+  .dark .flex-1.p-4.md\:p-6.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.15);
   }
   
   .dark .flex-1.p-4.md\:p-6.overflow-y-auto {
     background: var(--content-bg-dark, #111827);
     box-shadow: -5px 0 25px rgba(0, 0, 0, 0.2);
   }
+  
+  /* Animation d'apparition du contenu */
+  .container.mx-auto.py-4.h-full.flex.flex-col {
+    animation: fadeContentIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
 }
 
-/* Ajustements pour le mode mobile */
+/* Personnalisation pour le mode mobile */
 @media (max-width: 767px) {
   .min-h-screen.flex.flex-col.md\:flex-row {
     display: flex;
@@ -1327,6 +1399,64 @@ button svg,
   .flex-1.p-4.md\:p-6.overflow-y-auto {
     flex: 1;
     padding-top: 1rem;
+    background-color: var(--content-bg-mobile, #f8fafc);
+    margin-top: -0.5rem;
+    border-top-left-radius: 1.25rem;
+    border-top-right-radius: 1.25rem;
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+    overflow-x: hidden;
+  }
+  
+  .dark .flex-1.p-4.md\:p-6.overflow-y-auto {
+    background-color: var(--content-bg-dark-mobile, #0f172a);
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.25);
+  }
+  
+  /* Animation d'apparition du contenu sur mobile */
+  .container.mx-auto.py-4.h-full.flex.flex-col {
+    animation: fadeContentInMobile 0.3s ease-out;
+  }
+  
+  @keyframes fadeContentInMobile {
+    from { opacity: 0.7; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* Variables globales pour le thème clair */
+:root:not(.dark) {
+  --app-bg: #f8fafc;
+  --content-bg: #ffffff;
+  --content-bg-mobile: #f8fafc;
+  --card-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  --card-border-color: rgba(0,0,0,0.1);
+  --scroll-thumb: rgba(0, 0, 0, 0.1);
+  --scroll-thumb-hover: rgba(0, 0, 0, 0.2);
+}
+
+/* Variables globales pour le thème sombre */
+.dark {
+  --app-bg-dark: #0f172a;
+  --content-bg-dark: #111827;
+  --content-bg-dark-mobile: #0f172a;
+  --card-shadow-dark: 0 4px 20px rgba(0,0,0,0.3);
+  --card-border-color-dark: rgba(255,255,255,0.05);
+  --scroll-thumb: rgba(255, 255, 255, 0.1);
+  --scroll-thumb-hover: rgba(255, 255, 255, 0.15);
+}
+
+/* Amélioration des animations pour l'accessibilité */
+@media (prefers-reduced-motion: reduce) {
+  .container.mx-auto.py-4.h-full.flex.flex-col,
+  .fade-enter-active,
+  .fade-exit-active {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+  
+  .flex-1.p-4.md\:p-6.overflow-y-auto {
+    transition: none !important;
   }
 }
 

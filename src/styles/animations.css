@@ -1,0 +1,271 @@
+/* Animations fluides pour l'application Learning Tracker */
+
+/* Animation pour l'entrée des éléments */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from { 
+    opacity: 0; 
+    transform: translateX(-20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from { 
+    opacity: 0; 
+    transform: translateX(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Animation pour les cartes */
+@keyframes cardAppear {
+  0% { 
+    opacity: 0; 
+    transform: scale(0.9) translateY(10px);
+  }
+  70% {
+    transform: scale(1.02) translateY(-2px);
+  }
+  100% { 
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Animation pour les badges */
+@keyframes badgePulse {
+  0% { 
+    transform: scale(1); 
+  }
+  50% { 
+    transform: scale(1.05); 
+  }
+  100% { 
+    transform: scale(1); 
+  }
+}
+
+/* Animation pour les boutons */
+@keyframes buttonPush {
+  0% { 
+    transform: scale(1); 
+  }
+  40% { 
+    transform: scale(0.95); 
+  }
+  100% { 
+    transform: scale(1); 
+  }
+}
+
+/* Animation pour les notifications */
+@keyframes notificationSlideIn {
+  0% { 
+    opacity: 0; 
+    transform: translateX(40px);
+  }
+  100% { 
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes notificationSlideOut {
+  0% { 
+    opacity: 1; 
+    transform: translateX(0);
+  }
+  100% { 
+    opacity: 0;
+    transform: translateX(40px);
+  }
+}
+
+/* Animation pour les tooltips */
+@keyframes tooltipAppear {
+  0% { 
+    opacity: 0; 
+    transform: translateY(5px);
+  }
+  100% { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation de pulsation pour les éléments qui nécessitent de l'attention */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* Animation pour le chargement */
+@keyframes spin {
+  0% { 
+    transform: rotate(0deg); 
+  }
+  100% { 
+    transform: rotate(360deg); 
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Classes utilitaires pour appliquer les animations */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-fade-in-left {
+  animation: fadeInLeft 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-fade-in-right {
+  animation: fadeInRight 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-card-appear {
+  animation: cardAppear 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-badge-pulse {
+  animation: badgePulse 1.5s ease-in-out infinite;
+}
+
+.animate-button-push {
+  animation: buttonPush 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.animate-notification-in {
+  animation: notificationSlideIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-notification-out {
+  animation: notificationSlideOut 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-tooltip {
+  animation: tooltipAppear 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Style de transition pour les états de bouton */
+.btn-transition,
+button[class*="primary"],
+button[class*="secondary"],
+button[class*="action"] {
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.btn-transition:active,
+button[class*="primary"]:active,
+button[class*="secondary"]:active,
+button[class*="action"]:active {
+  transform: scale(0.96);
+}
+
+/* Animations pour les cartes en fonction de leur ordre d'apparition */
+.learning-item-card,
+[class*="learning-card"],
+[class*="dashboard-card"] {
+  animation: cardAppear 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--card-index, 0) * 0.05s);
+}
+
+/* Animation pour le statut "mastered" */
+.mastered-badge,
+[class*="mastered-indicator"] {
+  animation: badgePulse 2s ease-in-out;
+}
+
+/* Animation pour les améliorations d'accessibilité */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+  }
+  
+  .animate-fade-in,
+  .animate-fade-in-up,
+  .animate-fade-in-left,
+  .animate-fade-in-right,
+  .animate-card-appear,
+  .animate-badge-pulse,
+  .animate-button-push,
+  .animate-notification-in,
+  .animate-notification-out,
+  .animate-tooltip,
+  .animate-pulse,
+  .animate-spin,
+  .animate-shimmer,
+  .learning-item-card,
+  [class*="learning-card"],
+  [class*="dashboard-card"],
+  .mastered-badge,
+  [class*="mastered-indicator"] {
+    animation: none !important;
+    transform: none !important;
+  }
+}
