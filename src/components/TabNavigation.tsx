@@ -17,40 +17,37 @@ interface TabNavigationProps {
   onTabChange: (tab: string) => void;
 }
 
-// Simplified version without complex animations and calculations
+// Version simplifiée optimisée pour le défilement mobile
 export const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange }) => {
-  const [isMobile, setIsMobile] = useState(true); // Default to mobile
+  const [isMobile, setIsMobile] = useState(true); // Supposer mobile par défaut
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeTabRef = useRef<HTMLButtonElement>(null);
   
-  // Simple media query for mobile detection
+  // Détection simplifiée de mobile
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    // Initial check
-    handleResize();
-    
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize(); // Exécuter immédiatement
     window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Simple scroll to active tab
+  // Centrer l'onglet actif dans la vue
   useEffect(() => {
-    if (isMobile && activeTabRef.current && scrollContainerRef.current) {
+    if (activeTabRef.current && scrollContainerRef.current) {
       try {
+        // Utiliser scrollIntoView qui est plus performant
         activeTabRef.current.scrollIntoView({
           inline: 'center',
-          behavior: 'auto'
+          behavior: 'auto' // 'auto' au lieu de 'smooth' pour éviter les problèmes de performance
         });
       } catch (error) {
-        console.error('Error scrolling:', error);
+        // Fallback si scrollIntoView échoue
+        const container = scrollContainerRef.current;
+        const tab = activeTabRef.current;
+        container.scrollLeft = tab.offsetLeft - (container.clientWidth / 2) + (tab.clientWidth / 2);
       }
     }
-  }, [activeTab, isMobile]);
+  }, [activeTab]);
 
   const tabs = [
     {

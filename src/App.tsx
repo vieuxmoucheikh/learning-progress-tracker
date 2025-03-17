@@ -535,40 +535,6 @@ export default function App() {
     loadFlashcards();
   }, []);
 
-  // Ajouter cette fonction au début du composant App
-  useEffect(() => {
-    // Fonction pour synchroniser le thème sans rafraîchissement
-    const handleThemeChange = () => {
-      const isDarkMode = document.documentElement.classList.contains('dark');
-      document.documentElement.style.colorScheme = isDarkMode ? 'dark' : 'light';
-      
-      // Forcer l'application des styles sans rafraîchir
-      document.body.style.display = 'none';
-      setTimeout(() => {
-        document.body.style.display = '';
-      }, 0);
-      
-      // Mettre à jour les attributs data-theme pour les bibliothèques externes
-      document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-    };
-    
-    // Observer les changements de classe sur html
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'class') {
-          handleThemeChange();
-        }
-      });
-    });
-    
-    observer.observe(document.documentElement, { attributes: true });
-    
-    // Nettoyage
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
   const filteredItems = useMemo(() => {
     return state.items
       .filter(item => {

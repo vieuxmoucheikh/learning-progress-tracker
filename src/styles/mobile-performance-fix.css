@@ -1,79 +1,68 @@
-/* Correctifs critiques pour performances mobiles */
+/* Correctifs critiques pour performances mobiles et défilement fluide */
 
-/* Optimisations globales pour performances mobiles */
+/* Optimisations globales pour le défilement sur mobile */
 @media (max-width: 768px) {
-  /* Réduire les impacts CPU/GPU */
+  /* Optimisations générales pour tout le site */
   * {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
   }
   
-  /* Désactiver les animations pour améliorer les performances */
-  *, *::before, *::after {
-    animation: none !important;
+  /* Désactiver les animations pour améliorer les performances de défilement */
+  .tab-navigation-item,
+  .tab-navigation-item *,
+  .tab-navigation-container * {
     transition: none !important;
+    animation: none !important;
   }
   
-  /* Forcer l'accélération matérielle sur les blocs critiques */
-  .tab-navigation-container,
-  .tab-navigation-items {
-    will-change: transform;
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    perspective: 1000;
-  }
-  
-  /* Améliorer le défilement sur iOS */
-  .tab-navigation-items {
-    -webkit-overflow-scrolling: touch !important;
-  }
-  
-  /* Styles simplifiés pour garantir la visibilité */
+  /* Optimisations spécifiques pour le menu de navigation */
   .tab-navigation-container {
-    background-color: #1e3a8a !important;
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    z-index: 1000; /* Assurer que le menu reste au-dessus de tout */
   }
   
-  :root:not(.dark) .tab-navigation-container {
-    background-color: #3b82f6 !important;
+  /* Optimisations pour le conteneur de défilement */
+  .tab-navigation-items {
+    scroll-behavior: auto !important; /* Auto au lieu de smooth pour de meilleures performances */
+    -webkit-overflow-scrolling: touch !important; /* Défilement inertiel iOS */
+    scroll-snap-type: none !important; /* Désactiver snap qui peut causer des problèmes */
+    overscroll-behavior-x: contain; /* Empêcher le défilement de propager à la page */
+    touch-action: pan-x; /* Optimiser pour les gestes horizontaux */
+    transform: translateZ(0); /* Promotion GPU */
+    will-change: scroll-position; /* Indication au navigateur d'optimiser */
+    mask-image: none !important; /* Désactiver les masques qui peuvent causer des problèmes */
+    -webkit-mask-image: none !important;
   }
   
+  /* S'assurer que tous les éléments interactifs sont suffisamment grands pour mobile */
   .tab-navigation-item {
-    color: white !important;
+    padding: 0.625rem 0.8rem !important;
+    min-height: 2.5rem !important;
+    min-width: auto !important;
+    max-width: none !important;
+    transform: translateZ(0); /* Promotion GPU */
+    will-change: transform; /* Indication au navigateur d'optimiser */
   }
   
-  /* Simplifier la mise en page pour réduire la charge de rendu */
-  .tab-navigation-item {
-    padding: 0.6rem 0.8rem !important;
-    margin: 0 0.25rem !important;
-    border-radius: 8px !important;
-    background: rgba(255, 255, 255, 0.1) !important;
+  /* Amélioration des performances pour Safari iOS */
+  @supports (-webkit-touch-callout: none) {
+    body {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    
+    .tab-navigation-items {
+      -webkit-overflow-scrolling: touch !important;
+    }
   }
   
-  .tab-navigation-item.active {
-    background: rgba(255, 255, 255, 0.2) !important;
-  }
-  
-  /* Assurer que le texte reste visible */
-  .nav-text {
-    color: white !important;
-  }
-  
-  /* Cacher les éléments non essentiels sur mobile */
-  .getting-started-tip-container {
-    display: none !important;
-  }
-}
-
-/* Mode sombre optimisé */
-@media (max-width: 768px) {
-  html.dark body, html.dark #root {
-    background-color: #0f172a !important;
-    color: white !important;
-  }
-  
-  /* Mode clair optimisé */
-  html:not(.dark) body, html:not(.dark) #root {
-    background-color: white !important;
-    color: #0f172a !important;
+  /* Corrections spécifiques pour Chrome sur Android */
+  @supports (-webkit-appearance:none) {
+    .tab-navigation-items {
+      overscroll-behavior: contain;
+    }
   }
 }
