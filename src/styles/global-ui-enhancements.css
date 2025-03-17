@@ -99,6 +99,21 @@ button:active,
   --text-secondary: #334155;
   --text-tertiary: #64748b;
 }
+  /* Variables pour le titre "Learning Progress" et le bouton "Sign Out" */
+  --title-primary: #4338ca;
+  --title-gradient-from: #4f46e5;
+  --title-gradient-to: #3b82f6;
+  --title-underline-light: rgba(79, 70, 229, 0.5);
+  
+  --signout-bg: rgba(67, 56, 202, 0.1);
+  --signout-text: #4338ca;
+  --signout-border: rgba(67, 56, 202, 0.2);
+  --signout-shadow: rgba(0, 0, 0, 0.05);
+  --signout-hover-bg: rgba(67, 56, 202, 0.15);
+  --signout-hover-text: #4338ca;
+  --signout-hover-border: rgba(67, 56, 202, 0.3);
+  --signout-hover-shadow: rgba(67, 56, 202, 0.1);
+}
 
 :root:not(.dark) .text-gray-500,
 :root:not(.dark) .text-gray-600,
@@ -142,6 +157,21 @@ button:active,
   --text-primary: #f8fafc;
   --text-secondary: #e2e8f0;
   --text-tertiary: #cbd5e0;
+
+  /* Variables pour le titre "Learning Progress" et le bouton "Sign Out" */
+  --title-primary: white;
+  --title-gradient-from: rgba(255, 255, 255, 0.95);
+  --title-gradient-to: rgba(255, 255, 255, 0.75);
+  --title-underline: rgba(255, 255, 255, 0.5);
+  
+  --signout-bg: rgba(255, 255, 255, 0.07);
+  --signout-text: rgba(255, 255, 255, 0.8);
+  --signout-border: rgba(255, 255, 255, 0.1);
+  --signout-shadow: rgba(0, 0, 0, 0.1);
+  --signout-hover-bg: rgba(255, 255, 255, 0.12);
+  --signout-hover-text: white;
+  --signout-hover-border: rgba(255, 255, 255, 0.15);
+  --signout-hover-shadow: rgba(0, 0, 0, 0.15);
 }
 
 .dark .text-gray-300,
@@ -1310,32 +1340,174 @@ button svg,
   .dark .flex-1.p-4.md\:p-6.overflow-y-auto {
     background: var(--content-bg-dark, #111827);
     box-shadow: -5px 0 25px rgba(0, 0, 0, 0.2);
-  }
-}
 
-/* Ajustements pour le mode mobile */
-@media (max-width: 767px) {
-  .min-h-screen.flex.flex-col.md\:flex-row {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .md\:w-64 {
-    width: 100%;
-  }
-  
-  .flex-1.p-4.md\:p-6.overflow-y-auto {
-    flex: 1;
-    padding-top: 1rem;
-  }
-}
 
-/* Animation de transition pour améliorer le changement d'onglets */
-.container.mx-auto.py-4.h-full.flex.flex-col {
-  animation: fadeContentIn 0.3s ease-out;
-}
 
-@keyframes fadeContentIn {
-  from { opacity: 0.7; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}  to { opacity: 1; transform: translateY(0); }  from { opacity: 0.7; transform: translateY(5px); }@keyframes fadeContentIn {}  animation: fadeContentIn 0.3s ease-out;.container.mx-auto.py-4.h-full.flex.flex-col {/* Animation de transition pour améliorer le changement d'onglets */}  }    padding-top: 1rem;    flex: 1;  .flex-1.p-4.md\:p-6.overflow-y-auto {    }    width: 100%;  .md\:w-64 {    }    flex-direction: column;    display: flex;  .min-h-screen.flex.flex-col.md\:flex-row {@media (max-width: 767px) {/* Ajustements pour le mode mobile */}  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  :root:not(.dark) [class*="app-title"],  :root:not(.dark) .app-header,  :root:not(.dark) .header-container,  :root:not(.dark) .main-header,  /* Style pour le mode clair */
+    }    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    border-color: rgba(255, 255, 255, 0.15);    color: white;    background-color: rgba(255, 255, 255, 0.12);  .dark a:has(svg[class*="log-out"]):hover {  .dark button:has(svg[class*="log-out"]):hover,  .dark [class*="log-out"]:hover,  .dark [class*="logout"]:hover,  .dark button[class*="sign-out"]:hover,  }    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);    transition: all 0.2s ease;    padding: 0.5rem 0.75rem;    border-radius: 8px;    border: 1px solid rgba(255, 255, 255, 0.1);    color: rgba(255, 255, 255, 0.8);    background-color: rgba(255, 255, 255, 0.07);  .dark a:has(svg[class*="log-out"]) {  .dark button:has(svg[class*="log-out"]),  .dark [class*="log-out"],  .dark [class*="logout"],  .dark button[class*="sign-out"],  /* Style du bouton de déconnexion pour qu'il corresponde au menu */  }    font-weight: 700;    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}  }    position: relative;    font-weight: 700;    -webkit-text-fill-color: transparent;    background-clip: text;
+
+    -webkit-background-clip: text;    background: linear-gradient(90deg, var(--title-gradient-from), var(--title-gradient-to));
+
+
+  [class*="brand-title"] span {  [class*="site-title"] span,
+
+  [class*="app-title"] span,  [class*="app-name"] span,
+
+  [class*="brand-title"] h1,  [class*="site-title"] h1,
+
+  [class*="app-title"] h1,  [class*="app-name"] h1,
+    }    position: relative;  [class*="brand-title"] {  [class*="site-title"],
+  [class*="app-title"],  [class*="app-name"],  /* Titre principal */  
+
+  }    background: transparent !important;  [class*="app-header"] {  [class*="header-wrapper"],
+
+  [class*="top-bar"],  [class*="navbar"],  /* En-tête de l'application principal */
+
+
+@media (min-width: 768px) {/* Ciblage spécifique des en-têtes existants */
+
+
+}  transform: translateX(2px);.menu-styled-button:hover svg {}  transition: transform 0.2s ease;    -webkit-text-fill-color: transparent;
+.menu-styled-button svg {}  box-shadow: 0 3px 6px var(--signout-hover-shadow);
+
+
+    background-clip: text;    -webkit-background-clip: text;    background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.75));  border-color: var(--signout-hover-border);  color: var(--signout-hover-text);  background-color: var(--signout-hover-bg);.menu-styled-button:hover {}  box-shadow: 0 2px 4px var(--signout-shadow);  transition: all 0.2s ease;  padding: 0.5rem 0.75rem;  border-radius: 8px;  border: 1px solid var(--signout-border);  color: var(--signout-text);  background-color: var(--signout-bg);.menu-styled-button {}  font-weight: 700;  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  -webkit-text-fill-color: transparent;  background-clip: text;  -webkit-background-clip: text;  background: linear-gradient(90deg, var(--title-gradient-from, rgba(255, 255, 255, 0.95)), var(--title-gradient-to, rgba(255, 255, 255, 0.75)));.menu-styled-text.gradient {}  color: var(--title-primary) !important;.menu-styled-text {/* Classes utilitaires pour appliquer le style du menu à d'autres éléments *//* Harmonisation du style pour l'en-tête principal */
+
+
+
+
+  .dark [class*="title-container"] h1 {  .dark [class*="app-name"] span,
+
+
+  .dark [class*="app-name"] h1,  .dark .app-title h1,
+
+  .dark h1.main-title,  /* Style du titre "Learning Progress" pour qu'il corresponde au menu */
+
+
+
+
+
+
+    }    font-weight: 600;    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);    color: white !important;
+
+
+
+
+  .dark [class*="title-container"] {  .dark [class*="app-name"],  .dark [class*="app-title"],  .dark .app-header,  .dark .header-container,  .dark .main-header,  /* En-tête principal qui correspond au style du menu */@media (min-width: 768px) {/* Adaptation du style de l'en-tête en mode bureau pour s'harmoniser avec le menu latéral */.main-header,
+
+
+
+}  color: var(--text-primary) !important;  background: transparent !important;.header-container,
+.app-header {
