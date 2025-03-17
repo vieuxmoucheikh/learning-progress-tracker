@@ -540,6 +540,113 @@
   }
 }
 
+/* Mode de compatibilité mobile - version simplifiée pour démarrage rapide */
+@media (max-width: 767px) {
+  /* Variables simplifiées pour un chargement rapide */
+  :root {
+    --nav-bg-dark: #1e3a8a;
+    --nav-bg-light: #3b82f6;
+    --nav-item-bg: rgba(255, 255, 255, 0.1);
+    --nav-text-color: white;
+    --nav-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .tab-navigation-container {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--nav-bg-dark);
+    box-shadow: var(--nav-shadow);
+    position: relative;
+    z-index: 10;
+    overflow: hidden;
+  }
+  
+  :root:not(.dark) .tab-navigation-container {
+    background-color: var(--nav-bg-light);
+  }
+  
+  .mobile-logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.75rem 0;
+  }
+  
+  .mobile-logo {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .logo-icon {
+    width: 24px;
+    height: 24px;
+    color: white;
+  }
+  
+  .tab-navigation-items {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.5rem 0;
+    gap: 0.5rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .tab-navigation-items::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .tab-navigation-item {
+    flex: 0 0 auto;
+    color: var(--nav-text-color);
+    font-weight: 500;
+    border-radius: 12px;
+    margin: 0 0.25rem;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--nav-item-bg);
+  }
+  
+  .tab-navigation-item.active {
+    color: white;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .nav-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    width: 20px;
+  }
+  
+  .nav-text {
+    font-size: 0.875rem;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  
+  .getting-started-tip-container {
+    display: none;
+  }
+}
+
 /* Animation du menu au chargement de la page */
 @keyframes slideIn {
   from {
