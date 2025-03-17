@@ -98,7 +98,7 @@ button:active,
   --text-primary: #1a202c;
   --text-secondary: #334155;
   --text-tertiary: #64748b;
-}
+  
   /* Variables pour le titre "Learning Progress" et le bouton "Sign Out" */
   --title-primary: #4338ca;
   --title-gradient-from: #4f46e5;
@@ -1340,257 +1340,239 @@ button svg,
   .dark .flex-1.p-4.md\:p-6.overflow-y-auto {
     background: var(--content-bg-dark, #111827);
     box-shadow: -5px 0 25px rgba(0, 0, 0, 0.2);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}  to { opacity: 1; transform: translateY(0); }  from { opacity: 0.7; transform: translateY(5px); }@keyframes fadeContentIn {}  animation: fadeContentIn 0.3s ease-out;.container.mx-auto.py-4.h-full.flex.flex-col {/* Animation de transition pour améliorer le changement d'onglets */}  }    padding-top: 1rem;    flex: 1;  .flex-1.p-4.md\:p-6.overflow-y-auto {    }    width: 100%;  .md\:w-64 {    }    flex-direction: column;    display: flex;  .min-h-screen.flex.flex-col.md\:flex-row {@media (max-width: 767px) {/* Ajustements pour le mode mobile */}  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}  }    background: linear-gradient(to right, transparent, var(--title-underline-light, rgba(79, 70, 229, 0.5)), transparent);  :root:not(.dark) [class*="title-container"] h1::after {  :root:not(.dark) [class*="app-name"] h1::after,  :root:not(.dark) h1.main-title::after,  :root:not(.dark) .app-title h1::after,    }    opacity: 0.6;    background: linear-gradient(to right, transparent, var(--title-underline, rgba(255, 255, 255, 0.5)), transparent);    height: 1px;    width: 70%;    transform: translateX(-50%);    left: 50%;    bottom: -4px;    position: absolute;    content: '';  [class*="title-container"] h1::after {  [class*="app-name"] h1::after,  h1.main-title::after,  .app-title h1::after,@media (min-width: 768px) {/* Effet spécial pour les titres principaux en mode desktop */}  transform: translateX(2px);.sign-out-button:hover .sign-out-icon {[class*="log-out"]:hover svg,[class*="logout"]:hover svg,button[class*="sign-out"]:hover svg,}  transition: transform 0.2s ease;.sign-out-icon {[class*="log-out"] svg,[class*="logout"] svg,button[class*="sign-out"] svg,/* Animation subtile de l'icône de déconnexion au survol */}  }    box-shadow: 0 3px 6px rgba(67, 56, 202, 0.1);    border-color: rgba(67, 56, 202, 0.3);    color: #4338ca;    background-color: rgba(67, 56, 202, 0.15);  :root:not(.dark) a:has(svg[class*="log-out"]):hover {  :root:not(.dark) button:has(svg[class*="log-out"]):hover,  :root:not(.dark) [class*="log-out"]:hover,  :root:not(.dark) [class*="logout"]:hover,  :root:not(.dark) button[class*="sign-out"]:hover,    }    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);    transition: all 0.2s ease;    padding: 0.5rem 0.75rem;    border-radius: 8px;    border: 1px solid rgba(67, 56, 202, 0.2);    color: #4338ca;    background-color: rgba(67, 56, 202, 0.1);  :root:not(.dark) a:has(svg[class*="log-out"]) {  :root:not(.dark) button:has(svg[class*="log-out"]),  :root:not(.dark) [class*="log-out"],  :root:not(.dark) [class*="logout"],  :root:not(.dark) button[class*="sign-out"],    }    font-weight: 700;    -webkit-text-fill-color: transparent;    background-clip: text;    -webkit-background-clip: text;    background: linear-gradient(90deg, #4f46e5, #3b82f6);  :root:not(.dark) [class*="title-container"] h1 {  :root:not(.dark) [class*="app-name"] span,  :root:not(.dark) [class*="app-name"] h1,   :root:not(.dark) .app-title h1,  :root:not(.dark) h1.main-title,    }    color: #4338ca !important; /* Indigo pour s'harmoniser avec le menu violet-bleu */  :root:not(.dark) [class*="title-container"] {  :root:not(.dark) [class*="app-name"],  :root:not(.dark) [class*="app-title"],  :root:not(.dark) .app-header,  :root:not(.dark) .header-container,  :root:not(.dark) .main-header,  /* Style pour le mode clair */
-    }    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    border-color: rgba(255, 255, 255, 0.15);    color: white;    background-color: rgba(255, 255, 255, 0.12);  .dark a:has(svg[class*="log-out"]):hover {  .dark button:has(svg[class*="log-out"]):hover,  .dark [class*="log-out"]:hover,  .dark [class*="logout"]:hover,  .dark button[class*="sign-out"]:hover,  }    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);    transition: all 0.2s ease;    padding: 0.5rem 0.75rem;    border-radius: 8px;    border: 1px solid rgba(255, 255, 255, 0.1);    color: rgba(255, 255, 255, 0.8);    background-color: rgba(255, 255, 255, 0.07);  .dark a:has(svg[class*="log-out"]) {  .dark button:has(svg[class*="log-out"]),  .dark [class*="log-out"],  .dark [class*="logout"],  .dark button[class*="sign-out"],  /* Style du bouton de déconnexion pour qu'il corresponde au menu */  }    font-weight: 700;    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}  }    position: relative;    font-weight: 700;    -webkit-text-fill-color: transparent;    background-clip: text;
-
-    -webkit-background-clip: text;    background: linear-gradient(90deg, var(--title-gradient-from), var(--title-gradient-to));
-
-
-  [class*="brand-title"] span {  [class*="site-title"] span,
-
-  [class*="app-title"] span,  [class*="app-name"] span,
-
-  [class*="brand-title"] h1,  [class*="site-title"] h1,
-
-  [class*="app-title"] h1,  [class*="app-name"] h1,
-    }    position: relative;  [class*="brand-title"] {  [class*="site-title"],
-  [class*="app-title"],  [class*="app-name"],  /* Titre principal */  
-
-  }    background: transparent !important;  [class*="app-header"] {  [class*="header-wrapper"],
-
-  [class*="top-bar"],  [class*="navbar"],  /* En-tête de l'application principal */
-
-
-@media (min-width: 768px) {/* Ciblage spécifique des en-têtes existants */
-
-
-}  transform: translateX(2px);.menu-styled-button:hover svg {}  transition: transform 0.2s ease;    -webkit-text-fill-color: transparent;
-.menu-styled-button svg {}  box-shadow: 0 3px 6px var(--signout-hover-shadow);
-
-
-    background-clip: text;    -webkit-background-clip: text;    background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.75));  border-color: var(--signout-hover-border);  color: var(--signout-hover-text);  background-color: var(--signout-hover-bg);.menu-styled-button:hover {}  box-shadow: 0 2px 4px var(--signout-shadow);  transition: all 0.2s ease;  padding: 0.5rem 0.75rem;  border-radius: 8px;  border: 1px solid var(--signout-border);  color: var(--signout-text);  background-color: var(--signout-bg);.menu-styled-button {}  font-weight: 700;  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  -webkit-text-fill-color: transparent;  background-clip: text;  -webkit-background-clip: text;  background: linear-gradient(90deg, var(--title-gradient-from, rgba(255, 255, 255, 0.95)), var(--title-gradient-to, rgba(255, 255, 255, 0.75)));.menu-styled-text.gradient {}  color: var(--title-primary) !important;.menu-styled-text {/* Classes utilitaires pour appliquer le style du menu à d'autres éléments *//* Harmonisation du style pour l'en-tête principal */
-
-
-
-
-  .dark [class*="title-container"] h1 {  .dark [class*="app-name"] span,
-
-
-  .dark [class*="app-name"] h1,  .dark .app-title h1,
-
-  .dark h1.main-title,  /* Style du titre "Learning Progress" pour qu'il corresponde au menu */
-
-
-
-
-
-
-    }    font-weight: 600;    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);    color: white !important;
-
-
-
-
-  .dark [class*="title-container"] {  .dark [class*="app-name"],  .dark [class*="app-title"],  .dark .app-header,  .dark .header-container,  .dark .main-header,  /* En-tête principal qui correspond au style du menu */@media (min-width: 768px) {/* Adaptation du style de l'en-tête en mode bureau pour s'harmoniser avec le menu latéral */.main-header,
-
-
-
-}  color: var(--text-primary) !important;  background: transparent !important;.header-container,
+  }
+}
+
+/* Harmonisation du style pour l'en-tête principal */
+.main-header,
+.header-container,
 .app-header {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+}
+
+/* Adaptation du style de l'en-tête en mode bureau pour s'harmoniser avec le menu latéral */
+@media (min-width: 768px) {
+  /* En-tête principal qui correspond au style du menu */
+  .dark .main-header,
+  .dark .header-container,
+  .dark .app-header,
+  .dark [class*="app-title"],
+  .dark [class*="app-name"],
+  .dark [class*="title-container"] {
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    font-weight: 600;
+  }
+  
+  /* Style du titre "Learning Progress" pour qu'il corresponde au menu */
+  .dark h1.main-title,
+  .dark .app-title h1,
+  .dark [class*="app-name"] h1,
+  .dark [class*="app-name"] span,
+  .dark [class*="title-container"] h1 {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.75));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-weight: 700;
+  }
+
+  /* Style du bouton de déconnexion pour qu'il corresponde au menu */
+  .dark button[class*="sign-out"],
+  .dark [class*="logout"],
+  .dark [class*="log-out"],
+  .dark button:has(svg[class*="log-out"]),
+  .dark a:has(svg[class*="log-out"]) {
+    background-color: rgba(255, 255, 255, 0.07);
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark button[class*="sign-out"]:hover,
+  .dark [class*="logout"]:hover,
+  .dark [class*="log-out"]:hover,
+  .dark button:has(svg[class*="log-out"]):hover,
+  .dark a:has(svg[class*="log-out"]):hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Style pour le mode clair */
+  :root:not(.dark) .main-header,
+  :root:not(.dark) .header-container,
+  :root:not(.dark) .app-header,
+  :root:not(.dark) [class*="app-title"],
+  :root:not(.dark) [class*="app-name"],
+  :root:not(.dark) [class*="title-container"] {
+    color: #4338ca !important; /* Indigo pour s'harmoniser avec le menu violet-bleu */
+  }
+  
+  :root:not(.dark) h1.main-title,
+  :root:not(.dark) .app-title h1,
+  :root:not(.dark) [class*="app-name"] h1, 
+  :root:not(.dark) [class*="app-name"] span,
+  :root:not(.dark) [class*="title-container"] h1 {
+    background: linear-gradient(90deg, #4f46e5, #3b82f6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+  }
+  
+  :root:not(.dark) button[class*="sign-out"],
+  :root:not(.dark) [class*="logout"],
+  :root:not(.dark) [class*="log-out"],
+  :root:not(.dark) button:has(svg[class*="log-out"]),
+  :root:not(.dark) a:has(svg[class*="log-out"]) {
+    background-color: rgba(67, 56, 202, 0.1);
+    color: #4338ca;
+    border: 1px solid rgba(67, 56, 202, 0.2);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  :root:not(.dark) button[class*="sign-out"]:hover,
+  :root:not(.dark) [class*="logout"]:hover,
+  :root:not(.dark) [class*="log-out"]:hover,
+  :root:not(.dark) button:has(svg[class*="log-out"]):hover,
+  :root:not(.dark) a:has(svg[class*="log-out"]):hover {
+    background-color: rgba(67, 56, 202, 0.15);
+    color: #4338ca;
+    border-color: rgba(67, 56, 202, 0.3);
+    box-shadow: 0 3px 6px rgba(67, 56, 202, 0.1);
+  }
+}
+
+/* Animation subtile de l'icône de déconnexion au survol */
+button[class*="sign-out"] svg,
+[class*="logout"] svg,
+[class*="log-out"] svg,
+.sign-out-icon {
+  transition: transform 0.2s ease;
+}
+
+button[class*="sign-out"]:hover svg,
+[class*="logout"]:hover svg,
+[class*="log-out"]:hover svg,
+.sign-out-button:hover .sign-out-icon {
+  transform: translateX(2px);
+}
+
+/* Effet spécial pour les titres principaux en mode desktop */
+@media (min-width: 768px) {
+  .app-title h1::after,
+  h1.main-title::after,
+  [class*="app-name"] h1::after,
+  [class*="title-container"] h1::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--title-underline, rgba(255, 255, 255, 0.5)), transparent);
+    opacity: 0.6;
+  }
+  
+  :root:not(.dark) .app-title h1::after,
+  :root:not(.dark) h1.main-title::after,
+  :root:not(.dark) [class*="app-name"] h1::after,
+  :root:not(.dark) [class*="title-container"] h1::after {
+    background: linear-gradient(to right, transparent, var(--title-underline-light, rgba(79, 70, 229, 0.5)), transparent);
+  }
+}
+
+/* Classes utilitaires pour appliquer le style du menu à d'autres éléments */
+.menu-styled-text {
+  color: var(--title-primary) !important;
+}
+
+.menu-styled-text.gradient {
+  background: linear-gradient(90deg, var(--title-gradient-from, rgba(255, 255, 255, 0.95)), var(--title-gradient-to, rgba(255, 255, 255, 0.75)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-weight: 700;
+}
+
+.menu-styled-button {
+  background-color: var(--signout-bg);
+  color: var(--signout-text);
+  border: 1px solid var(--signout-border);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px var(--signout-shadow);
+}
+
+.menu-styled-button:hover {
+  background-color: var(--signout-hover-bg);
+  color: var(--signout-hover-text);
+  border-color: var(--signout-hover-border);
+  box-shadow: 0 3px 6px var(--signout-hover-shadow);
+}
+
+.menu-styled-button svg {
+  transition: transform 0.2s ease;
+}
+
+.menu-styled-button:hover svg {
+  transform: translateX(2px);
+}
+
+/* Ciblage spécifique des en-têtes existants */
+@media (min-width: 768px) {
+  /* En-tête de l'application principal */
+  [class*="navbar"],
+  [class*="top-bar"],
+  [class*="header-wrapper"],
+  [class*="app-header"] {
+    background: transparent !important;
+  }
+  
+  /* Titre principal */
+  [class*="app-name"],
+  [class*="app-title"],
+  [class*="site-title"],
+  [class*="brand-title"] {
+    position: relative;
+  }
+  
+  [class*="app-name"] h1,
+  [class*="app-title"] h1,
+  [class*="site-title"] h1,
+  [class*="brand-title"] h1,
+  [class*="app-name"] span,
+  [class*="app-title"] span,
+  [class*="site-title"] span,
+  [class*="brand-title"] span {
+    background: linear-gradient(90deg, var(--title-gradient-from), var(--title-gradient-to));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    position: relative;
+  }
+}
+
+/* Animation de transition pour améliorer le changement d'onglets */
+.container.mx-auto.py-4.h-full.flex.flex-col {
+  animation: fadeContentIn 0.3s ease-out;
+}
+
+@keyframes fadeContentIn {
+  from { opacity: 0.7; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
