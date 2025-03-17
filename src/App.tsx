@@ -37,6 +37,7 @@ import './components/LearningItemCard.css';
 import './components/Calendar.css';
 import './components/StatusBadge.css';
 import './components/PomodoroTimer.css';
+import './styles/theme-transition.css'; // Importation des styles de transition
 
 interface State {
   items: LearningItem[];

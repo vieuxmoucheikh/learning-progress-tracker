@@ -1,11 +1,16 @@
 /**
- * Script pour corriger les problèmes de mode clair sur mobile
+ * Script pour corriger les problèmes de mode clair sur mobile et assurer une transition fluide
  */
 (function() {
   function fixLightMode() {
     // Détecter si on est en mode clair
     const isLightMode = document.documentElement.getAttribute('data-theme') === 'light';
     const isMobile = window.innerWidth <= 768;
+    
+    // Ne pas appliquer les modifications pendant la transition de thème
+    if (document.documentElement.classList.contains('theme-transitioning')) {
+      return;
+    }
     
     if (isLightMode && isMobile) {
       // Forcer le fond en clair avec un léger dégradé
@@ -49,7 +54,7 @@
           children[i].style.background = '#ffffff';
           
           // Si c'est un élément avec une classe contenant "gradient"
-          if (children[i].className.includes('gradient')) {
+          if (children[i].className && children[i].className.includes && children[i].className.includes('gradient')) {
             children[i].style.backgroundImage = 'none';
           }
         }
@@ -265,11 +270,46 @@
       // Supprimer le style d'urgence
       const styleElement = document.getElementById('emergency-card-fix');
       if (styleElement) styleElement.remove();
+      
+      // Restaurer les couleurs sombres
+      const cardSelectors = [
+        '.card', 
+        '[class*="Card"]', 
+        '[class*="-card"]',
+        '[class*="card"]',
+        '.mastered-card',
+        '.rounded-xl',
+        '.border-l-4'
+      ];
+      
+      // Sélectionner toutes les cartes
+      const cards = document.querySelectorAll(cardSelectors.join(','));
+      
+      // Réinitialiser les styles pour mode sombre
+      cards.forEach(card => {
+        card.style.removeProperty('background-color');
+        card.style.removeProperty('background');
+        card.style.removeProperty('box-shadow');
+        card.style.removeProperty('border-radius');
+        card.style.removeProperty('border');
+        
+        // Traiter également les enfants directs
+        const children = card.children;
+        for (let i = 0; i < children.length; i++) {
+          children[i].style.removeProperty('background-color');
+          children[i].style.removeProperty('background');
+        }
+      });
     }
   }
   
-  // Exécuter immédiatement
-  fixLightMode();
+  // Si le DOM est déjà chargé, exécuter immédiatement
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    fixLightMode();
+  } else {
+    // Sinon, attendre que le DOM soit chargé
+    document.addEventListener('DOMContentLoaded', fixLightMode);
+  }
   
   // Écouter les changements de taille de fenêtre
   window.addEventListener('resize', fixLightMode);
@@ -278,21 +318,17 @@
   const observer = new MutationObserver(mutations => {
     mutations.forEach(mutation => {
       if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
-        fixLightMode();
+        // Attendre que la transition de thème soit terminée
+        setTimeout(fixLightMode, 200);
       }
     });
   });
   
   observer.observe(document.documentElement, { attributes: true });
   
-  // Réappliquer périodiquement pour s'assurer que les corrections sont maintenues
-  setInterval(fixLightMode, 1000);
-
-  // Ajouter un écouteur pour le chargement du contenu dynamique
-  window.addEventListener('DOMContentLoaded', fixLightMode);
+  // Appliquer à l'initialisation et après chargement complet
+  window.addEventListener('load', fixLightMode);
   
   // Réappliquer après un court délai pour attraper le contenu dynamique chargé après le DOM initial
   setTimeout(fixLightMode, 500);
-  setTimeout(fixLightMode, 1500);
-  setTimeout(fixLightMode, 3000);
 })();

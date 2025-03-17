@@ -69,6 +69,81 @@
         color-scheme: light dark;
       }
     </style>
+
+    <!-- Script de détection préliminaire du thème -->
+    <script>
+      (function () {
+        // Déterminer le thème initial
+        const getInitialTheme = () => {
+          const persistedTheme = localStorage.getItem("theme");
+          if (persistedTheme === "light" || persistedTheme === "dark") {
+            return persistedTheme;
+          }
+
+          // Détecter les préférences du système si pas de préférence persistée
+          if (
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+          ) {
+            return "dark";
+          }
+
+          // Par défaut: mode clair
+          return "light";
+        };
+
+        // Appliquer le thème immédiatement pour éviter les flashs
+        const theme = getInitialTheme();
+        document.documentElement.setAttribute("data-theme", theme);
+        document.documentElement.classList.add(theme);
+
+        // Ajouter la classe de transition pendant le chargement initial
+        document.documentElement.classList.add("theme-transitioning");
+
+        // Retirer la classe après le chargement pour permettre des transitions fluides
+        window.addEventListener("load", function () {
+          setTimeout(function () {
+            document.documentElement.classList.remove("theme-transitioning");
+          }, 100);
+        });
+      })();
+    </script>
+
+    <style>
+      /* Styles critiques pour éviter les clignotements au chargement */
+      :root {
+        --background: 255, 255, 255;
+        --foreground: 15, 23, 42;
+      }
+
+      :root.dark {
+        --background: 15, 23, 42;
+        --foreground: 255, 255, 255;
+      }
+
+      body {
+        background-color: rgb(var(--background));
+        color: rgb(var(--foreground));
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+          "Segoe UI Symbol";
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        font-feature-settings: "kern";
+      }
+
+      /* Fix pour éviter le flash en mode clair/sombre */
+      html.theme-transitioning * {
+        transition: none !important;
+      }
+
+      /* Script de détection préliminaire du thème pour éviter le flash */
+      :root {
+        color-scheme: light dark;
+      }
+    </style>
   </head>
   <body>
     <noscript

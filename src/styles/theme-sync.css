@@ -1,8 +1,20 @@
 /* Synchronisation des thèmes pour transitions fluides et cohérence visuelle */
 
+/* Définir des transitions globales pour tous les éléments */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Forcer l'application immédiate du mode clair/sombre sans délai */
 html {
   transition: background-color 0.1s ease-out;
+}
+
+/* Forcer l'application immédiate du mode clair/sombre sans délai si la classe transitioning est active */
+html.theme-transitioning * {
+  transition: none !important;
 }
 
 /* Styles de base pour le système de gestion des thèmes */
@@ -14,9 +26,9 @@ html[data-theme="dark"] {
   color-scheme: dark;
 }
 
-/* Éviter le flash pendant la transition de thèmes */
-html.theme-transitioning * {
-  transition: none !important;
+/* Animation du bouton de commutation */
+.theme-toggle-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Amélioration des styles pour les icônes et textes */
@@ -39,13 +51,13 @@ html[data-theme="light"] {
   --icon-muted: 100 116 139;
   
   /* Badges et boutons */
-  --badge-bg-blue: 239 246 255;
+  --badge-bg-blue: rgba(59, 130, 246, 0.1);
   --badge-text-blue: 30 64 175;
-  --badge-bg-green: 236 253 245;
+  --badge-bg-green: rgba(16, 185, 129, 0.1);
   --badge-text-green: 5 150 105;
-  --badge-bg-yellow: 254 249 195;
+  --badge-bg-yellow: rgba(245, 158, 11, 0.1);
   --badge-text-yellow: 202 138 4;
-  --badge-bg-red: 254 226 226;
+  --badge-bg-red: rgba(220, 38, 38, 0.1);
   --badge-text-red: 185 28 28;
   
   /* Boutons */
