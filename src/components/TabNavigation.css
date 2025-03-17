@@ -7,7 +7,7 @@
   z-index: 30;
   overflow: hidden;
   color-scheme: dark;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
   background: linear-gradient(160deg, var(--menu-bg-gradient-from, #1e293b) 0%, var(--menu-bg-gradient-to, #0f172a) 100%);
   box-shadow: var(--menu-shadow, 0 4px 20px -1px rgba(0, 0, 0, 0.3));
   border-right: 1px solid var(--menu-border, rgba(255, 255, 255, 0.06));
@@ -26,6 +26,8 @@
   background: 
     radial-gradient(circle at 30% 20%, var(--menu-glow-primary, rgba(56, 189, 248, 0.08)), transparent 40%),
     radial-gradient(circle at 70% 80%, var(--menu-glow-secondary, rgba(29, 78, 216, 0.08)), transparent 40%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 /* Logo amélioré */
@@ -177,6 +179,7 @@
   font-size: 0.875rem;
   white-space: nowrap;
   transition: color 0.3s ease;
+  font-weight: 500;
 }
 
 /* Effets d'interaction */
@@ -201,6 +204,7 @@
     padding: 1.5rem 0 1rem;
     width: 100%;
     background: linear-gradient(180deg, var(--menu-bg-desktop-from, #0f172a) 0%, var(--menu-bg-desktop-to, #1e293b) 100%);
+    border-right: 1px solid var(--menu-border, rgba(255, 255, 255, 0.06));
   }
   
   .mobile-logo-container {
@@ -243,25 +247,23 @@
     background-color: var(--tab-active-bg-desktop, rgba(255, 255, 255, 0.1));
     transform: none !important;
     box-shadow: 
-      0 3px 12px var(--tab-active-shadow-desktop, rgba(0, 0, 0, 0.12)),
+      0 4px 8px var(--tab-active-shadow-desktop, rgba(0, 0, 0, 0.12)),
       0 0 0 1px var(--tab-active-glow-desktop, rgba(255, 255, 255, 0.08)) inset;
   }
-
-  .tab-navigation-item.active::after {
-    content: none; /* Suppression de l'indicateur du bas */
-  }
   
-  /* Indicateur latéral pour l'onglet actif en desktop */
-  .tab-navigation-item.active::before {
+  /* Indicateur vertical pour l'onglet actif en desktop */
+  .tab-navigation-item.active::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: -0.85rem;
-    height: 100%;
-    width: 4px;
-    opacity: 1;
+    top: 50%;
+    right: -1px;
+    left: auto;
+    bottom: auto;
+    width: 3px;
+    height: 70%;
+    transform: translateY(-50%);
+    border-radius: 2px;
     background: var(--tab-indicator-desktop, linear-gradient(to bottom, rgba(99, 102, 241, 1), rgba(59, 130, 246, 1)));
-    border-radius: 0 4px 4px 0;
     box-shadow: 0 0 10px var(--tab-indicator-glow-desktop, rgba(99, 102, 241, 0.5));
   }
 
@@ -274,7 +276,7 @@
   }
   
   .nav-text {
-    font-size: 0.9175rem;
+    font-size: 0.9375rem;
   }
   
   .getting-started-tip-container {
@@ -300,20 +302,21 @@
   .mobile-logo {
     width: 42px;
     height: 42px;
+    border-radius: 12px;
   }
   
   .tab-navigation-items {
-    padding: 0.25rem;
+    padding: 0.25rem 0.5rem;
   }
   
   .tab-navigation-item {
     padding: 0.6rem 0.8rem;
-    border-radius: 8px;
+    border-radius: 10px;
     margin: 0 0.2rem;
   }
   
   .nav-text {
-    font-size: 0.8rem;
+    font-size: 0.815rem;
   }
 }
 
@@ -359,7 +362,7 @@
 
 .tip-heading {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--tip-heading, rgba(255, 255, 255, 0.9));
   margin-bottom: 0.35rem;
   text-transform: uppercase;
