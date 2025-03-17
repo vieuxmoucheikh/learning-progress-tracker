@@ -102,6 +102,27 @@
     background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%) !important;
     border-color: #6ee7b7 !important; /* emerald-300 */
   }
+  
+  /* Fix pour les icônes en mode sombre sur mobile */
+  @media (max-width: 768px) {
+    html[data-theme="dark"] .learning-item-card [class*="lucide-"],
+    html[data-theme="dark"] .item-wrapper [class*="lucide-"],
+    .dark .learning-item-card [class*="lucide-"],
+    .dark .item-wrapper [class*="lucide-"] {
+      fill: none !important;
+      stroke: currentColor !important;
+      stroke-width: 2px !important;
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
+    }
+    
+    /* Exception pour les icônes qui ont besoin d'un remplissage spécifique */
+    html[data-theme="dark"] .learning-item-card .lucide-play,
+    .dark .learning-item-card .lucide-play {
+      fill: currentColor !important;
+      stroke: currentColor !important;
+    }
+  }
 }
 
 /* Styles globaux pour améliorer la visibilité des contenus dans tous les contextes */
