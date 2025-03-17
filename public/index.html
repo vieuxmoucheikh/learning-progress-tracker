@@ -5,13 +5,10 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <meta name="theme-color" content="#1e3a8a" />
-    <meta
-      name="description"
-      content="Application de suivi d'apprentissage - Organisez et suivez vos études et projets"
-    />
+    <meta name="description" content="Application de suivi d'apprentissage" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
@@ -19,98 +16,81 @@
     <link rel="preload" href="%PUBLIC_URL%/mobile-light-mode.css" as="style" />
     <link rel="stylesheet" href="%PUBLIC_URL%/mobile-light-mode.css" />
 
-    <!-- Styles inline critiques pour les cartes -->
+    <!-- Styles critiques pour éviter FOUC -->
     <style>
-      /* Styles immédiats pour les cartes */
-      .learning-item-card > .card,
-      .item-wrapper > .card {
-        border: 3px solid #cbd5e1 !important;
-        border-left-width: 8px !important;
-        border-left-color: #3b82f6 !important;
-        border-radius: 18px !important;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
-        overflow: hidden !important;
-        margin-bottom: 32px !important;
-      }
-
-      /* Styles de base pour éviter le flash de contenu non stylisé */
-      html,
-      body,
-      #root {
-        height: 100%;
-        width: 100%;
-        padding: 0;
-        margin: 0;
-        overflow-x: hidden;
-      }
-
+      /* Base critical styles */
       body {
+        margin: 0;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        background-color: #fff;
-        color: #000;
       }
 
-      html.dark body {
+      :root:not(.dark) body {
+        background-color: #ffffff;
+        color: #0f172a;
+      }
+
+      :root.dark body {
         background-color: #0f172a;
-        color: #fff;
+        color: #ffffff;
       }
 
-      /* Chargement indicateur */
-      #root:empty::before {
-        content: "";
+      /* Loading spinner */
+      #root:empty {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #root:empty::after {
+        content: "";
         width: 40px;
         height: 40px;
-        border-radius: 50%;
-        border: 3px solid #e5e7eb;
+        border: 3px solid #cbd5e1;
         border-top-color: #3b82f6;
-        animation: loader 0.8s linear infinite;
+        border-radius: 50%;
+        animation: spinner 0.6s linear infinite;
       }
 
-      @keyframes loader {
+      @keyframes spinner {
         to {
-          transform: translate(-50%, -50%) rotate(360deg);
+          transform: rotate(360deg);
         }
       }
 
-      /* Style de base pour le menu mobile */
-      @media (max-width: 767px) {
-        .tab-navigation-container {
-          display: flex;
-          flex-direction: column;
-          background-color: #1e3a8a;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          position: relative;
-          z-index: 10;
-          overflow: hidden;
-        }
+      /* Tab navigation basic styles */
+      .tab-navigation-container {
+        background-color: #1e3a8a;
+      }
 
-        html:not(.dark) .tab-navigation-container {
-          background-color: #3b82f6;
-        }
+      :root:not(.dark) .tab-navigation-container {
+        background-color: #3b82f6;
+      }
 
-        .tab-navigation-items {
-          display: flex;
-          overflow-x: auto;
-          padding: 0.5rem 0;
-        }
+      .tab-navigation-items {
+        display: flex;
+        overflow-x: auto;
+        padding: 0.5rem;
+      }
 
-        .tab-navigation-item {
-          flex: 0 0 auto;
-          color: white;
-          border-radius: 12px;
-          margin: 0 0.25rem;
-          padding: 0.75rem 1rem;
-          display: flex;
-          align-items: center;
-          background: rgba(255, 255, 255, 0.1);
-        }
+      .tab-navigation-item {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 0.6rem;
+        margin: 0 0.25rem;
+        white-space: nowrap;
+      }
+
+      .tab-navigation-item.active {
+        background: rgba(255, 255, 255, 0.2);
       }
     </style>
 
@@ -150,7 +130,7 @@
       }
     </style>
 
-    <!-- Script de détection préliminaire du thème - exécution synchrone pour éviter le flash -->
+    <!-- Theme detection script - simplified and synchronous -->
     <script>
       (function () {
         try {
@@ -160,24 +140,11 @@
           ).matches;
           var isDark = storedTheme === "dark" || (!storedTheme && prefersDark);
 
-          // Appliquer immédiatement pour éviter le flash
           if (isDark) {
             document.documentElement.classList.add("dark");
-            document.documentElement.style.backgroundColor = "#0f172a";
           } else {
             document.documentElement.classList.remove("dark");
-            document.documentElement.style.backgroundColor = "#ffffff";
           }
-
-          // Désactiver les transitions pendant le chargement initial
-          document.documentElement.classList.add("no-transitions");
-
-          // Réactiver les transitions après le chargement
-          window.addEventListener("load", function () {
-            setTimeout(function () {
-              document.documentElement.classList.remove("no-transitions");
-            }, 100);
-          });
         } catch (e) {
           console.error("Theme detection error:", e);
         }
@@ -197,31 +164,18 @@
     <!-- Script d'application des styles pour les cartes -->
     <script src="%PUBLIC_URL%/card-styler.js"></script>
 
-    <!-- Script de détection préliminaire du thème -->
+    <!-- Critical error handling fallback -->
     <script>
-      (function () {
-        // Essayer de détecter le thème préféré
-        const storedTheme = localStorage.getItem("theme");
-        const prefersDark = window.matchMedia(
-          "(prefers-color-scheme: dark)"
-        ).matches;
-        const theme = storedTheme || (prefersDark ? "dark" : "light");
+      window.addEventListener("error", function (e) {
+        console.error("Global error caught:", e);
+      });
 
-        // Appliquer immédiatement pour éviter le flash
-        document.documentElement.setAttribute("data-theme", theme);
-        document.documentElement.classList.add(theme);
-      })();
-    </script>
-
-    <!-- Fallback en cas d'erreur de chargement -->
-    <script>
-      // Vérifier si l'application est chargée après un délai
+      // Backup error handler if app fails to load after 5 seconds
       setTimeout(function () {
-        var rootElement = document.getElementById("root");
-        if (rootElement && !rootElement.hasChildNodes()) {
-          rootElement.innerHTML = `
-            <div style="padding: 20px; text-align: center; font-family: system-ui, sans-serif;">
-              <h2 style="color: #1e40af;">Problème de chargement</h2>
+        if (!document.getElementById("root").children.length) {
+          document.getElementById("root").innerHTML = `
+            <div style="padding: 20px; text-align: center;">
+              <h2>Problème de chargement</h2>
               <p>L'application n'a pas pu démarrer correctement.</p>
               <button onclick="window.location.reload()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 5px; margin-top: 20px;">
                 Réessayer

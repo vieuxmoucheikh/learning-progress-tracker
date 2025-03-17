@@ -1,0 +1,79 @@
+/* Correctifs critiques pour performances mobiles */
+
+/* Optimisations globales pour performances mobiles */
+@media (max-width: 768px) {
+  /* Réduire les impacts CPU/GPU */
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+  
+  /* Désactiver les animations pour améliorer les performances */
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  /* Forcer l'accélération matérielle sur les blocs critiques */
+  .tab-navigation-container,
+  .tab-navigation-items {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000;
+  }
+  
+  /* Améliorer le défilement sur iOS */
+  .tab-navigation-items {
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Styles simplifiés pour garantir la visibilité */
+  .tab-navigation-container {
+    background-color: #1e3a8a !important;
+  }
+  
+  :root:not(.dark) .tab-navigation-container {
+    background-color: #3b82f6 !important;
+  }
+  
+  .tab-navigation-item {
+    color: white !important;
+  }
+  
+  /* Simplifier la mise en page pour réduire la charge de rendu */
+  .tab-navigation-item {
+    padding: 0.6rem 0.8rem !important;
+    margin: 0 0.25rem !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  .tab-navigation-item.active {
+    background: rgba(255, 255, 255, 0.2) !important;
+  }
+  
+  /* Assurer que le texte reste visible */
+  .nav-text {
+    color: white !important;
+  }
+  
+  /* Cacher les éléments non essentiels sur mobile */
+  .getting-started-tip-container {
+    display: none !important;
+  }
+}
+
+/* Mode sombre optimisé */
+@media (max-width: 768px) {
+  html.dark body, html.dark #root {
+    background-color: #0f172a !important;
+    color: white !important;
+  }
+  
+  /* Mode clair optimisé */
+  html:not(.dark) body, html:not(.dark) #root {
+    background-color: white !important;
+    color: #0f172a !important;
+  }
+}
