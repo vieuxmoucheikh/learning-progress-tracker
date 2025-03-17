@@ -1,11 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Brain, LayoutDashboard, BookOpen, Calendar, Activity, FlaskConical, Target, FlameKindling, Clock } from 'lucide-react';
+import { Brain, LayoutDashboard, Activity, FlaskConical, FlameKindling, Clock } from 'lucide-react';
 import './TabNavigation.css';
 
 export const TAB_OPTIONS = {
   DASHBOARD: 'dashboard',
-  LEARNING: 'learning',
-  CALENDAR: 'calendar',
   ANALYTICS: 'analytics',
   FLASHCARDS: 'flashcards',
   LEARNING_CARDS: 'learning-cards',
@@ -31,20 +29,6 @@ export const TabNavigation: React.FC<TabNavProps> = ({ activeTab, onTabChange })
       shortLabel: 'Dashboard',
       icon: <LayoutDashboard size={20} />,
       description: 'Vue d\'ensemble de vos progrès d\'apprentissage'
-    },
-    {
-      id: TAB_OPTIONS.LEARNING,
-      label: 'Learning',
-      shortLabel: 'Learning',
-      icon: <BookOpen size={20} />,
-      description: 'Gérez vos éléments d\'apprentissage actifs'
-    },
-    {
-      id: TAB_OPTIONS.CALENDAR,
-      label: 'Calendar',
-      shortLabel: 'Calendar',
-      icon: <Calendar size={20} />,
-      description: 'Planifiez vos activités d\'apprentissage'
     },
     {
       id: TAB_OPTIONS.ANALYTICS,
