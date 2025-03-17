@@ -55,6 +55,22 @@
     0 4px 12px var(--logo-shadow, rgba(0, 0, 0, 0.12)),
     0 0 0 1px var(--logo-glow, rgba(255, 255, 255, 0.05)) inset;
   transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animation subtile pour le logo */
+.mobile-logo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.mobile-logo:hover::after {
+  opacity: 1;
 }
 
 .mobile-logo:hover {
@@ -69,6 +85,11 @@
   height: 24px;
   color: var(--logo-color, white);
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mobile-logo:hover .logo-icon {
+  transform: scale(1.15);
 }
 
 /* Design amélioré pour les items de navigation */
@@ -391,6 +412,7 @@
   
   --logo-bg: rgba(255, 255, 255, 0.2);
   --logo-border: rgba(255, 255, 255, 0.15);
+  --logo-color: white;
   --logo-shadow: rgba(0, 0, 0, 0.15);
   --logo-glow: rgba(255, 255, 255, 0.1);
   --logo-hover-shadow: rgba(0, 0, 0, 0.2);
@@ -436,6 +458,7 @@
   
   --logo-bg: rgba(255, 255, 255, 0.1);
   --logo-border: rgba(255, 255, 255, 0.08);
+  --logo-color: white;
   --logo-shadow: rgba(0, 0, 0, 0.12);
   --logo-glow: rgba(255, 255, 255, 0.05);
   --logo-hover-shadow: rgba(0, 0, 0, 0.15);
