@@ -146,3 +146,142 @@ html[data-theme="dark"] body .rounded-xl.p-4.bg-gray-100 {
   background: #0f172a !important;
   border: 1px solid #334155 !important;
 }
+
+/* CORRECTIFS SPÉCIFIQUES POUR LES ICÔNES EN MODE SOMBRE */
+/* Ces règles ont une priorité très élevée pour surcharger tous les autres styles */
+html[data-theme="dark"] svg,
+.dark svg,
+html[data-theme="dark"] [class*="lucide-"],
+.dark [class*="lucide-"] {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  vector-effect: non-scaling-stroke !important;
+}
+
+/* CIBLAGE INDIVIDUEL DES ICÔNES LUCIDE LES PLUS COURANTES */
+html[data-theme="dark"] .lucide-edit,
+.dark .lucide-edit,
+html[data-theme="dark"] .lucide-save,
+.dark .lucide-save,
+html[data-theme="dark"] .lucide-trash-2,
+.dark .lucide-trash-2,
+html[data-theme="dark"] .lucide-clock,
+.dark .lucide-clock,
+html[data-theme="dark"] .lucide-check,
+.dark .lucide-check,
+html[data-theme="dark"] .lucide-x,
+.dark .lucide-x,
+html[data-theme="dark"] .lucide-plus,
+.dark .lucide-plus,
+html[data-theme="dark"] .lucide-external-link,
+.dark .lucide-external-link,
+html[data-theme="dark"] .lucide-check-circle-2,
+.dark .lucide-check-circle-2,
+html[data-theme="dark"] .lucide-copy,
+.dark .lucide-copy {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+
+/* CAS SPÉCIAL POUR LES ICÔNES DE LECTURE/PAUSE/ARRÊT */
+html[data-theme="dark"] .lucide-play,
+.dark .lucide-play {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+html[data-theme="dark"] .lucide-pause,
+.dark .lucide-pause,
+html[data-theme="dark"] .lucide-stop-circle,
+.dark .lucide-stop-circle {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5px !important;
+}
+
+/* CORRECTION POUR LES ICÔNES DANS LES BADGES ET BOUTONS */
+html[data-theme="dark"] button svg,
+.dark button svg,
+html[data-theme="dark"] .badge svg,
+.dark .badge svg,
+html[data-theme="dark"] [role="button"] svg,
+.dark [role="button"] svg {
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+/* FORCAGE DES ATTRIBUTS SVG DIRECTEMENT */
+html[data-theme="dark"] svg *,
+.dark svg * {
+  fill: inherit !important;
+  stroke: inherit !important;
+  stroke-width: inherit !important;
+}
+
+/* ADAPTATION POUR LE MODE MOBILE */
+@media (max-width: 768px) {
+  html[data-theme="dark"] svg,
+  .dark svg,
+  html[data-theme="dark"] [class*="lucide-"],
+  .dark [class*="lucide-"] {
+    stroke-width: 2.5px !important; /* Légèrement plus épais pour meilleure visibilité sur mobile */
+  }
+}
+
+/* CORRECTION CRITIQUE POUR LES BOUTONS AVEC ICÔNES */
+html[data-theme="dark"] button.text-red-600 svg, 
+.dark button.text-red-600 svg,
+html[data-theme="dark"] button.text-red-500 svg, 
+.dark button.text-red-500 svg {
+  stroke: #ef4444 !important;
+  fill: none !important;
+}
+
+html[data-theme="dark"] button.text-green-600 svg, 
+.dark button.text-green-600 svg,
+html[data-theme="dark"] button.text-green-500 svg, 
+.dark button.text-green-500 svg {
+  stroke: #22c55e !important;
+  fill: none !important;
+}
+
+html[data-theme="dark"] button.text-blue-600 svg, 
+.dark button.text-blue-600 svg,
+html[data-theme="dark"] button.text-blue-500 svg, 
+.dark button.text-blue-500 svg {
+  stroke: #3b82f6 !important;
+  fill: none !important;
+}
+
+html[data-theme="dark"] button.text-yellow-600 svg, 
+.dark button.text-yellow-600 svg,
+html[data-theme="dark"] button.text-yellow-500 svg, 
+.dark button.text-yellow-500 svg {
+  stroke: #f59e0b !important;
+  fill: none !important;
+}
+
+/* CORRECTIFS POUR LES SVG DANS LES LEARNING CARDS */
+html[data-theme="dark"] .learning-item-card svg,
+.dark .learning-item-card svg,
+html[data-theme="dark"] [class*="learning-card"] svg,
+.dark [class*="learning-card"] svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+}
+
+/* CORRECTIFS SPÉCIFIQUES POUR LES BOUTONS DANS LES LEARNING CARDS */
+html[data-theme="dark"] .learning-item-card button svg,
+.dark .learning-item-card button svg,
+html[data-theme="dark"] [class*="learning-card"] button svg,
+.dark [class*="learning-card"] button svg {
+  fill: none !important;
+  stroke: currentColor !important;
+}
