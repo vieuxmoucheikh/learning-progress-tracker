@@ -117,6 +117,11 @@ export const TabNavigation: React.FC<TabNavProps> = ({ activeTab, onTabChange })
         <div className="mobile-logo">
           <Brain className="logo-icon" />
         </div>
+        {!isMobile && (
+          <div className="app-title">
+            <h1>Learning Progress</h1>
+          </div>
+        )}
       </div>
       
       <div 
