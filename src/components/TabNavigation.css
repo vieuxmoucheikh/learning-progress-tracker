@@ -3,12 +3,12 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: linear-gradient(165deg, #111827 0%, #1e3a8a 100%); /* Gradient plus profond et subtil */
+  background: linear-gradient(165deg, #0f172a 0%, #1e40af 100%); /* Gradient plus profond et élégant */
   box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.35);
   position: relative;
   z-index: 10;
   overflow: hidden;
-  transition: background 0.5s ease;
+  transition: background 0.6s ease;
 }
 
 /* Effet de verre pour le fond du menu avec animation plus subtile */
@@ -49,15 +49,15 @@
 }
 
 .mobile-logo {
-  width: 52px;
-  height: 52px;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 16px; /* Coins légèrement moins arrondis pour un look plus moderne */
+  width: 54px;
+  height: 54px;
+  background: rgba(255, 255, 255, 0.13);
+  border-radius: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 
     0 4px 16px rgba(0, 0, 0, 0.2),
@@ -73,23 +73,25 @@
 }
 
 .logo-icon {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   color: white;
-  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
-  animation: pulse 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+  animation: pulseLogo 3s ease-in-out infinite;
 }
 
-@keyframes pulse {
+@keyframes pulseLogo {
   0%, 100% {
     filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+    transform: scale(1);
   }
   50% {
     filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.7));
+    transform: scale(1.1);
   }
 }
 
-/* Items de navigation avec style amélioré */
+/* Items de navigation avec style amélioré - Optimisé pour défilement fluide */
 .tab-navigation-items {
   display: flex;
   flex-direction: row;
@@ -97,12 +99,16 @@
   overflow-x: auto;
   overflow-y: hidden;
   scroll-behavior: smooth;
-  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-  padding: 0.75rem 0;
-  gap: 0.5rem;
+  scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch; /* Important pour le défilement fluide sur iOS */
+  padding: 0.85rem 0.1rem;
+  gap: 0.6rem;
+  margin: 0 0.5rem;
+  will-change: scroll-position; /* Optimisation pour le défilement */
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
 }
 
 .tab-navigation-items::-webkit-scrollbar {
@@ -112,23 +118,25 @@
 /* Item de navigation individuel */
 .tab-navigation-item {
   flex: 0 0 auto;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Transition plus élégante */
-  color: rgba(255, 255, 255, 0.85); /* Meilleur contraste initial */
+  transition: all 0.3s cubic-bezier(0.2, 0, 0.2, 1); /* Transition plus fluide */
+  color: rgba(255, 255, 255, 0.85);
   font-weight: 500;
-  border-radius: 12px; /* Coins plus arrondis pour un design moderne */
-  margin: 0 0.25rem;
+  border-radius: 14px;
+  margin: 0 0.2rem;
   position: relative;
   scroll-snap-align: center;
   min-width: max-content;
-  padding: 0.85rem 1.15rem; /* Dimensions plus confortables */
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  padding: 0.85rem 1.15rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   gap: 0.75rem;
   letter-spacing: 0.01em;
-  overflow: hidden; /* Contient le pseudo-élément */
+  overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  transform: translateZ(0); /* Accélération matérielle pour animations fluides */
+  will-change: transform, background-color, box-shadow; /* Optimisation pour animations */
 }
 
 /* Effet de superposition sur les onglets */
@@ -161,14 +169,14 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Indicateur visuel pour l'onglet actif avec animation */
+/* Indicateur visuel pour l'onglet actif avec animation plus fluide */
 .tab-navigation-item.active::after {
   content: '';
   position: absolute;
   bottom: -2px;
   left: 50%;
   transform: translateX(-50%);
-  width: 60%; /* Largeur relative pour adaptation aux différentes tailles */
+  width: 60%;
   height: 3px;
   background: linear-gradient(to right, #818cf8, #60a5fa);
   border-radius: 3px;
@@ -194,6 +202,7 @@
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   height: 22px;
   width: 22px;
+  will-change: transform; /* Optimisation pour animations fluides */
 }
 
 .nav-text {
@@ -226,7 +235,7 @@
     padding: 1.5rem 0 1rem;
     width: 100%;
     border-right: 1px solid rgba(255, 255, 255, 0.08);
-    background: linear-gradient(180deg, #0f172a 0%, #1e293b 40%, #2563eb 100%); /* Gradient vertical plus profond */
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 40%, #1d4ed8 100%); /* Gradient vertical plus raffiné */
     box-shadow: 
       -6px 0 20px rgba(0, 0, 0, 0.2) inset,
       4px 0 10px -4px rgba(0, 0, 0, 0.1);
@@ -244,15 +253,15 @@
   }
   
   .mobile-logo {
-    width: 60px;
-    height: 60px;
+    width: 64px;
+    height: 64px;
     border-radius: 18px;
     background: rgba(255, 255, 255, 0.14);
   }
   
   .logo-icon {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
   }
   
@@ -264,6 +273,8 @@
     padding: 0;
     margin-bottom: 0;
     margin-top: 0.5rem;
+    gap: 0.5rem;
+    scroll-snap-type: none;
   }
   
   .tab-navigation-item {
@@ -292,7 +303,7 @@
       0 6px 16px rgba(0, 0, 0, 0.18),
       0 0 0 1px rgba(255, 255, 255, 0.15) inset;
     transform: none !important;
-    border-color: rgba(255, 255, 255, 0.15); /* Bordure visible uniquement pour l'onglet actif */
+    border-color: rgba(255, 255, 255, 0.15);
   }
 
   .tab-navigation-item.active::after {
@@ -307,7 +318,7 @@
     left: -0.85rem;
     height: 100%;
     width: 4px;
-    background: linear-gradient(to bottom, #818cf8, #60a5fa); /* Gradient bleu plus subtil */
+    background: linear-gradient(to bottom, #818cf8, #60a5fa);
     border-radius: 0 4px 4px 0;
     box-shadow: 2px 0 6px rgba(59, 130, 246, 0.4);
     opacity: 1;
@@ -370,10 +381,10 @@
     position: absolute;
     top: 52px;
     width: 40px;
-    height: 32px;
+    height: 38px;
     z-index: 30;
     pointer-events: none;
-    opacity: 0.85;
+    opacity: 0.9;
   }
   
   .tab-navigation-container::before {
@@ -388,40 +399,43 @@
   
   /* Ajustements pour garantir que le menu est bien visible */
   .tab-navigation-items {
-    padding: 0.65rem 0.5rem;
+    padding: 0.75rem 0.75rem;
     mask-image: none;
+    margin: 0 0.25rem;
   }
   
   .tab-navigation-item {
-    padding: 0.75rem 1rem;
-    border-radius: 12px;
+    padding: 0.8rem 1.1rem;
+    border-radius: 14px;
     margin: 0 0.35rem;
     background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.12);
+    will-change: transform, background-color; /* Améliorer la performance de défilement */
   }
   
   .tab-navigation-item.active {
     background: rgba(255, 255, 255, 0.18);
     box-shadow: 
-      0 4px 14px rgba(0, 0, 0, 0.2),
-      0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+      0 6px 16px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.18) inset;
   }
   
   .nav-text {
-    font-size: 0.815rem;
+    font-size: 0.875rem;
+    font-weight: 600;
   }
   
   /* Optimiser le logo sur mobile */
   .mobile-logo-container {
-    padding: 0.75rem 0;
+    padding: 0.75rem 0 0.5rem;
   }
   
   .mobile-logo {
     box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.2),
+      0 6px 16px rgba(0, 0, 0, 0.2),
       0 0 0 1px rgba(255, 255, 255, 0.15) inset;
-    background: rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.16);
   }
   
   /* Animation de l'icône du logo sur mobile */
@@ -440,11 +454,138 @@
   .logo-icon {
     animation: pulseGlow 3s ease-in-out infinite;
   }
+  
+  /* Optimisation pour le défilement fluide */
+  .tab-navigation-container {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  
+  /* Amélioration du défilement tactile */
+  .tab-navigation-items {
+    scroll-snap-type: x proximity; /* Changé de mandatory à proximity pour un snap plus naturel */
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    overscroll-behavior-x: contain;
+    scroll-behavior: auto; /* Laisser notre JS gérer les animations pour plus de fluidité */
+    padding: 0.85rem 0.5rem;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+  
+  .tab-navigation-item {
+    padding: 0.85rem 1.15rem;
+    margin: 0 0.3rem;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.15),
+      0 1px 2px rgba(0, 0, 0, 0.05),
+      0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transform: translateZ(0);
+    transition: 
+      transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+      background-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  
+  .tab-navigation-item:active {
+    transform: scale(0.96);
+    background: rgba(255, 255, 255, 0.15);
+    transition: transform 0.1s ease, background-color 0.1s ease;
+  }
+  
+  .tab-navigation-item.active {
+    background: rgba(255, 255, 255, 0.18);
+    transform: translateY(-2px);
+    box-shadow: 
+      0 6px 16px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+    font-weight: 600;
+  }
+  
+  .tab-navigation-item.active:active {
+    transform: translateY(-1px) scale(0.98);
+  }
+  
+  .tab-navigation-item::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: inherit;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    transition: transform 0.4s, opacity 0.3s;
+    pointer-events: none;
+  }
+  
+  .tab-navigation-item:active::after {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0.3;
+    transition: transform 0.15s, opacity 0.15s;
+  }
+  
+  .tab-navigation-container::before,
+  .tab-navigation-container::after {
+    content: '';
+    position: absolute;
+    top: 52px;
+    width: 40px;
+    height: 41px;
+    z-index: 30;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .tab-navigation-container::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(15, 23, 42, 0.95), transparent);
+  }
+  
+  .tab-navigation-container::after {
+    right: 0;
+    background: linear-gradient(to left, rgba(15, 23, 42, 0.95), transparent);
+  }
+  
+  .tab-navigation-items:not([data-at-start="true"]) ~ .tab-navigation-container::before,
+  .tab-navigation-container:not([data-at-start="true"])::before {
+    opacity: 0.9;
+  }
+  
+  .tab-navigation-items:not([data-at-end="true"]) ~ .tab-navigation-container::after,
+  .tab-navigation-container:not([data-at-end="true"])::after {
+    opacity: 0.9;
+  }
+  
+  .tab-navigation-item.active::after {
+    width: 65%;
+    height: 4px;
+    bottom: -1px;
+    background: linear-gradient(to right, #93c5fd, #60a5fa);
+    animation: glowPulseStrong 3s infinite alternate;
+  }
+  
+  @keyframes glowPulseStrong {
+    0%, 100% {
+      filter: drop-shadow(0 1px 3px rgba(59, 130, 246, 0.6));
+    }
+    50% {
+      filter: drop-shadow(0 1px 8px rgba(59, 130, 246, 0.9));
+    }
+  }
 }
 
 /* Optimisations pour le mode light */
 :root:not(.dark) .tab-navigation-container {
-  background: linear-gradient(165deg, #4f46e5 0%, #3b82f6 100%); /* Gradient plus vif et moderne */
+  background: linear-gradient(165deg, #4338ca 0%, #3b82f6 100%); /* Gradient plus vibrant et moderne */
   box-shadow: 0 4px 20px rgba(37, 99, 235, 0.18);
 }
 
@@ -456,31 +597,31 @@
 
 :root:not(.dark) .tab-navigation-item {
   color: rgba(255, 255, 255, 0.95); /* Plus de contraste en mode clair */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
 }
 
 :root:not(.dark) .tab-navigation-item.active {
   box-shadow: 
-    0 6px 16px rgba(37, 99, 235, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+    0 8px 20px rgba(37, 99, 235, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
 }
 
 :root:not(.dark) .tab-navigation-item.active::after {
   background: linear-gradient(to right, #fcd34d, #f59e0b); /* Gradient doré plus vif en mode clair */
-  box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.5);
 }
 
 :root:not(.dark) .tab-navigation-item.active::before {
   background: linear-gradient(to bottom, #fcd34d, #f59e0b); /* Gradient doré pour l'indicateur desktop */
-  box-shadow: 2px 0 6px rgba(251, 191, 36, 0.5);
+  box-shadow: 2px 0 8px rgba(251, 191, 36, 0.5);
 }
 
 :root:not(.dark) .mobile-logo {
-  background: rgba(255, 255, 255, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+    0 6px 16px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
 }
 
 /* Animation du menu au chargement de la page */
@@ -510,14 +651,14 @@
 }
 
 .getting-started-tip {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.08));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08));
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  border-radius: 14px;
-  padding: 1.15rem;
+  border-radius: 16px;
+  padding: 1.25rem;
   border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 6px 18px rgba(0, 0, 0, 0.18),
     0 0 0 1px rgba(255, 255, 255, 0.05) inset;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
@@ -541,14 +682,14 @@
   transform: translateY(-2px);
   box-shadow: 
     0 8px 20px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset;
 }
 
 .tip-heading {
   display: block;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 0.35rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.92);
+  margin-bottom: 0.4rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 600;
@@ -556,7 +697,7 @@
 
 .tip-text {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   color: white;
   font-weight: 500;
   line-height: 1.4;
@@ -595,30 +736,39 @@
 @media (min-width: 768px) and (max-width: 1023px) {
   .tab-navigation-container {
     min-height: 100vh;
-    padding: 1.25rem 0 1rem;
+    padding: 1.5rem 0 1rem;
   }
   
   .mobile-logo {
-    width: 54px;
-    height: 54px;
+    width: 58px;
+    height: 58px;
   }
   
   .tab-navigation-item {
-    margin: 0.3rem 0.75rem;
-    padding: 0.8rem 1rem;
+    margin: 0.35rem 0.75rem;
+    padding: 0.85rem 1.1rem;
   }
   
   .nav-text {
-    font-size: 0.875rem;
+    font-size: 0.9rem;
   }
   
   .getting-started-tip-container {
-    margin-bottom: 1rem;
-    padding: 0 1rem;
+    margin-bottom: 1.25rem;
+    padding: 0 1.15rem;
   }
   
   .getting-started-tip {
-    padding: 1rem;
+    padding: 1.15rem;
+  }
+  
+  .tab-navigation-item {
+    transition: all 0.25s cubic-bezier(0.2, 0, 0.2, 1);
+  }
+  
+  .tab-navigation-item:hover:not(.active) {
+    transform: translateX(3px);
+    background-color: rgba(255, 255, 255, 0.12);
   }
 }
 
@@ -626,48 +776,77 @@
 @media (min-width: 1600px), 
        (min-resolution: 192dpi) and (min-width: 1200px) {
   .tab-navigation-container {
-    padding: 2rem 0 1.5rem;
+    padding: 2.5rem 0 1.5rem;
   }
   
   .mobile-logo {
-    width: 64px;
-    height: 64px;
-    border-radius: 18px;
+    width: 70px;
+    height: 70px;
+    border-radius: 20px;
   }
   
   .logo-icon {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
   }
   
   .tab-navigation-item {
-    margin: 0.5rem 1.25rem;
-    padding: 1rem 1.25rem;
+    margin: 0.5rem 1.5rem;
+    padding: 1.1rem 1.4rem;
   }
   
   .nav-text {
-    font-size: 1rem;
+    font-size: 1.05rem;
   }
   
   .nav-icon {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
   }
   
   .getting-started-tip-container {
-    margin-bottom: 1.5rem;
-    padding: 0 1.5rem;
+    margin-bottom: 1.75rem;
+    padding: 0 1.75rem;
   }
   
   .getting-started-tip {
-    padding: 1.25rem;
+    padding: 1.4rem;
   }
   
   .tip-heading {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
   }
   
   .tip-text {
-    font-size: 0.925rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* Amélioration de la performance de défilement sur iOS */
+@supports (-webkit-touch-callout: none) {
+  .tab-navigation-items {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .tab-navigation-item {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+  
+  .tab-navigation-item.active {
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+  }
+}
+
+/* Animation d'onde au clic pour tous les appareils */
+@keyframes rippleEffect {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
   }
 }

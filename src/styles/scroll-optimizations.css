@@ -1,0 +1,167 @@
+/* Optimisations de défilement pour toute l'application */
+
+/* Optimisations générales de défilement */
+* {
+  /* Optimisations de performance pour les animations et transitions */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Accélération matérielle pour améliorer les performances de défilement */
+html, body {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior-y: none;
+}
+
+/* Accélération matérielle pour les conteneurs avec défilement */
+.overflow-auto,
+.overflow-y-auto,
+.overflow-x-auto,
+[style*="overflow: auto"],
+[style*="overflow-y: auto"],
+[style*="overflow-x: auto"] {
+  -webkit-overflow-scrolling: touch;
+  will-change: scroll-position;
+  transform: translateZ(0);
+}
+
+/* Optimisations spécifiques pour le défilement mobile */
+@media (max-width: 767px) {
+  /* Améliorer le défilement horizontal pour les listes et grilles */
+  [role="tablist"],
+  [class*="grid"],
+  [class*="carousel"],
+  [class*="slider"],
+  [class*="scroll-container"] {
+    scroll-snap-type: x proximity;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Masquer la barre de défilement sur Firefox */
+    -ms-overflow-style: none; /* Masquer la barre de défilement sur IE/Edge */
+    overscroll-behavior-x: contain;
+  }
+  
+  /* Masquer la barre de défilement sur Webkit */
+  [role="tablist"]::-webkit-scrollbar,
+  [class*="grid"]::-webkit-scrollbar,
+  [class*="carousel"]::-webkit-scrollbar,
+  [class*="slider"]::-webkit-scrollbar,
+  [class*="scroll-container"]::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Ajouter une sensation tactile fluide aux éléments interactifs */
+  button,
+  [role="button"],
+  a,
+  input,
+  select,
+  .interactive {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Désactiver le pull-to-refresh du navigateur lorsque ce n'est pas nécessaire */
+  [class*="fixed"],
+  [class*="sticky"],
+  [class*="absolute"],
+  [style*="position: fixed"],
+  [style*="position: sticky"],
+  [style*="position: absolute"] {
+    overscroll-behavior-y: contain;
+  }
+  
+  /* Améliorer la performance des animations */
+  [class*="animate"],
+  [class*="transition"],
+  .will-animate {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+  }
+}
+
+/* Optimisations spécifiques pour iOS */
+@supports (-webkit-touch-callout: none) {
+  body {
+    /* Éviter certains bugs de défilement sur iOS */
+    -webkit-user-select: none;
+    position: relative;
+    width: 100%;
+  }
+  
+  /* Restaurer la sélection de texte où c'est nécessaire */
+  p, h1, h2, h3, h4, h5, h6, li, span, input, textarea {
+    -webkit-user-select: text;
+  }
+  
+  /* Éviter les problèmes de flou sur les positions fixes en iOS */
+  [class*="fixed"],
+  [style*="position: fixed"] {
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+  }
+}
+
+/* Optimisations pour tablettes */
+@media (min-width: 768px) and (max-width: 1023px) {
+  [role="tablist"],
+  .tab-navigation-items {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Respect des préférences de mouvement réduit */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Animation d'effet tactile pour les interactions mobiles */
+.touch-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.touch-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.4);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%, -50%);
+  transform-origin: 50% 50%;
+}
+
+.touch-ripple:active::after {
+  opacity: 0.2;
+  transform: scale(50, 50) translate(-50%, -50%);
+  transition: transform 0.5s, opacity 0.3s ease;
+}
+
+/* Utility classes pour une meilleure expérience tactile */
+.touch-smooth {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.hardware-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.smooth-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
