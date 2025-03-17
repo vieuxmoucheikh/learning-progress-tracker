@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Brain, LayoutDashboard, BookOpen, Calendar, Activity, FlaskConical, Target, FlameKindling } from 'lucide-react';
+import { Brain, LayoutDashboard, BookOpen, Calendar, Activity, FlaskConical, Target, FlameKindling, Clock } from 'lucide-react';
 import './TabNavigation.css';
 
 export const TAB_OPTIONS = {
@@ -8,7 +8,8 @@ export const TAB_OPTIONS = {
   CALENDAR: 'calendar',
   ANALYTICS: 'analytics',
   FLASHCARDS: 'flashcards',
-  LEARNING_CARDS: 'learning-cards'
+  LEARNING_CARDS: 'learning-cards',
+  POMODORO: 'pomodoro'
 };
 
 interface TabNavProps {
@@ -33,21 +34,21 @@ export const TabNavigation: React.FC<TabNavProps> = ({ activeTab, onTabChange })
     },
     {
       id: TAB_OPTIONS.LEARNING,
-      label: 'Apprentissage',
-      shortLabel: 'Apprendre',
+      label: 'Learning',
+      shortLabel: 'Learning',
       icon: <BookOpen size={20} />,
       description: 'Gérez vos éléments d\'apprentissage actifs'
     },
     {
       id: TAB_OPTIONS.CALENDAR,
-      label: 'Calendrier',
-      shortLabel: 'Calendrier',
+      label: 'Calendar',
+      shortLabel: 'Calendar',
       icon: <Calendar size={20} />,
       description: 'Planifiez vos activités d\'apprentissage'
     },
     {
       id: TAB_OPTIONS.ANALYTICS,
-      label: 'Statistiques', 
+      label: 'Analytics',
       shortLabel: 'Stats',
       icon: <Activity size={20} />,
       description: 'Visualisez vos progrès et statistiques'
@@ -61,10 +62,17 @@ export const TabNavigation: React.FC<TabNavProps> = ({ activeTab, onTabChange })
     },
     {
       id: TAB_OPTIONS.LEARNING_CARDS,
-      label: 'Fiches',
-      shortLabel: 'Fiches',
+      label: 'Learning Cards',
+      shortLabel: 'Cards',
       icon: <FlameKindling size={20} />,
       description: 'Consultez vos fiches d\'apprentissage'
+    },
+    {
+      id: TAB_OPTIONS.POMODORO,
+      label: 'Pomodoro',
+      shortLabel: 'Pomodoro',
+      icon: <Clock size={20} />,
+      description: 'Utilisez la technique Pomodoro pour concentrer votre travail'
     },
   ];
 
