@@ -1,32 +1,15 @@
-import React from 'react';
-import { useRef, useEffect, useState } from "react";
-import { 
-  BarChart3, 
-  Timer, 
-  BookOpen, 
-  LayoutDashboard,
-  Library,
-  GraduationCap,
-  Brain
-} from "lucide-react";
+import React, { useState, useEffect, useRef } from 'react';
+import { Brain, LayoutDashboard, BookOpen, Calendar, ListTodo, BarChart2, FlaskConical, Activity } from 'lucide-react';
 import './TabNavigation.css';
 
-// Define all available tabs
 export const TAB_OPTIONS = {
-  DASHBOARD: "dashboard",
-  ITEMS: "items",
-  ANALYTICS: "analytics",
-  POMODORO: "pomodoro",
-  LEARNING_CARDS: "learning-cards",
-  FLASHCARDS: "flashcards"
-};
-
-type Tab = {
-  id: string;
-  label: string;
-  shortLabel: string;
-  icon: React.ReactNode;
-  description?: string; // Description optionnelle pour l'accessibilité
+  DASHBOARD: 'dashboard',
+  ITEMS: 'items',
+  LEARNING_CARDS: 'learning-cards',
+  CALENDAR: 'calendar',
+  POMODORO: 'pomodoro',
+  ANALYTICS: 'analytics',
+  FLASHCARDS: 'flashcards'
 };
 
 interface TabNavigationProps {
@@ -34,117 +17,110 @@ interface TabNavigationProps {
   onTabChange: (tab: string) => void;
 }
 
-export const TabNavigation: React.FC<TabNavigationProps> = ({
-  activeTab,
-  onTabChange,
-}) => {
+export const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange }) => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeTabRef = useRef<HTMLButtonElement>(null);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  
-  const tabs: Tab[] = [
-    { 
-      id: 'dashboard', 
-      label: 'Dashboard', 
-      shortLabel: 'Dashboard', 
-      icon: <LayoutDashboard size={20} />,
-      description: 'Vue d\'ensemble de vos activités d\'apprentissage'
-    },
-    { 
-      id: 'items', 
-      label: 'All Items', 
-      shortLabel: 'Items', 
-      icon: <BookOpen size={20} />,
-      description: 'Liste de toutes vos ressources d\'apprentissage'
-    },
-    { 
-      id: 'analytics', 
-      label: 'Analytics', 
-      shortLabel: 'Stats', 
-      icon: <BarChart3 size={20} />,
-      description: 'Visualisation de votre progression'
-    },
-    { 
-      id: 'pomodoro', 
-      label: 'Pomodoro', 
-      shortLabel: 'Timer', 
-      icon: <Timer size={20} />,
-      description: 'Technique de gestion du temps'
-    },
-    { 
-      id: 'flashcards', 
-      label: 'Flashcards', 
-      shortLabel: 'Cards', 
-      icon: <Library size={20} />,
-      description: 'Vos cartes mémoire'
-    },
-    { 
-      id: 'learning-cards', 
-      label: 'Learning', 
-      shortLabel: 'Learn', 
-      icon: <GraduationCap size={20} />,
-      description: 'Vos cartes d\'apprentissage'
-    },
-  ];
 
-  // Scroll active tab into view when it changes or when component loads
   useEffect(() => {
-    if (activeTabRef.current && scrollContainerRef.current) {
+    // Faire défiler automatiquement pour centrer l'onglet actif sur mobile
+    if (isMobile && activeTabRef.current && scrollContainerRef.current) {
       const container = scrollContainerRef.current;
-      const activeTab = activeTabRef.current;
+      const activeElement = activeTabRef.current;
       
-      if (isMobile) {
-        // Calculate position to center the active tab
-        const containerWidth = container.offsetWidth;
-        const tabWidth = activeTab.offsetWidth;
-        const tabLeft = activeTab.offsetLeft;
-        const scrollLeft = tabLeft - (containerWidth / 2) + (tabWidth / 2);
-        
-        // Use requestAnimationFrame to ensure smooth scrolling after render
-        requestAnimationFrame(() => {
-          container.scrollTo({
-            left: scrollLeft,
-            behavior: 'smooth'
-          });
-        });
-      }
+      // Obtenir les positions et dimensions
+      const containerWidth = container.clientWidth;
+      const activeElementWidth = activeElement.clientWidth;
+      const activeElementLeft = activeElement.offsetLeft;
+      
+      // Calculer la position de défilement pour centrer l'élément actif
+      const scrollPosition = activeElementLeft - (containerWidth / 2) + (activeElementWidth / 2);
+      
+      // Appliquer le défilement avec animation douce
+      container.scrollTo({
+        left: scrollPosition,
+        behavior: 'smooth'
+      });
     }
   }, [activeTab, isMobile]);
-  
-  // Add touch events for better mobile scrolling
+
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (scrollContainerRef.current) {
-      // Store the initial touch position
-      scrollContainerRef.current.dataset.touchStartX = e.touches[0].clientX.toString();
-    }
+    setTouchStartX(e.touches[0].clientX);
   };
-  
+
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (scrollContainerRef.current && scrollContainerRef.current.dataset.touchStartX) {
-      const touchStartX = parseInt(scrollContainerRef.current.dataset.touchStartX);
-      const currentX = e.touches[0].clientX;
-      const diff = touchStartX - currentX;
-      
-      // Scroll the container
-      scrollContainerRef.current.scrollLeft += diff;
-      
-      // Update the touch start position
-      scrollContainerRef.current.dataset.touchStartX = currentX.toString();
-    }
+    if (touchStartX === null || !scrollContainerRef.current) return;
+    
+    const touchX = e.touches[0].clientX;
+    const diff = touchStartX - touchX;
+    scrollContainerRef.current.scrollLeft += diff / 5; // Divisé par 5 pour un défilement plus doux
+    setTouchStartX(touchX);
   };
+
+  const tabs = [
+    {
+      id: TAB_OPTIONS.DASHBOARD,
+      label: 'Dashboard',
+      shortLabel: 'Dashboard',
+      icon: <LayoutDashboard className="w-5 h-5" />,
+      description: 'Vue d\'ensemble de tous vos apprentissages'
+    },
+    {
+      id: TAB_OPTIONS.ITEMS,
+      label: 'Learning Items',
+      shortLabel: 'Items',
+      icon: <ListTodo className="w-5 h-5" />,
+      description: 'Gérer vos éléments d\'apprentissage'
+    },
+    {
+      id: TAB_OPTIONS.LEARNING_CARDS,
+      label: 'Learning Cards',
+      shortLabel: 'Cards',
+      icon: <BookOpen className="w-5 h-5" />,
+      description: 'Consulter vos cartes d\'apprentissage'
+    },
+    {
+      id: TAB_OPTIONS.CALENDAR,
+      label: 'Calendar',
+      shortLabel: 'Calendar',
+      icon: <Calendar className="w-5 h-5" />,
+      description: 'Visualiser votre calendrier d\'apprentissage'
+    },
+    {
+      id: TAB_OPTIONS.POMODORO,
+      label: 'Pomodoro',
+      shortLabel: 'Pomodoro',
+      icon: <Activity className="w-5 h-5" />,
+      description: 'Technique Pomodoro pour la gestion du temps'
+    },
+    {
+      id: TAB_OPTIONS.FLASHCARDS,
+      label: 'Flashcards',
+      shortLabel: 'Flashcards',
+      icon: <FlaskConical className="w-5 h-5" />,
+      description: 'Créer et étudier des cartes mémoire'
+    },
+    {
+      id: TAB_OPTIONS.ANALYTICS,
+      label: 'Analytics',
+      shortLabel: 'Analytics',
+      icon: <BarChart2 className="w-5 h-5" />,
+      description: 'Analyser vos progrès d\'apprentissage'
+    }
+  ];
 
   return (
     <div className="tab-navigation-container">
-      {/* Logo ou branding - icône uniquement */}
       <div className="mobile-logo-container">
         <div className="mobile-logo">
           <Brain className="logo-icon" />

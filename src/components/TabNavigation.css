@@ -3,14 +3,15 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: linear-gradient(165deg, #1e293b 0%, #2563eb 100%); /* Gradient plus profond et élégant */
-  box-shadow: 0 4px 20px -1px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(165deg, #111827 0%, #1e3a8a 100%); /* Gradient plus profond et subtil */
+  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.35);
   position: relative;
   z-index: 10;
   overflow: hidden;
+  transition: background 0.5s ease;
 }
 
-/* Effet de verre pour le fond du menu */
+/* Effet de verre pour le fond du menu avec animation plus subtile */
 .tab-navigation-container::before {
   content: '';
   position: absolute;
@@ -19,9 +20,22 @@
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.12), transparent 40%),
-    radial-gradient(circle at 80% 80%, rgba(29, 78, 216, 0.12), transparent 40%);
+    radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.10), transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(29, 78, 216, 0.08), transparent 40%);
   z-index: -1;
+  opacity: 0.8;
+  animation: subtleGlowNav 20s ease-in-out infinite alternate;
+}
+
+@keyframes subtleGlowNav {
+  0%, 100% {
+    opacity: 0.6;
+    background-position: 0% 0%, 100% 100%;
+  }
+  50% {
+    opacity: 0.9;
+    background-position: 5% 5%, 95% 95%;
+  }
 }
 
 /* Logo pour mobile */
@@ -29,16 +43,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 1rem 0;
+  padding: 1.25rem 0;
   margin-bottom: 0.5rem;
   position: relative;
 }
 
 .mobile-logo {
-  width: 48px;
-  height: 48px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 15px; /* Coins légèrement moins arrondis pour un look plus moderne */
+  width: 52px;
+  height: 52px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 16px; /* Coins légèrement moins arrondis pour un look plus moderne */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -46,45 +60,58 @@
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .mobile-logo:hover {
   transform: translateY(-2px) scale(1.05);
   box-shadow: 
-    0 6px 20px rgba(0, 0, 0, 0.2),
+    0 8px 24px rgba(0, 0, 0, 0.25),
     0 0 0 1px rgba(255, 255, 255, 0.2) inset;
 }
 
 .logo-icon {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   color: white;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+  animation: pulse 3s ease-in-out infinite;
 }
 
-/* Container des onglets avec défilement horizontal */
+@keyframes pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.7));
+  }
+}
+
+/* Items de navigation avec style amélioré */
 .tab-navigation-items {
   display: flex;
   flex-direction: row;
+  align-items: center;
   overflow-x: auto;
-  padding: 0.75rem 0.5rem;
-  scrollbar-width: none; /* Masquer scrollbar Firefox */
-  -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
-  scroll-snap-type: x mandatory; /* Snap scrolling */
-  position: relative;
-  mask-image: linear-gradient(to right, transparent, black 10px, black 90%, transparent); /* Fade effect */
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  padding: 0.75rem 0;
+  gap: 0.5rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .tab-navigation-items::-webkit-scrollbar {
-  display: none; /* Masquer scrollbar Chrome */
+  display: none;
 }
 
-/* Style des onglets */
+/* Item de navigation individuel */
 .tab-navigation-item {
-  white-space: nowrap;
+  flex: 0 0 auto;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Transition plus élégante */
   color: rgba(255, 255, 255, 0.85); /* Meilleur contraste initial */
   font-weight: 500;
@@ -98,7 +125,7 @@
   -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.75rem;
   letter-spacing: 0.01em;
   overflow: hidden; /* Contient le pseudo-élément */
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -113,27 +140,28 @@
   right: 0;
   bottom: 0;
   border-radius: inherit;
-  background-color: rgba(255, 255, 255, 0);
-  transition: background-color 0.3s ease;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
   z-index: -1;
 }
 
 .tab-navigation-item:hover::before {
-  background-color: rgba(255, 255, 255, 0.08);
+  opacity: 1;
 }
 
 .tab-navigation-item.active {
   color: white;
   font-weight: 600;
   transform: translateY(-2px);
-  background-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.15);
   box-shadow: 
     0 4px 15px -3px rgba(0, 0, 0, 0.2),
     0 0 0 1px rgba(255, 255, 255, 0.15) inset;
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Indicateur visuel pour l'onglet actif */
+/* Indicateur visuel pour l'onglet actif avec animation */
 .tab-navigation-item.active::after {
   content: '';
   position: absolute;
@@ -142,9 +170,19 @@
   transform: translateX(-50%);
   width: 60%; /* Largeur relative pour adaptation aux différentes tailles */
   height: 3px;
-  background: linear-gradient(to right, #3b82f6, #60a5fa);
+  background: linear-gradient(to right, #818cf8, #60a5fa);
   border-radius: 3px;
   filter: drop-shadow(0 1px 2px rgba(59, 130, 246, 0.5));
+  animation: glowPulse 3s infinite alternate;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    filter: drop-shadow(0 1px 2px rgba(59, 130, 246, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 1px 6px rgba(59, 130, 246, 0.8));
+  }
 }
 
 /* Styles pour icônes et texte dans les onglets */
@@ -162,6 +200,8 @@
   font-size: 0.925rem;
   white-space: nowrap;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-weight: 500;
+  letter-spacing: 0.015em;
 }
 
 .tab-navigation-item:hover .nav-icon {
@@ -204,15 +244,16 @@
   }
   
   .mobile-logo {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.14);
   }
   
   .logo-icon {
-    width: 28px;
-    height: 28px;
-    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+    width: 30px;
+    height: 30px;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
   }
   
   .tab-navigation-items {
@@ -227,26 +268,29 @@
   
   .tab-navigation-item {
     text-align: left;
-    margin: 0.35rem 0.85rem;
-    padding: 0.85rem 1.1rem;
-    color: rgba(255, 255, 255, 0.85);
+    margin: 0.4rem 0.85rem;
+    padding: 0.9rem 1.15rem;
+    color: rgba(255, 255, 255, 0.9);
     font-weight: 500;
     position: relative;
-    border-radius: 12px;
+    border-radius: 14px;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     transform: none !important;
     letter-spacing: 0.01em;
     border-color: transparent; /* Masquer les bordures en mode desktop */
+    border-left-width: 0;
+    transition: all 0.25s ease;
+    background: rgba(255, 255, 255, 0.06);
   }
   
   .tab-navigation-item.active {
-    background-color: rgba(255, 255, 255, 0.12);
+    background-color: rgba(255, 255, 255, 0.15);
     border-left: none;
     font-weight: 600;
     box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.15),
-      0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+      0 6px 16px rgba(0, 0, 0, 0.18),
+      0 0 0 1px rgba(255, 255, 255, 0.15) inset;
     transform: none !important;
     border-color: rgba(255, 255, 255, 0.15); /* Bordure visible uniquement pour l'onglet actif */
   }
@@ -263,13 +307,14 @@
     left: -0.85rem;
     height: 100%;
     width: 4px;
-    background: linear-gradient(to bottom, #3b82f6, #60a5fa); /* Gradient bleu plus subtil */
+    background: linear-gradient(to bottom, #818cf8, #60a5fa); /* Gradient bleu plus subtil */
     border-radius: 0 4px 4px 0;
     box-shadow: 2px 0 6px rgba(59, 130, 246, 0.4);
+    opacity: 1;
   }
 
   .tab-navigation-item:hover:not(.active) {
-    background-color: rgba(255, 255, 255, 0.07);
+    background-color: rgba(255, 255, 255, 0.1);
     transform: none !important;
   }
   
@@ -298,7 +343,7 @@
     right: 0;
     bottom: 0;
     background: 
-      radial-gradient(circle at 90% 10%, rgba(96, 165, 250, 0.15), transparent 35%),
+      radial-gradient(circle at 90% 10%, rgba(96, 165, 250, 0.12), transparent 35%),
       radial-gradient(circle at 10% 90%, rgba(15, 23, 42, 0.15), transparent 40%);
     z-index: -1;
     animation: subtleGlow 15s ease-in-out infinite alternate;
@@ -306,10 +351,12 @@
   
   @keyframes subtleGlow {
     0% {
-      opacity: 0.5;
+      opacity: 0.6;
+      background-position: 0% 0%, 100% 100%;
     }
     100% {
-      opacity: 0.8;
+      opacity: 0.9;
+      background-position: 5% 5%, 95% 95%;
     }
   }
 }
@@ -322,11 +369,11 @@
     content: '';
     position: absolute;
     top: 52px;
-    width: 32px;
+    width: 40px;
     height: 32px;
     z-index: 30;
     pointer-events: none;
-    opacity: 0.7;
+    opacity: 0.85;
   }
   
   .tab-navigation-container::before {
@@ -349,20 +396,20 @@
     padding: 0.75rem 1rem;
     border-radius: 12px;
     margin: 0 0.35rem;
-    background-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.12);
   }
   
   .tab-navigation-item.active {
-    background-color: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.18);
     box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.15),
-      0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+      0 4px 14px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.15) inset;
   }
   
   .nav-text {
-    font-size: 0.8rem;
+    font-size: 0.815rem;
   }
   
   /* Optimiser le logo sur mobile */
@@ -372,21 +419,21 @@
   
   .mobile-logo {
     box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.15),
+      0 4px 12px rgba(0, 0, 0, 0.2),
       0 0 0 1px rgba(255, 255, 255, 0.15) inset;
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.14);
   }
   
   /* Animation de l'icône du logo sur mobile */
   @keyframes pulseGlow {
     0% {
-      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
+      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
     }
     50% {
-      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
+      filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.6));
     }
     100% {
-      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
+      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
     }
   }
   
@@ -397,25 +444,25 @@
 
 /* Optimisations pour le mode light */
 :root:not(.dark) .tab-navigation-container {
-  background: linear-gradient(165deg, #6366f1 0%, #3b82f6 100%); /* Gradient plus vif et moderne */
-  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.15);
+  background: linear-gradient(165deg, #4f46e5 0%, #3b82f6 100%); /* Gradient plus vif et moderne */
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.18);
 }
 
 :root:not(.dark) .tab-navigation-container::before {
   background: 
-    radial-gradient(circle at 20% 20%, rgba(224, 242, 254, 0.15), transparent 40%),
-    radial-gradient(circle at 80% 80%, rgba(29, 78, 216, 0.1), transparent 40%);
+    radial-gradient(circle at 20% 20%, rgba(224, 242, 254, 0.2), transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(29, 78, 216, 0.15), transparent 40%);
 }
 
 :root:not(.dark) .tab-navigation-item {
   color: rgba(255, 255, 255, 0.95); /* Plus de contraste en mode clair */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 :root:not(.dark) .tab-navigation-item.active {
   box-shadow: 
-    0 4px 12px rgba(37, 99, 235, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+    0 6px 16px rgba(37, 99, 235, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.25) inset;
 }
 
 :root:not(.dark) .tab-navigation-item.active::after {
@@ -425,15 +472,15 @@
 
 :root:not(.dark) .tab-navigation-item.active::before {
   background: linear-gradient(to bottom, #fcd34d, #f59e0b); /* Gradient doré pour l'indicateur desktop */
-  box-shadow: 2px 0 6px rgba(251, 191, 36, 0.4);
+  box-shadow: 2px 0 6px rgba(251, 191, 36, 0.5);
 }
 
 :root:not(.dark) .mobile-logo {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 
-    0 4px 15px rgba(37, 99, 235, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.25) inset;
 }
 
 /* Animation du menu au chargement de la page */
@@ -466,7 +513,7 @@
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.08));
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 1.15rem;
   border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 
@@ -484,23 +531,23 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(to right, #3b82f6, #60a5fa);
+  background: linear-gradient(to right, #818cf8, #60a5fa);
   border-radius: 1px;
-  opacity: 0.7;
+  opacity: 0.8;
 }
 
 .getting-started-tip:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.12));
   transform: translateY(-2px);
   box-shadow: 
-    0 6px 20px rgba(0, 0, 0, 0.2),
+    0 8px 20px rgba(0, 0, 0, 0.25),
     0 0 0 1px rgba(255, 255, 255, 0.1) inset;
 }
 
 .tip-heading {
   display: block;
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 0.35rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -519,8 +566,8 @@
 .tab-navigation-item:focus-visible {
   outline: none;
   box-shadow: 
-    0 0 0 2px rgba(255, 255, 255, 0.7),
-    0 0 0 4px rgba(59, 130, 246, 0.5);
+    0 0 0 2px rgba(255, 255, 255, 0.8),
+    0 0 0 4px rgba(99, 102, 241, 0.6);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -538,7 +585,8 @@
     transition: none !important;
   }
   
-  .tab-navigation-container::after {
+  .tab-navigation-container::after,
+  .tab-navigation-container::before {
     animation: none !important;
   }
 }
@@ -551,13 +599,13 @@
   }
   
   .mobile-logo {
-    width: 50px;
-    height: 50px;
+    width: 54px;
+    height: 54px;
   }
   
   .tab-navigation-item {
-    margin: 0.25rem 0.75rem;
-    padding: 0.75rem 1rem;
+    margin: 0.3rem 0.75rem;
+    padding: 0.8rem 1rem;
   }
   
   .nav-text {
