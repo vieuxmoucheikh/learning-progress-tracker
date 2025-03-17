@@ -27,7 +27,6 @@ import { toast } from '@/components/ui/use-toast';
 // Importer les fichiers CSS pour les améliorations visuelles
 import './styles/critical-light-mode-fixes.css';
 import './styles/global-ui-enhancements.css';
-import './styles/responsive-fixes.css';
 import './styles/card-fixes.css';
 import './styles/universal-card-borders.css';
 import './styles/critical-card-borders.css'; // Ajout du fichier de correctifs critiques pour les bordures
