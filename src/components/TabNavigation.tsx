@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Brain, LayoutDashboard, Activity, FlaskConical, FlameKindling, Clock } from 'lucide-react';
+import { Brain, LayoutDashboard, Activity, FlaskConical, FlameKindling, Clock, List } from 'lucide-react';
 import './TabNavigation.css';
 
 export const TAB_OPTIONS = {
@@ -7,7 +7,8 @@ export const TAB_OPTIONS = {
   ANALYTICS: 'analytics',
   FLASHCARDS: 'flashcards',
   LEARNING_CARDS: 'learning-cards',
-  POMODORO: 'pomodoro'
+  POMODORO: 'pomodoro',
+  ITEMS: 'items'
 };
 
 interface TabNavProps {
@@ -29,6 +30,13 @@ export const TabNavigation: React.FC<TabNavProps> = ({ activeTab, onTabChange })
       shortLabel: 'Dashboard',
       icon: <LayoutDashboard size={20} />,
       description: 'Vue d\'ensemble de vos progrès d\'apprentissage'
+    },
+    {
+      id: TAB_OPTIONS.ITEMS,
+      label: 'All Items',
+      shortLabel: 'Items',
+      icon: <List size={20} />,
+      description: 'Voir tous vos éléments d\'apprentissage'
     },
     {
       id: TAB_OPTIONS.ANALYTICS,
