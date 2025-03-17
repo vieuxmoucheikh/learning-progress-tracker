@@ -98,21 +98,6 @@ button:active,
   --text-primary: #1a202c;
   --text-secondary: #334155;
   --text-tertiary: #64748b;
-  
-  /* Variables pour le titre "Learning Progress" et le bouton "Sign Out" */
-  --title-primary: #4338ca;
-  --title-gradient-from: #4f46e5;
-  --title-gradient-to: #3b82f6;
-  --title-underline-light: rgba(79, 70, 229, 0.5);
-  
-  --signout-bg: rgba(67, 56, 202, 0.1);
-  --signout-text: #4338ca;
-  --signout-border: rgba(67, 56, 202, 0.2);
-  --signout-shadow: rgba(0, 0, 0, 0.05);
-  --signout-hover-bg: rgba(67, 56, 202, 0.15);
-  --signout-hover-text: #4338ca;
-  --signout-hover-border: rgba(67, 56, 202, 0.3);
-  --signout-hover-shadow: rgba(67, 56, 202, 0.1);
 }
 
 :root:not(.dark) .text-gray-500,
@@ -157,21 +142,6 @@ button:active,
   --text-primary: #f8fafc;
   --text-secondary: #e2e8f0;
   --text-tertiary: #cbd5e0;
-
-  /* Variables pour le titre "Learning Progress" et le bouton "Sign Out" */
-  --title-primary: white;
-  --title-gradient-from: rgba(255, 255, 255, 0.95);
-  --title-gradient-to: rgba(255, 255, 255, 0.75);
-  --title-underline: rgba(255, 255, 255, 0.5);
-  
-  --signout-bg: rgba(255, 255, 255, 0.07);
-  --signout-text: rgba(255, 255, 255, 0.8);
-  --signout-border: rgba(255, 255, 255, 0.1);
-  --signout-shadow: rgba(0, 0, 0, 0.1);
-  --signout-hover-bg: rgba(255, 255, 255, 0.12);
-  --signout-hover-text: white;
-  --signout-hover-border: rgba(255, 255, 255, 0.15);
-  --signout-hover-shadow: rgba(0, 0, 0, 0.15);
 }
 
 .dark .text-gray-300,
@@ -1343,227 +1313,20 @@ button svg,
   }
 }
 
-/* Harmonisation du style pour l'en-tête principal */
-.main-header,
-.header-container,
-.app-header {
-  background: transparent !important;
-  color: var(--text-primary) !important;
-}
-
-/* Adaptation du style de l'en-tête en mode bureau pour s'harmoniser avec le menu latéral */
-@media (min-width: 768px) {
-  /* En-tête principal qui correspond au style du menu */
-  .dark .main-header,
-  .dark .header-container,
-  .dark .app-header,
-  .dark [class*="app-title"],
-  .dark [class*="app-name"],
-  .dark [class*="title-container"] {
-    color: white !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    font-weight: 600;
+/* Ajustements pour le mode mobile */
+@media (max-width: 767px) {
+  .min-h-screen.flex.flex-col.md\:flex-row {
+    display: flex;
+    flex-direction: column;
   }
   
-  /* Style du titre "Learning Progress" pour qu'il corresponde au menu */
-  .dark h1.main-title,
-  .dark .app-title h1,
-  .dark [class*="app-name"] h1,
-  .dark [class*="app-name"] span,
-  .dark [class*="title-container"] h1 {
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.75));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    font-weight: 700;
-  }
-
-  /* Style du bouton de déconnexion pour qu'il corresponde au menu */
-  .dark button[class*="sign-out"],
-  .dark [class*="logout"],
-  .dark [class*="log-out"],
-  .dark button:has(svg[class*="log-out"]),
-  .dark a:has(svg[class*="log-out"]) {
-    background-color: rgba(255, 255, 255, 0.07);
-    color: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 0.5rem 0.75rem;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  .dark button[class*="sign-out"]:hover,
-  .dark [class*="logout"]:hover,
-  .dark [class*="log-out"]:hover,
-  .dark button:has(svg[class*="log-out"]):hover,
-  .dark a:has(svg[class*="log-out"]):hover {
-    background-color: rgba(255, 255, 255, 0.12);
-    color: white;
-    border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  .md\:w-64 {
+    width: 100%;
   }
   
-  /* Style pour le mode clair */
-  :root:not(.dark) .main-header,
-  :root:not(.dark) .header-container,
-  :root:not(.dark) .app-header,
-  :root:not(.dark) [class*="app-title"],
-  :root:not(.dark) [class*="app-name"],
-  :root:not(.dark) [class*="title-container"] {
-    color: #4338ca !important; /* Indigo pour s'harmoniser avec le menu violet-bleu */
-  }
-  
-  :root:not(.dark) h1.main-title,
-  :root:not(.dark) .app-title h1,
-  :root:not(.dark) [class*="app-name"] h1, 
-  :root:not(.dark) [class*="app-name"] span,
-  :root:not(.dark) [class*="title-container"] h1 {
-    background: linear-gradient(90deg, #4f46e5, #3b82f6);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-weight: 700;
-  }
-  
-  :root:not(.dark) button[class*="sign-out"],
-  :root:not(.dark) [class*="logout"],
-  :root:not(.dark) [class*="log-out"],
-  :root:not(.dark) button:has(svg[class*="log-out"]),
-  :root:not(.dark) a:has(svg[class*="log-out"]) {
-    background-color: rgba(67, 56, 202, 0.1);
-    color: #4338ca;
-    border: 1px solid rgba(67, 56, 202, 0.2);
-    border-radius: 8px;
-    padding: 0.5rem 0.75rem;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  }
-  
-  :root:not(.dark) button[class*="sign-out"]:hover,
-  :root:not(.dark) [class*="logout"]:hover,
-  :root:not(.dark) [class*="log-out"]:hover,
-  :root:not(.dark) button:has(svg[class*="log-out"]):hover,
-  :root:not(.dark) a:has(svg[class*="log-out"]):hover {
-    background-color: rgba(67, 56, 202, 0.15);
-    color: #4338ca;
-    border-color: rgba(67, 56, 202, 0.3);
-    box-shadow: 0 3px 6px rgba(67, 56, 202, 0.1);
-  }
-}
-
-/* Animation subtile de l'icône de déconnexion au survol */
-button[class*="sign-out"] svg,
-[class*="logout"] svg,
-[class*="log-out"] svg,
-.sign-out-icon {
-  transition: transform 0.2s ease;
-}
-
-button[class*="sign-out"]:hover svg,
-[class*="logout"]:hover svg,
-[class*="log-out"]:hover svg,
-.sign-out-button:hover .sign-out-icon {
-  transform: translateX(2px);
-}
-
-/* Effet spécial pour les titres principaux en mode desktop */
-@media (min-width: 768px) {
-  .app-title h1::after,
-  h1.main-title::after,
-  [class*="app-name"] h1::after,
-  [class*="title-container"] h1::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 70%;
-    height: 1px;
-    background: linear-gradient(to right, transparent, var(--title-underline, rgba(255, 255, 255, 0.5)), transparent);
-    opacity: 0.6;
-  }
-  
-  :root:not(.dark) .app-title h1::after,
-  :root:not(.dark) h1.main-title::after,
-  :root:not(.dark) [class*="app-name"] h1::after,
-  :root:not(.dark) [class*="title-container"] h1::after {
-    background: linear-gradient(to right, transparent, var(--title-underline-light, rgba(79, 70, 229, 0.5)), transparent);
-  }
-}
-
-/* Classes utilitaires pour appliquer le style du menu à d'autres éléments */
-.menu-styled-text {
-  color: var(--title-primary) !important;
-}
-
-.menu-styled-text.gradient {
-  background: linear-gradient(90deg, var(--title-gradient-from, rgba(255, 255, 255, 0.95)), var(--title-gradient-to, rgba(255, 255, 255, 0.75)));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  font-weight: 700;
-}
-
-.menu-styled-button {
-  background-color: var(--signout-bg);
-  color: var(--signout-text);
-  border: 1px solid var(--signout-border);
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px var(--signout-shadow);
-}
-
-.menu-styled-button:hover {
-  background-color: var(--signout-hover-bg);
-  color: var(--signout-hover-text);
-  border-color: var(--signout-hover-border);
-  box-shadow: 0 3px 6px var(--signout-hover-shadow);
-}
-
-.menu-styled-button svg {
-  transition: transform 0.2s ease;
-}
-
-.menu-styled-button:hover svg {
-  transform: translateX(2px);
-}
-
-/* Ciblage spécifique des en-têtes existants */
-@media (min-width: 768px) {
-  /* En-tête de l'application principal */
-  [class*="navbar"],
-  [class*="top-bar"],
-  [class*="header-wrapper"],
-  [class*="app-header"] {
-    background: transparent !important;
-  }
-  
-  /* Titre principal */
-  [class*="app-name"],
-  [class*="app-title"],
-  [class*="site-title"],
-  [class*="brand-title"] {
-    position: relative;
-  }
-  
-  [class*="app-name"] h1,
-  [class*="app-title"] h1,
-  [class*="site-title"] h1,
-  [class*="brand-title"] h1,
-  [class*="app-name"] span,
-  [class*="app-title"] span,
-  [class*="site-title"] span,
-  [class*="brand-title"] span {
-    background: linear-gradient(90deg, var(--title-gradient-from), var(--title-gradient-to));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-weight: 700;
-    position: relative;
+  .flex-1.p-4.md\:p-6.overflow-y-auto {
+    flex: 1;
+    padding-top: 1rem;
   }
 }
 
