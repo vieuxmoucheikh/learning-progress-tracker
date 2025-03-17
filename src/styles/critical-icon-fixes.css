@@ -438,6 +438,255 @@ html[data-theme="dark"] body .items-grid div.card span:not([class*="icon"]) {
   html[data-theme="dark"] body [class*="lucide-"] *[stroke] {
     stroke: currentColor !important;
   }
+
+  /* Timer actif en mode sombre */
+  html[data-theme="dark"] body .time-tracker,
+  html[data-theme="dark"] body .time-counter,
+  html[data-theme="dark"] body [class*="session-timer"],
+  html[data-theme="dark"] body [class*="active-timer"],
+  html[data-theme="dark"] body .timer-active,
+  html[data-theme="dark"] body [class*="session-active"] {
+    background-color: #0f172a !important;
+    border: 2px solid #3b82f6 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.4) !important;
+    padding: 12px !important;
+    margin: 10px 0 !important;
+    animation: pulse-dark 2s infinite !important;
+  }
+
+  /* Timer en pause en mode sombre */
+  html[data-theme="dark"] body .timer-paused,
+  html[data-theme="dark"] body [class*="session-paused"] {
+    background-color: #0f172a !important;
+    border: 2px solid #f59e0b !important;
+    border-radius: 12px !important;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4) !important;
+    padding: 12px !important;
+    margin: 10px 0 !important;
+  }
+
+  /* Texte du timer en mode sombre */
+  html[data-theme="dark"] body .time-tracker span,
+  html[data-theme="dark"] body .time-counter span,
+  html[data-theme="dark"] body [class*="session-timer"] span,
+  html[data-theme="dark"] body .timer-active span,
+  html[data-theme="dark"] body [class*="session-active"] span {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 1.25rem !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  /* Texte de session en pause en mode sombre */
+  html[data-theme="dark"] body .timer-paused span,
+  html[data-theme="dark"] body [class*="session-paused"] span {
+    color: #fdba74 !important;
+    font-weight: 700 !important;
+    font-size: 1.25rem !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  /* Animation de pulsation pour le timer actif en mode sombre */
+  @keyframes pulse-dark {
+    0% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); }
+    50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.7); }
+    100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); }
+  }
+
+  /* Timer actif en mode clair */
+  html[data-theme="light"] body .time-tracker,
+  html[data-theme="light"] body .time-counter,
+  html[data-theme="light"] body [class*="session-timer"],
+  html[data-theme="light"] body .timer-active,
+  html[data-theme="light"] body [class*="session-active"] {
+    background: linear-gradient(135deg, #dbeafe, #eff6ff) !important;
+    border: 2px solid #3b82f6 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+    padding: 12px !important;
+    margin: 10px 0 !important;
+    animation: pulse-light 2s infinite !important;
+  }
+
+  /* Timer en pause en mode clair */
+  html[data-theme="light"] body .timer-paused,
+  html[data-theme="light"] body [class*="session-paused"] {
+    background: linear-gradient(135deg, #fff7ed, #ffedd5) !important;
+    border: 2px solid #f59e0b !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3) !important;
+    padding: 12px !important;
+    margin: 10px 0 !important;
+  }
+
+  /* Texte du timer en mode clair */
+  html[data-theme="light"] body .time-tracker span,
+  html[data-theme="light"] body .time-counter span,
+  html[data-theme="light"] body [class*="session-timer"] span,
+  html[data-theme="light"] body .timer-active span,
+  html[data-theme="light"] body [class*="session-active"] span {
+    color: #1e40af !important;
+    font-weight: 700 !important;
+    font-size: 1.25rem !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+  }
+
+  /* Texte de session en pause en mode clair */
+  html[data-theme="light"] body .timer-paused span,
+  html[data-theme="light"] body [class*="session-paused"] span {
+    color: #b45309 !important;
+    font-weight: 700 !important;
+    font-size: 1.25rem !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+  }
+
+  /* Animation de pulsation pour le timer actif en mode clair */
+  @keyframes pulse-light {
+    0% { box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2); }
+    50% { box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4); }
+    100% { box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2); }
+  }
+
+  /* Boutons du timer en mode sombre - Play, Pause, Stop */
+  html[data-theme="dark"] body .time-tracker button,
+  html[data-theme="dark"] body .time-counter button,
+  html[data-theme="dark"] body [class*="session-timer"] button {
+    background-color: #0f172a !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    margin: 0 5px !important;
+    padding: 8px 16px !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+  }
+
+  /* Boutons du timer en mode clair - Play, Pause, Stop */
+  html[data-theme="light"] body .time-tracker button,
+  html[data-theme="light"] body .time-counter button,
+  html[data-theme="light"] body [class*="session-timer"] button {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    margin: 0 5px !important;
+    padding: 8px 16px !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+  }
+
+  /* Bouton Play spécifique en mode sombre */
+  html[data-theme="dark"] body .time-tracker button:has(.lucide-play),
+  html[data-theme="dark"] body .time-counter button:has(.lucide-play),
+  html[data-theme="dark"] body [class*="session-timer"] button:has(.lucide-play) {
+    background-color: #1e3a8a !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4) !important;
+  }
+
+  /* Bouton Pause spécifique en mode sombre */
+  html[data-theme="dark"] body .time-tracker button:has(.lucide-pause),
+  html[data-theme="dark"] body .time-counter button:has(.lucide-pause),
+  html[data-theme="dark"] body [class*="session-timer"] button:has(.lucide-pause) {
+    background-color: #854d0e !important;
+    border-color: #f59e0b !important;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4) !important;
+  }
+
+  /* Bouton Stop spécifique en mode sombre */
+  html[data-theme="dark"] body .time-tracker button:has(.lucide-stop-circle),
+  html[data-theme="dark"] body .time-counter button:has(.lucide-stop-circle),
+  html[data-theme="dark"] body [class*="session-timer"] button:has(.lucide-stop-circle) {
+    background-color: #7f1d1d !important;
+    border-color: #ef4444 !important;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4) !important;
+  }
+
+  /* Bouton Play spécifique en mode clair */
+  html[data-theme="light"] body .time-tracker button:has(.lucide-play),
+  html[data-theme="light"] body .time-counter button:has(.lucide-play),
+  html[data-theme="light"] body [class*="session-timer"] button:has(.lucide-play) {
+    background: linear-gradient(135deg, #3b82f6, #1e40af) !important;
+    border-color: #2563eb !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+  }
+
+  /* Bouton Pause spécifique en mode clair */
+  html[data-theme="light"] body .time-tracker button:has(.lucide-pause),
+  html[data-theme="light"] body .time-counter button:has(.lucide-pause),
+  html[data-theme="light"] body [class*="session-timer"] button:has(.lucide-pause) {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    border-color: #b45309 !important;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3) !important;
+  }
+
+  /* Bouton Stop spécifique en mode clair */
+  html[data-theme="light"] body .time-tracker button:has(.lucide-stop-circle),
+  html[data-theme="light"] body .time-counter button:has(.lucide-stop-circle),
+  html[data-theme="light"] body [class*="session-timer"] button:has(.lucide-stop-circle) {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    border-color: #b91c1c !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
+  }
+
+  /* Icônes dans les boutons du timer en mode sombre */
+  html[data-theme="dark"] body .time-tracker button svg,
+  html[data-theme="dark"] body .time-counter button svg,
+  html[data-theme="dark"] body [class*="session-timer"] button svg {
+    fill: currentColor !important;
+    stroke: currentColor !important;
+    color: #ffffff !important;
+    stroke-width: 2px !important;
+    height: 20px !important;
+    width: 20px !important;
+  }
+
+  /* Icônes dans les boutons du timer en mode clair */
+  html[data-theme="light"] body .time-tracker button svg,
+  html[data-theme="light"] body .time-counter button svg,
+  html[data-theme="light"] body [class*="session-timer"] button svg {
+    fill: currentColor !important;
+    stroke: currentColor !important;
+    color: #ffffff !important;
+    stroke-width: 2px !important;
+    height: 20px !important;
+    width: 20px !important;
+  }
+
+  /* Surbrillance pour les numéros dans le timer */
+  html[data-theme="dark"] body .time-tracker [class*="time-value"],
+  html[data-theme="dark"] body .time-counter [class*="time-value"],
+  html[data-theme="dark"] body [class*="session-timer"] [class*="time-value"],
+  html[data-theme="dark"] body .time-tracker [class*="time-display"],
+  html[data-theme="dark"] body .time-counter [class*="time-display"],
+  html[data-theme="dark"] body [class*="session-timer"] [class*="time-display"] {
+    font-family: monospace, SFMono-Regular, Menlo !important;
+    font-size: 1.4rem !important;
+    font-weight: 700 !important;
+    background-color: rgba(15, 23, 42, 0.8) !important;
+    color: #60a5fa !important;
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  /* Surbrillance pour les numéros dans le timer en mode clair */
+  html[data-theme="light"] body .time-tracker [class*="time-value"],
+  html[data-theme="light"] body .time-counter [class*="time-value"],
+  html[data-theme="light"] body [class*="session-timer"] [class*="time-value"],
+  html[data-theme="light"] body .time-tracker [class*="time-display"],
+  html[data-theme="light"] body .time-counter [class*="time-display"],
+  html[data-theme="light"] body [class*="session-timer"] [class*="time-display"] {
+    font-family: monospace, SFMono-Regular, Menlo !important;
+    font-size: 1.4rem !important;
+    font-weight: 700 !important;
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    color: #1e40af !important;
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    letter-spacing: 0.05em !important;
+  }
 }
 
 /* STYLES SPÉCIFIQUES POUR LE TEXTE "ORGANIZE AND MANAGE" */
