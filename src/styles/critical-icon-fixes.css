@@ -285,3 +285,168 @@ html[data-theme="dark"] [class*="learning-card"] button svg,
   fill: none !important;
   stroke: currentColor !important;
 }
+
+/* CORRECTIFS SPÉCIFIQUES POUR LES CARTES DU DASHBOARD ET ALL ITEMS */
+html[data-theme="dark"] body #dashboard .card,
+html[data-theme="dark"] body .dashboard .card,
+html[data-theme="dark"] body #items .card,
+html[data-theme="dark"] body .items .card,
+html[data-theme="dark"] body #dashboard .rounded-xl,
+html[data-theme="dark"] body .dashboard .rounded-xl,
+html[data-theme="dark"] body #items .rounded-xl,
+html[data-theme="dark"] body .items .rounded-xl,
+html[data-theme="dark"] body #dashboard [class*="learning-item-card"],
+html[data-theme="dark"] body .dashboard [class*="learning-item-card"],
+html[data-theme="dark"] body #items [class*="learning-item-card"],
+html[data-theme="dark"] body .items [class*="learning-item-card"],
+html[data-theme="dark"] body .dashboard-grid div.rounded-xl,
+html[data-theme="dark"] body .dashboard-grid div.card,
+html[data-theme="dark"] body .items-grid div.rounded-xl,
+html[data-theme="dark"] body .items-grid div.card {
+  background-color: #1e293b !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+  overflow: hidden !important;
+}
+
+/* TITRES DANS LES CARTES DU DASHBOARD ET ALL ITEMS */
+html[data-theme="dark"] body #dashboard .card h3,
+html[data-theme="dark"] body .dashboard .card h3,
+html[data-theme="dark"] body #items .card h3,
+html[data-theme="dark"] body .items .card h3,
+html[data-theme="dark"] body #dashboard .card [class*="title"],
+html[data-theme="dark"] body .dashboard .card [class*="title"],
+html[data-theme="dark"] body #items .card [class*="title"],
+html[data-theme="dark"] body .items .card [class*="title"],
+html[data-theme="dark"] body .dashboard-grid div.rounded-xl h3,
+html[data-theme="dark"] body .dashboard-grid div.card h3,
+html[data-theme="dark"] body .items-grid div.rounded-xl h3,
+html[data-theme="dark"] body .items-grid div.card h3,
+html[data-theme="dark"] body .dashboard-grid div.rounded-xl [class*="title"],
+html[data-theme="dark"] body .dashboard-grid div.card [class*="title"],
+html[data-theme="dark"] body .items-grid div.rounded-xl [class*="title"],
+html[data-theme="dark"] body .items-grid div.card [class*="title"] {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* TEXTES DANS LES CARTES DU DASHBOARD ET ALL ITEMS */
+html[data-theme="dark"] body #dashboard .card p,
+html[data-theme="dark"] body .dashboard .card p,
+html[data-theme="dark"] body #items .card p,
+html[data-theme="dark"] body .items .card p,
+html[data-theme="dark"] body #dashboard .card span:not([class*="icon"]),
+html[data-theme="dark"] body .dashboard .card span:not([class*="icon"]),
+html[data-theme="dark"] body #items .card span:not([class*="icon"]),
+html[data-theme="dark"] body .items .card span:not([class*="icon"]),
+html[data-theme="dark"] body .dashboard-grid div.rounded-xl p,
+html[data-theme="dark"] body .dashboard-grid div.card p,
+html[data-theme="dark"] body .items-grid div.rounded-xl p,
+html[data-theme="dark"] body .items-grid div.card p,
+html[data-theme="dark"] body .dashboard-grid div.rounded-xl span:not([class*="icon"]),
+html[data-theme="dark"] body .dashboard-grid div.card span:not([class*="icon"]),
+html[data-theme="dark"] body .items-grid div.rounded-xl span:not([class*="icon"]),
+html[data-theme="dark"] body .items-grid div.card span:not([class*="icon"]) {
+  color: #f1f5f9 !important;
+}
+
+/* MODE MOBILE - CORRECTIFS ULTRA-SPÉCIFIQUES */
+@media (max-width: 768px) {
+  /* Cartes du Dashboard et All Items sur mobile */
+  html[data-theme="dark"] body #dashboard .card,
+  html[data-theme="dark"] body .dashboard .card,
+  html[data-theme="dark"] body #items .card,
+  html[data-theme="dark"] body .items .card,
+  html[data-theme="dark"] body #dashboard .rounded-xl,
+  html[data-theme="dark"] body .dashboard .rounded-xl,
+  html[data-theme="dark"] body #items .rounded-xl,
+  html[data-theme="dark"] body .items .rounded-xl,
+  html[data-theme="dark"] body #dashboard [class*="learning-item-card"],
+  html[data-theme="dark"] body .dashboard [class*="learning-item-card"],
+  html[data-theme="dark"] body #items [class*="learning-item-card"],
+  html[data-theme="dark"] body .items [class*="learning-item-card"],
+  html[data-theme="dark"] body .dashboard-grid div.rounded-xl,
+  html[data-theme="dark"] body .dashboard-grid div.card,
+  html[data-theme="dark"] body .items-grid div.rounded-xl,
+  html[data-theme="dark"] body .items-grid div.card,
+  html[data-theme="dark"] body div[class*="dashboard-"] div.rounded-xl,
+  html[data-theme="dark"] body div[class*="dashboard-"] div.card,
+  html[data-theme="dark"] body div[class*="items-"] div.rounded-xl,
+  html[data-theme="dark"] body div[class*="items-"] div.card {
+    background-color: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+  }
+  
+  /* Titres sur mobile - Plus grands et plus visibles */
+  html[data-theme="dark"] body #dashboard .card h3,
+  html[data-theme="dark"] body .dashboard .card h3,
+  html[data-theme="dark"] body #items .card h3,
+  html[data-theme="dark"] body .items .card h3,
+  html[data-theme="dark"] body #dashboard .card [class*="title"],
+  html[data-theme="dark"] body .dashboard .card [class*="title"],
+  html[data-theme="dark"] body #items .card [class*="title"],
+  html[data-theme="dark"] body .items .card [class*="title"],
+  html[data-theme="dark"] body .dashboard-grid div.rounded-xl h3,
+  html[data-theme="dark"] body .dashboard-grid div.card h3,
+  html[data-theme="dark"] body .items-grid div.rounded-xl h3,
+  html[data-theme="dark"] body .items-grid div.card h3,
+  html[data-theme="dark"] body .dashboard-grid div.rounded-xl [class*="title"],
+  html[data-theme="dark"] body .dashboard-grid div.card [class*="title"],
+  html[data-theme="dark"] body .items-grid div.rounded-xl [class*="title"],
+  html[data-theme="dark"] body .items-grid div.card [class*="title"] {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 1.25rem !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+  }
+  
+  /* CORRECTIFS POUR LES ICÔNES DU DASHBOARD ET ALL ITEMS SUR MOBILE */
+  html[data-theme="dark"] body #dashboard svg,
+  html[data-theme="dark"] body .dashboard svg,
+  html[data-theme="dark"] body #items svg,
+  html[data-theme="dark"] body .items svg,
+  html[data-theme="dark"] body #dashboard [class*="lucide-"],
+  html[data-theme="dark"] body .dashboard [class*="lucide-"],
+  html[data-theme="dark"] body #items [class*="lucide-"],
+  html[data-theme="dark"] body .items [class*="lucide-"] {
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 2.5px !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    vector-effect: non-scaling-stroke !important;
+  }
+  
+  /* EXCEPTION POUR L'ICÔNE PLAY */
+  html[data-theme="dark"] body .lucide-play,
+  html[data-theme="dark"] body .lucide-play polygon {
+    fill: currentColor !important;
+    stroke: currentColor !important;
+  }
+  
+  /* RESET COMPLET DES ATTRIBUTS SVG PROBLÉMATIQUES */
+  html[data-theme="dark"] body svg *[fill]:not([fill="none"]),
+  html[data-theme="dark"] body [class*="lucide-"] *[fill]:not([fill="none"]) {
+    fill: currentColor !important;
+  }
+  
+  html[data-theme="dark"] body svg *[stroke],
+  html[data-theme="dark"] body [class*="lucide-"] *[stroke] {
+    stroke: currentColor !important;
+  }
+}
+
+/* STYLES SPÉCIFIQUES POUR LE TEXTE "ORGANIZE AND MANAGE" */
+html[data-theme="dark"] body [class*="organize-text"],
+html[data-theme="dark"] body [class*="manage-text"],
+html[data-theme="dark"] body [class*="learning-description"],
+html[data-theme="dark"] body [class*="description"] {
+  color: #f1f5f9 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  font-weight: 500 !important;
+}

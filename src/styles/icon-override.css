@@ -95,3 +95,186 @@ html[data-theme="dark"] h5,
 html[data-theme="dark"] h6 {
   color: #f8fafc !important;
 }
+
+/**
+ * CORRECTIFS D'URGENCE POUR LES ICÔNES - PRIORITÉ MAXIMALE
+ * Ce fichier est chargé en dernier et contient des correctifs à priorité maximale
+ * pour les icônes en mode sombre sur mobile, spécialement dans le Dashboard et All Items.
+ */
+
+/* FORCE L'ABSENCE DE REMPLISSAGE POUR TOUTES LES ICÔNES LUCIDE */
+html[data-theme="dark"] [class*="lucide-"],
+.dark [class*="lucide-"] {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+
+/* EXCEPTIONS POUR LES ICÔNES QUI DOIVENT AVOIR UN REMPLISSAGE */
+html[data-theme="dark"] .lucide-play,
+.dark .lucide-play {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* SURCHARGE POUR LES ICÔNES SPÉCIFIQUES AUX CARTES */
+html[data-theme="dark"] .card svg,
+html[data-theme="dark"] .learning-item-card svg,
+html[data-theme="dark"] .item-wrapper svg,
+html[data-theme="dark"] .dashboard svg,
+html[data-theme="dark"] #dashboard svg,
+html[data-theme="dark"] .items svg,
+html[data-theme="dark"] #items svg,
+.dark .card svg,
+.dark .learning-item-card svg,
+.dark .item-wrapper svg,
+.dark .dashboard svg,
+.dark #dashboard svg,
+.dark .items svg,
+.dark #items svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+
+/* RÈGLES MOBILES D'URGENCE */
+@media (max-width: 768px) {
+  /* AUGMENTATION DE L'ÉPAISSEUR DU TRAIT POUR MEILLEURE VISIBILITÉ */
+  html[data-theme="dark"] svg,
+  html[data-theme="dark"] [class*="lucide-"],
+  .dark svg,
+  .dark [class*="lucide-"] {
+    stroke-width: 2.5px !important;
+  }
+  
+  /* FORCE L'APPLICATION DES RÈGLES POUR DASHBOARD ET ITEMS */
+  html[data-theme="dark"] #dashboard .card svg,
+  html[data-theme="dark"] .dashboard .card svg,
+  html[data-theme="dark"] #items .card svg,
+  html[data-theme="dark"] .items .card svg,
+  html[data-theme="dark"] #dashboard [class*="lucide-"],
+  html[data-theme="dark"] .dashboard [class*="lucide-"],
+  html[data-theme="dark"] #items [class*="lucide-"],
+  html[data-theme="dark"] .items [class*="lucide-"],
+  .dark #dashboard .card svg,
+  .dark .dashboard .card svg,
+  .dark #items .card svg,
+  .dark .items .card svg,
+  .dark #dashboard [class*="lucide-"],
+  .dark .dashboard [class*="lucide-"],
+  .dark #items [class*="lucide-"],
+  .dark .items [class*="lucide-"] {
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 2.5px !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    vector-effect: non-scaling-stroke !important;
+  }
+  
+  /* CORRECTION POUR L'ICÔNE PLAY SPÉCIFIQUEMENT */
+  html[data-theme="dark"] .lucide-play,
+  html[data-theme="dark"] #dashboard .lucide-play,
+  html[data-theme="dark"] .dashboard .lucide-play,
+  html[data-theme="dark"] #items .lucide-play,
+  html[data-theme="dark"] .items .lucide-play,
+  .dark .lucide-play,
+  .dark #dashboard .lucide-play,
+  .dark .dashboard .lucide-play,
+  .dark #items .lucide-play,
+  .dark .items .lucide-play {
+    fill: currentColor !important;
+    stroke: currentColor !important;
+  }
+  
+  /* CORRECTION DES BOUTONS DANS ICÔNES COLORÉES */
+  html[data-theme="dark"] button.text-blue-600 svg,
+  html[data-theme="dark"] button.text-blue-500 svg,
+  .dark button.text-blue-600 svg,
+  .dark button.text-blue-500 svg {
+    stroke: #3b82f6 !important;
+    fill: none !important;
+  }
+  
+  html[data-theme="dark"] button.text-green-600 svg,
+  html[data-theme="dark"] button.text-green-500 svg,
+  .dark button.text-green-600 svg,
+  .dark button.text-green-500 svg {
+    stroke: #22c55e !important;
+    fill: none !important;
+  }
+  
+  html[data-theme="dark"] button.text-red-600 svg,
+  html[data-theme="dark"] button.text-red-500 svg,
+  .dark button.text-red-600 svg,
+  .dark button.text-red-500 svg {
+    stroke: #ef4444 !important;
+    fill: none !important;
+  }
+  
+  html[data-theme="dark"] button.text-yellow-600 svg,
+  html[data-theme="dark"] button.text-yellow-500 svg,
+  .dark button.text-yellow-600 svg,
+  .dark button.text-yellow-500 svg {
+    stroke: #f59e0b !important;
+    fill: none !important;
+  }
+  
+  /* SURCHARGE DE FORCE MAXIMALE POUR LES SÉLECTEURS PROFONDS */
+  html[data-theme="dark"] *:not(.lucide-play):not([class*="fill"]) > svg,
+  html[data-theme="dark"] *:not(.lucide-play):not([class*="fill"]) > [class*="lucide-"],
+  .dark *:not(.lucide-play):not([class*="fill"]) > svg,
+  .dark *:not(.lucide-play):not([class*="fill"]) > [class*="lucide-"] {
+    fill: none !important;
+    stroke: currentColor !important;
+  }
+  
+  /* HACK SPÉCIFIQUE POUR CORRIGER LES ICÔNES PROBLÉMATIQUES */
+  html[data-theme="dark"] [class*="lucide-"] path:not([fill]),
+  html[data-theme="dark"] [class*="lucide-"] line,
+  html[data-theme="dark"] [class*="lucide-"] polyline,
+  html[data-theme="dark"] [class*="lucide-"] rect:not([fill]),
+  html[data-theme="dark"] [class*="lucide-"] circle:not([fill]),
+  .dark [class*="lucide-"] path:not([fill]),
+  .dark [class*="lucide-"] line,
+  .dark [class*="lucide-"] polyline,
+  .dark [class*="lucide-"] rect:not([fill]),
+  .dark [class*="lucide-"] circle:not([fill]) {
+    fill: none !important;
+    stroke: currentColor !important;
+  }
+}
+
+/* CORRECTION SPÉCIFIQUE POUR LES ATTRIBUTS INLINE */
+html[data-theme="dark"] svg[fill]:not(.lucide-play),
+html[data-theme="dark"] [class*="lucide-"][fill]:not(.lucide-play),
+.dark svg[fill]:not(.lucide-play),
+.dark [class*="lucide-"][fill]:not(.lucide-play) {
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+/* HACK DE DERNIER RECOURS POUR FORCER L'ABSENCE DE REMPLISSAGE */
+@-moz-document url-prefix() {
+  html[data-theme="dark"] svg:not(.lucide-play),
+  html[data-theme="dark"] [class*="lucide-"]:not(.lucide-play),
+  .dark svg:not(.lucide-play),
+  .dark [class*="lucide-"]:not(.lucide-play) {
+    fill: none !important;
+    stroke: currentColor !important;
+  }
+}
+
+@supports (-webkit-appearance:none) {
+  html[data-theme="dark"] svg:not(.lucide-play),
+  html[data-theme="dark"] [class*="lucide-"]:not(.lucide-play),
+  .dark svg:not(.lucide-play),
+  .dark [class*="lucide-"]:not(.lucide-play) {
+    fill: none !important;
+    stroke: currentColor !important;
+  }
+}

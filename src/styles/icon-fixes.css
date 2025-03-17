@@ -133,3 +133,145 @@ html[data-theme="dark"] svg.text-red-400 {
   width: 0.875rem !important;
   margin-right: 0.25rem !important;
 }
+
+/* CIBLAGE SPÉCIFIQUE POUR LE DASHBOARD ET ALL ITEMS */
+html[data-theme="dark"] [id*="dashboard"] .card,
+html[data-theme="dark"] [class*="dashboard"] .card,
+html[data-theme="dark"] [id*="dashboard"] .rounded-xl,
+html[data-theme="dark"] [class*="dashboard"] .rounded-xl,
+html[data-theme="dark"] [id*="items"] .card,
+html[data-theme="dark"] [class*="items"] .card,
+html[data-theme="dark"] [id*="items"] .rounded-xl,
+html[data-theme="dark"] [class*="items"] .rounded-xl {
+  background-color: #1e293b !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+  overflow: hidden !important;
+}
+
+/* CORRECTIFS POUR LES ÉLÉMENTS À L'INTÉRIEUR DES CARTES */
+html[data-theme="dark"] [id*="dashboard"] .card h3,
+html[data-theme="dark"] [class*="dashboard"] .card h3,
+html[data-theme="dark"] [id*="items"] .card h3,
+html[data-theme="dark"] [class*="items"] .card h3,
+html[data-theme="dark"] [id*="dashboard"] .card [class*="title"],
+html[data-theme="dark"] [class*="dashboard"] .card [class*="title"],
+html[data-theme="dark"] [id*="items"] .card [class*="title"],
+html[data-theme="dark"] [class*="items"] .card [class*="title"] {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* TEXTES DANS LES CARTES */
+html[data-theme="dark"] [id*="dashboard"] .card p,
+html[data-theme="dark"] [class*="dashboard"] .card p,
+html[data-theme="dark"] [id*="items"] .card p,
+html[data-theme="dark"] [class*="items"] .card p,
+html[data-theme="dark"] [id*="dashboard"] .card span:not([class*="icon"]),
+html[data-theme="dark"] [class*="dashboard"] .card span:not([class*="icon"]),
+html[data-theme="dark"] [id*="items"] .card span:not([class*="icon"]),
+html[data-theme="dark"] [class*="items"] .card span:not([class*="icon"]) {
+  color: #f1f5f9 !important;
+}
+
+/* CIBLAGE DES ICÔNES DANS LE DASHBOARD ET ALL ITEMS */
+html[data-theme="dark"] [id*="dashboard"] svg,
+html[data-theme="dark"] [class*="dashboard"] svg,
+html[data-theme="dark"] [id*="items"] svg,
+html[data-theme="dark"] [class*="items"] svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+
+/* MODE MOBILE - PRIORITÉ MAXIMALE */
+@media (max-width: 768px) {
+  /* Cartes du Dashboard et All Items sur mobile */
+  html[data-theme="dark"] [id*="dashboard"] .card,
+  html[data-theme="dark"] [class*="dashboard"] .card,
+  html[data-theme="dark"] [id*="items"] .card,
+  html[data-theme="dark"] [class*="items"] .card,
+  html[data-theme="dark"] [id*="dashboard"] .rounded-xl,
+  html[data-theme="dark"] [class*="dashboard"] .rounded-xl,
+  html[data-theme="dark"] [id*="items"] .rounded-xl,
+  html[data-theme="dark"] [class*="items"] .rounded-xl,
+  html[data-theme="dark"] [id*="dashboard"] [class*="learning-item-card"],
+  html[data-theme="dark"] [class*="dashboard"] [class*="learning-item-card"],
+  html[data-theme="dark"] [id*="items"] [class*="learning-item-card"],
+  html[data-theme="dark"] [class*="items"] [class*="learning-item-card"] {
+    background-color: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+  }
+  
+  /* Titres sur mobile - Plus grands et plus visibles */
+  html[data-theme="dark"] [id*="dashboard"] .card h3,
+  html[data-theme="dark"] [class*="dashboard"] .card h3,
+  html[data-theme="dark"] [id*="items"] .card h3,
+  html[data-theme="dark"] [class*="items"] .card h3,
+  html[data-theme="dark"] [id*="dashboard"] .card [class*="title"],
+  html[data-theme="dark"] [class*="dashboard"] .card [class*="title"],
+  html[data-theme="dark"] [id*="items"] .card [class*="title"],
+  html[data-theme="dark"] [class*="items"] .card [class*="title"] {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 1.25rem !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+  }
+  
+  /* Icônes sur mobile - Trait plus épais pour meilleure visibilité */
+  html[data-theme="dark"] [id*="dashboard"] svg,
+  html[data-theme="dark"] [class*="dashboard"] svg,
+  html[data-theme="dark"] [id*="items"] svg,
+  html[data-theme="dark"] [class*="items"] svg {
+    stroke-width: 2.5px !important;
+    fill: none !important;
+  }
+  
+  /* Correction spécifique pour les icônes Lucide */
+  html[data-theme="dark"] [id*="dashboard"] [class*="lucide-"],
+  html[data-theme="dark"] [class*="dashboard"] [class*="lucide-"],
+  html[data-theme="dark"] [id*="items"] [class*="lucide-"],
+  html[data-theme="dark"] [class*="items"] [class*="lucide-"] {
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 2.5px !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+  }
+  
+  /* Correction spécifique pour l'icône Play qui a besoin de remplissage */
+  html[data-theme="dark"] [id*="dashboard"] .lucide-play,
+  html[data-theme="dark"] [class*="dashboard"] .lucide-play,
+  html[data-theme="dark"] [id*="items"] .lucide-play,
+  html[data-theme="dark"] [class*="items"] .lucide-play {
+    fill: currentColor !important;
+    stroke: currentColor !important;
+  }
+}
+
+/* CIBLAGE ULTRA-SPÉCIFIQUE POUR LES CARTES DU DASHBOARD */
+html[data-theme="dark"] div[id*="dashboard"] div.grid div.rounded-xl,
+html[data-theme="dark"] div[class*="dashboard"] div.grid div.rounded-xl {
+  background-color: #1e293b !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0.75rem !important;
+  overflow: hidden !important;
+}
+
+/* FORÇAGE DES STYLES D'ICÔNES DANS LES BOUTONS ET BADGES */
+html[data-theme="dark"] button svg,
+html[data-theme="dark"] [role="button"] svg,
+html[data-theme="dark"] .badge svg,
+html[data-theme="dark"] [class*="badge"] svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
