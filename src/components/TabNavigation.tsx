@@ -20,117 +20,295 @@ interface TabNavigationProps {
 export const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
+  const [velocity, setVelocity] = useState(0);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const [lastTouchTimestamp, setLastTouchTimestamp] = useState(0);
+  const [touchStarted, setTouchStarted] = useState(false);
+  const [preventClick, setPreventClick] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeTabRef = useRef<HTMLButtonElement>(null);
-  const lastScrollLeft = useRef<number>(0);
-  const scrollAnimationRef = useRef<number | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const touchMoveCountRef = useRef(0);
+  const prefersReducedMotion = useRef(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   
-  const smoothScrollTo = useCallback((element: HTMLElement, to: number, duration: number) => {
-    if (scrollAnimationRef.current) {
-      cancelAnimationFrame(scrollAnimationRef.current);
+  // Nettoyage des animations à la sortie
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
+
+  // Fonction de défilement fluide optimisée avec easing cubic-bezier
+  const smoothScrollTo = useCallback((element: HTMLElement, to: number, duration: number = 300) => {
+    // Si l'utilisateur préfère des mouvements réduits, effectuer un défilement instantané
+    if (prefersReducedMotion.current) {
+      element.scrollLeft = to;
+      return;
+    }
+    
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
     }
     
     const start = element.scrollLeft;
     const change = to - start;
     const startTime = performance.now();
     
+    // Ajouter une classe pour désactiver les transitions pendant le défilement
+    if (element.classList) {
+      element.classList.add('scrolling');
+    }
+    
+    // Fonction d'animation avec easing cubic-bezier personnalisé
     const animateScroll = (currentTime: number) => {
       const elapsedTime = currentTime - startTime;
       
       if (elapsedTime >= duration) {
         element.scrollLeft = to;
+        
+        // Retirer la classe après le défilement
+        if (element.classList) {
+          setTimeout(() => {
+            element.classList.remove('scrolling');
+          }, 50);
+        }
         return;
       }
-      
-      // Easing function: easeInOutCubic
+
+      // Easing function: cubicBezier(0.33, 1, 0.68, 1) - délicieux et naturel
       const t = elapsedTime / duration;
-      const progress = t < 0.5 
-        ? 4 * t * t * t 
-        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      let progress;
+      
+      // Implémentation personnalisée de cubic-bezier pour une animation super fluide
+      const x1 = 0.33, y1 = 1, x2 = 0.68, y2 = 1;
+      
+      // Calcul approximatif de cubic-bezier
+      const calcBezier = (t: number, p1: number, p2: number) => {
+        return 3 * t * (1 - t) * (1 - t) * p1 + 3 * t * t * (1 - t) * p2 + t * t * t;
+      };
+      
+      progress = calcBezier(t, y1, y2);
       
       element.scrollLeft = start + change * progress;
-      scrollAnimationRef.current = requestAnimationFrame(animateScroll);
+      animationFrameRef.current = requestAnimationFrame(animateScroll);
     };
     
-    scrollAnimationRef.current = requestAnimationFrame(animateScroll);
+    animationFrameRef.current = requestAnimationFrame(animateScroll);
   }, []);
-
+  
+  // Détection du mode mobile avec debounce
   useEffect(() => {
+    let resizeTimer: NodeJS.Timeout;
+    
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const newIsMobile = window.innerWidth < 768;
+        setIsMobile(newIsMobile);
+        
+        // Réinitialiser la position de défilement lors du changement de mode
+        if (!newIsMobile && scrollContainerRef.current) {
+          scrollContainerRef.current.scrollLeft = 0;
+        }
+      }, 100); // Debounce de 100ms
+    };
+
+    // Détecter les préférences de mouvement réduit
+    const motionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleMotionPreferenceChange = (e: MediaQueryListEvent) => {
+      prefersReducedMotion.current = e.matches;
     };
 
     window.addEventListener('resize', handleResize);
+    motionMediaQuery.addEventListener('change', handleMotionPreferenceChange);
+    
+    // Appel initial
+    handleResize();
+    
     return () => {
       window.removeEventListener('resize', handleResize);
-      if (scrollAnimationRef.current) {
-        cancelAnimationFrame(scrollAnimationRef.current);
-      }
+      motionMediaQuery.removeEventListener('change', handleMotionPreferenceChange);
+      clearTimeout(resizeTimer);
     };
   }, []);
 
-  // Défilement automatique pour centrer l'onglet actif sur mobile
+  // Centre automatiquement l'onglet actif dans la vue avec un délai
   useEffect(() => {
     if (isMobile && activeTabRef.current && scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const activeElement = activeTabRef.current;
+      // Délai court pour s'assurer que le DOM est bien rendu
+      const timeoutId = setTimeout(() => {
+        if (!activeTabRef.current || !scrollContainerRef.current) return;
+        
+        const container = scrollContainerRef.current;
+        const activeElement = activeTabRef.current;
+        
+        // Obtenir les positions et dimensions
+        const containerWidth = container.clientWidth;
+        const activeElementWidth = activeElement.clientWidth;
+        const activeElementLeft = activeElement.offsetLeft;
+        
+        // Calculer la position de défilement pour centrer l'élément actif
+        const scrollPosition = activeElementLeft - (containerWidth / 2) + (activeElementWidth / 2);
+        
+        // Utiliser notre fonction de défilement améliorée avec une durée plus longue
+        // pour une animation plus douce lors du changement d'onglet
+        smoothScrollTo(container, scrollPosition, 500);
+      }, 50);
       
-      // Obtenir les positions et dimensions
-      const containerWidth = container.clientWidth;
-      const activeElementWidth = activeElement.clientWidth;
-      const activeElementLeft = activeElement.offsetLeft;
-      
-      // Calculer la position de défilement pour centrer l'élément actif
-      const scrollPosition = activeElementLeft - (containerWidth / 2) + (activeElementWidth / 2);
-      
-      // Utiliser notre fonction de défilement personnalisée
-      smoothScrollTo(container, scrollPosition, 500);
+      return () => clearTimeout(timeoutId);
     }
   }, [activeTab, isMobile, smoothScrollTo]);
 
+  // Gestion du défilement par inertie améliorée avec physique raffinée
+  useEffect(() => {
+    if (!isScrolling || !scrollContainerRef.current) return;
+    
+    let lastTime = performance.now();
+    let momentumScroll = (currentTime: number) => {
+      const deltaTime = currentTime - lastTime;
+      lastTime = currentTime;
+      
+      if (!scrollContainerRef.current || Math.abs(velocity) < 0.5) {
+        setIsScrolling(false);
+        snapToNearestTab(); // Snap à la fin du défilement par inertie
+        return;
+      }
+      
+      // Appliquer une friction dépendante du temps pour un comportement plus naturel
+      // Formule améliorée pour une sensation plus réaliste
+      const friction = Math.pow(0.92, deltaTime / 16); // Friction légèrement plus importante pour un meilleur contrôle
+      const newVelocity = velocity * friction;
+      
+      // Déplacement avec compensation du temps écoulé pour une animation indépendante du framerate
+      scrollContainerRef.current.scrollLeft += newVelocity * (deltaTime / 16);
+      setVelocity(newVelocity);
+      
+      animationFrameRef.current = requestAnimationFrame(momentumScroll);
+    };
+    
+    animationFrameRef.current = requestAnimationFrame(momentumScroll);
+    
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [isScrolling, velocity]);
+
+  // Gérer le début du toucher avec prévention des événements multiples
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (scrollAnimationRef.current) {
-      cancelAnimationFrame(scrollAnimationRef.current);
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
     }
-    setIsDragging(true);
+    
+    // Éviter les manipulations involontaires
+    if (e.touches.length !== 1) return;
+    
+    // Réinitialiser l'état
+    touchMoveCountRef.current = 0;
+    setVelocity(0);
+    setIsScrolling(false);
     setTouchStartX(e.touches[0].clientX);
+    setLastTouchTimestamp(e.timeStamp);
+    setTouchStarted(true);
+    setPreventClick(false);
+    
+    // Ajouter une classe pour stylisation pendant le défilement
     if (scrollContainerRef.current) {
-      lastScrollLeft.current = scrollContainerRef.current.scrollLeft;
+      scrollContainerRef.current.classList.add('touch-active');
     }
   };
 
+  // Gérer le mouvement du toucher avec optimisations
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || touchStartX === null || !scrollContainerRef.current) return;
+    if (touchStartX === null || !scrollContainerRef.current || !touchStarted) return;
     
-    e.preventDefault(); // Empêcher le défilement de la page pendant le mouvement
-    const container = scrollContainerRef.current;
+    // Ignorer les gestes multi-touch
+    if (e.touches.length !== 1) return;
+    
     const touchX = e.touches[0].clientX;
     const diff = touchStartX - touchX;
+    const timeElapsed = e.timeStamp - lastTouchTimestamp;
     
-    container.scrollLeft = lastScrollLeft.current + diff;
+    // Compteur de mouvements pour déterminer s'il s'agit d'un scroll intentionnel
+    touchMoveCountRef.current += 1;
+    
+    // Détecter si l'utilisateur fait défiler intentionnellement
+    if (touchMoveCountRef.current > 3 && Math.abs(diff) > 10) {
+      setPreventClick(true);
+    }
+    
+    // Ne pas traiter les mouvements mineurs pour éviter les déclenchements accidentels
+    if (Math.abs(diff) < 1) return;
+    
+    // Calculer la vélocité (pour le défilement par inertie)
+    // Formule optimisée pour une meilleure réactivité
+    const newVelocity = timeElapsed > 0 ? (diff / timeElapsed) * 16 : 0;
+    
+    // Appliquer le défilement en fonction de la distance parcourue par le doigt
+    scrollContainerRef.current.scrollLeft += diff;
+    
+    // Mettre à jour l'état pour le prochain mouvement
+    setTouchStartX(touchX);
+    setLastTouchTimestamp(e.timeStamp);
+    setVelocity(newVelocity);
+    
+    // Prévenir le défilement de la page seulement si le mouvement est significatif
+    if (Math.abs(diff) > 5) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   };
 
+  // Gérer la fin du toucher avec optimisations
   const handleTouchEnd = () => {
-    setIsDragging(false);
+    if (!touchStarted) return;
+    
+    setTouchStarted(false);
+    
+    // Retirer la classe de stylisation
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.classList.remove('touch-active');
+    }
+    
+    // Activer le défilement par inertie si la vélocité est suffisante
+    if (Math.abs(velocity) > 0.5 && scrollContainerRef.current) {
+      setIsScrolling(true);
+    } else {
+      setIsScrolling(false);
+      // Snap seulement si la vélocité est faible (pas un swipe rapide)
+      snapToNearestTab();
+    }
+    
     setTouchStartX(null);
     
-    if (!scrollContainerRef.current) return;
+    // Réinitialiser après un court délai pour permettre le clic si c'était intentionnel
+    setTimeout(() => {
+      setPreventClick(false);
+    }, 300);
+  };
+
+  // Fonction pour s'aligner automatiquement sur l'onglet le plus proche - optimisée
+  const snapToNearestTab = useCallback(() => {
+    if (!scrollContainerRef.current || prefersReducedMotion.current) return;
     
-    // Snap to the nearest tab when touch ends
     const container = scrollContainerRef.current;
-    const containerWidth = container.clientWidth;
     const scrollLeft = container.scrollLeft;
+    const containerWidth = container.clientWidth;
+    const containerCenter = scrollLeft + containerWidth / 2;
     
-    // Find the tab that is most visible (closest to center)
+    // Trouver l'onglet le plus proche du centre
     const tabs = Array.from(container.children) as HTMLElement[];
-    let closestTab = null;
+    
+    if (tabs.length === 0) return;
+    
+    let closestTab = tabs[0];
     let minDistance = Infinity;
     
     for (const tab of tabs) {
-      const tabLeft = tab.offsetLeft;
-      const tabCenter = tabLeft + tab.offsetWidth / 2;
-      const containerCenter = scrollLeft + containerWidth / 2;
+      const tabCenter = tab.offsetLeft + tab.offsetWidth / 2;
       const distance = Math.abs(tabCenter - containerCenter);
       
       if (distance < minDistance) {
@@ -139,14 +317,51 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabCh
       }
     }
     
-    if (closestTab) {
-      const tabCenter = closestTab.offsetLeft + closestTab.offsetWidth / 2;
-      const containerCenter = containerWidth / 2;
-      const scrollTo = tabCenter - containerCenter;
-      
-      smoothScrollTo(container, scrollTo, 300);
+    // Faire défiler jusqu'à l'onglet le plus proche
+    const tabCenter = closestTab.offsetLeft + closestTab.offsetWidth / 2;
+    const scrollTo = tabCenter - containerWidth / 2;
+    
+    // Animation plus douce pour le snap
+    smoothScrollTo(container, scrollTo, 350);
+  }, [smoothScrollTo]);
+
+  // Gestionnaire de défilement terminé
+  const handleScrollEnd = useCallback(() => {
+    // Snap à la fin d'un défilement manuel (sans inertie)
+    if (!isScrolling && scrollContainerRef.current) {
+      snapToNearestTab();
     }
-  };
+  }, [isScrolling, snapToNearestTab]);
+
+  // Détecter la fin du défilement
+  useEffect(() => {
+    if (!scrollContainerRef.current) return;
+    
+    let timeout: NodeJS.Timeout;
+    const container = scrollContainerRef.current;
+    
+    const handleScroll = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        if (!isScrolling) {
+          handleScrollEnd();
+        }
+      }, 150);
+    };
+    
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      clearTimeout(timeout);
+    };
+  }, [handleScrollEnd, isScrolling]);
+  
+  // Gestionnaire de clic conditionnel pour éviter les clics accidentels pendant le défilement
+  const handleTabClick = useCallback((tabId: string) => {
+    if (preventClick) return;
+    onTabChange(tabId);
+  }, [preventClick, onTabChange]);
 
   const tabs = [
     {
@@ -209,7 +424,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabCh
       </div>
       
       <div 
-        className="tab-navigation-items" 
+        className={`tab-navigation-items ${isScrolling ? 'scrolling' : ''}`}
         ref={scrollContainerRef}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -223,11 +438,12 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabCh
           <button
             key={tab.id}
             ref={tab.id === activeTab ? activeTabRef : null}
-            onClick={() => onTabChange(tab.id)}
+            onClick={() => handleTabClick(tab.id)}
             className={`
               tab-navigation-item
               ${activeTab === tab.id ? 'active' : ''}
               flex items-center gap-2 transition-all
+              ${isScrolling ? 'touch-none' : ''}
             `}
             style={{ '--item-index': index } as React.CSSProperties}
             aria-current={activeTab === tab.id ? 'page' : undefined}

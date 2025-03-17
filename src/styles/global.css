@@ -1,0 +1,1390 @@
+/* Améliorations UI globales */
+
+/* Typographie plus lisible */
+body {
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Améliorations pour les cartes */
+.card, 
+.bg-card, 
+[class*="bg-white"], 
+[class*="dark:bg-gray-800"] {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+/* Amélioration des cartes d'apprentissage */
+.dark [class*="learning-item-card"],
+.dark [class*="learning-card"] {
+  background-color: #1e293b !important; /* slate-800 pour un meilleur contraste en mode sombre */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:root:not(.dark) [class*="learning-item-card"],
+:root:not(.dark) [class*="learning-card"] {
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Amélioration de la lisibilité du texte dans les cartes */
+.dark [class*="learning-item-card"] h3,
+.dark [class*="learning-card"] h3,
+.dark [class*="learning-item-card"] [class*="title"],
+.dark [class*="learning-card"] [class*="title"] {
+  color: #f8fafc !important; /* slate-50 pour un texte très clair en mode sombre */
+  font-weight: 600;
+}
+
+:root:not(.dark) [class*="learning-item-card"] h3,
+:root:not(.dark) [class*="learning-card"] h3,
+:root:not(.dark) [class*="learning-item-card"] [class*="title"],
+:root:not(.dark) [class*="learning-card"] [class*="title"] {
+  color: #0f172a !important; /* slate-900 pour un texte très foncé en mode clair */
+  font-weight: 600;
+}
+
+/* Amélioration de la lisibilité des descriptions et des textes secondaires */
+.dark [class*="learning-item-card"] p,
+.dark [class*="learning-card"] p,
+.dark [class*="learning-item-card"] [class*="text-gray"],
+.dark [class*="learning-card"] [class*="text-gray"] {
+  color: #cbd5e1 !important; /* slate-300 pour une meilleure lisibilité */
+}
+
+:root:not(.dark) [class*="learning-item-card"] p,
+:root:not(.dark) [class*="learning-card"] p,
+:root:not(.dark) [class*="learning-item-card"] [class*="text-gray"],
+:root:not(.dark) [class*="learning-card"] [class*="text-gray"] {
+  color: #334155 !important; /* slate-700 pour un bon contraste */
+}
+
+/* Effet de survol pour les cartes */
+[class*="learning-item-card"]:hover,
+[class*="learning-card"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Boutons améliorés */
+button, 
+.button,
+[class*="btn-"],
+[role="button"] {
+  transition: all 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+button:active, 
+.button:active,
+[class*="btn-"]:active,
+[role="button"]:active {
+  transform: translateY(1px);
+}
+
+/* Améliorations visuelles pour le mode clair */
+:root:not(.dark) {
+  --card-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  --card-border-color: rgba(0,0,0,0.1);
+  --text-primary: #1a202c;
+  --text-secondary: #334155;
+  --text-tertiary: #64748b;
+}
+
+:root:not(.dark) .text-gray-500,
+:root:not(.dark) .text-gray-600,
+:root:not(.dark) .text-gray-700 {
+  color: var(--text-secondary) !important;
+}
+
+:root:not(.dark) h1, 
+:root:not(.dark) h2, 
+:root:not(.dark) h3, 
+:root:not(.dark) h4 {
+  color: var(--text-primary) !important;
+}
+
+/* Amélioration spécifique pour mobile en mode clair */
+@media (max-width: 768px) {
+  :root:not(.dark) [class*="learning-item-card"],
+  :root:not(.dark) [class*="learning-card"] {
+    background-color: #f8fafc !important; /* Un léger fond gris pour mieux se détacher */
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+  
+  :root:not(.dark) [class*="learning-item-card"] h3,
+  :root:not(.dark) [class*="learning-card"] h3,
+  :root:not(.dark) [class*="learning-item-card"] [class*="title"],
+  :root:not(.dark) [class*="learning-card"] [class*="title"] {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  
+  :root:not(.dark) [class*="learning-item-card"] p,
+  :root:not(.dark) [class*="learning-card"] p {
+    font-size: 0.95rem;
+  }
+}
+
+/* Améliorations visuelles pour le mode sombre */
+.dark {
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.2);
+  --card-border-color: rgba(255,255,255,0.05);
+  --text-primary: #f8fafc;
+  --text-secondary: #e2e8f0;
+  --text-tertiary: #cbd5e0;
+}
+
+.dark .text-gray-300,
+.dark .text-gray-400,
+.dark .text-gray-500 {
+  color: var(--text-secondary) !important;
+}
+
+.dark h1, 
+.dark h2, 
+.dark h3, 
+.dark h4 {
+  color: var(--text-primary) !important;
+}
+
+/* Amélioration de l'affichage des badges et étiquettes */
+.badge, [class*="badge"] {
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Badges plus visibles en mode sombre */
+.dark .badge, 
+.dark [class*="badge"] {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+/* Badges plus visibles en mode clair */
+:root:not(.dark) .badge, 
+:root:not(.dark) [class*="badge"] {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #334155;
+}
+
+:root:not(.dark) .badge.bg-blue-100 {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+  border: none;
+}
+
+:root:not(.dark) .badge.bg-green-100 {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #15803d;
+  border: none;
+}
+
+:root:not(.dark) .badge.bg-yellow-100 {
+  background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
+  color: #854d0e;
+  border: none;
+}
+
+:root:not(.dark) .badge.bg-red-100 {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #b91c1c;
+  border: none;
+}
+
+/* Animations subtiles */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+/* Animation de pulsation pour les éléments actifs */
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+.active-pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Effet de focus amélioré */
+*:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  transition: box-shadow 0.2s ease;
+}
+
+/* Améliorations spécifiques pour la visibilité des éléments */
+/* Correction du texte dans le Dashboard (Calendrier et Objectifs) */
+.dark [class*="calendar-toggle"],
+.dark [class*="goals-header"],
+.dark [class*="calendar-header"],
+.dark [class*="filter-label"],
+.dark button[class*="export"],
+.dark [class*="export-button"],
+.dark [class*="filter-dropdown"] button,
+.dark [class*="filter"] button,
+.dark [class*="filter"] span,
+.dark [class*="filter-text"],
+.dark [class*="placeholder"],
+.dark [class*="select-text"],
+.dark [class*="dropdown-text"] {
+  color: #f1f5f9 !important; /* slate-100 pour un contraste élevé en mode sombre */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Léger effet d'ombre pour améliorer la lisibilité */
+}
+
+/* Correction de l'export button */
+.dark button[class*="export"],
+.dark [class*="export-button"] {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.dark button[class*="export"]:hover,
+.dark [class*="export-button"]:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Amélioration des champs de filtre */
+.dark [class*="select"],
+.dark [class*="dropdown"],
+.dark [class*="combobox"],
+.dark select,
+.dark option {
+  background-color: #1e293b !important; /* slate-800 */
+  color: #f1f5f9 !important; /* slate-100 */
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Amélioration de l'affichage des filtres pour la catégorie et le statut */
+.dark [class*="filter"] [class*="trigger"],
+.dark [class*="filter"] button[role="combobox"],
+.dark [class*="filter"] [role="combobox"] {
+  background-color: #334155 !important; /* slate-700 */
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Amélioration des placeholders dans les inputs */
+.dark input::placeholder,
+.dark textarea::placeholder,
+.dark select::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Correction des textes dans les cartes d'apprentissage */
+.dark [class*="learning-card"] p,
+.dark [class*="learning-card"] span,
+.dark [class*="learning-card"] div,
+.dark [class*="learning-item-card"] p,
+.dark [class*="learning-item-card"] span,
+.dark [class*="learning-item-card"] div {
+  color: #e2e8f0 !important; /* slate-200 pour une meilleure lisibilité */
+}
+
+.dark [class*="learning-card"] [class*="category"],
+.dark [class*="learning-card"] [class*="difficulty"],
+.dark [class*="learning-card"] [class*="tag"],
+.dark [class*="learning-item-card"] [class*="category"],
+.dark [class*="learning-item-card"] [class*="difficulty"],
+.dark [class*="learning-item-card"] [class*="tag"] {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+}
+
+/* Amélioration pour les cartes en mode clair sur mobile */
+@media (max-width: 768px) {
+  :root:not(.dark) [class*="learning-card"] p,
+  :root:not(.dark) [class*="learning-card"] span,
+  :root:not(.dark) [class*="learning-card"] div,
+  :root:not(.dark) [class*="learning-item-card"] p,
+  :root:not(.dark) [class*="learning-item-card"] span,
+  :root:not(.dark) [class*="learning-item-card"] div {
+    color: #334155 !important; /* slate-700 pour un bon contraste */
+  }
+  
+  /* Amélioration des filtres sur mobile */
+  :root:not(.dark) [class*="filter"] button,
+  :root:not(.dark) [class*="filter"] [role="combobox"],
+  :root:not(.dark) [class*="select-text"],
+  :root:not(.dark) [class*="dropdown-text"] {
+    background-color: #f1f5f9 !important; /* slate-100 */
+    color: #1e293b !important; /* slate-800 */
+    font-weight: 500;
+  }
+  
+  .dark [class*="filter"] button,
+  .dark [class*="filter"] [role="combobox"],
+  .dark [class*="select-text"],
+  .dark [class*="dropdown-text"] {
+    background-color: #334155 !important; /* slate-700 */
+    color: white !important;
+    font-weight: 500;
+  }
+}
+
+/* Amélioration spécifique pour le Dashboard en mode sombre sur mobile */
+@media (max-width: 768px) {
+  /* Correction spécifique pour "Show Calendar" et "Goals" */
+  .dark [class*="dashboard"] [class*="calendar-toggle"],
+  .dark [class*="dashboard"] [class*="show-calendar"],
+  .dark [class*="dashboard"] [class*="calendar-button"],
+  .dark [class*="dashboard"] [class*="goals-header"],
+  .dark [class*="dashboard"] [class*="goals-title"],
+  .dark [class*="dashboard"] [class*="section-title"],
+  .dark [class*="dashboard"] [class*="section-header"],
+  .dark [class*="dashboard"] button span {
+    color: #ffffff !important; /* Blanc pur */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    font-weight: 600;
+  }
+  
+  /* Assurer la visibilité des icônes dans le Dashboard */
+  .dark [class*="dashboard"] svg,
+  .dark [class*="calendar"] svg,
+  .dark [class*="goals"] svg {
+    color: #ffffff !important;
+    opacity: 1;
+  }
+  
+  /* Amélioration spécifique pour les textes des boutons du Dashboard */
+  .dark [class*="dashboard"] button,
+  .dark [class*="dashboard"] [role="button"] {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Amélioration des en-têtes de section dans le Dashboard */
+  .dark [class*="dashboard"] h2,
+  .dark [class*="dashboard"] h3,
+  .dark [class*="dashboard"] [class*="heading"] {
+    color: #f8fafc !important; /* slate-50 */
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Amélioration des cartes d'apprentissage en mode sombre sur mobile */
+@media (max-width: 768px) {
+  /* Fond des cartes d'apprentissage */
+  .dark [class*="learning-card"],
+  .dark [class*="learning-item-card"] {
+    background-color: #1e293b !important; /* slate-800 */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Titres des cartes d'apprentissage */
+  .dark [class*="learning-card"] h3,
+  .dark [class*="learning-card"] [class*="title"],
+  .dark [class*="learning-item-card"] h3,
+  .dark [class*="learning-item-card"] [class*="title"],
+  .dark [class*="learning-card"] [class*="header"],
+  .dark [class*="learning-item-card"] [class*="header"] {
+    color: #ffffff !important; /* Blanc pur */
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Contenu textuel principal des cartes */
+  .dark [class*="learning-card"] p,
+  .dark [class*="learning-card"] li,
+  .dark [class*="learning-card"] div > span,
+  .dark [class*="learning-item-card"] p,
+  .dark [class*="learning-item-card"] li,
+  .dark [class*="learning-item-card"] div > span {
+    color: #f1f5f9 !important; /* slate-100 */
+  }
+  
+  /* Texte des descriptions */
+  .dark [class*="learning-card"] [class*="description"],
+  .dark [class*="learning-item-card"] [class*="description"] {
+    color: #e2e8f0 !important; /* slate-200 */
+    line-height: 1.5;
+  }
+  
+  /* Textes secondaires et métadonnées */
+  .dark [class*="learning-card"] [class*="text-gray"],
+  .dark [class*="learning-item-card"] [class*="text-gray"],
+  .dark [class*="learning-card"] [class*="text-muted"],
+  .dark [class*="learning-item-card"] [class*="text-muted"],
+  .dark [class*="learning-card"] [class*="metadata"],
+  .dark [class*="learning-item-card"] [class*="metadata"] {
+    color: #cbd5e1 !important; /* slate-300 */
+  }
+  
+  /* Étiquettes et badges */
+  .dark [class*="learning-card"] [class*="tag"],
+  .dark [class*="learning-card"] [class*="badge"],
+  .dark [class*="learning-card"] [class*="category"],
+  .dark [class*="learning-card"] [class*="difficulty"],
+  .dark [class*="learning-card"] [class*="status"],
+  .dark [class*="learning-item-card"] [class*="tag"],
+  .dark [class*="learning-item-card"] [class*="badge"],
+  .dark [class*="learning-item-card"] [class*="category"],
+  .dark [class*="learning-item-card"] [class*="difficulty"],
+  .dark [class*="learning-item-card"] [class*="status"] {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+    font-weight: 500;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+  }
+  
+  /* Icônes et indicateurs visuels */
+  .dark [class*="learning-card"] svg,
+  .dark [class*="learning-item-card"] svg,
+  .dark [class*="learning-card"] [class*="icon"],
+  .dark [class*="learning-item-card"] [class*="icon"] {
+    color: #f8fafc !important; /* slate-50 */
+    opacity: 0.9;
+  }
+  
+  /* Boutons dans les cartes */
+  .dark [class*="learning-card"] button,
+  .dark [class*="learning-item-card"] button,
+  .dark [class*="learning-card"] [role="button"],
+  .dark [class*="learning-item-card"] [role="button"] {
+    color: #ffffff !important;
+    background-color: #334155; /* slate-700 */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  /* S'assurer que tous les compteurs et indicateurs sont visibles */
+  .dark [class*="learning-card"] [class*="count"],
+  .dark [class*="learning-item-card"] [class*="count"],
+  .dark [class*="learning-card"] [class*="stat"],
+  .dark [class*="learning-item-card"] [class*="stat"] {
+    color: #ffffff !important;
+    font-weight: 600;
+  }
+}
+
+/* CORRECTIONS CRITIQUES POUR MOBILE EN MODE SOMBRE - PRIORITÉ MAXIMALE */
+@media (max-width: 768px) {
+  /* Correction Dashboard - "Show Calendar" et "Goals" */
+  .dark [class*="dashboard"] [class*="calendar-toggle"],
+  .dark [class*="dashboard"] [class*="show-calendar"],
+  .dark [class*="dashboard"] [class*="goals-header"],
+  .dark [class*="dashboard"] [class*="section-title"] {
+    color: #ffffff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+    font-weight: 700 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Ciblage spécifique pour les boutons de calendrier et objectifs */
+  .dark button[class*="calendar"],
+  .dark [class*="calendar"] button,
+  .dark button[class*="goal"],
+  .dark [class*="goal"] button,
+  .dark [class*="dashboard"] button {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  }
+  
+  /* Force la visibilité du texte dans les boutons */
+  .dark [class*="dashboard"] button *,
+  .dark [class*="calendar"] button *,
+  .dark [class*="goal"] button * {
+    color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* CORRECTION POUR LES CARTES D'APPRENTISSAGE - Renforcement des sélecteurs */
+  .dark [class*="learning-card"],
+  .dark [class*="learning-item-card"] {
+    background-color: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) !important;
+  }
+  
+  /* Force la couleur du texte dans TOUS les éléments des cartes d'apprentissage */
+  .dark [class*="learning-card"] *,
+  .dark [class*="learning-item-card"] * {
+    color: #ffffff !important;
+  }
+  
+  /* Exceptions pour les textes secondaires */
+  .dark [class*="learning-card"] [class*="text-gray"] *,
+  .dark [class*="learning-item-card"] [class*="text-gray"] *,
+  .dark [class*="learning-card"] [class*="description"] *,
+  .dark [class*="learning-item-card"] [class*="description"] *,
+  .dark [class*="learning-card"] p,
+  .dark [class*="learning-item-card"] p {
+    color: #e2e8f0 !important;
+  }
+  
+  /* Sélecteurs extrêmement spécifiques pour les textes problématiques */
+  .dark [id*="dashboard"] [class*="calendar"] span,
+  .dark [id*="dashboard"] [class*="goal"] span,
+  .dark [id*="dashboard"] [class*="calendar"] div,
+  .dark [id*="dashboard"] [class*="goal"] div {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+  }
+  
+  /* Force également la visibilité des icônes SVG */
+  .dark [class*="dashboard"] svg *,
+  .dark [class*="calendar"] svg *,
+  .dark [class*="goal"] svg *,
+  .dark [class*="learning-card"] svg *,
+  .dark [class*="learning-item-card"] svg * {
+    fill: currentColor !important;
+    stroke: currentColor !important;
+    opacity: 1 !important;
+  }
+  
+  /* Surcharge pour les éléments qui pourraient avoir inline styles */
+  .dark [style*="color"] {
+    color: #ffffff !important;
+  }
+  
+  /* Étiquettes et badges avec priorité maximale */
+  .dark [class*="learning-card"] [class*="tag"],
+  .dark [class*="learning-card"] [class*="badge"],
+  .dark [class*="learning-card"] [class*="category"],
+  .dark [class*="learning-card"] [class*="difficulty"],
+  .dark [class*="learning-card"] [class*="status"],
+  .dark [class*="learning-item-card"] [class*="tag"],
+  .dark [class*="learning-item-card"] [class*="badge"],
+  .dark [class*="learning-item-card"] [class*="category"],
+  .dark [class*="learning-item-card"] [class*="difficulty"],
+  .dark [class*="learning-item-card"] [class*="status"] {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    font-weight: 600 !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3) !important;
+  }
+}
+
+/* CIBLAGE SPÉCIFIQUE POUR LE DASHBOARD ET LES LEARNING CARDS EN MODE SOMBRE SUR MOBILE */
+@media (max-width: 768px) {
+  /* Ciblage spécifique pour les boutons "Show Calendar" et "Goals" dans le Dashboard */
+  .dark .md\:hidden .grid.grid-cols-2 button span {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Amélioration des boutons eux-mêmes */
+  .dark .md\:hidden .grid.grid-cols-2 button {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  }
+
+  /* Ciblage spécifique pour le texte dans les cartes d'apprentissage */
+  .dark [class*="title"] h3,
+  .dark [class*="learning-card"] h3,
+  .dark [class*="learning-card"] [class*="title"],
+  .dark [class*="learning-item-card"] h3,
+  .dark [class*="learning-item-card"] [class*="title"] {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    font-weight: 700 !important;
+  }
+
+  /* Correction pour les textes avec gradient/transparent dans les cartes d'apprentissage */
+  .dark [class*="learning-card"] [class*="text-transparent"],
+  .dark [class*="learning-card"] [class*="bg-clip-text"],
+  .dark [class*="learning-item-card"] [class*="text-transparent"],
+  .dark [class*="learning-item-card"] [class*="bg-clip-text"] {
+    color: white !important;
+    -webkit-text-fill-color: white !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    background-image: none !important;
+  }
+
+  /* Correction pour les textes de description dans les cartes */
+  .dark [class*="learning-card"] p,
+  .dark [class*="learning-item-card"] p,
+  .dark [class*="learning-card"] [class*="description"],
+  .dark [class*="learning-item-card"] [class*="description"] {
+    color: #e2e8f0 !important; /* slate-200 pour une bonne lisibilité */
+  }
+}
+
+/* CIBLAGE PRÉCIS POUR LE DASHBOARD ET LES LEARNING CARDS */
+@media (max-width: 768px) {
+  /* Correction spécifique pour le texte des boutons "Show Calendar" et "Goals" sans affecter les icônes */
+  .dark .md\:hidden .grid.grid-cols-2 button span {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Ne pas modifier la couleur des SVG (icônes) */
+  .dark .md\:hidden .grid.grid-cols-2 button svg {
+    /* Laisser les couleurs originales des icônes */
+    color: inherit !important;
+    fill: currentColor !important;
+  }
+
+  /* Amélioration des boutons eux-mêmes */
+  .dark .md\:hidden .grid.grid-cols-2 button {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    /* Pas de modification de la couleur du texte au niveau du bouton */
+  }
+
+  /* Pour les cartes d'apprentissage - s'assurer que le texte est visible en mode sombre */
+  .dark .learning-item-card h3,
+  .dark [class*="learning-item-card"] h3,
+  .dark [class*="learning-card"] h3,
+  .dark .learning-item-card [class*="title"],
+  .dark [class*="learning-item-card"] [class*="title"],
+  .dark [class*="learning-card"] [class*="title"] {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    font-weight: 700 !important;
+  }
+
+  /* Pour le mode clair - s'assurer que le texte reste visible */
+  :root:not(.dark) .learning-item-card h3,
+  :root:not(.dark) [class*="learning-item-card"] h3,
+  :root:not(.dark) [class*="learning-card"] h3,
+  :root:not(.dark) .learning-item-card [class*="title"],
+  :root:not(.dark) [class*="learning-item-card"] [class*="title"],
+  :root:not(.dark) [class*="learning-card"] [class*="title"] {
+    color: #1e293b !important; /* slate-800 pour une bonne lisibilité en mode clair */
+    font-weight: 700 !important;
+  }
+}
+
+/* CORRECTIONS FINALES - PRIORITÉ MAXIMALE */
+@media (max-width: 768px) {
+  /* Restaurer les couleurs spécifiques des icônes pour Calendar (bleu) et Goals (vert) */
+  .dark .md\:hidden .grid.grid-cols-2 button svg.lucide-calendar {
+    color: #60a5fa !important; /* blue-400 pour Calendar */
+  }
+
+  .dark .md\:hidden .grid.grid-cols-2 button svg.lucide-target {
+    color: #4ade80 !important; /* green-400 pour Goals */
+  }
+  
+  /* Assurer uniquement que le texte du bouton est blanc - pas les icônes */
+  .dark .md\:hidden .grid.grid-cols-2 button span {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+    font-weight: 600 !important;
+  }
+  
+  /* Correction pour le contenu des cartes d'apprentissage lors de l'affichage ou édition */
+  /* Pour les dialogues et popups d'édition et de zoom */
+  .dark .dialog-content,
+  .dark [role="dialog"],
+  .dark .prose-dark,
+  .dark .tiptap,
+  .dark .ProseMirror {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+  }
+  
+  /* Pour le contenu rich text en mode édition */
+  .dark [contenteditable="true"],
+  .dark .tiptap {
+    background-color: #1e293b !important; 
+    color: #f1f5f9 !important;
+  }
+  
+  /* Pour les dialogues qui affichent le contenu agrandi */
+  .dark [class*="dialog-content"] *,
+  .dark [role="dialog"] * {
+    color: #f1f5f9 !important;
+  }
+  
+  /* Exception pour les icônes et les éléments qui doivent conserver leurs couleurs */
+  .dark [role="dialog"] svg,
+  .dark [class*="dialog-content"] svg {
+    color: inherit !important;
+  }
+
+  /* Correction pour les titres dans les cartes zoomées (expanded) */
+  .dark [role="dialog"] h1,
+  .dark [role="dialog"] h2,
+  .dark [role="dialog"] h3,
+  .dark [role="dialog"] h4,
+  .dark [role="dialog"] h5,
+  .dark [role="dialog"] h6,
+  .dark [class*="dialog-content"] h1,
+  .dark [class*="dialog-content"] h2,
+  .dark [class*="dialog-content"] h3,
+  .dark [class*="dialog-content"] h4,
+  .dark [class*="dialog-content"] h5,
+  .dark [class*="dialog-content"] h6 {
+    color: #ffffff !important;
+  }
+}
+
+/* CORRECTIONS SPÉCIFIQUES POUR LES PROBLÈMES D'INTERFACE */
+@media (max-width: 768px) {
+  /* Pour les champs d'édition dans les cartes en mode sombre */
+  .dark [contenteditable="true"],
+  .dark .tiptap,
+  .dark .ProseMirror,
+  .dark .tiptap p,
+  .dark .ProseMirror p,
+  .dark .tiptap h1, 
+  .dark .tiptap h2, 
+  .dark .tiptap h3,
+  .dark .ProseMirror h1,
+  .dark .ProseMirror h2,
+  .dark .ProseMirror h3 {
+    color: #f1f5f9 !important; /* slate-100 pour une bonne lisibilité */
+    background-color: #1e293b !important; /* slate-800 pour le fond */
+  }
+  
+  /* Correction pour les textes dans les sélecteurs de catégorie */
+  .dark [role="combobox"],
+  .dark [class*="select-trigger"],
+  .dark select,
+  .dark [role="option"],
+  .dark [class*="command-item"],
+  .dark [class*="select-item"] {
+    color: #f1f5f9 !important; /* slate-100 pour le texte */
+    background-color: #1e293b !important; /* slate-800 pour le fond */
+  }
+  
+  /* Correction pour l'étiquette "Categories" et "New" */
+  .dark [class*="select-group"] div,
+  .dark [class*="command-group"] div {
+    color: #94a3b8 !important; /* slate-400 pour une meilleure lisibilité */
+  }
+
+  /* Correction pour les options sélectionnées */
+  .dark [role="option"][aria-selected="true"],
+  .dark [class*="command-item"][aria-selected="true"],
+  .dark [class*="select-item"][aria-selected="true"] {
+    background-color: #334155 !important; /* slate-700 pour le fond sélectionné */
+    color: #ffffff !important; /* blanc pour le texte */
+  }
+
+  /* Correction pour l'input de recherche dans les selects/combobox */
+  .dark [class*="command-input"] input,
+  .dark [class*="select-group"] input {
+    color: #f1f5f9 !important; /* slate-100 pour le texte */
+    background-color: #1e293b !important; /* slate-800 pour le fond */
+  }
+
+  /* Pour s'assurer que les panels des selects sont visibles en mode sombre */
+  .dark [class*="select-content"],
+  .dark [class*="command"] {
+    background-color: #1e293b !important; /* slate-800 pour le fond */
+    border-color: #475569 !important; /* slate-600 pour la bordure */
+  }
+  
+  /* Correction pour les contenus des dialogues en mode sombre */
+  .dark [role="dialog"] .prose,
+  .dark [role="dialog"] .prose * {
+    color: #f1f5f9 !important; /* slate-100 pour le texte */
+  }
+}
+
+/* CORRECTIONS FINALES POUR LES PROBLÈMES D'INTERFACE CRITIQUE */
+/* Correction pour le titre invisible dans les cartes marquées comme maîtrisées */
+.dark [class*="border-emerald-400"] h3,
+.dark [class*="border-emerald-400"] [class*="title"],
+.dark [class*="from-emerald-50"] h3,
+.dark [class*="from-emerald-50"] [class*="title"] {
+  color: #0f172a !important; /* slate-900 pour une meilleure lisibilité sur fond clair */
+  text-shadow: none !important;
+}
+
+/* Correction pour le champ de saisie du titre en mode sombre */
+.dark input[placeholder="Enter title..."],
+.dark input[placeholder*="title"],
+.dark [class*="learning-card"] input[type="text"],
+.dark [class*="learning-item-card"] input[type="text"],
+.dark [class*="sm:text-xl"] {
+  background-color: #1e293b !important; /* slate-800 pour le fond */
+  color: #f8fafc !important; /* slate-50 pour le texte */
+  border-color: #475569 !important; /* slate-600 pour la bordure */
+}
+
+/* Pour assurer que les icônes de Dashboard ne sont pas remplies en mode mobile et sombre */
+@media (max-width: 768px) {
+  .dark .dashboard-calendar-button svg.lucide-calendar,
+  .dark .dashboard-goals-button svg.lucide-target {
+    fill: none !important; /* Force l'absence de remplissage */
+    stroke: currentColor !important; /* Utilise uniquement le contour */
+    stroke-width: 1.5px !important; /* Épaisseur de trait optimale */
+  }
+  
+  /* Pour Calendar, garde seulement le contour bleu */
+  .dark .dashboard-calendar-button svg.lucide-calendar {
+    color: #60a5fa !important; /* blue-400 */
+  }
+  
+  /* Pour Goals, garde seulement le contour vert */
+  .dark .dashboard-goals-button svg.lucide-target {
+    color: #4ade80 !important; /* green-400 */
+  }
+  
+  /* Correction spécifique pour le champ de titre des nouvelles cartes sur mobile */
+  .dark [class*="card-editor"] input,
+  .dark [class*="new-card"] input,
+  .dark [class*="card-form"] input {
+    background-color: #1e293b !important; /* slate-800 pour le fond */
+    color: #f8fafc !important; /* slate-50 pour le texte */
+    border-color: #475569 !important; /* slate-600 pour la bordure */
+  }
+  
+  /* Correction pour le titre de carte mastered en mode sombre sur mobile */
+  .dark [class*="mastered"] h3,
+  .dark [class*="mastered"] [class*="title"] {
+    color: #0f172a !important; /* slate-900 pour assurer la visibilité sur fond clair */
+  }
+  
+  /* Assure que tous les champs de saisie sont visibles en mode sombre mobile */
+  .dark input[type="text"],
+  .dark input[type="search"],
+  .dark input:not([type="checkbox"]):not([type="radio"]) {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #475569 !important;
+  }
+}
+
+/* CORRECTIONS FINALES POUR LA VISIBILITÉ DES TEXTES SPÉCIFIQUES SUR MOBILE */
+@media (max-width: 768px) {
+  /* Correction pour le texte "Organize and manage your learning notes" sur les cartes */
+  .dark [class*="learning"] [class*="description"],
+  .dark [class*="learning"] [class*="subtitle"],
+  .dark [class*="organize-text"],
+  .dark [class*="manage-text"],
+  .dark [class*="learning-description"] {
+    color: #f1f5f9 !important; /* slate-100 pour un contraste élevé */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Amélioration drastique du contraste texte/arrière-plan pour les cartes maîtrisées */
+  .dark [class*="mastered-card"] p,
+  .dark [class*="from-emerald-50"] p,
+  .dark [class*="border-emerald-400"] p,
+  .dark [class*="mastered"] p,
+  .dark [class*="mastered-card"] span,
+  .dark [class*="from-emerald-50"] span,
+  .dark [class*="border-emerald-400"] span,
+  .dark [class*="mastered"] span,
+  .dark [class*="mastered-card"] div,
+  .dark [class*="from-emerald-50"] div,
+  .dark [class*="border-emerald-400"] div,
+  .dark [class*="mastered"] div {
+    color: #0f172a !important; /* slate-900 pour assurer la lisibilité sur le fond clair */
+    font-weight: 500 !important; /* Légèrement plus gras pour augmenter le contraste */
+  }
+
+  /* Focus particulier sur le texte "updated minutes ago" dans les cartes maîtrisées */
+  .dark [class*="mastered-card"] [class*="meta"] span,
+  .dark [class*="from-emerald-50"] [class*="meta"] span,
+  .dark [class*="border-emerald-400"] [class*="meta"] span,
+  .dark [class*="mastered"] [class*="Clock"],
+  .dark [class*="mastered"] [class*="updated"],
+  .dark [class*="mastered"] [class*="ago"] {
+    color: #0f172a !important; /* slate-900 */
+    font-weight: 600 !important; /* Gras pour meilleure lisibilité */
+    opacity: 0.9 !important; /* Légèrement plus visible */
+  }
+
+  /* Pour le contenu HTML dans les cartes d'apprentissage maîtrisées */
+  .dark [class*="mastered"] [class*="prose"] p,
+  .dark [class*="mastered"] [class*="prose"] li,
+  .dark [class*="mastered"] [class*="prose"] span,
+  .dark [class*="mastered"] .prose-invert p,
+  .dark [class*="mastered"] .prose-invert li,
+  .dark [class*="mastered"] .prose-invert span,
+  .dark [class*="mastered"] [dangerouslySetInnerHTML] p,
+  .dark [class*="mastered"] [dangerouslySetInnerHTML] li {
+    color: #0f172a !important; /* slate-900 */
+    opacity: 0.95 !important;
+  }
+
+  /* Icônes toujours visibles dans les cartes maîtrisées */
+  .dark [class*="mastered"] svg,
+  .dark [class*="from-emerald-50"] svg,
+  .dark [class*="border-emerald-400"] svg {
+    color: currentColor !important; /* Préserve la couleur d'origine de l'icône */
+    opacity: 1 !important;
+    stroke: currentColor !important;
+  }
+  
+  /* Pour tous les p dans les cartes maîtrisées, sauf ceux ayant une classe de couleur spécifique */
+  .dark [class*="mastered"] p:not([class*="text-"]),
+  .dark [class*="from-emerald-50"] p:not([class*="text-"]),
+  .dark [class*="border-emerald-400"] p:not([class*="text-"]) {
+    color: #0f172a !important;
+  }
+}
+
+/* CORRECTIONS POUR LES PROBLÈMES SPÉCIFIQUES DES LEARNING CARDS SUR MOBILE EN MODE SOMBRE */
+@media (max-width: 768px) {
+  /* Amélioration de la visibilité du texte "Mark as Mastered" */
+  .dark [class*="learning"] button:has(.lucide-bookmark),
+  .dark [class*="learning"] button:has(svg[class*="bookmark"]) {
+    color: #4ade80 !important; /* green-400 pour une bonne visibilité */
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+    font-weight: 500;
+  }
+  
+  /* Amélioration de la visibilité pour le texte déjà mastered */
+  .dark [class*="learning"] button:has(.lucide-bookmark-check),
+  .dark [class*="learning"] button:has(svg[class*="bookmark-check"]) {
+    color: #10b981 !important; /* green-500 pour une meilleure visibilité */
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+    font-weight: 600;
+  }
+
+  /* Amélioration de la visibilité des icônes (hide, edit, download) sur fond sombre */
+  .dark [class*="learning"] button:has(.lucide-eye),
+  .dark [class*="learning"] button:has(.lucide-eye-off),
+  .dark [class*="learning"] button:has(.lucide-edit),
+  .dark [class*="learning"] button:has(.lucide-save),
+  .dark [class*="learning"] button:has(.lucide-download) {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: #f8fafc !important; /* slate-50 */
+  }
+  
+  /* Icônes elles-mêmes */
+  .dark [class*="learning"] .lucide-eye,
+  .dark [class*="learning"] .lucide-eye-off,
+  .dark [class*="learning"] .lucide-edit,
+  .dark [class*="learning"] .lucide-save,
+  .dark [class*="learning"] .lucide-download {
+    color: #60a5fa !important; /* blue-400 pour les rendre plus visibles */
+    stroke-width: 2px !important;
+  }
+
+  /* Pour le texte "Organize and manage your learning notes" */
+  .dark [class*="organize-text"],
+  .dark [class*="manage-text"],
+  .dark [class*="learning-description"],
+  .dark [class*="description"] p,
+  .dark [class*="learning-card"] [class*="introduction"],
+  .dark [class*="learning-card"] p[class*="intro"],
+  .dark [class*="header"] + p {
+    color: #f1f5f9 !important; /* slate-100 pour une excellente lisibilité */
+    opacity: 1 !important;
+    visibility: visible !important;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* CORRECTION URGENTE POUR LE TEXTE "ORGANIZE AND MANAGE" EN MODE SOMBRE SUR MOBILE */
+@media (max-width: 768px) {
+  /* Ciblage ultra-spécifique pour le texte d'introduction des cartes d'apprentissage */
+  .dark [class*="learning"] p[class*="text-muted"],
+  .dark [class*="learning"] p[class*="intro"],
+  .dark [class*="learning"] p[class*="description"],
+  .dark [class*="learning"] p[class*="subtitle"],
+  .dark [class*="learning"] p[class*="manage"],
+  .dark [class*="learning"] p[class*="organize"],
+  .dark [class*="learning"] p[class*="muted"],
+  .dark [class*="learning"] p:first-of-type,
+  .dark [class*="learning"] [class*="introduction"],
+  .dark [class*="learning"] [class*="page-description"],
+  .dark [class*="learning"] [role="paragraph"],
+  .dark [class*="learning"] [class*="headline"] + p {
+    color: #f8fafc !important; /* slate-50 pour garantir un contraste maximal */
+    opacity: 1 !important;
+    visibility: visible !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3) !important;
+    font-weight: 500 !important;
+  }
+  
+  /* Règles encore plus spécifiques pour déboguer le problème */
+  .dark [data-testid*="learning"],
+  .dark [id*="learning"],
+  .dark [class*="learning-tab"],
+  .dark [class*="learning-content"] {
+    & p, & div[class*="text"], & span[class*="text"] {
+      color: #f8fafc !important; /* slate-50 */
+    }
+    
+    & [class*="description"],
+    & [class*="intro"],
+    & [class*="subtitle"],
+    & [class*="muted"] {
+      color: #f8fafc !important; /* slate-50 */
+      opacity: 1 !important;
+    }
+  }
+  
+  /* Éviter que les règles pour les cartes mastered n'écrasent ce style */
+  .dark [class*="learning"] p:not([class*="mastered"]):not([class*="emerald"]) {
+    color: #f8fafc !important; /* slate-50 */
+  }
+  
+  /* Assurer une visibilité maximale avec !important multi-niveau */
+  .dark [class*="learning"] p.dark\:text-gray-500,
+  .dark [class*="learning"] .dark\:text-gray-500,
+  .dark [class*="learning"] .dark\:text-gray-400,
+  .dark [class*="learning"] .dark\:text-muted-foreground {
+    color: #f8fafc !important; /* slate-50 */
+  }
+  
+  /* Règle universelle pour déboguer en dernier recours */
+  .dark [class*="learning"] * {
+    color: inherit;
+  }
+  
+  .dark [class*="learning"] p {
+    color: #f8fafc !important; /* slate-50 */
+  }
+}
+
+/* Amélioration des boutons principaux en mode clair */
+:root:not(.dark) button.bg-blue-500,
+:root:not(.dark) button.bg-blue-600,
+:root:not(.dark) [class*="primary"] {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 8px;
+}
+
+:root:not(.dark) button.bg-blue-500:hover,
+:root:not(.dark) button.bg-blue-600:hover,
+:root:not(.dark) [class*="primary"]:hover {
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+  transform: translateY(-1px);
+}
+
+:root:not(.dark) button.bg-red-500,
+:root:not(.dark) button.bg-red-600 {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 2px 10px rgba(220, 38, 38, 0.3);
+  border-radius: 8px;
+}
+
+:root:not(.dark) button.bg-green-500,
+:root:not(.dark) button.bg-green-600 {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+  border-radius: 8px;
+}
+
+/* Amélioration des formulaires */
+:root:not(.dark) input,
+:root:not(.dark) textarea,
+:root:not(.dark) select {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+:root:not(.dark) input:focus,
+:root:not(.dark) textarea:focus,
+:root:not(.dark) select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  outline: none;
+}
+
+/* Styles spéciaux pour les cartes maîtrisées */
+:root:not(.dark) .mastered-card,
+:root:not(.dark) [class*="from-emerald-50"] {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border-color: #6ee7b7;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
+}
+
+/* Améliorations pour mobile */
+@media (max-width: 768px) {
+  :root:not(.dark) [class*="learning-item-card"],
+  :root:not(.dark) [class*="learning-card"] {
+    background-color: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  
+  :root:not(.dark) [class*="learning-item-card"] h3,
+  :root:not(.dark) [class*="learning-card"] h3,
+  :root:not(.dark) [class*="learning-item-card"] [class*="title"],
+  :root:not(.dark) [class*="learning-card"] [class*="title"] {
+    color: #0f172a !important;
+    font-weight: 700;
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+  
+  :root:not(.dark) [class*="learning-item-card"] p,
+  :root:not(.dark) [class*="learning-card"] p {
+    color: #334155 !important;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  /* Amélioration des filtres sur mobile */
+  :root:not(.dark) [class*="filter"] button,
+  :root:not(.dark) [class*="filter"] [role="combobox"],
+  :root:not(.dark) [class*="select-text"],
+  :root:not(.dark) [class*="dropdown-text"] {
+    background-color: #f1f5f9 !important;
+    color: #1e293b !important;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Améliorer la visibilité des statuts et badges */
+  :root:not(.dark) [class*="status"],
+  :root:not(.dark) [class*="priority"],
+  :root:not(.dark) [class*="difficulty"] {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Amélioration de l'affichage du calendrier */
+  :root:not(.dark) .Calendar,
+  :root:not(.dark) [class*="calendar"],
+  :root:not(.dark) [class*="date-picker"] {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+  }
+  
+  /* Jours du calendrier plus attrayants */
+  :root:not(.dark) .Calendar [role="gridcell"] button {
+    border-radius: 50%;
+    transition: all 0.2s ease;
+  }
+  
+  :root:not(.dark) .Calendar [role="gridcell"] button:hover {
+    background-color: #f1f5f9;
+    transform: scale(1.05);
+  }
+  
+  :root:not(.dark) .Calendar [role="gridcell"] button[data-state="active"],
+  :root:not(.dark) [class*="selected-day"] {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3);
+  }
+  
+  /* Améliorations spécifiques pour les composants Learning */
+  :root:not(.dark) .LearningGoals,
+  :root:not(.dark) [class*="goals"] {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 1rem;
+  }
+  
+  /* Amélioration de l'apparence du timer Pomodoro */
+  :root:not(.dark) .PomodoroTimer,
+  :root:not(.dark) [class*="pomodoro"] {
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 1rem;
+  }
+}
+
+/* Préservation des couleurs d'icônes */
+button svg, 
+[role="button"] svg,
+.preserve-colors svg,
+[class*="lucide-"] {
+  color: currentColor !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+}
+
+/* AMÉLIORATIONS DE LA NAVIGATION */
+/* Effet de focus bien visible pour l'accessibilité */
+.tab-navigation-item:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+}
+
+/* Animation des icônes du menu de navigation */
+.tab-navigation-item svg {
+  transform-origin: center;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.tab-navigation-item.active svg {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.6));
+}
+
+/* Amélioration de la lisibilité du texte dans la navigation */
+.tab-navigation-item span {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.tab-navigation-item.active span {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+/* Optimisations pour le menu sur dispositifs à haute résolution */
+@media (min-resolution: 192dpi) {
+  .tab-navigation-container {
+    background-size: 200% 200%;
+  }
+  
+  .tab-navigation-item {
+    border-width: 0.5px;
+  }
+}
+
+/* Amélioration pour le mode clair du menu */
+:root:not(.dark) .tab-navigation-container {
+  --menu-gradient-start: #4f46e5;
+  --menu-gradient-end: #3b82f6;
+  --menu-item-hover: rgba(255, 255, 255, 0.15);
+  --menu-item-active: rgba(255, 255, 255, 0.25);
+  --menu-item-shadow: rgba(0, 0, 0, 0.15);
+  --menu-indicator: #f59e0b;
+}
+
+/* Amélioration pour le mode sombre du menu */
+.dark .tab-navigation-container {
+  --menu-gradient-start: #111827;
+  --menu-gradient-end: #1e3a8a;
+  --menu-item-hover: rgba(255, 255, 255, 0.1);
+  --menu-item-active: rgba(255, 255, 255, 0.18);
+  --menu-item-shadow: rgba(0, 0, 0, 0.25);
+  --menu-indicator: #60a5fa;
+}
+
+/* Menu adaptatif sur tous les appareils avec des microinteractions subtiles */
+.tab-navigation-item:active {
+  transform: scale(0.98);
+}
+
+.tab-navigation-item.active:active {
+  transform: scale(0.98) translateY(-2px);
+}
+
+/* Améliorations de la navigation */
+/* Effet de focus bien visible pour l'accessibilité */
+.tab-navigation-item:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
+}
+
+/* Animation des icônes du menu de navigation */
+.tab-navigation-item svg {
+  transform-origin: center;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.tab-navigation-item.active svg {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+}
+
+/* Amélioration de la lisibilité du texte dans la navigation */
+.tab-navigation-item span {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.tab-navigation-item.active span {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Amélioration de l'accessibilité et du contraste */
+@media (prefers-reduced-motion: reduce) {
+  .tab-navigation-item {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .tab-navigation-item svg {
+    transition: none !important;
+  }
+}
+
+/* Optimisations globales pour les transitions de thème */
+.theme-transitions-enabled,
+.theme-transitions-enabled * {
+  transition-property: background-color, background-image, border-color, color, fill, stroke;
+  transition-duration: 0.5s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Désactiver les transitions pour les éléments clés pendant le défilement */
+.scrolling * {
+  transition: none !important;
+}
+
+/* Optimisations pour le rendu sur mobile */
+@media (max-width: 767px) {
+  html, body {
+    overflow-x: hidden;
+  }
+  
+  /* Améliorer les performances sur les éléments animés */
+  .tab-navigation-items,
+  .tab-navigation-item,
+  .mobile-logo,
+  [class*="learning-card"],
+  [class*="learning-item-card"] {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000;
+    will-change: transform;
+  }
+  
+  /* Optimiser le défilement sur tous les conteneurs */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Améliorer la performance des transitions */
+  .theme-transitions-enabled {
+    transition-delay: 0.15s;
+  }
+}
