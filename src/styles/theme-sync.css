@@ -1,16 +1,20 @@
 /* Synchronisation des thèmes pour transitions fluides et cohérence visuelle */
 
-/* Définir des transitions globales contrôlées pour tous les éléments */
-html:not(.theme-transitioning) * {
-  transition-property: background-color, border-color, color, fill, stroke;
+/* Définir des transitions globales pour tous les éléments */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
   transition-duration: 150ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Désactiver complètement les transitions pendant le changement de thème */
+/* Forcer l'application immédiate du mode clair/sombre sans délai */
+html {
+  transition: background-color 0.1s ease-out;
+}
+
+/* Forcer l'application immédiate du mode clair/sombre sans délai si la classe transitioning est active */
 html.theme-transitioning * {
   transition: none !important;
-  animation: none !important;
 }
 
 /* Styles de base pour le système de gestion des thèmes */
@@ -24,22 +28,10 @@ html[data-theme="dark"] {
 
 /* Animation du bouton de commutation */
 .theme-toggle-button {
-  position: relative;
-  will-change: opacity, transform;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Styles spécifiques pour le bouton de thème */
-.theme-toggle-button:not(:disabled):active {
-  transform: scale(0.97);
-}
-
-/* Stabiliser le rendu des icônes */
-.theme-toggle-button svg {
-  will-change: transform, opacity;
-  transform-origin: center;
-}
-
-/* Variables pour thème clair */
+/* Amélioration des styles pour les icônes et textes */
 html[data-theme="light"] {
   --card-bg: 255 255 255;
   --card-border: 226 232 240;
@@ -77,7 +69,6 @@ html[data-theme="light"] {
   --button-danger-text: 255 255 255;
 }
 
-/* Variables pour thème sombre */
 html[data-theme="dark"] {
   --card-bg: 30 41 59;
   --card-border: 51 65 85;
@@ -170,21 +161,4 @@ svg.lucide-info, [class*="info"] svg {
 .badge.bg-red-100, .badge.dark\:bg-red-800\/30 {
   background-color: rgb(var(--badge-bg-red));
   color: rgb(var(--badge-text-red));
-}
-
-/* Optimisations pour le mode mobile */
-@media (max-width: 768px) {
-  /* Force des styles spécifiques immédiats pour mobile */
-  html[data-theme="light"] body {
-    background-color: #ffffff !important;
-  }
-  
-  html[data-theme="dark"] body {
-    background-color: #0f172a !important;
-  }
-  
-  /* Stabiliser le bouton de thème sur mobile */
-  .theme-toggle-button {
-    transition: none !important;
-  }
 }

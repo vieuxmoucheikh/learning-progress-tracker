@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import '../styles/mobile-light-mode-fixes.css';
-import '../styles/critical-light-mode-fixes.css';
+import '../styles/critical-light-mode-fixes.css'; // Ajout de nos correctifs critiques
 
 type Theme = 'light' | 'dark';
 
@@ -16,7 +16,6 @@ interface ThemeContextType {
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
   isDark: boolean;
-  isChanging: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -38,9 +37,6 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
     // Default to light mode
     return defaultTheme === 'dark' ? 'dark' : 'light';
   });
-  
-  // Add a state to track if theme is changing to disable animations temporarily
-  const [isChanging, setIsChanging] = useState(false);
 
   // Listen for system preference changes if enabled
   useEffect(() => {
@@ -55,10 +51,9 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [enableSystem]);
 
-  // Apply theme changes to document with improved handling
+  // Apply theme changes to document
   useEffect(() => {
-    // Begin transition - disable all animations
-    setIsChanging(true);
+    // Apply theme transitioning class
     document.documentElement.classList.add('theme-transitioning');
     
     // Set attribute on html element - typically data-theme
@@ -85,57 +80,21 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
       document.documentElement.classList.remove('mobile-light-theme');
     }
     
-    // Handle direct body and root styling
-    if (theme === 'dark') {
-      document.body.style.backgroundColor = '#0f172a';
-      document.body.style.color = '#f8fafc';
-    } else {
-      document.body.style.backgroundColor = '#ffffff';
-      document.body.style.color = '#0f172a';
-    }
-    
-    // Apply immediate styles to fix theme toggle appearance issues
-    const themeToggle = document.querySelector('.theme-toggle-button');
-    if (themeToggle) {
-      if (theme === 'dark') {
-        themeToggle.classList.add('dark-theme-active');
-        themeToggle.classList.remove('light-theme-active');
-      } else {
-        themeToggle.classList.add('light-theme-active');
-        themeToggle.classList.remove('dark-theme-active');
-      }
-    }
-    
-    // Apply theme smoothly after a very short delay to allow DOM updates
+    // Apply theme smoothly
     const applyTheme = () => {
-      // Force a browser paint/reflow before removing transition class
-      document.body.getBoundingClientRect();
-      
-      // Remove transitioning class to allow normal transitions
-      document.documentElement.classList.remove('theme-transitioning');
-      
-      // Delay setting isChanging to false to ensure animations don't start too early
+      // Remove transitioning class after styles are applied
       setTimeout(() => {
-        setIsChanging(false);
-      }, 50);
+        document.documentElement.classList.remove('theme-transitioning');
+      }, 150);
     };
     
     // Apply with a slight delay to allow CSS transitions to work
-    setTimeout(applyTheme, 20);
+    setTimeout(applyTheme, 10);
     
   }, [theme, attribute]);
 
-  // Improved theme toggle with debounce to prevent rapid toggling
   const toggleTheme = () => {
-    if (isChanging) return; // Prevent toggling during transition
-    
-    // Set isChanging first to prevent multiple toggles
-    setIsChanging(true);
-    
-    // Toggle theme after very small delay to prevent flickering
-    setTimeout(() => {
-      setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-    }, 10);
+    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
   };
 
   const isDark = theme === 'dark';
@@ -145,7 +104,6 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
     setTheme,
     toggleTheme,
     isDark,
-    isChanging
   };
 
   return (

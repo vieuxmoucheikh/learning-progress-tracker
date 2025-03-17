@@ -2,42 +2,24 @@
  * Script pour corriger les problèmes de mode clair sur mobile et assurer une transition fluide
  */
 (function() {
-  // Variables pour gérer les transitions de thème
-  let isCurrentlyTransitioning = false;
-  let transitionTimer = null;
-  let themeChangeCount = 0;
-  
   function fixLightMode() {
     // Détecter si on est en mode clair
     const isLightMode = document.documentElement.getAttribute('data-theme') === 'light';
     const isMobile = window.innerWidth <= 768;
-    
-    // Protection contre les appels multiples en cours de transition
-    if (isCurrentlyTransitioning) {
-      return;
-    }
     
     // Ne pas appliquer les modifications pendant la transition de thème
     if (document.documentElement.classList.contains('theme-transitioning')) {
       return;
     }
     
-    // Marquer le début de la transition
-    isCurrentlyTransitioning = true;
-    
-    // Incrémenter le compteur de changements de thème
-    themeChangeCount++;
-    
-    // Stabiliser d'abord le bouton de changement de thème
-    stabilizeThemeToggleButton(isLightMode);
-
     if (isLightMode && isMobile) {
       // Forcer le fond en clair avec un léger dégradé
       const bgGradient = 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)';
       document.body.style.background = bgGradient;
       document.documentElement.style.background = bgGradient;
       
-      // Assurer que les cartes ont un fond blanc
+      // Assurer que les cartes ont un fond blanc - VERSION RENFORCÉE
+      // Sélecteurs très larges pour attraper toutes les cartes possibles
       const cardSelectors = [
         '.card', 
         '[class*="Card"]', 
@@ -65,7 +47,7 @@
         card.style.borderRadius = '12px';
         card.style.border = '1px solid rgba(0, 0, 0, 0.06)';
         
-        // Traiter également les enfants directs
+        // Traiter également les enfants directs qui peuvent avoir des backgrounds
         const children = card.children;
         for (let i = 0; i < children.length; i++) {
           children[i].style.backgroundColor = '#ffffff';
@@ -92,6 +74,7 @@
         button.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
         button.style.boxShadow = '0 2px 10px rgba(37, 99, 235, 0.3)';
         button.style.transform = 'translateY(0)';
+        button.style.transition = 'transform 0.2s, box-shadow 0.2s';
         button.style.color = '#ffffff';
       });
       
@@ -274,29 +257,6 @@
               border-color: #3b82f6 !important;
               box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
             }
-
-            /* Corrections pour le bouton de changement de thème */
-            .theme-toggle-button {
-              transition: none !important;
-              transform: none !important;
-              border-color: rgba(203, 213, 225, 0.8) !important;
-            }
-            
-            html[data-theme="light"] .theme-toggle-button {
-              background-color: white !important;
-              color: #0f172a !important;
-            }
-            
-            html[data-theme="dark"] .theme-toggle-button {
-              background-color: #1e293b !important;
-              color: #f8fafc !important;
-              border-color: #334155 !important;
-            }
-            
-            .theme-toggle-button svg {
-              transition: none !important;
-              transform: none !important;
-            }
           }
         `;
         document.head.appendChild(styleElement);
@@ -304,92 +264,43 @@
     } else if (!isLightMode && isMobile) {
       // Mode sombre sur mobile - s'assurer qu'il est correctement appliqué
       document.documentElement.classList.remove('mobile-light-theme-active');
-      document.body.style.backgroundColor = '#0f172a';
-      document.body.style.color = '#f8fafc';
+      document.body.style.removeProperty('background');
       document.documentElement.style.removeProperty('background');
       
       // Supprimer le style d'urgence
       const styleElement = document.getElementById('emergency-card-fix');
       if (styleElement) styleElement.remove();
-    }
-    
-    // Terminer la transition après un court délai
-    clearTimeout(transitionTimer);
-    transitionTimer = setTimeout(() => {
-      isCurrentlyTransitioning = false;
       
-      // Force un re-render si nécessaire
-      if (themeChangeCount > 1) {
-        // Force une re-peinture du DOM après multiples changements
-        document.body.style.display = 'none';
-        document.body.offsetHeight; // Force reflow
-        document.body.style.display = '';
+      // Restaurer les couleurs sombres
+      const cardSelectors = [
+        '.card', 
+        '[class*="Card"]', 
+        '[class*="-card"]',
+        '[class*="card"]',
+        '.mastered-card',
+        '.rounded-xl',
+        '.border-l-4'
+      ];
+      
+      // Sélectionner toutes les cartes
+      const cards = document.querySelectorAll(cardSelectors.join(','));
+      
+      // Réinitialiser les styles pour mode sombre
+      cards.forEach(card => {
+        card.style.removeProperty('background-color');
+        card.style.removeProperty('background');
+        card.style.removeProperty('box-shadow');
+        card.style.removeProperty('border-radius');
+        card.style.removeProperty('border');
         
-        // Reset le compteur
-        themeChangeCount = 0;
-      }
-    }, 200);
-  }
-  
-  // Fonction pour s'assurer que le bouton de changement de thème est stable
-  function stabilizeThemeToggleButton(isLightMode) {
-    const themeToggle = document.querySelector('.theme-toggle-button');
-    if (!themeToggle) return;
-    
-    // Désactiver toutes les transitions du bouton pendant les changements
-    themeToggle.style.transition = 'none';
-    
-    // Forcer les styles appropriés selon le thème
-    if (isLightMode) {
-      themeToggle.classList.add('light-mode-button');
-      themeToggle.classList.remove('dark-mode-button');
-      
-      // Force les styles exacts pour le mode clair
-      themeToggle.style.backgroundColor = '#ffffff';
-      themeToggle.style.borderColor = 'rgba(203, 213, 225, 0.8)';
-      themeToggle.style.color = '#0f172a';
-      
-      // Trouver et styliser les icônes
-      const sunIcon = themeToggle.querySelector('svg:first-of-type');
-      if (sunIcon) {
-        sunIcon.style.color = '#f59e0b';
-        sunIcon.style.opacity = '1';
-        sunIcon.style.transform = 'scale(1)';
-      }
-      
-      const moonIcon = themeToggle.querySelector('svg:last-of-type');
-      if (moonIcon) {
-        moonIcon.style.color = '#94a3b8';
-        moonIcon.style.opacity = '0.5';
-        moonIcon.style.transform = 'scale(0.75)';
-      }
-    } else {
-      themeToggle.classList.add('dark-mode-button');
-      themeToggle.classList.remove('light-mode-button');
-      
-      // Force les styles exacts pour le mode sombre
-      themeToggle.style.backgroundColor = '#1e293b';
-      themeToggle.style.borderColor = '#334155';
-      themeToggle.style.color = '#f8fafc';
-      
-      // Trouver et styliser les icônes
-      const sunIcon = themeToggle.querySelector('svg:first-of-type');
-      if (sunIcon) {
-        sunIcon.style.color = '#94a3b8';
-        sunIcon.style.opacity = '0.5';
-        sunIcon.style.transform = 'scale(0.75)';
-      }
-      
-      const moonIcon = themeToggle.querySelector('svg:last-of-type');
-      if (moonIcon) {
-        moonIcon.style.color = '#3b82f6';
-        moonIcon.style.opacity = '1';
-        moonIcon.style.transform = 'scale(1)';
-      }
+        // Traiter également les enfants directs
+        const children = card.children;
+        for (let i = 0; i < children.length; i++) {
+          children[i].style.removeProperty('background-color');
+          children[i].style.removeProperty('background');
+        }
+      });
     }
-    
-    // Force une repeinture du bouton
-    themeToggle.getBoundingClientRect();
   }
   
   // Si le DOM est déjà chargé, exécuter immédiatement
@@ -407,76 +318,17 @@
   const observer = new MutationObserver(mutations => {
     mutations.forEach(mutation => {
       if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
-        document.documentElement.classList.add('theme-transitioning');
-        stabilizeThemeToggleButton(document.documentElement.getAttribute('data-theme') === 'light');
-        
         // Attendre que la transition de thème soit terminée
-        setTimeout(() => {
-          fixLightMode();
-          setTimeout(() => {
-            document.documentElement.classList.remove('theme-transitioning');
-          }, 50);
-        }, 10);
+        setTimeout(fixLightMode, 200);
       }
     });
   });
   
   observer.observe(document.documentElement, { attributes: true });
   
-  // Ajouter des styles spécifiques pour stabiliser le bouton de thème
-  const themeToggleStyles = document.createElement('style');
-  themeToggleStyles.id = 'theme-toggle-stability';
-  themeToggleStyles.textContent = `
-    /* Styles pour stabiliser le bouton de thème */
-    .theme-toggle-button.theme-transitioning * {
-      transition: none !important;
-      animation: none !important;
-    }
-    
-    /* Mode clair */
-    .light-mode-button {
-      background-color: white !important;
-      border-color: rgba(203, 213, 225, 0.8) !important;
-      color: #0f172a !important;
-    }
-    
-    /* Mode sombre */
-    .dark-mode-button {
-      background-color: #1e293b !important;
-      border-color: #334155 !important;
-      color: #f8fafc !important;
-    }
-    
-    /* Fix pour les icônes Sun et Moon */
-    .light-mode-button svg:first-of-type {
-      color: #f59e0b !important;
-      opacity: 1 !important;
-      transform: scale(1) !important;
-    }
-    
-    .light-mode-button svg:last-of-type {
-      color: #94a3b8 !important;
-      opacity: 0.5 !important;
-      transform: scale(0.75) !important;
-    }
-    
-    .dark-mode-button svg:first-of-type {
-      color: #94a3b8 !important;
-      opacity: 0.5 !important;
-      transform: scale(0.75) !important;
-    }
-    
-    .dark-mode-button svg:last-of-type {
-      color: #3b82f6 !important;
-      opacity: 1 !important;
-      transform: scale(1) !important;
-    }
-  `;
-  document.head.appendChild(themeToggleStyles);
-  
   // Appliquer à l'initialisation et après chargement complet
   window.addEventListener('load', fixLightMode);
   
   // Réappliquer après un court délai pour attraper le contenu dynamique chargé après le DOM initial
-  setTimeout(fixLightMode, 300);
+  setTimeout(fixLightMode, 500);
 })();
