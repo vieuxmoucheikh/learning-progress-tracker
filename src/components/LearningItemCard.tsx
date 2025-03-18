@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/dialog";
 import './LearningItemCard.css';
 
-// Ajoutez hideFooterUrl à l'interface des props
+// Modifier l'interface Props pour supprimer hideFooterUrl
 interface Props {
   item: LearningItem;
   onUpdate: (id: string, updates: Partial<LearningItem>) => void;
@@ -56,7 +56,7 @@ interface Props {
   onNotesUpdate?: (id: string, notes: string) => void;
   onSetActiveItem?: (id: string | null) => void;
   onSessionNoteAdd?: (id: string, note: string) => void;
-  hideFooterUrl?: boolean; // Nouvelle prop pour cacher la section "Lien externe"
+  // hideFooterUrl a été supprimé
 }
 
 interface LocalSession {
@@ -91,7 +91,16 @@ const calculateTotalTimeSpent = (item: LearningItem) => {
   }, 0);
 };
 
-const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTracking, onNotesUpdate, onSetActiveItem, onSessionNoteAdd, hideFooterUrl }: Props) => {
+const LearningItemCard = ({ 
+  item, 
+  onUpdate, 
+  onDelete, 
+  onStartTracking, 
+  onStopTracking, 
+  onNotesUpdate, 
+  onSetActiveItem, 
+  onSessionNoteAdd 
+}: Props) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(item.title);
   const [editedNotes, setEditedNotes] = useState(item.notes || '');
@@ -110,10 +119,10 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
   const [copySuccess, setCopySuccess] = useState(false);
   const [isTitleEditing, setIsTitleEditing] = useState(false);
   
-  // Ajouter des états pour la section URL du bas
-  const [isFooterUrlEditing, setIsFooterUrlEditing] = useState(false);
-  const [editedFooterUrl, setEditedFooterUrl] = useState(item.footerUrl || item.url || '');
-  const [copyFooterSuccess, setCopyFooterSuccess] = useState(false);
+  // Supprimer les états suivants:
+  // const [isFooterUrlEditing, setIsFooterUrlEditing] = useState(false);
+  // const [editedFooterUrl, setEditedFooterUrl] = useState(item.footerUrl || item.url || '');
+  // const [copyFooterSuccess, setCopyFooterSuccess] = useState(false);
 
   const getActiveSession = () => {
     if (!item.progress?.sessions) return null;
@@ -1075,13 +1084,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     }
   }, [item.url]);
 
-  // Fonction pour ouvrir l'URL de pied de page dans un nouvel onglet
-  const handleOpenFooterUrl = useCallback(() => {
-    if (item.footerUrl) {
-      window.open(item.footerUrl, '_blank', 'noopener,noreferrer');
-    }
-  }, [item.footerUrl]);
-
   // Fonction pour copier l'URL dans le presse-papier (pour l'en-tête)
   const handleCopyUrl = useCallback(() => {
     if (item.url) {
@@ -1092,53 +1094,21 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     }
   }, [item.url]);
 
-  // Fonction pour copier l'URL dans le presse-papier (pour le pied de page)
-  const handleCopyFooterUrl = useCallback(() => {
-    if (item.footerUrl) {
-      navigator.clipboard.writeText(item.footerUrl).then(() => {
-        setCopyFooterSuccess(true);
-        setTimeout(() => setCopyFooterSuccess(false), 2000);
-      });
-    }
-  }, [item.footerUrl]);
-
   // Fonction pour enregistrer l'URL modifiée (pour l'en-tête)
   const handleUrlSave = useCallback(() => {
     if (editedUrl !== item.url) {
-      // Modification: Mise à jour de l'URL et synchronisation avec la section du bas
       const newUrl = editedUrl.trim();
       onUpdate(item.id, { url: newUrl });
-      
-      // Ne pas mettre à jour editedFooterUrl ici
-      // On laisse l'effet useEffect s'en charger si l'utilisateur navigue
     }
     setIsUrlEditing(false);
   }, [editedUrl, item.id, item.url, onUpdate]);
 
-  // Fonction pour enregistrer l'URL modifiée (pour le pied de page)
-  const handleFooterUrlSave = useCallback(() => {
-    if (editedFooterUrl !== item.footerUrl) {
-      // Modification: Mise à jour de l'URL et synchronisation avec la section du haut
-      const newUrl = editedFooterUrl.trim();
-      onUpdate(item.id, { footerUrl: newUrl });
-      
-      // Ne pas mettre à jour editedUrl ici
-      // On laisse l'effet useEffect s'en charger si l'utilisateur navigue
-    }
-    setIsFooterUrlEditing(false);
-  }, [editedFooterUrl, item.id, item.footerUrl, onUpdate]);
-
-  // Synchroniser les URLs lorsque l'élément change
+  // Simplifier l'effet useEffect qui synchronise les URLs
   useEffect(() => {
-    // On met à jour les valeurs éditées uniquement si l'utilisateur n'est pas
-    // actuellement en train de modifier l'une des URLs
     if (!isUrlEditing) {
       setEditedUrl(item.url || '');
     }
-    if (!isFooterUrlEditing) {
-      setEditedFooterUrl(item.footerUrl || '');
-    }
-  }, [item.url, item.footerUrl, isUrlEditing, isFooterUrlEditing]);
+  }, [item.url, isUrlEditing]);
 
   return (
     <div className="learning-item-card w-full">
@@ -1469,103 +1439,6 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               {renderDuration()}
             </div>
           </div>
-
-          {/* URL Section with editing functionality */}
-          {!hideFooterUrl && (item.url || isFooterUrlEditing) && (
-            <div className="mt-4 mb-4 border border-blue-100 dark:border-blue-800/50 rounded-lg p-3 bg-blue-50/50 dark:bg-blue-900/10">
-              <div className="flex items-center justify-between mb-2">
-                <h5 className="text-sm font-medium text-blue-700 dark:text-blue-300 flex items-center gap-1">
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  Lien externe
-                </h5>
-                <div className="flex items-center gap-1">
-                  {!isFooterUrlEditing && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleCopyFooterUrl}
-                        className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-100 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30"
-                        title="Copier le lien"
-                        disabled={!item.footerUrl}
-                      >
-                        {copyFooterSuccess ? <CheckCheck className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setIsFooterUrlEditing(true);
-                          setEditedFooterUrl(item.footerUrl || '');
-                        }}
-                        className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-100 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30"
-                        title="Modifier le lien"
-                      >
-                        <Edit className="h-3.5 w-3.5" />
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-              
-              {isFooterUrlEditing ? (
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="url"
-                    value={editedFooterUrl}
-                    onChange={(e) => setEditedFooterUrl(e.target.value)}
-                    placeholder="https://..."
-                    className="flex-1 text-sm border-blue-200 focus:ring-blue-500 dark:border-blue-700 dark:bg-gray-800 dark:text-white"
-                  />
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleFooterUrlSave}
-                      className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-900/30"
-                    >
-                      <Save className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setIsFooterUrlEditing(false);
-                        setEditedFooterUrl(item.footerUrl || '');
-                      }}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/30"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ) : item.footerUrl ? (
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-1">
-                  <a 
-                    href={item.footerUrl} 
-                    target="_blank"
-                    rel="noopener noreferrer" 
-                    className="text-sm text-blue-600 hover:underline dark:text-blue-400 break-all line-clamp-1 flex-1"
-                  >
-                    {item.footerUrl}
-                  </a>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleOpenFooterUrl}
-                    className="w-full sm:w-auto bg-white hover:bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-300 dark:border-blue-800/50 flex items-center justify-center gap-2"
-                  >
-                    <ExternalLink className="h-3.5 w-3.5" />
-                    Ouvrir
-                  </Button>
-                </div>
-              ) : (
-                <div className="text-sm text-gray-500 dark:text-gray-400 italic">
-                  Aucun lien défini
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Session History Section avec style amélioré */}
           <div className="space-y-4">

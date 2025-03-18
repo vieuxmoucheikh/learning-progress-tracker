@@ -489,7 +489,6 @@ export function DashboardTab({
                       onNotesUpdate={onNotesUpdate}
                       onSetActiveItem={onSetActiveItem}
                       onSessionNoteAdd={onSessionNoteAdd}
-                      hideFooterUrl={true}
                     />
                   </div>
                 ))}
