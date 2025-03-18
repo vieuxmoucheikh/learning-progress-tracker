@@ -316,11 +316,16 @@ export function DashboardTab({
               <Calendar 
                 items={items}
                 onDateSelect={(date) => {
+                  // Ne pas fermer le calendrier après sélection de date sur mobile
                   setSelectedDate(date);
                   onDateSelect(date);
+                  // Supprimé: setShowCalendar(false); - Ne pas fermer automatiquement
                 }}
                 selectedDate={selectedDate}
-                onAddItem={() => onAddItem(selectedDate)}
+                onAddItem={() => {
+                  onAddItem(selectedDate);
+                  // Supprimé: setShowCalendar(false); - Ne pas fermer automatiquement
+                }}
               />
             </div>
           </Card>
@@ -423,6 +428,7 @@ export function DashboardTab({
                   onDateSelect={(date) => {
                     setSelectedDate(date);
                     onDateSelect(date);
+                    // Ne pas modifier showCalendar ici
                   }}
                   selectedDate={selectedDate}
                   onAddItem={() => onAddItem(selectedDate)}
