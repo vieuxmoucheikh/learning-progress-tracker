@@ -794,3 +794,137 @@ html[data-theme="dark"] .fixed.z-50.bg-white.dark\:bg-gray-800 .text-gray-700,
 html[data-theme="dark"] .fixed.z-50.bg-white.dark\:bg-gray-800 .text-muted-foreground {
   color: #cbd5e1 !important; /* slate-300 */
 }
+
+/* AMÉLIORATION SPÉCIFIQUE POUR LES TEXTES "COMPLETED" ET LES CATÉGORIES DANS LES CARTES */
+html[data-theme="dark"] .learning-item-card [class*="status-"],
+html[data-theme="dark"] .learning-item-card [class*="category-"],
+html[data-theme="dark"] .item-card [class*="status-"],
+html[data-theme="dark"] .item-card [class*="category-"],
+html[data-theme="dark"] [class*="learning-item-"] [class*="status-"],
+html[data-theme="dark"] [class*="learning-item-"] [class*="category-"] {
+  background-color: rgba(51, 65, 85, 0.4) !important; /* slate-700 avec plus d'opacité */
+  color: #f8fafc !important; /* slate-50 - blanc froid très visible */
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  padding: 0.25rem 0.75rem !important;
+  border-radius: 9999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  letter-spacing: 0.025em !important;
+}
+
+/* STYLES SPÉCIFIQUES POUR CHAQUE STATUT DANS LES CARTES */
+html[data-theme="dark"] .learning-item-card .status-completed,
+html[data-theme="dark"] .item-card .status-completed,
+html[data-theme="dark"] [class*="learning-item-"] .status-completed {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(5, 150, 105, 0.4)) !important;
+  color: #6ee7b7 !important; /* emerald-300 */
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+html[data-theme="dark"] .learning-item-card .status-in_progress,
+html[data-theme="dark"] .item-card .status-in_progress,
+html[data-theme="dark"] [class*="learning-item-"] .status-in_progress {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(37, 99, 235, 0.4)) !important;
+  color: #93c5fd !important; /* blue-300 */
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+html[data-theme="dark"] .learning-item-card .status-not_started,
+html[data-theme="dark"] .item-card .status-not_started,
+html[data-theme="dark"] [class*="learning-item-"] .status-not_started {
+  background: linear-gradient(135deg, rgba(107, 114, 128, 0.4), rgba(75, 85, 99, 0.4)) !important;
+  color: #e5e7eb !important; /* gray-200 */
+  border: 1px solid rgba(107, 114, 128, 0.3) !important;
+}
+
+html[data-theme="dark"] .learning-item-card .status-on_hold,
+html[data-theme="dark"] .item-card .status-on_hold,
+html[data-theme="dark"] [class*="learning-item-"] .status-on_hold {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.4), rgba(217, 119, 6, 0.4)) !important;
+  color: #fcd34d !important; /* amber-300 */
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+html[data-theme="dark"] .learning-item-card .status-archived,
+html[data-theme="dark"] .item-card .status-archived,
+html[data-theme="dark"] [class*="learning-item-"] .status-archived {
+  background: linear-gradient(135deg, rgba(107, 114, 128, 0.3), rgba(75, 85, 99, 0.3)) !important;
+  color: #d1d5db !important; /* gray-300 */
+  border: 1px solid rgba(107, 114, 128, 0.2) !important;
+}
+
+/* STYLES SPÉCIFIQUES POUR CHAQUE CATÉGORIE DANS LES CARTES */
+html[data-theme="dark"] .learning-item-card .category-programming,
+html[data-theme="dark"] .item-card .category-programming,
+html[data-theme="dark"] [class*="learning-item-"] .category-programming {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(37, 99, 235, 0.4)) !important;
+  color: #93c5fd !important; /* blue-300 */
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+html[data-theme="dark"] .learning-item-card .category-design,
+html[data-theme="dark"] .item-card .category-design,
+html[data-theme="dark"] [class*="learning-item-"] .category-design {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.4), rgba(220, 38, 38, 0.4)) !important;
+  color: #fca5a5 !important; /* red-300 */
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+html[data-theme="dark"] .learning-item-card .category-business,
+html[data-theme="dark"] .item-card .category-business,
+html[data-theme="dark"] [class*="learning-item-"] .category-business {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(5, 150, 105, 0.4)) !important;
+  color: #6ee7b7 !important; /* emerald-300 */
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+html[data-theme="dark"] .learning-item-card .category-marketing,
+html[data-theme="dark"] .item-card .category-marketing,
+html[data-theme="dark"] [class*="learning-item-"] .category-marketing {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.4), rgba(217, 119, 6, 0.4)) !important;
+  color: #fcd34d !important; /* amber-300 */
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+html[data-theme="dark"] .learning-item-card .category-languages,
+html[data-theme="dark"] .item-card .category-languages,
+html[data-theme="dark"] [class*="learning-item-"] .category-languages {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(147, 51, 234, 0.4)) !important;
+  color: #c4b5fd !important; /* purple-300 */
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
+}
+
+html[data-theme="dark"] .learning-item-card .category-default,
+html[data-theme="dark"] .item-card .category-default,
+html[data-theme="dark"] [class*="learning-item-"] .category-default {
+  background: linear-gradient(135deg, rgba(71, 85, 105, 0.4), rgba(51, 65, 85, 0.4)) !important;
+  color: #e2e8f0 !important; /* slate-200 */
+  border: 1px solid rgba(71, 85, 105, 0.3) !important;
+}
+
+/* CORRECTION POUR LES TEXTES À L'INTÉRIEUR DES BADGES DE CATÉGORIE ET DE STATUT */
+html[data-theme="dark"] [class*="status-"] span,
+html[data-theme="dark"] [class*="category-"] span {
+  color: inherit !important;
+  font-weight: inherit !important;
+  text-shadow: inherit !important;
+}
+
+/* ADAPTATION POUR LES APPAREILS MOBILES - BADGES PLUS VISIBLES */
+@media (max-width: 768px) {
+  html[data-theme="dark"] .learning-item-card [class*="status-"],
+  html[data-theme="dark"] .learning-item-card [class*="category-"],
+  html[data-theme="dark"] .item-card [class*="status-"],
+  html[data-theme="dark"] .item-card [class*="category-"],
+  html[data-theme="dark"] [class*="learning-item-"] [class*="status-"],
+  html[data-theme="dark"] [class*="learning-item-"] [class*="category-"] {
+    font-size: 0.75rem !important;
+    padding: 0.2rem 0.65rem !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
+  }
+}
