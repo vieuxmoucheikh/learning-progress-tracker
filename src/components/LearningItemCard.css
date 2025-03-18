@@ -1435,80 +1435,96 @@ html[data-theme="dark"] span.text-gray-600 {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Amélioration drastique des statuts de session en mode sombre */
-html[data-theme="dark"] .badge.capitalize.font-medium {
+/* ==========================================================
+   CORRECTIF IMPORTANT: AMÉLIORATION DE LA VISIBILITÉ DES STATUTS DE SESSION
+   ========================================================== */
+
+/* Badges de statut de session toujours visibles en mode sombre */
+html[data-theme="dark"] .badge.capitalize.font-medium.bg-blue-100.text-blue-700.hover\:bg-blue-200.dark\:bg-blue-800\/30.dark\:text-blue-300.border.border-blue-300.dark\:border-blue-700,
+html[data-theme="dark"] .badge.capitalize.font-medium.bg-green-50.text-green-700.dark\:bg-green-800\/30.dark\:text-green-300.border.border-green-300.dark\:border-green-700,
+html[data-theme="dark"] .badge.capitalize.font-medium.bg-yellow-50.text-yellow-700.border-yellow-200.dark\:bg-yellow-800\/30.dark\:text-yellow-300.border.border-yellow-300.dark\:border-yellow-700 {
   font-weight: 700 !important;
-  letter-spacing: 0.03em !important;
   border-width: 2px !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
-}
-
-/* Statuts de session spécifiques avec grande priorité */
-html[data-theme="dark"] .badge.capitalize.font-medium:has(text="In Progress"),
-html[data-theme="dark"] .badge:contains("In Progress") {
-  background-color: rgba(30, 64, 175, 0.7) !important;
-  color: #dbeafe !important; /* blue-200 - très visible */
-  border: 2px solid #60a5fa !important; /* blue-400 */
-}
-
-html[data-theme="dark"] .badge.capitalize.font-medium:has(text="Completed"),
-html[data-theme="dark"] .badge:contains("Completed") {
-  background-color: rgba(22, 101, 52, 0.7) !important;
-  color: #d1fae5 !important; /* green-200 - très visible */
-  border: 2px solid #34d399 !important; /* green-400 */
-}
-
-html[data-theme="dark"] .badge.capitalize.font-medium:has(text="On Hold"),
-html[data-theme="dark"] .badge:contains("On Hold") {
-  background-color: rgba(133, 77, 14, 0.7) !important;
-  color: #fef3c7 !important; /* yellow-200 - très visible */
-  border: 2px solid #fbbf24 !important; /* yellow-400 */
-}
-
-/* Amélioration des compteurs d'état en haut à droite */
-html[data-theme="dark"] .text-xs.font-medium.bg-blue-500\/10 {
-  background-color: rgba(37, 99, 235, 0.3) !important;
-  color: #dbeafe !important; /* blue-200 - très visible */
-  border: 2px solid rgba(59, 130, 246, 0.7) !important; /* blue-500 */
-  font-weight: 700 !important;
-  padding: 0.25rem 0.75rem !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
-}
-
-html[data-theme="dark"] .text-xs.font-medium.bg-green-500\/10 {
-  background-color: rgba(22, 163, 74, 0.3) !important;
-  color: #d1fae5 !important; /* green-200 - très visible */
-  border: 2px solid rgba(34, 197, 94, 0.7) !important; /* green-500 */
-  font-weight: 700 !important;
-  padding: 0.25rem 0.75rem !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
-}
-
-/* Styles pour les petits textes indiquant des compteurs */
-html[data-theme="dark"] .text-sm.font-medium.text-gray-600,
-html[data-theme="dark"] span.text-gray-600,
-html[data-theme="dark"] .text-sm.text-gray-600,
-html[data-theme="dark"] .font-medium.text-gray-600 {
-  color: #e2e8f0 !important; /* gray-200 pour une visibilité bien meilleure */
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
-  font-weight: 600 !important;
-}
-
-/* Style ultra-spécifique pour le texte du type (à côté du badge de statut) */
-html[data-theme="dark"] .text-sm.font-medium.text-gray-600.dark\:text-gray-300 {
-  color: #f1f5f9 !important; /* slate-100 - extrêmement visible */
-  font-weight: 700 !important;
-}
-
-/* Correction critique pour les statuts "Completed", "In Progress", "On Hold" */
-html[data-theme="dark"] .badge.bg-blue-100.text-blue-700.hover\:bg-blue-200.dark\:bg-blue-800\/30.dark\:text-blue-300,
-html[data-theme="dark"] .badge.bg-green-50.text-green-700.dark\:bg-green-800\/30.dark\:text-green-300,
-html[data-theme="dark"] .badge.bg-yellow-50.text-yellow-700.border-yellow-200.dark\:bg-yellow-800\/30.dark\:text-yellow-300 {
-  border-width: 2px !important;
-  font-weight: 700 !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.03em !important;
+  letter-spacing: 0.05em !important;
+  padding: 4px 12px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Style spécifique pour In Progress */
+html[data-theme="dark"] .badge.capitalize.font-medium.bg-blue-100.text-blue-700.hover\:bg-blue-200.dark\:bg-blue-800\/30.dark\:text-blue-300.border.border-blue-300.dark\:border-blue-700 {
+  background-color: rgba(37, 99, 235, 0.8) !important;
+  color: white !important;
+  border-color: #60a5fa !important;
+}
+
+/* Style spécifique pour Completed */
+html[data-theme="dark"] .badge.capitalize.font-medium.bg-green-50.text-green-700.dark\:bg-green-800\/30.dark\:text-green-300.border.border-green-300.dark\:border-green-700 {
+  background-color: rgba(22, 163, 74, 0.8) !important;
+  color: white !important;
+  border-color: #4ade80 !important;
+}
+
+/* Style spécifique pour On Hold */
+html[data-theme="dark"] .badge.capitalize.font-medium.bg-yellow-50.text-yellow-700.border-yellow-200.dark\:bg-yellow-800\/30.dark\:text-yellow-300.border.border-yellow-300.dark\:border-yellow-700 {
+  background-color: rgba(202, 138, 4, 0.8) !important;
+  color: white !important;
+  border-color: #fcd34d !important;
+}
+
+/* ==========================================================
+   CORRECTIF IMPORTANT: AMÉLIORATION DES COMPTEURS SUPÉRIEURS
+   ========================================================== */
+
+/* Compteurs d'activité en haut à droite avec plus de visibilité */
+html[data-theme="dark"] .text-xs.font-medium.bg-blue-500\/10,
+html[data-theme="dark"] .text-xs.font-medium.bg-green-500\/10 {
+  background-color: rgba(15, 23, 42, 0.8) !important;
+  color: white !important;
+  border: 2px solid rgba(59, 130, 246, 0.7) !important;
+  font-weight: 700 !important;
+  padding: 5px 10px !important;
+  border-radius: 999px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Compteur spécifique "Active Tasks" */
+html[data-theme="dark"] .text-xs.font-medium.bg-blue-500\/10 {
+  background-color: rgba(37, 99, 235, 0.8) !important;
+  border-color: #60a5fa !important;
+}
+
+/* Compteur spécifique "Completed Today" */
+html[data-theme="dark"] .text-xs.font-medium.bg-green-500\/10 {
+  background-color: rgba(22, 163, 74, 0.8) !important;
+  border-color: #4ade80 !important;
+}
+
+/* Container pour les compteurs en haut à droite */
+html[data-theme="dark"] .flex.items-center:has(.text-xs.font-medium.bg-blue-500\/10),
+html[data-theme="dark"] .flex.items-center:has(.text-xs.font-medium.bg-green-500\/10) {
+  gap: 12px !important;
+}
+
+/* Textes de statut de session pour plus de lisibilité */
+html[data-theme="dark"] span:contains("Session Paused:"),
+html[data-theme="dark"] span:contains("Current Session:") {
+  background-color: rgba(30, 58, 138, 0.7) !important;
+  color: white !important;
+  font-weight: 700 !important;
+  border-radius: 999px !important;
+  padding: 6px 12px !important;
+  border: 2px solid rgba(59, 130, 246, 0.7) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Amélioration des textes "In Progress", "Completed", "On Hold" dans la carte */
+.capitalize.font-medium,
+.badge.capitalize.font-medium {
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
 }
