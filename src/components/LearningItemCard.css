@@ -1377,3 +1377,60 @@ html.dark body .item-wrapper [style*="background: #ffffff"] {
   background: #1e293b !important;
   color: #f8fafc !important;
 }
+
+/* Amélioration de la visibilité des textes de statut (Not Started, In Progress, etc.) */
+html[data-theme="dark"] .text-sm.font-medium.text-gray-600,
+html[data-theme="dark"] span.text-gray-600,
+html[data-theme="dark"] .capitalize.font-medium {
+  color: #e2e8f0 !important; /* text-gray-200 pour une meilleure visibilité */
+}
+
+/* Amélioration des status badges et des textes de statut */
+html[data-theme="dark"] .badge.capitalize.font-medium {
+  border-width: 1.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* Amélioration des statuts spécifiques */
+html[data-theme="dark"] .badge.capitalize.font-medium.bg-gray-100,
+html[data-theme="dark"] .badge.capitalize.font-medium.dark\:bg-gray-800 {
+  background-color: rgba(71, 85, 105, 0.5) !important;
+  color: #e2e8f0 !important;
+  border-color: #475569 !important;
+}
+
+html[data-theme="dark"] .badge.capitalize.font-medium.bg-blue-100,
+html[data-theme="dark"] .badge.capitalize.font-medium.dark\:bg-blue-800\/30 {
+  background-color: rgba(37, 99, 235, 0.5) !important;
+  color: #bfdbfe !important;
+  border-color: #3b82f6 !important;
+}
+
+html[data-theme="dark"] .badge.capitalize.font-medium.bg-green-100,
+html[data-theme="dark"] .badge.capitalize.font-medium.dark\:bg-green-800\/30 {
+  background-color: rgba(22, 163, 74, 0.5) !important;
+  color: #86efac !important;
+  border-color: #22c55e !important;
+}
+
+html[data-theme="dark"] .badge.capitalize.font-medium.bg-yellow-100,
+html[data-theme="dark"] .badge.capitalize.font-medium.dark\:bg-yellow-800\/30 {
+  background-color: rgba(202, 138, 4, 0.5) !important;
+  color: #fef08a !important;
+  border-color: #eab308 !important;
+}
+
+html[data-theme="dark"] .badge.capitalize.font-medium.bg-red-100,
+html[data-theme="dark"] .badge.capitalize.font-medium.dark\:bg-red-800\/30 {
+  background-color: rgba(220, 38, 38, 0.5) !important;
+  color: #fca5a5 !important;
+  border-color: #ef4444 !important;
+}
+
+/* Amélioration des status text span simples */
+html[data-theme="dark"] span.text-sm.font-medium.text-gray-600,
+html[data-theme="dark"] span.text-gray-600 {
+  color: #e2e8f0 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}

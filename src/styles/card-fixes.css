@@ -1581,3 +1581,74 @@ html[data-theme="dark"] .badge {
 }
 
 /* ...existing code... */
+
+/* Amélioration des badges de statut dans tous les contextes */
+.text-status-badge,
+.badge.capitalize.font-medium,
+[class*="status-"] {
+  letter-spacing: 0.02em !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important; 
+  font-size: 0.75rem !important;
+}
+
+/* Mode sombre - Amélioration des badges de statut */
+html[data-theme="dark"] .badge.capitalize.font-medium {
+  border-width: 2px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Styles spécifiques pour les badges de statut, spécifiquement en mode sombre */
+html[data-theme="dark"] .badge.bg-blue-100,
+html[data-theme="dark"] .badge.dark\:bg-blue-800\/30,
+html[data-theme="dark"] .badge.capitalize.font-medium.bg-blue-100,
+html[data-theme="dark"] .badge.capitalize.font-medium.dark\:bg-blue-800\/30 {
+  background-color: rgba(30, 64, 175, 0.5) !important;
+  color: #bfdbfe !important;
+  border-color: #3b82f6 !important;
+}
+
+html[data-theme="dark"] .badge.bg-green-100,
+html[data-theme="dark"] .badge.dark\:bg-green-800\/30,
+html[data-theme="dark"] .badge.capitalize.font-medium.bg-green-100,
+html[data-theme="dark"] .badge.capitalize.font-medium.dark\:bg-green-800\/30 {
+  background-color: rgba(22, 101, 52, 0.5) !important;
+  color: #86efac !important;
+  border-color: #22c55e !important;
+}
+
+html[data-theme="dark"] .badge.bg-yellow-100,
+html[data-theme="dark"] .badge.dark\:bg-yellow-800\/30,
+html[data-theme="dark"] .badge.capitalize.font-medium.bg-yellow-100,
+html[data-theme="dark"] .badge.capitalize.font-medium.dark\:bg-yellow-800\/30 {
+  background-color: rgba(133, 77, 14, 0.5) !important;
+  color: #fef08a !important;
+  border-color: #eab308 !important;
+}
+
+html[data-theme="dark"] .badge.bg-gray-100,
+html[data-theme="dark"] .badge.dark\:bg-gray-800,
+html[data-theme="dark"] .badge.capitalize.font-medium.bg-gray-100,
+html[data-theme="dark"] .badge.capitalize.font-medium.dark\:bg-gray-800 {
+  background-color: rgba(71, 85, 105, 0.5) !important;
+  color: #e2e8f0 !important;
+  border-color: #64748b !important;
+}
+
+/* Amélioration de tout texte d'état dans la carte */
+html[data-theme="dark"] .learning-item-card .text-sm,
+html[data-theme="dark"] .item-wrapper .text-sm {
+  color: #e2e8f0;
+}
+
+/* Style supplémentaire pour les statuts en mode sombre dans les cartes améliorées */
+html[data-theme="dark"] .enhanced-learning-card .badge,
+html[data-theme="dark"] .mastered-card .badge {
+  border-width: 2px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  padding: 0.25rem 0.5rem !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* ...existing code... */
