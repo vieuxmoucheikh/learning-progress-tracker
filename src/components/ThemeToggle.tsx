@@ -24,7 +24,7 @@ export function ThemeToggle() {
     >
       <div className="flex items-center gap-2">
         <Sun className={cn(
-          "h-4 w-4 transition-all duration-300 transform preserve-icon",
+          "h-4 w-4 transition-all duration-300 transform",
           theme === 'light' 
             ? "text-amber-500 scale-100 opacity-100" 
             : "text-gray-400 scale-90 opacity-60 translate-y-0"
@@ -49,7 +49,7 @@ export function ThemeToggle() {
         </span>
         
         <Moon className={cn(
-          "h-4 w-4 transition-all duration-300 transform preserve-icon",
+          "h-4 w-4 transition-all duration-300 transform",
           theme === 'dark' 
             ? "text-blue-400 scale-100 opacity-100" 
             : "text-gray-400 scale-90 opacity-60 -translate-y-0"

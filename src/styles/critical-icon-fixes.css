@@ -205,13 +205,6 @@ html[data-theme="dark"] .lucide-stop-circle,
   stroke-width: 2.5px !important;
 }
 
-/* Protection contre les problèmes de transition */
-.theme-transitioning svg[class*="lucide-"],
-.theme-transitioning .dark svg[class*="lucide-"],
-.theme-transitioning html[data-theme="dark"] svg[class*="lucide-"] {
-  transition: none !important;
-}
-
 /* CORRECTION POUR LES ICÔNES DANS LES BADGES ET BOUTONS */
 html[data-theme="dark"] button svg,
 .dark button svg,

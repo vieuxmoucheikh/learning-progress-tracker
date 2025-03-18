@@ -46,18 +46,13 @@
 }
 
 /* Transition pour les icônes et SVG */
-:root:not(.theme-transitioning) svg:not(.preserve-icon),
-:root:not(.theme-transitioning) [class*="icon"]:not(.preserve-icon),
-:root:not(.theme-transitioning) [class*="lucide"]:not(.preserve-icon) {
+:root:not(.theme-transitioning) svg,
+:root:not(.theme-transitioning) [class*="icon"],
+:root:not(.theme-transitioning) [class*="lucide"] {
   transition: 
     color var(--transition-duration) var(--transition-timing) var(--transition-delay),
-    fill var(--transition-duration) var (--transition-timing) var(--transition-delay),
+    fill var(--transition-duration) var(--transition-timing) var(--transition-delay),
     stroke var(--transition-duration) var(--transition-timing) var(--transition-delay);
-}
-
-/* Les icônes avec la classe preserve-icon sont exemptées de transitions pour éviter les glitches */
-.preserve-icon {
-  transition: transform var(--transition-duration) var(--transition-timing) !important;
 }
 
 /* Animation du bouton de changement de thème */
@@ -90,28 +85,6 @@
 /* Désactivation des transitions pendant le changement de thème */
 .theme-transitioning * {
   transition: none !important;
-}
-
-/* Exception pour les icônes qui doivent conserver leurs styles pendant la transition */
-.theme-transitioning svg[class*="lucide-"],
-.theme-transitioning [class*="lucide-"] {
-  fill: currentColor !important;
-  stroke: currentColor !important;
-}
-
-/* Mode sombre - exception pour certaines icônes */
-.theme-transitioning.dark svg[class*="lucide-"]:not(.lucide-play),
-.theme-transitioning html[data-theme="dark"] svg[class*="lucide-"]:not(.lucide-play) {
-  fill: none !important;
-  stroke: currentColor !important;
-  stroke-width: 2px !important;
-}
-
-/* Exception pour l'icône de lecture */
-.theme-transitioning.dark svg.lucide-play,
-.theme-transitioning html[data-theme="dark"] svg.lucide-play {
-  fill: currentColor !important;
-  stroke: currentColor !important;
 }
 
 /* Styles Mobile */
