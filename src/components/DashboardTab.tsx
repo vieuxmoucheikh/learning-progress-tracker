@@ -392,7 +392,7 @@ export function DashboardTab({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* Active Tasks - Full width on mobile, half width on desktop */}
         <div className="md:col-span-1">
-          <Card className="p-4 hover:shadow-md transition-shadow shadow-sm border-gray-200 dark:border-gray-700 h-full flex flex-col">
+          <Card className="p-4 hover:shadow-md transition-shadow shadow-sm border-gray-200 dark:border-gray-700 flex flex-col">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 bg-blue-50 dark:bg-blue-900/50 rounded-lg">
@@ -415,20 +415,22 @@ export function DashboardTab({
                 </div>
               </div>
             ) : (
-              <div className="flex-grow overflow-y-auto pr-2 mt-3">
-                {activeTasks.map((item) => (
-                  <LearningItemCard
-                    key={item.id}
-                    item={item}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                    onStartTracking={onStartTracking}
-                    onStopTracking={onStopTracking}
-                    onNotesUpdate={onNotesUpdate}
-                    onSetActiveItem={onSetActiveItem}
-                    onSessionNoteAdd={onSessionNoteAdd}
-                  />
-                ))}
+              <div className="flex-grow overflow-y-auto pr-2">
+                <div className="space-y-3">
+                  {activeTasks.map((item) => (
+                    <LearningItemCard
+                      key={item.id}
+                      item={item}
+                      onUpdate={onUpdate}
+                      onDelete={onDelete}
+                      onStartTracking={onStartTracking}
+                      onStopTracking={onStopTracking}
+                      onNotesUpdate={onNotesUpdate}
+                      onSetActiveItem={onSetActiveItem}
+                      onSessionNoteAdd={onSessionNoteAdd}
+                    />
+                  ))}
+                </div>
               </div>
             )}
           </Card>

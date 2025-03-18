@@ -39,4 +39,20 @@
     min-height: 0;
     max-height: calc(100% - 50px);
   }
+  
+  /* Ajustement précis pour les cartes "Active Tasks" et "Calendar" */
+  .md\:col-span-1 .card {
+    height: auto;
+    max-height: 450px;
+  }
+  
+  /* Limiter la hauteur de la zone de défilement des tâches actives */
+  .md\:col-span-1 .card .flex-grow.overflow-y-auto {
+    max-height: 340px;
+  }
+  
+  /* État vide des tâches actives */
+  .md\:col-span-1 .card .flex-grow.flex.items-center.justify-center {
+    max-height: 340px;
+  }
 }
