@@ -339,10 +339,10 @@ export function DashboardTab({
 
       {/* Stats Cards - Responsive Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        <Card className="p-3 md:p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border-blue-100 dark:border-blue-900/30 shadow-sm hover:shadow-md transition-all">
+        <Card className="p-3 md:p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/40 dark:to-blue-900/40 border-blue-100 dark:border-blue-800/30 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-              <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+              <Clock className="h-5 w-5 text-blue-600 dark:text-blue-300" />
             </div>
             <div>
               <p className="text-xs text-blue-700 dark:text-blue-300 font-medium">Study Time</p>
@@ -351,10 +351,10 @@ export function DashboardTab({
           </div>
         </Card>
 
-        <Card className="p-3 md:p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 border-green-100 dark:border-green-900/30 shadow-sm hover:shadow-md transition-all">
+        <Card className="p-3 md:p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-900/40 border-green-100 dark:border-green-800/30 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+            <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-lg">
+              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-300" />
             </div>
             <div>
               <p className="text-xs text-green-700 dark:text-green-300 font-medium">Completed</p>
@@ -363,10 +363,10 @@ export function DashboardTab({
           </div>
         </Card>
 
-        <Card className="p-3 md:p-4 bg-gradient-to-br from-purple-50 to-fuchsia-50 dark:from-purple-950/40 dark:to-fuchsia-950/40 border-purple-100 dark:border-purple-900/30 shadow-sm hover:shadow-md transition-all">
+        <Card className="p-3 md:p-4 bg-gradient-to-br from-purple-50 to-fuchsia-50 dark:from-purple-950/40 dark:to-fuchsia-900/40 border-purple-100 dark:border-purple-800/30 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-              <BookOpen className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            <div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
+              <BookOpen className="h-5 w-5 text-purple-600 dark:text-purple-300" />
             </div>
             <div>
               <p className="text-xs text-purple-700 dark:text-purple-300 font-medium">In Progress</p>
@@ -375,10 +375,10 @@ export function DashboardTab({
           </div>
         </Card>
 
-        <Card className="p-3 md:p-4 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/40 dark:to-yellow-950/40 border-amber-100 dark:border-amber-900/30 shadow-sm hover:shadow-md transition-all">
+        <Card className="p-3 md:p-4 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/40 dark:to-yellow-900/40 border-amber-100 dark:border-amber-800/30 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
-              <Trophy className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            <div className="p-2 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
+              <Trophy className="h-5 w-5 text-amber-600 dark:text-amber-300" />
             </div>
             <div>
               <p className="text-xs text-amber-700 dark:text-amber-300 font-medium">Streak</p>
@@ -420,10 +420,10 @@ export function DashboardTab({
         {/* Active Tasks - Full width on mobile, half width on desktop */}
         <div className="md:col-span-1">
           <Card className="p-4 hover:shadow-md transition-shadow shadow-sm border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                  <Clock className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                <div className="p-1.5 bg-blue-50 dark:bg-blue-900/50 rounded-lg">
+                  <Clock className="w-5 h-5 text-blue-500 dark:text-blue-300" />
                 </div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Active Tasks</h2>
               </div>
@@ -461,10 +461,10 @@ export function DashboardTab({
 
         {/* Completed Tasks - Full width on mobile */}
         <Card className="p-4 hover:shadow-md transition-shadow md:col-span-2 shadow-sm border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-green-50 dark:bg-green-900/30 rounded-lg">
-                <CheckCircle className="w-5 h-5 text-green-500 dark:text-green-400" />
+              <div className="p-1.5 bg-green-50 dark:bg-green-900/50 rounded-lg">
+                <CheckCircle className="w-5 h-5 text-green-500 dark:text-green-300" />
               </div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Completed Today</h2>
             </div>

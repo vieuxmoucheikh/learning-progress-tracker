@@ -242,20 +242,31 @@ html[data-theme="dark"] [class*="calendar-header"] {
 
 html[data-theme="dark"] .calendar-title,
 html[data-theme="dark"] [class*="calendar-title"] {
-  color: #f8fafc; /* slate-50 */
+  color: #f8fafc !important; /* slate-50 */
 }
 
 html[data-theme="dark"] .calendar-nav-button,
 html[data-theme="dark"] [class*="calendar"] button {
   background-color: #334155; /* slate-700 */
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #f8fafc; /* slate-50 */
+  color: #f8fafc !important; /* slate-50 */
 }
 
 html[data-theme="dark"] .calendar-selected,
 html[data-theme="dark"] [class*="calendar"] [class*="selected"] {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  color: white;
+  color: white !important;
+}
+
+/* Couleurs pour les indicateurs d'activité en mode sombre */
+html[data-theme="dark"] .calendar-has-activity::after,
+html[data-theme="dark"] [class*="calendar"] [class*="activity"]::after {
+  background-color: #60a5fa !important; /* blue-400 */
+}
+
+html[data-theme="dark"] .calendar-has-many-activities::after,
+html[data-theme="dark"] [class*="calendar"] [class*="many-activities"]::after {
+  background-color: #a78bfa !important; /* violet-400 */
 }
 
 /* Amélioration de l'apparence pour les weekends et jours spéciaux */
