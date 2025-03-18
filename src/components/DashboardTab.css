@@ -54,11 +54,20 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    flex: 1;
+    overflow: hidden;
   }
   
   .tasks-scroll-container {
     flex: 1;
     overflow-y: auto;
+    height: 100%;
+    max-height: unset;
+  }
+  
+  /* Set a fixed height for empty state to match calendar */
+  .text-center.py-6.flex-1.flex.flex-col.justify-center {
+    min-height: 350px;
   }
   
   /* Customize scrollbar for the tasks list */

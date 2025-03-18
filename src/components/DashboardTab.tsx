@@ -442,8 +442,8 @@ export function DashboardTab({
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Start tracking a task to see it here</p>
               </div>
             ) : (
-              <div className="flex-1 overflow-hidden tasks-container">
-                <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 tasks-scroll-container">
+              <div className="tasks-container">
+                <div className="tasks-scroll-container">
                   {activeTasks.map((item) => (
                     <LearningItemCard
                       key={item.id}
