@@ -27,80 +27,70 @@
 
 /* Ensure equal height between calendar and active tasks on desktop */
 @media (min-width: 768px) {
-  .grid.grid-cols-1.md\:grid-cols-2.gap-3.md\:gap-4 > div.md\:col-span-1 {
+  .grid.grid-cols-1.md\:grid-cols-2.gap-4.md\:gap-6 > div.md\:col-span-1 {
     display: flex;
     flex-direction: column;
   }
   
-  .grid.grid-cols-1.md\:grid-cols-2.gap-3.md\:gap-4 > div.md\:col-span-1 > .card {
+  .grid.grid-cols-1.md\:grid-cols-2.gap-4.md\:gap-6 > div.md\:col-span-1 > .card {
     display: flex;
     flex-direction: column;
   }
   
-  /* Calendar container specific height */
-  .calendar-container {
-    max-height: 400px !important;
-    overflow: auto !important;
+  /* Calendar sizing adjustments */
+  .calendar-wrapper {
+    transform: scale(0.92);
+    transform-origin: top center;
+    margin-bottom: -20px;
   }
   
-  /* Make sure the calendar is fully visible */
-  .calendar-container > div {
-    margin-bottom: 16px;
+  /* Fix for calendar height issue */
+  .calendar-wrapper table {
+    margin-bottom: 0 !important;
   }
   
-  /* Active tasks scrollable area */
-  .max-h-\[380px\] {
-    max-height: 380px !important;
+  /* Active tasks container */
+  .tasks-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
   
-  /* Optimize space usage overall */
-  .space-y-6 {
-    margin-top: 0.5rem;
-  }
-  
-  /* Reduce padding around main elements */
-  .p-3 {
-    padding: 0.75rem !important;
+  .tasks-scroll-container {
+    flex: 1;
+    overflow-y: auto;
   }
   
   /* Customize scrollbar for the tasks list */
-  .overflow-y-auto::-webkit-scrollbar {
-    width: 4px;
+  .space-y-3.overflow-y-auto::-webkit-scrollbar,
+  .tasks-scroll-container::-webkit-scrollbar {
+    width: 6px;
   }
   
-  .overflow-y-auto::-webkit-scrollbar-track {
+  .space-y-3.overflow-y-auto::-webkit-scrollbar-track,
+  .tasks-scroll-container::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.05);
     border-radius: 10px;
   }
   
-  .overflow-y-auto::-webkit-scrollbar-thumb {
+  .space-y-3.overflow-y-auto::-webkit-scrollbar-thumb,
+  .tasks-scroll-container::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.1);
     border-radius: 10px;
   }
   
-  .dark .overflow-y-auto::-webkit-scrollbar-track {
+  .dark .space-y-3.overflow-y-auto::-webkit-scrollbar-track,
+  .dark .tasks-scroll-container::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.05);
   }
   
-  .dark .overflow-y-auto::-webkit-scrollbar-thumb {
+  .dark .space-y-3.overflow-y-auto::-webkit-scrollbar-thumb,
+  .dark .tasks-scroll-container::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
   }
   
-  /* Reduce space between task cards */
-  .space-y-2 > * + * {
-    margin-top: 0.5rem !important;
-  }
-}
-
-/* Fix for header height */
-.hidden.md\:flex.justify-between.items-center {
-  margin-bottom: 0.75rem !important;
-}
-
-/* Smaller headers on desktop */
-@media (min-width: 768px) {
-  .text-2xl.font-bold {
-    font-size: 1.25rem !important;
-    margin-bottom: 0 !important;
+  /* Reduce space between elements */
+  .space-y-6 > * + * {
+    margin-top: 1rem !important;
   }
 }

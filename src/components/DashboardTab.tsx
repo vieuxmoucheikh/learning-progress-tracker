@@ -339,73 +339,73 @@ export function DashboardTab({
 
       {/* Stats Cards - Responsive Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        <Card className="p-2 md:p-3 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/40 dark:to-blue-900/40 border-blue-100 dark:border-blue-800/30 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
-              <Clock className="h-4 w-4 text-blue-600 dark:text-blue-300" />
+        <Card className="p-3 md:p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/40 dark:to-blue-900/40 border-blue-100 dark:border-blue-800/30 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+              <Clock className="h-5 w-5 text-blue-600 dark:text-blue-300" />
             </div>
             <div>
               <p className="text-xs text-blue-700 dark:text-blue-300 font-medium">Study Time</p>
-              <p className="text-base font-bold text-gray-900 dark:text-white">{stats.dailyTimeSpentHours}h {stats.dailyTimeSpentMinutes}m</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{stats.dailyTimeSpentHours}h {stats.dailyTimeSpentMinutes}m</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-2 md:p-3 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-900/40 border-green-100 dark:border-green-800/30 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-green-100 dark:bg-green-900/50 rounded-lg">
-              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-300" />
+        <Card className="p-3 md:p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-900/40 border-green-100 dark:border-green-800/30 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-lg">
+              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-300" />
             </div>
             <div>
               <p className="text-xs text-green-700 dark:text-green-300 font-medium">Completed</p>
-              <p className="text-base font-bold text-gray-900 dark:text-white">{completedTasks.length}</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{completedTasks.length}</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-2 md:p-3 bg-gradient-to-br from-purple-50 to-fuchsia-50 dark:from-purple-950/40 dark:to-fuchsia-900/40 border-purple-100 dark:border-purple-800/30 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
-              <BookOpen className="h-4 w-4 text-purple-600 dark:text-purple-300" />
+        <Card className="p-3 md:p-4 bg-gradient-to-br from-purple-50 to-fuchsia-50 dark:from-purple-950/40 dark:to-fuchsia-900/40 border-purple-100 dark:border-purple-800/30 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
+              <BookOpen className="h-5 w-5 text-purple-600 dark:text-purple-300" />
             </div>
             <div>
               <p className="text-xs text-purple-700 dark:text-purple-300 font-medium">In Progress</p>
-              <p className="text-base font-bold text-gray-900 dark:text-white">{activeTasks.length}</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{activeTasks.length}</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-2 md:p-3 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/40 dark:to-yellow-900/40 border-amber-100 dark:border-amber-800/30 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
-              <Trophy className="h-4 w-4 text-amber-600 dark:text-amber-300" />
+        <Card className="p-3 md:p-4 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/40 dark:to-yellow-900/40 border-amber-100 dark:border-amber-800/30 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
+              <Trophy className="h-5 w-5 text-amber-600 dark:text-amber-300" />
             </div>
             <div>
               <p className="text-xs text-amber-700 dark:text-amber-300 font-medium">Streak</p>
-              <p className="text-base font-bold text-gray-900 dark:text-white">{streak} days</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{streak} days</p>
             </div>
           </div>
         </Card>
       </div>
 
       {/* Main Content - Responsive Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* Calendar - Hidden on mobile, shown in dialog */}
         <div className="hidden md:block md:col-span-1 w-full">
-          <Card className="p-3 h-full w-full shadow-sm hover:shadow-md transition-all border-gray-200 dark:border-gray-700">
+          <Card className="p-4 h-full w-full shadow-sm hover:shadow-md transition-all border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-2 calendar-header">
               <div className="flex items-center gap-2">
-                <div className="p-1 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
                   <CalendarIcon 
-                    className="w-4 h-4 text-blue-500 dark:text-blue-400"
+                    className="w-5 h-5 text-blue-500 dark:text-blue-400"
                     fill="none"
                     strokeWidth={1.5} 
                   />
                 </div>
-                <h3 className="text-base font-semibold text-gray-900 dark:text-white">Calendar</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Calendar</h3>
               </div>
             </div>
-            <div className="calendar-container max-h-[400px] overflow-auto">
+            <div className="calendar-wrapper">
               <Calendar 
                 items={items}
                 onDateSelect={(date) => {
@@ -421,29 +421,29 @@ export function DashboardTab({
 
         {/* Active Tasks - Full width on mobile, half width on desktop */}
         <div className="md:col-span-1">
-          <Card className="p-3 hover:shadow-md transition-shadow shadow-sm border-gray-200 dark:border-gray-700 h-full flex flex-col">
+          <Card className="p-4 hover:shadow-md transition-shadow shadow-sm border-gray-200 dark:border-gray-700 h-full flex flex-col">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <div className="p-1 bg-blue-50 dark:bg-blue-900/50 rounded-lg">
-                  <Clock className="w-4 h-4 text-blue-500 dark:text-blue-300" />
+                <div className="p-1.5 bg-blue-50 dark:bg-blue-900/50 rounded-lg">
+                  <Clock className="w-5 h-5 text-blue-500 dark:text-blue-300" />
                 </div>
-                <h2 className="text-base font-semibold text-gray-900 dark:text-white">Active Tasks</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Active Tasks</h2>
               </div>
-              <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 text-xs py-0 px-2">
+              <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
                 {activeTasks.length}
               </Badge>
             </div>
             {activeTasks.length === 0 ? (
-              <div className="text-center py-4 flex-1 flex flex-col justify-center">
-                <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-2 mx-auto">
-                  <Clock className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+              <div className="text-center py-6 flex-1 flex flex-col justify-center">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3 mx-auto">
+                  <Clock className="h-6 w-6 text-gray-400 dark:text-gray-500" />
                 </div>
-                <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">No active tasks</h3>
+                <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">No active tasks</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Start tracking a task to see it here</p>
               </div>
             ) : (
-              <div className="flex-1 overflow-hidden">
-                <div className="space-y-2 max-h-[380px] overflow-y-auto pr-2">
+              <div className="flex-1 overflow-hidden tasks-container">
+                <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 tasks-scroll-container">
                   {activeTasks.map((item) => (
                     <LearningItemCard
                       key={item.id}
@@ -464,15 +464,15 @@ export function DashboardTab({
         </div>
 
         {/* Completed Tasks - Full width on mobile */}
-        <Card className="p-3 hover:shadow-md transition-shadow md:col-span-2 shadow-sm border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between mb-2">
+        <Card className="p-4 hover:shadow-md transition-shadow md:col-span-2 shadow-sm border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <div className="p-1 bg-green-50 dark:bg-green-900/50 rounded-lg">
-                <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-300" />
+              <div className="p-1.5 bg-green-50 dark:bg-green-900/50 rounded-lg">
+                <CheckCircle className="w-5 h-5 text-green-500 dark:text-green-300" />
               </div>
-              <h2 className="text-base font-semibold text-gray-900 dark:text-white">Completed Today</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Completed Today</h2>
             </div>
-            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300">
+            <span className="px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300">
               {completedTasks.length}
             </span>
           </div>
