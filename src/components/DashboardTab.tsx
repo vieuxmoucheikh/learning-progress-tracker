@@ -4,7 +4,7 @@ import { StreakDisplay } from "./StreakDisplay";
 import { Stats } from "./Stats";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
-import { Plus, BookOpen, CheckCircle, Clock, Target, Trophy, ChartBar, User, Library } from "lucide-react";
+import { Plus, BookOpen, CheckCircle, Clock, Target, Trophy, ChartBar, User, Library, ChevronDown, ChevronUp } from "lucide-react";
 import { LearningItem, Session } from "@/types";
 import { Calendar } from "./Calendar";
 import LearningItemCard from './LearningItemCard';
@@ -80,6 +80,7 @@ export function DashboardTab({
   const [showCalendar, setShowCalendar] = useState(false);
   const [showGoals, setShowGoals] = useState(false);
   const [streak, setStreak] = useState(0);
+  const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
 
   // Helper function to get date string in YYYY-MM-DD format
   const getDateStr = (date: Date | string) => {
@@ -430,9 +431,35 @@ export function DashboardTab({
                 </div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Active Tasks</h2>
               </div>
-              <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
-                {activeTasks.length}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                  {activeTasks.length > 0 ? `${currentTaskIndex + 1}/${activeTasks.length}` : '0'}
+                </Badge>
+                {activeTasks.length > 1 && (
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentTaskIndex(prev => (prev > 0 ? prev - 1 : prev))}
+                      disabled={currentTaskIndex === 0}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                      <span className="sr-only">Previous task</span>
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentTaskIndex(prev => (prev < activeTasks.length - 1 ? prev + 1 : prev))}
+                      disabled={currentTaskIndex >= activeTasks.length - 1}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                      <span className="sr-only">Next task</span>
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
             {activeTasks.length === 0 ? (
               <div className="flex-1 flex items-center justify-center">
@@ -445,28 +472,27 @@ export function DashboardTab({
                 </div>
               </div>
             ) : (
-              <div className="flex-1 overflow-y-auto pr-2" style={{ height: 'calc(100vh - 300px)' }}>
-                <div className="space-y-4">
-                  {activeTasks.map((item, index) => (
-                    <div key={item.id} className="snap-start snap-always">
-                      <LearningItemCard
-                        key={item.id}
-                        item={item}
-                        onUpdate={onUpdate}
-                        onDelete={onDelete}
-                        onStartTracking={onStartTracking}
-                        onStopTracking={onStopTracking}
-                        onNotesUpdate={onNotesUpdate}
-                        onSetActiveItem={onSetActiveItem}
-                        onSessionNoteAdd={onSessionNoteAdd}
-                        hideFooterUrl={true}
-                      />
-                      {index < activeTasks.length - 1 && (
-                        <div className="h-4"></div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+              <div className="flex-1" style={{ height: 'calc(100vh - 300px)' }}>
+                {activeTasks.map((item, index) => (
+                  <div 
+                    key={item.id}
+                    style={{ display: index === currentTaskIndex ? 'block' : 'none' }}
+                    className="h-full overflow-y-auto pr-2"
+                  >
+                    <LearningItemCard
+                      key={item.id}
+                      item={item}
+                      onUpdate={onUpdate}
+                      onDelete={onDelete}
+                      onStartTracking={onStartTracking}
+                      onStopTracking={onStopTracking}
+                      onNotesUpdate={onNotesUpdate}
+                      onSetActiveItem={onSetActiveItem}
+                      onSessionNoteAdd={onSessionNoteAdd}
+                      hideFooterUrl={true}
+                    />
+                  </div>
+                ))}
               </div>
             )}
           </Card>
