@@ -1870,90 +1870,148 @@ html[data-theme="dark"] .text-xs.font-medium.bg-green-500\/10 {
 
 /* Assurer que la hauteur du cadre "Active Tasks" corresponde à celle du calendrier sur desktop */
 @media (min-width: 768px) {
-  /* Conteneur parent pour les widgets */
+  /* Conteneurs des widgets du dashboard */
   .dashboard-widgets-container > div,
   .dashboard-top-row > div,
   .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3.gap-4 > div,
   [class*="dashboard"] [class*="grid"] > div,
-  [class*="Widget"] [class*="container"] > div {
-    height: 100% !important;
-  }
-
-  /* Cadre spécifique des tâches actives */
-  .dashboard-widgets-container .active-tasks-widget,
-  [class*="active-tasks"],
-  div:has(> [class*="ActiveTasks"]),
-  div:has(> h2:contains("Active Tasks")),
-  div:has(> h3:contains("Active Tasks")),
-  div:has(> div > h2:contains("Active Tasks")),
-  div:has(> div > h3:contains("Active Tasks")),
-  [class*="dashboard"] [class*="card"]:has(h2:contains("Active Tasks")),
-  [class*="dashboard"] [class*="card"]:has(h3:contains("Active Tasks")) {
+  div.md\:grid-cols-2 > div,
+  div.lg\:grid-cols-3 > div {
     height: 100% !important;
     display: flex !important;
     flex-direction: column !important;
   }
 
-  /* Contenu interne du widget des tâches actives */
-  .dashboard-widgets-container .active-tasks-widget > div,
-  [class*="active-tasks"] > div,
-  div:has(> [class*="ActiveTasks"]) > div,
-  div:has(> h2:contains("Active Tasks")) > div:nth-child(2),
-  div:has(> h3:contains("Active Tasks")) > div:nth-child(2),
-  div:has(> div > h2:contains("Active Tasks")) > div:nth-child(2),
-  div:has(> div > h3:contains("Active Tasks")) > div:nth-child(2),
-  [class*="dashboard"] [class*="card"]:has(h2:contains("Active Tasks")) > div:nth-child(2),
-  [class*="dashboard"] [class*="card"]:has(h3:contains("Active Tasks")) > div:nth-child(2) {
+  /* Conteneur direct des widgets (cartes) */
+  .dashboard-widgets-container > div > div,
+  .dashboard-top-row > div > div,
+  [class*="dashboard"] [class*="grid"] > div > div,
+  div.md\:grid-cols-2 > div > div,
+  div.lg\:grid-cols-3 > div > div {
+    height: 100% !important;
     flex: 1 !important;
-    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
-  /* Égaliser spécifiquement la hauteur entre le widget des tâches actives et le calendrier */
-  .dashboard-widgets-container > div:has(> [class*="calendar"]),
-  .dashboard-top-row > div:has(> [class*="calendar"]),
-  .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3.gap-4 > div:has(> [class*="calendar"]),
-  div:has(> [class*="Calendar"]),
-  div:has(> div > [class*="Calendar"]),
-  [class*="dashboard"] [class*="card"]:has([class*="Calendar"]) {
-    height: auto !important;
+  /* Widgets spécifiques avec hauteur égale */
+  .active-tasks-widget,
+  [class*="active-tasks"],
+  div:has(> h2:contains("Active Tasks")),
+  div:has(> h3:contains("Active Tasks")),
+  div:has(> div > h2:contains("Active Tasks")),
+  div:has(> div > h3:contains("Active Tasks")),
+  [class*="dashboard"] [class*="card"]:has(h2:contains("Active Tasks")),
+  [class*="dashboard"] [class*="card"]:has(h3:contains("Active Tasks")),
+  .calendar-widget,
+  [class*="calendar"],
+  div:has(.rdp),
+  [class*="dashboard"] [class*="card"]:has(.rdp) {
+    height: 100% !important;
     min-height: 380px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
   }
 
-  /* Conteneur des cartes de tâches actives pour assurer le défilement */
-  .active-tasks-widget .active-tasks-list,
-  [class*="active-tasks"] [class*="list"],
+  /* Toutes les cartes dans le dashboard sont étirées en hauteur */
+  .dashboard-widgets-container .card,
+  .dashboard-top-row .card,
+  [class*="dashboard"] [class*="grid"] .card,
+  div.md\:grid-cols-2 .card,
+  div.lg\:grid-cols-3 .card {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Conteneur de contenu des cartes */
+  .dashboard-widgets-container .card > div:not(:first-child),
+  .dashboard-top-row .card > div:not(:first-child),
+  [class*="dashboard"] [class*="grid"] .card > div:not(:first-child),
+  div.md\:grid-cols-2 .card > div:not(:first-child),
+  div.lg\:grid-cols-3 .card > div:not(:first-child) {
+    flex: 1 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Contenu défilable pour les widgets de tâches */
+  .active-tasks-widget [class*="grid"],
+  [class*="active-tasks"] [class*="grid"],
   div:has(> h2:contains("Active Tasks")) [class*="grid"],
   div:has(> h3:contains("Active Tasks")) [class*="grid"],
   div:has(> div > h2:contains("Active Tasks")) [class*="grid"],
   div:has(> div > h3:contains("Active Tasks")) [class*="grid"],
   [class*="dashboard"] [class*="card"]:has(h2:contains("Active Tasks")) [class*="grid"],
   [class*="dashboard"] [class*="card"]:has(h3:contains("Active Tasks")) [class*="grid"] {
-    max-height: calc(100% - 50px) !important;
+    flex: 1 !important;
     overflow-y: auto !important;
+    max-height: 100% !important;
+    padding-right: 2px !important;
+  }
+
+  /* Style de la barre de défilement */
+  .active-tasks-widget [class*="grid"]::-webkit-scrollbar,
+  [class*="active-tasks"] [class*="grid"]::-webkit-scrollbar {
+    width: 4px !important;
+  }
+
+  .active-tasks-widget [class*="grid"]::-webkit-scrollbar-track,
+  [class*="active-tasks"] [class*="grid"]::-webkit-scrollbar-track {
+    background: transparent !important;
+  }
+
+  .active-tasks-widget [class*="grid"]::-webkit-scrollbar-thumb,
+  [class*="active-tasks"] [class*="grid"]::-webkit-scrollbar-thumb {
+    background-color: rgba(100, 116, 139, 0.3) !important;
+    border-radius: 10px !important;
+  }
+
+  /* Assurer que le calendrier s'étend correctement */
+  .calendar-widget > div,
+  [class*="calendar"] > div,
+  div:has(.rdp) > div,
+  [class*="dashboard"] [class*="card"]:has(.rdp) > div {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Conteneur du calendrier */
+  .rdp-month,
+  .rdp,
+  [class*="calendar-container"] {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    height: 100% !important;
+  }
+
+  /* S'assurer que les widgets ont une hauteur égale sur les colonnes */
+  .dashboard-widgets-container > div,
+  .dashboard-top-row > div,
+  .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3.gap-4 > div,
+  [class*="dashboard"] [class*="grid"] > div {
+    display: flex !important;
+    min-height: 380px !important; /* hauteur minimale pour tous les widgets */
   }
 }
 
-/* Styles spécifiques pour les cartes dans la section des tâches actives */
-@media (min-width: 768px) {
-  /* Cartes dans la section des tâches actives */
-  .active-tasks-widget .card,
-  [class*="active-tasks"] .card,
-  div:has(> h2:contains("Active Tasks")) .card,
-  div:has(> h3:contains("Active Tasks")) .card,
-  div:has(> div > h2:contains("Active Tasks")) .card,
-  div:has(> div > h3:contains("Active Tasks")) .card,
-  [class*="dashboard"] [class*="card"]:has(h2:contains("Active Tasks")) .card,
-  [class*="dashboard"] [class*="card"]:has(h3:contains("Active Tasks")) .card {
-    margin-bottom: 12px !important;
-  }
-
-  /* Styles pour le widget du calendrier */
-  [class*="calendar-widget"],
-  [class*="Calendar"],
-  div:has(> [class*="Calendar"]),
-  div:has(> div > [class*="Calendar"]) {
-    height: 100% !important;
-    min-height: 380px !important;
+/* Ajustements supplémentaires pour les grandes résolutions */
+@media (min-width: 1200px) {
+  /* Augmenter légèrement la hauteur minimale sur les grands écrans */
+  .active-tasks-widget,
+  [class*="active-tasks"],
+  .calendar-widget,
+  [class*="calendar"],
+  div:has(.rdp),
+  .dashboard-widgets-container > div,
+  .dashboard-top-row > div,
+  [class*="dashboard"] [class*="grid"] > div {
+    min-height: 440px !important;
   }
 }
 

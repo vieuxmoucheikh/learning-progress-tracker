@@ -93,43 +93,132 @@
     }
   }
   
-  // Apply styles immediately
-  applyCounterStyles();
+  // Ajout d'une fonction pour égaliser les hauteurs des widgets sur le dashboard
+  function equalizeWidgetHeights() {
+    // Ne pas appliquer sur mobile
+    if (window.innerWidth < 768) return;
+    
+    // Trouver les widgets de calendrier et de tâches actives
+    const calendarWidgets = document.querySelectorAll('.calendar-widget, [class*="calendar"], div:has(.rdp)');
+    const taskWidgets = document.querySelectorAll('.active-tasks-widget, [class*="active-tasks"], div:has(h2:contains("Active Tasks")), div:has(h3:contains("Active Tasks"))');
+    
+    if (calendarWidgets.length === 0 || taskWidgets.length === 0) return;
+    
+    // Déterminer la hauteur de référence (calendrier)
+    let targetHeight = 380; // Hauteur minimale par défaut
+    
+    // Utiliser la hauteur du premier calendrier trouvé
+    calendarWidgets.forEach(calendar => {
+      const height = calendar.offsetHeight;
+      if (height > 100) { // Ignorer les hauteurs non significatives
+        targetHeight = Math.max(targetHeight, height);
+      }
+    });
+    
+    // Appliquer la hauteur aux widgets de tâches actives
+    taskWidgets.forEach(widget => {
+      // Définir les styles pour égaliser la hauteur
+      widget.style.height = `${targetHeight}px`;
+      widget.style.minHeight = `${targetHeight}px`;
+      widget.style.display = 'flex';
+      widget.style.flexDirection = 'column';
+      
+      // Trouver la liste des tâches
+      const taskList = widget.querySelector('[class*="grid"]');
+      if (taskList) {
+        taskList.style.flex = '1';
+        taskList.style.overflowY = 'auto';
+      }
+      
+      // Appliquer également aux cartes internes
+      const cards = widget.querySelectorAll('.card');
+      cards.forEach(card => {
+        card.style.height = '100%';
+        card.style.display = 'flex';
+        card.style.flexDirection = 'column';
+        
+        // Faire que le corps de la carte s'étende
+        const cardBody = card.querySelector('div:not(:first-child)');
+        if (cardBody) {
+          cardBody.style.flex = '1';
+          cardBody.style.display = 'flex';
+          cardBody.style.flexDirection = 'column';
+        }
+      });
+    });
+    
+    // S'assurer que les calendriers ont aussi la bonne hauteur
+    calendarWidgets.forEach(widget => {
+      widget.style.height = `${targetHeight}px`;
+      widget.style.minHeight = `${targetHeight}px`;
+    });
+  }
   
-  // Setup a MutationObserver to detect DOM changes and reapply styles
-  const observer = new MutationObserver((mutations) => {
-    for (const mutation of mutations) {
-      if (mutation.type === 'childList' || mutation.type === 'attributes') {
-        // Check if any counters were added or modified
-        const counters = document.querySelectorAll('.text-xs.font-medium.bg-blue-500\\/10, .text-xs.font-medium.bg-green-500\\/10');
-        if (counters.length > 0) {
-          applyCounterStyles();
-          break;
+  // Fonction d'initialisation
+  function initialize() {
+    // Appliquer les styles pour les compteurs
+    applyCounterStyles();
+    
+    // Égaliser les hauteurs après un court délai pour s'assurer que les éléments sont rendus
+    setTimeout(equalizeWidgetHeights, 500);
+    
+    // Observer les changements DOM
+    const observer = new MutationObserver((mutations) => {
+      let shouldUpdateStyles = false;
+      let shouldUpdateHeights = false;
+      
+      for (const mutation of mutations) {
+        if (mutation.type === 'childList' || 
+            (mutation.type === 'attributes' && mutation.attributeName === 'class')) {
+          
+          // Vérifier si des compteurs ont été modifiés
+          const counters = document.querySelectorAll('.text-xs.font-medium.bg-blue-500\\/10, .text-xs.font-medium.bg-green-500\\/10');
+          if (counters.length > 0) {
+            shouldUpdateStyles = true;
+          }
+          
+          // Vérifier si des widgets du dashboard ont été modifiés
+          const dashboardWidgets = document.querySelectorAll('.calendar-widget, .active-tasks-widget, [class*="calendar"], [class*="active-tasks"]');
+          if (dashboardWidgets.length > 0) {
+            shouldUpdateHeights = true;
+          }
         }
       }
-    }
-  });
-  
-  // Start observing DOM changes when document is fully loaded
-  window.addEventListener('load', () => {
-    observer.observe(document.body, { 
-      childList: true, 
+      
+      if (shouldUpdateStyles) {
+        applyCounterStyles();
+      }
+      
+      if (shouldUpdateHeights) {
+        equalizeWidgetHeights();
+      }
+    });
+    
+    // Observer les changements dans le DOM
+    observer.observe(document.body, {
+      childList: true,
       subtree: true,
       attributes: true,
       attributeFilter: ['class', 'style']
     });
     
-    // Also reapply styles periodically to make sure they're not lost
-    setInterval(applyCounterStyles, 2000);
-  });
-  
-  // For immediate application, also observe current DOM
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    observer.observe(document.body, { 
-      childList: true, 
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['class', 'style']
+    // S'assurer que la hauteur est ajustée au redimensionnement
+    window.addEventListener('resize', () => {
+      equalizeWidgetHeights();
     });
+    
+    // Réappliquer périodiquement
+    setInterval(() => {
+      if (window.location.href.includes('dashboard')) {
+        equalizeWidgetHeights();
+      }
+    }, 2000);
+  }
+  
+  // Initialiser le script
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize);
+  } else {
+    initialize();
   }
 })();
