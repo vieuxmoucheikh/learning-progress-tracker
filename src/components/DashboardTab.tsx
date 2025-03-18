@@ -391,8 +391,8 @@ export function DashboardTab({
       {/* Main Content - Responsive Layout */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Calendar Card - Full width on mobile, 2/3 width on desktop */}
-        <div className="md:col-span-2 h-full">
-          <Card className="p-4 hover:shadow-md transition-shadow shadow-sm border-gray-200 dark:border-gray-700 h-full flex flex-col">
+        <div className="md:col-span-2">
+          <Card className="p-4 hover:shadow-md transition-shadow shadow-sm border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 bg-green-50 dark:bg-green-900/50 rounded-lg">
@@ -405,24 +405,22 @@ export function DashboardTab({
               </Button>
             </div>
             {showCalendar && (
-              <div className="flex-1">
-                <Calendar 
-                  items={items}
-                  onDateSelect={(date) => {
-                    setSelectedDate(date);
-                    onDateSelect(date);
-                  }}
-                  selectedDate={selectedDate}
-                  onAddItem={() => onAddItem(selectedDate)}
-                />
-              </div>
+              <Calendar 
+                items={items}
+                onDateSelect={(date) => {
+                  setSelectedDate(date);
+                  onDateSelect(date);
+                }}
+                selectedDate={selectedDate}
+                onAddItem={() => onAddItem(selectedDate)}
+              />
             )}
           </Card>
         </div>
 
         {/* Active Tasks - Full width on mobile, 1/3 width on desktop */}
-        <div className="md:col-span-1 h-full">
-          <Card className="p-4 hover:shadow-md transition-shadow shadow-sm border-gray-200 dark:border-gray-700 h-full flex flex-col">
+        <div className="md:col-span-1">
+          <Card className="p-4 hover:shadow-md transition-shadow shadow-sm border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 bg-blue-50 dark:bg-blue-900/50 rounded-lg">
@@ -435,17 +433,15 @@ export function DashboardTab({
               </Badge>
             </div>
             {activeTasks.length === 0 ? (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3">
-                    <Clock className="h-6 w-6 text-gray-400 dark:text-gray-500" />
-                  </div>
-                  <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">No active tasks</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Start tracking a task to see it here</p>
+              <div className="text-center py-6">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3">
+                  <Clock className="h-6 w-6 text-gray-400 dark:text-gray-500" />
                 </div>
+                <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">No active tasks</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Start tracking a task to see it here</p>
               </div>
             ) : (
-              <div className="flex-1 overflow-y-auto pr-2 space-y-3">
+              <div className="max-h-[calc(100vh-350px)] md:max-h-[500px] overflow-y-auto pr-2 space-y-3">
                 {activeTasks.map((item) => (
                   <LearningItemCard
                     key={item.id}
