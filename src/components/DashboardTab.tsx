@@ -457,7 +457,7 @@ export function DashboardTab({
                     onNotesUpdate={onNotesUpdate}
                     onSetActiveItem={onSetActiveItem}
                     onSessionNoteAdd={onSessionNoteAdd}
-                    hideFooterUrl={true} // Ajout d'une prop pour cacher la partie "Lien externe"
+                    hideFooterUrl={true} // Cette prop sera maintenant correctement utilisée
                   />
                 ))}
               </div>

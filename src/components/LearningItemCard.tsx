@@ -1471,7 +1471,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
           </div>
 
           {/* URL Section with editing functionality */}
-          {(item.url || isFooterUrlEditing) && (
+          {!hideFooterUrl && (item.url || isFooterUrlEditing) && (
             <div className="mt-4 mb-4 border border-blue-100 dark:border-blue-800/50 rounded-lg p-3 bg-blue-50/50 dark:bg-blue-900/10">
               <div className="flex items-center justify-between mb-2">
                 <h5 className="text-sm font-medium text-blue-700 dark:text-blue-300 flex items-center gap-1">
