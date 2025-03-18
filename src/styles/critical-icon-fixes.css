@@ -703,23 +703,23 @@ html[data-theme="dark"] body [class*="description"] {
 /* CORRECTIFS SPÉCIFIQUES POUR LES ICÔNES DANS LES SECTIONS DU DASHBOARD */
 html[data-theme="dark"] .p-2.bg-blue-50,
 html[data-theme="dark"] .p-2.bg-blue-100,
-html[data-theme="dark"] .p-1_5.bg-blue-50,
+html[data-theme="dark"] .p-1\.5.bg-blue-50,
 html[data-theme="dark"] .p-2.bg-green-50,
 html[data-theme="dark"] .p-2.bg-green-100,
-html[data-theme="dark"] .p-1.5.bg-green-50,
+html[data-theme="dark"] .p-1\.5.bg-green-50,
 html[data-theme="dark"] .p-2.bg-purple-50,
 html[data-theme="dark"] .p-2.bg-purple-100,
-html[data-theme="dark"] .p-1.5.bg-purple-50,
+html[data-theme="dark"] .p-1\.5.bg-purple-50,
 html[data-theme="dark"] .p-2.bg-amber-50,
 html[data-theme="dark"] .p-2.bg-amber-100,
-html[data-theme="dark"] .p-1.5.bg-amber-50 {
+html[data-theme="dark"] .p-1\.5.bg-amber-50 {
   background-color: rgba(30, 58, 138, 0.3) !important; /* Fond bleu foncé semi-transparent */
 }
 
 /* Couleurs pour les icônes spécifiques dans les cartes du dashboard */
 html[data-theme="dark"] .p-2.bg-blue-50 svg,
 html[data-theme="dark"] .p-2.bg-blue-100 svg,
-html[data-theme="dark"] .p-1.5.bg-blue-50 svg {
+html[data-theme="dark"] .p-1_5.bg-blue-50 svg {
   color: #93c5fd !important; /* blue-300 */
   stroke: #93c5fd !important;
   fill: none !important;
@@ -727,7 +727,7 @@ html[data-theme="dark"] .p-1.5.bg-blue-50 svg {
 
 html[data-theme="dark"] .p-2.bg-green-50 svg,
 html[data-theme="dark"] .p-2.bg-green-100 svg,
-html[data-theme="dark"] .p-1.5.bg-green-50 svg {
+html[data-theme="dark"] .p-1_5.bg-green-50 svg {
   color: #6ee7b7 !important; /* green-300 */
   stroke: #6ee7b7 !important;
   fill: none !important;
@@ -735,7 +735,7 @@ html[data-theme="dark"] .p-1.5.bg-green-50 svg {
 
 html[data-theme="dark"] .p-2.bg-purple-50 svg,
 html[data-theme="dark"] .p-2.bg-purple-100 svg,
-html[data-theme="dark"] .p-1.5.bg-purple-50 svg {
+html[data-theme="dark"] .p-1_5.bg-purple-50 svg {
   color: #c4b5fd !important; /* purple-300 */
   stroke: #c4b5fd !important;
   fill: none !important;
@@ -743,7 +743,7 @@ html[data-theme="dark"] .p-1.5.bg-purple-50 svg {
 
 html[data-theme="dark"] .p-2.bg-amber-50 svg,
 html[data-theme="dark"] .p-2.bg-amber-100 svg,
-html[data-theme="dark"] .p-1.5.bg-amber-50 svg {
+html[data-theme="dark"] .p-1_5.bg-amber-50 svg {
   color: #fcd34d !important; /* amber-300 */
   stroke: #fcd34d !important;
   fill: none !important;
