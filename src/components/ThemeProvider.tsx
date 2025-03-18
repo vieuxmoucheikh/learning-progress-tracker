@@ -49,21 +49,20 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
     
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [enableSystem]);
+  }, [enableSystem, setTheme]);
 
   // Apply theme changes to document
   useEffect(() => {
-    // Apply theme transitioning class
-    document.documentElement.classList.add('theme-transitioning');
-    
-    // Set attribute on html element - typically data-theme
-    const attrName = attribute || 'data-theme';
-    document.documentElement.setAttribute(attrName, theme);
-    
     // Store the preference
     localStorage.setItem('theme', theme);
     
-    // Add specific class for styling targeting
+    // Add transitioning class before changing to prevent flicker
+    document.documentElement.classList.add('theme-transitioning');
+    
+    // Set data-theme attribute
+    document.documentElement.setAttribute(attribute || 'data-theme', theme);
+    
+    // Also set class for compatibility
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
       document.documentElement.classList.remove('light');

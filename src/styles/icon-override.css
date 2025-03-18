@@ -103,8 +103,8 @@ html[data-theme="dark"] h6 {
  */
 
 /* FORCE L'ABSENCE DE REMPLISSAGE POUR TOUTES LES ICÔNES LUCIDE */
-html[data-theme="dark"] [class*="lucide-"],
-.dark [class*="lucide-"] {
+html[data-theme="dark"] [class*="lucide-"]:not(.theme-toggle-icon),
+.dark [class*="lucide-"]:not(.theme-toggle-icon) {
   fill: none !important;
   stroke: currentColor !important;
   stroke-width: 2px !important;
@@ -115,6 +115,19 @@ html[data-theme="dark"] [class*="lucide-"],
 /* EXCEPTIONS POUR LES ICÔNES QUI DOIVENT AVOIR UN REMPLISSAGE */
 html[data-theme="dark"] .lucide-play,
 .dark .lucide-play {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* Éviter les problèmes de transition */
+.theme-transitioning svg[class*="lucide-"]:not(.lucide-play) {
+  transition: none !important;
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+.theme-transitioning svg.lucide-play {
+  transition: none !important;
   fill: currentColor !important;
   stroke: currentColor !important;
 }
