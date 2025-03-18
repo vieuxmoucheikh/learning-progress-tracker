@@ -214,10 +214,8 @@ html[data-theme="dark"] [role="button"] svg,
 .dark [role="button"] svg {
   fill: none !important;
   stroke: currentColor !important;
-  stroke-width: 2px !important;
-  transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease !important;
 }
- 
+
 /* FORCAGE DES ATTRIBUTS SVG DIRECTEMENT */
 html[data-theme="dark"] svg *,
 .dark svg * {
@@ -702,122 +700,136 @@ html[data-theme="dark"] body [class*="description"] {
   font-weight: 500 !important;
 }
 
-/* CORRECTIFS POUR LA TRANSITION ENTRE LES MODES CLAIR ET SOMBRE */
-/* Ces règles s'appliquent pendant et après la transition de thème */
-html:is([data-theme="dark"], [data-theme="light"]) body svg,
-html:is([data-theme="dark"], [data-theme="light"]) body [class*="lucide-"] {
-  transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease, color 0.2s ease !important;
-  stroke-linecap: round !important;
-  stroke-linejoin: round !important;
-  vector-effect: non-scaling-stroke !important;
+/* CORRECTIFS SPÉCIFIQUES POUR LE BOUTON DE BASCULEMENT DE THÈME */
+html[data-theme="dark"] [role="button"][aria-label*="theme"],
+html[data-theme="dark"] [role="button"][aria-label*="mode"],
+html[data-theme="dark"] button[aria-label*="theme"],
+html[data-theme="dark"] button[aria-label*="mode"],
+.dark [role="button"][aria-label*="theme"],
+.dark [role="button"][aria-label*="mode"],
+.dark button[aria-label*="theme"],
+.dark button[aria-label*="mode"] {
+  position: relative;
+  z-index: 50;
+  transition: background-color 0.3s ease, transform 0.2s ease !important;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  background-color: #1e293b !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Assurer que les icônes maintiennent leurs styles pendant la transition de thème */
-html body svg,
-html body [class*="lucide-"] {
+/* ICÔNES DANS LE BOUTON DE BASCULEMENT DE THÈME */
+html[data-theme="dark"] [role="button"][aria-label*="theme"] svg,
+html[data-theme="dark"] [role="button"][aria-label*="mode"] svg,
+html[data-theme="dark"] button[aria-label*="theme"] svg,
+html[data-theme="dark"] button[aria-label*="mode"] svg,
+.dark [role="button"][aria-label*="theme"] svg,
+.dark [role="button"][aria-label*="mode"] svg,
+.dark button[aria-label*="theme"] svg,
+.dark button[aria-label*="mode"] svg {
   fill: none !important;
-  stroke: currentColor !important;
+  stroke: #f8fafc !important;
   stroke-width: 2px !important;
-  transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease, color 0.2s ease !important;
+  transition: stroke 0.3s ease !important;
 }
 
-/* Règles pour les icônes spécifiques comme play, pause et stop pendant la transition */
-html body .lucide-play {
-  fill: currentColor !important;
-  stroke: currentColor !important;
-  transition: fill 0.2s ease, stroke 0.2s ease !important;
+/* MODE CLAIR - STYLES POUR LE BOUTON DE BASCULEMENT */
+html[data-theme="light"] [role="button"][aria-label*="theme"],
+html[data-theme="light"] [role="button"][aria-label*="mode"],
+html[data-theme="light"] button[aria-label*="theme"],
+html[data-theme="light"] button[aria-label*="mode"] {
+  position: relative;
+  z-index: 50;
+  transition: background-color 0.3s ease, transform 0.2s ease !important;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f1f5f9 !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
 
-html body .lucide-pause,
-html body .lucide-stop-circle {
+/* ICÔNES EN MODE CLAIR POUR LE BOUTON DE BASCULEMENT */
+html[data-theme="light"] [role="button"][aria-label*="theme"] svg,
+html[data-theme="light"] [role="button"][aria-label*="mode"] svg,
+html[data-theme="light"] button[aria-label*="theme"] svg,
+html[data-theme="light"] button[aria-label*="mode"] svg {
   fill: none !important;
-  stroke: currentColor !important;
-  stroke-width: 2.5px !important;
-  transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease !important;
-}
-
-/* CORRECTIFS POUR LE TOGGLE DE THÈME */
-.theme-toggle svg,
-[class*="theme-switcher"] svg,
-#theme-toggle svg,
-.theme-switcher svg {
-  fill: none !important;
-  stroke: currentColor !important;
+  stroke: #0f172a !important;
   stroke-width: 2px !important;
-  transition: fill 0.2s ease, stroke 0.2s ease, color 0.2s ease !important;
+  transition: stroke 0.3s ease !important;
 }
 
-/* Assurez-vous que les icônes du toggle de thème conservent leur style */
-.theme-toggle svg *,
-[class*="theme-switcher"] svg *,
-#theme-toggle svg *,
-.theme-switcher svg * {
-  fill: inherit !important;
-  stroke: inherit !important;
-  transition: fill 0.2s ease, stroke 0.2s ease !important;
+/* EFFET AU SURVOL EN MODE SOMBRE */
+html[data-theme="dark"] [role="button"][aria-label*="theme"]:hover,
+html[data-theme="dark"] [role="button"][aria-label*="mode"]:hover,
+html[data-theme="dark"] button[aria-label*="theme"]:hover,
+html[data-theme="dark"] button[aria-label*="mode"]:hover,
+.dark [role="button"][aria-label*="theme"]:hover,
+.dark [role="button"][aria-label*="mode"]:hover,
+.dark button[aria-label*="theme"]:hover,
+.dark button[aria-label*="mode"]:hover {
+  background-color: #2d3748 !important;
+  transform: translateY(-1px);
 }
 
-/* Règles pour les icônes de soleil et de lune */
-html body .lucide-sun,
-html body .lucide-moon,
-html body [class*="sun-icon"],
-html body [class*="moon-icon"] {
-  fill: none !important;
-  stroke: currentColor !important;
-  stroke-width: 2px !important;
-  transition: fill 0.2s ease, stroke 0.2s ease, color 0.2s ease !important;
+/* EFFET AU SURVOL EN MODE CLAIR */
+html[data-theme="light"] [role="button"][aria-label*="theme"]:hover,
+html[data-theme="light"] [role="button"][aria-label*="mode"]:hover,
+html[data-theme="light"] button[aria-label*="theme"]:hover,
+html[data-theme="light"] button[aria-label*="mode"]:hover {
+  background-color: #e2e8f0 !important;
+  transform: translateY(-1px);
 }
 
-/* CORRECTIFS POUR LES APPAREILS MOBILES */
+/* TRANSITION PENDANT LE CHANGEMENT DE THÈME */
+html.changing-theme [role="button"][aria-label*="theme"],
+html.changing-theme [role="button"][aria-label*="mode"],
+html.changing-theme button[aria-label*="theme"],
+html.changing-theme button[aria-label*="mode"] {
+  transition: none !important;
+  transform: scale(1.1);
+}
+
+/* ADAPTATION POUR LE MODE MOBILE */
 @media (max-width: 768px) {
-  /* Maintenir les styles d'icônes pendant la transition sur mobile */
-  html body svg,
-  html body [class*="lucide-"] {
-    stroke-width: 2.5px !important;
-    transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease, color 0.2s ease !important;
+  html[data-theme="dark"] [role="button"][aria-label*="theme"],
+  html[data-theme="dark"] [role="button"][aria-label*="mode"],
+  html[data-theme="dark"] button[aria-label*="theme"],
+  html[data-theme="dark"] button[aria-label*="mode"],
+  .dark [role="button"][aria-label*="theme"],
+  .dark [role="button"][aria-label*="mode"],
+  .dark button[aria-label*="theme"],
+  .dark button[aria-label*="mode"],
+  html[data-theme="light"] [role="button"][aria-label*="theme"],
+  html[data-theme="light"] [role="button"][aria-label*="mode"],
+  html[data-theme="light"] button[aria-label*="theme"],
+  html[data-theme="light"] button[aria-label*="mode"] {
+    padding: 0.6rem !important;
+    margin: 0.25rem !important;
+    border-radius: 0.6rem !important;
   }
   
-  /* Assurer que les icônes du toggle de thème fonctionnent correctement sur mobile */
-  .theme-toggle svg,
-  [class*="theme-switcher"] svg,
-  #theme-toggle svg,
-  .theme-switcher svg {
+  html[data-theme="dark"] [role="button"][aria-label*="theme"] svg,
+  html[data-theme="dark"] [role="button"][aria-label*="mode"] svg,
+  html[data-theme="dark"] button[aria-label*="theme"] svg,
+  html[data-theme="dark"] button[aria-label*="mode"] svg,
+  .dark [role="button"][aria-label*="theme"] svg,
+  .dark [role="button"][aria-label*="mode"] svg,
+  .dark button[aria-label*="theme"] svg,
+  .dark button[aria-label*="mode"] svg,
+  html[data-theme="light"] [role="button"][aria-label*="theme"] svg,
+  html[data-theme="light"] [role="button"][aria-label*="mode"] svg,
+  html[data-theme="light"] button[aria-label*="theme"] svg,
+  html[data-theme="light"] button[aria-label*="mode"] svg {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
     stroke-width: 2.5px !important;
-    transition: fill 0.2s ease, stroke 0.2s ease, color 0.2s ease !important;
   }
 }
 
-/* CORRECTIFS SPÉCIFIQUES POUR LES ATTRIBUTS SVG PROBLÉMATIQUES PENDANT LA TRANSITION */
-/* Ces sélecteurs s'appliquent indépendamment du thème pour assurer une transition fluide */
-html body svg *[fill]:not([fill="none"]),
-html body [class*="lucide-"] *[fill]:not([fill="none"]) {
-  transition: fill 0.2s ease !important;
-}
-
-html body svg *[stroke],
-html body [class*="lucide-"] *[stroke] {
-  transition: stroke 0.2s ease, stroke-width 0.2s ease !important;
-}
-
-/* CONTINUITÉ VISUELLE PENDANT LA TRANSITION DE THÈME */
-html.transitioning svg,
-html.transitioning [class*="lucide-"] {
-  fill: none !important;
-  stroke: currentColor !important;
-  stroke-width: 2px !important;
-  transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease, color 0.2s ease !important;
-}
-
-/* RÈGLES POUR LES ICÔNES DANS LES COMPOSANTS UI DURANT LA TRANSITION */
-.dialog svg,
-.popover svg,
-.dropdown svg,
-.modal svg,
-[role="dialog"] svg,
-[role="tooltip"] svg,
-[role="menu"] svg {
-  fill: none !important;
-  stroke: currentColor !important;
-  stroke-width: 2px !important;
-  transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease, color 0.2s ease !important;
+/* FORCAGE DES ATTRIBUTS SVG DIRECTEMENT */
+html[data-theme="dark"] svg *,
+.dark svg * {
+  fill: inherit !important;
+  stroke: inherit !important;
+  stroke-width: inherit !important;
 }
