@@ -90,6 +90,8 @@ export function DashboardTab({
   const [showGoals, setShowGoals] = useState(false);
   const [streak, setStreak] = useState(0);
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
+  // Ajout d'un état pour contrôler l'affichage du calendrier mobile spécifiquement
+  const [showMobileCalendar, setShowMobileCalendar] = useState(false);
 
   // Ajouter un effet pour gérer le redimensionnement de la fenêtre
   useEffect(() => {
@@ -256,16 +258,35 @@ export function DashboardTab({
         <div className="flex flex-col space-y-3">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-bold">Today's Focus</h2>
-            <Button 
-              size="sm" 
-              onClick={() => onAddItem(selectedDate)}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm"
-            >
-              <Plus className="h-4 w-4 mr-1" /> <span className="hidden sm:inline">Add Item</span>
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700 dashboard-calendar-button"
+                onClick={() => setShowMobileCalendar(!showMobileCalendar)}
+              >
+                <CalendarIcon 
+                  className="h-4 w-4 text-blue-600 dark:text-blue-400 lucide-calendar" 
+                  fill="none"
+                  strokeWidth={1.5} 
+                  stroke="currentColor"
+                />
+                <span className="text-xs font-medium dashboard-calendar-text">
+                  {showMobileCalendar ? "Hide Calendar" : "Show Calendar"}
+                </span>
+              </Button>
+              
+              <Button 
+                size="sm" 
+                onClick={() => onAddItem(selectedDate)}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm"
+              >
+                <Plus className="h-4 w-4 mr-1" /> <span className="hidden sm:inline">Add Item</span>
+              </Button>
+            </div>
           </div>
           
-          {/* Remplacer la grid par un unique bouton */}
+          {/* Bouton Goals */}
           <div className="flex justify-end">
             <Button 
               variant="outline" 
@@ -287,8 +308,8 @@ export function DashboardTab({
         </div>
       </div>
 
-      {/* Inline Mobile Calendar - S'affiche uniquement sur mobile */}
-      {showCalendar && (
+      {/* Inline Mobile Calendar - Utiliser showMobileCalendar au lieu de showCalendar */}
+      {showMobileCalendar && (
         <div className="md:hidden">
           <Card className="p-4 w-full hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4 calendar-header">
@@ -306,7 +327,7 @@ export function DashboardTab({
                 variant="ghost" 
                 size="sm" 
                 className="h-8 w-8 p-0" 
-                onClick={() => setShowCalendar(false)}
+                onClick={() => setShowMobileCalendar(false)}
               >
                 <span className="sr-only">Close</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
@@ -316,16 +337,11 @@ export function DashboardTab({
               <Calendar 
                 items={items}
                 onDateSelect={(date) => {
-                  // Ne pas fermer le calendrier après sélection de date sur mobile
                   setSelectedDate(date);
                   onDateSelect(date);
-                  // Supprimé: setShowCalendar(false); - Ne pas fermer automatiquement
                 }}
                 selectedDate={selectedDate}
-                onAddItem={() => {
-                  onAddItem(selectedDate);
-                  // Supprimé: setShowCalendar(false); - Ne pas fermer automatiquement
-                }}
+                onAddItem={() => onAddItem(selectedDate)}
               />
             </div>
           </Card>
@@ -406,8 +422,8 @@ export function DashboardTab({
 
       {/* Main Content - Responsive Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {/* Calendar Card - Full width on mobile, 1/2 width on desktop */}
-        <div className="md:col-span-1">
+        {/* Calendar Card - DESKTOP ONLY */}
+        <div className="hidden md:block md:col-span-1">
           <Card className="p-4 hover:shadow-md transition-shadow shadow-sm border-gray-200 dark:border-gray-700 h-full flex flex-col">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -420,15 +436,14 @@ export function DashboardTab({
                 {showCalendar ? 'Hide' : 'Show'} Calendar
               </Button>
             </div>
-            {/* Ajouter hidden md:block pour masquer ce calendrier sur mobile */}
+            {/* Calendrier desktop uniquement affiché si showCalendar est true */}
             {showCalendar && (
-              <div className="hidden md:flex flex-1 overflow-y-auto" style={{ height: 'calc(100vh - 300px)' }}>
+              <div className="flex-1 overflow-y-auto" style={{ height: 'calc(100vh - 300px)' }}>
                 <Calendar 
                   items={items}
                   onDateSelect={(date) => {
                     setSelectedDate(date);
                     onDateSelect(date);
-                    // Ne pas modifier showCalendar ici
                   }}
                   selectedDate={selectedDate}
                   onAddItem={() => onAddItem(selectedDate)}
