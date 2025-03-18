@@ -161,6 +161,77 @@ html[data-theme="dark"] .badge.dark\:bg-green-800\/30 { color: #86efac !importan
 html[data-theme="dark"] .badge.dark\:bg-yellow-800\/30 { color: #fde047 !important; } /* yellow-300 */
 html[data-theme="dark"] .badge.dark\:bg-red-800\/30 { color: #fca5a5 !important; } /* red-300 */
 
+/* Améliorations pour le mode sombre */
+/* Correction pour les statuts et badges en mode sombre */
+html[data-theme="dark"] .badge.dark\:bg-blue-800\/30 { 
+  color: #93c5fd !important; 
+  background-color: rgba(30, 58, 138, 0.5) !important; 
+} 
+html[data-theme="dark"] .badge.dark\:bg-green-800\/30 { 
+  color: #86efac !important; 
+  background-color: rgba(20, 83, 45, 0.5) !important; 
+} 
+html[data-theme="dark"] .badge.dark\:bg-yellow-800\/30 { 
+  color: #fde047 !important; 
+  background-color: rgba(113, 63, 18, 0.5) !important; 
+} 
+html[data-theme="dark"] .badge.dark\:bg-red-800\/30 { 
+  color: #fca5a5 !important; 
+  background-color: rgba(127, 29, 29, 0.5) !important; 
+}
+
+/* Amélioration des couleurs de catégories en mode sombre */
+html[data-theme="dark"] .from-blue-900\/30.to-indigo-900\/30 {
+  background: rgba(30, 58, 138, 0.5) !important;
+  color: #bfdbfe !important;
+  border-color: #1e40af !important;
+}
+
+/* Correction pour les textes completed/in progress/etc en mode sombre */
+html[data-theme="dark"] [class*="status-not_started"] {
+  background: rgba(71, 85, 105, 0.3) !important;
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] [class*="status-in_progress"] {
+  background: rgba(37, 99, 235, 0.3) !important;
+  color: #bfdbfe !important;
+}
+
+html[data-theme="dark"] [class*="status-completed"] {
+  background: rgba(34, 197, 94, 0.3) !important;
+  color: #bbf7d0 !important;
+}
+
+html[data-theme="dark"] [class*="status-on_hold"] {
+  background: rgba(234, 179, 8, 0.3) !important;
+  color: #fef08a !important;
+}
+
+html[data-theme="dark"] [class*="status-archived"] {
+  background: rgba(100, 116, 139, 0.3) !important;
+  color: #cbd5e1 !important;
+}
+
+/* Correction des badges "Completed" pour les sessions */
+html[data-theme="dark"] .badge.bg-green-50 {
+  background-color: rgba(22, 163, 74, 0.3) !important;
+  color: #86efac !important;
+  border-color: #16a34a !important;
+}
+
+html[data-theme="dark"] .badge.bg-yellow-50 {
+  background-color: rgba(202, 138, 4, 0.3) !important;
+  color: #fde047 !important;
+  border-color: #ca8a04 !important;
+}
+
+html[data-theme="dark"] .badge.bg-blue-50 {
+  background-color: rgba(37, 99, 235, 0.3) !important;
+  color: #93c5fd !important;
+  border-color: #2563eb !important;
+}
+
 /* Styles améliorés pour les cartes d'apprentissage */
 
 /* Styles de base pour toutes les cartes */

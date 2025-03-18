@@ -1540,3 +1540,44 @@ html[data-theme="dark"] .learning-item-card .border.rounded-xl.border-l-blue-400
 }
 
 /* ...existing code... */
+
+/* Corrections pour le mode sombre */
+.dark .badge,
+html[data-theme="dark"] .badge {
+  border-width: 1px !important;
+}
+
+/* Amélioration de la visibilité des badges de statut en mode sombre */
+.dark .badge.bg-blue-100,
+.dark .badge.dark\:bg-blue-800\/30 {
+  background-color: rgba(30, 64, 175, 0.4) !important;
+  color: #bfdbfe !important;
+}
+
+.dark .badge.bg-green-100,
+.dark .badge.dark\:bg-green-800\/30 {
+  background-color: rgba(22, 101, 52, 0.4) !important;
+  color: #86efac !important;
+}
+
+.dark .badge.bg-yellow-100,
+.dark .badge.dark\:bg-yellow-800\/30 {
+  background-color: rgba(133, 77, 14, 0.4) !important;
+  color: #fef08a !important;
+}
+
+.dark .badge.bg-red-100,
+.dark .badge.dark\:bg-red-800\/30 {
+  background-color: rgba(153, 27, 27, 0.4) !important;
+  color: #fca5a5 !important;
+}
+
+/* Amélioration de la visibilité des catégories en mode sombre */
+.dark .px-3.py-1\.5.rounded-full.text-sm.font-medium.bg-gradient-to-r.from-blue-50.to-indigo-50,
+.dark .px-3.py-1\.5.rounded-full.text-sm.from-blue-900\/30.to-indigo-900\/30 {
+  background: rgba(30, 58, 138, 0.5) !important;
+  color: #93c5fd !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+/* ...existing code... */

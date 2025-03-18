@@ -749,7 +749,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                       "capitalize font-medium",
                       !session.endTime && session.status === 'in_progress' && "bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-800/30 dark:text-blue-300",
                       !session.endTime && session.status === 'on_hold' && "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-800/30 dark:text-yellow-300",
-                      session.endTime && "bg-green-50 text-green-700 dark:bg-green-800/30 dark:text-green-300"
+                      session.endTime && "bg-green-50 text-green-700 dark:bg-green-800/30 dark:text-green-300",
+                      "dark:border-opacity-50" // Amélioration de la visibilité de la bordure
                     )}
                   >
                     {session.endTime ? "Completed" : session.status === 'on_hold' ? "On Hold" : "In Progress"}
@@ -1319,7 +1320,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
                         getStatusBadgeClass(),
                         "capitalize font-medium",
                         "shadow-sm",
-                        "preserve-color" // Classe pour préserver les couleurs
+                        "preserve-color", // Classe pour préserver les couleurs
+                        "dark:text-gray-100" // Amélioration de la visibilité en mode sombre
                       )}
                     >
                       {getStatusText()}
