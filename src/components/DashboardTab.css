@@ -30,93 +30,38 @@
   .grid.grid-cols-1.md\:grid-cols-2.gap-4.md\:gap-6 > div.md\:col-span-1 {
     display: flex;
     flex-direction: column;
-    height: fit-content;
   }
   
   .grid.grid-cols-1.md\:grid-cols-2.gap-4.md\:gap-6 > div.md\:col-span-1 > .card {
     display: flex;
     flex-direction: column;
-    height: 100%;
   }
   
-  /* Calendar sizing adjustments */
-  .calendar-wrapper {
-    transform: scale(0.92);
-    transform-origin: top center;
-    margin-bottom: -20px;
-    height: 380px; /* Set a fixed reference height for the calendar */
-  }
-  
-  /* Fix for calendar height issue */
-  .calendar-wrapper table {
-    margin-bottom: 0 !important;
-  }
-  
-  /* Match calendar height precisely */
-  .tasks-container {
-    display: flex;
-    flex-direction: column;
-    height: 380px; /* Match calendar height */
-    overflow: hidden;
-  }
-  
-  /* Ensure tasks are displayed with spacing between them */
-  .tasks-scroll-container {
+  .grid.grid-cols-1.md\:grid-cols-2.gap-4.md\:gap-6 > div.md\:col-span-1 > .card > div.space-y-3 {
     flex: 1;
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    padding-right: 0.5rem;
-  }
-  
-  /* Make sure cards inside the task container have proper margins */
-  .tasks-scroll-container > * {
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-  }
-  
-  /* Equal height enforcement for both columns */
-  .grid.grid-cols-1.md\:grid-cols-2.gap-4.md\:gap-6 {
-    align-items: stretch;
-  }
-  
-  /* Set a fixed height for empty state to match calendar */
-  .text-center.py-6.flex-1.flex.flex-col.justify-center {
-    height: 380px;
-    min-height: unset;
   }
   
   /* Customize scrollbar for the tasks list */
-  .space-y-3.overflow-y-auto::-webkit-scrollbar,
-  .tasks-scroll-container::-webkit-scrollbar {
+  .space-y-3.overflow-y-auto::-webkit-scrollbar {
     width: 6px;
   }
   
-  .space-y-3.overflow-y-auto::-webkit-scrollbar-track,
-  .tasks-scroll-container::-webkit-scrollbar-track {
+  .space-y-3.overflow-y-auto::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.05);
     border-radius: 10px;
   }
   
-  .space-y-3.overflow-y-auto::-webkit-scrollbar-thumb,
-  .tasks-scroll-container::-webkit-scrollbar-thumb {
+  .space-y-3.overflow-y-auto::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.1);
     border-radius: 10px;
   }
   
-  .dark .space-y-3.overflow-y-auto::-webkit-scrollbar-track,
-  .dark .tasks-scroll-container::-webkit-scrollbar-track {
+  .dark .space-y-3.overflow-y-auto::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.05);
   }
   
-  .dark .space-y-3.overflow-y-auto::-webkit-scrollbar-thumb,
-  .dark .tasks-scroll-container::-webkit-scrollbar-thumb {
+  .dark .space-y-3.overflow-y-auto::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
-  }
-  
-  /* Reduce space between elements */
-  .space-y-6 > * + * {
-    margin-top: 1rem !important;
   }
 }
