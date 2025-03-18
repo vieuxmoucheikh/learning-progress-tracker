@@ -46,15 +46,17 @@ import {
 } from "@/components/ui/dialog";
 import './LearningItemCard.css';
 
+// Ajoutez hideFooterUrl à l'interface des props
 interface Props {
   item: LearningItem;
   onUpdate: (id: string, updates: Partial<LearningItem>) => void;
   onDelete: (id: string) => void;
-  onStartTracking: (id: string) => void;
-  onStopTracking: (id: string) => void;
-  onNotesUpdate: (id: string, notes: string) => void;
-  onSetActiveItem: (id: string | null) => void;
-  onSessionNoteAdd: (id: string, note: string) => void;
+  onStartTracking?: (id: string) => void;
+  onStopTracking?: (id: string) => void;
+  onNotesUpdate?: (id: string, notes: string) => void;
+  onSetActiveItem?: (id: string | null) => void;
+  onSessionNoteAdd?: (id: string, note: string) => void;
+  hideFooterUrl?: boolean; // Nouvelle prop pour cacher la section "Lien externe"
 }
 
 interface LocalSession {
@@ -89,7 +91,7 @@ const calculateTotalTimeSpent = (item: LearningItem) => {
   }, 0);
 };
 
-const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTracking, onNotesUpdate, onSetActiveItem, onSessionNoteAdd }: Props) => {
+const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTracking, onNotesUpdate, onSetActiveItem, onSessionNoteAdd, hideFooterUrl }: Props) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(item.title);
   const [editedNotes, setEditedNotes] = useState(item.notes || '');
@@ -201,8 +203,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
               sessions: [storedSession, ...(item.progress?.sessions || [])]
             }
           });
-          onStartTracking(item.id);
-          onSetActiveItem(item.id);
+          onStartTracking?.(item.id);
+          onSetActiveItem?.(item.id);
         } else {
           // Clean up stale or duplicate session
           if (isStaleSession && !storedSession.endTime) {
@@ -293,8 +295,8 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     });
     
     // Notify parent components
-    onStartTracking(item.id);
-    onSetActiveItem(item.id);
+    onStartTracking?.(item.id);
+    onSetActiveItem?.(item.id);
     
     // Reset any paused state
     setPausedTime(null);
@@ -537,13 +539,13 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
       }
     });
 
-    onSessionNoteAdd(item.id, sessionNote);
+    onSessionNoteAdd?.(item.id, sessionNote);
     setSessionNote('');
     setShowNoteDialog(false);
   }, [item.id, item.progress, sessionNote, onSessionNoteAdd, onUpdate, activeSession]);
 
   const handleSaveNotes = () => {
-    onNotesUpdate(item.id, editedNotes);
+    onNotesUpdate?.(item.id, editedNotes);
     setIsEditing(false);
   };
 
@@ -568,7 +570,7 @@ const LearningItemCard = ({ item, onUpdate, onDelete, onStartTracking, onStopTra
     
     // Stop tracking if item is being tracked
     if (activeSession) {
-      onStopTracking(item.id);
+      onStopTracking?.(item.id);
     }
     
     // Reset UI state

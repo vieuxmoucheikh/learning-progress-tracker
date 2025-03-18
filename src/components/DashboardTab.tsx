@@ -405,7 +405,7 @@ export function DashboardTab({
               </Button>
             </div>
             {showCalendar && (
-              <div className="flex-1 overflow-y-auto" style={{ maxHeight: '400px' }}>
+              <div className="flex-1 overflow-y-auto" style={{ height: 'calc(100vh - 300px)' }}>
                 <Calendar 
                   items={items}
                   onDateSelect={(date) => {
@@ -445,7 +445,7 @@ export function DashboardTab({
                 </div>
               </div>
             ) : (
-              <div className="flex-1 overflow-y-auto pr-2 space-y-3" style={{ maxHeight: '400px' }}>
+              <div className="flex-1 overflow-y-auto pr-2 space-y-3" style={{ height: 'calc(100vh - 300px)' }}>
                 {activeTasks.map((item) => (
                   <LearningItemCard
                     key={item.id}
@@ -457,6 +457,7 @@ export function DashboardTab({
                     onNotesUpdate={onNotesUpdate}
                     onSetActiveItem={onSetActiveItem}
                     onSessionNoteAdd={onSessionNoteAdd}
+                    hideFooterUrl={true} // Ajout d'une prop pour cacher la partie "Lien externe"
                   />
                 ))}
               </div>
