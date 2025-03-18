@@ -1574,3 +1574,308 @@ button svg,
   color: #f87171 !important; /* red-400 */
   margin-right: 4px !important;
 }
+
+/* AMÉLIORATIONS SPÉCIFIQUES POUR LES COMPOSANTS D'ANALYSE NON RÉSOLUS */
+
+/* Learning Insight / Learning Activity Analytics Background */
+.dark [class*="analytics"] [class*="insight"],
+.dark [class*="analytics-tab"] [class*="insight"],
+.dark [class*="AnalyticsTab"] [class*="insight"],
+.dark [class*="analytics"] [class*="learning-activity"],
+.dark [class*="analytics-tab"] [class*="learning-activity"],
+.dark [class*="AnalyticsTab"] [class*="learning-activity"] {
+  background-color: #1e293b !important; /* slate-800 */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+  padding: 16px !important;
+  margin-bottom: 1.5rem !important;
+}
+
+/* Titres dans Learning Insight */
+.dark [class*="analytics"] [class*="insight"] h3,
+.dark [class*="analytics-tab"] [class*="insight"] h3,
+.dark [class*="AnalyticsTab"] [class*="insight"] h3,
+.dark [class*="analytics"] [class*="learning-activity"] h3,
+.dark [class*="analytics-tab"] [class*="learning-activity"] h3,
+.dark [class*="AnalyticsTab"] [class*="learning-activity"] h3 {
+  color: #f8fafc !important; /* slate-50 */
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.75rem !important;
+}
+
+/* Progress by Difficulty - Conteneur */
+.dark [class*="analytics"] [class*="difficulty-progress"],
+.dark [class*="analytics-tab"] [class*="difficulty-progress"],
+.dark [class*="AnalyticsTab"] [class*="difficulty-progress"],
+.dark [class*="analytics"] [class*="progress-difficulty"],
+.dark [class*="analytics-tab"] [class*="progress-difficulty"],
+.dark [class*="AnalyticsTab"] [class*="progress-difficulty"] {
+  background-color: #1e293b !important; /* slate-800 */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  padding: 16px !important;
+  margin-bottom: 1.5rem !important;
+}
+
+/* Progress by Difficulty - Barres de progression */
+.dark [class*="analytics"] [class*="difficulty-bar"],
+.dark [class*="analytics-tab"] [class*="difficulty-bar"],
+.dark [class*="AnalyticsTab"] [class*="difficulty-bar"] {
+  height: 12px !important;
+  border-radius: 6px !important;
+  margin-bottom: 8px !important;
+}
+
+/* Progress by Difficulty - Labels et pourcentages */
+.dark [class*="analytics"] [class*="difficulty-label"],
+.dark [class*="analytics-tab"] [class*="difficulty-label"],
+.dark [class*="AnalyticsTab"] [class*="difficulty-label"],
+.dark [class*="analytics"] [class*="difficulty-percent"],
+.dark [class*="analytics-tab"] [class*="difficulty-percent"],
+.dark [class*="AnalyticsTab"] [class*="difficulty-percent"] {
+  color: #e2e8f0 !important; /* slate-200 */
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+}
+
+/* Daily Activity (Past 14 Days) */
+.dark [class*="analytics"] [class*="daily-activity"],
+.dark [class*="analytics-tab"] [class*="daily-activity"],
+.dark [class*="AnalyticsTab"] [class*="daily-activity"],
+.dark [class*="analytics"] [class*="activity-chart"],
+.dark [class*="analytics-tab"] [class*="activity-chart"],
+.dark [class*="AnalyticsTab"] [class*="activity-chart"] {
+  background-color: #1e293b !important; /* slate-800 */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  padding: 16px !important;
+  margin-bottom: 1.5rem !important;
+}
+
+/* Daily Activity - Barres d'activité */
+.dark [class*="analytics"] [class*="activity-bar"],
+.dark [class*="analytics-tab"] [class*="activity-bar"],
+.dark [class*="AnalyticsTab"] [class*="activity-bar"] {
+  background-color: #60a5fa !important; /* blue-400 */
+  border-radius: 3px !important;
+}
+
+/* Daily Activity - Jours et labels */
+.dark [class*="analytics"] [class*="day-label"],
+.dark [class*="analytics-tab"] [class*="day-label"],
+.dark [class*="AnalyticsTab"] [class*="day-label"] {
+  color: #cbd5e1 !important; /* slate-300 */
+  font-size: 0.75rem !important;
+}
+
+/* Learning Focus (Pie Chart) */
+.dark [class*="analytics"] [class*="learning-focus"],
+.dark [class*="analytics-tab"] [class*="learning-focus"],
+.dark [class*="AnalyticsTab"] [class*="learning-focus"],
+.dark [class*="analytics"] [class*="focus-chart"],
+.dark [class*="analytics-tab"] [class*="focus-chart"],
+.dark [class*="AnalyticsTab"] [class*="focus-chart"] {
+  background-color: #1e293b !important; /* slate-800 */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  padding: 16px !important;
+  margin-bottom: 1.5rem !important;
+}
+
+/* Learning Focus - Légende */
+.dark [class*="analytics"] [class*="focus-legend"],
+.dark [class*="analytics-tab"] [class*="focus-legend"],
+.dark [class*="AnalyticsTab"] [class*="focus-legend"] {
+  color: #e2e8f0 !important; /* slate-200 */
+  font-size: 0.875rem !important;
+  margin-top: 0.75rem !important;
+}
+
+/* Learning Focus - Indicateurs de couleur dans la légende */
+.dark [class*="analytics"] [class*="legend-indicator"],
+.dark [class*="analytics-tab"] [class*="legend-indicator"],
+.dark [class*="AnalyticsTab"] [class*="legend-indicator"] {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  display: inline-block !important;
+  margin-right: 6px !important;
+}
+
+/* Time Spent by Category */
+.dark [class*="analytics"] [class*="time-spent"],
+.dark [class*="analytics-tab"] [class*="time-spent"],
+.dark [class*="AnalyticsTab"] [class*="time-spent"],
+.dark [class*="analytics"] [class*="category-time"],
+.dark [class*="analytics-tab"] [class*="category-time"],
+.dark [class*="AnalyticsTab"] [class*="category-time"] {
+  background-color: #1e293b !important; /* slate-800 */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  padding: 16px !important;
+  margin-bottom: 1.5rem !important;
+}
+
+/* Time Spent by Category - Barres */
+.dark [class*="analytics"] [class*="category-bar"],
+.dark [class*="analytics-tab"] [class*="category-bar"],
+.dark [class*="AnalyticsTab"] [class*="category-bar"] {
+  height: 10px !important;
+  border-radius: 5px !important;
+  margin-bottom: 12px !important;
+}
+
+/* Couleurs spécifiques pour les graphiques et barres de progression */
+.dark [class*="analytics"] [class*="bar-beginner"],
+.dark [class*="analytics-tab"] [class*="bar-beginner"],
+.dark [class*="AnalyticsTab"] [class*="bar-beginner"] {
+  background-color: #4ade80 !important; /* green-400 */
+}
+
+.dark [class*="analytics"] [class*="bar-intermediate"],
+.dark [class*="analytics-tab"] [class*="bar-intermediate"],
+.dark [class*="AnalyticsTab"] [class*="bar-intermediate"] {
+  background-color: #60a5fa !important; /* blue-400 */
+}
+
+.dark [class*="analytics"] [class*="bar-advanced"],
+.dark [class*="analytics-tab"] [class*="bar-advanced"],
+.dark [class*="AnalyticsTab"] [class*="bar-advanced"] {
+  background-color: #f472b6 !important; /* pink-400 */
+}
+
+.dark [class*="analytics"] [class*="bar-expert"],
+.dark [class*="analytics-tab"] [class*="bar-expert"],
+.dark [class*="AnalyticsTab"] [class*="bar-expert"] {
+  background-color: #a78bfa !important; /* violet-400 */
+}
+
+/* Amélioration des couleurs dans les graphiques en camembert et donut */
+.dark [class*="analytics"] [class*="pie-segment"],
+.dark [class*="analytics-tab"] [class*="pie-segment"],
+.dark [class*="AnalyticsTab"] [class*="pie-segment"],
+.dark [class*="analytics"] [class*="donut-segment"],
+.dark [class*="analytics-tab"] [class*="donut-segment"],
+.dark [class*="AnalyticsTab"] [class*="donut-segment"] {
+  stroke-width: 1.5px !important;
+  stroke: #0f172a !important; /* slate-900 pour délimiter les segments */
+}
+
+/* Assurer la visibilité des textes dans les graphiques camembert/donut */
+.dark [class*="analytics"] [class*="pie-label"],
+.dark [class*="analytics-tab"] [class*="pie-label"],
+.dark [class*="AnalyticsTab"] [class*="pie-label"],
+.dark [class*="analytics"] [class*="donut-label"],
+.dark [class*="analytics-tab"] [class*="donut-label"],
+.dark [class*="AnalyticsTab"] [class*="donut-label"] {
+  fill: #f8fafc !important; /* slate-50 */
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+}
+
+/* Correction spécifique pour les pourcentages au centre des donuts */
+.dark [class*="analytics"] [class*="donut-center"],
+.dark [class*="analytics-tab"] [class*="donut-center"],
+.dark [class*="AnalyticsTab"] [class*="donut-center"] {
+  fill: #f8fafc !important; /* slate-50 */
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+}
+
+/* Assurer la lisibilité des éléments SVG spécifiques aux graphiques */
+.dark [class*="analytics"] svg text,
+.dark [class*="analytics-tab"] svg text,
+.dark [class*="AnalyticsTab"] svg text {
+  fill: #e2e8f0 !important; /* slate-200 */
+  font-size: 0.75rem !important;
+}
+
+/* Correction spécifique pour les tooltips des graphiques */
+.dark [class*="recharts-tooltip"],
+.dark [class*="tooltip-container"],
+.dark [class*="chart-tooltip"] {
+  background-color: #0f172a !important; /* slate-900 */
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  color: #f8fafc !important; /* slate-50 */
+  font-size: 0.875rem !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  z-index: 9999 !important;
+}
+
+/* Correction spécifique pour les tables de données dans Analytics */
+.dark [class*="analytics"] table,
+.dark [class*="analytics-tab"] table,
+.dark [class*="AnalyticsTab"] table {
+  background-color: #1e293b !important; /* slate-800 */
+  border-radius: 8px !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  overflow: hidden !important;
+  width: 100% !important;
+}
+
+.dark [class*="analytics"] th,
+.dark [class*="analytics-tab"] th,
+.dark [class*="AnalyticsTab"] th {
+  background-color: #334155 !important; /* slate-700 */
+  color: #f8fafc !important; /* slate-50 */
+  font-weight: 600 !important;
+  padding: 12px 16px !important;
+  text-align: left !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark [class*="analytics"] td,
+.dark [class*="analytics-tab"] td,
+.dark [class*="AnalyticsTab"] td {
+  color: #e2e8f0 !important; /* slate-200 */
+  padding: 12px 16px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark [class*="analytics"] tr:last-child td,
+.dark [class*="analytics-tab"] tr:last-child td,
+.dark [class*="AnalyticsTab"] tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* Correction pour les filtres et contrôles dans Analytics */
+.dark [class*="analytics"] [class*="filter-container"],
+.dark [class*="analytics-tab"] [class*="filter-container"],
+.dark [class*="AnalyticsTab"] [class*="filter-container"] {
+  margin-bottom: 1.5rem !important;
+  display: flex !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+}
+
+.dark [class*="analytics"] [class*="filter-button"],
+.dark [class*="analytics-tab"] [class*="filter-button"],
+.dark [class*="AnalyticsTab"] [class*="filter-button"] {
+  background-color: #334155 !important; /* slate-700 */
+  color: #f8fafc !important; /* slate-50 */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.dark [class*="analytics"] [class*="filter-button"]:hover,
+.dark [class*="analytics-tab"] [class*="filter-button"]:hover,
+.dark [class*="AnalyticsTab"] [class*="filter-button"]:hover {
+  background-color: #475569 !important; /* slate-600 */
+}
+
+.dark [class*="analytics"] [class*="filter-button"][class*="active"],
+.dark [class*="analytics-tab"] [class*="filter-button"][class*="active"],
+.dark [class*="AnalyticsTab"] [class*="filter-button"][class*="active"] {
+  background-color: #2563eb !important; /* blue-600 */
+  color: white !important;
+  border-color: #2563eb !important;
+}
