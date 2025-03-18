@@ -86,65 +86,6 @@
         border-color: #4ade80 !important;
       }
     </style>
-    <!-- Style pour forcer l'égalisation des hauteurs sur le dashboard -->
-    <style id="dashboard-layout-fix">
-      @media (min-width: 768px) {
-        /* Ajuster la hauteur des widgets sur le tableau de bord */
-        .dashboard-widgets-container > div,
-        .dashboard-top-row > div,
-        .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3.gap-4 > div,
-        [class*="dashboard"] [class*="grid"] > div,
-        div.md\:grid-cols-2 > div,
-        div.lg\:grid-cols-3 > div {
-          height: 100% !important;
-          min-height: 380px !important;
-          display: flex !important;
-          flex-direction: column !important;
-        }
-
-        /* Widgets spécifiques */
-        .active-tasks-widget,
-        [class*="active-tasks"],
-        div:has(> h2:contains("Active")),
-        div:has(> h3:contains("Active")),
-        .calendar-widget,
-        [class*="calendar"],
-        div:has(.rdp) {
-          height: 100% !important;
-          min-height: 380px !important;
-          display: flex !important;
-          flex-direction: column !important;
-        }
-
-        /* Cartes dans les widgets */
-        .dashboard-widgets-container .card,
-        .dashboard-top-row .card,
-        [class*="dashboard"] [class*="grid"] .card {
-          height: 100% !important;
-          display: flex !important;
-          flex-direction: column !important;
-        }
-
-        /* Zone de contenu des cartes */
-        .dashboard-widgets-container .card > div:not(:first-child),
-        .dashboard-top-row .card > div:not(:first-child),
-        [class*="dashboard"] [class*="grid"] .card > div:not(:first-child) {
-          flex: 1 !important;
-          display: flex !important;
-          flex-direction: column !important;
-        }
-
-        /* Listes de tâches avec défilement */
-        .active-tasks-widget [class*="grid"],
-        [class*="active-tasks"] [class*="grid"],
-        div:has(> h2:contains("Active")) [class*="grid"],
-        div:has(> h3:contains("Active")) [class*="grid"] {
-          flex: 1 !important;
-          overflow-y: auto !important;
-          padding-right: 2px !important;
-        }
-      }
-    </style>
   </head>
   <body>
     <div id="root"></div>
