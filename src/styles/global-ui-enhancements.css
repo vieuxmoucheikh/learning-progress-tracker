@@ -1438,3 +1438,139 @@ button svg,
   margin-bottom: 1rem !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
 }
+
+/* Amélioration des cartes statistiques dans Analytics */
+.dark [class*="analytics"] [class*="stat-card"],
+.dark [class*="analytics"] [class*="metric-card"],
+.dark [class*="analytics"] [class*="info-card"],
+.dark [class*="analytics-tab"] [class*="stat-card"],
+.dark [class*="analytics-tab"] [class*="metric-card"],
+.dark [class*="analytics-tab"] [class*="info-card"],
+.dark [class*="AnalyticsTab"] [class*="stat-card"],
+.dark [class*="AnalyticsTab"] [class*="metric-card"],
+.dark [class*="AnalyticsTab"] [class*="info-card"] {
+  background-color: #1e293b !important; /* slate-800 */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+  padding: 16px !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+/* Animation subtile au survol des cartes stats */
+.dark [class*="analytics"] [class*="stat-card"]:hover,
+.dark [class*="analytics"] [class*="metric-card"]:hover,
+.dark [class*="analytics"] [class*="info-card"]:hover,
+.dark [class*="analytics-tab"] [class*="stat-card"]:hover,
+.dark [class*="analytics-tab"] [class*="metric-card"]:hover,
+.dark [class*="analytics-tab"] [class*="info-card"]:hover,
+.dark [class*="AnalyticsTab"] [class*="stat-card"]:hover,
+.dark [class*="AnalyticsTab"] [class*="metric-card"]:hover,
+.dark [class*="AnalyticsTab"] [class*="info-card"]:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Titre des cartes stats */
+.dark [class*="analytics"] [class*="stat-card"] h3,
+.dark [class*="analytics"] [class*="metric-card"] h3,
+.dark [class*="analytics"] [class*="info-card"] h3,
+.dark [class*="analytics-tab"] [class*="stat-card"] h3,
+.dark [class*="analytics-tab"] [class*="metric-card"] h3,
+.dark [class*="analytics-tab"] [class*="info-card"] h3,
+.dark [class*="AnalyticsTab"] [class*="stat-card"] h3,
+.dark [class*="AnalyticsTab"] [class*="metric-card"] h3,
+.dark [class*="AnalyticsTab"] [class*="info-card"] h3 {
+  color: #f8fafc !important; /* slate-50 */
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+}
+
+/* Valeurs principales dans les cartes stats */
+.dark [class*="analytics"] [class*="stat-card"] [class*="value"],
+.dark [class*="analytics"] [class*="metric-card"] [class*="value"],
+.dark [class*="analytics"] [class*="info-card"] [class*="value"],
+.dark [class*="analytics-tab"] [class*="stat-card"] [class*="value"],
+.dark [class*="analytics-tab"] [class*="metric-card"] [class*="value"],
+.dark [class*="analytics-tab"] [class*="info-card"] [class*="value"],
+.dark [class*="AnalyticsTab"] [class*="stat-card"] [class*="value"],
+.dark [class*="AnalyticsTab"] [class*="metric-card"] [class*="value"],
+.dark [class*="AnalyticsTab"] [class*="info-card"] [class*="value"] {
+  color: #60a5fa !important; /* blue-400 pour une bonne visibilité */
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+}
+
+/* Icônes dans les cartes stats */
+.dark [class*="analytics"] [class*="stat-card"] svg,
+.dark [class*="analytics"] [class*="metric-card"] svg,
+.dark [class*="analytics"] [class*="info-card"] svg,
+.dark [class*="analytics-tab"] [class*="stat-card"] svg,
+.dark [class*="analytics-tab"] [class*="metric-card"] svg,
+.dark [class*="analytics-tab"] [class*="info-card"] svg,
+.dark [class*="AnalyticsTab"] [class*="stat-card"] svg,
+.dark [class*="AnalyticsTab"] [class*="metric-card"] svg,
+.dark [class*="AnalyticsTab"] [class*="info-card"] svg {
+  color: #93c5fd !important; /* blue-300 */
+  stroke-width: 1.5px !important;
+}
+
+/* Amélioration des tendances positives et négatives */
+.dark [class*="analytics"] [class*="positive"],
+.dark [class*="analytics"] [class*="increase"],
+.dark [class*="analytics"] [class*="up"],
+.dark [class*="analytics-tab"] [class*="positive"],
+.dark [class*="analytics-tab"] [class*="increase"],
+.dark [class*="analytics-tab"] [class*="up"],
+.dark [class*="AnalyticsTab"] [class*="positive"],
+.dark [class*="AnalyticsTab"] [class*="increase"],
+.dark [class*="AnalyticsTab"] [class*="up"] {
+  color: #4ade80 !important; /* green-400 */
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.dark [class*="analytics"] [class*="negative"],
+.dark [class*="analytics"] [class*="decrease"],
+.dark [class*="analytics"] [class*="down"],
+.dark [class*="analytics-tab"] [class*="negative"],
+.dark [class*="analytics-tab"] [class*="decrease"],
+.dark [class*="analytics-tab"] [class*="down"],
+.dark [class*="AnalyticsTab"] [class*="negative"],
+.dark [class*="AnalyticsTab"] [class*="decrease"],
+.dark [class*="AnalyticsTab"] [class*="down"] {
+  color: #f87171 !important; /* red-400 */
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+/* Amélioration des icônes de tendance */
+.dark [class*="analytics"] [class*="positive"] svg,
+.dark [class*="analytics"] [class*="increase"] svg,
+.dark [class*="analytics"] [class*="up"] svg,
+.dark [class*="analytics-tab"] [class*="positive"] svg,
+.dark [class*="analytics-tab"] [class*="increase"] svg,
+.dark [class*="analytics-tab"] [class*="up"] svg,
+.dark [class*="AnalyticsTab"] [class*="positive"] svg,
+.dark [class*="AnalyticsTab"] [class*="increase"] svg,
+.dark [class*="AnalyticsTab"] [class*="up"] svg {
+  color: #4ade80 !important; /* green-400 */
+  margin-right: 4px !important;
+}
+
+.dark [class*="analytics"] [class*="negative"] svg,
+.dark [class*="analytics"] [class*="decrease"] svg,
+.dark [class*="analytics"] [class*="down"] svg,
+.dark [class*="analytics-tab"] [class*="negative"] svg,
+.dark [class*="analytics-tab"] [class*="decrease"] svg,
+.dark [class*="analytics-tab"] [class*="down"] svg,
+.dark [class*="AnalyticsTab"] [class*="negative"] svg,
+.dark [class*="AnalyticsTab"] [class*="decrease"] svg,
+.dark [class*="AnalyticsTab"] [class*="down"] svg {
+  color: #f87171 !important; /* red-400 */
+  margin-right: 4px !important;
+}
