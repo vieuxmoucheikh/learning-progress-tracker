@@ -1380,3 +1380,61 @@ button svg,
   border-radius: 8px !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
 }
+
+/* Amélioration des légendes et labels dans les graphiques */
+.dark [class*="analytics"] [class*="legend"],
+.dark [class*="analytics"] [class*="label"],
+.dark [class*="analytics"] [class*="tick"],
+.dark [class*="analytics"] [class*="axis"],
+.dark [class*="analytics-tab"] [class*="legend"],
+.dark [class*="analytics-tab"] [class*="label"],
+.dark [class*="analytics-tab"] [class*="tick"],
+.dark [class*="analytics-tab"] [class*="axis"],
+.dark [class*="AnalyticsTab"] [class*="legend"],
+.dark [class*="AnalyticsTab"] [class*="label"],
+.dark [class*="AnalyticsTab"] [class*="tick"],
+.dark [class*="AnalyticsTab"] [class*="axis"] {
+  color: #e2e8f0 !important; /* slate-200 pour une bonne visibilité */
+  fill: #e2e8f0 !important; /* Pour les textes SVG */
+  font-weight: 500 !important;
+  font-size: 0.85rem !important;
+}
+
+/* Amélioration des tooltips sur les graphiques */
+.dark [class*="analytics"] [class*="tooltip"],
+.dark [class*="analytics-tab"] [class*="tooltip"],
+.dark [class*="AnalyticsTab"] [class*="tooltip"] {
+  background-color: #0f172a !important; /* slate-900 pour un fond sombre */
+  color: #f8fafc !important; /* slate-50 pour le texte */
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  font-weight: 500 !important;
+  z-index: 50 !important;
+}
+
+/* Amélioration des lignes de grille et axes */
+.dark [class*="analytics"] [class*="grid"] line,
+.dark [class*="analytics"] [class*="axis"] line,
+.dark [class*="analytics-tab"] [class*="grid"] line,
+.dark [class*="analytics-tab"] [class*="axis"] line,
+.dark [class*="AnalyticsTab"] [class*="grid"] line,
+.dark [class*="AnalyticsTab"] [class*="axis"] line {
+  stroke: rgba(255, 255, 255, 0.1) !important;
+  stroke-width: 1px !important;
+}
+
+/* Amélioration des titres de section dans les graphiques */
+.dark [class*="analytics"] [class*="chart-title"],
+.dark [class*="analytics"] [class*="graph-title"],
+.dark [class*="analytics-tab"] [class*="chart-title"],
+.dark [class*="analytics-tab"] [class*="graph-title"],
+.dark [class*="AnalyticsTab"] [class*="chart-title"],
+.dark [class*="AnalyticsTab"] [class*="graph-title"] {
+  color: #f8fafc !important; /* slate-50 pour une excellente visibilité */
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  margin-bottom: 1rem !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
