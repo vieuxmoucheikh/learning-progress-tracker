@@ -419,7 +419,7 @@ export function DashboardTab({
 
         {/* Active Tasks - Full width on mobile, half width on desktop */}
         <div className="md:col-span-1">
-          <Card className="p-4 hover:shadow-md transition-shadow shadow-sm border-gray-200 dark:border-gray-700">
+          <Card className="p-4 hover:shadow-md transition-shadow shadow-sm border-gray-200 dark:border-gray-700 h-full flex flex-col">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 bg-blue-50 dark:bg-blue-900/50 rounded-lg">
@@ -432,28 +432,30 @@ export function DashboardTab({
               </Badge>
             </div>
             {activeTasks.length === 0 ? (
-              <div className="text-center py-6">
-                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3">
+              <div className="text-center py-6 flex-1 flex flex-col justify-center">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3 mx-auto">
                   <Clock className="h-6 w-6 text-gray-400 dark:text-gray-500" />
                 </div>
                 <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">No active tasks</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Start tracking a task to see it here</p>
               </div>
             ) : (
-              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
-                {activeTasks.map((item) => (
-                  <LearningItemCard
-                    key={item.id}
-                    item={item}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                    onStartTracking={onStartTracking}
-                    onStopTracking={onStopTracking}
-                    onNotesUpdate={onNotesUpdate}
-                    onSetActiveItem={onSetActiveItem}
-                    onSessionNoteAdd={onSessionNoteAdd}
-                  />
-                ))}
+              <div className="flex-1 overflow-hidden flex flex-col">
+                <div className="space-y-3 overflow-y-auto flex-1 pr-2">
+                  {activeTasks.map((item) => (
+                    <LearningItemCard
+                      key={item.id}
+                      item={item}
+                      onUpdate={onUpdate}
+                      onDelete={onDelete}
+                      onStartTracking={onStartTracking}
+                      onStopTracking={onStopTracking}
+                      onNotesUpdate={onNotesUpdate}
+                      onSetActiveItem={onSetActiveItem}
+                      onSessionNoteAdd={onSessionNoteAdd}
+                    />
+                  ))}
+                </div>
               </div>
             )}
           </Card>
