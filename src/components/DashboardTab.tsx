@@ -239,24 +239,8 @@ export function DashboardTab({
             </Button>
           </div>
           
-          <div className="grid grid-cols-2 gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="flex justify-center items-center gap-1.5 h-10 border-gray-200 dark:border-gray-700 dashboard-calendar-button"
-              onClick={() => setShowCalendar(!showCalendar)}
-            >
-              <CalendarIcon 
-                className="h-4 w-4 text-blue-600 dark:text-blue-400 lucide-calendar" 
-                fill="none"
-                strokeWidth={1.5} 
-                stroke="currentColor"
-              />
-              <span className="text-xs font-medium dashboard-calendar-text">
-                {showCalendar ? "Hide Calendar" : "Show Calendar"}
-              </span>
-            </Button>
-            
+          {/* Remplacer la grid par un unique bouton */}
+          <div className="flex justify-end">
             <Button 
               variant="outline" 
               size="sm"
