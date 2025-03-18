@@ -5,9 +5,10 @@ import { LearningItemFormData as BaseLearningItemFormData } from '../types';
 import { Button } from './ui/button';
 import { getLearningItems } from '../lib/database';
 
-// Extend the imported type to include tags
+// Extend the imported type to include tags and difficulty
 interface LearningItemFormData extends BaseLearningItemFormData {
   tags: string[];
+  difficulty: 'easy' | 'medium' | 'hard';
 }
 
 // Add generateId function

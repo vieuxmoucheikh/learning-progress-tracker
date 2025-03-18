@@ -45,9 +45,11 @@ export interface LearningItem {
   category?: string;
   date: string;
   completed?: boolean;
+  completed_at?: string;  // Date ISO d'achèvement lorsque l'élément est marqué comme terminé
   url?: string;
   footerUrl?: string; // Ajouter cette propriété pour stocker l'URL du pied de page
   priority?: 'low' | 'medium' | 'high';
+  difficulty?: 'easy' | 'medium' | 'hard';
   duration?: {
     hours: number;
     minutes: number;

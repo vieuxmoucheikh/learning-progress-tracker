@@ -44,7 +44,7 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
       
       // Calculate time from sessions
       const sessionTime = (item.progress?.sessions || []).reduce((time, session) => {
-        if (session.duration) {
+        if (session.duration?.hours !== undefined && session.duration?.minutes !== undefined) {
           return time + (session.duration.hours * 60 + session.duration.minutes);
         }
         return time;

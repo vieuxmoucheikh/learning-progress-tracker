@@ -92,7 +92,7 @@ export function LearningInsights({ goalId }: LearningInsightsProps) {
 
     // Calculate total time
     const totalMinutes = sortedSessions.reduce((total, session) => 
-      total + (session.duration.hours * 60 + session.duration.minutes), 0
+      total + ((session.duration?.hours || 0) * 60 + (session.duration?.minutes || 0)), 0
     );
 
     // Group sessions by day
@@ -157,7 +157,7 @@ export function LearningInsights({ goalId }: LearningInsightsProps) {
     });
 
     const recentTotalMinutes = recentSessions.reduce((total, session) => 
-      total + (session.duration.hours * 60 + session.duration.minutes), 0
+      total + ((session.duration?.hours || 0) * 60 + (session.duration?.minutes || 0)), 0
     );
 
     // Calculate weekly average
