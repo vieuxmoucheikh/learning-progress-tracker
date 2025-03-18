@@ -392,8 +392,8 @@ export function DashboardTab({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* Calendar - Hidden on mobile, shown in dialog */}
         <div className="hidden md:block md:col-span-1 w-full">
-          <Card className="p-4 shadow-sm hover:shadow-md transition-all border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between calendar-header">
+          <Card className="p-4 h-full w-full shadow-sm hover:shadow-md transition-all border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-4 calendar-header">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
                   <CalendarIcon 
@@ -405,24 +405,22 @@ export function DashboardTab({
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Calendar</h3>
               </div>
             </div>
-            <div className="calendar-container">
-              <Calendar 
-                items={items}
-                onDateSelect={(date) => {
-                  setSelectedDate(date);
-                  onDateSelect(date);
-                }}
-                selectedDate={selectedDate}
-                onAddItem={() => onAddItem(selectedDate)}
-              />
-            </div>
+            <Calendar 
+              items={items}
+              onDateSelect={(date) => {
+                setSelectedDate(date);
+                onDateSelect(date);
+              }}
+              selectedDate={selectedDate}
+              onAddItem={() => onAddItem(selectedDate)}
+            />
           </Card>
         </div>
 
         {/* Active Tasks - Full width on mobile, half width on desktop */}
         <div className="md:col-span-1">
           <Card className="p-4 hover:shadow-md transition-shadow shadow-sm border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between tasks-header">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 bg-blue-50 dark:bg-blue-900/50 rounded-lg">
                   <Clock className="w-5 h-5 text-blue-500 dark:text-blue-300" />
@@ -434,7 +432,7 @@ export function DashboardTab({
               </Badge>
             </div>
             {activeTasks.length === 0 ? (
-              <div className="tasks-empty-state">
+              <div className="text-center py-6">
                 <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3">
                   <Clock className="h-6 w-6 text-gray-400 dark:text-gray-500" />
                 </div>
@@ -442,7 +440,7 @@ export function DashboardTab({
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Start tracking a task to see it here</p>
               </div>
             ) : (
-              <div className="tasks-container">
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
                 {activeTasks.map((item) => (
                   <LearningItemCard
                     key={item.id}
