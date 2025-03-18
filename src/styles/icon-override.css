@@ -910,6 +910,200 @@ html[data-theme="dark"] #items svg,
       padding-bottom: 0 !important;
     }
   }
+
+  /* SIMPLIFICATION DES CARTES EN MODE CLAIR */
+  @media (max-width: 768px) {
+    /* Style simplifié pour les cartes */
+    html[data-theme="light"] .card,
+    html[data-theme="light"] .learning-item-card,
+    html[data-theme="light"] [class*="learning-card"],
+    html[data-theme="light"] .rounded-xl {
+      background-color: white !important;
+      border: 1px solid rgba(0, 0, 0, 0.1) !important;
+      border-radius: 12px !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+      padding: 16px !important;
+      margin-bottom: 16px !important;
+      transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    }
+
+    /* Élimination des dégradés et effets visuels excessifs */
+    html[data-theme="light"] .card > div,
+    html[data-theme="light"] .learning-item-card > div,
+    html[data-theme="light"] [class*="learning-card"] > div {
+      background: white !important;
+      background-image: none !important;
+    }
+
+    /* Simplification des titres */
+    html[data-theme="light"] .card h3,
+    html[data-theme="light"] .learning-item-card h3,
+    html[data-theme="light"] [class*="learning-card"] h3,
+    html[data-theme="light"] .card [class*="title"],
+    html[data-theme="light"] .learning-item-card [class*="title"],
+    html[data-theme="light"] [class*="learning-card"] [class*="title"] {
+      color: #0f172a !important;
+      font-weight: 600 !important;
+      font-size: 1.125rem !important;
+      margin-bottom: 12px !important;
+      text-shadow: none !important;
+    }
+
+    /* Simplification du texte */
+    html[data-theme="light"] .card p,
+    html[data-theme="light"] .learning-item-card p,
+    html[data-theme="light"] [class*="learning-card"] p {
+      color: #334155 !important;
+      font-size: 0.9375rem !important;
+      line-height: 1.5 !important;
+      margin-bottom: 12px !important;
+    }
+
+    /* Simplification des badges de statut */
+    html[data-theme="light"] .badge,
+    html[data-theme="light"] [class*="status-"] {
+      background-color: #f1f5f9 !important;
+      background-image: none !important;
+      color: #334155 !important;
+      font-weight: 500 !important;
+      font-size: 0.75rem !important;
+      padding: 0.25rem 0.5rem !important;
+      border-radius: 4px !important;
+      box-shadow: none !important;
+      text-transform: none !important;
+      letter-spacing: normal !important;
+    }
+
+    /* Couleurs de badge simplifiées */
+    html[data-theme="light"] [class*="status-in_progress"] {
+      background-color: #dbeafe !important;
+      color: #1e40af !important;
+    }
+
+    html[data-theme="light"] [class*="status-completed"] {
+      background-color: #dcfce7 !important;
+      color: #15803d !important;
+    }
+
+    html[data-theme="light"] [class*="status-on_hold"] {
+      background-color: #fef3c7 !important;
+      color: #92400e !important;
+    }
+
+    html[data-theme="light"] [class*="status-not_started"] {
+      background-color: #e2e8f0 !important;
+      color: #334155 !important;
+    }
+
+    /* Simplification des boutons */
+    html[data-theme="light"] .learning-item-card button,
+    html[data-theme="light"] [class*="learning-card"] button {
+      background-color: #f8fafc !important;
+      background-image: none !important;
+      color: #0f172a !important;
+      font-weight: normal !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 6px !important;
+      box-shadow: none !important;
+      padding: 6px 12px !important;
+      margin: 0 4px !important;
+      height: 36px !important;
+      min-width: 36px !important;
+      transition: background-color 0.2s ease !important;
+    }
+
+    /* Effet hover simplifié */
+    html[data-theme="light"] .learning-item-card button:hover,
+    html[data-theme="light"] [class*="learning-card"] button:hover {
+      background-color: #f1f5f9 !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Suppression des bordures colorées et des indicateurs visuels */
+    html[data-theme="light"] .learning-item-card .card[class*="border-"],
+    html[data-theme="light"] [class*="learning-card"] .card[class*="border-"] {
+      border-width: 1px !important;
+      border-left-width: 1px !important;
+      border-color: rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Supprimer les pseudo-éléments décoratifs */
+    html[data-theme="light"] .learning-item-card .card::before,
+    html[data-theme="light"] .learning-item-card .card::after,
+    html[data-theme="light"] [class*="learning-card"] .card::before,
+    html[data-theme="light"] [class*="learning-card"] .card::after {
+      display: none !important;
+    }
+
+    /* Simplification des sessions */
+    html[data-theme="light"] .learning-item-card [class*="session-"],
+    html[data-theme="light"] [class*="learning-card"] [class*="session-"] {
+      background-color: #f8fafc !important;
+      background-image: none !important;
+      border: 1px solid #e2e8f0 !important;
+      border-left: none !important;
+      border-radius: 8px !important;
+      box-shadow: none !important;
+      padding: 12px !important;
+      margin: 12px 0 !important;
+      animation: none !important;
+    }
+
+    /* Simplification de l'historique des sessions */
+    html[data-theme="light"] .learning-item-card [class*="sessions-list"],
+    html[data-theme="light"] .learning-item-card [class*="session-history"],
+    html[data-theme="light"] [class*="learning-card"] [class*="sessions-list"] {
+      background-color: transparent !important;
+      background-image: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+    }
+
+    /* Simplification du titre de l'historique */
+    html[data-theme="light"] .learning-item-card h4:has(+ [class*="sessions-list"]),
+    html[data-theme="light"] .learning-item-card h4:has(+ div > [class*="session-"]),
+    html[data-theme="light"] [class*="learning-card"] h4:has(+ [class*="sessions-list"]) {
+      border: none !important;
+      color: #0f172a !important;
+      font-size: 1rem !important;
+      font-weight: 600 !important;
+      margin-bottom: 8px !important;
+      padding-bottom: 0 !important;
+    }
+
+    /* Simplification des affichages de temps */
+    html[data-theme="light"] .learning-item-card [class*="total-time"],
+    html[data-theme="light"] .learning-item-card [class*="total-minutes"],
+    html[data-theme="light"] .learning-item-card .time-display,
+    html[data-theme="light"] .learning-item-card .stats-display,
+    html[data-theme="light"] [class*="learning-card"] [class*="total-time"],
+    html[data-theme="light"] [class*="learning-card"] [class*="total-minutes"] {
+      background-color: #f8fafc !important;
+      background-image: none !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 8px !important;
+      box-shadow: none !important;
+      padding: 12px !important;
+      margin: 12px 0 !important;
+    }
+
+    /* Simplification des valeurs de temps */
+    html[data-theme="light"] .learning-item-card [class*="time-value"],
+    html[data-theme="light"] .learning-item-card [class*="minute-value"],
+    html[data-theme="light"] .learning-item-card [class*="hour-value"],
+    html[data-theme="light"] [class*="learning-card"] [class*="time-value"] {
+      background-color: transparent !important;
+      box-shadow: none !important;
+      font-family: 'SFMono-Regular', Consolas, monospace !important;
+      font-size: 1.125rem !important;
+      font-weight: 600 !important;
+      color: #0f172a !important;
+      padding: 0 !important;
+      letter-spacing: normal !important;
+    }
+  }
 }
 
 /* CORRECTION SPÉCIFIQUE POUR LES ATTRIBUTS INLINE */
