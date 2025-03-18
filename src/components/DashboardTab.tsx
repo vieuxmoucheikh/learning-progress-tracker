@@ -445,21 +445,28 @@ export function DashboardTab({
                 </div>
               </div>
             ) : (
-              <div className="flex-1 overflow-y-auto pr-2 space-y-3" style={{ height: 'calc(100vh - 300px)' }}>
-                {activeTasks.map((item) => (
-                  <LearningItemCard
-                    key={item.id}
-                    item={item}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                    onStartTracking={onStartTracking}
-                    onStopTracking={onStopTracking}
-                    onNotesUpdate={onNotesUpdate}
-                    onSetActiveItem={onSetActiveItem}
-                    onSessionNoteAdd={onSessionNoteAdd}
-                    hideFooterUrl={true} // Cette prop sera maintenant correctement utilisée
-                  />
-                ))}
+              <div className="flex-1 overflow-y-auto pr-2" style={{ height: 'calc(100vh - 300px)' }}>
+                <div className="space-y-4">
+                  {activeTasks.map((item, index) => (
+                    <div key={item.id} className="snap-start snap-always">
+                      <LearningItemCard
+                        key={item.id}
+                        item={item}
+                        onUpdate={onUpdate}
+                        onDelete={onDelete}
+                        onStartTracking={onStartTracking}
+                        onStopTracking={onStopTracking}
+                        onNotesUpdate={onNotesUpdate}
+                        onSetActiveItem={onSetActiveItem}
+                        onSessionNoteAdd={onSessionNoteAdd}
+                        hideFooterUrl={true}
+                      />
+                      {index < activeTasks.length - 1 && (
+                        <div className="h-4"></div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </Card>
