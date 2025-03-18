@@ -1,9 +1,14 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo } from 'react';
 import { Plus, Link as LinkIcon, Clock, X } from 'lucide-react';
-import { LearningItemFormData } from '../types';
+import { LearningItemFormData as BaseLearningItemFormData } from '../types';
 import { Button } from './ui/button';
 import { getLearningItems } from '../lib/database';
+
+// Extend the imported type to include tags
+interface LearningItemFormData extends BaseLearningItemFormData {
+  tags: string[];
+}
 
 // Add generateId function
 const generateId = (): string => {
@@ -122,7 +127,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
       }
 
       // Create a clean object with only the necessary data
-      const formDataToSubmit: LearningItemFormData = {
+      const formDataToSubmit = {
         title: formData.title,
         type: formData.type as 'video' | 'pdf' | 'url' | 'book',
         current: {
@@ -141,7 +146,7 @@ export function AddLearningItem({ onAdd, onClose, isOpen, selectedDate }: Props)
           getAdjustedDateStr(new Date()),
         difficulty: formData.difficulty || 'medium',
         status: formData.status || 'not_started'
-      };
+      } as LearningItemFormData;
 
       // Add https:// to URL if needed
       if (formDataToSubmit.url && !formDataToSubmit.url.startsWith('http://') && !formDataToSubmit.url.startsWith('https://')) {

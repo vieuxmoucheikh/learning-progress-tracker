@@ -73,6 +73,7 @@ export type LearningItemFormData = Omit<LearningItem, 'id' | 'progress'> & {
   goal?: { hours: number; minutes: number };
   unit: 'hours' | 'pages' | 'percent';
   sessions?: Session[];
+  tags: string[];
 };
 
 export interface StreakData {
