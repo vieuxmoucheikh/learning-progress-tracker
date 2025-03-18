@@ -1339,3 +1339,417 @@ button svg,
   from { opacity: 0.7; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/**
+ * AMÉLIORATIONS GLOBALES DE L'INTERFACE UTILISATEUR
+ * Ce fichier contient des améliorations générales pour l'interface utilisateur,
+ * principalement axées sur le mode clair mobile pour une meilleure expérience utilisateur.
+ */
+
+/* AMÉLIORATIONS POUR LES INDICATEURS DE PROGRESSION */
+@media (max-width: 768px) {
+  /* Barres de progression avec style moderne */
+  html[data-theme="light"] progress,
+  html[data-theme="light"] [class*="progress-bar"],
+  html[data-theme="light"] [class*="progress"] {
+    height: 8px !important;
+    border-radius: 4px !important;
+    overflow: hidden !important;
+    background-color: #e2e8f0 !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Couleur de la barre de progression */
+  html[data-theme="light"] progress::-webkit-progress-value,
+  html[data-theme="light"] [class*="progress-bar"] > div,
+  html[data-theme="light"] [class*="progress"] > div {
+    background: linear-gradient(90deg, #3b82f6, #2563eb) !important;
+    border-radius: 4px !important;
+    transition: width 0.3s ease !important;
+  }
+
+  /* Amélioration de l'affichage des pourcentages */
+  html[data-theme="light"] [class*="percentage"],
+  html[data-theme="light"] [class*="percent"] {
+    font-family: 'SFMono-Regular', Consolas, monospace !important;
+    font-weight: 700 !important;
+    color: #1e40af !important;
+    font-size: 0.875rem !important;
+  }
+
+  /* Conteneur entourant un indicateur de progression */
+  html[data-theme="light"] [class*="progress-container"],
+  html[data-theme="light"] div:has(> progress),
+  html[data-theme="light"] div:has(> [class*="progress-bar"]),
+  html[data-theme="light"] div:has(> [class*="progress"]) {
+    margin: 12px 0 !important;
+  }
+
+  /* Étiquette associée à une barre de progression */
+  html[data-theme="light"] [class*="progress-label"],
+  html[data-theme="light"] label:has(+ progress),
+  html[data-theme="light"] span:has(+ progress) {
+    font-weight: 600 !important;
+    color: #0f172a !important;
+    font-size: 0.875rem !important;
+    margin-bottom: 4px !important;
+    display: block !important;
+  }
+}
+
+/* AMÉLIORATIONS POUR LES TABLEAUX ET LISTES */
+@media (max-width: 768px) {
+  /* Style moderne pour les tableaux */
+  html[data-theme="light"] table {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    margin: 16px 0 !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+
+  /* En-têtes de tableau */
+  html[data-theme="light"] table th {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    padding: 12px 16px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+  }
+
+  /* Cellules de tableau */
+  html[data-theme="light"] table td {
+    padding: 12px 16px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    color: #334155 !important;
+  }
+
+  /* Dernière ligne sans bordure */
+  html[data-theme="light"] table tr:last-child td {
+    border-bottom: none !important;
+  }
+
+  /* Lignes alternées */
+  html[data-theme="light"] table tr:nth-child(even) {
+    background-color: #f8fafc !important;
+  }
+
+  /* Effet de survol des lignes */
+  html[data-theme="light"] table tr:hover {
+    background-color: #f1f5f9 !important;
+  }
+
+  /* Listes avec espacement optimisé */
+  html[data-theme="light"] ul,
+  html[data-theme="light"] ol {
+    padding-left: 1.5rem !important;
+    margin: 12px 0 !important;
+  }
+
+  html[data-theme="light"] li {
+    margin-bottom: 8px !important;
+    color: #334155 !important;
+  }
+
+  /* Listes sans puces avec séparateurs */
+  html[data-theme="light"] ul[class*="no-bullet"],
+  html[data-theme="light"] [class*="list-none"] {
+    list-style: none !important;
+    padding-left: 0 !important;
+  }
+
+  html[data-theme="light"] ul[class*="no-bullet"] li,
+  html[data-theme="light"] [class*="list-none"] li {
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 8px 0 !important;
+  }
+
+  html[data-theme="light"] ul[class*="no-bullet"] li:last-child,
+  html[data-theme="light"] [class*="list-none"] li:last-child {
+    border-bottom: none !important;
+  }
+}
+
+/* AMÉLIORATIONS DES NOTIFICATIONS ET MESSAGES */
+@media (max-width: 768px) {
+  /* Style général pour les notifications */
+  html[data-theme="light"] [class*="notification"],
+  html[data-theme="light"] [class*="toast"],
+  html[data-theme="light"] [class*="alert"],
+  html[data-theme="light"] [class*="message"] {
+    border-radius: 8px !important;
+    padding: 12px 16px !important;
+    margin: 12px 0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid transparent !important;
+  }
+
+  /* Notification de succès */
+  html[data-theme="light"] [class*="notification-success"],
+  html[data-theme="light"] [class*="toast-success"],
+  html[data-theme="light"] [class*="alert-success"],
+  html[data-theme="light"] [class*="message-success"] {
+    background-color: #f0fdf4 !important;
+    border-color: #bbf7d0 !important;
+    color: #16a34a !important;
+  }
+
+  /* Notification d'erreur */
+  html[data-theme="light"] [class*="notification-error"],
+  html[data-theme="light"] [class*="toast-error"],
+  html[data-theme="light"] [class*="alert-error"],
+  html[data-theme="light"] [class*="message-error"] {
+    background-color: #fef2f2 !important;
+    border-color: #fecaca !important;
+    color: #dc2626 !important;
+  }
+
+  /* Notification d'avertissement */
+  html[data-theme="light"] [class*="notification-warning"],
+  html[data-theme="light"] [class*="toast-warning"],
+  html[data-theme="light"] [class*="alert-warning"],
+  html[data-theme="light"] [class*="message-warning"] {
+    background-color: #fffbeb !important;
+    border-color: #fef3c7 !important;
+    color: #d97706 !important;
+  }
+
+  /* Notification d'information */
+  html[data-theme="light"] [class*="notification-info"],
+  html[data-theme="light"] [class*="toast-info"],
+  html[data-theme="light"] [class*="alert-info"],
+  html[data-theme="light"] [class*="message-info"] {
+    background-color: #f0f9ff !important;
+    border-color: #bae6fd !important;
+    color: #0284c7 !important;
+  }
+
+  /* Icônes dans les notifications */
+  html[data-theme="light"] [class*="notification"] svg,
+  html[data-theme="light"] [class*="toast"] svg,
+  html[data-theme="light"] [class*="alert"] svg,
+  html[data-theme="light"] [class*="message"] svg {
+    width: 20px !important;
+    height: 20px !important;
+    margin-right: 12px !important;
+    stroke-width: 2px !important;
+  }
+}
+
+/* OPTIMISATIONS VISUELLES POUR LES BOÎTES DE DIALOGUE ET MODALES */
+@media (max-width: 768px) {
+  /* Style général pour les modales */
+  html[data-theme="light"] [class*="modal"],
+  html[data-theme="light"] [class*="dialog"],
+  html[data-theme="light"] [role="dialog"] {
+    background-color: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.1) !important;
+    padding: 16px !important;
+    max-width: 90vw !important;
+    margin: 0 auto !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* En-tête de modale */
+  html[data-theme="light"] [class*="modal-header"],
+  html[data-theme="light"] [class*="dialog-header"],
+  html[data-theme="light"] [role="dialog"] > div:first-child {
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding-bottom: 12px !important;
+    margin-bottom: 16px !important;
+  }
+
+  /* Titre de modale */
+  html[data-theme="light"] [class*="modal-title"],
+  html[data-theme="light"] [class*="dialog-title"],
+  html[data-theme="light"] [role="dialog"] h3 {
+    color: #0f172a !important;
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+  }
+
+  /* Corps de modale */
+  html[data-theme="light"] [class*="modal-body"],
+  html[data-theme="light"] [class*="dialog-body"],
+  html[data-theme="light"] [role="dialog"] > div:nth-child(2) {
+    padding: 8px 0 !important;
+    max-height: 70vh !important;
+    overflow-y: auto !important;
+  }
+
+  /* Pied de modale */
+  html[data-theme="light"] [class*="modal-footer"],
+  html[data-theme="light"] [class*="dialog-footer"],
+  html[data-theme="light"] [role="dialog"] > div:last-child {
+    border-top: 1px solid #e2e8f0 !important;
+    padding-top: 16px !important;
+    margin-top: 16px !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+  }
+
+  /* Overlay d'arrière-plan */
+  html[data-theme="light"] [class*="modal-overlay"],
+  html[data-theme="light"] [class*="dialog-overlay"],
+  html[data-theme="light"] [class*="overlay"] {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(2px) !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 50 !important;
+  }
+}
+
+/* OPTIMISATIONS DES FORMULAIRES POUR MOBILE */
+@media (max-width: 768px) {
+  /* Groupes de formulaires avec espacement optimisé */
+  html[data-theme="light"] [class*="form-group"],
+  html[data-theme="light"] [class*="input-group"],
+  html[data-theme="light"] form > div {
+    margin-bottom: 16px !important;
+  }
+
+  /* Étiquettes de formulaire */
+  html[data-theme="light"] label {
+    display: block !important;
+    margin-bottom: 6px !important;
+    font-weight: 500 !important;
+    color: #0f172a !important;
+    font-size: 0.875rem !important;
+  }
+
+  /* Champs de saisie */
+  html[data-theme="light"] input[type="text"],
+  html[data-theme="light"] input[type="email"],
+  html[data-theme="light"] input[type="password"],
+  html[data-theme="light"] input[type="number"],
+  html[data-theme="light"] input[type="search"],
+  html[data-theme="light"] input[type="tel"],
+  html[data-theme="light"] input[type="url"],
+  html[data-theme="light"] input[type="date"],
+  html[data-theme="light"] textarea,
+  html[data-theme="light"] select {
+    display: block !important;
+    width: 100% !important;
+    padding: 10px 12px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    background-color: white !important;
+    color: #0f172a !important;
+    font-size: 1rem !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  /* État de focus */
+  html[data-theme="light"] input:focus,
+  html[data-theme="light"] textarea:focus,
+  html[data-theme="light"] select:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+  }
+
+  /* Cases à cocher et boutons radio */
+  html[data-theme="light"] input[type="checkbox"],
+  html[data-theme="light"] input[type="radio"] {
+    width: 18px !important;
+    height: 18px !important;
+    margin-right: 8px !important;
+    accent-color: #3b82f6 !important;
+  }
+
+  /* Messages d'erreur */
+  html[data-theme="light"] [class*="error-message"],
+  html[data-theme="light"] [class*="form-error"],
+  html[data-theme="light"] [class*="validation-error"] {
+    color: #dc2626 !important;
+    font-size: 0.875rem !important;
+    margin-top: 4px !important;
+    font-weight: 500 !important;
+  }
+
+  /* Bouton de soumission */
+  html[data-theme="light"] button[type="submit"],
+  html[data-theme="light"] input[type="submit"] {
+    display: block !important;
+    width: 100% !important;
+    padding: 12px 16px !important;
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-size: 1rem !important;
+    cursor: pointer !important;
+    margin-top: 20px !important;
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2) !important;
+    transition: all 0.2s ease !important;
+  }
+
+  /* Bouton de soumission - survol */
+  html[data-theme="light"] button[type="submit"]:hover,
+  html[data-theme="light"] input[type="submit"]:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    box-shadow: 0 6px 8px rgba(37, 99, 235, 0.3) !important;
+    transform: translateY(-1px) !important;
+  }
+}
+
+/* ANIMATIONS ET TRANSITIONS */
+@media (max-width: 768px) {
+  /* Animation d'apparition */
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Animation de fade-out */
+  @keyframes fade-out {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(10px); }
+  }
+
+  /* Animation de pulsation */
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  /* Effet de rebond */
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  /* Classes d'animation applicables */
+  html[data-theme="light"] .animate-fade-in {
+    animation: fade-in 0.3s ease forwards !important;
+  }
+
+  html[data-theme="light"] .animate-fade-out {
+    animation: fade-out 0.3s ease forwards !important;
+  }
+
+  html[data-theme="light"] .animate-pulse {
+    animation: pulse 2s infinite !important;
+  }
+
+  html[data-theme="light"] .animate-bounce {
+    animation: bounce 2s infinite !important;
+  }
+
+  /* Animations conditionnelles pour certains composants */
+  html[data-theme="light"] .card:hover .hover-animate,
+  html[data-theme="light"] .learning-item-card:hover .hover-animate {
+    animation: pulse 1s !important;
+  }
+}
