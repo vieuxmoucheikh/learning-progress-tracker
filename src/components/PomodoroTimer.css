@@ -5,44 +5,11 @@
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s ease;
-  position: relative; /* Ensure the positioning context for absolute elements */
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-/* Base timer display for both light and dark modes */
-.timer-display {
-  border-radius: 12px;
-  padding: 1.5rem;
-  font-size: clamp(1.5rem, 5vw, 2.5rem); /* Responsive font size */
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 1.5rem;
-  font-variant-numeric: tabular-nums;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  position: relative;
-}
-
-/* Timer status badge - making sure it's always visible */
-.timer-status-badge {
-  position: absolute;
-  top: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 0.4rem 1rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-  z-index: 10;
-  white-space: nowrap;
 }
 
 /* Améliorations pour le mode clair */
 html[data-theme="light"] .pomodoro-container,
-html[data-theme="light"] [class*="pomodoro"],
-.light-theme .pomodoro-container {
+html[data-theme="light"] [class*="pomodoro"] {
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
@@ -73,9 +40,7 @@ html[data-theme="light"] [class*="pomodoro-body"] {
 /* Affichage du temps en mode clair */
 html[data-theme="light"] .pomodoro-display,
 html[data-theme="light"] [class*="pomodoro-display"],
-html[data-theme="light"] [class*="timer-display"],
-html[data-theme="light"] .timer-display,
-.light-theme .timer-display {
+html[data-theme="light"] [class*="timer-display"] {
   background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
   color: #0f172a; /* slate-900 */
   border-radius: 8px;
@@ -91,24 +56,10 @@ html[data-theme="light"] .timer-display,
 
 /* Timer en cours en mode clair */
 html[data-theme="light"] .pomodoro-active .pomodoro-display,
-html[data-theme="light"] [class*="pomodoro-active"] [class*="timer-display"],
-html[data-theme="light"] .timer-active .timer-display,
-.light-theme .timer-active .timer-display {
+html[data-theme="light"] [class*="pomodoro-active"] [class*="timer-display"] {
   background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
   color: #1e40af; /* blue-800 */
-  animation: pulse-light 2s infinite;
-}
-
-@keyframes pulse-light {
-  0% {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
-  }
+  animation: pulse 2s infinite;
 }
 
 /* Timer en pause en mode clair */
@@ -287,15 +238,18 @@ html[data-theme="light"] [class*="pomodoro-stat-label"] {
   html[data-theme="light"] [class*="pomodoro-stats"] {
     grid-template-columns: repeat(2, 1fr);
   }
+  
+  .pomodoro-status {
+    margin-bottom: 0.75rem;
+  }
 }
 
 /* Améliorations pour le mode sombre */
 html[data-theme="dark"] .pomodoro-container,
-html[data-theme="dark"] [class*="pomodoro"],
-.dark-theme .pomodoro-container {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+html[data-theme="dark"] [class*="pomodoro"] {
+  background-color: #1e293b; /* slate-800 */
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 html[data-theme="dark"] .pomodoro-header,
@@ -310,10 +264,8 @@ html[data-theme="dark"] [class*="pomodoro-title"] {
 }
 
 html[data-theme="dark"] .pomodoro-display,
-html[data-theme="dark"] [class*="timer-display"],
-html[data-theme="dark"] .timer-display,
-.dark-theme .timer-display {
-  background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+html[data-theme="dark"] [class*="timer-display"] {
+  background-color: #334155; /* slate-700 */
   color: #f8fafc; /* slate-50 */
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
@@ -325,183 +277,15 @@ html[data-theme="dark"] [class*="pomodoro"] button {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-html[data-theme="dark"] .timer-status-badge,
-.dark-theme .timer-status-badge {
-  background: #3b82f6; /* blue-500 */
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-html[data-theme="dark"] .timer-active .timer-display,
-.dark-theme .timer-active .timer-display {
-  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
-  color: #f8fafc; /* slate-50 */
-  animation: pulse-dark 2s infinite;
-}
-
-@keyframes pulse-dark {
-  0% {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
-  }
-}
-
-/* Progress bar styles */
-.timer-progress {
-  height: 8px;
-  border-radius: 9999px;
-  overflow: hidden;
-  margin: 1rem 0;
-}
-
-html[data-theme="light"] .timer-progress,
-.light-theme .timer-progress {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-html[data-theme="dark"] .timer-progress,
-.dark-theme .timer-progress {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Control buttons styles */
-.timer-controls {
-  display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-/* Task progress section */
-.task-progress {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top-width: 1px;
-}
-
-html[data-theme="light"] .task-progress,
-.light-theme .task-progress {
-  border-top-color: rgba(0, 0, 0, 0.1);
-}
-
-html[data-theme="dark"] .task-progress,
-.dark-theme .task-progress {
-  border-top-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Stats display */
-.timer-stats {
-  margin-top: 1rem;
-  padding-top: 1rem;
-}
-
-html[data-theme="light"] .timer-stats,
-.light-theme .timer-stats {
-  border-top-color: rgba(0, 0, 0, 0.1);
-}
-
-html[data-theme="dark"] .timer-stats,
-.dark-theme .timer-stats {
-  border-top-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .pomodoro-container {
-    padding: 1rem;
-  }
-  
-  .timer-display {
-    padding: 1rem;
-    margin-bottom: 1rem;
-  }
-  
-  .timer-controls {
-    gap: 0.5rem;
-  }
-  
-  .timer-controls button {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.875rem;
-  }
-  
-  .timer-status-badge {
-    top: -12px;
-    padding: 0.25rem 0.75rem;
-    font-size: 0.7rem;
-  }
-}
-
-/* Task list styles */
-.task-list {
-  margin-top: 1.5rem;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.task-item {
-  padding: 0.75rem;
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
-  transition: all 0.2s ease;
-}
-
-html[data-theme="light"] .task-item,
-.light-theme .task-item {
-  background-color: rgba(0, 0, 0, 0.03);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-html[data-theme="light"] .task-item:hover,
-.light-theme .task-item:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-html[data-theme="dark"] .task-item,
-.dark-theme .task-item {
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-html[data-theme="dark"] .task-item:hover,
-.dark-theme .task-item:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Add task form */
-.add-task-form {
-  display: flex;
-  gap: 0.5rem;
+/* Style pour le badge de statut */
+.pomodoro-status {
+  position: relative;
+  z-index: 10;
   margin-bottom: 1rem;
 }
 
-.add-task-form input {
-  flex-grow: 1;
-}
-
-/* Make the timer circle rings visible on all backgrounds */
-.timer-ring {
-  stroke-width: 12px;
-  fill: none;
-  transition: stroke-dashoffset 1s linear;
-}
-
-.timer-ring-background {
-  stroke-width: 12px;
-  fill: none;
-}
-
-html[data-theme="light"] .timer-ring-background,
-.light-theme .timer-ring-background {
-  stroke: rgba(0, 0, 0, 0.1);
-}
-
-html[data-theme="dark"] .timer-ring-background,
-.dark-theme .timer-ring-background {
-  stroke: rgba(255, 255, 255, 0.1);
+/* Assurer que le conteneur principal a assez d'espace */
+.pomodoro-timer {
+  position: relative;
+  padding-top: 0.5rem;
 }

@@ -1557,14 +1557,16 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     }, [settings, audioContext]);
 
     return (
-        <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate-700/30 shadow-2xl rounded-xl">
+        <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate-700/30 shadow-2xl rounded-xl mt-8">
             <div className="pomodoro-timer space-y-6 md:space-y-8">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1.5 rounded-full shadow-lg bg-blue-600/90 backdrop-blur-sm">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full animate-pulse bg-blue-300" />
-                        <span className="text-sm font-medium text-white">
-                            {isBreak ? "Break Time" : "Focus Time"}
-                        </span>
+                <div className="pomodoro-status flex justify-center items-center mb-2">
+                    <div className="px-4 py-1.5 rounded-full shadow-lg bg-blue-600/90 backdrop-blur-sm">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full animate-pulse bg-blue-300" />
+                            <span className="text-sm font-medium text-white">
+                                {isBreak ? "Break Time" : "Focus Time"}
+                            </span>
+                        </div>
                     </div>
                 </div>
                 <div className="w-full">
