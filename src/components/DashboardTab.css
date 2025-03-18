@@ -36,6 +36,7 @@
   .grid.grid-cols-1.md\:grid-cols-2.gap-4.md\:gap-6 > div.md\:col-span-1 > .card {
     display: flex;
     flex-direction: column;
+    height: 100%;
   }
   
   /* Calendar sizing adjustments */
@@ -43,6 +44,7 @@
     transform: scale(0.92);
     transform-origin: top center;
     margin-bottom: -20px;
+    height: 380px; /* Set a fixed reference height for the calendar */
   }
   
   /* Fix for calendar height issue */
@@ -54,7 +56,7 @@
   .tasks-container {
     display: flex;
     flex-direction: column;
-    height: 350px; /* Fixed height to match calendar */
+    height: 380px; /* Match calendar height */
     overflow: hidden;
   }
   
@@ -65,7 +67,6 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    max-height: 100%;
     padding-right: 0.5rem;
   }
   
@@ -82,7 +83,7 @@
   
   /* Set a fixed height for empty state to match calendar */
   .text-center.py-6.flex-1.flex.flex-col.justify-center {
-    height: 350px;
+    height: 380px;
     min-height: unset;
   }
   
