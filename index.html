@@ -86,6 +86,50 @@
         border-color: #4ade80 !important;
       }
     </style>
+    <!-- Style pour forcer l'égalisation des hauteurs sur le dashboard -->
+    <style id="dashboard-layout-fix">
+      @media (min-width: 768px) {
+        /* Conteneurs de widgets */
+        .dashboard-widgets-container > div,
+        .dashboard-top-row > div,
+        .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3.gap-4 > div,
+        [class*="dashboard"] [class*="grid"] > div {
+          height: 100% !important;
+          min-height: 380px !important;
+        }
+
+        /* Widget des tâches actives */
+        .active-tasks-widget,
+        [class*="active-tasks"],
+        div:has(> h2:contains("Active")),
+        div:has(> h3:contains("Active")),
+        [class*="card"]:has(h2:contains("Active")) {
+          display: flex !important;
+          flex-direction: column !important;
+          height: 100% !important;
+        }
+
+        /* Liste des tâches actives */
+        .active-tasks-widget [class*="grid"],
+        [class*="active-tasks"] [class*="grid"],
+        div:has(> h2:contains("Active")) [class*="grid"],
+        div:has(> h3:contains("Active")) [class*="grid"],
+        [class*="card"]:has(h2:contains("Active")) [class*="grid"] {
+          flex: 1 !important;
+          overflow-y: auto !important;
+          max-height: calc(100% - 60px) !important;
+        }
+
+        /* Widget du calendrier */
+        [class*="calendar-widget"],
+        [class*="Calendar"],
+        .rdp-month,
+        [class*="calendar"] {
+          height: 100% !important;
+          min-height: 380px !important;
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
@@ -94,5 +138,7 @@
     <script src="/light-mode-fixer.js"></script>
     <!-- Ajout du script de correction des compteurs -->
     <script src="/counter-fix.js"></script>
+    <!-- Ajout du script pour égaliser les hauteurs sur le dashboard -->
+    <script src="/dashboard-layout-fix.js"></script>
   </body>
 </html>

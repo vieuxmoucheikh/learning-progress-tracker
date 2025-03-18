@@ -1863,3 +1863,98 @@ html[data-theme="dark"] .text-xs.font-medium.bg-green-500\/10 {
 }
 
 /* ...existing code... */
+
+/* ==========================================================
+   CORRECTIFS POUR L'ALIGNEMENT DES HAUTEURS SUR DESKTOP
+   ========================================================== */
+
+/* Assurer que la hauteur du cadre "Active Tasks" corresponde à celle du calendrier sur desktop */
+@media (min-width: 768px) {
+  /* Conteneur parent pour les widgets */
+  .dashboard-widgets-container > div,
+  .dashboard-top-row > div,
+  .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3.gap-4 > div,
+  [class*="dashboard"] [class*="grid"] > div,
+  [class*="Widget"] [class*="container"] > div {
+    height: 100% !important;
+  }
+
+  /* Cadre spécifique des tâches actives */
+  .dashboard-widgets-container .active-tasks-widget,
+  [class*="active-tasks"],
+  div:has(> [class*="ActiveTasks"]),
+  div:has(> h2:contains("Active Tasks")),
+  div:has(> h3:contains("Active Tasks")),
+  div:has(> div > h2:contains("Active Tasks")),
+  div:has(> div > h3:contains("Active Tasks")),
+  [class*="dashboard"] [class*="card"]:has(h2:contains("Active Tasks")),
+  [class*="dashboard"] [class*="card"]:has(h3:contains("Active Tasks")) {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Contenu interne du widget des tâches actives */
+  .dashboard-widgets-container .active-tasks-widget > div,
+  [class*="active-tasks"] > div,
+  div:has(> [class*="ActiveTasks"]) > div,
+  div:has(> h2:contains("Active Tasks")) > div:nth-child(2),
+  div:has(> h3:contains("Active Tasks")) > div:nth-child(2),
+  div:has(> div > h2:contains("Active Tasks")) > div:nth-child(2),
+  div:has(> div > h3:contains("Active Tasks")) > div:nth-child(2),
+  [class*="dashboard"] [class*="card"]:has(h2:contains("Active Tasks")) > div:nth-child(2),
+  [class*="dashboard"] [class*="card"]:has(h3:contains("Active Tasks")) > div:nth-child(2) {
+    flex: 1 !important;
+    overflow-y: auto !important;
+  }
+
+  /* Égaliser spécifiquement la hauteur entre le widget des tâches actives et le calendrier */
+  .dashboard-widgets-container > div:has(> [class*="calendar"]),
+  .dashboard-top-row > div:has(> [class*="calendar"]),
+  .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3.gap-4 > div:has(> [class*="calendar"]),
+  div:has(> [class*="Calendar"]),
+  div:has(> div > [class*="Calendar"]),
+  [class*="dashboard"] [class*="card"]:has([class*="Calendar"]) {
+    height: auto !important;
+    min-height: 380px !important;
+  }
+
+  /* Conteneur des cartes de tâches actives pour assurer le défilement */
+  .active-tasks-widget .active-tasks-list,
+  [class*="active-tasks"] [class*="list"],
+  div:has(> h2:contains("Active Tasks")) [class*="grid"],
+  div:has(> h3:contains("Active Tasks")) [class*="grid"],
+  div:has(> div > h2:contains("Active Tasks")) [class*="grid"],
+  div:has(> div > h3:contains("Active Tasks")) [class*="grid"],
+  [class*="dashboard"] [class*="card"]:has(h2:contains("Active Tasks")) [class*="grid"],
+  [class*="dashboard"] [class*="card"]:has(h3:contains("Active Tasks")) [class*="grid"] {
+    max-height: calc(100% - 50px) !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* Styles spécifiques pour les cartes dans la section des tâches actives */
+@media (min-width: 768px) {
+  /* Cartes dans la section des tâches actives */
+  .active-tasks-widget .card,
+  [class*="active-tasks"] .card,
+  div:has(> h2:contains("Active Tasks")) .card,
+  div:has(> h3:contains("Active Tasks")) .card,
+  div:has(> div > h2:contains("Active Tasks")) .card,
+  div:has(> div > h3:contains("Active Tasks")) .card,
+  [class*="dashboard"] [class*="card"]:has(h2:contains("Active Tasks")) .card,
+  [class*="dashboard"] [class*="card"]:has(h3:contains("Active Tasks")) .card {
+    margin-bottom: 12px !important;
+  }
+
+  /* Styles pour le widget du calendrier */
+  [class*="calendar-widget"],
+  [class*="Calendar"],
+  div:has(> [class*="Calendar"]),
+  div:has(> div > [class*="Calendar"]) {
+    height: 100% !important;
+    min-height: 380px !important;
+  }
+}
+
+/* ...existing code... */

@@ -153,16 +153,89 @@ const injectCriticalStyles = () => {
   }, 500);
 };
 
-// S'assurer que les styles sont injectés au chargement de la page
+// Ajout d'une fonction pour égaliser les hauteurs des widgets sur le dashboard
+const equalizeWidgetHeights = () => {
+  if (window.innerWidth < 768) return; // N'appliquer que sur desktop
+  
+  // Identifier les éléments potentiels
+  const findElements = (selectors) => {
+    for (const selector of selectors) {
+      const elements = document.querySelectorAll(selector);
+      if (elements.length > 0) return Array.from(elements);
+    }
+    return [];
+  };
+  
+  // Sélecteurs potentiels pour le widget calendrier
+  const calendarSelectors = [
+    '[class*="calendar-widget"]', 
+    '[class*="Calendar"]',
+    '.rdp-month',
+    '[class*="calendar"]',
+    'div:has(> .rdp)'
+  ];
+  
+  // Sélecteurs potentiels pour le widget des tâches actives
+  const activeTasksSelectors = [
+    '.active-tasks-widget',
+    '[class*="active-tasks"]',
+    'div:has(> h2:contains("Active Tasks"))',
+    'div:has(> h3:contains("Active Tasks"))',
+    'div:has(> div > h2:contains("Active Tasks"))',
+    '[class*="card"]:has(h2:contains("Active Tasks"))'
+  ];
+  
+  setTimeout(() => {
+    const calendarElements = findElements(calendarSelectors);
+    const activeTasksElements = findElements(activeTasksSelectors);
+    
+    if (calendarElements.length > 0 && activeTasksElements.length > 0) {
+      // Trouver le calendrier et le widget des tâches actives
+      const calendarWidget = calendarElements[0];
+      const activeTasksWidget = activeTasksElements[0];
+      
+      // Obtenir la hauteur du calendrier
+      const calendarHeight = calendarWidget.offsetHeight;
+      
+      if (calendarHeight > 0) {
+        // Appliquer la même hauteur au widget des tâches actives
+        activeTasksWidget.style.height = `${calendarHeight}px`;
+        activeTasksWidget.style.display = 'flex';
+        activeTasksWidget.style.flexDirection = 'column';
+        
+        // Trouver la liste de tâches à l'intérieur du widget et lui donner un défilement
+        const tasksList = activeTasksWidget.querySelector('[class*="grid"], [class*="list"]');
+        if (tasksList) {
+          tasksList.style.flex = '1';
+          tasksList.style.overflowY = 'auto';
+          tasksList.style.maxHeight = 'calc(100% - 50px)';
+        }
+      }
+    }
+  }, 500); // Délai pour s'assurer que les éléments sont rendus
+};
+
+// S'assurer que les styles sont injectés et que les hauteurs sont égalisées
 if (typeof window !== 'undefined') {
-  window.addEventListener('DOMContentLoaded', injectCriticalStyles);
-  // Aussi injecter immédiatement au cas où le DOM est déjà chargé
+  window.addEventListener('DOMContentLoaded', () => {
+    injectCriticalStyles();
+    equalizeWidgetHeights();
+  });
+  
+  // Aussi appliquer au redimensionnement
+  window.addEventListener('resize', equalizeWidgetHeights);
+  
+  // Également injecter immédiatement au cas où le DOM est déjà chargé
   if (document.readyState === 'interactive' || document.readyState === 'complete') {
     injectCriticalStyles();
+    equalizeWidgetHeights();
   }
   
-  // Réinjecter les styles après un délai pour s'assurer qu'ils ne sont pas écrasés
-  setTimeout(injectCriticalStyles, 1000);
+  // Réinjecter les styles et égaliser les hauteurs après un délai
+  setTimeout(() => {
+    injectCriticalStyles();
+    equalizeWidgetHeights();
+  }, 1000);
 }
 
 function Root() {
