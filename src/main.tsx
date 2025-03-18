@@ -46,29 +46,57 @@ const injectCriticalStyles = () => {
       border-color: #4ade80 !important;
     }
     
-    /* Compteurs en haut à droite */
-    html[data-theme="dark"] .bg-blue-500\\/10, 
-    html[data-theme="dark"] .bg-green-500\\/10 {
-      background-color: rgba(15, 23, 42, 0.85) !important;
+    /* CORRECTIF CRITIQUE POUR LES COMPTEURS EN HAUT À DROITE (TOP CORNER COUNTERS) */
+    /* Ces sélecteurs sont ultra-spécifiques pour cibler les compteurs dans la barre supérieure */
+    html[data-theme="dark"] header .flex.items-center span.text-xs.font-medium,
+    html[data-theme="dark"] nav .flex.items-center span.text-xs.font-medium,
+    html[data-theme="dark"] div[class*="header"] .flex.items-center span.text-xs.font-medium,
+    html[data-theme="dark"] div[class*="navbar"] .flex.items-center span.text-xs.font-medium,
+    html[data-theme="dark"] div.flex.items-center.justify-end span.text-xs.font-medium {
       color: white !important;
-      border: 2px solid rgba(148, 163, 184, 0.7) !important;
       font-weight: 700 !important;
-      padding: 4px 10px !important;
+      padding: 5px 10px !important;
+      border: 2px solid !important;
       border-radius: 9999px !important;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+      margin: 0 4px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      min-width: 28px !important;
+      position: relative !important;
+      z-index: 50 !important;
     }
     
-    /* Active Tasks */
-    html[data-theme="dark"] .bg-blue-500\\/10 {
-      background-color: rgba(37, 99, 235, 0.85) !important;
+    /* "Active Tasks" counter specifics */
+    html[data-theme="dark"] header .flex.items-center span.text-xs.font-medium.bg-blue-500\\/10,
+    html[data-theme="dark"] nav .flex.items-center span.text-xs.font-medium.bg-blue-500\\/10,
+    html[data-theme="dark"] div[class*="header"] .flex.items-center span.text-xs.font-medium.bg-blue-500\\/10,
+    html[data-theme="dark"] div[class*="navbar"] .flex.items-center span.text-xs.font-medium.bg-blue-500\\/10,
+    html[data-theme="dark"] div.flex.items-center.justify-end span.text-xs.font-medium.bg-blue-500\\/10 {
+      background-color: rgba(37, 99, 235, 1) !important;
       border-color: #60a5fa !important;
     }
     
-    /* Completed Today */
-    html[data-theme="dark"] .bg-green-500\\/10 {
-      background-color: rgba(22, 163, 74, 0.85) !important;
+    /* "Completed Today" counter specifics */
+    html[data-theme="dark"] header .flex.items-center span.text-xs.font-medium.bg-green-500\\/10,
+    html[data-theme="dark"] nav .flex.items-center span.text-xs.font-medium.bg-green-500\\/10,
+    html[data-theme="dark"] div[class*="header"] .flex.items-center span.text-xs.font-medium.bg-green-500\\/10,
+    html[data-theme="dark"] div[class*="navbar"] .flex.items-center span.text-xs.font-medium.bg-green-500\\/10,
+    html[data-theme="dark"] div.flex.items-center.justify-end span.text-xs.font-medium.bg-green-500\\/10 {
+      background-color: rgba(22, 163, 74, 1) !important;
       border-color: #4ade80 !important;
+    }
+    
+    /* Amélioration de la visibilité des textes à côté des compteurs */
+    html[data-theme="dark"] header .flex.items-center span:not(.text-xs.font-medium),
+    html[data-theme="dark"] nav .flex.items-center span:not(.text-xs.font-medium),
+    html[data-theme="dark"] div[class*="header"] .flex.items-center span:not(.text-xs.font-medium),
+    html[data-theme="dark"] div[class*="navbar"] .flex.items-center span:not(.text-xs.font-medium),
+    html[data-theme="dark"] div.flex.items-center.justify-end span:not(.text-xs.font-medium) {
+      color: #e2e8f0 !important;
+      font-weight: 600 !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
     }
     
     /* Status dans les sessions (Current Session ou Session Paused) */
@@ -82,9 +110,47 @@ const injectCriticalStyles = () => {
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
     }
+    
+    /* Sélecteurs universels pour les compteurs d'activité */
+    html[data-theme="dark"] span.text-xs.font-medium.bg-blue-500\\/10,
+    html[data-theme="dark"] span.text-xs.font-medium.bg-green-500\\/10 {
+      color: white !important;
+      border: 2px solid !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 4px 8px !important;
+      border-radius: 9999px !important;
+      font-weight: 700 !important;
+      min-width: 24px !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+    }
+    
+    html[data-theme="dark"] span.text-xs.font-medium.bg-blue-500\\/10 {
+      background-color: rgba(37, 99, 235, 1) !important;
+      border-color: #60a5fa !important;
+    }
+    
+    html[data-theme="dark"] span.text-xs.font-medium.bg-green-500\\/10 {
+      background-color: rgba(22, 163, 74, 1) !important;
+      border-color: #4ade80 !important;
+    }
   `;
   
   document.head.appendChild(styleElement);
+  
+  // Ajouter un script pour forcer le rendu des compteurs
+  setTimeout(() => {
+    const counters = document.querySelectorAll('.text-xs.font-medium.bg-blue-500\\/10, .text-xs.font-medium.bg-green-500\\/10');
+    counters.forEach(counter => {
+      // Forcer un re-rendu en modifiant légèrement le DOM
+      const parent = counter.parentElement;
+      if (parent) {
+        const clone = counter.cloneNode(true);
+        parent.replaceChild(clone, counter);
+      }
+    });
+  }, 500);
 };
 
 // S'assurer que les styles sont injectés au chargement de la page
@@ -94,6 +160,9 @@ if (typeof window !== 'undefined') {
   if (document.readyState === 'interactive' || document.readyState === 'complete') {
     injectCriticalStyles();
   }
+  
+  // Réinjecter les styles après un délai pour s'assurer qu'ils ne sont pas écrasés
+  setTimeout(injectCriticalStyles, 1000);
 }
 
 function Root() {
