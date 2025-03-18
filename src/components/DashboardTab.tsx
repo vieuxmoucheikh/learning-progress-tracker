@@ -405,15 +405,17 @@ export function DashboardTab({
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Calendar</h3>
               </div>
             </div>
-            <Calendar 
-              items={items}
-              onDateSelect={(date) => {
-                setSelectedDate(date);
-                onDateSelect(date);
-              }}
-              selectedDate={selectedDate}
-              onAddItem={() => onAddItem(selectedDate)}
-            />
+            <div className="calendar-container max-h-[450px] overflow-hidden">
+              <Calendar 
+                items={items}
+                onDateSelect={(date) => {
+                  setSelectedDate(date);
+                  onDateSelect(date);
+                }}
+                selectedDate={selectedDate}
+                onAddItem={() => onAddItem(selectedDate)}
+              />
+            </div>
           </Card>
         </div>
 
@@ -440,8 +442,8 @@ export function DashboardTab({
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Start tracking a task to see it here</p>
               </div>
             ) : (
-              <div className="flex-1 overflow-hidden flex flex-col">
-                <div className="space-y-3 overflow-y-auto flex-1 pr-2">
+              <div className="flex-1 overflow-hidden">
+                <div className="space-y-3 max-h-[380px] overflow-y-auto pr-2">
                   {activeTasks.map((item) => (
                     <LearningItemCard
                       key={item.id}

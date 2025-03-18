@@ -37,9 +37,15 @@
     flex-direction: column;
   }
   
-  .grid.grid-cols-1.md\:grid-cols-2.gap-4.md\:gap-6 > div.md\:col-span-1 > .card > div.space-y-3 {
-    flex: 1;
-    overflow-y: auto;
+  /* Calendar container specific height */
+  .calendar-container {
+    max-height: 450px;
+    overflow: hidden;
+  }
+  
+  /* Active tasks scrollable area */
+  .max-h-\[380px\] {
+    max-height: 380px !important;
   }
   
   /* Customize scrollbar for the tasks list */
