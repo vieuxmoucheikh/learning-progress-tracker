@@ -77,10 +77,36 @@ export function DashboardTab({
   const [activeTasks, setActiveTasks] = useState<LearningItem[]>([]);
   const [completedTasks, setCompletedTasks] = useState<LearningItem[]>([]);
   const [showGoalDialog, setShowGoalDialog] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false);
+  // Modifier l'initialisation de showCalendar pour qu'il soit true par défaut en desktop
+  const [showCalendar, setShowCalendar] = useState(() => {
+    // Vérifier si le navigateur est disponible (côté client)
+    if (typeof window !== 'undefined') {
+      // Si la largeur d'écran est >= 768px (desktop), afficher le calendrier par défaut
+      return window.innerWidth >= 768;
+    }
+    // Par défaut (côté serveur ou fallback), ne pas afficher le calendrier
+    return false;
+  });
   const [showGoals, setShowGoals] = useState(false);
   const [streak, setStreak] = useState(0);
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
+
+  // Ajouter un effet pour gérer le redimensionnement de la fenêtre
+  useEffect(() => {
+    const handleResize = () => {
+      // Mettre à jour l'état showCalendar uniquement si nous franchissons le seuil mobile/desktop
+      const isDesktop = window.innerWidth >= 768;
+      setShowCalendar(isDesktop);
+    };
+
+    // Ajouter l'écouteur d'événements de redimensionnement
+    window.addEventListener('resize', handleResize);
+    
+    // Nettoyage
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   // Helper function to get date string in YYYY-MM-DD format
   const getDateStr = (date: Date | string) => {
@@ -521,30 +547,6 @@ export function DashboardTab({
           </div>
         )}
       </Card>
-
-      {/* Mobile Calendar Dialog */}
-      <Dialog open={false} onOpenChange={setShowCalendar}>
-        <DialogContent className="sm:max-w-[90%] w-[95%] max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Calendar</DialogTitle>
-          </DialogHeader>
-          <div className="w-full">
-            <Calendar 
-              items={items}
-              onDateSelect={(date) => {
-                setSelectedDate(date);
-                onDateSelect(date);
-                setShowCalendar(false);
-              }}
-              selectedDate={selectedDate}
-              onAddItem={() => {
-                onAddItem(selectedDate);
-                setShowCalendar(false);
-              }}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Goals Dialog */}
       <Dialog open={showGoals} onOpenChange={setShowGoals}>
