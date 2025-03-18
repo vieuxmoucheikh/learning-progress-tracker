@@ -180,6 +180,7 @@ export function ItemsTab({
                     onNotesUpdate={onNotesUpdate}
                     onSessionNoteAdd={onSessionNoteAdd}
                     onSetActiveItem={onSetActiveItem}
+                    hideFooterUrl={true} // Ajouter cette prop pour supprimer la section "Lien externe"
                   />
                 </div>
               )
