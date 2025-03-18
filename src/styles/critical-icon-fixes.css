@@ -214,8 +214,10 @@ html[data-theme="dark"] [role="button"] svg,
 .dark [role="button"] svg {
   fill: none !important;
   stroke: currentColor !important;
+  stroke-width: 2px !important;
+  transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease !important;
 }
-
+ 
 /* FORCAGE DES ATTRIBUTS SVG DIRECTEMENT */
 html[data-theme="dark"] svg *,
 .dark svg * {
@@ -698,4 +700,124 @@ html[data-theme="dark"] body [class*="description"] {
   visibility: visible !important;
   opacity: 1 !important;
   font-weight: 500 !important;
+}
+
+/* CORRECTIFS POUR LA TRANSITION ENTRE LES MODES CLAIR ET SOMBRE */
+/* Ces règles s'appliquent pendant et après la transition de thème */
+html:is([data-theme="dark"], [data-theme="light"]) body svg,
+html:is([data-theme="dark"], [data-theme="light"]) body [class*="lucide-"] {
+  transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease, color 0.2s ease !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  vector-effect: non-scaling-stroke !important;
+}
+
+/* Assurer que les icônes maintiennent leurs styles pendant la transition de thème */
+html body svg,
+html body [class*="lucide-"] {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease, color 0.2s ease !important;
+}
+
+/* Règles pour les icônes spécifiques comme play, pause et stop pendant la transition */
+html body .lucide-play {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  transition: fill 0.2s ease, stroke 0.2s ease !important;
+}
+
+html body .lucide-pause,
+html body .lucide-stop-circle {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.5px !important;
+  transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease !important;
+}
+
+/* CORRECTIFS POUR LE TOGGLE DE THÈME */
+.theme-toggle svg,
+[class*="theme-switcher"] svg,
+#theme-toggle svg,
+.theme-switcher svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  transition: fill 0.2s ease, stroke 0.2s ease, color 0.2s ease !important;
+}
+
+/* Assurez-vous que les icônes du toggle de thème conservent leur style */
+.theme-toggle svg *,
+[class*="theme-switcher"] svg *,
+#theme-toggle svg *,
+.theme-switcher svg * {
+  fill: inherit !important;
+  stroke: inherit !important;
+  transition: fill 0.2s ease, stroke 0.2s ease !important;
+}
+
+/* Règles pour les icônes de soleil et de lune */
+html body .lucide-sun,
+html body .lucide-moon,
+html body [class*="sun-icon"],
+html body [class*="moon-icon"] {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  transition: fill 0.2s ease, stroke 0.2s ease, color 0.2s ease !important;
+}
+
+/* CORRECTIFS POUR LES APPAREILS MOBILES */
+@media (max-width: 768px) {
+  /* Maintenir les styles d'icônes pendant la transition sur mobile */
+  html body svg,
+  html body [class*="lucide-"] {
+    stroke-width: 2.5px !important;
+    transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease, color 0.2s ease !important;
+  }
+  
+  /* Assurer que les icônes du toggle de thème fonctionnent correctement sur mobile */
+  .theme-toggle svg,
+  [class*="theme-switcher"] svg,
+  #theme-toggle svg,
+  .theme-switcher svg {
+    stroke-width: 2.5px !important;
+    transition: fill 0.2s ease, stroke 0.2s ease, color 0.2s ease !important;
+  }
+}
+
+/* CORRECTIFS SPÉCIFIQUES POUR LES ATTRIBUTS SVG PROBLÉMATIQUES PENDANT LA TRANSITION */
+/* Ces sélecteurs s'appliquent indépendamment du thème pour assurer une transition fluide */
+html body svg *[fill]:not([fill="none"]),
+html body [class*="lucide-"] *[fill]:not([fill="none"]) {
+  transition: fill 0.2s ease !important;
+}
+
+html body svg *[stroke],
+html body [class*="lucide-"] *[stroke] {
+  transition: stroke 0.2s ease, stroke-width 0.2s ease !important;
+}
+
+/* CONTINUITÉ VISUELLE PENDANT LA TRANSITION DE THÈME */
+html.transitioning svg,
+html.transitioning [class*="lucide-"] {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease, color 0.2s ease !important;
+}
+
+/* RÈGLES POUR LES ICÔNES DANS LES COMPOSANTS UI DURANT LA TRANSITION */
+.dialog svg,
+.popover svg,
+.dropdown svg,
+.modal svg,
+[role="dialog"] svg,
+[role="tooltip"] svg,
+[role="menu"] svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease, color 0.2s ease !important;
 }
