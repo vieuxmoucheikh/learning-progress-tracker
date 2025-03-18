@@ -24,3 +24,76 @@
     color: white !important;
   }
 }
+
+/* Ensure equal height between calendar and active tasks on desktop */
+@media (min-width: 768px) {
+  /* Equal heights for both columns */
+  .grid.grid-cols-1.md\:grid-cols-2.gap-4.md\:gap-6 {
+    align-items: stretch;
+  }
+  
+  .grid.grid-cols-1.md\:grid-cols-2.gap-4.md\:gap-6 > div.md\:col-span-1 {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .grid.grid-cols-1.md\:grid-cols-2.gap-4.md\:gap-6 > div.md\:col-span-1 > .card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  /* Calendar container */
+  .calendar-container {
+    height: 420px; /* Fixed reference height */
+  }
+  
+  /* Tasks container with scrolling starting at calendar height limit */
+  .tasks-container {
+    overflow-y: auto;
+    max-height: 373px; /* Calendar content height minus header and padding */
+    padding-right: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+  }
+  
+  /* Empty state for tasks */
+  .tasks-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 373px; /* Same as the tasks container */
+    text-align: center;
+  }
+  
+  /* Customize scrollbar for the tasks list */
+  .tasks-container::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .tasks-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+  }
+  
+  .tasks-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+  }
+  
+  .dark .tasks-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .dark .tasks-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Reduce space between elements */
+  .space-y-6 > * + * {
+    margin-top: 1rem !important;
+  }
+}
