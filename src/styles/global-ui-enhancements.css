@@ -1339,3 +1339,44 @@ button svg,
   from { opacity: 0.7; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* AMÉLIORATION DU DASHBOARD ANALYTIQUE EN MODE SOMBRE */
+.dark [class*="analytics"] h1,
+.dark [class*="analytics"] h2,
+.dark [class*="analytics"] h3,
+.dark [class*="analytics-tab"] h1,
+.dark [class*="analytics-tab"] h2,
+.dark [class*="analytics-tab"] h3,
+.dark [class*="AnalyticsTab"] h1,
+.dark [class*="AnalyticsTab"] h2,
+.dark [class*="AnalyticsTab"] h3 {
+  color: #f8fafc !important; /* slate-50 pour un contraste maximal */
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark [class*="analytics"] p,
+.dark [class*="analytics"] span,
+.dark [class*="analytics-tab"] p,
+.dark [class*="analytics-tab"] span,
+.dark [class*="AnalyticsTab"] p,
+.dark [class*="AnalyticsTab"] span {
+  color: #e2e8f0 !important; /* slate-200 pour une bonne lisibilité */
+  font-weight: 500 !important;
+}
+
+/* Amélioration des graphiques et visualisations */
+.dark [class*="analytics"] [class*="chart"],
+.dark [class*="analytics"] [class*="graph"],
+.dark [class*="analytics"] [class*="visualization"],
+.dark [class*="analytics-tab"] [class*="chart"],
+.dark [class*="analytics-tab"] [class*="graph"],
+.dark [class*="analytics-tab"] [class*="visualization"],
+.dark [class*="AnalyticsTab"] [class*="chart"],
+.dark [class*="AnalyticsTab"] [class*="graph"],
+.dark [class*="AnalyticsTab"] [class*="visualization"] {
+  background-color: #1e293b !important; /* slate-800 pour le fond */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
