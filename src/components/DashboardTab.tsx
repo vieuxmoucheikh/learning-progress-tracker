@@ -287,7 +287,7 @@ export function DashboardTab({
         </div>
       </div>
 
-      {/* Inline Mobile Calendar */}
+      {/* Inline Mobile Calendar - S'affiche uniquement sur mobile */}
       {showCalendar && (
         <div className="md:hidden">
           <Card className="p-4 w-full hover:shadow-md transition-shadow">
@@ -415,8 +415,9 @@ export function DashboardTab({
                 {showCalendar ? 'Hide' : 'Show'} Calendar
               </Button>
             </div>
+            {/* Ajouter hidden md:block pour masquer ce calendrier sur mobile */}
             {showCalendar && (
-              <div className="flex-1 overflow-y-auto" style={{ height: 'calc(100vh - 300px)' }}>
+              <div className="hidden md:flex flex-1 overflow-y-auto" style={{ height: 'calc(100vh - 300px)' }}>
                 <Calendar 
                   items={items}
                   onDateSelect={(date) => {
