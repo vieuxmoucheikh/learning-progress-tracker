@@ -14,86 +14,115 @@ import '../public/emergency-mobile-fix.css' // Ajout du correctif d'urgence
 // Injecter un style critique pour assurer la visibilité des compteurs et statuts
 const injectCriticalStyles = () => {
   const styleElement = document.createElement('style');
-  styleElement.setAttribute('id', 'critical-status-counters-fix');
+  styleElement.setAttribute('id', 'critical-session-status-fix');
   styleElement.textContent = `
-    /* CORRECTIFS INJECTÉS DIRECTEMENT POUR LES STATUTS ET COMPTEURS */
-    html[data-theme="dark"] .badge.capitalize.font-medium {
+    /* CORRECTIFS CRITIQUES ULTRA-CIBLÉS POUR LES SESSIONS ET COMPTEURS */
+    
+    /* 1. STATUTS DE SESSION - Pour tous les badges dans les cartes de session */
+    .border.rounded-xl .badge,
+    .rounded-xl .badge.capitalize {
       font-weight: 700 !important;
-      padding: 4px 10px !important;
       text-transform: uppercase !important;
-      letter-spacing: 0.05em !important;
+      letter-spacing: 0.03em !important;
       border-width: 2px !important;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+      padding: 0.25rem 0.5rem !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
     }
     
-    /* In Progress, On Hold, Completed avec fonds contrastés */
-    html[data-theme="dark"] .badge:contains("In Progress") {
-      background-color: rgba(37, 99, 235, 0.85) !important;
+    /* En mode sombre, les badges sont encore plus visibles */
+    html[data-theme="dark"] .border.rounded-xl .badge,
+    html[data-theme="dark"] .rounded-xl .badge.capitalize {
+      border-width: 2px !important;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    /* Styles spécifiques par type de statut */
+    html[data-theme="dark"] .border.rounded-xl .badge.bg-blue-100,
+    html[data-theme="dark"] .rounded-xl .badge.bg-blue-100,
+    html[data-theme="dark"] .border.rounded-xl .badge.dark\\:bg-blue-800\\/30 {
+      background-color: rgba(37, 99, 235, 0.9) !important;
       color: white !important;
       border-color: #60a5fa !important;
     }
     
-    html[data-theme="dark"] .badge:contains("On Hold") {
-      background-color: rgba(202, 138, 4, 0.85) !important;
+    html[data-theme="dark"] .border.rounded-xl .badge.bg-green-50,
+    html[data-theme="dark"] .rounded-xl .badge.bg-green-50,
+    html[data-theme="dark"] .border.rounded-xl .badge.dark\\:bg-green-800\\/30 {
+      background-color: rgba(22, 163, 74, 0.9) !important;
+      color: white !important;
+      border-color: #4ade80 !important;
+    }
+    
+    html[data-theme="dark"] .border.rounded-xl .badge.bg-yellow-50,
+    html[data-theme="dark"] .rounded-xl .badge.bg-yellow-50,
+    html[data-theme="dark"] .border.rounded-xl .badge.dark\\:bg-yellow-800\\/30 {
+      background-color: rgba(202, 138, 4, 0.9) !important;
       color: white !important;
       border-color: #fcd34d !important;
     }
     
-    html[data-theme="dark"] .badge:contains("Completed") {
-      background-color: rgba(22, 163, 74, 0.85) !important;
-      color: white !important;
-      border-color: #4ade80 !important;
-    }
-    
-    /* Compteurs en haut à droite */
-    html[data-theme="dark"] .bg-blue-500\\/10, 
-    html[data-theme="dark"] .bg-green-500\\/10 {
-      background-color: rgba(15, 23, 42, 0.85) !important;
-      color: white !important;
-      border: 2px solid rgba(148, 163, 184, 0.7) !important;
+    /* 2. COMPTEURS EN HAUT À DROITE */
+    /* Styles pour les compteurs dans les coins supérieurs */
+    html[data-theme="dark"] span.text-xs.font-medium {
       font-weight: 700 !important;
-      padding: 4px 10px !important;
       border-radius: 9999px !important;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+      padding: 0.4rem 0.7rem !important;
+      border: 2px solid !important;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) !important;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+      color: white !important;
+      line-height: 1 !important;
     }
     
     /* Active Tasks */
-    html[data-theme="dark"] .bg-blue-500\\/10 {
-      background-color: rgba(37, 99, 235, 0.85) !important;
+    html[data-theme="dark"] span.text-xs.font-medium.bg-blue-500\\/10 {
+      background-color: rgba(37, 99, 235, 0.9) !important;
       border-color: #60a5fa !important;
     }
     
     /* Completed Today */
-    html[data-theme="dark"] .bg-green-500\\/10 {
-      background-color: rgba(22, 163, 74, 0.85) !important;
+    html[data-theme="dark"] span.text-xs.font-medium.bg-green-500\\/10 {
+      background-color: rgba(22, 163, 74, 0.9) !important;
       border-color: #4ade80 !important;
     }
     
-    /* Status dans les sessions (Current Session ou Session Paused) */
-    html[data-theme="dark"] .text-blue-600.dark\\:text-blue-400.bg-blue-50\\/50.dark\\:bg-blue-900\\/20 {
-      background-color: rgba(37, 99, 235, 0.7) !important;
+    /* CORRECTIFS SUPPLÉMENTAIRES POUR LES STATUTS DE SESSION */
+    /* Noms des indicateurs de statut dans les sessions */
+    html[data-theme="dark"] .border.rounded-xl .font-semibold.text-lg {
       color: white !important;
-      border: 2px solid rgba(59, 130, 246, 0.7) !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    /* Couleurs des statuts dans les sessions quand ils sont affichés en texte */
+    html[data-theme="dark"] .text-blue-600.dark\\:text-blue-400,
+    html[data-theme="dark"] .text-yellow-600.dark\\:text-yellow-400,
+    html[data-theme="dark"] .text-gray-700.dark\\:text-gray-300 {
       font-weight: 700 !important;
-      padding: 5px 10px !important;
-      border-radius: 999px !important;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
     }
   `;
   
   document.head.appendChild(styleElement);
 };
 
-// S'assurer que les styles sont injectés au chargement de la page
+// S'assurer que les styles sont injectés le plus tôt possible
 if (typeof window !== 'undefined') {
-  window.addEventListener('DOMContentLoaded', injectCriticalStyles);
-  // Aussi injecter immédiatement au cas où le DOM est déjà chargé
-  if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  // Injecter immédiatement
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectCriticalStyles);
+  } else {
     injectCriticalStyles();
   }
+  
+  // Injecter aussi après le chargement complet pour s'assurer que nos styles ont priorité
+  window.addEventListener('load', () => {
+    // Petit délai pour s'assurer que tous les autres styles sont chargés
+    setTimeout(injectCriticalStyles, 100);
+  });
+  
+  // Réinjecter périodiquement pour maintenir les styles (au cas où ils seraient écrasés)
+  setInterval(injectCriticalStyles, 2000);
 }
 
 function Root() {
