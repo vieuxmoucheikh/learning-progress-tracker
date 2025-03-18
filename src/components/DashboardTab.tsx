@@ -390,52 +390,6 @@ export function DashboardTab({
 
       {/* Main Content - Responsive Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-        {/* Active Tasks - Full width on mobile, half width on desktop */}
-        <div className="md:col-span-1">
-          <Card className="p-4 hover:shadow-md transition-shadow shadow-sm border-gray-200 dark:border-gray-700 flex flex-col">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-blue-50 dark:bg-blue-900/50 rounded-lg">
-                  <Clock className="w-5 h-5 text-blue-500 dark:text-blue-300" />
-                </div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Active Tasks</h2>
-              </div>
-              <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
-                {activeTasks.length}
-              </Badge>
-            </div>
-            {activeTasks.length === 0 ? (
-              <div className="text-center py-6 flex-grow flex items-center justify-center">
-                <div className="flex flex-col items-center">
-                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3">
-                    <Clock className="h-6 w-6 text-gray-400 dark:text-gray-500" />
-                  </div>
-                  <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">No active tasks</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Start tracking a task to see it here</p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex-grow overflow-y-auto pr-2">
-                <div className="space-y-3">
-                  {activeTasks.map((item) => (
-                    <LearningItemCard
-                      key={item.id}
-                      item={item}
-                      onUpdate={onUpdate}
-                      onDelete={onDelete}
-                      onStartTracking={onStartTracking}
-                      onStopTracking={onStopTracking}
-                      onNotesUpdate={onNotesUpdate}
-                      onSetActiveItem={onSetActiveItem}
-                      onSessionNoteAdd={onSessionNoteAdd}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </Card>
-        </div>
-
         {/* Calendar - Hidden on mobile, shown in dialog */}
         <div className="hidden md:block md:col-span-1 w-full">
           <Card className="p-4 h-full w-full shadow-sm hover:shadow-md transition-all border-gray-200 dark:border-gray-700">
@@ -460,6 +414,48 @@ export function DashboardTab({
               selectedDate={selectedDate}
               onAddItem={() => onAddItem(selectedDate)}
             />
+          </Card>
+        </div>
+
+        {/* Active Tasks - Full width on mobile, half width on desktop */}
+        <div className="md:col-span-1">
+          <Card className="p-4 hover:shadow-md transition-shadow shadow-sm border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-blue-50 dark:bg-blue-900/50 rounded-lg">
+                  <Clock className="w-5 h-5 text-blue-500 dark:text-blue-300" />
+                </div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Active Tasks</h2>
+              </div>
+              <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                {activeTasks.length}
+              </Badge>
+            </div>
+            {activeTasks.length === 0 ? (
+              <div className="text-center py-6">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-full inline-block mb-3">
+                  <Clock className="h-6 w-6 text-gray-400 dark:text-gray-500" />
+                </div>
+                <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">No active tasks</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Start tracking a task to see it here</p>
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                {activeTasks.map((item) => (
+                  <LearningItemCard
+                    key={item.id}
+                    item={item}
+                    onUpdate={onUpdate}
+                    onDelete={onDelete}
+                    onStartTracking={onStartTracking}
+                    onStopTracking={onStopTracking}
+                    onNotesUpdate={onNotesUpdate}
+                    onSetActiveItem={onSetActiveItem}
+                    onSessionNoteAdd={onSessionNoteAdd}
+                  />
+                ))}
+              </div>
+            )}
           </Card>
         </div>
 
