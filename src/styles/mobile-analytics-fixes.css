@@ -1,0 +1,76 @@
+/* Correctifs pour l'affichage mobile des graphiques en mode sombre */
+
+/* Amélioration de la visibilité des graphiques sur mobile */
+@media (max-width: 768px) {
+  /* Augmentation du contraste des graphiques en mode sombre */
+  .dark .recharts-wrapper {
+    filter: brightness(1.2) contrast(1.1);
+  }
+  
+  /* Augmentation de la taille des labels sur mobile */
+  .recharts-text {
+    font-size: 10px !important;
+  }
+  
+  /* Amélioration de la taille des touches pour les interactions tactiles */
+  .recharts-dot,
+  .recharts-bar-rectangle,
+  .recharts-active-dot {
+    cursor: pointer;
+    transform: scale(1.2);
+  }
+
+  /* Meilleure visibilité pour le PieChart */
+  .dark .recharts-pie-label-text {
+    fill: #f3f4f6 !important; /* Texte plus clair en mode sombre */
+  }
+
+  /* Contour plus visible pour les cellules de heat map */
+  .dark .heatmap-cell {
+    stroke: #374151 !important;
+    stroke-width: 1px !important;
+  }
+  
+  /* Rendre les tooltips plus visibles en mode sombre */
+  .dark .recharts-tooltip-wrapper .recharts-default-tooltip {
+    background-color: rgba(17, 24, 39, 0.9) !important;
+    border-color: #4b5563 !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Assurer que le texte des tooltips est visible */
+  .dark .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-label {
+    color: #f3f4f6 !important;
+  }
+  
+  .dark .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-item-list .recharts-tooltip-item {
+    color: #e5e7eb !important;
+  }
+  
+  /* Corriger les marges du conteneur des graphiques radar en mode mobile */
+  .recharts-radar {
+    margin: 0 auto;
+  }
+
+  /* Améliorer la lisibilité du RadarChart */
+  .dark .recharts-polar-angle-axis-tick text {
+    fill: #d1d5db !important;
+    font-weight: 500;
+  }
+}
+
+/* Correction pour l'affichage de la heatmap sur mobile */
+.yearly-activity-heatmap-container {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+/* Assurer que les couleurs des cellules de la heatmap sont visibles en mode sombre */
+.dark .heatmap-cell-level-0 { fill: #1f2937 !important; } /* Fond */
+.dark .heatmap-cell-level-1 { fill: #1e3a8a !important; } /* Activité très faible */
+.dark .heatmap-cell-level-2 { fill: #1d4ed8 !important; } /* Activité faible */
+.dark .heatmap-cell-level-3 { fill: #2563eb !important; } /* Activité moyenne */
+.dark .heatmap-cell-level-4 { fill: #3b82f6 !important; } /* Activité élevée */
+.dark .heatmap-cell-level-5 { fill: #60a5fa !important; } /* Activité très élevée */

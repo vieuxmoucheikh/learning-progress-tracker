@@ -61,6 +61,7 @@ export function YearlyActivityHeatmap({ data, year, isDarkMode = false }: Heatma
     // Now add actual days
     while (currentDate <= endDate) {
       const formattedDate = format(currentDate, 'yyyy-MM-dd');
+      // S'assurer que count est toujours un nombre (0 par défaut)
       const count = countsMap[formattedDate] || 0;
       
       // Record the start position of each month
@@ -103,12 +104,16 @@ export function YearlyActivityHeatmap({ data, year, isDarkMode = false }: Heatma
   }, [data, year]);
   
   // Fonction qui détermine la couleur en fonction du nombre d'activités
+  // Utiliser une valeur de comptage avec traitement explicite pour éviter des undefined
   const getColorIntensity = (count: number) => {
+    // S'assurer que count est toujours un nombre valide
+    const safeCount = typeof count === 'number' ? count : 0;
+    
     const thresholds = [0, 1, 2, 4, 6, 8]; // Seuils d'intensité
     const palette = isDarkMode ? colorScale.dark : colorScale.light;
     
     for (let i = thresholds.length - 1; i >= 0; i--) {
-      if (count >= thresholds[i]) {
+      if (safeCount >= thresholds[i]) {
         return palette[i as keyof typeof palette];
       }
     }
@@ -167,6 +172,9 @@ export function YearlyActivityHeatmap({ data, year, isDarkMode = false }: Heatma
                     ? 'ring-2 ring-blue-500 dark:ring-blue-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900' 
                     : '';
                   
+                  // Assurons-nous que count est toujours un nombre
+                  const count = typeof day.count === 'number' ? day.count : 0;
+                  
                   return (
                     <div
                       key={day.date || `empty-${dayIdx}`}
@@ -176,11 +184,11 @@ export function YearlyActivityHeatmap({ data, year, isDarkMode = false }: Heatma
                         borderClass
                       )}
                       style={{
-                        backgroundColor: getColorIntensity(day.count),
+                        backgroundColor: getColorIntensity(count),
                         width: '16px',
                         height: '16px'
                       }}
-                      title={day.date ? `${format(parseISO(day.date), 'PPP', { locale: fr })}: ${day.count} activities` : ''}
+                      title={day.date ? `${format(parseISO(day.date), 'PPP', { locale: fr })}: ${count} activities` : ''}
                     />
                   );
                 })}
