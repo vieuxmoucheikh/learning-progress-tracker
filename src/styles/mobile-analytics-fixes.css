@@ -64,6 +64,7 @@
     padding-left: 0;
     margin-left: -8px;
     margin-right: -8px;
+    overflow-x: hidden;
   }
   
   /* Réduire davantage la taille des cellules sur mobile */
@@ -77,6 +78,16 @@
     font-size: 9px !important;
     width: 12px !important;
     margin-right: 1px !important;
+  }
+  
+  /* Amélioration du sélecteur d'années sur mobile */
+  .year-selector {
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+  }
+  
+  .year-selector-dropdown {
+    max-height: 200px !important;
   }
 }
 
@@ -222,5 +233,265 @@
 @media (max-width: 768px) {
   .heatmap-cell:hover {
     transform: none !important;
+  }
+}
+
+/* NOUVELLES AMÉLIORATIONS VISUELLES POUR LE CALENDRIER ET LE SÉLECTEUR D'ANNÉES */
+
+/* Sélecteur d'années amélioré - style commun */
+.year-selector-container {
+  position: relative;
+  margin-bottom: 1rem;
+  margin-top: 0.5rem;
+}
+
+.year-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--background-highlight, #f3f4f6);
+  color: var(--text-primary, #111827);
+  border: 1px solid var(--border-subtle, #e5e7eb);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Sélecteur d'années - version claire */
+:root:not(.dark) .year-selector {
+  background: linear-gradient(to bottom, #ffffff, #f9fafb);
+  border: 1px solid #e2e8f0;
+  color: #334155;
+}
+
+:root:not(.dark) .year-selector:hover {
+  background: linear-gradient(to bottom, #f9fafb, #f1f5f9);
+  border-color: #cbd5e1;
+}
+
+/* Sélecteur d'années - version sombre */
+.dark .year-selector {
+  background: linear-gradient(to bottom, #1f2937, #111827);
+  border: 1px solid #374151;
+  color: #e5e7eb;
+}
+
+.dark .year-selector:hover {
+  background: linear-gradient(to bottom, #374151, #1f2937);
+  border-color: #4b5563;
+}
+
+.year-selector-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 50;
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 0.5rem;
+  border-radius: 6px;
+  background: var(--background-dropdown, white);
+  border: 1px solid var(--border-subtle, #e5e7eb);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.year-selector-dropdown.hidden {
+  display: none;
+}
+
+.year-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+/* Version claire des options d'années */
+:root:not(.dark) .year-selector-dropdown {
+  background: white;
+  border: 1px solid #e2e8f0;
+}
+
+:root:not(.dark) .year-option {
+  color: #334155;
+}
+
+:root:not(.dark) .year-option:hover {
+  background-color: #f1f5f9;
+}
+
+:root:not(.dark) .year-option.active {
+  background-color: #e0f2fe;
+  color: #0284c7;
+  font-weight: 500;
+}
+
+/* Version sombre des options d'années */
+.dark .year-selector-dropdown {
+  background: #1f2937;
+  border: 1px solid #374151;
+}
+
+.dark .year-option {
+  color: #e5e7eb;
+}
+
+.dark .year-option:hover {
+  background-color: #374151;
+}
+
+.dark .year-option.active {
+  background-color: #0c4a6e;
+  color: #7dd3fc;
+  font-weight: 500;
+}
+
+/* Améliorations pour le calendrier */
+.yearly-activity-heatmap-container {
+  position: relative;
+  width: 100%;
+  border-radius: 8px;
+  padding: 1.5rem 0.5rem 1rem;
+  margin-top: 1.5rem;
+  background: var(--background-secondary, #f9fafb);
+  border: 1px solid var(--border-subtle, #e5e7eb);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Version claire du conteneur de calendrier */
+:root:not(.dark) .yearly-activity-heatmap-container {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+/* Version sombre du conteneur de calendrier */
+.dark .yearly-activity-heatmap-container {
+  background-color: #111827;
+  border: 1px solid #1f2937;
+}
+
+/* Ajouter un titre au conteneur du calendrier */
+.yearly-activity-heatmap-container::before {
+  content: "Contribution Calendar";
+  position: absolute;
+  top: -12px;
+  left: 12px;
+  background: var(--background-primary, white);
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 4px;
+  color: var(--text-secondary, #4b5563);
+  border: 1px solid var(--border-subtle, #e5e7eb);
+}
+
+:root:not(.dark) .yearly-activity-heatmap-container::before {
+  background-color: white;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.dark .yearly-activity-heatmap-container::before {
+  background-color: #1e293b;
+  color: #94a3b8;
+  border: 1px solid #1f2937;
+}
+
+/* Amélioration de l'aspect du heatmap */
+.heatmap-cell {
+  transition: all 0.2s ease;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.dark .heatmap-cell {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.heatmap-cell:hover {
+  transform: scale(1.2);
+  z-index: 10;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5), 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Amélioration de la légende */
+.heatmap-legend {
+  margin-top: 1rem;
+  padding: 0.5rem;
+  border-top: 1px solid var(--border-subtle, #e5e7eb);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+:root:not(.dark) .heatmap-legend {
+  border-top: 1px solid #e2e8f0;
+}
+
+.dark .heatmap-legend {
+  border-top: 1px solid #1f2937;
+}
+
+.heatmap-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.dark .heatmap-legend-color {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Allègement de l'interface sur mobile pour éviter horizontal scroll */
+@media (max-width: 500px) {
+  .yearly-activity-heatmap-container {
+    transform-origin: left top;
+    transform: scale(0.85);
+    width: 117%;
+    margin-left: -8%;
+  }
+}
+
+/* Animation pour les interactions */
+.heatmap-cell, .year-option, .year-selector {
+  will-change: transform, opacity;
+}
+
+/* Tooltip amélioré */
+[title] {
+  position: relative;
+  overflow: visible;
+}
+
+[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: calc(100% + 5px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  white-space: nowrap;
+  z-index: 100;
+  opacity: 0;
+  animation: fadeIn 0.2s ease forwards;
+  pointer-events: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
 }

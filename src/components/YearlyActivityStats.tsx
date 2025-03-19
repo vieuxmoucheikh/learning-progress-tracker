@@ -16,6 +16,7 @@ export function YearlyActivityStats() {
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const { toast } = useToast();
   
   // Détection du mode sombre
@@ -101,10 +102,18 @@ export function YearlyActivityStats() {
     return activityData.filter(item => item.category === selectedCategory);
   }, [activityData, selectedCategory]);
 
-  const heatmapData = useMemo(() => {
-    if (filteredData.length === 0) return [];
+  // Filtrer les données en fonction de l'année sélectionnée
+  const filteredDataByYear = useMemo(() => {
+    return filteredData.filter(item => {
+      const year = parseInt(item.date.substring(0, 4));
+      return year === selectedYear;
+    });
+  }, [filteredData, selectedYear]);
 
-    const dataMap = filteredData.reduce((acc, curr) => {
+  const heatmapData = useMemo(() => {
+    if (filteredDataByYear.length === 0) return [];
+
+    const dataMap = filteredDataByYear.reduce((acc, curr) => {
       const date = curr.date;
       acc[date] = (acc[date] || 0) + curr.count;
       return acc;
@@ -116,7 +125,7 @@ export function YearlyActivityStats() {
     }));
 
     return data;
-  }, [filteredData]);
+  }, [filteredDataByYear]);
 
   // Calcul des statistiques
   const stats = useMemo(() => {
@@ -147,6 +156,11 @@ export function YearlyActivityStats() {
     }
     return false;
   }, []);
+
+  // Handler pour le changement d'année
+  const handleYearChange = (year: number) => {
+    setSelectedYear(year);
+  };
 
   // Amélioration du rendu avec gestion plus robuste des données vides
   const renderContent = () => {
@@ -256,12 +270,13 @@ export function YearlyActivityStats() {
               </div>
             </div>
 
-            {/* Heatmap avec meilleure visibilité - New wrapper for better scaling */}
-            <div className="w-full overflow-hidden relative heatmap-container">
+            {/* Heatmap avec meilleure visibilité - Now with year selector */}
+            <div className="w-full rounded-lg relative">
               <YearlyActivityHeatmap 
                 data={heatmapData} 
-                year={new Date().getFullYear()}
+                year={selectedYear}
                 isDarkMode={isDarkMode}
+                onYearChange={handleYearChange}
               />
             </div>
           </div>

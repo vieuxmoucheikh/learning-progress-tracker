@@ -2,19 +2,35 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { format, parseISO, getDay, addDays, startOfYear, endOfYear } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { ChevronDown, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface HeatmapProps {
   data: { date: string; count: number }[];
   year: number;
   isDarkMode?: boolean;
+  onYearChange?: (year: number) => void;
 }
 
 const DAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
 
-export function YearlyActivityHeatmap({ data, year, isDarkMode = false }: HeatmapProps) {
+// Générer les années disponibles (5 ans en arrière et 2 ans en avant)
+const generateAvailableYears = (): number[] => {
+  const currentYear = new Date().getFullYear();
+  return Array.from({ length: 8 }, (_, i) => currentYear - 5 + i);
+};
+
+export function YearlyActivityHeatmap({ 
+  data, 
+  year, 
+  isDarkMode = false,
+  onYearChange 
+}: HeatmapProps) {
   const [containerWidth, setContainerWidth] = useState<number>(0);
   const [scale, setScale] = useState<number>(1);
+  const [showYearDropdown, setShowYearDropdown] = useState(false);
+  const [selectedYear, setSelectedYear] = useState(year);
+  const availableYears = useMemo(generateAvailableYears, []);
   
   // Mise à jour de la largeur du conteneur et adaptation du scale
   useEffect(() => {
@@ -70,8 +86,8 @@ export function YearlyActivityHeatmap({ data, year, isDarkMode = false }: Heatma
       countsMap[item.date] = item.count;
     });
 
-    const startDate = startOfYear(new Date(year, 0, 1));
-    const endDate = endOfYear(new Date(year, 11, 31));
+    const startDate = startOfYear(new Date(selectedYear, 0, 1));
+    const endDate = endOfYear(new Date(selectedYear, 11, 31));
     
     let currentDate = startDate;
     const days = [];
@@ -128,7 +144,7 @@ export function YearlyActivityHeatmap({ data, year, isDarkMode = false }: Heatma
     }
     
     return { daysGrid, monthLabels };
-  }, [data, year]);
+  }, [data, selectedYear]);
   
   // Fonction qui détermine la couleur en fonction du nombre d'activités
   // Utiliser une valeur de comptage avec traitement explicite pour éviter des undefined
@@ -157,107 +173,180 @@ export function YearlyActivityHeatmap({ data, year, isDarkMode = false }: Heatma
     return 12;
   }, [containerWidth]);
 
+  // Handler pour le changement d'année
+  const handleYearChange = (newYear: number) => {
+    setSelectedYear(newYear);
+    setShowYearDropdown(false);
+    if (onYearChange) {
+      onYearChange(newYear);
+    }
+  };
+
+  // Handler pour incrémenter/décrémenter l'année
+  const changeYear = (increment: number) => {
+    const newYear = selectedYear + increment;
+    if (availableYears.includes(newYear)) {
+      handleYearChange(newYear);
+    }
+  };
+
   return (
-    <div className="yearly-activity-heatmap-container">
-      <div 
-        className="heatmap-responsive-wrapper"
-        style={{ 
-          transform: `scale(${scale})`, 
-          transformOrigin: 'left top',
-          width: scale === 1 ? '100%' : `${100 / scale}%`
-        }}
-      >
-        <div className="min-w-max relative">
-          {/* Month labels on top - Now using absolute positioning for better alignment */}
-          <div className="month-labels">
-            {monthLabels.map((label, idx) => (
-              <div
-                key={`month-${idx}`}
-                className="month-label"
-                style={{
-                  left: `${label.position * (cellSize + 2) + 24}px` // Ajuster en fonction de la taille des cellules
-                }}
-              >
-                {label.month}
-              </div>
-            ))}
-          </div>
+    <div>
+      {/* Year Selector Component - Sélecteur d'années amélioré */}
+      <div className="year-selector-container">
+        <button 
+          className="year-selector w-full"
+          onClick={() => setShowYearDropdown(!showYearDropdown)}
+        >
+          <Calendar className="h-4 w-4" />
+          <span>{selectedYear}</span>
+          <ChevronDown className={`h-4 w-4 transition-transform ${showYearDropdown ? 'transform rotate-180' : ''}`} />
           
-          {/* Grid with improved styling */}
-          <div className="yearly-heatmap-grid mt-6">
-            {/* Day labels - Now with fixed width for better alignment */}
-            <div className="flex flex-col justify-around mr-2 w-6">
-              {DAYS.map((day, idx) => (
-                <div 
-                  key={day} 
-                  className="text-xs text-gray-500 dark:text-gray-400 flex items-center justify-center"
-                  style={{ height: `${cellSize + 2}px` }}
+          <div className="flex ml-auto">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                changeYear(-1);
+              }}
+              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+              disabled={!availableYears.includes(selectedYear - 1)}
+            >
+              <ChevronLeft className="h-3 w-3" />
+            </button>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                changeYear(1);
+              }}
+              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+              disabled={!availableYears.includes(selectedYear + 1)}
+            >
+              <ChevronRight className="h-3 w-3" />
+            </button>
+          </div>
+        </button>
+        
+        <div className={`year-selector-dropdown ${showYearDropdown ? '' : 'hidden'}`}>
+          {availableYears.map(year => (
+            <div 
+              key={year} 
+              className={`year-option ${year === selectedYear ? 'active' : ''}`}
+              onClick={() => handleYearChange(year)}
+            >
+              {year}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Heatmap Calendar Container */}
+      <div className="yearly-activity-heatmap-container">
+        <div 
+          className="heatmap-responsive-wrapper"
+          style={{ 
+            transform: `scale(${scale})`, 
+            transformOrigin: 'left top',
+            width: scale === 1 ? '100%' : `${100 / scale}%`
+          }}
+        >
+          <div className="min-w-max relative">
+            {/* Month labels on top - Now using absolute positioning for better alignment */}
+            <div className="month-labels">
+              {monthLabels.map((label, idx) => (
+                <div
+                  key={`month-${idx}`}
+                  className="month-label"
+                  style={{
+                    left: `${label.position * (cellSize + 2) + 24}px` // Ajuster en fonction de la taille des cellules
+                  }}
                 >
-                  {window.innerWidth > 500 ? day : day[0]}
+                  {label.month}
                 </div>
               ))}
             </div>
             
-            {/* Calendar grid - Now with consistent spacing */}
-            <div className="grid grid-flow-col gap-1" style={{ gap: '2px' }}>
-              {daysGrid.map((week, weekIdx) => (
-                <div key={`week-${weekIdx}`} className="heatmap-week grid gap-1" style={{ gap: '2px' }}>
-                  {Array(7).fill(0).map((_, dayIdx) => {
-                    const day = week.find(d => d.dayOfWeek === dayIdx);
-                    if (!day) {
-                      return <div key={`empty-${dayIdx}`} style={{ width: `${cellSize}px`, height: `${cellSize}px` }} />;
-                    }
-                    
-                    const isToday = day.date === today;
-                    const borderClass = isToday 
-                      ? 'ring-2 ring-blue-500 dark:ring-blue-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900' 
-                      : '';
-                    
-                    // Assurons-nous que count est toujours un nombre
-                    const count = typeof day.count === 'number' ? day.count : 0;
-                    const level = count === 0 ? 0 : count === 1 ? 1 : count < 3 ? 2 : count < 5 ? 3 : count < 7 ? 4 : 5;
-                    
-                    return (
-                      <div
-                        key={day.date || `empty-${dayIdx}`}
-                        className={cn(
-                          "heatmap-cell rounded-sm transition-colors",
-                          `heatmap-cell-level-${level}`,
-                          "transform hover:scale-110 cursor-pointer",
-                          borderClass
-                        )}
-                        style={{
-                          backgroundColor: getColorIntensity(count),
-                          width: `${cellSize}px`, 
-                          height: `${cellSize}px`
-                        }}
-                        title={day.date ? `${format(parseISO(day.date), 'PPP', { locale: fr })}: ${count} activité${count !== 1 ? 's' : ''}` : ''}
-                      />
-                    );
-                  })}
-                </div>
-              ))}
+            {/* Grid with improved styling */}
+            <div className="yearly-heatmap-grid mt-6">
+              {/* Day labels - Now with fixed width for better alignment */}
+              <div className="flex flex-col justify-around mr-2 w-6">
+                {DAYS.map((day, idx) => (
+                  <div 
+                    key={day} 
+                    className="text-xs text-gray-500 dark:text-gray-400 flex items-center justify-center"
+                    style={{ height: `${cellSize + 2}px` }}
+                  >
+                    {window.innerWidth > 500 ? day : day[0]}
+                  </div>
+                ))}
+              </div>
+              
+              {/* Calendar grid - Now with consistent spacing */}
+              <div className="grid grid-flow-col gap-1" style={{ gap: '2px' }}>
+                {daysGrid.map((week, weekIdx) => (
+                  <div key={`week-${weekIdx}`} className="heatmap-week grid gap-1" style={{ gap: '2px' }}>
+                    {Array(7).fill(0).map((_, dayIdx) => {
+                      const day = week.find(d => d.dayOfWeek === dayIdx);
+                      if (!day) {
+                        return <div key={`empty-${dayIdx}`} style={{ width: `${cellSize}px`, height: `${cellSize}px` }} />;
+                      }
+                      
+                      const isToday = day.date === today;
+                      const borderClass = isToday 
+                        ? 'ring-2 ring-blue-500 dark:ring-blue-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900' 
+                        : '';
+                      
+                      // Assurons-nous que count est toujours un nombre
+                      const count = typeof day.count === 'number' ? day.count : 0;
+                      const level = count === 0 ? 0 : count === 1 ? 1 : count < 3 ? 2 : count < 5 ? 3 : count < 7 ? 4 : 5;
+                      
+                      // Format date for tooltip - Make it human-friendly
+                      const tooltipDate = day.date ? 
+                        format(parseISO(day.date), 'EEEE d MMMM yyyy', { locale: fr }) : '';
+                      const tooltipText = `${tooltipDate}: ${count} activité${count !== 1 ? 's' : ''}`;
+                      
+                      return (
+                        <div
+                          key={day.date || `empty-${dayIdx}`}
+                          className={cn(
+                            "heatmap-cell rounded-sm transition-colors",
+                            `heatmap-cell-level-${level}`,
+                            "transform hover:scale-110 cursor-pointer",
+                            borderClass
+                          )}
+                          style={{
+                            backgroundColor: getColorIntensity(count),
+                            width: `${cellSize}px`, 
+                            height: `${cellSize}px`
+                          }}
+                          title={tooltipText}
+                          aria-label={tooltipText}
+                        />
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-          
-          {/* Legend - Now with better spacing and alignment */}
-          <div className="heatmap-legend text-xs">
-            <span className="text-gray-600 dark:text-gray-400 mr-2">Moins</span>
-            {[0, 1, 2, 3, 4, 5].map((level) => (
-              <div
-                key={level}
-                className={cn(
-                  "heatmap-legend-color mx-0.5",
-                  `heatmap-cell-level-${level}`
-                )}
-                style={{ 
-                  backgroundColor: isDarkMode ? colorScale.dark[level as keyof typeof colorScale.dark] : colorScale.light[level as keyof typeof colorScale.light],
-                  width: `${cellSize - 2}px`, 
-                  height: `${cellSize - 2}px`
-                }}
-              />
-            ))}
-            <span className="text-gray-600 dark:text-gray-400 ml-2">Plus</span>
+            
+            {/* Legend - Now with better spacing and alignment */}
+            <div className="heatmap-legend text-xs">
+              <span className="text-gray-600 dark:text-gray-400 mr-2">Moins</span>
+              {[0, 1, 2, 3, 4, 5].map((level) => (
+                <div
+                  key={level}
+                  className={cn(
+                    "heatmap-legend-color mx-0.5",
+                    `heatmap-cell-level-${level}`
+                  )}
+                  style={{ 
+                    backgroundColor: isDarkMode ? colorScale.dark[level as keyof typeof colorScale.dark] : colorScale.light[level as keyof typeof colorScale.light],
+                    width: `${cellSize - 2}px`, 
+                    height: `${cellSize - 2}px`
+                  }}
+                />
+              ))}
+              <span className="text-gray-600 dark:text-gray-400 ml-2">Plus</span>
+            </div>
           </div>
         </div>
       </div>
