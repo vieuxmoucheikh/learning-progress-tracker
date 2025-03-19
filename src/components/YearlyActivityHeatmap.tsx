@@ -39,8 +39,8 @@ export function YearlyActivityHeatmap({
   const tooltipRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const selectorRef = useRef<HTMLButtonElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const heatmapContainerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const heatmapContainerRef = useRef<HTMLDivElement | null>(null);
   
   // Générer des années avec classification
   const availableYears = useMemo(() => {
@@ -265,16 +265,6 @@ export function YearlyActivityHeatmap({
   // Obtention de la date du jour pour la mettre en évidence
   const today = format(new Date(), 'yyyy-MM-dd');
   
-  // Déterminer la taille des cellules en fonction de l'échelle et de la taille du conteneur
-  const cellSize = useMemo(() => {
-    // Sur mobile, utiliser une taille fixe pour permettre un défilement fluide
-    if (window.innerWidth <= 768) return 10;
-    // Sinon, adapter au conteneur
-    if (containerWidth < 400) return 8;
-    if (containerWidth < 640) return 10;
-    return 12;
-  }, [containerWidth]);
-
   // Handler pour le changement d'année
   const handleYearChange = (newYear: number) => {
     setSelectedYear(newYear);
@@ -306,7 +296,11 @@ export function YearlyActivityHeatmap({
     const tooltipY = rect.top;
     
     // Format date for tooltip - Make it human-friendly
-    const formattedDate = format(parseISO(date), 'EEEE d MMMM yyyy', { locale: fr });
+    // Assurons-nous que date est toujours une chaîne valide
+    const formattedDate = date 
+      ? format(parseISO(date), 'EEEE d MMMM yyyy', { locale: fr }) 
+      : 'Date inconnue';
+    
     const tooltipText = `
       <div class="tooltip-date">${formattedDate}</div>
       <div><span class="tooltip-count">${count}</span> activité${count !== 1 ? 's' : ''}</div>
@@ -411,8 +405,11 @@ export function YearlyActivityHeatmap({
       <div 
         className={`yearly-activity-heatmap-container ${isScrollActive ? 'scroll-active' : ''}`}
         ref={(el) => {
-          containerRef.current = el;
-          heatmapContainerRef.current = el; // Ajouter la double référence
+          // Correction de l'erreur - utilisation de fonctions de rappel de ref au lieu d'assignation directe
+          if (el) {
+            containerRef.current = el;
+            heatmapContainerRef.current = el;
+          }
         }}
         data-is-mobile={isMobile ? "true" : "false"} // Attribut pour cibler en CSS
       >
@@ -475,8 +472,10 @@ export function YearlyActivityHeatmap({
                       const level = count === 0 ? 0 : count === 1 ? 1 : count < 3 ? 2 : count < 5 ? 3 : count < 7 ? 4 : 5;
                       
                       // Format date for tooltip - Make it human-friendly
-                      const tooltipDate = day.date ? 
-                        format(parseISO(day.date), 'EEEE d MMMM yyyy', { locale: fr }) : '';
+                      const tooltipDate = day.date 
+                        ? format(parseISO(day.date), 'EEEE d MMMM yyyy', { locale: fr }) 
+                        : 'Date inconnue';
+                      
                       const tooltipText = `${tooltipDate}: ${count} activité${count !== 1 ? 's' : ''}`;
                       
                       return (
@@ -496,7 +495,7 @@ export function YearlyActivityHeatmap({
                           }}
                           title={tooltipText}
                           aria-label={tooltipText}
-                          onMouseEnter={(e) => handleCellMouseEnter(e, day.date, count)}
+                          onMouseEnter={(e) => handleCellMouseEnter(e, day.date || '', count)}
                           onMouseLeave={handleCellMouseLeave}
                         />
                       );
