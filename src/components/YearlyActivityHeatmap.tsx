@@ -1,292 +1,205 @@
-import React, { useState, useMemo } from 'react';
-import { cn } from '../lib/utils';
-import { 
-  format, 
-  addDays, 
-  getDay,
-  startOfWeek,
-  addWeeks,
-  isWithinInterval,
-  startOfYear,
-  endOfYear,
-  isBefore,
-  parseISO,
-  eachWeekOfInterval,
-  eachMonthOfInterval,
-  differenceInWeeks,
-  getYear,
-  endOfWeek,
-  getMonth
-} from 'date-fns';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from './ui/button';
+import React, { useMemo } from 'react';
+import { format, parseISO, getDay, addDays, startOfYear, endOfYear } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
-interface DayData {
-  date: string;
-  count: number;
-  isOutsideMonth?: boolean;
-  isCurrentYear: boolean;
+interface HeatmapProps {
+  data: { date: string; count: number }[];
+  year: number;
+  isDarkMode?: boolean;
 }
 
-type WeekData = (DayData | null)[];
+const DAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
 
-interface MonthLabel {
-  text: string;
-  index: number;
-}
-
-interface Activity {
-  date: string;
-  count: number;
-}
-
-interface YearlyActivityHeatmapProps {
-  data: Record<string, number>;
-  year?: number;
-  onYearChange?: (year: number) => void;
-}
-
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-export function YearlyActivityHeatmap({ 
-  data: activityData, 
-  year = new Date().getFullYear(),
-  onYearChange 
-}: YearlyActivityHeatmapProps) {
-  const [selectedYear, setSelectedYear] = useState(year);
-  
-  const handleYearChange = (newYear: number) => {
-    setSelectedYear(newYear);
-    onYearChange?.(newYear);
-  };
-
-  const generateCalendarData = () => {
-    const yearStart = startOfYear(new Date(selectedYear, 0, 1));
-    const yearEnd = endOfYear(yearStart);
-    const activityMap: { [key: string]: number } = {};
-
-    // Initialize all dates with 0
-    let currentDay = yearStart;
-    while (isBefore(currentDay, addDays(yearEnd, 1))) {
-      const dateKey = format(currentDay, 'yyyy-MM-dd');
-      activityMap[dateKey] = 0;
-      currentDay = addDays(currentDay, 1);
-    }
-
-    // Fill in the activity data
-    Object.entries(activityData).forEach(([dateStr, count]) => {
-      // Handle timezone offset for consistent date display
-      const date = new Date(dateStr);
-      const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-      const dateKey = format(localDate, 'yyyy-MM-dd');
-      
-      if (getYear(localDate) === selectedYear) {
-        activityMap[dateKey] = count;
-        console.log('Added activity to heatmap:', { 
-          originalDate: dateStr,
-          localDate: dateKey,
-          count 
-        });
-      }
-    });
-
-    return activityMap;
-  };
-
-  const calendarData = useMemo(() => generateCalendarData(), [selectedYear, activityData]);
-
-  // Calculate the start and end dates for the year
-  const startDate = startOfYear(new Date(selectedYear, 0, 1));
-  const endDate = endOfYear(startDate);
-
-  // Calculate the start of the first week and end of the last week
-  const firstWeekStart = startOfWeek(startDate);
-  const lastWeekEnd = endOfWeek(endDate);
-
-  // Generate weeks
-  const weeks = useMemo(() => {
-    const weekStarts = eachWeekOfInterval(
-      { 
-        start: firstWeekStart,
-        end: lastWeekEnd
+export function YearlyActivityHeatmap({ data, year, isDarkMode = false }: HeatmapProps) {
+  // Palette de couleurs adaptée au mode clair/sombre
+  const colorScale = useMemo(() => {
+    return {
+      light: {
+        0: '#f3f4f6', // Gris très clair pour les jours sans activité
+        1: '#dbeafe', // Bleu très clair
+        2: '#bfdbfe', // Bleu clair
+        3: '#93c5fd', // Bleu moyen
+        4: '#60a5fa', // Bleu normal
+        5: '#3b82f6', // Bleu vif
       },
-      { weekStartsOn: 0 }
-    );
-
-    return weekStarts.map(weekStart => {
-      const days: DayData[] = Array(7).fill(null).map((_, index) => {
-        const date = addDays(weekStart, index);
-        const dateStr = format(date, 'yyyy-MM-dd');
-        const count = calendarData[dateStr] || 0;
-        
-        console.log('Processing day:', { 
-          date: dateStr, 
-          count,
-          isCurrentYear: getYear(date) === selectedYear,
-          hasActivity: count > 0
-        });
-        
-        return {
-          date: dateStr,
-          count,
-          isCurrentYear: getYear(date) === selectedYear
-        };
-      });
-      return days;
-    });
-  }, [selectedYear, calendarData, firstWeekStart, lastWeekEnd]);
-
-  const monthLabels = useMemo(() => {
-    const labels: MonthLabel[] = [];
-    let currentMonth = -1;
-
-    weeks.forEach((week, weekIndex) => {
-      const firstDayOfWeek = parseISO(week[0].date);
-      const month = getMonth(firstDayOfWeek);
-
-      if (month !== currentMonth && getYear(firstDayOfWeek) === selectedYear) {
-        labels.push({
-          text: format(firstDayOfWeek, 'MMM'),
-          index: weekIndex
-        });
-        currentMonth = month;
+      dark: {
+        0: '#1f2937', // Fond sombre pour les jours sans activité
+        1: '#1e3a8a', // Bleu sombre
+        2: '#1d4ed8', // Bleu foncé
+        3: '#2563eb', // Bleu moyen
+        4: '#3b82f6', // Bleu standard
+        5: '#60a5fa', // Bleu vif
       }
+    };
+  }, []);
+
+  // Génération de la structure de données pour la heatmap
+  const { daysGrid, monthLabels } = useMemo(() => {
+    // Create a map for quick lookup of counts by date
+    const countsMap: Record<string, number> = {};
+    data.forEach(item => {
+      countsMap[item.date] = item.count;
     });
 
-    return labels;
-  }, [weeks, selectedYear]);
-
-  const getColorForCount = (count: number) => {
-    if (count === 0) return 'bg-gray-200 dark:bg-gray-200';
-    if (count === 1) return 'bg-emerald-400 hover:bg-emerald-500 dark:bg-emerald-400 dark:hover:bg-emerald-300';
-    if (count <= 3) return 'bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-400';
-    return 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500';
+    const startDate = startOfYear(new Date(year, 0, 1));
+    const endDate = endOfYear(new Date(year, 11, 31));
+    
+    let currentDate = startDate;
+    const days = [];
+    const monthPositions: { month: number; position: number }[] = [];
+    
+    let weekIndex = 0;
+    let dayIndex = getDay(startDate); // 0-6, where 0 is Sunday
+    
+    // First, let's add empty cells for days before the 1st of January
+    for (let i = 0; i < dayIndex; i++) {
+      days.push({ empty: true });
+    }
+    
+    // Now add actual days
+    while (currentDate <= endDate) {
+      const formattedDate = format(currentDate, 'yyyy-MM-dd');
+      const count = countsMap[formattedDate] || 0;
+      
+      // Record the start position of each month
+      if (currentDate.getDate() === 1) {
+        monthPositions.push({
+          month: currentDate.getMonth(),
+          position: days.length,
+        });
+      }
+      
+      days.push({
+        date: formattedDate,
+        count,
+        dayOfWeek: dayIndex,
+        weekIndex,
+      });
+      
+      // Move to the next day
+      currentDate = addDays(currentDate, 1);
+      dayIndex = (dayIndex + 1) % 7;
+      if (dayIndex === 0) {
+        weekIndex++;
+      }
+    }
+    
+    // Generate month labels with their positions
+    const monthLabels = monthPositions.map(pos => ({
+      month: MONTHS[pos.month],
+      position: Math.floor(pos.position / 7),
+    }));
+    
+    // Organize days into a grid
+    const daysGrid = [];
+    for (let i = 0; i <= weekIndex; i++) {
+      const week = days.filter((d) => !d.empty && d.weekIndex === i);
+      daysGrid.push(week);
+    }
+    
+    return { daysGrid, monthLabels };
+  }, [data, year]);
+  
+  // Fonction qui détermine la couleur en fonction du nombre d'activités
+  const getColorIntensity = (count: number) => {
+    const thresholds = [0, 1, 2, 4, 6, 8]; // Seuils d'intensité
+    const palette = isDarkMode ? colorScale.dark : colorScale.light;
+    
+    for (let i = thresholds.length - 1; i >= 0; i--) {
+      if (count >= thresholds[i]) {
+        return palette[i as keyof typeof palette];
+      }
+    }
+    return palette[0];
   };
 
+  // Obtention de la date du jour pour la mettre en évidence
+  const today = format(new Date(), 'yyyy-MM-dd');
+  
   return (
-    <div className="w-full bg-white/80 dark:bg-white/10 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100 dark:border-white/10">
-      {/* Year navigation */}
-      <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-white/10">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setSelectedYear(selectedYear - 1)}
-          className="hover:bg-white/50 dark:hover:bg-white/10 border-gray-100 dark:border-white/10"
-        >
-          <ChevronLeft className="h-4 w-4 text-blue-500" />
-        </Button>
-        <div className="text-lg font-semibold text-black dark:text-black">{selectedYear}</div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setSelectedYear(selectedYear + 1)}
-          className="hover:bg-white/50 dark:hover:bg-white/10 border-gray-100 dark:border-white/10"
-        >
-          <ChevronRight className="h-4 w-4 text-blue-500" />
-        </Button>
-      </div>
-
-      {/* Heatmap grid */}
-      <div className="w-full p-3">
-        <div className="w-full" style={{ fontSize: 'min(1.5vw, 11px)' }}>
-          {/* Month labels */}
-          <div className="flex mb-1.5">
-            <div className="w-5" /> {/* Offset for day labels */}
-            <div className="flex-1">
-              <div className="grid grid-cols-[repeat(53,1fr)] gap-[2px]">
-                {monthLabels.map((label, i) => (
-                  <div
-                    key={i}
-                    className="text-black dark:text-black text-center font-medium"
-                    style={{ 
-                      gridColumnStart: label.index + 1,
-                      gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
-                    }}
-                  >
-                    {label.text}
-                  </div>
-                ))}
+    <div className="w-full overflow-x-auto py-2">
+      <div className="min-w-max flex flex-col space-y-1">
+        {/* Month labels on top */}
+        <div className="flex ml-8">
+          {monthLabels.map((label, idx) => (
+            <div
+              key={`month-${idx}`}
+              className="text-xs text-gray-500 dark:text-gray-400"
+              style={{
+                position: 'absolute',
+                left: `${label.position * 18 + 36}px` // Align with weeks
+              }}
+            >
+              {label.month}
+            </div>
+          ))}
+        </div>
+        
+        {/* Grid */}
+        <div className="flex mt-6">
+          {/* Day labels */}
+          <div className="flex flex-col justify-around mr-2">
+            {DAYS.map((day, idx) => (
+              <div 
+                key={day} 
+                className="text-xs h-4 text-gray-500 dark:text-gray-400 w-4"
+                style={{ height: '18px' }}
+              >
+                {day}
               </div>
-            </div>
-          </div>
-
-          {/* Main grid */}
-          <div className="flex w-full">
-            {/* Day labels */}
-            <div className="flex flex-col gap-[2px] pr-1.5">
-              {DAYS.map((day) => (
-                <div 
-                  key={day} 
-                  className="text-black dark:text-black flex items-center w-5 font-medium"
-                  style={{ 
-                    height: 'min(1.5vw, 14px)',
-                    maxHeight: '14px'
-                  }}
-                >
-                  {day[0]}
-                </div>
-              ))}
-            </div>
-
-            {/* Calendar grid */}
-            <div className="flex-1">
-              <div className="grid grid-cols-[repeat(53,1fr)] gap-[2px]">
-                {weeks.map((week, weekIndex) => (
-                  <div key={weekIndex} className="flex flex-col gap-[2px]">
-                    {week.map((day, dayIndex) => (
-                      <TooltipProvider key={day.date}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div
-                              className={cn(
-                                'rounded-[1px] transition-colors duration-200',
-                                day.isCurrentYear
-                                  ? getColorForCount(day.count)
-                                  : 'bg-gray-200 dark:bg-gray-200'
-                              )}
-                              style={{ 
-                                height: 'min(1.5vw, 14px)',
-                                minHeight: '6px'
-                              }}
-                            />
-                          </TooltipTrigger>
-                          <TooltipContent 
-                            side="top"
-                            className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-100 dark:border-white/10"
-                          >
-                            <div className="text-xs">
-                              <div className="font-medium text-black dark:text-black">
-                                {format(parseISO(day.date), 'MMM d, yyyy')}
-                              </div>
-                              <div className="text-black dark:text-black">
-                                {day.count} {day.count === 1 ? 'activity' : 'activities'}
-                              </div>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Legend */}
-          <div className="flex items-center gap-1.5 mt-3 justify-end text-black dark:text-black">
-            <span className="text-xs font-medium">Less</span>
-            {[0, 1, 2, 4].map((count) => (
-              <div
-                key={count}
-                className={cn(
-                  'w-2.5 h-2.5 rounded-[1px]',
-                  getColorForCount(count)
-                )}
-              />
             ))}
-            <span className="text-xs font-medium">More</span>
           </div>
+          
+          {/* Calendar grid */}
+          <div className="grid grid-flow-col gap-1">
+            {daysGrid.map((week, weekIdx) => (
+              <div key={`week-${weekIdx}`} className="grid gap-1">
+                {Array(7).fill(0).map((_, dayIdx) => {
+                  const day = week.find(d => d.dayOfWeek === dayIdx);
+                  if (!day) {
+                    return <div key={`empty-${dayIdx}`} className="w-4 h-4" />;
+                  }
+                  
+                  const isToday = day.date === today;
+                  const borderClass = isToday 
+                    ? 'ring-2 ring-blue-500 dark:ring-blue-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900' 
+                    : '';
+                  
+                  return (
+                    <div
+                      key={day.date || `empty-${dayIdx}`}
+                      className={cn(
+                        "w-4 h-4 rounded-sm transition-colors",
+                        "transform hover:scale-110 cursor-pointer",
+                        borderClass
+                      )}
+                      style={{
+                        backgroundColor: getColorIntensity(day.count),
+                        width: '16px',
+                        height: '16px'
+                      }}
+                      title={day.date ? `${format(parseISO(day.date), 'PPP', { locale: fr })}: ${day.count} activities` : ''}
+                    />
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Legend */}
+        <div className="flex items-center justify-end mt-2 space-x-2">
+          <span className="text-xs text-gray-600 dark:text-gray-400">Moins</span>
+          {[0, 1, 2, 3, 4, 5].map((level) => (
+            <div
+              key={level}
+              className="w-3 h-3 rounded-sm"
+              style={{ backgroundColor: isDarkMode ? colorScale.dark[level as keyof typeof colorScale.dark] : colorScale.light[level as keyof typeof colorScale.light] }}
+            />
+          ))}
+          <span className="text-xs text-gray-600 dark:text-gray-400">Plus</span>
         </div>
       </div>
     </div>
