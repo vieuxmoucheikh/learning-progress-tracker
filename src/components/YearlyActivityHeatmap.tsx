@@ -177,7 +177,9 @@ export function YearlyActivityHeatmap({
         >
           <ChevronLeft className="h-4 w-4 text-blue-500" />
         </Button>
-        <div className="text-lg font-bold text-black dark:text-white">{selectedYear}</div>
+        <div className="text-lg font-bold text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-800 px-3 py-1 rounded-lg">
+          {selectedYear}
+        </div>
         <Button
           variant="outline"
           size="sm"
@@ -204,7 +206,7 @@ export function YearlyActivityHeatmap({
                   {monthLabels.map((label, i) => (
                     <div
                       key={i}
-                      className="text-black dark:text-white text-center font-bold text-sm whitespace-nowrap"
+                      className="text-gray-700 dark:text-gray-300 text-center font-bold text-sm whitespace-nowrap bg-gray-50 dark:bg-gray-800 rounded px-1"
                       style={{ 
                         gridColumnStart: label.index + 1,
                         gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
@@ -224,11 +226,11 @@ export function YearlyActivityHeatmap({
                 {DAYS.map((day) => (
                   <div 
                     key={day} 
-                    className="text-black dark:text-white flex items-center justify-center w-10 font-bold text-sm"
+                    className="text-gray-700 dark:text-gray-300 flex items-center justify-center w-10 font-bold text-sm bg-gray-50 dark:bg-gray-800 rounded"
                     style={{ 
-                      height: 'min(2vw, 16px)',
+                      height: '16px',
                       minHeight: '16px',
-                      lineHeight: '16px', // Assurer que la hauteur de ligne correspond à la hauteur de la cellule
+                      lineHeight: '16px',
                     }}
                   >
                     {day[0]}
@@ -253,7 +255,7 @@ export function YearlyActivityHeatmap({
                                     : 'bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 opacity-50'
                                 )}
                                 style={{ 
-                                  height: '16px', // Hauteur fixe pour toutes les cellules
+                                  height: '16px',
                                   minHeight: '16px',
                                   minWidth: '16px'
                                 }}
@@ -264,10 +266,10 @@ export function YearlyActivityHeatmap({
                               className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200 dark:border-white/10"
                             >
                               <div className="text-xs">
-                                <div className="font-medium text-black dark:text-white">
+                                <div className="font-medium text-gray-900 dark:text-gray-100">
                                   {format(parseISO(day.date), 'MMM d, yyyy')}
                                 </div>
-                                <div className="text-gray-800 dark:text-gray-200">
+                                <div className="text-gray-700 dark:text-gray-300">
                                   {day.count} {day.count === 1 ? 'activity' : 'activities'}
                                 </div>
                               </div>
@@ -285,12 +287,12 @@ export function YearlyActivityHeatmap({
 
         {/* Légende - position fixe */}
         <div className="flex items-center gap-2 mt-5 justify-end">
-          <span className="text-sm font-bold text-black dark:text-white">Less</span>
+          <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Less</span>
           <div className="w-4 h-4 rounded-sm bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600" />
           <div className="w-4 h-4 rounded-sm bg-emerald-400 dark:bg-emerald-400 border-2 border-emerald-500 dark:border-emerald-500" />
           <div className="w-4 h-4 rounded-sm bg-emerald-500 dark:bg-emerald-500 border-2 border-emerald-600 dark:border-emerald-600" />
           <div className="w-4 h-4 rounded-sm bg-emerald-600 dark:bg-emerald-600 border-2 border-emerald-700 dark:border-emerald-700" />
-          <span className="text-sm font-bold text-black dark:text-white">More</span>
+          <span className="text-sm font-bold text-gray-700 dark:text-gray-300">More</span>
         </div>
       </div>
     </div>
