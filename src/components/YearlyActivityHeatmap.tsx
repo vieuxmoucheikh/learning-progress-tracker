@@ -245,8 +245,10 @@ export function YearlyActivityHeatmap({
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      // Assurer un alignement parfait avec les cellules
-                      boxSizing: 'border-box'
+                      boxSizing: 'border-box',
+                      paddingTop: '2px', // Décalage vers le bas pour un meilleur alignement avec les cellules
+                      position: 'relative',
+                      top: '1px' // Léger décalage supplémentaire pour affiner l'alignement
                     }}
                   >
                     {day[0]}
