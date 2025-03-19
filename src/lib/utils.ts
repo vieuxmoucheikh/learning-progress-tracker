@@ -77,13 +77,13 @@ export function calculateTimeByCategory(items: LearningItem[]): Record<string, {
   const categoryTimes: Record<string, number> = {};
 
   items.forEach(item => {
-    const category = item.category;
+    const category = item.category || "Uncategorized";
     if (!categoryTimes[category]) {
       categoryTimes[category] = 0;
     }
 
     // Add time from completed sessions
-    const sessionMinutes = item.progress.sessions.reduce((total, session) => {
+    const sessionMinutes = (item.progress?.sessions || []).reduce((total, session) => {
       if (session.duration) {
         return total + (session.duration.hours * 60) + session.duration.minutes;
       }
@@ -106,8 +106,8 @@ export function calculateTimeByCategory(items: LearningItem[]): Record<string, {
 export function calculateStreak(items: LearningItem[]): { currentStreak: number; longestStreak: number; lastActiveDate: string | null } {
   // Sort all sessions by date in descending order
   const sessions = items
-    .flatMap(item => item.progress.sessions || [])
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    .flatMap(item => item.progress?.sessions || [])
+    .sort((a, b) => new Date(b.date || b.startTime || '').getTime() - new Date(a.date || a.startTime || '').getTime());
 
   if (sessions.length === 0) {
     return { currentStreak: 0, longestStreak: 0, lastActiveDate: null };
