@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState, useRef } from 'react';
 import { format, parseISO, getDay, addDays, startOfYear, endOfYear } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -14,10 +14,12 @@ interface HeatmapProps {
 const DAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
 
-// Générer les années disponibles (5 ans en arrière et 2 ans en avant)
+// Générer une plage d'années plus large (15 ans en arrière et 10 ans en avant)
 const generateAvailableYears = (): number[] => {
   const currentYear = new Date().getFullYear();
-  return Array.from({ length: 8 }, (_, i) => currentYear - 5 + i);
+  const recentYears = Array.from({ length: 15 }, (_, i) => currentYear - 14 + i);
+  const futureYears = Array.from({ length: 10 }, (_, i) => currentYear + 1 + i);
+  return [...recentYears, ...futureYears];
 };
 
 export function YearlyActivityHeatmap({ 
@@ -30,7 +32,63 @@ export function YearlyActivityHeatmap({
   const [scale, setScale] = useState<number>(1);
   const [showYearDropdown, setShowYearDropdown] = useState(false);
   const [selectedYear, setSelectedYear] = useState(year);
-  const availableYears = useMemo(generateAvailableYears, []);
+  const [tooltipContent, setTooltipContent] = useState<string>('');
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [isScrollActive, setIsScrollActive] = useState(false);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const selectorRef = useRef<HTMLButtonElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Générer des années avec classification
+  const availableYears = useMemo(() => {
+    const years = generateAvailableYears();
+    const currentYear = new Date().getFullYear();
+    
+    // Classer les années par type
+    return years.map(year => ({
+      year,
+      type: year < currentYear ? 'history' : 
+            year === currentYear ? 'current' : 'future'
+    }));
+  }, []);
+  
+  // Fermer le dropdown lorsqu'on clique à l'extérieur
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current && 
+        !dropdownRef.current.contains(event.target as Node) && 
+        selectorRef.current && 
+        !selectorRef.current.contains(event.target as Node)
+      ) {
+        setShowYearDropdown(false);
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+  
+  // Détecter le défilement horizontal pour l'indicateur
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      if (container.scrollLeft > 0) {
+        setIsScrollActive(true);
+      } else {
+        setIsScrollActive(false);
+      }
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
   
   // Mise à jour de la largeur du conteneur et adaptation du scale
   useEffect(() => {
@@ -40,13 +98,20 @@ export function YearlyActivityHeatmap({
         const width = container.clientWidth;
         setContainerWidth(width);
         
-        // Calculer le facteur d'échelle si nécessaire
-        const contentWidth = 800; // Largeur estimée du contenu complet
-        if (width < contentWidth) {
-          // Ajuster l'échelle pour que tout s'affiche
-          setScale(Math.max(0.7, width / contentWidth));
-        } else {
+        // Ne pas utiliser de scaling automatique sur mobile, pour permettre
+        // un défilement horizontal naturel
+        if (window.innerWidth <= 768) {
           setScale(1);
+        } else {
+          // Sur desktop, calculer le facteur d'échelle si nécessaire
+          const contentWidth = 800; // Largeur estimée du contenu complet
+          const minScale = window.innerWidth <= 640 ? 0.6 : 0.8;
+          
+          if (width < contentWidth) {
+            setScale(Math.max(minScale, width / contentWidth));
+          } else {
+            setScale(1);
+          }
         }
       }
     };
@@ -147,7 +212,6 @@ export function YearlyActivityHeatmap({
   }, [data, selectedYear]);
   
   // Fonction qui détermine la couleur en fonction du nombre d'activités
-  // Utiliser une valeur de comptage avec traitement explicite pour éviter des undefined
   const getColorIntensity = (count: number) => {
     // S'assurer que count est toujours un nombre valide
     const safeCount = typeof count === 'number' ? count : 0;
@@ -168,6 +232,9 @@ export function YearlyActivityHeatmap({
   
   // Déterminer la taille des cellules en fonction de l'échelle et de la taille du conteneur
   const cellSize = useMemo(() => {
+    // Sur mobile, utiliser une taille fixe pour permettre un défilement fluide
+    if (window.innerWidth <= 768) return 10;
+    // Sinon, adapter au conteneur
     if (containerWidth < 400) return 8;
     if (containerWidth < 640) return 10;
     return 12;
@@ -185,9 +252,38 @@ export function YearlyActivityHeatmap({
   // Handler pour incrémenter/décrémenter l'année
   const changeYear = (increment: number) => {
     const newYear = selectedYear + increment;
-    if (availableYears.includes(newYear)) {
+    // S'assurer que l'année existe dans notre liste
+    if (availableYears.some(y => y.year === newYear)) {
       handleYearChange(newYear);
     }
+  };
+
+  // Gestionnaires pour le tooltip personnalisé
+  const handleCellMouseEnter = (
+    e: React.MouseEvent<HTMLDivElement>, 
+    date: string, 
+    count: number
+  ) => {
+    if (window.innerWidth <= 768) return; // Désactiver sur mobile
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const tooltipX = rect.left + rect.width / 2;
+    const tooltipY = rect.top;
+    
+    // Format date for tooltip - Make it human-friendly
+    const formattedDate = format(parseISO(date), 'EEEE d MMMM yyyy', { locale: fr });
+    const tooltipText = `
+      <div class="tooltip-date">${formattedDate}</div>
+      <div><span class="tooltip-count">${count}</span> activité${count !== 1 ? 's' : ''}</div>
+    `;
+    
+    setTooltipContent(tooltipText);
+    setTooltipPosition({ x: tooltipX, y: tooltipY });
+    setTooltipVisible(true);
+  };
+  
+  const handleCellMouseLeave = () => {
+    setTooltipVisible(false);
   };
 
   return (
@@ -195,58 +291,98 @@ export function YearlyActivityHeatmap({
       {/* Year Selector Component - Sélecteur d'années amélioré */}
       <div className="year-selector-container">
         <button 
+          ref={selectorRef}
           className="year-selector w-full"
           onClick={() => setShowYearDropdown(!showYearDropdown)}
         >
-          <Calendar className="h-4 w-4" />
-          <span>{selectedYear}</span>
-          <ChevronDown className={`h-4 w-4 transition-transform ${showYearDropdown ? 'transform rotate-180' : ''}`} />
+          <div className="year-display">
+            <Calendar className="h-4 w-4" />
+            <span>{selectedYear}</span>
+            <ChevronDown className={`h-4 w-4 transition-transform ${showYearDropdown ? 'transform rotate-180' : ''}`} />
+          </div>
           
-          <div className="flex ml-auto">
+          <div className="year-nav-buttons">
             <button 
+              className="year-nav-button"
               onClick={(e) => {
                 e.stopPropagation();
                 changeYear(-1);
               }}
-              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
-              disabled={!availableYears.includes(selectedYear - 1)}
+              disabled={!availableYears.some(y => y.year === selectedYear - 1)}
             >
-              <ChevronLeft className="h-3 w-3" />
+              <ChevronLeft className="h-4 w-4" />
             </button>
             <button 
+              className="year-nav-button"
               onClick={(e) => {
                 e.stopPropagation();
                 changeYear(1);
               }}
-              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
-              disabled={!availableYears.includes(selectedYear + 1)}
+              disabled={!availableYears.some(y => y.year === selectedYear + 1)}
             >
-              <ChevronRight className="h-3 w-3" />
+              <ChevronRight className="h-4 w-4" />
             </button>
           </div>
         </button>
         
-        <div className={`year-selector-dropdown ${showYearDropdown ? '' : 'hidden'}`}>
-          {availableYears.map(year => (
-            <div 
-              key={year} 
-              className={`year-option ${year === selectedYear ? 'active' : ''}`}
-              onClick={() => handleYearChange(year)}
-            >
-              {year}
-            </div>
-          ))}
+        <div 
+          ref={dropdownRef}
+          className={`year-selector-dropdown ${showYearDropdown ? '' : 'hidden'}`}
+        >
+          {/* Grouper les années par type */}
+          <div className="year-selector-section-title">Années récentes</div>
+          {availableYears
+            .filter(y => y.type === 'history' || y.type === 'current')
+            .map(({ year, type }) => (
+              <div 
+                key={year} 
+                className={`year-option ${type} ${year === selectedYear ? 'active' : ''}`}
+                onClick={() => handleYearChange(year)}
+              >
+                {year} {year === new Date().getFullYear() ? '(actuel)' : ''}
+              </div>
+            ))
+          }
+          
+          <div className="year-selector-section-title">Années futures</div>
+          {availableYears
+            .filter(y => y.type === 'future')
+            .map(({ year }) => (
+              <div 
+                key={year} 
+                className={`year-option future ${year === selectedYear ? 'active' : ''}`}
+                onClick={() => handleYearChange(year)}
+              >
+                {year}
+              </div>
+            ))
+          }
         </div>
       </div>
 
-      {/* Heatmap Calendar Container */}
-      <div className="yearly-activity-heatmap-container">
+      {/* Tooltip personnalisé */}
+      <div 
+        ref={tooltipRef}
+        className={`calendar-tooltip ${tooltipVisible ? 'visible' : ''}`}
+        style={{
+          left: `${tooltipPosition.x}px`,
+          top: `${tooltipPosition.y}px`,
+          display: tooltipVisible ? 'block' : 'none'
+        }}
+        dangerouslySetInnerHTML={{ __html: tooltipContent }}
+      />
+
+      {/* Heatmap Calendar Container avec défilement horizontal */}
+      <div 
+        className={`yearly-activity-heatmap-container ${isScrollActive ? 'scroll-active' : ''}`}
+        ref={containerRef}
+      >
         <div 
           className="heatmap-responsive-wrapper"
           style={{ 
-            transform: `scale(${scale})`, 
+            transform: window.innerWidth > 768 ? `scale(${scale})` : 'none',
             transformOrigin: 'left top',
-            width: scale === 1 ? '100%' : `${100 / scale}%`
+            width: window.innerWidth > 768 && scale !== 1 ? `${100 / scale}%` : 'auto'
           }}
         >
           <div className="min-w-max relative">
@@ -311,7 +447,8 @@ export function YearlyActivityHeatmap({
                             "heatmap-cell rounded-sm transition-colors",
                             `heatmap-cell-level-${level}`,
                             "transform hover:scale-110 cursor-pointer",
-                            borderClass
+                            borderClass,
+                            isToday ? "today" : ""
                           )}
                           style={{
                             backgroundColor: getColorIntensity(count),
@@ -320,6 +457,8 @@ export function YearlyActivityHeatmap({
                           }}
                           title={tooltipText}
                           aria-label={tooltipText}
+                          onMouseEnter={(e) => handleCellMouseEnter(e, day.date, count)}
+                          onMouseLeave={handleCellMouseLeave}
                         />
                       );
                     })}
@@ -330,7 +469,7 @@ export function YearlyActivityHeatmap({
             
             {/* Legend - Now with better spacing and alignment */}
             <div className="heatmap-legend text-xs">
-              <span className="text-gray-600 dark:text-gray-400 mr-2">Moins</span>
+              <span className="heatmap-legend-label">Moins</span>
               {[0, 1, 2, 3, 4, 5].map((level) => (
                 <div
                   key={level}
@@ -345,7 +484,7 @@ export function YearlyActivityHeatmap({
                   }}
                 />
               ))}
-              <span className="text-gray-600 dark:text-gray-400 ml-2">Plus</span>
+              <span className="heatmap-legend-label">Plus</span>
             </div>
           </div>
         </div>

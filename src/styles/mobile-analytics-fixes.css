@@ -89,6 +89,48 @@
   .year-selector-dropdown {
     max-height: 200px !important;
   }
+
+  /* Assurer que le conteneur occupe toute la largeur disponible */
+  .yearly-activity-heatmap-container {
+    width: 100vw !important;
+    margin-left: -1rem !important;
+    margin-right: -1rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* S'assurer que le wrapper responsive est correctement configuré */
+  .heatmap-responsive-wrapper {
+    min-width: 800px !important;
+    transform: scale(1) !important;
+    transform-origin: left top !important;
+  }
+
+  /* Adapter la taille des cellules pour mobile */
+  .heatmap-cell {
+    width: 10px !important;
+    height: 10px !important;
+  }
+
+  /* Améliorer l'indicateur de défilement */
+  .yearly-activity-heatmap-container::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    right: 10px;
+    width: 40px;
+    height: 4px;
+    background: linear-gradient(to right, transparent, rgba(107, 114, 128, 0.5));
+    border-radius: 2px;
+    pointer-events: none;
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  .dark .yearly-activity-heatmap-container::after {
+    background: linear-gradient(to right, transparent, rgba(156, 163, 175, 0.5));
+  }
 }
 
 /* Correction pour l'affichage de la heatmap sur mobile et bureau */
@@ -100,6 +142,14 @@
   scrollbar-width: thin;
   padding-bottom: 1rem;
   margin-bottom: 1rem;
+  position: relative;
+  border-radius: 8px;
+  padding: 1.5rem 0.5rem 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  background: var(--background-secondary, #f9fafb);
+  border: 1px solid var(--border-subtle, #e5e7eb);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 /* Adaptation responsive automatique */
@@ -147,6 +197,18 @@
   height: 12px;
   rx: 2px;
   ry: 2px;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.dark .heatmap-cell {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.heatmap-cell:hover {
+  transform: scale(1.2);
+  z-index: 10;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5), 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Améliorations pour le conteneur principal du heatmap */
@@ -188,6 +250,20 @@
   align-items: center;
   margin-top: 0.75rem;
   padding-right: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.5rem;
+  border-top: 1px solid var(--border-subtle, #e5e7eb);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+:root:not(.dark) .heatmap-legend {
+  border-top: 1px solid #e2e8f0;
+}
+
+.dark .heatmap-legend {
+  border-top: 1px solid #1f2937;
 }
 
 .heatmap-legend-item {
@@ -202,6 +278,14 @@
   height: 10px;
   border-radius: 2px;
   margin-right: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.dark .heatmap-legend-color {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 /* Fixe pour le défilement horizontal sur petits écrans */
@@ -298,16 +382,32 @@
   background: var(--background-dropdown, white);
   border: 1px solid var(--border-subtle, #e5e7eb);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
 }
 
 .year-selector-dropdown.hidden {
   display: none;
 }
 
+.year-selector-dropdown::-webkit-scrollbar {
+  width: 5px;
+}
+
+.year-selector-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.year-selector-dropdown::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.3);
+  border-radius: 3px;
+}
+
 .year-option {
   padding: 8px 12px;
   cursor: pointer;
   transition: all 0.15s ease;
+  position: relative;
 }
 
 /* Version claire des options d'années */
@@ -348,6 +448,48 @@
   background-color: #0c4a6e;
   color: #7dd3fc;
   font-weight: 500;
+}
+
+.year-option.active::before {
+  content: "•";
+  position: absolute;
+  left: 4px;
+  font-size: 16px;
+}
+
+.year-option.active {
+  padding-left: 20px;
+}
+
+.year-option.history {
+  color: var(--history-year, #9ca3af);
+}
+
+.year-option.future {
+  color: var(--future-year, #6366f1);
+}
+
+.dark .year-option.history {
+  color: #6b7280;
+}
+
+.dark .year-option.future {
+  color: #818cf8;
+}
+
+.year-selector-section-title {
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  background-color: rgba(243, 244, 246, 0.8);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dark .year-selector-section-title {
+  color: #9ca3af;
+  background-color: rgba(31, 41, 55, 0.8);
+  border-bottom: 1px solid #374151;
 }
 
 /* Améliorations pour le calendrier */
@@ -399,51 +541,6 @@
   background-color: #1e293b;
   color: #94a3b8;
   border: 1px solid #1f2937;
-}
-
-/* Amélioration de l'aspect du heatmap */
-.heatmap-cell {
-  transition: all 0.2s ease;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
-}
-
-.dark .heatmap-cell {
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-.heatmap-cell:hover {
-  transform: scale(1.2);
-  z-index: 10;
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5), 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Amélioration de la légende */
-.heatmap-legend {
-  margin-top: 1rem;
-  padding: 0.5rem;
-  border-top: 1px solid var(--border-subtle, #e5e7eb);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-:root:not(.dark) .heatmap-legend {
-  border-top: 1px solid #e2e8f0;
-}
-
-.dark .heatmap-legend {
-  border-top: 1px solid #1f2937;
-}
-
-.heatmap-legend-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
-}
-
-.dark .heatmap-legend-color {
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 /* Allègement de l'interface sur mobile pour éviter horizontal scroll */
