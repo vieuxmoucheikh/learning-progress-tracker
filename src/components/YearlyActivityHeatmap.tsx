@@ -1,540 +1,293 @@
-import React, { useMemo, useEffect, useState, useRef } from 'react';
-import { format, parseISO, getDay, addDays, startOfYear, endOfYear } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
-import { ChevronDown, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { cn } from '../lib/utils';
+import { 
+  format, 
+  addDays, 
+  getDay,
+  startOfWeek,
+  addWeeks,
+  isWithinInterval,
+  startOfYear,
+  endOfYear,
+  isBefore,
+  parseISO,
+  eachWeekOfInterval,
+  eachMonthOfInterval,
+  differenceInWeeks,
+  getYear,
+  endOfWeek,
+  getMonth
+} from 'date-fns';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from './ui/button';
 
-interface HeatmapProps {
-  data: { date: string; count: number }[];
-  year: number;
-  isDarkMode?: boolean;
+interface DayData {
+  date: string;
+  count: number;
+  isOutsideMonth?: boolean;
+  isCurrentYear: boolean;
+}
+
+type WeekData = (DayData | null)[];
+
+interface MonthLabel {
+  text: string;
+  index: number;
+}
+
+interface Activity {
+  date: string;
+  count: number;
+}
+
+interface YearlyActivityHeatmapProps {
+  data: Record<string, number>;
+  year?: number;
   onYearChange?: (year: number) => void;
 }
 
-const DAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
-
-// Générer une plage d'années plus large (15 ans en arrière et 10 ans en avant)
-const generateAvailableYears = (): number[] => {
-  const currentYear = new Date().getFullYear();
-  const recentYears = Array.from({ length: 15 }, (_, i) => currentYear - 14 + i);
-  const futureYears = Array.from({ length: 10 }, (_, i) => currentYear + 1 + i);
-  return [...recentYears, ...futureYears];
-};
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function YearlyActivityHeatmap({ 
-  data, 
-  year, 
-  isDarkMode = false,
+  data: activityData, 
+  year = new Date().getFullYear(),
   onYearChange 
-}: HeatmapProps) {
-  const [containerWidth, setContainerWidth] = useState<number>(0);
-  const [scale, setScale] = useState<number>(1);
-  const [showYearDropdown, setShowYearDropdown] = useState(false);
+}: YearlyActivityHeatmapProps) {
   const [selectedYear, setSelectedYear] = useState(year);
-  const [tooltipContent, setTooltipContent] = useState<string>('');
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const [tooltipVisible, setTooltipVisible] = useState(false);
-  const [isScrollActive, setIsScrollActive] = useState(false);
-  const tooltipRef = useRef<HTMLDivElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const selectorRef = useRef<HTMLButtonElement>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const heatmapContainerRef = useRef<HTMLDivElement | null>(null);
   
-  // Générer des années avec classification
-  const availableYears = useMemo(() => {
-    const years = generateAvailableYears();
-    const currentYear = new Date().getFullYear();
-    
-    // Classer les années par type
-    return years.map(year => ({
-      year,
-      type: year < currentYear ? 'history' : 
-            year === currentYear ? 'current' : 'future'
-    }));
-  }, []);
-  
-  // Fermer le dropdown lorsqu'on clique à l'extérieur
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current && 
-        !dropdownRef.current.contains(event.target as Node) && 
-        selectorRef.current && 
-        !selectorRef.current.contains(event.target as Node)
-      ) {
-        setShowYearDropdown(false);
-      }
-    }
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-  
-  // Détecter le défilement horizontal pour l'indicateur
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      if (container.scrollLeft > 0) {
-        setIsScrollActive(true);
-      } else {
-        setIsScrollActive(false);
-      }
-    };
-
-    container.addEventListener('scroll', handleScroll);
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-  
-  // Vérifier si on est sur mobile
-  const isMobile = useMemo(() => {
-    if (typeof window !== 'undefined') {
-      return window.innerWidth <= 768;
-    }
-    return false;
-  }, []);
-
-  // Mise à jour de la largeur du conteneur et adaptation du scale
-  useEffect(() => {
-    const updateDimensions = () => {
-      const container = heatmapContainerRef.current;
-      if (!container) return;
-      
-      // Stocker la largeur du conteneur
-      const width = container.clientWidth;
-      setContainerWidth(width);
-      
-      // Ne pas utiliser de scaling automatique sur mobile
-      if (window.innerWidth <= 768) {
-        setScale(1);
-      } else {
-        // Sur desktop uniquement, calculer le facteur d'échelle
-        const contentWidth = 800; // Largeur estimée du contenu
-        if (width < contentWidth) {
-          setScale(Math.max(0.7, width / contentWidth));
-        } else {
-          setScale(1);
-        }
-      }
-    };
-    
-    updateDimensions();
-    
-    // Ajouter un délai pour s'assurer que les dimensions sont correctes après le rendu complet
-    const timeoutId = setTimeout(updateDimensions, 100);
-    
-    window.addEventListener('resize', updateDimensions);
-    return () => {
-      window.removeEventListener('resize', updateDimensions);
-      clearTimeout(timeoutId);
-    };
-  }, []);
-  
-  // Fonction pour déterminer la taille des cellules adaptée au type d'appareil
-  const cellSize = useMemo(() => {
-    if (isMobile) return 10; // Taille fixe sur mobile pour stabilité
-    if (containerWidth < 400) return 8;
-    if (containerWidth < 640) return 10;
-    return 12;
-  }, [containerWidth, isMobile]);
-  
-  // Effet pour forcer le scroll si on est sur mobile
-  useEffect(() => {
-    if (isMobile && containerRef.current) {
-      // Ajouter un délai pour laisser le temps au navigateur de calculer les dimensions
-      setTimeout(() => {
-        if (containerRef.current) {
-          // Forcer un petit scroll pour activer le défilement tactile sur iOS
-          containerRef.current.scrollLeft = 1;
-        }
-      }, 200);
-    }
-  }, [isMobile]);
-
-  // Palette de couleurs adaptée au mode clair/sombre
-  const colorScale = useMemo(() => {
-    return {
-      light: {
-        0: '#f3f4f6', // Gris très clair pour les jours sans activité
-        1: '#dbeafe', // Bleu très clair
-        2: '#bfdbfe', // Bleu clair
-        3: '#93c5fd', // Bleu moyen
-        4: '#60a5fa', // Bleu normal
-        5: '#3b82f6', // Bleu vif
-      },
-      dark: {
-        0: '#1f2937', // Fond sombre pour les jours sans activité
-        1: '#1e3a8a', // Bleu sombre
-        2: '#1d4ed8', // Bleu foncé
-        3: '#2563eb', // Bleu moyen
-        4: '#3b82f6', // Bleu standard
-        5: '#60a5fa', // Bleu vif
-      }
-    };
-  }, []);
-
-  // Génération de la structure de données pour la heatmap
-  const { daysGrid, monthLabels } = useMemo(() => {
-    // Create a map for quick lookup of counts by date
-    const countsMap: Record<string, number> = {};
-    data.forEach(item => {
-      countsMap[item.date] = item.count;
-    });
-
-    const startDate = startOfYear(new Date(selectedYear, 0, 1));
-    const endDate = endOfYear(new Date(selectedYear, 11, 31));
-    
-    let currentDate = startDate;
-    const days = [];
-    const monthPositions: { month: number; position: number }[] = [];
-    
-    let weekIndex = 0;
-    let dayIndex = getDay(startDate); // 0-6, where 0 is Sunday
-    
-    // First, let's add empty cells for days before the 1st of January
-    for (let i = 0; i < dayIndex; i++) {
-      days.push({ empty: true });
-    }
-    
-    // Now add actual days
-    while (currentDate <= endDate) {
-      const formattedDate = format(currentDate, 'yyyy-MM-dd');
-      // S'assurer que count est toujours un nombre (0 par défaut)
-      const count = countsMap[formattedDate] || 0;
-      
-      // Record the start position of each month
-      if (currentDate.getDate() === 1) {
-        monthPositions.push({
-          month: currentDate.getMonth(),
-          position: days.length,
-        });
-      }
-      
-      days.push({
-        date: formattedDate,
-        count,
-        dayOfWeek: dayIndex,
-        weekIndex,
-      });
-      
-      // Move to the next day
-      currentDate = addDays(currentDate, 1);
-      dayIndex = (dayIndex + 1) % 7;
-      if (dayIndex === 0) {
-        weekIndex++;
-      }
-    }
-    
-    // Generate month labels with their positions
-    const monthLabels = monthPositions.map(pos => ({
-      month: MONTHS[pos.month],
-      position: Math.floor(pos.position / 7),
-    }));
-    
-    // Organize days into a grid
-    const daysGrid = [];
-    for (let i = 0; i <= weekIndex; i++) {
-      const week = days.filter((d) => !d.empty && d.weekIndex === i);
-      daysGrid.push(week);
-    }
-    
-    return { daysGrid, monthLabels };
-  }, [data, selectedYear]);
-  
-  // Fonction qui détermine la couleur en fonction du nombre d'activités
-  const getColorIntensity = (count: number) => {
-    // S'assurer que count est toujours un nombre valide
-    const safeCount = typeof count === 'number' ? count : 0;
-    
-    const thresholds = [0, 1, 2, 4, 6, 8]; // Seuils d'intensité
-    const palette = isDarkMode ? colorScale.dark : colorScale.light;
-    
-    for (let i = thresholds.length - 1; i >= 0; i--) {
-      if (safeCount >= thresholds[i]) {
-        return palette[i as keyof typeof palette];
-      }
-    }
-    return palette[0];
-  };
-
-  // Obtention de la date du jour pour la mettre en évidence
-  const today = format(new Date(), 'yyyy-MM-dd');
-  
-  // Handler pour le changement d'année
   const handleYearChange = (newYear: number) => {
     setSelectedYear(newYear);
-    setShowYearDropdown(false);
-    if (onYearChange) {
-      onYearChange(newYear);
-    }
+    onYearChange?.(newYear);
   };
 
-  // Handler pour incrémenter/décrémenter l'année
-  const changeYear = (increment: number) => {
-    const newYear = selectedYear + increment;
-    // S'assurer que l'année existe dans notre liste
-    if (availableYears.some(y => y.year === newYear)) {
-      handleYearChange(newYear);
+  const generateCalendarData = () => {
+    const yearStart = startOfYear(new Date(selectedYear, 0, 1));
+    const yearEnd = endOfYear(yearStart);
+    const activityMap: { [key: string]: number } = {};
+
+    // Initialize all dates with 0
+    let currentDay = yearStart;
+    while (isBefore(currentDay, addDays(yearEnd, 1))) {
+      const dateKey = format(currentDay, 'yyyy-MM-dd');
+      activityMap[dateKey] = 0;
+      currentDay = addDays(currentDay, 1);
     }
+
+    // Fill in the activity data
+    Object.entries(activityData).forEach(([dateStr, count]) => {
+      // Handle timezone offset for consistent date display
+      const date = new Date(dateStr);
+      const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      const dateKey = format(localDate, 'yyyy-MM-dd');
+      
+      if (getYear(localDate) === selectedYear) {
+        activityMap[dateKey] = count;
+        console.log('Added activity to heatmap:', { 
+          originalDate: dateStr,
+          localDate: dateKey,
+          count 
+        });
+      }
+    });
+
+    return activityMap;
   };
 
-  // Gestionnaires pour le tooltip personnalisé
-  const handleCellMouseEnter = (
-    e: React.MouseEvent<HTMLDivElement>, 
-    date: string, 
-    count: number
-  ) => {
-    if (window.innerWidth <= 768) return; // Désactiver sur mobile
-    
-    const rect = e.currentTarget.getBoundingClientRect();
-    const tooltipX = rect.left + rect.width / 2;
-    const tooltipY = rect.top;
-    
-    // Format date for tooltip - Make it human-friendly
-    // Assurons-nous que date est toujours une chaîne valide
-    const formattedDate = date 
-      ? format(parseISO(date), 'EEEE d MMMM yyyy', { locale: fr }) 
-      : 'Date inconnue';
-    
-    const tooltipText = `
-      <div class="tooltip-date">${formattedDate}</div>
-      <div><span class="tooltip-count">${count}</span> activité${count !== 1 ? 's' : ''}</div>
-    `;
-    
-    setTooltipContent(tooltipText);
-    setTooltipPosition({ x: tooltipX, y: tooltipY });
-    setTooltipVisible(true);
-  };
-  
-  const handleCellMouseLeave = () => {
-    setTooltipVisible(false);
+  const calendarData = useMemo(() => generateCalendarData(), [selectedYear, activityData]);
+
+  // Calculate the start and end dates for the year
+  const startDate = startOfYear(new Date(selectedYear, 0, 1));
+  const endDate = endOfYear(startDate);
+
+  // Calculate the start of the first week and end of the last week
+  const firstWeekStart = startOfWeek(startDate);
+  const lastWeekEnd = endOfWeek(endDate);
+
+  // Generate weeks
+  const weeks = useMemo(() => {
+    const weekStarts = eachWeekOfInterval(
+      { 
+        start: firstWeekStart,
+        end: lastWeekEnd
+      },
+      { weekStartsOn: 0 }
+    );
+
+    return weekStarts.map(weekStart => {
+      const days: DayData[] = Array(7).fill(null).map((_, index) => {
+        const date = addDays(weekStart, index);
+        const dateStr = format(date, 'yyyy-MM-dd');
+        const count = calendarData[dateStr] || 0;
+        
+        console.log('Processing day:', { 
+          date: dateStr, 
+          count,
+          isCurrentYear: getYear(date) === selectedYear,
+          hasActivity: count > 0
+        });
+        
+        return {
+          date: dateStr,
+          count,
+          isCurrentYear: getYear(date) === selectedYear
+        };
+      });
+      return days;
+    });
+  }, [selectedYear, calendarData, firstWeekStart, lastWeekEnd]);
+
+  const monthLabels = useMemo(() => {
+    const labels: MonthLabel[] = [];
+    let currentMonth = -1;
+
+    weeks.forEach((week, weekIndex) => {
+      const firstDayOfWeek = parseISO(week[0].date);
+      const month = getMonth(firstDayOfWeek);
+
+      if (month !== currentMonth && getYear(firstDayOfWeek) === selectedYear) {
+        labels.push({
+          text: format(firstDayOfWeek, 'MMM'),
+          index: weekIndex
+        });
+        currentMonth = month;
+      }
+    });
+
+    return labels;
+  }, [weeks, selectedYear]);
+
+  const getColorForCount = (count: number) => {
+    if (count === 0) return 'bg-gray-200 dark:bg-gray-200';
+    if (count === 1) return 'bg-emerald-400 hover:bg-emerald-500 dark:bg-emerald-400 dark:hover:bg-emerald-300';
+    if (count <= 3) return 'bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-400';
+    return 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500';
   };
 
   return (
-    <div>
-      {/* Year Selector Component - Sélecteur d'années amélioré */}
-      <div className="year-selector-container">
-        <button 
-          ref={selectorRef}
-          className="year-selector w-full"
-          onClick={() => setShowYearDropdown(!showYearDropdown)}
+    <div className="w-full bg-white/80 dark:bg-white/10 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100 dark:border-white/10">
+      {/* Year navigation */}
+      <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-white/10">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setSelectedYear(selectedYear - 1)}
+          className="hover:bg-white/50 dark:hover:bg-white/10 border-gray-100 dark:border-white/10"
         >
-          <div className="year-display">
-            <Calendar className="h-4 w-4" />
-            <span>{selectedYear}</span>
-            <ChevronDown className={`h-4 w-4 transition-transform ${showYearDropdown ? 'transform rotate-180' : ''}`} />
-          </div>
-          
-          <div className="year-nav-buttons">
-            <button 
-              className="year-nav-button"
-              onClick={(e) => {
-                e.stopPropagation();
-                changeYear(-1);
-              }}
-              disabled={!availableYears.some(y => y.year === selectedYear - 1)}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button 
-              className="year-nav-button"
-              onClick={(e) => {
-                e.stopPropagation();
-                changeYear(1);
-              }}
-              disabled={!availableYears.some(y => y.year === selectedYear + 1)}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-        </button>
-        
-        <div 
-          ref={dropdownRef}
-          className={`year-selector-dropdown ${showYearDropdown ? '' : 'hidden'}`}
+          <ChevronLeft className="h-4 w-4 text-blue-500" />
+        </Button>
+        <div className="text-lg font-semibold text-black dark:text-black">{selectedYear}</div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setSelectedYear(selectedYear + 1)}
+          className="hover:bg-white/50 dark:hover:bg-white/10 border-gray-100 dark:border-white/10"
         >
-          {/* Grouper les années par type */}
-          <div className="year-selector-section-title">Années récentes</div>
-          {availableYears
-            .filter(y => y.type === 'history' || y.type === 'current')
-            .map(({ year, type }) => (
-              <div 
-                key={year} 
-                className={`year-option ${type} ${year === selectedYear ? 'active' : ''}`}
-                onClick={() => handleYearChange(year)}
-              >
-                {year} {year === new Date().getFullYear() ? '(actuel)' : ''}
-              </div>
-            ))
-          }
-          
-          <div className="year-selector-section-title">Années futures</div>
-          {availableYears
-            .filter(y => y.type === 'future')
-            .map(({ year }) => (
-              <div 
-                key={year} 
-                className={`year-option future ${year === selectedYear ? 'active' : ''}`}
-                onClick={() => handleYearChange(year)}
-              >
-                {year}
-              </div>
-            ))
-          }
-        </div>
+          <ChevronRight className="h-4 w-4 text-blue-500" />
+        </Button>
       </div>
 
-      {/* Tooltip personnalisé */}
-      <div 
-        ref={tooltipRef}
-        className={`calendar-tooltip ${tooltipVisible ? 'visible' : ''}`}
-        style={{
-          left: `${tooltipPosition.x}px`,
-          top: `${tooltipPosition.y}px`,
-          display: tooltipVisible ? 'block' : 'none'
-        }}
-        dangerouslySetInnerHTML={{ __html: tooltipContent }}
-      />
+      {/* Heatmap grid */}
+      <div className="w-full p-3">
+        <div className="w-full" style={{ fontSize: 'min(1.5vw, 11px)' }}>
+          {/* Month labels */}
+          <div className="flex mb-1.5">
+            <div className="w-5" /> {/* Offset for day labels */}
+            <div className="flex-1">
+              <div className="grid grid-cols-[repeat(53,1fr)] gap-[2px]">
+                {monthLabels.map((label, i) => (
+                  <div
+                    key={i}
+                    className="text-black dark:text-black text-center font-medium"
+                    style={{ 
+                      gridColumnStart: label.index + 1,
+                      gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
+                    }}
+                  >
+                    {label.text}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
-      {/* Heatmap Calendar Container avec défilement horizontal */}
-      <div 
-        className={`yearly-activity-heatmap-container ${isScrollActive ? 'scroll-active' : ''}`}
-        ref={(el) => {
-          // Correction de l'erreur - utilisation de fonctions de rappel de ref au lieu d'assignation directe
-          if (el) {
-            containerRef.current = el;
-            heatmapContainerRef.current = el;
-          }
-        }}
-        data-is-mobile={isMobile ? "true" : "false"} // Attribut pour cibler en CSS
-      >
-        <div 
-          className="heatmap-responsive-wrapper"
-          style={{ 
-            transform: window.innerWidth > 768 ? `scale(${scale})` : 'none',
-            transformOrigin: 'left top',
-            width: window.innerWidth > 768 && scale !== 1 ? `${100 / scale}%` : 'auto'
-          }}
-        >
-          <div className="min-w-max relative">
-            {/* Month labels on top - Now using absolute positioning for better alignment */}
-            <div className="month-labels">
-              {monthLabels.map((label, idx) => (
-                <div
-                  key={`month-${idx}`}
-                  className="month-label"
-                  style={{
-                    left: `${label.position * (cellSize + 2) + 24}px` // Ajuster en fonction de la taille des cellules
+          {/* Main grid */}
+          <div className="flex w-full">
+            {/* Day labels */}
+            <div className="flex flex-col gap-[2px] pr-1.5">
+              {DAYS.map((day) => (
+                <div 
+                  key={day} 
+                  className="text-black dark:text-black flex items-center w-5 font-medium"
+                  style={{ 
+                    height: 'min(1.5vw, 14px)',
+                    maxHeight: '14px'
                   }}
                 >
-                  {label.month}
+                  {day[0]}
                 </div>
               ))}
             </div>
-            
-            {/* Grid with improved styling */}
-            <div className="yearly-heatmap-grid mt-6">
-              {/* Day labels - Now with fixed width for better alignment */}
-              <div className="flex flex-col justify-around mr-2 w-6">
-                {DAYS.map((day, idx) => (
-                  <div 
-                    key={day} 
-                    className="text-xs text-gray-500 dark:text-gray-400 flex items-center justify-center"
-                    style={{ height: `${cellSize + 2}px` }}
-                  >
-                    {window.innerWidth > 500 ? day : day[0]}
-                  </div>
-                ))}
-              </div>
-              
-              {/* Calendar grid - Now with consistent spacing */}
-              <div className="grid grid-flow-col gap-1" style={{ gap: '2px' }}>
-                {daysGrid.map((week, weekIdx) => (
-                  <div key={`week-${weekIdx}`} className="heatmap-week grid gap-1" style={{ gap: '2px' }}>
-                    {Array(7).fill(0).map((_, dayIdx) => {
-                      const day = week.find(d => d.dayOfWeek === dayIdx);
-                      if (!day) {
-                        return <div key={`empty-${dayIdx}`} style={{ width: `${cellSize}px`, height: `${cellSize}px` }} />;
-                      }
-                      
-                      const isToday = day.date === today;
-                      const borderClass = isToday 
-                        ? 'ring-2 ring-blue-500 dark:ring-blue-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900' 
-                        : '';
-                      
-                      // Assurons-nous que count est toujours un nombre
-                      const count = typeof day.count === 'number' ? day.count : 0;
-                      const level = count === 0 ? 0 : count === 1 ? 1 : count < 3 ? 2 : count < 5 ? 3 : count < 7 ? 4 : 5;
-                      
-                      // Format date for tooltip - Make it human-friendly
-                      const tooltipDate = day.date 
-                        ? format(parseISO(day.date), 'EEEE d MMMM yyyy', { locale: fr }) 
-                        : 'Date inconnue';
-                      
-                      const tooltipText = `${tooltipDate}: ${count} activité${count !== 1 ? 's' : ''}`;
-                      
-                      return (
-                        <div
-                          key={day.date || `empty-${dayIdx}`}
-                          className={cn(
-                            "heatmap-cell rounded-sm transition-colors",
-                            `heatmap-cell-level-${level}`,
-                            "transform hover:scale-110 cursor-pointer",
-                            borderClass,
-                            isToday ? "today" : ""
-                          )}
-                          style={{
-                            backgroundColor: getColorIntensity(count),
-                            width: `${cellSize}px`, 
-                            height: `${cellSize}px`
-                          }}
-                          title={tooltipText}
-                          aria-label={tooltipText}
-                          onMouseEnter={(e) => handleCellMouseEnter(e, day.date || '', count)}
-                          onMouseLeave={handleCellMouseLeave}
-                        />
-                      );
-                    })}
+
+            {/* Calendar grid */}
+            <div className="flex-1">
+              <div className="grid grid-cols-[repeat(53,1fr)] gap-[2px]">
+                {weeks.map((week, weekIndex) => (
+                  <div key={weekIndex} className="flex flex-col gap-[2px]">
+                    {week.map((day, dayIndex) => (
+                      <TooltipProvider key={day.date}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div
+                              className={cn(
+                                'rounded-[1px] transition-colors duration-200',
+                                day.isCurrentYear
+                                  ? getColorForCount(day.count)
+                                  : 'bg-gray-200 dark:bg-gray-200'
+                              )}
+                              style={{ 
+                                height: 'min(1.5vw, 14px)',
+                                minHeight: '6px'
+                              }}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent 
+                            side="top"
+                            className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-100 dark:border-white/10"
+                          >
+                            <div className="text-xs">
+                              <div className="font-medium text-black dark:text-black">
+                                {format(parseISO(day.date), 'MMM d, yyyy')}
+                              </div>
+                              <div className="text-black dark:text-black">
+                                {day.count} {day.count === 1 ? 'activity' : 'activities'}
+                              </div>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ))}
                   </div>
                 ))}
               </div>
             </div>
-            
-            {/* Legend - Now with better spacing and alignment */}
-            <div className="heatmap-legend text-xs">
-              <span className="heatmap-legend-label">Moins</span>
-              {[0, 1, 2, 3, 4, 5].map((level) => (
-                <div
-                  key={level}
-                  className={cn(
-                    "heatmap-legend-color mx-0.5",
-                    `heatmap-cell-level-${level}`
-                  )}
-                  style={{ 
-                    backgroundColor: isDarkMode ? colorScale.dark[level as keyof typeof colorScale.dark] : colorScale.light[level as keyof typeof colorScale.light],
-                    width: `${cellSize - 2}px`, 
-                    height: `${cellSize - 2}px`
-                  }}
-                />
-              ))}
-              <span className="heatmap-legend-label">Plus</span>
-            </div>
+          </div>
+
+          {/* Legend */}
+          <div className="flex items-center gap-1.5 mt-3 justify-end text-black dark:text-black">
+            <span className="text-xs font-medium">Less</span>
+            {[0, 1, 2, 4].map((count) => (
+              <div
+                key={count}
+                className={cn(
+                  'w-2.5 h-2.5 rounded-[1px]',
+                  getColorForCount(count)
+                )}
+              />
+            ))}
+            <span className="text-xs font-medium">More</span>
           </div>
         </div>
-        
-        {/* Indicateur visuel de défilement pour mobile */}
-        {isMobile && (
-          <div className="mobile-scroll-indicator">
-            <div className="scroll-dot"></div>
-            <div className="scroll-dot"></div>
-            <div className="scroll-dot"></div>
-          </div>
-        )}
       </div>
     </div>
   );

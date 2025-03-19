@@ -13,20 +13,20 @@ export interface GoalSession {
 }
 
 export interface Session {
-  id: string;
-  goal_id: string;
-  user_id: string;
+  id?: string;
+  goal_id?: string;
+  user_id?: string;
   date: string;
-  startTime: string;  // Propriété obligatoire
-  endTime?: string;   // Propriété optionnelle
-  status?: 'in_progress' | 'completed' | 'on_hold';
-  duration: {
+  startTime: string;
+  endTime?: string;
+  duration?: {
     hours: number;
     minutes: number;
   };
-  notes?: string;
-  created_at: string;
-  updated_at: string;
+  notes?: (string | { content: string; timestamp: string })[];
+  created_at?: string;
+  updated_at?: string;
+  status?: 'in_progress' | 'completed' | 'on_hold';
 }
 
 export interface Progress {

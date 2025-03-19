@@ -915,7 +915,6 @@ export async function addSession(goalId: string, sessionData: { date: string; du
       throw new Error('Invalid date format');
     }
     const utcDate = new Date(localDate.getTime() + localDate.getTimezoneOffset() * 60000);
-    const currentTime = new Date().toISOString();
 
     const { data: session, error } = await supabase
       .from('goal_sessions')
@@ -924,13 +923,11 @@ export async function addSession(goalId: string, sessionData: { date: string; du
           goal_id: goalId,
           user_id: user.id,
           date: utcDate.toISOString(),
-          startTime: currentTime, // Ajout de la propriété startTime
           duration: {
             hours: Math.max(0, Math.floor(sessionData.duration.hours)),
             minutes: Math.max(0, Math.min(59, Math.floor(sessionData.duration.minutes)))
           },
-          notes: sessionData.notes || '',
-          status: 'completed' // Par défaut, les sessions ajoutées manuellement sont complétées
+          notes: sessionData.notes || ''
         }
       ])
       .select()
@@ -955,12 +952,10 @@ export async function addSession(goalId: string, sessionData: { date: string; du
       goal_id: session.goal_id,
       user_id: session.user_id,
       date: dateStr,
-      startTime: session.startTime || currentTime, // Assurer que startTime existe
       duration: {
         hours: session.duration.hours,
         minutes: session.duration.minutes
       },
-      status: session.status || 'completed',
       notes: session.notes || '',
       created_at: session.created_at,
       updated_at: session.updated_at
@@ -996,38 +991,21 @@ export async function getSessions(goalId: string): Promise<Session[]> {
       return [];
     }
 
-    // Add explicit type annotation to the session parameter
-    return sessions.map((session: {
-      id: string;
-      goal_id: string;
-      user_id: string;
-      date: string;
-      startTime?: string;
-      duration?: { hours?: number; minutes?: number };
-      notes?: string;
-      created_at: string;
-      updated_at: string;
-      status?: 'in_progress' | 'completed' | 'on_hold';
-    }) => {
+    return sessions.map(session => {
       // Convert UTC date to local date string (YYYY-MM-DD)
       const utcDate = new Date(session.date);
       const localDate = new Date(utcDate.getTime() - utcDate.getTimezoneOffset() * 60000);
       const dateStr = localDate.toISOString().split('T')[0];
-      
-      // Assurer que startTime existe (utiliser created_at comme fallback)
-      const startTime = session.startTime || session.created_at || utcDate.toISOString();
 
       return {
         id: session.id,
         goal_id: session.goal_id,
         user_id: session.user_id,
         date: dateStr,
-        startTime: startTime,
         duration: {
           hours: session.duration?.hours || 0,
           minutes: session.duration?.minutes || 0
         },
-        status: session.status || 'completed',
         notes: session.notes || '',
         created_at: session.created_at,
         updated_at: session.updated_at
@@ -1071,6 +1049,7 @@ export async function trackLearningActivity(category: string) {
       .eq('category', category)
       .eq('date', dateStr)
       .single();
+
     if (selectError && selectError.code !== 'PGRST116') {
       console.error('Error checking existing activity:', selectError);
       throw selectError;
@@ -1087,6 +1066,7 @@ export async function trackLearningActivity(category: string) {
         .eq('id', existing.id)
         .select()
         .single();
+
       if (updateError) {
         console.error('Error updating activity:', updateError);
         throw updateError;
@@ -1107,6 +1087,7 @@ export async function trackLearningActivity(category: string) {
         }])
         .select()
         .single();
+
       if (insertError) {
         console.error('Error creating activity:', insertError);
         throw insertError;
@@ -1132,6 +1113,7 @@ export async function getYearlyActivity(category: string) {
     const year = currentDate.getFullYear();
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year, 11, 31);
+
     const startDateStr = startDate.toISOString().split('T')[0];
     const endDateStr = endDate.toISOString().split('T')[0];
 
@@ -1152,6 +1134,7 @@ export async function getYearlyActivity(category: string) {
       .eq('category', category)
       .gte('date', startDateStr)
       .lte('date', endDateStr);
+
     if (error) {
       console.error('Error fetching yearly activity:', error);
       return [];
@@ -1164,6 +1147,7 @@ export async function getYearlyActivity(category: string) {
     let currentDatePointer = new Date(startDate);
     currentDatePointer.setUTCHours(0, 0, 0, 0);
     const endDateTime = endDate.getTime();
+    
     while (currentDatePointer.getTime() <= endDateTime) {
       const dateStr = currentDatePointer.toISOString().split('T')[0];
       const existingData = activities?.find(d => d.date === dateStr);
@@ -1195,7 +1179,7 @@ export async function getYearlyActivity(category: string) {
       total: activeDays.length,
       days: activeDays.map(d => ({ date: d.date, count: d.count }))
     });
-
+    
     return filledData;
   } catch (error) {
     console.error('Error in getYearlyActivity:', error);
@@ -1236,6 +1220,7 @@ export async function addTestActivityData() {
     const { error } = await supabase
       .from('learning_activity')
       .insert(testData);
+
     if (error) {
       console.error('Error inserting test data:', error);
       return;
@@ -1363,88 +1348,4 @@ export async function deletePomodoroTask(id: string): Promise<void> {
     console.error('Error in deletePomodoroTask:', error);
     throw error;
   }
-}
-
-// Fonction pour récupérer les données d'activité d'apprentissage
-export async function getLearningActivity(): Promise<{ date: string; count: number; category?: string }[]> {
-  try {
-    // Récupérer l'utilisateur actuel
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
-
-    // Récupérer les éléments d'apprentissage de l'utilisateur
-    const { data: items, error } = await supabase
-      .from('learning_items')
-      .select('*')
-      .eq('user_id', user.id);
-
-    if (error) {
-      throw error;
-    }
-
-    if (!items || items.length === 0) {
-      return [];
-    }
-
-    // Structurer les données d'activité à partir des sessions de progression
-    const activityData: { date: string; count: number; category?: string }[] = [];
-
-    items.forEach(item => {
-      // S'assurer que progress et sessions existent
-      if (item.progress && item.progress.sessions) {
-        // Grouper les sessions par date
-        const sessionsByDate: Record<string, { count: number; category?: string }> = {};
-        
-        // Ajouter un typage explicite au paramètre session pour éviter l'erreur
-        item.progress.sessions.forEach((session: { startTime?: string; endTime?: string; status?: string }) => {
-          if (session.startTime) {
-            // Extraire la date (YYYY-MM-DD) de la date de début
-            const date = session.startTime.split('T')[0];
-            
-            if (!sessionsByDate[date]) {
-              sessionsByDate[date] = { count: 0, category: item.category };
-            }
-
-            // Incrémenter le compteur pour cette date
-            sessionsByDate[date].count += 1;
-          }
-        });
-
-        // Convertir en tableau de données d'activité
-        Object.entries(sessionsByDate).forEach(([date, data]) => {
-          activityData.push({
-            date,
-            count: data.count,
-            category: data.category
-          });
-        });
-      }
-    });
-
-    // Récupérer également les données de suivi d'activité spécifiques (si elles existent)
-    const { data: trackedActivities, error: trackError } = await supabase
-      .from('learning_activity')
-      .select('*')
-      .eq('user_id', user.id);
-
-    if (trackError) {
-      console.error('Error fetching activity tracking data:', trackError);
-    } else if (trackedActivities && trackedActivities.length > 0) {
-      // Ajouter les données de suivi d'activité au tableau de données d'activité
-      trackedActivities.forEach(activity => {
-        activityData.push({
-          date: activity.date,
-          count: activity.count || 1, // Assurer qu'un count est toujours défini
-          category: activity.category
-        });
-      });
-    }
-
-    return activityData;
-  } catch (error) {
-    console.error('Error in getLearningActivity:', error);
-    return [];
-  } 
 }
