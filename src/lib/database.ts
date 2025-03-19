@@ -1396,7 +1396,9 @@ export async function getLearningActivity(): Promise<{ date: string; count: numb
       if (item.progress && item.progress.sessions) {
         // Grouper les sessions par date
         const sessionsByDate: Record<string, { count: number; category?: string }> = {};
-        item.progress.sessions.forEach(session => {
+        
+        // Ajouter un typage explicite au paramètre session pour éviter l'erreur
+        item.progress.sessions.forEach((session: { startTime?: string; endTime?: string; status?: string }) => {
           if (session.startTime) {
             // Extraire la date (YYYY-MM-DD) de la date de début
             const date = session.startTime.split('T')[0];

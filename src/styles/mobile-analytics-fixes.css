@@ -58,35 +58,48 @@
     font-weight: 500;
   }
   
-  /* Amélioration mobile pour heatmap */
+  /* Heatmap - Adapter la taille pour mobile */
   .yearly-activity-heatmap-container {
-    padding-left: 1rem;
+    width: 100%; 
+    padding-left: 0;
+    margin-left: -8px;
+    margin-right: -8px;
   }
   
-  /* Réduire la taille des cellules sur mobile pour tout afficher */
+  /* Réduire davantage la taille des cellules sur mobile */
   .heatmap-cell {
-    width: 12px !important;
-    height: 12px !important;
+    width: 10px !important;
+    height: 10px !important;
   }
   
-  /* Augmenter le contraste des cellules de la heatmap en mode sombre sur mobile */
-  .dark .heatmap-cell-level-1,
-  .dark .heatmap-cell-level-2,
-  .dark .heatmap-cell-level-3,
-  .dark .heatmap-cell-level-4,
-  .dark .heatmap-cell-level-5 {
-    filter: brightness(1.3) !important;
+  /* Ajustement des labels de jours pour mobile */
+  .flex.flex-col.justify-around.mr-2.w-6 {
+    font-size: 9px !important;
+    width: 12px !important;
+    margin-right: 1px !important;
   }
 }
 
 /* Correction pour l'affichage de la heatmap sur mobile et bureau */
 .yearly-activity-heatmap-container {
+  width: 100%;
   max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   padding-bottom: 1rem;
   margin-bottom: 1rem;
+}
+
+/* Adaptation responsive automatique */
+.heatmap-responsive-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  scrollbar-width: thin;
 }
 
 /* Style personnalisé pour la barre de défilement */
@@ -119,8 +132,8 @@
 
 /* Ajuster la taille des cellules du heatmap */
 .heatmap-cell {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   rx: 2px;
   ry: 2px;
 }
@@ -182,8 +195,19 @@
 
 /* Fixe pour le défilement horizontal sur petits écrans */
 @media (max-width: 640px) {
-  .yearly-activity-heatmap-container {
-    min-width: 700px;
+  .yearly-activity-heatmap-container .min-w-max {
+    min-width: auto;
+    width: 100%;
+    transform: scale(0.9);
+    transform-origin: left top;
+  }
+}
+
+/* Améliorer l'affichage sur les tablettes */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .yearly-activity-heatmap-container .min-w-max {
+    transform: scale(0.95);
+    transform-origin: left top;
   }
 }
 
@@ -191,5 +215,12 @@
 @supports (-webkit-touch-callout: none) {
   .yearly-activity-heatmap-container {
     -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Désactiver les transformations au survol sur mobile pour assurer l'affichage complet */
+@media (max-width: 768px) {
+  .heatmap-cell:hover {
+    transform: none !important;
   }
 }

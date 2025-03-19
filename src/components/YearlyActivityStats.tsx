@@ -140,6 +140,14 @@ export function YearlyActivityStats() {
     };
   }, [filteredData]);
 
+  // Fonction pour détecter si l'appareil est mobile
+  const isMobile = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth <= 768;
+    }
+    return false;
+  }, []);
+
   // Amélioration du rendu avec gestion plus robuste des données vides
   const renderContent = () => {
     if (loading) {
@@ -248,8 +256,8 @@ export function YearlyActivityStats() {
               </div>
             </div>
 
-            {/* Heatmap avec meilleure visibilité en mode sombre */}
-            <div className="w-full">
+            {/* Heatmap avec meilleure visibilité - New wrapper for better scaling */}
+            <div className="w-full overflow-hidden relative heatmap-container">
               <YearlyActivityHeatmap 
                 data={heatmapData} 
                 year={new Date().getFullYear()}
