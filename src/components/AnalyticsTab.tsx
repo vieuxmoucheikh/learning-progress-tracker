@@ -21,15 +21,28 @@ import {
 } from "recharts";
 import { LearningItem } from "@/types";
 import { useMemo } from "react";
-import { Brain, Target, TrendingUp, CheckCircle, BookOpen, PieChart as PieChartIcon, BarChart3, Calendar } from "lucide-react";
+import { Brain, Target, TrendingUp, CheckCircle, BookOpen, PieChart as PieChartIcon, BarChart3, Calendar, Lightbulb } from "lucide-react";
 import LearningGoals from './LearningGoals';
 import { YearlyActivityStats } from './YearlyActivityStats';
+import { cn } from "@/lib/utils";
 
 interface AnalyticsTabProps {
   items: LearningItem[];
 }
 
-const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#14B8A6"];
+// Palette de couleurs améliorée pour les graphiques avec meilleure compatibilité dark/light
+const COLORS = [
+  "#3B82F6", // blue-500
+  "#10B981", // emerald-500
+  "#F59E0B", // amber-500
+  "#EF4444", // red-500
+  "#8B5CF6", // violet-500
+  "#EC4899", // pink-500
+  "#14B8A6", // teal-500
+  "#6366F1", // indigo-500
+  "#F97316", // orange-500
+];
+
 const DIFFICULTY_COLORS = {
   easy: "#10B981",
   medium: "#F59E0B",
@@ -166,14 +179,27 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
 
   return (
     <div className="space-y-8">
-      {/* Learning Goals */}
-      <Card className="p-6 hover:shadow-md transition-shadow border-l-4 border-indigo-500">
+      {/* En-tête de la page */}
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+          Learning Analytics
+        </h1>
+        <p className="text-gray-500 dark:text-gray-400 text-lg">
+          Visualisez vos progrès et identifiez vos tendances d'apprentissage
+        </p>
+      </div>
+
+      {/* Learning Goals - Design amélioré */}
+      <Card className="p-6 overflow-hidden relative border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-950/40 dark:to-indigo-900/40 border-indigo-100 dark:border-indigo-800/30">
+        <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-indigo-500 to-indigo-600"></div>
         <CardHeader className="px-0 pt-0">
-          <CardTitle className="text-xl flex items-center gap-2">
-            <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-              <Target className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+          <CardTitle className="text-xl flex items-center gap-3">
+            <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/50 rounded-full shadow-sm">
+              <Target className="w-5 h-5 text-indigo-600 dark:text-indigo-400" strokeWidth={2} />
             </div>
-            Learning Goals
+            <span className="bg-gradient-to-r from-indigo-600 to-indigo-800 dark:from-indigo-400 dark:to-indigo-300 bg-clip-text text-transparent">
+              Learning Goals
+            </span>
           </CardTitle>
         </CardHeader>
         <CardContent className="px-0 pb-0">
@@ -181,60 +207,80 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
         </CardContent>
       </Card>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="p-4 hover:shadow-md transition-shadow border-l-4 border-blue-500">
+      {/* Summary Cards - Design modernisé */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+        <Card className={cn(
+          "p-5 hover:shadow-md transition-all duration-300 border-0 shadow-md",
+          "overflow-hidden relative bg-gradient-to-br from-blue-50 to-blue-100",
+          "dark:from-blue-900/20 dark:to-blue-800/20"
+        )}>
+          <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-blue-500 to-blue-600"></div>
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Learning Time</h3>
-              <p className="mt-2 text-3xl font-semibold text-blue-600 dark:text-blue-400">
+              <h3 className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">Total Learning Time</h3>
+              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
                 {Math.round(analytics.categoryData.reduce((sum, cat) => sum + cat.value, 0))}h
               </p>
             </div>
-            <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-              <Brain className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+            <div className="p-2.5 bg-blue-100 dark:bg-blue-900/50 rounded-full shadow-sm">
+              <Brain className="w-5 h-5 text-blue-600 dark:text-blue-400" strokeWidth={2} />
             </div>
           </div>
         </Card>
 
-        <Card className="p-4 hover:shadow-md transition-shadow border-l-4 border-green-500">
+        <Card className={cn(
+          "p-5 hover:shadow-md transition-all duration-300 border-0 shadow-md",
+          "overflow-hidden relative bg-gradient-to-br from-green-50 to-green-100",
+          "dark:from-green-900/20 dark:to-green-800/20"
+        )}>
+          <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-green-500 to-green-600"></div>
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Completion Rate</h3>
-              <p className="mt-2 text-3xl font-semibold text-green-600 dark:text-green-400">
+              <h3 className="text-sm font-medium text-green-700 dark:text-green-300 mb-1">Completion Rate</h3>
+              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
                 {Math.round((analytics.completionMetrics.completed || 0) / items.length * 100)}%
               </p>
             </div>
-            <div className="p-2 bg-green-50 dark:bg-green-900/30 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-green-500 dark:text-green-400" />
+            <div className="p-2.5 bg-green-100 dark:bg-green-900/50 rounded-full shadow-sm">
+              <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" strokeWidth={2} />
             </div>
           </div>
         </Card>
 
-        <Card className="p-4 hover:shadow-md transition-shadow border-l-4 border-amber-500">
+        <Card className={cn(
+          "p-5 hover:shadow-md transition-all duration-300 border-0 shadow-md",
+          "overflow-hidden relative bg-gradient-to-br from-amber-50 to-amber-100",
+          "dark:from-amber-900/20 dark:to-amber-800/20"
+        )}>
+          <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-amber-500 to-amber-600"></div>
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Days</h3>
-              <p className="mt-2 text-3xl font-semibold text-amber-600 dark:text-amber-400">
+              <h3 className="text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Active Days</h3>
+              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
                 {analytics.dailyData.filter(d => d.hours > 0).length}/14
               </p>
             </div>
-            <div className="p-2 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
-              <TrendingUp className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+            <div className="p-2.5 bg-amber-100 dark:bg-amber-900/50 rounded-full shadow-sm">
+              <TrendingUp className="w-5 h-5 text-amber-600 dark:text-amber-400" strokeWidth={2} />
             </div>
           </div>
         </Card>
         
-        <Card className="p-4 hover:shadow-md transition-shadow border-l-4 border-purple-500">
+        <Card className={cn(
+          "p-5 hover:shadow-md transition-all duration-300 border-0 shadow-md",
+          "overflow-hidden relative bg-gradient-to-br from-purple-50 to-purple-100",
+          "dark:from-purple-900/20 dark:to-purple-800/20"
+        )}>
+          <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-purple-500 to-purple-600"></div>
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Categories</h3>
-              <p className="mt-2 text-3xl font-semibold text-purple-600 dark:text-purple-400">
+              <h3 className="text-sm font-medium text-purple-700 dark:text-purple-300 mb-1">Categories</h3>
+              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
                 {analytics.categoryData.length}
               </p>
             </div>
-            <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
-              <BookOpen className="w-5 h-5 text-purple-500 dark:text-purple-400" />
+            <div className="p-2.5 bg-purple-100 dark:bg-purple-900/50 rounded-full shadow-sm">
+              <BookOpen className="w-5 h-5 text-purple-600 dark:text-purple-400" strokeWidth={2} />
             </div>
           </div>
         </Card>
