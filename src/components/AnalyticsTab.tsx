@@ -43,13 +43,41 @@ const COLORS = [
   "#F97316", // orange-500
 ];
 
+// Couleurs plus vives pour le mode sombre
+const DARK_MODE_COLORS = [
+  "#60A5FA", // blue-400
+  "#34D399", // emerald-400
+  "#FBBF24", // amber-400
+  "#F87171", // red-400
+  "#A78BFA", // violet-400
+  "#F472B6", // pink-400
+  "#2DD4BF", // teal-400
+  "#818CF8", // indigo-400
+  "#FB923C", // orange-400
+];
+
 const DIFFICULTY_COLORS = {
   easy: "#10B981",
   medium: "#F59E0B",
   hard: "#EF4444"
 };
 
+const DARK_DIFFICULTY_COLORS = {
+  easy: "#34D399",
+  medium: "#FBBF24",
+  hard: "#F87171"
+};
+
 export function AnalyticsTab({ items }: AnalyticsTabProps) {
+  // Détecter le mode sombre
+  const isDarkMode = document.documentElement.classList.contains('dark') || 
+                    document.documentElement.getAttribute('data-theme') === 'dark';
+  
+  // Choisir la palette de couleurs en fonction du mode
+  const currentColors = isDarkMode ? DARK_MODE_COLORS : COLORS;
+  const currentDifficultyColors = isDarkMode ? DARK_DIFFICULTY_COLORS : DIFFICULTY_COLORS;
+  
+  // Le reste de la logique reste inchangée
   const analytics = useMemo(() => {
     // Time spent per category (using actual session data)
     const categoryData = items.reduce((acc, item) => {
@@ -181,23 +209,23 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
     <div className="space-y-8">
       {/* En-tête de la page */}
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-50">
           Learning Analytics
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 text-lg">
+        <p className="text-gray-600 dark:text-gray-300 text-lg">
           Visualisez vos progrès et identifiez vos tendances d'apprentissage
         </p>
       </div>
 
       {/* Learning Goals - Design amélioré */}
       <Card className="p-6 overflow-hidden relative border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-950/40 dark:to-indigo-900/40 border-indigo-100 dark:border-indigo-800/30">
-        <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-indigo-500 to-indigo-600"></div>
+        <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-indigo-500 to-indigo-600 dark:from-indigo-400 dark:to-indigo-500"></div>
         <CardHeader className="px-0 pt-0">
           <CardTitle className="text-xl flex items-center gap-3">
-            <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/50 rounded-full shadow-sm">
-              <Target className="w-5 h-5 text-indigo-600 dark:text-indigo-400" strokeWidth={2} />
+            <div className="p-2.5 bg-indigo-100 dark:bg-indigo-800/50 rounded-full shadow-sm">
+              <Target className="w-5 h-5 text-indigo-600 dark:text-indigo-300" strokeWidth={2} />
             </div>
-            <span className="bg-gradient-to-r from-indigo-600 to-indigo-800 dark:from-indigo-400 dark:to-indigo-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-indigo-600 to-indigo-800 dark:from-indigo-300 dark:to-indigo-200 bg-clip-text text-transparent">
               Learning Goals
             </span>
           </CardTitle>
@@ -212,18 +240,18 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
         <Card className={cn(
           "p-5 hover:shadow-md transition-all duration-300 border-0 shadow-md",
           "overflow-hidden relative bg-gradient-to-br from-blue-50 to-blue-100",
-          "dark:from-blue-900/20 dark:to-blue-800/20"
+          "dark:from-blue-900/30 dark:to-blue-800/30"
         )}>
-          <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-blue-500 to-blue-600"></div>
+          <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500"></div>
           <div className="flex items-start justify-between">
             <div>
               <h3 className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">Total Learning Time</h3>
-              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-50">
                 {Math.round(analytics.categoryData.reduce((sum, cat) => sum + cat.value, 0))}h
               </p>
             </div>
-            <div className="p-2.5 bg-blue-100 dark:bg-blue-900/50 rounded-full shadow-sm">
-              <Brain className="w-5 h-5 text-blue-600 dark:text-blue-400" strokeWidth={2} />
+            <div className="p-2.5 bg-blue-100 dark:bg-blue-800/50 rounded-full shadow-sm">
+              <Brain className="w-5 h-5 text-blue-600 dark:text-blue-300" strokeWidth={2} />
             </div>
           </div>
         </Card>
@@ -231,18 +259,18 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
         <Card className={cn(
           "p-5 hover:shadow-md transition-all duration-300 border-0 shadow-md",
           "overflow-hidden relative bg-gradient-to-br from-green-50 to-green-100",
-          "dark:from-green-900/20 dark:to-green-800/20"
+          "dark:from-green-900/30 dark:to-green-800/30"
         )}>
-          <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-green-500 to-green-600"></div>
+          <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-green-500 to-green-600 dark:from-green-400 dark:to-green-500"></div>
           <div className="flex items-start justify-between">
             <div>
               <h3 className="text-sm font-medium text-green-700 dark:text-green-300 mb-1">Completion Rate</h3>
-              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-50">
                 {Math.round((analytics.completionMetrics.completed || 0) / items.length * 100)}%
               </p>
             </div>
-            <div className="p-2.5 bg-green-100 dark:bg-green-900/50 rounded-full shadow-sm">
-              <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" strokeWidth={2} />
+            <div className="p-2.5 bg-green-100 dark:bg-green-800/50 rounded-full shadow-sm">
+              <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-300" strokeWidth={2} />
             </div>
           </div>
         </Card>
@@ -250,18 +278,18 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
         <Card className={cn(
           "p-5 hover:shadow-md transition-all duration-300 border-0 shadow-md",
           "overflow-hidden relative bg-gradient-to-br from-amber-50 to-amber-100",
-          "dark:from-amber-900/20 dark:to-amber-800/20"
+          "dark:from-amber-900/30 dark:to-amber-800/30"
         )}>
-          <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-amber-500 to-amber-600"></div>
+          <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-amber-500 to-amber-600 dark:from-amber-400 dark:to-amber-500"></div>
           <div className="flex items-start justify-between">
             <div>
               <h3 className="text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Active Days</h3>
-              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-50">
                 {analytics.dailyData.filter(d => d.hours > 0).length}/14
               </p>
             </div>
-            <div className="p-2.5 bg-amber-100 dark:bg-amber-900/50 rounded-full shadow-sm">
-              <TrendingUp className="w-5 h-5 text-amber-600 dark:text-amber-400" strokeWidth={2} />
+            <div className="p-2.5 bg-amber-100 dark:bg-amber-800/50 rounded-full shadow-sm">
+              <TrendingUp className="w-5 h-5 text-amber-600 dark:text-amber-300" strokeWidth={2} />
             </div>
           </div>
         </Card>
@@ -269,18 +297,18 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
         <Card className={cn(
           "p-5 hover:shadow-md transition-all duration-300 border-0 shadow-md",
           "overflow-hidden relative bg-gradient-to-br from-purple-50 to-purple-100",
-          "dark:from-purple-900/20 dark:to-purple-800/20"
+          "dark:from-purple-900/30 dark:to-purple-800/30"
         )}>
-          <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-purple-500 to-purple-600"></div>
+          <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-purple-500 to-purple-600 dark:from-purple-400 dark:to-purple-500"></div>
           <div className="flex items-start justify-between">
             <div>
               <h3 className="text-sm font-medium text-purple-700 dark:text-purple-300 mb-1">Categories</h3>
-              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-50">
                 {analytics.categoryData.length}
               </p>
             </div>
-            <div className="p-2.5 bg-purple-100 dark:bg-purple-900/50 rounded-full shadow-sm">
-              <BookOpen className="w-5 h-5 text-purple-600 dark:text-purple-400" strokeWidth={2} />
+            <div className="p-2.5 bg-purple-100 dark:bg-purple-800/50 rounded-full shadow-sm">
+              <BookOpen className="w-5 h-5 text-purple-600 dark:text-purple-300" strokeWidth={2} />
             </div>
           </div>
         </Card>
@@ -289,12 +317,12 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Time by Category */}
-        <Card className="p-6 hover:shadow-md transition-shadow lg:col-span-2">
+        <Card className="p-6 hover:shadow-md transition-shadow lg:col-span-2 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 mb-6">
-            <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-              <PieChartIcon className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+            <div className="p-1.5 bg-blue-50 dark:bg-blue-900/50 rounded-lg">
+              <PieChartIcon className="w-5 h-5 text-blue-500 dark:text-blue-300" />
             </div>
-            <h2 className="text-lg font-semibold">Time Spent by Category</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50">Time Spent by Category</h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="h-[300px]">
@@ -307,10 +335,18 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
                     cx="50%"
                     cy="50%"
                     outerRadius={100}
+                    fill="#8884d8"
                     label={({ name, percentage }) => `${name}: ${percentage}%`}
+                    labelLine={true}
+                    stroke={isDarkMode ? "#374151" : "#f3f4f6"}
+                    strokeWidth={isDarkMode ? 1 : 0.5}
                   >
                     {analytics.categoryData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={currentColors[index % currentColors.length]}
+                        style={{ filter: isDarkMode ? 'brightness(1.2)' : 'none' }}
+                      />
                     ))}
                   </Pie>
                   <Tooltip 
@@ -318,24 +354,40 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
                       `${value}h (${entry.payload.percentage}%)`,
                       `${name} (${entry.payload.itemCount} items)`
                     ]}
+                    contentStyle={{ 
+                      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                      border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
+                      color: isDarkMode ? '#e5e7eb' : '#111827',
+                      borderRadius: '0.375rem'
+                    }}
+                    itemStyle={{
+                      color: isDarkMode ? '#e5e7eb' : '#374151'
+                    }}
+                    labelStyle={{
+                      fontWeight: 600,
+                      color: isDarkMode ? '#e5e7eb' : '#111827'
+                    }}
                   />
-                  <Legend />
+                  <Legend 
+                    formatter={(value) => <span style={{ color: isDarkMode ? '#e5e7eb' : '#374151' }}>{value}</span>}
+                    iconType="circle"
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
             <div className="space-y-4">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Category Breakdown</h3>
-              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300">Category Breakdown</h3>
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
                 {analytics.categoryData.map((category, index) => (
                   <div key={category.name} className="flex items-center gap-3">
                     <div 
                       className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      style={{ backgroundColor: currentColors[index % currentColors.length] }}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center text-sm">
-                        <span className="font-medium truncate">{category.name}</span>
-                        <span className="text-gray-500 dark:text-gray-400">
+                        <span className="font-medium truncate text-gray-800 dark:text-gray-200">{category.name}</span>
+                        <span className="text-gray-600 dark:text-gray-400">
                           {category.value}h ({category.percentage}%)
                         </span>
                       </div>
@@ -344,7 +396,7 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
                           className="h-1.5 rounded-full transition-all duration-500"
                           style={{
                             width: `${category.percentage}%`,
-                            backgroundColor: COLORS[index % COLORS.length]
+                            backgroundColor: currentColors[index % currentColors.length]
                           }}
                         />
                       </div>
@@ -360,71 +412,120 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
         </Card>
 
         {/* Learning Focus */}
-        <Card className="p-6 hover:shadow-md transition-shadow">
+        <Card className="p-6 hover:shadow-md transition-shadow border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 mb-6">
-            <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-              <Target className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+            <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/50 rounded-lg">
+              <Target className="w-5 h-5 text-indigo-500 dark:text-indigo-300" />
             </div>
-            <h2 className="text-lg font-semibold">Learning Focus</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50">Learning Focus</h2>
           </div>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart cx="50%" cy="50%" outerRadius="80%" data={analytics.focusMetrics}>
-                <PolarGrid />
-                <PolarAngleAxis dataKey="subject" />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                <PolarGrid stroke={isDarkMode ? "#4b5563" : "#e5e7eb"} />
+                <PolarAngleAxis 
+                  dataKey="subject" 
+                  tick={{ fill: isDarkMode ? "#e5e7eb" : "#374151" }}
+                  stroke={isDarkMode ? "#6b7280" : "#9ca3af"}
+                />
+                <PolarRadiusAxis 
+                  angle={30} 
+                  domain={[0, 100]} 
+                  tick={{ fill: isDarkMode ? "#e5e7eb" : "#374151" }}
+                  stroke={isDarkMode ? "#6b7280" : "#d1d5db"}
+                />
                 <Radar
                   name="Learning Focus"
                   dataKey="value"
-                  stroke="#8884d8"
-                  fill="#8884d8"
+                  stroke={isDarkMode ? "#a78bfa" : "#8b5cf6"}
+                  fill={isDarkMode ? "#a78bfa" : "#8b5cf6"}
                   fillOpacity={0.6}
                 />
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                    border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
+                    color: isDarkMode ? '#e5e7eb' : '#111827',
+                    borderRadius: '0.375rem'
+                  }}
+                  formatter={(value: number) => [`${value}%`, "Score"]}
+                  labelFormatter={(label) => label}
+                />
               </RadarChart>
             </ResponsiveContainer>
           </div>
         </Card>
 
         {/* Daily Activity */}
-        <Card className="p-6 hover:shadow-md transition-shadow lg:col-span-2">
+        <Card className="p-6 hover:shadow-md transition-shadow lg:col-span-2 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 mb-6">
-            <div className="p-1.5 bg-green-50 dark:bg-green-900/30 rounded-lg">
-              <BarChart3 className="w-5 h-5 text-green-500 dark:text-green-400" />
+            <div className="p-1.5 bg-green-50 dark:bg-green-900/50 rounded-lg">
+              <BarChart3 className="w-5 h-5 text-green-500 dark:text-green-300" />
             </div>
-            <h2 className="text-lg font-semibold">Daily Activity (Past 14 Days)</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50">Daily Activity (Past 14 Days)</h2>
           </div>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={analytics.dailyData}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  stroke={isDarkMode ? "#374151" : "#e5e7eb"}
+                />
                 <XAxis
                   dataKey="date"
                   tickFormatter={(value) => new Date(value).toLocaleDateString(undefined, { weekday: 'short' })}
+                  stroke={isDarkMode ? "#9ca3af" : "#6b7280"}
+                  tick={{ fill: isDarkMode ? "#e5e7eb" : "#374151" }}
                 />
-                <YAxis yAxisId="left" />
-                <YAxis yAxisId="right" orientation="right" />
+                <YAxis 
+                  yAxisId="left" 
+                  stroke={isDarkMode ? "#9ca3af" : "#6b7280"}
+                  tick={{ fill: isDarkMode ? "#e5e7eb" : "#374151" }}
+                />
+                <YAxis 
+                  yAxisId="right" 
+                  orientation="right" 
+                  stroke={isDarkMode ? "#9ca3af" : "#6b7280"}
+                  tick={{ fill: isDarkMode ? "#e5e7eb" : "#374151" }}
+                />
                 <Tooltip
                   labelFormatter={(value) => new Date(value).toLocaleDateString()}
                   formatter={(value: number, name: string) => [
                     name === 'hours' ? `${value} hours` : `${value} sessions`,
                     name === 'hours' ? 'Time Spent' : 'Sessions'
                   ]}
+                  contentStyle={{ 
+                    backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                    border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
+                    color: isDarkMode ? '#e5e7eb' : '#111827',
+                    borderRadius: '0.375rem'
+                  }}
+                  itemStyle={{
+                    color: isDarkMode ? '#e5e7eb' : '#374151'
+                  }}
+                  labelStyle={{
+                    fontWeight: 600,
+                    color: isDarkMode ? '#e5e7eb' : '#111827'
+                  }}
                 />
-                <Legend />
+                <Legend 
+                  formatter={(value) => <span style={{ color: isDarkMode ? '#e5e7eb' : '#374151' }}>{value}</span>}
+                />
                 <Line
                   yAxisId="left"
                   type="monotone"
                   dataKey="hours"
-                  stroke={COLORS[0]}
+                  stroke={currentColors[0]}
                   activeDot={{ r: 8 }}
+                  strokeWidth={2}
                 />
                 <Line
                   yAxisId="right"
                   type="monotone"
                   dataKey="sessions"
-                  stroke={COLORS[1]}
+                  stroke={currentColors[1]}
                   activeDot={{ r: 8 }}
+                  strokeWidth={2}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -432,30 +533,58 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
         </Card>
 
         {/* Progress by Difficulty */}
-        <Card className="p-6 hover:shadow-md transition-shadow">
+        <Card className="p-6 hover:shadow-md transition-shadow border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 mb-6">
-            <div className="p-1.5 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
-              <TrendingUp className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+            <div className="p-1.5 bg-amber-50 dark:bg-amber-900/50 rounded-lg">
+              <TrendingUp className="w-5 h-5 text-amber-500 dark:text-amber-300" />
             </div>
-            <h2 className="text-lg font-semibold">Progress by Difficulty</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50">Progress by Difficulty</h2>
           </div>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={analytics.difficultyData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  stroke={isDarkMode ? "#374151" : "#e5e7eb"}
+                />
+                <XAxis 
+                  dataKey="name" 
+                  stroke={isDarkMode ? "#9ca3af" : "#6b7280"}
+                  tick={{ fill: isDarkMode ? "#e5e7eb" : "#374151" }}
+                />
+                <YAxis 
+                  stroke={isDarkMode ? "#9ca3af" : "#6b7280"}
+                  tick={{ fill: isDarkMode ? "#e5e7eb" : "#374151" }}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                    border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
+                    color: isDarkMode ? '#e5e7eb' : '#111827',
+                    borderRadius: '0.375rem'
+                  }}
+                  itemStyle={{
+                    color: isDarkMode ? '#e5e7eb' : '#374151'
+                  }}
+                  labelStyle={{
+                    fontWeight: 600,
+                    color: isDarkMode ? '#e5e7eb' : '#111827'
+                  }}
+                />
+                <Legend 
+                  formatter={(value) => <span style={{ color: isDarkMode ? '#e5e7eb' : '#374151' }}>{value}</span>}
+                />
                 <Bar
                   dataKey="progress"
                   name="Avg. Progress %"
-                  fill={COLORS[2]}
+                  fill={currentColors[2]}
+                  radius={[4, 4, 0, 0]}
                 />
                 <Bar
                   dataKey="count"
                   name="Number of Items"
-                  fill={COLORS[3]} 
+                  fill={currentColors[3]} 
+                  radius={[4, 4, 0, 0]}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -464,12 +593,12 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
       </div>
 
       {/* Yearly Activity Heatmap */}
-      <Card className="p-6 hover:shadow-md transition-shadow">
+      <Card className="p-6 hover:shadow-md transition-shadow border border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-2 mb-6">
-          <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-            <Calendar className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+          <div className="p-1.5 bg-blue-50 dark:bg-blue-900/50 rounded-lg">
+            <Calendar className="w-5 h-5 text-blue-500 dark:text-blue-300" />
           </div>
-          <h2 className="text-lg font-semibold">Learning Insights</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50">Learning Insights</h2>
         </div>
         <YearlyActivityStats />
       </Card>
