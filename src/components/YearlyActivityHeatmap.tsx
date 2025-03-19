@@ -158,10 +158,10 @@ export function YearlyActivityHeatmap({
   }, [weeks, selectedYear]);
 
   const getColorForCount = (count: number) => {
-    if (count === 0) return 'bg-gray-200 dark:bg-gray-200';
-    if (count === 1) return 'bg-emerald-400 hover:bg-emerald-500 dark:bg-emerald-400 dark:hover:bg-emerald-300';
-    if (count <= 3) return 'bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-400';
-    return 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500';
+    if (count === 0) return 'bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600';
+    if (count === 1) return 'bg-green-500 hover:bg-green-600 dark:bg-emerald-400 dark:hover:bg-emerald-300 border border-green-600 dark:border-emerald-500';
+    if (count <= 3) return 'bg-green-600 hover:bg-green-700 dark:bg-emerald-500 dark:hover:bg-emerald-400 border border-green-700 dark:border-emerald-600';
+    return 'bg-green-700 hover:bg-green-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 border border-green-800 dark:border-emerald-700';
   };
 
   return (
@@ -243,11 +243,11 @@ export function YearlyActivityHeatmap({
                                 'rounded-[1px] transition-colors duration-200',
                                 day.isCurrentYear
                                   ? getColorForCount(day.count)
-                                  : 'bg-gray-200 dark:bg-gray-200'
+                                  : 'bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 opacity-50'
                               )}
                               style={{ 
                                 height: 'min(1.5vw, 14px)',
-                                minHeight: '6px'
+                                minHeight: '10px', // Augmenté de 6px à 10px pour une meilleure visibilité sur mobile
                               }}
                             />
                           </TooltipTrigger>
@@ -276,15 +276,10 @@ export function YearlyActivityHeatmap({
           {/* Legend */}
           <div className="flex items-center gap-1.5 mt-3 justify-end text-black dark:text-black">
             <span className="text-xs font-medium">Less</span>
-            {[0, 1, 2, 4].map((count) => (
-              <div
-                key={count}
-                className={cn(
-                  'w-2.5 h-2.5 rounded-[1px]',
-                  getColorForCount(count)
-                )}
-              />
-            ))}
+            <div className="w-2.5 h-2.5 rounded-[1px] bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600" />
+            <div className="w-2.5 h-2.5 rounded-[1px] bg-green-500 dark:bg-emerald-400 border border-green-600 dark:border-emerald-500" />
+            <div className="w-2.5 h-2.5 rounded-[1px] bg-green-600 dark:bg-emerald-500 border border-green-700 dark:border-emerald-600" />
+            <div className="w-2.5 h-2.5 rounded-[1px] bg-green-700 dark:bg-emerald-600 border border-green-800 dark:border-emerald-700" />
             <span className="text-xs font-medium">More</span>
           </div>
         </div>
