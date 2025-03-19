@@ -40,6 +40,7 @@ export function YearlyActivityHeatmap({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const selectorRef = useRef<HTMLButtonElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const heatmapContainerRef = useRef<HTMLDivElement>(null);
   
   // Générer des années avec classification
   const availableYears = useMemo(() => {
@@ -90,36 +91,70 @@ export function YearlyActivityHeatmap({
     };
   }, []);
   
+  // Vérifier si on est sur mobile
+  const isMobile = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth <= 768;
+    }
+    return false;
+  }, []);
+
   // Mise à jour de la largeur du conteneur et adaptation du scale
   useEffect(() => {
     const updateDimensions = () => {
-      const container = document.querySelector('.yearly-activity-heatmap-container');
-      if (container) {
-        const width = container.clientWidth;
-        setContainerWidth(width);
-        
-        // Ne pas utiliser de scaling automatique sur mobile, pour permettre
-        // un défilement horizontal naturel
-        if (window.innerWidth <= 768) {
-          setScale(1);
+      const container = heatmapContainerRef.current;
+      if (!container) return;
+      
+      // Stocker la largeur du conteneur
+      const width = container.clientWidth;
+      setContainerWidth(width);
+      
+      // Ne pas utiliser de scaling automatique sur mobile
+      if (window.innerWidth <= 768) {
+        setScale(1);
+      } else {
+        // Sur desktop uniquement, calculer le facteur d'échelle
+        const contentWidth = 800; // Largeur estimée du contenu
+        if (width < contentWidth) {
+          setScale(Math.max(0.7, width / contentWidth));
         } else {
-          // Sur desktop, calculer le facteur d'échelle si nécessaire
-          const contentWidth = 800; // Largeur estimée du contenu complet
-          const minScale = window.innerWidth <= 640 ? 0.6 : 0.8;
-          
-          if (width < contentWidth) {
-            setScale(Math.max(minScale, width / contentWidth));
-          } else {
-            setScale(1);
-          }
+          setScale(1);
         }
       }
     };
     
     updateDimensions();
+    
+    // Ajouter un délai pour s'assurer que les dimensions sont correctes après le rendu complet
+    const timeoutId = setTimeout(updateDimensions, 100);
+    
     window.addEventListener('resize', updateDimensions);
-    return () => window.removeEventListener('resize', updateDimensions);
+    return () => {
+      window.removeEventListener('resize', updateDimensions);
+      clearTimeout(timeoutId);
+    };
   }, []);
+  
+  // Fonction pour déterminer la taille des cellules adaptée au type d'appareil
+  const cellSize = useMemo(() => {
+    if (isMobile) return 10; // Taille fixe sur mobile pour stabilité
+    if (containerWidth < 400) return 8;
+    if (containerWidth < 640) return 10;
+    return 12;
+  }, [containerWidth, isMobile]);
+  
+  // Effet pour forcer le scroll si on est sur mobile
+  useEffect(() => {
+    if (isMobile && containerRef.current) {
+      // Ajouter un délai pour laisser le temps au navigateur de calculer les dimensions
+      setTimeout(() => {
+        if (containerRef.current) {
+          // Forcer un petit scroll pour activer le défilement tactile sur iOS
+          containerRef.current.scrollLeft = 1;
+        }
+      }, 200);
+    }
+  }, [isMobile]);
 
   // Palette de couleurs adaptée au mode clair/sombre
   const colorScale = useMemo(() => {
@@ -375,7 +410,11 @@ export function YearlyActivityHeatmap({
       {/* Heatmap Calendar Container avec défilement horizontal */}
       <div 
         className={`yearly-activity-heatmap-container ${isScrollActive ? 'scroll-active' : ''}`}
-        ref={containerRef}
+        ref={(el) => {
+          containerRef.current = el;
+          heatmapContainerRef.current = el; // Ajouter la double référence
+        }}
+        data-is-mobile={isMobile ? "true" : "false"} // Attribut pour cibler en CSS
       >
         <div 
           className="heatmap-responsive-wrapper"
@@ -488,6 +527,15 @@ export function YearlyActivityHeatmap({
             </div>
           </div>
         </div>
+        
+        {/* Indicateur visuel de défilement pour mobile */}
+        {isMobile && (
+          <div className="mobile-scroll-indicator">
+            <div className="scroll-dot"></div>
+            <div className="scroll-dot"></div>
+            <div className="scroll-dot"></div>
+          </div>
+        )}
       </div>
     </div>
   );

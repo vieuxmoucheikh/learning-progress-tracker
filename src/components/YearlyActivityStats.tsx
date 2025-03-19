@@ -270,8 +270,11 @@ export function YearlyActivityStats() {
               </div>
             </div>
 
-            {/* Heatmap avec meilleure visibilité - Now with year selector */}
-            <div className="w-full rounded-lg relative">
+            {/* Heatmap avec meilleure visibilité - Spécifiquement optimisé pour mobile */}
+            <div className={`w-full rounded-lg relative ${isMobile ? 'mobile-heatmap-container' : ''}`}>
+              <span className="text-sm text-gray-500 dark:text-gray-400 mb-2 block">
+                {isMobile ? "Faites défiler horizontalement pour voir tout le calendrier" : ""}
+              </span>
               <YearlyActivityHeatmap 
                 data={heatmapData} 
                 year={selectedYear}
