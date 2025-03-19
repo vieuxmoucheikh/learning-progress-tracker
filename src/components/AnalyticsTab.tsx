@@ -21,7 +21,7 @@ import {
   TooltipProps
 } from "recharts";
 import { LearningItem } from "@/types";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Brain, Target, TrendingUp, CheckCircle, BookOpen, PieChart as PieChartIcon, BarChart3, Calendar, Lightbulb, Layers } from "lucide-react";
 import LearningGoals from './LearningGoals';
 import { YearlyActivityStats } from './YearlyActivityStats';
@@ -32,8 +32,8 @@ interface AnalyticsTabProps {
   items: LearningItem[];
 }
 
-// Palette de couleurs améliorée pour les graphiques avec meilleure compatibilité dark/light
-const COLORS = [
+// Palettes de couleurs optimisées pour chaque mode
+const LIGHT_COLORS = [
   "#3B82F6", // blue-500
   "#10B981", // emerald-500
   "#F59E0B", // amber-500
@@ -45,25 +45,44 @@ const COLORS = [
   "#F97316", // orange-500
 ];
 
+const DARK_COLORS = [
+  "#60A5FA", // blue-400
+  "#34D399", // emerald-400
+  "#FBBF24", // amber-400
+  "#F87171", // red-400
+  "#A78BFA", // violet-400
+  "#F472B6", // pink-400
+  "#2DD4BF", // teal-400
+  "#818CF8", // indigo-400
+  "#FB923C", // orange-400
+];
+
 const DIFFICULTY_COLORS = {
-  easy: "#10B981",
-  medium: "#F59E0B",
-  hard: "#EF4444"
+  light: {
+    easy: "#10B981",
+    medium: "#F59E0B",
+    hard: "#EF4444"
+  },
+  dark: {
+    easy: "#34D399",
+    medium: "#FBBF24",
+    hard: "#F87171"
+  }
 };
 
-// Composant personnalisé pour le tooltip des graphiques
+// Composant personnalisé pour le tooltip des graphiques avec meilleure visibilité
 const CustomTooltip = ({ active, payload, label, labelFormatter }: TooltipProps<any, any>) => {
   if (!active || !payload || !payload.length) return null;
   
   return (
-    <div className="bg-white dark:bg-gray-800 p-3 shadow-lg border border-gray-200 dark:border-gray-700 rounded-md">
+    <div className="bg-white/95 dark:bg-gray-800/95 p-3 shadow-lg border border-gray-200 dark:border-gray-700/80 rounded-md backdrop-blur-sm">
       <p className="font-medium text-gray-800 dark:text-gray-100">
         {labelFormatter ? labelFormatter(label, payload) : label}
       </p>
       <div className="mt-2">
         {payload.map((item: any, index: number) => (
           <div key={index} className="flex items-center gap-2 text-sm">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+            <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: item.color }} />
             <span className="text-gray-700 dark:text-gray-300">
               {item.name}: {item.value} {item.unit || ''}
             </span>
@@ -76,6 +95,34 @@ const CustomTooltip = ({ active, payload, label, labelFormatter }: TooltipProps<
 
 export function AnalyticsTab({ items }: AnalyticsTabProps) {
   const [selectedMetric, setSelectedMetric] = useState<'hours' | 'sessions'>('hours');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  
+  // Détecter le mode sombre
+  useEffect(() => {
+    // Détecter le thème initial
+    const checkTheme = () => {
+      const isDark = document.documentElement.classList.contains('dark') || 
+                     document.documentElement.getAttribute('data-theme') === 'dark';
+      setIsDarkMode(isDark);
+    };
+    
+    checkTheme();
+    
+    // Observer les changements de thème
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class', 'data-theme'],
+    });
+    
+    return () => observer.disconnect();
+  }, []);
+  
+  // Utiliser les couleurs appropriées selon le mode
+  const COLORS = isDarkMode ? DARK_COLORS : LIGHT_COLORS;
+  const currentDifficultyColors = isDarkMode ? DIFFICULTY_COLORS.dark : DIFFICULTY_COLORS.light;
+
+  // Calculs pour les analyses (code existant)
   const analytics = useMemo(() => {
     // Time spent per category (using actual session data)
     const categoryData = items.reduce((acc, item) => {
@@ -210,7 +257,7 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
         <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
           Learning Analytics
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 text-lg">
+        <p className="text-gray-600 dark:text-gray-300 text-lg">
           Visualisez vos progrès et identifiez vos tendances d'apprentissage
         </p>
       </div>
@@ -295,7 +342,7 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
       </div>
 
       {/* Learning Goals - Design amélioré */}
-      <Card className="overflow-hidden relative border border-gray-200 dark:border-gray-800 shadow-md hover:shadow-lg transition-all duration-300">
+      <Card className="overflow-hidden relative border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all duration-300">
         <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-indigo-500 to-indigo-600"></div>
         <div className="p-6">
           <CardHeader className="px-0 pt-0">
@@ -317,10 +364,10 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
       {/* Charts Grid - Optimized for dark mode and mobile */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Time by Category - Improved for dark mode */}
-        <Card className="border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 lg:col-span-2">
+        <Card className="border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 lg:col-span-2">
           <div className="p-6">
             <div className="flex items-center gap-2 mb-6">
-              <div className="p-2.5 bg-blue-100 dark:bg-blue-900/50 rounded-full shadow-sm">
+              <div className="p-2.5 bg-blue-100 dark:bg-blue-800/50 rounded-full shadow-sm">
                 <PieChartIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" strokeWidth={2} />
               </div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Time Spent by Category</h2>
@@ -328,7 +375,7 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Responsive chart container with better dark mode support */}
-              <div className="h-[320px] md:h-[360px]">
+              <div className="h-[320px] md:h-[360px] bg-white dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700/70">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -339,13 +386,13 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
                       cy="50%"
                       outerRadius="70%"
                       label={({ name, percentage }) => `${name}: ${percentage}%`}
-                      labelLine={{ stroke: "#888", strokeWidth: 1 }}
+                      labelLine={{ stroke: isDarkMode ? "#aaa" : "#666", strokeWidth: 1 }}
                     >
                       {analytics.categoryData.map((_, index) => (
                         <Cell 
                           key={`cell-${index}`} 
                           fill={COLORS[index % COLORS.length]} 
-                          stroke="rgba(255,255,255,0.2)"
+                          stroke={isDarkMode ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.5)"}
                           strokeWidth={1}
                         />
                       ))}
@@ -357,31 +404,37 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
 
               {/* Category breakdown with improved mobile & dark mode appearance */}
               <div className="space-y-4">
-                <h3 className="text-base font-medium text-gray-700 dark:text-gray-300">Category Breakdown</h3>
-                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 pb-2">
+                <h3 className="text-base font-medium text-gray-700 dark:text-gray-200">Category Breakdown</h3>
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 pb-2 custom-scrollbar">
                   {analytics.categoryData.map((category, index) => (
-                    <div key={category.name} className="bg-white dark:bg-gray-800/50 rounded-lg p-3 border border-gray-100 dark:border-gray-700">
+                    <div key={category.name} className="bg-white dark:bg-gray-800/50 rounded-lg p-3 border border-gray-100 dark:border-gray-700/70 hover:shadow-sm transition-all">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
                           <div 
-                            className="w-3 h-3 rounded-full" 
+                            className="w-3 h-3 flex-shrink-0 rounded-full shadow-sm ring-1 ring-inset ring-black/5 dark:ring-white/10" 
                             style={{ backgroundColor: COLORS[index % COLORS.length] }}
                           />
-                          <span className="font-medium text-gray-900 dark:text-white truncate">{category.name}</span>
+                          <span className="font-medium text-gray-900 dark:text-white truncate">
+                            {category.name}
+                          </span>
                         </div>
-                        <span className="text-gray-600 dark:text-gray-400 text-sm">
+                        <span className="text-gray-600 dark:text-gray-300 text-sm font-medium ml-2">
                           {category.value}h
                         </span>
                       </div>
                       
                       <div className="mt-2">
                         <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="text-gray-500 dark:text-gray-400">{category.itemCount} items</span>
-                          <span className="text-gray-500 dark:text-gray-400">{category.percentage}%</span>
+                          <span className="text-gray-500 dark:text-gray-400">
+                            {category.itemCount} {category.itemCount > 1 ? 'items' : 'item'}
+                          </span>
+                          <span className="text-gray-500 dark:text-gray-400 font-medium">
+                            {category.percentage}%
+                          </span>
                         </div>
-                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700/70 rounded-full h-2 overflow-hidden">
                           <div
-                            className="h-full rounded-full"
+                            className="h-full rounded-full shadow-sm"
                             style={{
                               width: `${category.percentage}%`,
                               backgroundColor: COLORS[index % COLORS.length]
@@ -398,27 +451,40 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
         </Card>
 
         {/* Learning Focus - Enhanced for dark mode & mobile */}
-        <Card className="border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+        <Card className="border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
           <div className="p-6">
             <div className="flex items-center gap-2 mb-6">
-              <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/50 rounded-full shadow-sm">
+              <div className="p-2.5 bg-indigo-100 dark:bg-indigo-800/50 rounded-full shadow-sm">
                 <Layers className="w-5 h-5 text-indigo-600 dark:text-indigo-400" strokeWidth={2} />
               </div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Learning Focus</h2>
             </div>
             
-            <div className="h-[300px]">
+            <div className="h-[300px] bg-white dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700/70">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart cx="50%" cy="50%" outerRadius="70%" data={analytics.focusMetrics}>
-                  <PolarGrid stroke="#888" />
-                  <PolarAngleAxis dataKey="subject" tick={{ fill: "#888" }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: "#888" }} />
+                  <PolarGrid stroke={isDarkMode ? "#555" : "#ddd"} />
+                  <PolarAngleAxis 
+                    dataKey="subject" 
+                    tick={{ 
+                      fill: isDarkMode ? "#bbb" : "#666",
+                      fontSize: 12,
+                    }} 
+                  />
+                  <PolarRadiusAxis 
+                    angle={30} 
+                    domain={[0, 100]} 
+                    tick={{ 
+                      fill: isDarkMode ? "#999" : "#666" 
+                    }} 
+                    stroke={isDarkMode ? "#555" : "#ddd"}
+                  />
                   <Radar
                     name="Learning Focus"
                     dataKey="value"
                     stroke={COLORS[4]}
                     fill={COLORS[4]}
-                    fillOpacity={0.5}
+                    fillOpacity={0.6}
                   />
                   <Tooltip content={<CustomTooltip />} />
                 </RadarChart>
@@ -429,11 +495,11 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
       </div>
 
       {/* Daily Activity - Improved dark mode support */}
-      <Card className="border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+      <Card className="border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
         <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
             <div className="flex items-center gap-2">
-              <div className="p-2.5 bg-green-100 dark:bg-green-900/50 rounded-full shadow-sm">
+              <div className="p-2.5 bg-green-100 dark:bg-green-800/50 rounded-full shadow-sm">
                 <BarChart3 className="w-5 h-5 text-green-600 dark:text-green-400" strokeWidth={2} />
               </div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Daily Activity (Past 14 Days)</h2>
@@ -458,25 +524,34 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
             </div>
           </div>
           
-          <div className="h-[300px]">
+          <div className="h-[300px] bg-white dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700/70">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={analytics.dailyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#888" opacity={0.3} />
+                <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"} />
                 <XAxis 
                   dataKey="date" 
                   tickFormatter={(value) => new Date(value).toLocaleDateString(undefined, { weekday: 'short' })}
-                  stroke="#888"
+                  stroke={isDarkMode ? "#aaa" : "#666"}
+                  tick={{ fill: isDarkMode ? "#aaa" : "#666" }}
                 />
-                <YAxis stroke="#888" />
+                <YAxis 
+                  stroke={isDarkMode ? "#aaa" : "#666"}
+                  tick={{ fill: isDarkMode ? "#aaa" : "#666" }}
+                />
                 <Tooltip 
                   content={<CustomTooltip />}
                   labelFormatter={(value) => new Date(value).toLocaleDateString()}
                   formatter={(value: number, name: string) => [
-                    selectedMetric === 'hours' ? `${value} hours` : `${value} sessions`,
-                    selectedMetric === 'hours' ? 'Time Spent' : 'Sessions'
+                    `${value} ${name === 'hours' ? 'hours' : 'sessions'}`,
+                    name === 'hours' ? 'Time Spent' : 'Sessions'
                   ]}
                 />
-                <Legend />
+                <Legend 
+                  wrapperStyle={{ 
+                    paddingTop: 20,
+                    color: isDarkMode ? "#fff" : "#000"
+                  }}
+                />
                 <Line
                   type="monotone"
                   dataKey={selectedMetric}
@@ -492,33 +567,51 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
       </Card>
 
       {/* Progress by Difficulty - Improved for dark mode */}
-      <Card className="border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+      <Card className="border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
         <div className="p-6">
           <div className="flex items-center gap-2 mb-6">
-            <div className="p-2.5 bg-amber-100 dark:bg-amber-900/50 rounded-full shadow-sm">
+            <div className="p-2.5 bg-amber-100 dark:bg-amber-800/50 rounded-full shadow-sm">
               <TrendingUp className="w-5 h-5 text-amber-600 dark:text-amber-400" strokeWidth={2} />
             </div>
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Progress by Difficulty</h2>
           </div>
           
-          <div className="h-[300px]">
+          <div className="h-[300px] bg-white dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700/70">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={analytics.difficultyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#888" opacity={0.3} />
-                <XAxis dataKey="name" stroke="#888" />
-                <YAxis stroke="#888" />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
+                <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"} />
+                <XAxis 
+                  dataKey="name" 
+                  stroke={isDarkMode ? "#aaa" : "#666"}
+                  tick={{ fill: isDarkMode ? "#aaa" : "#666" }}
+                />
+                <YAxis 
+                  stroke={isDarkMode ? "#aaa" : "#666"}
+                  tick={{ fill: isDarkMode ? "#aaa" : "#666" }}
+                />
+                <Tooltip 
+                  content={<CustomTooltip />}
+                  formatter={(value: number, name: string) => [
+                    name === 'progress' ? `${value}%` : value,
+                    name === 'progress' ? 'Progress' : 'Item Count'
+                  ]}
+                />
+                <Legend
+                  wrapperStyle={{ 
+                    paddingTop: 20,
+                    color: isDarkMode ? "#fff" : "#000"
+                  }}
+                />
                 <Bar
                   dataKey="progress"
                   name="Avg. Progress %"
-                  fill={COLORS[2]}
+                  fill={currentDifficultyColors.medium}
                   radius={[4, 4, 0, 0]}
                 />
                 <Bar
                   dataKey="count"
                   name="Number of Items"
-                  fill={COLORS[3]}
+                  fill={currentDifficultyColors.easy}
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
@@ -528,10 +621,10 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
       </Card>
 
       {/* Yearly Activity Heatmap - Enhanced appearance */}
-      <Card className="border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+      <Card className="border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
         <div className="p-6">
           <div className="flex items-center gap-2 mb-6">
-            <div className="p-2.5 bg-blue-100 dark:bg-blue-900/50 rounded-full shadow-sm">
+            <div className="p-2.5 bg-blue-100 dark:bg-blue-800/50 rounded-full shadow-sm">
               <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" strokeWidth={2} />
             </div>
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Learning Insights</h2>

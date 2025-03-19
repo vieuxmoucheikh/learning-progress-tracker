@@ -31,24 +31,24 @@ const getThemeMode = (): 'light' | 'dark' => {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 };
 
-// Couleurs optimisées pour une meilleure visibilité dans les deux modes
+// Couleurs optimisées avec classes CSS pour une meilleure compatibilité
 const getActivityColors = (isDarkMode: boolean) => {
   return isDarkMode 
     ? {
-        0: 'bg-gray-800',
-        1: 'bg-green-900/60',
-        2: 'bg-green-700/80',
-        3: 'bg-green-600',
-        4: 'bg-green-500',
-        5: 'bg-green-400',
+        0: 'bg-gray-800 dark-mode-color-0',
+        1: 'bg-green-900/60 dark-mode-color-1',
+        2: 'bg-green-700/80 dark-mode-color-2',
+        3: 'bg-green-600 dark-mode-color-3',
+        4: 'bg-green-500 dark-mode-color-4',
+        5: 'bg-green-400 dark-mode-color-5',
       }
     : {
-        0: 'bg-gray-100',
-        1: 'bg-green-100',
-        2: 'bg-green-200',
-        3: 'bg-green-300', 
-        4: 'bg-green-500',
-        5: 'bg-green-600',
+        0: 'bg-gray-100 light-mode-color-0',
+        1: 'bg-green-100 light-mode-color-1',
+        2: 'bg-green-200 light-mode-color-2',
+        3: 'bg-green-300 light-mode-color-3', 
+        4: 'bg-green-500 light-mode-color-4',
+        5: 'bg-green-600 light-mode-color-5',
       };
 };
 
@@ -146,7 +146,7 @@ export function YearlyActivityHeatmap({
           <ChevronLeft className="h-4 w-4 mr-1" />
           {currentYear - 1}
         </Button>
-        <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">
+        <h3 className="text-base font-medium text-gray-900 dark:text-white">
           {currentYear}
         </h3>
         <Button variant="outline" size="sm" onClick={() => handleYearChange('next')} 
@@ -156,12 +156,12 @@ export function YearlyActivityHeatmap({
         </Button>
       </div>
 
-      {/* Grille de calendrier avec contraste amélioré */}
+      {/* Grille de calendrier avec contraste amélioré et optimisation mobile */}
       <div className="relative overflow-x-auto pb-2">
         <div className="min-w-[640px]">
           <div className="flex">
             <div className="w-8"></div> {/* Espace pour les mois */}
-            <div className="flex flex-1 justify-around text-xs text-gray-500 dark:text-gray-400">
+            <div className="flex flex-1 justify-around text-xs font-medium text-gray-600 dark:text-gray-300">
               <div>L</div>
               <div>M</div>
               <div>M</div>
@@ -174,7 +174,7 @@ export function YearlyActivityHeatmap({
           <div className="mt-1">
             {calendarData.map((monthData, monthIndex) => (
               <div key={monthIndex} className="flex mb-2">
-                <div className="w-8 text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center justify-end pr-2">
+                <div className="w-8 text-xs font-medium text-gray-600 dark:text-gray-300 flex items-center justify-end pr-2">
                   {monthData.month}
                 </div>
                 <div className="flex-1">
@@ -193,7 +193,7 @@ export function YearlyActivityHeatmap({
                               <TooltipTrigger asChild>
                                 <div
                                   className={cn(
-                                    "w-full aspect-square rounded-sm",
+                                    "w-full aspect-square rounded-sm yearly-heatmap-cell",
                                     day.isToday 
                                       ? "ring-2 ring-blue-400 dark:ring-blue-500" 
                                       : "",
@@ -204,14 +204,14 @@ export function YearlyActivityHeatmap({
                                     "cursor-pointer",
                                   )}
                                   style={{
-                                    minWidth: '6px',
-                                    minHeight: '6px'
+                                    minWidth: '14px',
+                                    minHeight: '14px'
                                   }}
                                 />
                               </TooltipTrigger>
                               <TooltipContent 
                                 side="top"
-                                className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-100 dark:border-white/10"
+                                className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-100 dark:border-gray-700/80 shadow-lg"
                               >
                                 <div className="text-xs">
                                   <div className="font-medium text-gray-900 dark:text-white">
@@ -238,20 +238,20 @@ export function YearlyActivityHeatmap({
       {/* Légende avec meilleure visibilité */}
       <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-2">
-          <div className={cn("w-4 h-4 rounded", activityColors[0])} />
-          <span className="text-xs text-gray-700 dark:text-gray-300">Aucune activité</span>
+          <div className={cn("w-4 h-4 rounded shadow-inner border border-gray-200 dark:border-gray-700", activityColors[0])} />
+          <span className="text-xs text-gray-600 dark:text-gray-300">Aucune activité</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className={cn("w-4 h-4 rounded", activityColors[1])} />
-          <span className="text-xs text-gray-700 dark:text-gray-300">1 activité</span>
+          <div className={cn("w-4 h-4 rounded shadow-inner border border-gray-200 dark:border-gray-700", activityColors[1])} />
+          <span className="text-xs text-gray-600 dark:text-gray-300">1 activité</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className={cn("w-4 h-4 rounded", activityColors[3])} />
-          <span className="text-xs text-gray-700 dark:text-gray-300">2-4 activités</span>
+          <div className={cn("w-4 h-4 rounded shadow-inner border border-gray-200 dark:border-gray-700", activityColors[3])} />
+          <span className="text-xs text-gray-600 dark:text-gray-300">2-4 activités</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className={cn("w-4 h-4 rounded", activityColors[5])} />
-          <span className="text-xs text-gray-700 dark:text-gray-300">5+ activités</span>
+          <div className={cn("w-4 h-4 rounded shadow-inner border border-gray-200 dark:border-gray-700", activityColors[5])} />
+          <span className="text-xs text-gray-600 dark:text-gray-300">5+ activités</span>
         </div>
       </div>
     </div>

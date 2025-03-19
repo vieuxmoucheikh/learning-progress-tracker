@@ -1,0 +1,196 @@
+/* Correctifs pour les graphiques en mode sombre sur mobile */
+
+/* Amélioration de l'apparence du scrollbar customisé */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Correction spécifique pour les graphiques en mode sombre sur mobile */
+@media (max-width: 768px) {
+  /* Assurer que les couleurs des graphiques sont visibles en mode sombre */
+  .dark .recharts-sector {
+    stroke: rgba(255, 255, 255, 0.2) !important;
+  }
+  
+  .dark .recharts-pie-label-text {
+    fill: white !important;
+  }
+  
+  .dark .recharts-radar, 
+  .dark .recharts-polygon {
+    fill-opacity: 0.7 !important;
+  }
+  
+  .dark .recharts-cartesian-axis-tick-value tspan {
+    fill: #aaa !important; 
+  }
+  
+  .dark .recharts-label {
+    fill: white !important;
+  }
+  
+  /* Correction spécifique pour le heatmap calendar */
+  .dark [class*="activity-colors"] [class*="legend-item"] {
+    color: white !important;
+  }
+
+  /* Amélioration de la visibilité des légendes */
+  .dark .recharts-legend-item-text {
+    color: white !important;
+    fill: white !important;
+  }
+
+  /* Correction pour les tooltips sur mobile */
+  .dark .recharts-tooltip-wrapper .recharts-default-tooltip {
+    max-width: 90vw !important;
+    overflow: hidden !important;
+  }
+}
+
+/* Correction pour le heatmap en mode clair sur mobile */
+@media (max-width: 768px) {
+  .yearly-heatmap-cell {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    min-width: 12px !important;
+    min-height: 12px !important;
+  }
+  
+  .dark .yearly-heatmap-cell {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Forcer l'utilisation des couleurs appropriées pour le heatmap */
+  .light-mode-color-0 { background-color: #f3f4f6 !important; }
+  .light-mode-color-1 { background-color: #dcfce7 !important; }
+  .light-mode-color-2 { background-color: #bbf7d0 !important; }
+  .light-mode-color-3 { background-color: #86efac !important; }
+  .light-mode-color-4 { background-color: #4ade80 !important; }
+  .light-mode-color-5 { background-color: #22c55e !important; }
+  
+  .dark .dark-mode-color-0 { background-color: #1f2937 !important; }
+  .dark .dark-mode-color-1 { background-color: #064e3b !important; }
+  .dark .dark-mode-color-2 { background-color: #065f46 !important; }
+  .dark .dark-mode-color-3 { background-color: #047857 !important; }
+  .dark .dark-mode-color-4 { background-color: #10b981 !important; }
+  .dark .dark-mode-color-5 { background-color: #34d399 !important; }
+
+  /* Amélioration de la lisibilité du heatmap */
+  .dark .yearly-heatmap-cell {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+/* Améliorations générales pour tous les graphiques en mode sombre sur desktop */
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: rgba(30, 41, 59, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark .recharts-tooltip-wrapper .recharts-tooltip-item-name,
+.dark .recharts-tooltip-wrapper .recharts-tooltip-item-value {
+  color: white !important;
+}
+
+/* Ajustements pour améliorer la lisibilité des graphiques */
+.dark .recharts-text.recharts-legend-item-text {
+  fill: #e5e7eb !important;
+}
+
+/* Amélioration du contraste pour les étiquettes dans les graphiques */
+.dark .recharts-label-list text {
+  fill: white !important;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Correction pour les axes et les graphiques sans contenu */
+.dark .recharts-cartesian-axis-line {
+  stroke: rgba(255, 255, 255, 0.2) !important;
+}
+
+.dark .recharts-cartesian-grid line {
+  stroke: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Améliorations pour les graphiques vides ou en cours de chargement */
+.dark .recharts-wrapper:empty::before {
+  content: "Loading...";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Style spécifique pour les boutons de sélection dans les graphiques */
+.dark .analytics-chart-toggle button {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.dark .analytics-chart-toggle button[data-state="on"] {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+
+/* Correction de l'opacité des séries pour une meilleure visibilité */
+.dark .recharts-curve.recharts-line-curve,
+.dark .recharts-curve.recharts-area-curve {
+  opacity: 0.9 !important;
+}
+
+.dark .recharts-area-dot {
+  fill: white !important;
+  stroke: currentColor !important;
+}
+
+/* Amélioration des tooltips et des infobulles */
+.dark [data-tooltip-content] {
+  color: white;
+  background-color: rgba(30, 41, 59, 0.95);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Augmentation du contraste des éléments d'interface du tableau de bord */
+.dark .analytics-card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Amélioration de la visibilité des graphiques sur les appareils à écran de petite taille */
+@media (max-width: 640px) {
+  .chart-container {
+    margin-left: -16px;
+    margin-right: -16px;
+    width: calc(100% + 32px);
+    padding: 0 16px;
+  }
+
+  .recharts-responsive-container {
+    font-size: 12px !important;
+  }
+  
+  .dark .recharts-text {
+    font-size: 10px !important;
+  }
+}
