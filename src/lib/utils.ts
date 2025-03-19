@@ -103,46 +103,108 @@ export function calculateTimeByCategory(items: LearningItem[]): Record<string, {
   }, {} as Record<string, { hours: number; minutes: number }>);
 }
 
+// Fonction améliorée pour calculer le streak avec une meilleure gestion des erreurs
 export function calculateStreak(items: LearningItem[]): { currentStreak: number; longestStreak: number; lastActiveDate: string | null } {
-  // Sort all sessions by date in descending order
-  const sessions = items
-    .flatMap(item => item.progress?.sessions || [])
-    .sort((a, b) => new Date(b.date || b.startTime || '').getTime() - new Date(a.date || a.startTime || '').getTime());
+  try {
+    // Sort all sessions by date in descending order
+    const sessions = items
+      .flatMap(item => item.progress?.sessions || [])
+      .filter(session => Boolean(session.date || session.startTime)) // Assurez-vous que la date existe
+      .sort((a, b) => {
+        const dateA = new Date(a.date || a.startTime || '').getTime();
+        const dateB = new Date(b.date || b.startTime || '').getTime();
+        return dateB - dateA;
+      });
 
-  if (sessions.length === 0) {
-    return { currentStreak: 0, longestStreak: 0, lastActiveDate: null };
-  }
+    if (sessions.length === 0) {
+      return { currentStreak: 0, longestStreak: 0, lastActiveDate: null };
+    }
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  let currentStreak = 0;
-  let longestStreak = 0;
-  let currentDate = today;
-  let streakBroken = false;
-  let lastActiveDate = sessions[0].date;
-
-  // Check if there's activity today
-  const todayStr = today.toISOString().split('T')[0];
-  const hasActivityToday = sessions.some(s => s.date.split('T')[0] === todayStr);
-  
-  if (!hasActivityToday) {
-    // If no activity today, start checking from yesterday
-    currentDate.setDate(currentDate.getDate() - 1);
-  }
-
-  while (!streakBroken) {
-    const dateStr = currentDate.toISOString().split('T')[0];
-    const hasSession = sessions.some(s => s.date.split('T')[0] === dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     
-    if (!hasSession) {
-      streakBroken = true;
-    } else {
-      currentStreak++;
-      longestStreak = Math.max(longestStreak, currentStreak);
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let currentDate = today;
+    let streakBroken = false;
+    let lastActiveDate = sessions[0].date || sessions[0].startTime || null;
+
+    // Check if there's activity today
+    const todayStr = today.toISOString().split('T')[0];
+    const hasActivityToday = sessions.some(s => {
+      const sessionDate = s.date || s.startTime || '';
+      return sessionDate.startsWith(todayStr);
+    });
+    
+    if (!hasActivityToday) {
+      // If no activity today, start checking from yesterday
       currentDate.setDate(currentDate.getDate() - 1);
     }
-  }
 
-  return { currentStreak, longestStreak, lastActiveDate };
+    while (!streakBroken) {
+      const dateStr = currentDate.toISOString().split('T')[0];
+      const hasSession = sessions.some(s => {
+        const sessionDate = s.date || s.startTime || '';
+        return sessionDate.startsWith(dateStr);
+      });
+      
+      if (!hasSession) {
+        streakBroken = true;
+      } else {
+        currentStreak++;
+        longestStreak = Math.max(longestStreak, currentStreak);
+        currentDate.setDate(currentDate.getDate() - 1);
+      }
+    }
+
+    return { currentStreak, longestStreak, lastActiveDate };
+  } catch (error) {
+    console.error("Error calculating streak:", error);
+    return { currentStreak: 0, longestStreak: 0, lastActiveDate: null };
+  }
+}
+
+// Fonction sûre pour calculer le pourcentage avec protection contre division par zéro
+export function safePercentage(value: number, total: number, defaultValue = 0): number {
+  if (total === 0 || isNaN(value) || isNaN(total)) {
+    return defaultValue;
+  }
+  return Math.min(100, Math.round((value / total) * 100));
+}
+
+// Fonction utilitaire pour extraire la date à partir de différents formats
+export function extractDateString(dateValue: string | undefined): string | null {
+  if (!dateValue) return null;
+  
+  try {
+    if (dateValue.includes('T')) {
+      return dateValue.split('T')[0];
+    }
+    
+    const date = new Date(dateValue);
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+    
+    return date.toISOString().split('T')[0];
+  } catch (error) {
+    console.error("Error extracting date:", error);
+    return null;
+  }
+}
+
+// Fonction pour vérifier si deux dates sont le même jour
+export function isSameDay(date1: Date | string, date2: Date | string): boolean {
+  try {
+    const d1 = typeof date1 === 'string' ? new Date(date1) : date1;
+    const d2 = typeof date2 === 'string' ? new Date(date2) : date2;
+    
+    return (
+      d1.getFullYear() === d2.getFullYear() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getDate() === d2.getDate()
+    );
+  } catch (error) {
+    return false;
+  }
 }
