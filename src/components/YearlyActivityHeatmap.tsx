@@ -194,17 +194,17 @@ export function YearlyActivityHeatmap({
         <div className="overflow-x-auto pb-2">
           <div className="min-w-max">
             {/* Zone d'en-tête pour les mois */}
-            <div className="flex mb-2">
+            <div className="flex mb-3">
               {/* En-tête fixe des jours */}
-              <div className="sticky left-0 bg-white dark:bg-gray-800/30 w-8 z-10" />
+              <div className="sticky left-0 bg-white dark:bg-gray-800/30 w-10 z-10" />
               
               {/* En-tête des mois qui défile avec le calendrier */}
               <div className="flex-1">
-                <div className="grid grid-cols-[repeat(53,minmax(14px,1fr))] gap-[3px]">
+                <div className="grid grid-cols-[repeat(53,minmax(16px,1fr))] gap-[3px]">
                   {monthLabels.map((label, i) => (
                     <div
                       key={i}
-                      className="text-gray-800 dark:text-gray-200 text-center font-medium text-xs whitespace-nowrap"
+                      className="text-gray-800 dark:text-gray-200 text-center font-semibold text-sm whitespace-nowrap"
                       style={{ 
                         gridColumnStart: label.index + 1,
                         gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
@@ -224,10 +224,11 @@ export function YearlyActivityHeatmap({
                 {DAYS.map((day) => (
                   <div 
                     key={day} 
-                    className="text-gray-800 dark:text-gray-200 flex items-center w-8 font-medium text-xs px-1"
+                    className="text-gray-800 dark:text-gray-200 flex items-center justify-center w-10 font-semibold text-sm"
                     style={{ 
                       height: 'min(2vw, 16px)',
-                      minHeight: '14px'
+                      minHeight: '16px',
+                      paddingBottom: '1px' // Ajustement pour aligner verticalement avec les cellules
                     }}
                   >
                     {day[0]}
@@ -237,7 +238,7 @@ export function YearlyActivityHeatmap({
 
               {/* Grille du calendrier */}
               <div className="flex-1">
-                <div className="grid grid-cols-[repeat(53,minmax(14px,1fr))] gap-[3px]">
+                <div className="grid grid-cols-[repeat(53,minmax(16px,1fr))] gap-[3px]">
                   {weeks.map((week, weekIndex) => (
                     <div key={weekIndex} className="flex flex-col gap-[3px]">
                       {week.map((day, dayIndex) => (
@@ -253,8 +254,8 @@ export function YearlyActivityHeatmap({
                                 )}
                                 style={{ 
                                   height: 'min(2vw, 16px)',
-                                  minHeight: '14px',
-                                  minWidth: '14px'
+                                  minHeight: '16px',
+                                  minWidth: '16px'
                                 }}
                               />
                             </TooltipTrigger>
@@ -283,13 +284,13 @@ export function YearlyActivityHeatmap({
         </div>
 
         {/* Légende - position fixe */}
-        <div className="flex items-center gap-2 mt-4 justify-end">
-          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Less</span>
-          <div className="w-3 h-3 rounded-sm bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600" />
-          <div className="w-3 h-3 rounded-sm bg-emerald-400 dark:bg-emerald-400 border-2 border-emerald-500 dark:border-emerald-500" />
-          <div className="w-3 h-3 rounded-sm bg-emerald-500 dark:bg-emerald-500 border-2 border-emerald-600 dark:border-emerald-600" />
-          <div className="w-3 h-3 rounded-sm bg-emerald-600 dark:bg-emerald-600 border-2 border-emerald-700 dark:border-emerald-700" />
-          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">More</span>
+        <div className="flex items-center gap-2 mt-5 justify-end">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Less</span>
+          <div className="w-4 h-4 rounded-sm bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600" />
+          <div className="w-4 h-4 rounded-sm bg-emerald-400 dark:bg-emerald-400 border-2 border-emerald-500 dark:border-emerald-500" />
+          <div className="w-4 h-4 rounded-sm bg-emerald-500 dark:bg-emerald-500 border-2 border-emerald-600 dark:border-emerald-600" />
+          <div className="w-4 h-4 rounded-sm bg-emerald-600 dark:bg-emerald-600 border-2 border-emerald-700 dark:border-emerald-700" />
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">More</span>
         </div>
       </div>
     </div>
