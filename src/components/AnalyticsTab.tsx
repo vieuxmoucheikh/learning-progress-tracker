@@ -719,14 +719,16 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
           
           {/* Yearly Activity Heatmap */}
           <ErrorBoundary fallback={<p className="text-red-500">Erreur lors du chargement de l'activité annuelle</p>}>
-            <Card className="p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-2 mb-6">
+            <Card className="p-4 md:p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-2 mb-4 md:mb-6">
                 <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
                   <Calendar className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                 </div>
                 <h2 className="text-lg font-semibold">Learning Insights</h2>
               </div>
-              <YearlyActivityStats />
+              <div className="bg-white rounded-md shadow-sm p-3 overflow-auto">
+                <YearlyActivityStats />
+              </div>
             </Card>
           </ErrorBoundary>
         </div>

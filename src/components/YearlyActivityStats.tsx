@@ -167,6 +167,47 @@ export const YearlyActivityStats: React.FC = () => {
     return data;
   }, [activityData]);
 
+  // Définition des niveaux d'activité pour les labels
+  const activityLabels = [
+    "Aucune activité",
+    "Faible activité",
+    "Activité moyenne", 
+    "Activité élevée",
+    "Activité très élevée"
+  ];
+
+  // Modifier les couleurs pour une meilleure visibilité en mode clair
+  const colorLevels = [
+    "bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700", // niveau 0 (aucune activité)
+    "bg-green-100 dark:bg-green-900 border border-green-200 dark:border-green-800", // niveau 1 (faible activité)
+    "bg-green-300 dark:bg-green-700 border border-green-400 dark:border-green-600", // niveau 2 (activité moyenne)
+    "bg-green-500 dark:bg-green-500 border border-green-600 dark:border-green-400", // niveau 3 (activité élevée)
+    "bg-green-700 dark:bg-green-300 border border-green-800 dark:border-green-200", // niveau 4 (activité très élevée)
+  ];
+
+  // Typage correct pour la fonction renderCell
+  const renderCell = (day: number, level: number, date: string) => {
+    return (
+      <div
+        key={date}
+        className={`
+          ${colorLevels[level]} 
+          w-3 h-3 md:w-4 md:h-4 
+          rounded-sm 
+          transition-colors 
+          hover:scale-125
+          relative
+          group
+        `}
+        title={`${date}: ${activityLabels[level]}`}
+      >
+        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+          {date}: {activityLabels[level]}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="w-full space-y-8">
       <div className="flex flex-col gap-4">
