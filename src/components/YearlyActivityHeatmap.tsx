@@ -188,97 +188,102 @@ export function YearlyActivityHeatmap({
         </Button>
       </div>
 
-      {/* Heatmap grid - version améliorée pour le défilement */}
+      {/* Heatmap grid - structure révisée */}
       <div className="w-full p-4">
-        {/* Month labels - fixed position */}
-        <div className="flex mb-2 sticky left-0">
-          <div className="w-8 flex-shrink-0" /> {/* Offset for day labels - augmenté */}
-          <div className="flex-1 min-w-0">
-            <div className="grid grid-cols-[repeat(53,minmax(14px,1fr))] gap-[3px]">
-              {monthLabels.map((label, i) => (
-                <div
-                  key={i}
-                  className="text-gray-800 dark:text-gray-200 text-center font-medium text-xs whitespace-nowrap"
-                  style={{ 
-                    gridColumnStart: label.index + 1,
-                    gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
-                  }}
-                >
-                  {label.text}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Scrollable container for the calendar grid */}
+        {/* Conteneur principal avec défilement horizontal */}
         <div className="overflow-x-auto pb-2">
-          {/* Main grid */}
-          <div className="flex min-w-max">
-            {/* Day labels - fixed */}
-            <div className="flex flex-col gap-[3px] pr-2 sticky left-0 bg-white dark:bg-gray-800/30 z-10">
-              {DAYS.map((day) => (
-                <div 
-                  key={day} 
-                  className="text-gray-800 dark:text-gray-200 flex items-center w-8 font-medium text-xs px-1"
-                  style={{ 
-                    height: 'min(2vw, 16px)',
-                    minHeight: '14px'
-                  }}
-                >
-                  {day[0]}
+          <div className="min-w-max">
+            {/* Zone d'en-tête pour les mois */}
+            <div className="flex mb-2">
+              {/* En-tête fixe des jours */}
+              <div className="sticky left-0 bg-white dark:bg-gray-800/30 w-8 z-10" />
+              
+              {/* En-tête des mois qui défile avec le calendrier */}
+              <div className="flex-1">
+                <div className="grid grid-cols-[repeat(53,minmax(14px,1fr))] gap-[3px]">
+                  {monthLabels.map((label, i) => (
+                    <div
+                      key={i}
+                      className="text-gray-800 dark:text-gray-200 text-center font-medium text-xs whitespace-nowrap"
+                      style={{ 
+                        gridColumnStart: label.index + 1,
+                        gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
+                      }}
+                    >
+                      {label.text}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
 
-            {/* Calendar grid */}
-            <div className="flex-1">
-              <div className="grid grid-cols-[repeat(53,minmax(14px,1fr))] gap-[3px]">
-                {weeks.map((week, weekIndex) => (
-                  <div key={weekIndex} className="flex flex-col gap-[3px]">
-                    {week.map((day, dayIndex) => (
-                      <TooltipProvider key={day.date}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div
-                              className={cn(
-                                'rounded-sm transition-colors duration-200 cursor-pointer',
-                                day.isCurrentYear
-                                  ? getColorForCount(day.count)
-                                  : 'bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 opacity-50'
-                              )}
-                              style={{ 
-                                height: 'min(2vw, 16px)',
-                                minHeight: '14px',
-                                minWidth: '14px'
-                              }}
-                            />
-                          </TooltipTrigger>
-                          <TooltipContent 
-                            side="top"
-                            className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200 dark:border-white/10"
-                          >
-                            <div className="text-xs">
-                              <div className="font-medium text-gray-900 dark:text-white">
-                                {format(parseISO(day.date), 'MMM d, yyyy')}
-                              </div>
-                              <div className="text-gray-700 dark:text-gray-300">
-                                {day.count} {day.count === 1 ? 'activity' : 'activities'}
-                              </div>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ))}
+            {/* Grille principale */}
+            <div className="flex">
+              {/* Étiquettes des jours - fixes */}
+              <div className="flex flex-col gap-[3px] pr-2 sticky left-0 bg-white dark:bg-gray-800/30 z-10">
+                {DAYS.map((day) => (
+                  <div 
+                    key={day} 
+                    className="text-gray-800 dark:text-gray-200 flex items-center w-8 font-medium text-xs px-1"
+                    style={{ 
+                      height: 'min(2vw, 16px)',
+                      minHeight: '14px'
+                    }}
+                  >
+                    {day[0]}
                   </div>
                 ))}
+              </div>
+
+              {/* Grille du calendrier */}
+              <div className="flex-1">
+                <div className="grid grid-cols-[repeat(53,minmax(14px,1fr))] gap-[3px]">
+                  {weeks.map((week, weekIndex) => (
+                    <div key={weekIndex} className="flex flex-col gap-[3px]">
+                      {week.map((day, dayIndex) => (
+                        <TooltipProvider key={day.date}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div
+                                className={cn(
+                                  'rounded-sm transition-colors duration-200 cursor-pointer',
+                                  day.isCurrentYear
+                                    ? getColorForCount(day.count)
+                                    : 'bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 opacity-50'
+                                )}
+                                style={{ 
+                                  height: 'min(2vw, 16px)',
+                                  minHeight: '14px',
+                                  minWidth: '14px'
+                                }}
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent 
+                              side="top"
+                              className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200 dark:border-white/10"
+                            >
+                              <div className="text-xs">
+                                <div className="font-medium text-gray-900 dark:text-white">
+                                  {format(parseISO(day.date), 'MMM d, yyyy')}
+                                </div>
+                                <div className="text-gray-700 dark:text-gray-300">
+                                  {day.count} {day.count === 1 ? 'activity' : 'activities'}
+                                </div>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Legend - fixed position */}
-        <div className="flex items-center gap-2 mt-4 justify-end sticky left-0">
+        {/* Légende - position fixe */}
+        <div className="flex items-center gap-2 mt-4 justify-end">
           <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Less</span>
           <div className="w-3 h-3 rounded-sm bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600" />
           <div className="w-3 h-3 rounded-sm bg-emerald-400 dark:bg-emerald-400 border-2 border-emerald-500 dark:border-emerald-500" />
