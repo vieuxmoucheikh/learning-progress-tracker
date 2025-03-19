@@ -43,6 +43,19 @@ const COLORS = [
   "#F97316", // orange-500
 ];
 
+// Version pour mode sombre - plus vives pour une meilleure visibilité
+const DARK_MODE_COLORS = [
+  "#60A5FA", // blue-400
+  "#34D399", // emerald-400
+  "#FBBF24", // amber-400
+  "#F87171", // red-400
+  "#A78BFA", // violet-400
+  "#F472B6", // pink-400
+  "#2DD4BF", // teal-400
+  "#818CF8", // indigo-400
+  "#FB923C", // orange-400
+];
+
 const DIFFICULTY_COLORS = {
   easy: "#10B981",
   medium: "#F59E0B",
@@ -177,6 +190,13 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
     };
   }, [items]);
 
+  // Détecter le mode sombre pour utiliser la palette de couleurs appropriée
+  const isDarkMode = typeof window !== 'undefined' 
+    ? document.documentElement.classList.contains('dark') 
+    : false;
+    
+  const currentColorScheme = isDarkMode ? DARK_MODE_COLORS : COLORS;
+
   return (
     <div className="space-y-8">
       {/* En-tête de la page */}
@@ -310,7 +330,7 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
                     label={({ name, percentage }) => `${name}: ${percentage}%`}
                   >
                     {analytics.categoryData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={currentColorScheme[index % currentColorScheme.length]} />
                     ))}
                   </Pie>
                   <Tooltip 
@@ -330,7 +350,7 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
                   <div key={category.name} className="flex items-center gap-3">
                     <div 
                       className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      style={{ backgroundColor: currentColorScheme[index % currentColorScheme.length] }}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center text-sm">
@@ -344,7 +364,7 @@ export function AnalyticsTab({ items }: AnalyticsTabProps) {
                           className="h-1.5 rounded-full transition-all duration-500"
                           style={{
                             width: `${category.percentage}%`,
-                            backgroundColor: COLORS[index % COLORS.length]
+                            backgroundColor: currentColorScheme[index % currentColorScheme.length]
                           }}
                         />
                       </div>
