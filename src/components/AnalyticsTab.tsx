@@ -726,7 +726,7 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
                 </div>
                 <h2 className="text-lg font-semibold">Learning Insights</h2>
               </div>
-              <div className="bg-white dark:bg-gray-800/30 rounded-md shadow-sm overflow-x-auto">
+              <div className="bg-white dark:bg-gray-800/30 rounded-md shadow-sm">
                 <YearlyActivityStats />
               </div>
             </Card>

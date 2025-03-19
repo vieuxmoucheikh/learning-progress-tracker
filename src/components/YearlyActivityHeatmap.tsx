@@ -166,7 +166,7 @@ export function YearlyActivityHeatmap({
   };
 
   return (
-    <div className="w-full bg-white dark:bg-gray-800/30 backdrop-blur-sm rounded-lg shadow-md border border-gray-100 dark:border-white/10">
+    <div className="w-full bg-white dark:bg-gray-800/30 backdrop-blur-sm rounded-lg shadow-md border border-gray-200 dark:border-white/10">
       {/* Year navigation */}
       <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-white/10">
         <Button
@@ -188,41 +188,42 @@ export function YearlyActivityHeatmap({
         </Button>
       </div>
 
-      {/* Heatmap grid */}
+      {/* Heatmap grid - version améliorée pour le défilement */}
       <div className="w-full p-4">
-        <div className="w-full">
-          {/* Month labels */}
-          <div className="flex mb-2">
-            <div className="w-6" /> {/* Offset for day labels - augmenté */}
-            <div className="flex-1">
-              <div className="grid grid-cols-[repeat(53,1fr)] gap-[3px]"> {/* Gap augmenté */}
-                {monthLabels.map((label, i) => (
-                  <div
-                    key={i}
-                    className="text-gray-800 dark:text-gray-200 text-center font-medium text-xs"
-                    style={{ 
-                      gridColumnStart: label.index + 1,
-                      gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
-                    }}
-                  >
-                    {label.text}
-                  </div>
-                ))}
-              </div>
+        {/* Month labels - fixed position */}
+        <div className="flex mb-2 sticky left-0">
+          <div className="w-8 flex-shrink-0" /> {/* Offset for day labels - augmenté */}
+          <div className="flex-1 min-w-0">
+            <div className="grid grid-cols-[repeat(53,minmax(14px,1fr))] gap-[3px]">
+              {monthLabels.map((label, i) => (
+                <div
+                  key={i}
+                  className="text-gray-800 dark:text-gray-200 text-center font-medium text-xs whitespace-nowrap"
+                  style={{ 
+                    gridColumnStart: label.index + 1,
+                    gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
+                  }}
+                >
+                  {label.text}
+                </div>
+              ))}
             </div>
           </div>
+        </div>
 
+        {/* Scrollable container for the calendar grid */}
+        <div className="overflow-x-auto pb-2">
           {/* Main grid */}
-          <div className="flex w-full">
-            {/* Day labels */}
-            <div className="flex flex-col gap-[3px] pr-2"> {/* Gap augmenté */}
+          <div className="flex min-w-max">
+            {/* Day labels - fixed */}
+            <div className="flex flex-col gap-[3px] pr-2 sticky left-0 bg-white dark:bg-gray-800/30 z-10">
               {DAYS.map((day) => (
                 <div 
                   key={day} 
-                  className="text-gray-800 dark:text-gray-200 flex items-center w-6 font-medium text-xs" /* Largeur augmentée */
+                  className="text-gray-800 dark:text-gray-200 flex items-center w-8 font-medium text-xs px-1"
                   style={{ 
-                    height: 'min(2vw, 16px)', /* Taille augmentée */
-                    minHeight: '12px'
+                    height: 'min(2vw, 16px)',
+                    minHeight: '14px'
                   }}
                 >
                   {day[0]}
@@ -232,23 +233,24 @@ export function YearlyActivityHeatmap({
 
             {/* Calendar grid */}
             <div className="flex-1">
-              <div className="grid grid-cols-[repeat(53,1fr)] gap-[3px]"> {/* Gap augmenté */}
+              <div className="grid grid-cols-[repeat(53,minmax(14px,1fr))] gap-[3px]">
                 {weeks.map((week, weekIndex) => (
-                  <div key={weekIndex} className="flex flex-col gap-[3px]"> {/* Gap augmenté */}
+                  <div key={weekIndex} className="flex flex-col gap-[3px]">
                     {week.map((day, dayIndex) => (
                       <TooltipProvider key={day.date}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div
                               className={cn(
-                                'rounded-sm transition-colors duration-200 cursor-pointer', /* Arrondi augmenté */
+                                'rounded-sm transition-colors duration-200 cursor-pointer',
                                 day.isCurrentYear
                                   ? getColorForCount(day.count)
                                   : 'bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 opacity-50'
                               )}
                               style={{ 
-                                height: 'min(2vw, 16px)', /* Taille augmentée */
-                                minHeight: '12px'
+                                height: 'min(2vw, 16px)',
+                                minHeight: '14px',
+                                minWidth: '14px'
                               }}
                             />
                           </TooltipTrigger>
@@ -273,16 +275,16 @@ export function YearlyActivityHeatmap({
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Legend */}
-          <div className="flex items-center gap-2 mt-4 justify-end">
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Less</span>
-            <div className="w-3 h-3 rounded-sm bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600" />
-            <div className="w-3 h-3 rounded-sm bg-emerald-400 dark:bg-emerald-400 border-2 border-emerald-500 dark:border-emerald-500" />
-            <div className="w-3 h-3 rounded-sm bg-emerald-500 dark:bg-emerald-500 border-2 border-emerald-600 dark:border-emerald-600" />
-            <div className="w-3 h-3 rounded-sm bg-emerald-600 dark:bg-emerald-600 border-2 border-emerald-700 dark:border-emerald-700" />
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">More</span>
-          </div>
+        {/* Legend - fixed position */}
+        <div className="flex items-center gap-2 mt-4 justify-end sticky left-0">
+          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Less</span>
+          <div className="w-3 h-3 rounded-sm bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600" />
+          <div className="w-3 h-3 rounded-sm bg-emerald-400 dark:bg-emerald-400 border-2 border-emerald-500 dark:border-emerald-500" />
+          <div className="w-3 h-3 rounded-sm bg-emerald-500 dark:bg-emerald-500 border-2 border-emerald-600 dark:border-emerald-600" />
+          <div className="w-3 h-3 rounded-sm bg-emerald-600 dark:bg-emerald-600 border-2 border-emerald-700 dark:border-emerald-700" />
+          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">More</span>
         </div>
       </div>
     </div>
