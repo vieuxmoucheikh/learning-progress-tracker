@@ -25,8 +25,9 @@ import { Brain, Target, TrendingUp, CheckCircle, BookOpen, PieChart as PieChartI
 import LearningGoals from './LearningGoals';
 import { YearlyActivityStats } from './YearlyActivityStats';
 import { cn } from "@/lib/utils";
-import '../styles/analytics-charts.css'; // Importation des styles spécifiques aux graphiques
-import '../styles/mobile-analytics-fixes.css'; // Importation des corrections pour mobile
+// Import des fichiers CSS dans l'ordre correct pour éviter les erreurs
+import '../styles/analytics-charts.css';
+import '../styles/mobile-analytics-fixes.css';
 
 interface AnalyticsTabProps {
   items: LearningItem[];
