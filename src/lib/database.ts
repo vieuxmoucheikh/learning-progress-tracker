@@ -952,6 +952,7 @@ export async function addSession(goalId: string, sessionData: { date: string; du
       goal_id: session.goal_id,
       user_id: session.user_id,
       date: dateStr,
+      startTime: session.date, // Ajout de la propriété startTime requise
       duration: {
         hours: session.duration.hours,
         minutes: session.duration.minutes
@@ -1002,6 +1003,7 @@ export async function getSessions(goalId: string): Promise<Session[]> {
         goal_id: session.goal_id,
         user_id: session.user_id,
         date: dateStr,
+        startTime: session.date, // Ajout de la propriété startTime requise
         duration: {
           hours: session.duration?.hours || 0,
           minutes: session.duration?.minutes || 0

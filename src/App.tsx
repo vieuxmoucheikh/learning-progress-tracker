@@ -157,10 +157,13 @@ function reducer(state: State, action: Action): State {
     case 'START_TRACKING':
       const targetItem = state.items.find(item => item.id === action.payload);
       if (!targetItem?.progress) return state;
+      
+      // Extraire progress dans une constante pour que TypeScript sache qu'il est défini
+      const targetProgress = targetItem.progress;
 
       // Check for existing active or paused sessions
-      const hasActiveSession = targetItem.progress.sessions?.some(s => !s.endTime && s.status === 'in_progress');
-      const hasPausedSession = targetItem.progress.sessions?.some(s => !s.endTime && s.status === 'on_hold');
+      const hasActiveSession = targetProgress.sessions?.some(s => !s.endTime && s.status === 'in_progress');
+      const hasPausedSession = targetProgress.sessions?.some(s => !s.endTime && s.status === 'on_hold');
 
       // Don't create a new session if there's already an active one or if we're resuming a paused one
       if (hasActiveSession || hasPausedSession) {
@@ -187,8 +190,8 @@ function reducer(state: State, action: Action): State {
                 ...item,
                 lastTimestamp: Date.now(),
                 progress: {
-                  ...item.progress,
-                  sessions: [...(item.progress.sessions || []), newSession]
+                  ...targetProgress,
+                  sessions: [...(targetProgress.sessions || []), newSession]
                 }
               }
             : item
@@ -199,9 +202,15 @@ function reducer(state: State, action: Action): State {
     case 'STOP_TRACKING':
       const stoppingItem = state.items.find(item => item.id === action.payload);
       if (!stoppingItem?.progress) return state;
+      
+      // Extraire progress dans une constante pour que TypeScript sache qu'il est défini
+      const stoppingProgress = stoppingItem.progress;
+      
+      // S'assurer que sessions existe
+      const currentSessions = stoppingProgress.sessions || [];
 
       // End all active sessions
-      const updatedSessions = stoppingItem.progress.sessions.map(session => {
+      const updatedSessions = currentSessions.map(session => {
         if (!session.endTime) {
           const startTime = new Date(session.startTime);
           const now = new Date();
@@ -233,7 +242,7 @@ function reducer(state: State, action: Action): State {
                 ...item,
                 lastTimestamp: null,
                 progress: {
-                  ...item.progress,
+                  ...stoppingProgress,
                   sessions: updatedSessions
                 }
               }
@@ -541,7 +550,7 @@ export default function App() {
         const searchLower = searchQuery.toLowerCase();
         const matchesSearch =
           item.title.toLowerCase().includes(searchLower) ||
-          item.category.toLowerCase().includes(searchLower) ||
+          (item.category ?? '').toLowerCase().includes(searchLower) ||
           (item.notes?.toLowerCase() || '').includes(searchLower);
 
         // If a date is selected, only show items from that date
@@ -612,7 +621,7 @@ export default function App() {
         updates.status = 'completed' as const;
         
         // Track learning activity when completing an item
-        const normalizedCategory = (item.category || 'Uncategorized').toUpperCase();
+        const normalizedCategory = (item.category ?? 'Uncategorized').toUpperCase();
         console.log('Tracking activity for category:', { category: normalizedCategory });
         await trackLearningActivity(normalizedCategory);
       }
@@ -653,12 +662,18 @@ export default function App() {
       dispatch({ type: 'START_TRACKING', payload: id });
 
       const currentTime = new Date();
+      // Créer un objet progress par défaut si non défini
+      const currentProgress = item.progress || { 
+        current: { hours: 0, minutes: 0 }, 
+        sessions: [] 
+      };
+      
       const updates: Partial<LearningItem> = {
         progress: {
-          ...item.progress,
-          lastAccessed: currentTime.toISOString(),
+          current: currentProgress.current || { hours: 0, minutes: 0 },
+          total: currentProgress.total,
           sessions: [
-            ...item.progress.sessions,
+            ...(currentProgress.sessions || []),
             {
               startTime: currentTime.toISOString(),
               date: currentTime.toISOString().split('T')[0]
@@ -685,7 +700,19 @@ export default function App() {
       dispatch({ type: 'STOP_TRACKING', payload: id });
 
       const currentTime = new Date();
-      const lastSession = item.progress.sessions[item.progress.sessions.length - 1];
+      
+      // Créer un objet progress par défaut si non défini
+      const currentProgress = item.progress || { 
+        current: { hours: 0, minutes: 0 }, 
+        sessions: [],
+        total: { hours: 0, minutes: 0 }
+      };
+      
+      // S'assurer que sessions est défini et obtenir le dernier élément s'il existe
+      const sessions = currentProgress.sessions || [];
+      if (sessions.length === 0) return; // Rien à faire s'il n'y a pas de sessions
+      
+      const lastSession = sessions[sessions.length - 1];
 
       if (!lastSession || !lastSession.startTime) return;
 
@@ -693,22 +720,20 @@ export default function App() {
       const elapsedMinutes = Math.round((currentTime.getTime() - startTime.getTime()) / 60000);
 
       // Convert all times to minutes for accurate calculations
-      const currentMinutes = (item.progress.current.hours * 60) + item.progress.current.minutes;
-      const totalMinutes = item.progress.total ? (item.progress.total.hours * 60) + item.progress.total.minutes : 0;
+      const currentMinutes = (currentProgress.current?.hours || 0) * 60 + (currentProgress.current?.minutes || 0);
+      const totalMinutes = currentProgress.total ? (currentProgress.total.hours * 60) + currentProgress.total.minutes : 0;
       const newCurrentValue = currentMinutes + elapsedMinutes;
       const completed = totalMinutes > 0 && newCurrentValue >= totalMinutes;
 
       const updates: Partial<LearningItem> = {
         progress: {
-          ...item.progress,
           current: {
             hours: Math.floor(newCurrentValue / 60),
             minutes: newCurrentValue % 60
           },
-          total: item.progress.total || { hours: 0, minutes: 0 },
-          lastAccessed: currentTime.toISOString(),
+          total: currentProgress.total || { hours: 0, minutes: 0 },
           sessions: [
-            ...item.progress.sessions.slice(0, -1),
+            ...sessions.slice(0, -1),
             {
               ...lastSession,
               endTime: currentTime.toISOString(),
@@ -724,7 +749,6 @@ export default function App() {
       // Only update completion status if it's newly completed
       if (completed && !item.completed) {
         updates.completed = true;
-        // Suppression de la propriété 'completed_at' qui n'existe pas dans le type Partial<LearningItem>
         updates.status = 'completed' as const;
       }
 
