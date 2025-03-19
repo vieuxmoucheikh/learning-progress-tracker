@@ -1,0 +1,164 @@
+/* Styles spécifiques pour les graphiques et visualisations analytiques */
+
+/* Correction des couleurs pour les graphiques en mode sombre sur mobile */
+@media (max-width: 768px) {
+  .dark .recharts-wrapper .recharts-surface {
+    filter: brightness(1.2) contrast(1.1);
+  }
+  
+  .dark .recharts-pie path {
+    stroke-width: 1.5px !important;
+    stroke: #374151 !important;
+  }
+  
+  .dark .recharts-radar-polygon {
+    stroke-width: 2px !important;
+    fill-opacity: 0.7 !important;
+  }
+  
+  .dark .recharts-radar-circle {
+    fill: #3b82f6 !important;
+  }
+  
+  .dark .recharts-line .recharts-curve {
+    stroke-width: 3px !important;
+  }
+  
+  .dark .recharts-cartesian-axis-line,
+  .dark .recharts-polar-angle-axis-line,
+  .dark .recharts-polar-radius-axis-line {
+    stroke: #4b5563 !important;
+    stroke-width: 1px !important;
+  }
+  
+  .dark .recharts-legend-item-text {
+    color: #e5e7eb !important;
+  }
+  
+  .dark .recharts-tooltip-wrapper {
+    opacity: 0.98 !important;
+    filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.3)) !important;
+  }
+  
+  /* Amélioration de la lisibilité des labels */
+  .dark .recharts-cartesian-axis-tick-value,
+  .dark .recharts-polar-angle-axis-tick-value,
+  .dark .recharts-radial-bar-label,
+  .dark .recharts-label,
+  .dark .recharts-text {
+    fill: #e5e7eb !important;
+    font-weight: 500 !important;
+  }
+}
+
+/* Améliorations générales des graphs qui s'appliquent sur tous les écrans */
+.recharts-wrapper {
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+/* Animation des graphiques */
+.recharts-bar-rectangle,
+.recharts-pie-sector,
+.recharts-radar-polygon,
+.recharts-dot {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.recharts-bar-rectangle:hover,
+.recharts-pie-sector:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+/* Amélioration des tooltips */
+.analytics-tooltip {
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(229, 231, 235, 1);
+}
+
+html[data-theme="dark"] .analytics-tooltip {
+  background-color: rgba(31, 41, 55, 0.95);
+  border-color: rgba(55, 65, 81, 1);
+}
+
+/* Amélioration de la légende des graphiques */
+.recharts-default-legend {
+  padding: 0.5rem !important;
+  margin-top: 0.5rem !important;
+}
+
+.recharts-legend-item {
+  margin-right: 1rem !important;
+}
+
+.recharts-legend-item-text {
+  font-weight: 500 !important;
+}
+
+/* Graphiques spécifiques */
+.yearly-activity-card {
+  overflow-x: auto !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.yearly-activity-card::-webkit-scrollbar {
+  height: 6px;
+}
+
+.yearly-activity-card::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.yearly-activity-card::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 20px;
+}
+
+.dark .yearly-activity-card::-webkit-scrollbar-thumb {
+  background-color: rgba(75, 85, 99, 0.5);
+}
+
+/* Animation de chargement stylisée */
+.analytics-loading {
+  position: relative;
+  width: 50px;
+  height: 50px;
+}
+
+.analytics-loading:before,
+.analytics-loading:after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+.analytics-loading:before {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(59, 130, 246, 0.2);
+  animation-delay: 0.2s;
+}
+
+.analytics-loading:after {
+  width: 75%;
+  height: 75%;
+  background-color: rgba(59, 130, 246, 0.4);
+  top: 12.5%;
+  left: 12.5%;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}

@@ -38,6 +38,7 @@ import './components/Calendar.css';
 import './components/StatusBadge.css';
 import './components/PomodoroTimer.css';
 import './styles/theme-transition.css'; // Importation des styles de transition
+import './styles/analytics-charts.css'; // Importation du nouveau CSS
 
 interface State {
   items: LearningItem[];
@@ -1043,56 +1044,59 @@ export default function App() {
             </header>
 
             <main className="flex-1 overflow-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 md:p-6">
-              {selectedTab === TAB_OPTIONS.DASHBOARD && (
-                <DashboardTab 
-                  items={state.items}
-                  onUpdate={handleDashboardUpdate}
-                  onDelete={handleDeleteItem}
-                  onStartTracking={handleStartTracking}
-                  onStopTracking={handleStopTracking}
-                  onNotesUpdate={handleUpdateNotes}
-                  onSessionNoteAdd={handleAddSessionNote}
-                  onSetActiveItem={handleSetActiveItem}
-                  onAddItem={handleDashboardAddItem}
-                  onDateSelect={handleDateSelect}
-                />
-              )}
+              {/* Ajouter le wrapper spécial pour l'onglet Analytics sur mobile */}
+              <div className={`${selectedTab === TAB_OPTIONS.ANALYTICS ? 'analytics-tab-container' : ''}`}>
+                {selectedTab === TAB_OPTIONS.DASHBOARD && (
+                  <DashboardTab 
+                    items={state.items}
+                    onUpdate={handleDashboardUpdate}
+                    onDelete={handleDeleteItem}
+                    onStartTracking={handleStartTracking}
+                    onStopTracking={handleStopTracking}
+                    onNotesUpdate={handleUpdateNotes}
+                    onSessionNoteAdd={handleAddSessionNote}
+                    onSetActiveItem={handleSetActiveItem}
+                    onAddItem={handleDashboardAddItem}
+                    onDateSelect={handleDateSelect}
+                  />
+                )}
 
-              {selectedTab === TAB_OPTIONS.ITEMS && (
-                <ItemsTab 
-                  items={state.items}
-                  onUpdate={handleUpdateItem}
-                  onDelete={handleDeleteItem}
-                  onStartTracking={handleStartTracking}
-                  onStopTracking={handleStopTracking}
-                  onNotesUpdate={handleUpdateNotes}
-                  onSessionNoteAdd={handleAddSessionNote}
-                  onSetActiveItem={handleSetActiveItem}
-                  onAddItem={handleItemsAddItem}
-                />
-              )}
+                {selectedTab === TAB_OPTIONS.ITEMS && (
+                  <ItemsTab 
+                    items={state.items}
+                    onUpdate={handleUpdateItem}
+                    onDelete={handleDeleteItem}
+                    onStartTracking={handleStartTracking}
+                    onStopTracking={handleStopTracking}
+                    onNotesUpdate={handleUpdateNotes}
+                    onSessionNoteAdd={handleAddSessionNote}
+                    onSetActiveItem={handleSetActiveItem}
+                    onAddItem={handleItemsAddItem}
+                  />
+                )}
 
-              {selectedTab === TAB_OPTIONS.ANALYTICS && (
-                <AnalyticsTab items={state.items} />
-              )}
+                {selectedTab === TAB_OPTIONS.ANALYTICS && (
+                  <AnalyticsTab items={state.items} />
+                )}
 
-              {selectedTab === TAB_OPTIONS.POMODORO && (
-                <PomodoroTimer />
-              )}
-              
-              {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
-                <LearningCardsPage />
-              )}
+                {selectedTab === TAB_OPTIONS.POMODORO && (
+                  <PomodoroTimer />
+                )}
+                
+                {selectedTab === TAB_OPTIONS.LEARNING_CARDS && (
+                  <LearningCardsPage />
+                )}
 
-              {selectedTab === TAB_OPTIONS.FLASHCARDS && (
-                <FlashcardsTab 
-                  flashcards={flashcardDecks}
-                  onAddDeck={handleAddFlashcardDeck}
-                  onStudyDeck={handleStudyFlashcardDeck}
-                  onEditDeck={handleEditFlashcardDeck}
-                  onDeleteDeck={handleDeleteFlashcardDeck}
-                />
-              )}
+                {selectedTab === TAB_OPTIONS.FLASHCARDS && (
+                  <FlashcardsTab 
+                    flashcards={flashcardDecks}
+                    onAddDeck={handleAddFlashcardDeck}
+                    onStudyDeck={handleStudyFlashcardDeck}
+                    onEditDeck={handleEditFlashcardDeck}
+                    onDeleteDeck={handleDeleteFlashcardDeck}
+                  />
+                )}
+              </div>
             </main>
           </div>
 
