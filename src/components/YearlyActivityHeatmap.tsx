@@ -157,48 +157,49 @@ export function YearlyActivityHeatmap({
     return labels;
   }, [weeks, selectedYear]);
 
+  // Améliorer la fonction getColorForCount pour des couleurs plus visibles
   const getColorForCount = (count: number) => {
-    if (count === 0) return 'bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600';
-    if (count === 1) return 'bg-green-500 hover:bg-green-600 dark:bg-emerald-400 dark:hover:bg-emerald-300 border border-green-600 dark:border-emerald-500';
-    if (count <= 3) return 'bg-green-600 hover:bg-green-700 dark:bg-emerald-500 dark:hover:bg-emerald-400 border border-green-700 dark:border-emerald-600';
-    return 'bg-green-700 hover:bg-green-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 border border-green-800 dark:border-emerald-700';
+    if (count === 0) return 'bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600';
+    if (count === 1) return 'bg-emerald-400 hover:bg-emerald-500 dark:bg-emerald-400 dark:hover:bg-emerald-300 border-2 border-emerald-500 dark:border-emerald-500';
+    if (count <= 3) return 'bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-400 border-2 border-emerald-600 dark:border-emerald-600';
+    return 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 border-2 border-emerald-700 dark:border-emerald-700';
   };
 
   return (
-    <div className="w-full bg-white/80 dark:bg-white/10 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100 dark:border-white/10">
+    <div className="w-full bg-white dark:bg-gray-800/30 backdrop-blur-sm rounded-lg shadow-md border border-gray-100 dark:border-white/10">
       {/* Year navigation */}
-      <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-white/10">
+      <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-white/10">
         <Button
           variant="outline"
           size="sm"
           onClick={() => setSelectedYear(selectedYear - 1)}
-          className="hover:bg-white/50 dark:hover:bg-white/10 border-gray-100 dark:border-white/10"
+          className="hover:bg-white/50 dark:hover:bg-white/10 border-gray-200 dark:border-white/10"
         >
           <ChevronLeft className="h-4 w-4 text-blue-500" />
         </Button>
-        <div className="text-lg font-semibold text-black dark:text-black">{selectedYear}</div>
+        <div className="text-lg font-semibold text-gray-900 dark:text-white">{selectedYear}</div>
         <Button
           variant="outline"
           size="sm"
           onClick={() => setSelectedYear(selectedYear + 1)}
-          className="hover:bg-white/50 dark:hover:bg-white/10 border-gray-100 dark:border-white/10"
+          className="hover:bg-white/50 dark:hover:bg-white/10 border-gray-200 dark:border-white/10"
         >
           <ChevronRight className="h-4 w-4 text-blue-500" />
         </Button>
       </div>
 
       {/* Heatmap grid */}
-      <div className="w-full p-3">
-        <div className="w-full" style={{ fontSize: 'min(1.5vw, 11px)' }}>
+      <div className="w-full p-4">
+        <div className="w-full">
           {/* Month labels */}
-          <div className="flex mb-1.5">
-            <div className="w-5" /> {/* Offset for day labels */}
+          <div className="flex mb-2">
+            <div className="w-6" /> {/* Offset for day labels - augmenté */}
             <div className="flex-1">
-              <div className="grid grid-cols-[repeat(53,1fr)] gap-[2px]">
+              <div className="grid grid-cols-[repeat(53,1fr)] gap-[3px]"> {/* Gap augmenté */}
                 {monthLabels.map((label, i) => (
                   <div
                     key={i}
-                    className="text-black dark:text-black text-center font-medium"
+                    className="text-gray-800 dark:text-gray-200 text-center font-medium text-xs"
                     style={{ 
                       gridColumnStart: label.index + 1,
                       gridColumnEnd: i < monthLabels.length - 1 ? monthLabels[i + 1].index + 1 : 54
@@ -214,14 +215,14 @@ export function YearlyActivityHeatmap({
           {/* Main grid */}
           <div className="flex w-full">
             {/* Day labels */}
-            <div className="flex flex-col gap-[2px] pr-1.5">
+            <div className="flex flex-col gap-[3px] pr-2"> {/* Gap augmenté */}
               {DAYS.map((day) => (
                 <div 
                   key={day} 
-                  className="text-black dark:text-black flex items-center w-5 font-medium"
+                  className="text-gray-800 dark:text-gray-200 flex items-center w-6 font-medium text-xs" /* Largeur augmentée */
                   style={{ 
-                    height: 'min(1.5vw, 14px)',
-                    maxHeight: '14px'
+                    height: 'min(2vw, 16px)', /* Taille augmentée */
+                    minHeight: '12px'
                   }}
                 >
                   {day[0]}
@@ -231,35 +232,35 @@ export function YearlyActivityHeatmap({
 
             {/* Calendar grid */}
             <div className="flex-1">
-              <div className="grid grid-cols-[repeat(53,1fr)] gap-[2px]">
+              <div className="grid grid-cols-[repeat(53,1fr)] gap-[3px]"> {/* Gap augmenté */}
                 {weeks.map((week, weekIndex) => (
-                  <div key={weekIndex} className="flex flex-col gap-[2px]">
+                  <div key={weekIndex} className="flex flex-col gap-[3px]"> {/* Gap augmenté */}
                     {week.map((day, dayIndex) => (
                       <TooltipProvider key={day.date}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div
                               className={cn(
-                                'rounded-[1px] transition-colors duration-200',
+                                'rounded-sm transition-colors duration-200 cursor-pointer', /* Arrondi augmenté */
                                 day.isCurrentYear
                                   ? getColorForCount(day.count)
-                                  : 'bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 opacity-50'
+                                  : 'bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 opacity-50'
                               )}
                               style={{ 
-                                height: 'min(1.5vw, 14px)',
-                                minHeight: '10px', // Augmenté de 6px à 10px pour une meilleure visibilité sur mobile
+                                height: 'min(2vw, 16px)', /* Taille augmentée */
+                                minHeight: '12px'
                               }}
                             />
                           </TooltipTrigger>
                           <TooltipContent 
                             side="top"
-                            className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-100 dark:border-white/10"
+                            className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200 dark:border-white/10"
                           >
                             <div className="text-xs">
-                              <div className="font-medium text-black dark:text-black">
+                              <div className="font-medium text-gray-900 dark:text-white">
                                 {format(parseISO(day.date), 'MMM d, yyyy')}
                               </div>
-                              <div className="text-black dark:text-black">
+                              <div className="text-gray-700 dark:text-gray-300">
                                 {day.count} {day.count === 1 ? 'activity' : 'activities'}
                               </div>
                             </div>
@@ -274,13 +275,13 @@ export function YearlyActivityHeatmap({
           </div>
 
           {/* Legend */}
-          <div className="flex items-center gap-1.5 mt-3 justify-end text-black dark:text-black">
-            <span className="text-xs font-medium">Less</span>
-            <div className="w-2.5 h-2.5 rounded-[1px] bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600" />
-            <div className="w-2.5 h-2.5 rounded-[1px] bg-green-500 dark:bg-emerald-400 border border-green-600 dark:border-emerald-500" />
-            <div className="w-2.5 h-2.5 rounded-[1px] bg-green-600 dark:bg-emerald-500 border border-green-700 dark:border-emerald-600" />
-            <div className="w-2.5 h-2.5 rounded-[1px] bg-green-700 dark:bg-emerald-600 border border-green-800 dark:border-emerald-700" />
-            <span className="text-xs font-medium">More</span>
+          <div className="flex items-center gap-2 mt-4 justify-end">
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Less</span>
+            <div className="w-3 h-3 rounded-sm bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600" />
+            <div className="w-3 h-3 rounded-sm bg-emerald-400 dark:bg-emerald-400 border-2 border-emerald-500 dark:border-emerald-500" />
+            <div className="w-3 h-3 rounded-sm bg-emerald-500 dark:bg-emerald-500 border-2 border-emerald-600 dark:border-emerald-600" />
+            <div className="w-3 h-3 rounded-sm bg-emerald-600 dark:bg-emerald-600 border-2 border-emerald-700 dark:border-emerald-700" />
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">More</span>
           </div>
         </div>
       </div>
