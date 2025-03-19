@@ -16,6 +16,7 @@ interface YearlyActivityHeatmapProps {
   data: ActivityData[];
   year?: number;
   onYearChange?: (year: number) => void;
+  compact?: boolean; // Option pour afficher une version compacte
 }
 
 // Fonction améliorée pour une meilleure détection du thème
@@ -35,12 +36,12 @@ const getThemeMode = (): 'light' | 'dark' => {
 const getActivityColors = (isDarkMode: boolean) => {
   return isDarkMode 
     ? {
-        0: 'bg-gray-800 dark-mode-color-0',
-        1: 'bg-green-900/60 dark-mode-color-1',
-        2: 'bg-green-700/80 dark-mode-color-2',
-        3: 'bg-green-600 dark-mode-color-3',
-        4: 'bg-green-500 dark-mode-color-4',
-        5: 'bg-green-400 dark-mode-color-5',
+        0: 'bg-gray-800/90 dark-mode-color-0',
+        1: 'bg-green-900/70 dark-mode-color-1',
+        2: 'bg-green-800/80 dark-mode-color-2',
+        3: 'bg-green-700/90 dark-mode-color-3',
+        4: 'bg-green-600 dark-mode-color-4',
+        5: 'bg-green-500 dark-mode-color-5',
       }
     : {
         0: 'bg-gray-100 light-mode-color-0',
@@ -55,16 +56,28 @@ const getActivityColors = (isDarkMode: boolean) => {
 export function YearlyActivityHeatmap({ 
   data: activityData, 
   year = new Date().getFullYear(),
-  onYearChange 
+  onYearChange,
+  compact = false
 }: YearlyActivityHeatmapProps) {
   const [currentYear, setCurrentYear] = useState(year);
   const [isClient, setIsClient] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // S'assurer que le rendu côté client est détecté
+  // S'assurer que le rendu côté client est détecté et vérifier la taille de l'écran
   useEffect(() => {
     setIsClient(true);
     setIsDarkMode(getThemeMode() === 'dark');
+    
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Initialiser
+    handleResize();
+    
+    // Observer les changements de taille d'écran
+    window.addEventListener('resize', handleResize);
 
     // Observer les changements de thème
     const observer = new MutationObserver(() => {
@@ -76,7 +89,10 @@ export function YearlyActivityHeatmap({
       attributeFilter: ['data-theme', 'class'],
     });
 
-    return () => observer.disconnect();
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      observer.disconnect();
+    };
   }, []);
 
   // Gérer les changements d'année
@@ -96,7 +112,12 @@ export function YearlyActivityHeatmap({
       end: new Date(currentYear, 11, 31)
     });
 
-    return months.map(month => {
+    // Si compact est true, on ne garde que les 6 derniers mois pour les mobiles
+    const filteredMonths = compact && isMobile 
+      ? months.slice(months.length - 6) 
+      : months;
+
+    return filteredMonths.map(month => {
       const daysInMonth = eachDayOfInterval({
         start: new Date(month.getFullYear(), month.getMonth(), 1),
         end: new Date(month.getFullYear(), month.getMonth() + 1, 0)
@@ -130,7 +151,7 @@ export function YearlyActivityHeatmap({
         })
       };
     });
-  }, [currentYear, activityData, isClient]);
+  }, [currentYear, activityData, isClient, compact, isMobile]);
 
   // Ne pas rendre côté serveur
   if (!isClient) return null;
@@ -138,29 +159,50 @@ export function YearlyActivityHeatmap({
   // Obtenir les couleurs adaptées au mode
   const activityColors = getActivityColors(isDarkMode);
 
+  // Calcul de la taille des cellules en fonction du mode compact et de l'appareil
+  const cellSize = compact 
+    ? isMobile ? 8 : 10 // Plus petit en mode compact
+    : isMobile ? 10 : 12; // Taille normale
+    
+  const cellGap = compact || isMobile ? 1 : 2;
+
   return (
-    <div className="space-y-4 w-full overflow-hidden">
+    <div className="space-y-3 w-full yearly-heatmap-container">
       {/* Navigation d'année avec un design amélioré */}
-      <div className="flex items-center justify-between mb-2">
-        <Button variant="outline" size="sm" onClick={() => handleYearChange('prev')}>
-          <ChevronLeft className="h-4 w-4 mr-1" />
+      <div className="flex items-center justify-between mb-1">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => handleYearChange('prev')}
+          className="h-7 px-2 text-xs"
+        >
+          <ChevronLeft className="h-3 w-3 mr-1" />
           {currentYear - 1}
         </Button>
-        <h3 className="text-base font-medium text-gray-900 dark:text-white">
+        <h3 className="text-sm font-medium text-gray-900 dark:text-white">
           {currentYear}
         </h3>
-        <Button variant="outline" size="sm" onClick={() => handleYearChange('next')} 
-          disabled={currentYear >= new Date().getFullYear()}>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => handleYearChange('next')} 
+          disabled={currentYear >= new Date().getFullYear()}
+          className="h-7 px-2 text-xs"
+        >
           {currentYear + 1}
-          <ChevronRight className="h-4 w-4 ml-1" />
+          <ChevronRight className="h-3 w-3 ml-1" />
         </Button>
       </div>
 
       {/* Grille de calendrier avec contraste amélioré et optimisation mobile */}
-      <div className="relative overflow-x-auto pb-2">
-        <div className="min-w-[640px]">
+      <div className="relative overflow-x-auto heatmap-scroll-container pb-1">
+        <div className={cn(
+          "min-w-fit",
+          compact && "heatmap-compact", 
+          isMobile && "heatmap-mobile"
+        )}>
           <div className="flex">
-            <div className="w-8"></div> {/* Espace pour les mois */}
+            <div className="w-6"></div> {/* Espace pour les mois */}
             <div className="flex flex-1 justify-around text-xs font-medium text-gray-600 dark:text-gray-300">
               <div>L</div>
               <div>M</div>
@@ -173,39 +215,46 @@ export function YearlyActivityHeatmap({
           </div>
           <div className="mt-1">
             {calendarData.map((monthData, monthIndex) => (
-              <div key={monthIndex} className="flex mb-2">
-                <div className="w-8 text-xs font-medium text-gray-600 dark:text-gray-300 flex items-center justify-end pr-2">
+              <div key={monthIndex} className="flex mb-1">
+                <div className="w-6 text-2xs font-medium text-gray-600 dark:text-gray-300 flex items-center justify-end pr-1">
                   {monthData.month}
                 </div>
                 <div className="flex-1">
-                  <div className="grid grid-cols-7 gap-1">
+                  <div 
+                    className="grid gap-x-1" 
+                    style={{ 
+                      gridTemplateColumns: "repeat(7, minmax(auto, 1fr))",
+                      gap: `${cellGap}px`
+                    }}
+                  >
                     {monthData.days.map((day, dayIndex) => {
                       // Positionnement correct des jours dans la grille par semaine
-                      const offset = dayIndex === 0 ? day.dayOfWeek : 0;
                       return (
                         <div
                           key={dayIndex}
                           className="relative"
-                          style={{ gridColumnStart: dayIndex === 0 ? day.dayOfWeek + 1 : undefined }}
+                          style={{ 
+                            gridColumnStart: dayIndex === 0 ? day.dayOfWeek + 1 : undefined,
+                          }}
                         >
                           <TooltipProvider delayDuration={200}>
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <div
                                   className={cn(
-                                    "w-full aspect-square rounded-sm yearly-heatmap-cell",
+                                    "aspect-square rounded-sm yearly-heatmap-cell",
                                     day.isToday 
-                                      ? "ring-2 ring-blue-400 dark:ring-blue-500" 
+                                      ? "ring-1 ring-blue-400 dark:ring-blue-500" 
                                       : "",
                                     day.count > 0 
                                       ? activityColors[day.activityLevel as keyof typeof activityColors] 
                                       : activityColors[0],
-                                    "hover:opacity-80 transition-opacity",
                                     "cursor-pointer",
+                                    "transition-all duration-200 hover:opacity-80 hover:scale-110",
                                   )}
                                   style={{
-                                    minWidth: '14px',
-                                    minHeight: '14px'
+                                    width: `${cellSize}px`,
+                                    height: `${cellSize}px`,
                                   }}
                                 />
                               </TooltipTrigger>
@@ -235,25 +284,27 @@ export function YearlyActivityHeatmap({
         </div>
       </div>
 
-      {/* Légende avec meilleure visibilité */}
-      <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex items-center gap-2">
-          <div className={cn("w-4 h-4 rounded shadow-inner border border-gray-200 dark:border-gray-700", activityColors[0])} />
-          <span className="text-xs text-gray-600 dark:text-gray-300">Aucune activité</span>
+      {/* Légende avec meilleure visibilité - compact en mobile */}
+      {!compact && (
+        <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 pt-1 text-2xs border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-1.5">
+            <div className={cn("w-3 h-3 rounded", activityColors[0])} />
+            <span className="text-gray-600 dark:text-gray-300">Aucune</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className={cn("w-3 h-3 rounded", activityColors[1])} />
+            <span className="text-gray-600 dark:text-gray-300">1</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className={cn("w-3 h-3 rounded", activityColors[3])} />
+            <span className="text-gray-600 dark:text-gray-300">2-4</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className={cn("w-3 h-3 rounded", activityColors[5])} />
+            <span className="text-gray-600 dark:text-gray-300">5+</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className={cn("w-4 h-4 rounded shadow-inner border border-gray-200 dark:border-gray-700", activityColors[1])} />
-          <span className="text-xs text-gray-600 dark:text-gray-300">1 activité</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className={cn("w-4 h-4 rounded shadow-inner border border-gray-200 dark:border-gray-700", activityColors[3])} />
-          <span className="text-xs text-gray-600 dark:text-gray-300">2-4 activités</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className={cn("w-4 h-4 rounded shadow-inner border border-gray-200 dark:border-gray-700", activityColors[5])} />
-          <span className="text-xs text-gray-600 dark:text-gray-300">5+ activités</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

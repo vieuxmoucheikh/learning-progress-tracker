@@ -194,3 +194,102 @@
     font-size: 10px !important;
   }
 }
+
+/* Styles spécifiques pour le calendrier heatmap */
+.heatmap-scroll-container {
+  -webkit-overflow-scrolling: touch; /* Pour une meilleure expérience de défilement sur iOS */
+  scrollbar-width: thin;
+}
+
+.heatmap-scroll-container::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.heatmap-scroll-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 3px;
+}
+
+.heatmap-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+.dark .heatmap-scroll-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .heatmap-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Classes spécifiques pour les cellules du heatmap */
+.yearly-heatmap-cell {
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+}
+
+.dark .yearly-heatmap-cell {
+  box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.1);
+}
+
+/* Tailles des textes spécifiques */
+.text-2xs {
+  font-size: 0.65rem;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .yearly-heatmap-container {
+    margin: 0 -0.5rem; /* Réduire les marges sur mobile */
+  }
+  
+  /* Version plus compacte pour mobile */
+  .heatmap-mobile .yearly-heatmap-cell {
+    min-width: 7px !important;
+    min-height: 7px !important;
+  }
+
+  /* Version compacte générale */
+  .heatmap-compact .yearly-heatmap-cell {
+    min-width: 8px !important; 
+    min-height: 8px !important;
+  }
+  
+  /* Améliorer les couleurs pour plus de contraste sur mobile */
+  .dark .yearly-heatmap-cell.light-mode-color-0 { background-color: #1f2937 !important; }
+  .dark .yearly-heatmap-cell.dark-mode-color-0 { background-color: #1f2937 !important; }
+  
+  .dark .yearly-heatmap-cell.light-mode-color-1 { background-color: #064e3b !important; }
+  .dark .yearly-heatmap-cell.dark-mode-color-1 { background-color: #065f46 !important; }
+  
+  .dark .yearly-heatmap-cell.light-mode-color-2 { background-color: #065f46 !important; }
+  .dark .yearly-heatmap-cell.dark-mode-color-2 { background-color: #047857 !important; }
+  
+  .dark .yearly-heatmap-cell.light-mode-color-3 { background-color: #059669 !important; }
+  .dark .yearly-heatmap-cell.dark-mode-color-3 { background-color: #10b981 !important; }
+  
+  .dark .yearly-heatmap-cell.light-mode-color-4 { background-color: #10b981 !important; }
+  .dark .yearly-heatmap-cell.dark-mode-color-4 { background-color: #34d399 !important; }
+  
+  .dark .yearly-heatmap-cell.light-mode-color-5 { background-color: #34d399 !important; }
+  .dark .yearly-heatmap-cell.dark-mode-color-5 { background-color: #6ee7b7 !important; }
+
+  /* Améliorer le contraste des cellules en mode sombre */
+  .dark .yearly-heatmap-cell.dark-mode-color-0,
+  .dark .yearly-heatmap-cell.dark-mode-color-1,
+  .dark .yearly-heatmap-cell.dark-mode-color-2,
+  .dark .yearly-heatmap-cell.dark-mode-color-3,
+  .dark .yearly-heatmap-cell.dark-mode-color-4,
+  .dark .yearly-heatmap-cell.dark-mode-color-5 {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
+  }
+}
+
+/* Fournir une alternative en mode compact pour desktop aussi */
+@media (min-width: 769px) {
+  .heatmap-compact .yearly-heatmap-cell {
+    min-width: 10px !important;
+    min-height: 10px !important;
+  }
+}
