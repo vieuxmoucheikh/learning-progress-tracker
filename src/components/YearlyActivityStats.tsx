@@ -3,9 +3,7 @@ import { getYearlyActivity, getLearningItems } from '@/lib/database';
 import { getLearningActivity } from '@/lib/learningActivity';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { YearlyActivityHeatmap } from './YearlyActivityHeatmap';
-import { Activity, Calendar, BarChart2, ZoomIn, ZoomOut } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from './ui/button';
+import { Activity, Calendar, BarChart2 } from 'lucide-react';
 
 interface ActivityData {
   id: string;
@@ -35,7 +33,6 @@ export const YearlyActivityStats: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [compactView, setCompactView] = useState(true); // Par défaut en vue compacte
 
   // Function to fetch activities
   const fetchActivities = async (category: string) => {
@@ -145,48 +142,38 @@ export const YearlyActivityStats: React.FC = () => {
   const activeDays = activityData.filter(day => day.count > 0).length;
   const averagePerDay = activeDays > 0 ? (totalActivities / activeDays).toFixed(1) : '0';
 
-  // Transform ActivityData[] into array suitable for heatmap
+  // Transform ActivityData[] into Record<string, number>
   const heatmapData = useMemo(() => {
-    return Object.entries(
-      activityData.reduce((acc, activity) => {
-        if (activity.date && activity.count) {
-          // Convert to local date to handle timezone correctly
-          const date = new Date(activity.date);
-          const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-          const formattedDate = localDate.toISOString().split('T')[0];
-          
-          acc[formattedDate] = (acc[formattedDate] || 0) + activity.count;
-        }
-        return acc;
-      }, {} as Record<string, number>)
-    ).map(([date, count]) => ({ date, count }));
+    console.log('Transforming activity data:', activityData);
+    const data: Record<string, number> = {};
+    
+    activityData.forEach(activity => {
+      if (activity.date && activity.count) {
+        // Convert to local date to handle timezone correctly
+        const date = new Date(activity.date);
+        const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+        const formattedDate = localDate.toISOString().split('T')[0];
+        
+        data[formattedDate] = (data[formattedDate] || 0) + activity.count;
+        console.log('Added activity:', { 
+          originalDate: activity.date,
+          localDate: formattedDate,
+          count: activity.count 
+        });
+      }
+    });
+    
+    console.log('Transformed heatmap data:', data);
+    return data;
   }, [activityData]);
 
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full space-y-8">
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center justify-between sm:justify-start gap-2">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Learning Activity
-            </h2>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => setCompactView(!compactView)}
-              title={compactView ? "Vue détaillée" : "Vue compacte"}
-            >
-              {compactView ? (
-                <ZoomIn className="h-4 w-4" />
-              ) : (
-                <ZoomOut className="h-4 w-4" />
-              )}
-              <span className="sr-only">{compactView ? "Vue détaillée" : "Vue compacte"}</span>
-            </Button>
-          </div>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Learning Activity</h2>
           <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-            <SelectTrigger className="w-full sm:w-40 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <SelectTrigger className="w-32">
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent>
@@ -200,68 +187,41 @@ export const YearlyActivityStats: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center h-48">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-            <span className="ml-3 text-gray-600 dark:text-gray-400">Loading...</span>
+          <div className="flex justify-center items-center h-64">
+            Loading...
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Stats Cards - Design optimisé */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className={cn(
-                "p-2 rounded-lg shadow-sm",
-                "bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200/50",
-                "dark:from-blue-900/30 dark:to-blue-800/30 dark:border-blue-700/30"
-              )}>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-600/10 p-2.5 rounded-lg border border-blue-200/50 dark:border-blue-400/10">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-blue-100 dark:bg-blue-800/50 rounded-full">
-                    <Activity className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <p className="text-xs font-medium text-gray-800 dark:text-gray-200">Total</p>
+                  <Activity className="w-4 h-4 text-blue-500" />
+                  <p className="text-sm text-black dark:text-black font-medium">Total Activities</p>
                 </div>
-                <p className="text-lg font-semibold mt-0.5 text-gray-900 dark:text-white">{totalActivities}</p>
+                <p className="text-lg font-semibold mt-0.5 text-black dark:text-black">{totalActivities}</p>
               </div>
-              
-              <div className={cn(
-                "p-2 rounded-lg shadow-sm",
-                "bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200/50",
-                "dark:from-emerald-900/30 dark:to-emerald-800/30 dark:border-emerald-700/30"
-              )}>
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-500/10 dark:to-emerald-600/10 p-2.5 rounded-lg border border-emerald-200/50 dark:border-emerald-400/10">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-emerald-100 dark:bg-emerald-800/50 rounded-full">
-                    <Calendar className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <p className="text-xs font-medium text-gray-800 dark:text-gray-200">Active Days</p>
+                  <Calendar className="w-4 h-4 text-emerald-500" />
+                  <p className="text-sm text-black dark:text-black font-medium">Active Days</p>
                 </div>
-                <p className="text-lg font-semibold mt-0.5 text-gray-900 dark:text-white">{activeDays}</p>
+                <p className="text-lg font-semibold mt-0.5 text-black dark:text-black">{activeDays}</p>
               </div>
-              
-              <div className={cn(
-                "p-2 rounded-lg shadow-sm",
-                "bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200/50",
-                "dark:from-purple-900/30 dark:to-purple-800/30 dark:border-purple-700/30"
-              )}>
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-500/10 dark:to-purple-600/10 p-2.5 rounded-lg border border-purple-200/50 dark:border-purple-400/10">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-purple-100 dark:bg-purple-800/50 rounded-full">
-                    <BarChart2 className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <p className="text-xs font-medium text-gray-800 dark:text-gray-200">Average Per Day</p>
+                  <BarChart2 className="w-4 h-4 text-purple-500" />
+                  <p className="text-sm text-black dark:text-black font-medium">Average Per Day</p>
                 </div>
-                <p className="text-lg font-semibold mt-0.5 text-gray-900 dark:text-white">{averagePerDay}</p>
+                <p className="text-lg font-semibold mt-0.5 text-black dark:text-black">{averagePerDay}</p>
               </div>
             </div>
 
-            {/* Heatmap - Adapté avec le mode compact */}
-            <div className={cn(
-              "w-full overflow-hidden rounded-lg border",
-              "bg-white dark:bg-gray-800/50",
-              "border-gray-100 dark:border-gray-700",
-              compactView ? "p-3" : "p-4"
-            )}>
+            {/* Heatmap */}
+            <div className="w-full">
               <YearlyActivityHeatmap 
                 data={heatmapData} 
                 year={new Date().getFullYear()}
-                compact={compactView}
               />
             </div>
           </div>
@@ -274,7 +234,7 @@ export const YearlyActivityStats: React.FC = () => {
 const formatDate = (dateStr: string) => {
   if (!dateStr) return '';
   const date = new Date(dateStr);
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString('en-US', { 
     weekday: 'long', 
     year: 'numeric', 
     month: 'long', 
