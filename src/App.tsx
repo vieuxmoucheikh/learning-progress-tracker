@@ -24,20 +24,21 @@ import { createDeck } from './lib/flashcards';
 import { supabase } from './lib/supabase';
 import { toast } from '@/components/ui/use-toast';
 
-// Importer les fichiers CSS pour les améliorations visuelles
-import './styles/critical-light-mode-fixes.css';
-import './styles/global-ui-enhancements.css';
-import './styles/card-fixes.css';
-import './styles/universal-card-borders.css';
-import './styles/critical-card-borders.css'; // Ajout du fichier de correctifs critiques pour les bordures
-import './styles/icon-fixes.css'; // Ajout du fichier de correctifs pour les icônes
-import './styles/icon-override.css';
-import './styles/critical-icon-fixes.css'; // Ajout du nouveau fichier de correctifs critiques
-import './components/LearningItemCard.css';
-import './components/Calendar.css';
-import './components/StatusBadge.css';
-import './components/PomodoroTimer.css';
-import './styles/theme-transition.css'; // Importation des styles de transition
+// Importer les feuilles de style globales et les corrections
+import '@/styles/card-fixes.css';
+import '@/styles/card-force-styles.css';
+import '@/styles/critical-card-borders.css'; 
+import '@/styles/critical-icon-fixes.css';
+import '@/styles/critical-light-mode-fixes.css';
+import '@/styles/global-ui-enhancements.css';
+import '@/styles/icon-fixes.css';
+import '@/styles/icon-override.css';
+import '@/styles/mobile-light-mode-fixes.css';
+import '@/styles/theme-sync.css';
+import '@/styles/theme-transition.css';
+import '@/styles/universal-card-borders.css';
+// Importer notre nouveau fichier de corrections pour les graphiques
+import '@/styles/charts-fixes.css';
 
 interface State {
   items: LearningItem[];

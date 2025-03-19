@@ -1,0 +1,104 @@
+/* Corrections pour les graphiques et visualisations en mode sombre sur mobile */
+
+/* Correction pour les heatmaps sur mobile en mode clair */
+@media (max-width: 768px) {
+  /* Augmenter le contraste des cellules du heatmap en mode clair */
+  html:not(.dark) [class*="heatmap-day"],
+  html:not(.dark) [class*="activity-cell"],
+  html:not(.dark) [class*="heat-cell"] {
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  }
+
+  html:not(.dark) [class*="heatmap-day"][data-level="1"],
+  html:not(.dark) [class*="activity-cell"][data-level="1"],
+  html:not(.dark) [class*="heat-cell"][data-level="1"] {
+    background-color: #dcfce7 !important; /* green-100 */
+  }
+
+  html:not(.dark) [class*="heatmap-day"][data-level="2"],
+  html:not(.dark) [class*="activity-cell"][data-level="2"],
+  html:not(.dark) [class*="heat-cell"][data-level="2"] {
+    background-color: #bbf7d0 !important; /* green-200 */
+  }
+
+  html:not(.dark) [class*="heatmap-day"][data-level="3"],
+  html:not(.dark) [class*="activity-cell"][data-level="3"],
+  html:not(.dark) [class*="heat-cell"][data-level="3"] {
+    background-color: #86efac !important; /* green-300 */
+  }
+
+  html:not(.dark) [class*="heatmap-day"][data-level="4"],
+  html:not(.dark) [class*="activity-cell"][data-level="4"],
+  html:not(.dark) [class*="heat-cell"][data-level="4"] {
+    background-color: #4ade80 !important; /* green-400 */
+  }
+
+  html:not(.dark) [class*="heatmap-day"][data-level="5"],
+  html:not(.dark) [class*="activity-cell"][data-level="5"],
+  html:not(.dark) [class*="heat-cell"][data-level="5"] {
+    background-color: #22c55e !important; /* green-500 */
+  }
+}
+
+/* Correction pour les graphiques en mode sombre sur mobile */
+@media (max-width: 768px) {
+  /* Augmenter la visibilité des graphiques en mode sombre sur mobile */
+  .dark .recharts-wrapper .recharts-cartesian-grid-horizontal line,
+  .dark .recharts-wrapper .recharts-cartesian-grid-vertical line {
+    stroke: rgba(255, 255, 255, 0.2) !important;
+    stroke-width: 0.5 !important;
+  }
+
+  .dark .recharts-wrapper .recharts-text {
+    fill: rgba(255, 255, 255, 0.8) !important;
+  }
+
+  /* Assurer la visibilité des graphiques circulaires */
+  .dark .recharts-pie-label-text,
+  .dark .recharts-label-line {
+    fill: white !important;
+    stroke: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  /* Correction du contraste des couleurs des barres pour le mode sombre */
+  .dark .recharts-bar-rectangle path {
+    stroke: rgba(0, 0, 0, 0.3) !important;
+    stroke-width: 0.5 !important;
+  }
+  
+  /* Assurer que les tooltips sont visibles */
+  .dark .recharts-tooltip-wrapper .recharts-default-tooltip {
+    background-color: rgba(30, 41, 59, 0.95) !important; /* slate-800 with opacity */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3) !important;
+  }
+  
+  .dark .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-label,
+  .dark .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-item-name,
+  .dark .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-item-value {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+}
+
+/* Correction pour les graphiques radar en mode sombre */
+.dark .recharts-radar,
+.dark .recharts-radar-polygon {
+  stroke: rgba(255, 255, 255, 0.7) !important;
+  fill-opacity: 0.6 !important;
+}
+
+.dark .recharts-polar-angle-axis-tick-value,
+.dark .recharts-polar-radius-axis-tick-value {
+  fill: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Correction pour les légendes des graphiques */
+.dark .recharts-legend-item-text {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Assurer les couleurs des secteurs du graphique en camembert sont visibles */
+.dark .recharts-sector {
+  stroke: rgba(255, 255, 255, 0.1) !important;
+  stroke-width: 1 !important;
+}
