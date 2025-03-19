@@ -1444,5 +1444,5 @@ export async function getLearningActivity(): Promise<{ date: string; count: numb
   } catch (error) {
     console.error('Error in getLearningActivity:', error);
     return [];
-  }
+  } 
 }

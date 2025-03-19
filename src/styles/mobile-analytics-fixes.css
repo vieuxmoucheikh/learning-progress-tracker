@@ -57,14 +57,56 @@
     fill: #d1d5db !important;
     font-weight: 500;
   }
+  
+  /* Amélioration mobile pour heatmap */
+  .yearly-activity-heatmap-container {
+    padding-left: 1rem;
+  }
+  
+  /* Réduire la taille des cellules sur mobile pour tout afficher */
+  .heatmap-cell {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  
+  /* Augmenter le contraste des cellules de la heatmap en mode sombre sur mobile */
+  .dark .heatmap-cell-level-1,
+  .dark .heatmap-cell-level-2,
+  .dark .heatmap-cell-level-3,
+  .dark .heatmap-cell-level-4,
+  .dark .heatmap-cell-level-5 {
+    filter: brightness(1.3) !important;
+  }
 }
 
-/* Correction pour l'affichage de la heatmap sur mobile */
+/* Correction pour l'affichage de la heatmap sur mobile et bureau */
 .yearly-activity-heatmap-container {
   max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Style personnalisé pour la barre de défilement */
+.yearly-activity-heatmap-container::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+.yearly-activity-heatmap-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 2px;
+}
+
+.yearly-activity-heatmap-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+}
+
+.dark .yearly-activity-heatmap-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* Assurer que les couleurs des cellules de la heatmap sont visibles en mode sombre */
@@ -74,3 +116,80 @@
 .dark .heatmap-cell-level-3 { fill: #2563eb !important; } /* Activité moyenne */
 .dark .heatmap-cell-level-4 { fill: #3b82f6 !important; } /* Activité élevée */
 .dark .heatmap-cell-level-5 { fill: #60a5fa !important; } /* Activité très élevée */
+
+/* Ajuster la taille des cellules du heatmap */
+.heatmap-cell {
+  width: 14px;
+  height: 14px;
+  rx: 2px;
+  ry: 2px;
+}
+
+/* Améliorations pour le conteneur principal du heatmap */
+.yearly-heatmap-grid {
+  display: flex;
+  align-items: center;
+  margin-top: 2rem;
+  position: relative;
+}
+
+/* Ajuster l'affichage des étiquettes de mois sur le heatmap */
+.month-labels {
+  display: flex;
+  position: absolute;
+  top: -24px;
+  left: 32px;
+  width: calc(100% - 32px);
+}
+
+.month-label {
+  position: absolute;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.dark .month-label {
+  color: #9ca3af;
+}
+
+/* Ajouter un peu d'espace entre les colonnes de cellules */
+.heatmap-week {
+  margin-right: 2px;
+}
+
+/* S'assurer que la légende s'affiche correctement */
+.heatmap-legend {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-right: 0.5rem;
+}
+
+.heatmap-legend-item {
+  display: flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.heatmap-legend-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 4px;
+}
+
+/* Fixe pour le défilement horizontal sur petits écrans */
+@media (max-width: 640px) {
+  .yearly-activity-heatmap-container {
+    min-width: 700px;
+  }
+}
+
+/* Fixe pour iOS mobile */
+@supports (-webkit-touch-callout: none) {
+  .yearly-activity-heatmap-container {
+    -webkit-overflow-scrolling: touch;
+  }
+}

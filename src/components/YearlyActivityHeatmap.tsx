@@ -124,17 +124,16 @@ export function YearlyActivityHeatmap({ data, year, isDarkMode = false }: Heatma
   const today = format(new Date(), 'yyyy-MM-dd');
   
   return (
-    <div className="w-full overflow-x-auto py-2">
-      <div className="min-w-max flex flex-col space-y-1">
-        {/* Month labels on top */}
-        <div className="flex ml-8">
+    <div className="yearly-activity-heatmap-container">
+      <div className="min-w-max relative">
+        {/* Month labels on top - Now using absolute positioning for better alignment */}
+        <div className="month-labels">
           {monthLabels.map((label, idx) => (
             <div
               key={`month-${idx}`}
-              className="text-xs text-gray-500 dark:text-gray-400"
+              className="month-label"
               style={{
-                position: 'absolute',
-                left: `${label.position * 18 + 36}px` // Align with weeks
+                left: `${label.position * 18 + 24}px` // Adjust position for better alignment
               }}
             >
               {label.month}
@@ -142,14 +141,14 @@ export function YearlyActivityHeatmap({ data, year, isDarkMode = false }: Heatma
           ))}
         </div>
         
-        {/* Grid */}
-        <div className="flex mt-6">
-          {/* Day labels */}
-          <div className="flex flex-col justify-around mr-2">
+        {/* Grid with improved styling */}
+        <div className="yearly-heatmap-grid mt-6">
+          {/* Day labels - Now with fixed width for better alignment */}
+          <div className="flex flex-col justify-around mr-2 w-6">
             {DAYS.map((day, idx) => (
               <div 
                 key={day} 
-                className="text-xs h-4 text-gray-500 dark:text-gray-400 w-4"
+                className="text-xs text-gray-500 dark:text-gray-400 h-4 flex items-center justify-center"
                 style={{ height: '18px' }}
               >
                 {day}
@@ -157,10 +156,10 @@ export function YearlyActivityHeatmap({ data, year, isDarkMode = false }: Heatma
             ))}
           </div>
           
-          {/* Calendar grid */}
+          {/* Calendar grid - Now with consistent spacing */}
           <div className="grid grid-flow-col gap-1">
             {daysGrid.map((week, weekIdx) => (
-              <div key={`week-${weekIdx}`} className="grid gap-1">
+              <div key={`week-${weekIdx}`} className="heatmap-week grid gap-1">
                 {Array(7).fill(0).map((_, dayIdx) => {
                   const day = week.find(d => d.dayOfWeek === dayIdx);
                   if (!day) {
@@ -174,21 +173,21 @@ export function YearlyActivityHeatmap({ data, year, isDarkMode = false }: Heatma
                   
                   // Assurons-nous que count est toujours un nombre
                   const count = typeof day.count === 'number' ? day.count : 0;
+                  const level = count === 0 ? 0 : count === 1 ? 1 : count < 3 ? 2 : count < 5 ? 3 : count < 7 ? 4 : 5;
                   
                   return (
                     <div
                       key={day.date || `empty-${dayIdx}`}
                       className={cn(
-                        "w-4 h-4 rounded-sm transition-colors",
+                        "heatmap-cell rounded-sm transition-colors",
+                        `heatmap-cell-level-${level}`,
                         "transform hover:scale-110 cursor-pointer",
                         borderClass
                       )}
                       style={{
                         backgroundColor: getColorIntensity(count),
-                        width: '16px',
-                        height: '16px'
                       }}
-                      title={day.date ? `${format(parseISO(day.date), 'PPP', { locale: fr })}: ${count} activities` : ''}
+                      title={day.date ? `${format(parseISO(day.date), 'PPP', { locale: fr })}: ${count} activité${count !== 1 ? 's' : ''}` : ''}
                     />
                   );
                 })}
@@ -197,17 +196,20 @@ export function YearlyActivityHeatmap({ data, year, isDarkMode = false }: Heatma
           </div>
         </div>
         
-        {/* Legend */}
-        <div className="flex items-center justify-end mt-2 space-x-2">
-          <span className="text-xs text-gray-600 dark:text-gray-400">Moins</span>
+        {/* Legend - Now with better spacing and alignment */}
+        <div className="heatmap-legend text-xs">
+          <span className="text-gray-600 dark:text-gray-400 mr-2">Moins</span>
           {[0, 1, 2, 3, 4, 5].map((level) => (
             <div
               key={level}
-              className="w-3 h-3 rounded-sm"
+              className={cn(
+                "heatmap-legend-color mx-0.5",
+                `heatmap-cell-level-${level}`
+              )}
               style={{ backgroundColor: isDarkMode ? colorScale.dark[level as keyof typeof colorScale.dark] : colorScale.light[level as keyof typeof colorScale.light] }}
             />
           ))}
-          <span className="text-xs text-gray-600 dark:text-gray-400">Plus</span>
+          <span className="text-gray-600 dark:text-gray-400 ml-2">Plus</span>
         </div>
       </div>
     </div>
