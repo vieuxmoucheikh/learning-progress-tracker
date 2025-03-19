@@ -165,6 +165,19 @@ export function YearlyActivityHeatmap({
     return 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 border-2 border-emerald-700 dark:border-emerald-700';
   };
 
+  // State pour gérer le tooltip mobile
+  const [activeTouchTooltip, setActiveTouchTooltip] = useState<string | null>(null);
+
+  // Gestionnaire de touch pour les appareils mobiles
+  const handleTouchStart = (date: string) => {
+    setActiveTouchTooltip(date);
+  };
+
+  const handleTouchEnd = () => {
+    // Petit délai pour permettre l'interaction avec le tooltip avant qu'il ne disparaisse
+    setTimeout(() => setActiveTouchTooltip(null), 500);
+  };
+
   return (
     <div className="w-full bg-white dark:bg-gray-800/30 backdrop-blur-sm rounded-lg shadow-md border border-gray-200 dark:border-white/10">
       {/* Year navigation avec meilleure visibilité */}
@@ -247,8 +260,11 @@ export function YearlyActivityHeatmap({
                   {weeks.map((week, weekIndex) => (
                     <div key={weekIndex} className="flex flex-col gap-[3px]">
                       {week.map((day, dayIndex) => (
-                        <TooltipProvider key={day.date}>
-                          <Tooltip>
+                        <TooltipProvider key={day.date}> 
+                          <Tooltip 
+                            open={activeTouchTooltip === day.date ? true : undefined}
+                            delayDuration={0} // Réduire délai pour une réponse plus rapide sur mobile
+                          >
                             <TooltipTrigger asChild>
                               <div
                                 className={cn(
@@ -259,16 +275,20 @@ export function YearlyActivityHeatmap({
                                 )}
                                 style={{ 
                                   height: '16px',
-                                  boxSizing: 'border-box', // Garantir un alignement cohérent
+                                  boxSizing: 'border-box',
                                   minWidth: '16px'
                                 }}
+                                onTouchStart={() => handleTouchStart(day.date)}
+                                onTouchEnd={handleTouchEnd}
                               />
                             </TooltipTrigger>
                             <TooltipContent 
                               side="top"
-                              className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200 dark:border-white/10"
+                              className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200 dark:border-white/10 z-50"
+                              sideOffset={5}
+                              avoidCollisions={true}
                             >
-                              <div className="text-xs">
+                              <div className="text-xs p-1.5">
                                 <div className="font-medium text-gray-900 dark:text-gray-100">
                                   {format(parseISO(day.date), 'MMM d, yyyy')}
                                 </div>
