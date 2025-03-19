@@ -167,7 +167,7 @@ export function YearlyActivityHeatmap({
 
   return (
     <div className="w-full bg-white dark:bg-gray-800/30 backdrop-blur-sm rounded-lg shadow-md border border-gray-200 dark:border-white/10">
-      {/* Year navigation */}
+      {/* Year navigation avec meilleure visibilité */}
       <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-white/10">
         <Button
           variant="outline"
@@ -177,7 +177,7 @@ export function YearlyActivityHeatmap({
         >
           <ChevronLeft className="h-4 w-4 text-blue-500" />
         </Button>
-        <div className="text-lg font-bold text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-800 px-3 py-1 rounded-lg">
+        <div className="text-xl font-extrabold bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-200 px-4 py-1.5 rounded-lg shadow-sm border border-blue-200 dark:border-blue-800">
           {selectedYear}
         </div>
         <Button
@@ -221,16 +221,19 @@ export function YearlyActivityHeatmap({
 
             {/* Grille principale */}
             <div className="flex">
-              {/* Étiquettes des jours - fixes avec alignement amélioré */}
+              {/* Étiquettes des jours - Alignement amélioré pour mobile */}
               <div className="flex flex-col gap-[3px] pr-2 sticky left-0 bg-white dark:bg-gray-800/30 z-10">
                 {DAYS.map((day) => (
                   <div 
                     key={day} 
-                    className="text-gray-700 dark:text-gray-300 flex items-center justify-center w-10 font-bold text-sm bg-gray-50 dark:bg-gray-800 rounded"
+                    className="text-gray-700 dark:text-gray-300 flex w-10 font-bold text-sm bg-gray-50 dark:bg-gray-800 rounded"
                     style={{ 
                       height: '16px',
-                      minHeight: '16px',
-                      lineHeight: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      // Assurer un alignement parfait avec les cellules
+                      boxSizing: 'border-box'
                     }}
                   >
                     {day[0]}
@@ -256,7 +259,7 @@ export function YearlyActivityHeatmap({
                                 )}
                                 style={{ 
                                   height: '16px',
-                                  minHeight: '16px',
+                                  boxSizing: 'border-box', // Garantir un alignement cohérent
                                   minWidth: '16px'
                                 }}
                               />
