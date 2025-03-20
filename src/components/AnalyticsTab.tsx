@@ -70,10 +70,16 @@ const TimeByCategory = ({ categoryData }: { categoryData: any[] }) => {
               cy="50%"
               outerRadius={100}
               label={({ name, percentage }) => `${name}: ${percentage}%`}
+              labelLine={{ stroke: 'rgba(156, 163, 175, 0.5)', strokeWidth: 1 }}
               aria-label="Temps par catégorie"
             >
               {categoryData.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={COLORS[index % COLORS.length]} 
+                  stroke="rgba(255, 255, 255, 0.2)"
+                  strokeWidth={1}
+                />
               ))}
             </Pie>
             <Tooltip 
@@ -81,24 +87,41 @@ const TimeByCategory = ({ categoryData }: { categoryData: any[] }) => {
                 `${value}h (${entry.payload.percentage}%)`,
                 `${name} (${entry.payload.itemCount} items)`
               ]}
+              contentStyle={{ 
+                backgroundColor: 'rgba(31, 41, 55, 0.9)',
+                borderColor: 'rgba(107, 114, 128, 0.4)',
+                borderRadius: '0.375rem',
+                color: 'rgba(243, 244, 246, 1)',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+              }}
+              itemStyle={{ color: 'rgba(243, 244, 246, 1)' }}
+              labelStyle={{ color: 'rgba(243, 244, 246, 0.7)' }}
             />
-            <Legend />
+            <Legend 
+              verticalAlign="bottom" 
+              iconSize={10}
+              wrapperStyle={{
+                paddingTop: '20px',
+                fontSize: '12px',
+                color: 'rgba(156, 163, 175, 1)'
+              }}
+            />
           </PieChart>
         </ResponsiveContainer>
       </div>
       <div className="space-y-4">
-        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Category Breakdown</h3>
-        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-300">Category Breakdown</h3>
+        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 dark:scrollbar-thin dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800/50">
           {categoryData.map((category, index) => (
-            <div key={category.name} className="flex items-center gap-3">
+            <div key={category.name} className="flex items-center gap-3 p-2 rounded-lg dark:bg-gray-800/50 hover:dark:bg-gray-800/80 transition-colors">
               <div 
-                className="w-3 h-3 rounded-full" 
+                className="w-3 h-3 rounded-full shadow-sm" 
                 style={{ backgroundColor: COLORS[index % COLORS.length] }}
               />
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-center text-sm">
-                  <span className="font-medium truncate">{category.name}</span>
-                  <span className="text-gray-500 dark:text-gray-400">
+                  <span className="font-medium truncate text-gray-700 dark:text-gray-200">{category.name}</span>
+                  <span className="text-gray-500 dark:text-gray-400 font-mono">
                     {category.value}h ({category.percentage}%)
                   </span>
                 </div>
@@ -293,9 +316,19 @@ const FocusRadar = ({ focusMetrics }: { focusMetrics: Array<{ subject: string; v
     <div className="h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={focusMetrics}>
-          <PolarGrid />
-          <PolarAngleAxis dataKey="subject" />
-          <PolarRadiusAxis angle={30} domain={[0, 100]} />
+          <PolarGrid stroke="rgba(156, 163, 175, 0.3)" />
+          <PolarAngleAxis 
+            dataKey="subject" 
+            tick={{ fill: 'rgba(209, 213, 219, 1)', fontSize: 12 }}
+            stroke="rgba(156, 163, 175, 0.4)"
+          />
+          <PolarRadiusAxis 
+            angle={30} 
+            domain={[0, 100]} 
+            tick={{ fill: 'rgba(209, 213, 219, 0.8)', fontSize: 10 }}
+            stroke="rgba(156, 163, 175, 0.3)"
+            tickCount={5}
+          />
           <Radar
             name="Learning Focus"
             dataKey="value"
@@ -304,7 +337,18 @@ const FocusRadar = ({ focusMetrics }: { focusMetrics: Array<{ subject: string; v
             fillOpacity={0.6}
             aria-label="Graphique radar des compétences d'apprentissage"
           />
-          <Tooltip formatter={(value: number) => [`${value}%`, 'Score']} />
+          <Tooltip 
+            formatter={(value: number) => [`${value}%`, 'Score']}
+            contentStyle={{ 
+              backgroundColor: 'rgba(31, 41, 55, 0.9)',
+              borderColor: 'rgba(107, 114, 128, 0.4)',
+              borderRadius: '0.375rem',
+              color: 'rgba(243, 244, 246, 1)',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+            }}
+            itemStyle={{ color: 'rgba(243, 244, 246, 1)' }}
+            labelStyle={{ color: 'rgba(243, 244, 246, 0.7)' }}
+          />
         </RadarChart>
       </ResponsiveContainer>
     </div>
@@ -655,20 +699,20 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
 
   return (
     <div className="space-y-8">
-      {/* En-tête de la page */}
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+      {/* En-tête de la page - Amélioré pour le mode sombre sur desktop */}
+      <div className="flex flex-col space-y-2 bg-gradient-to-r from-gray-900/20 to-gray-800/10 p-6 rounded-xl border border-gray-800/30 shadow-inner">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-50 drop-shadow-sm">
           Learning Analytics
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 text-lg">
-          Visualisez vos progrès et identifiez vos tendances d'apprentissage
+        <p className="text-gray-300 text-lg max-w-3xl">
+          Visualisez vos progrès et identifiez vos tendances d'apprentissage avec des données exploitables
         </p>
       </div>
 
       {/* Barre de contrôles */}
-      <div className="flex flex-wrap gap-3 items-center justify-between">
-        {/* Onglets pour basculer entre les graphiques et les insights - Design amélioré pour mobile */}
-        <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-fit sticky top-0 z-10">
+      <div className="flex flex-wrap gap-3 items-center justify-between bg-gray-800/60 p-3 rounded-lg backdrop-blur-sm border border-gray-700/50 shadow-md">
+        {/* Onglets pour basculer entre les graphiques et les insights */}
+        <div className="flex space-x-1 bg-gray-900/70 p-1 rounded-lg w-fit z-10">
           <button
             onClick={switchToCharts}
             className={cn(
@@ -716,10 +760,10 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
         </div>
 
         {/* Sélecteur de période */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 gap-1.5">
-            <CalendarRange className="h-4 w-4" />
-            <span className="hidden sm:inline font-medium">{activePeriodLabel}</span>
+        <div className="flex items-center gap-3 bg-gray-800 px-3 py-2 rounded-lg border border-gray-700/70">
+          <div className="flex items-center text-sm text-gray-300 gap-1.5 font-medium">
+            <CalendarRange className="h-4 w-4 text-blue-400" />
+            <span className="hidden sm:inline">{activePeriodLabel}</span>
           </div>
           <Select value={timePeriod} onValueChange={setTimePeriod}>
             <SelectTrigger className="w-32 sm:w-40">
