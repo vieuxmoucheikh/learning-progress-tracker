@@ -674,7 +674,7 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
             className={cn(
               "px-5 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 relative",
               activeTab === 'charts' 
-                ? "bg-white dark:bg-gray-700 shadow-md text-blue-600 dark:text-blue-400 ring-2 ring-blue-300 dark:ring-blue-500/20" 
+                ? "bg-white dark:bg-gray-700 shadow-md text-blue-600 dark:text-blue-300 ring-4 ring-blue-200 dark:ring-blue-500/30" 
                 : "hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 active:bg-white/70 dark:active:bg-gray-700/70"
             )}
             aria-pressed={activeTab === 'charts'}
@@ -682,11 +682,13 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
           >
             <BarChart3 className={cn(
               "w-4 h-4 transition-transform", 
-              activeTab === 'charts' && "transform scale-110"
+              activeTab === 'charts' ? "text-blue-500 dark:text-blue-300 transform scale-125" : "text-gray-600 dark:text-gray-400"
             )} />
-            <span>Graphiques</span>
+            <span className={cn(
+              activeTab === 'charts' ? "font-bold" : "font-medium"
+            )}>Graphiques</span>
             {activeTab === 'charts' && (
-              <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-blue-500 dark:bg-blue-400 rounded-full" />
+              <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2/3 h-1 bg-blue-500 dark:bg-blue-400 rounded-full" />
             )}
           </button>
           <button
@@ -694,7 +696,7 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
             className={cn(
               "px-5 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 relative",
               activeTab === 'insights' 
-                ? "bg-white dark:bg-gray-700 shadow-md text-purple-600 dark:text-purple-400 ring-2 ring-purple-300 dark:ring-purple-500/20" 
+                ? "bg-white dark:bg-gray-700 shadow-md text-purple-600 dark:text-purple-300 ring-4 ring-purple-200 dark:ring-purple-500/30" 
                 : "hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 active:bg-white/70 dark:active:bg-gray-700/70"
             )}
             aria-pressed={activeTab === 'insights'}
@@ -702,11 +704,13 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
           >
             <Lightbulb className={cn(
               "w-4 h-4 transition-transform", 
-              activeTab === 'insights' && "transform scale-110"
+              activeTab === 'insights' ? "text-purple-500 dark:text-purple-300 transform scale-125" : "text-gray-600 dark:text-gray-400"
             )} />
-            <span>Recommandations</span>
+            <span className={cn(
+              activeTab === 'insights' ? "font-bold" : "font-medium"
+            )}>Recommandations</span>
             {activeTab === 'insights' && (
-              <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-purple-500 dark:bg-purple-400 rounded-full" />
+              <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2/3 h-1 bg-purple-500 dark:bg-purple-400 rounded-full" />
             )}
           </button>
         </div>
