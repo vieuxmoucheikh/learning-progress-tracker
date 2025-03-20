@@ -667,33 +667,47 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
 
       {/* Barre de contrôles */}
       <div className="flex flex-wrap gap-3 items-center justify-between">
-        {/* Onglets pour basculer entre les graphiques et les insights */}
+        {/* Onglets pour basculer entre les graphiques et les insights - Design amélioré pour mobile */}
         <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-fit sticky top-0 z-10">
           <button
             onClick={switchToCharts}
             className={cn(
-              "px-5 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2",
+              "px-5 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 relative",
               activeTab === 'charts' 
-                ? "bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400" 
-                : "hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300"
+                ? "bg-white dark:bg-gray-700 shadow-md text-blue-600 dark:text-blue-400 ring-2 ring-blue-300 dark:ring-blue-500/20" 
+                : "hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 active:bg-white/70 dark:active:bg-gray-700/70"
             )}
             aria-pressed={activeTab === 'charts'}
+            aria-label="Afficher les graphiques"
           >
-            <BarChart3 className="w-4 h-4" />
+            <BarChart3 className={cn(
+              "w-4 h-4 transition-transform", 
+              activeTab === 'charts' && "transform scale-110"
+            )} />
             <span>Graphiques</span>
+            {activeTab === 'charts' && (
+              <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-blue-500 dark:bg-blue-400 rounded-full" />
+            )}
           </button>
           <button
             onClick={switchToInsights}
             className={cn(
-              "px-5 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2",
+              "px-5 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 relative",
               activeTab === 'insights' 
-                ? "bg-white dark:bg-gray-700 shadow-sm text-purple-600 dark:text-purple-400" 
-                : "hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300"
+                ? "bg-white dark:bg-gray-700 shadow-md text-purple-600 dark:text-purple-400 ring-2 ring-purple-300 dark:ring-purple-500/20" 
+                : "hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 active:bg-white/70 dark:active:bg-gray-700/70"
             )}
             aria-pressed={activeTab === 'insights'}
+            aria-label="Afficher les recommandations"
           >
-            <Lightbulb className="w-4 h-4" />
+            <Lightbulb className={cn(
+              "w-4 h-4 transition-transform", 
+              activeTab === 'insights' && "transform scale-110"
+            )} />
             <span>Recommandations</span>
+            {activeTab === 'insights' && (
+              <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-purple-500 dark:bg-purple-400 rounded-full" />
+            )}
           </button>
         </div>
 
