@@ -21,13 +21,15 @@ import {
 } from "recharts";
 import { LearningItem } from "@/types";
 import { useMemo, useState, useCallback, useEffect } from "react";
-import { Brain, Target, TrendingUp, CheckCircle, BookOpen, PieChart as PieChartIcon, BarChart3, Calendar, Lightbulb, AlertCircle } from "lucide-react";
+import { Brain, Target, TrendingUp, CheckCircle, BookOpen, PieChart as PieChartIcon, BarChart3, Calendar, Lightbulb, AlertCircle, CalendarRange, Filter, SlidersHorizontal } from "lucide-react";
 import LearningGoals from './LearningGoals';
 import { YearlyActivityStats } from './YearlyActivityStats';
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton"; 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { subDays, subMonths, startOfYear, isAfter, format } from "date-fns";
 
 interface AnalyticsTabProps {
   items: LearningItem[];
@@ -248,11 +250,13 @@ const InsightsSection = ({ analytics, items }: { analytics: AnalyticsData, items
 const SummaryCard = ({ 
   title, 
   value, 
+  subtitle,
   icon, 
   colorClass 
 }: { 
   title: string; 
   value: string | number; 
+  subtitle?: string;
   icon: React.ReactNode; 
   colorClass: string;
 }) => {
@@ -269,6 +273,11 @@ const SummaryCard = ({
           <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
             {value}
           </p>
+          {subtitle && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {subtitle}
+            </p>
+          )}
         </div>
         <div className="p-2.5 bg-current/10 dark:bg-current/20 rounded-full shadow-sm">
           {icon}
@@ -370,14 +379,79 @@ const DifficultyProgress = ({ difficultyData }: { difficultyData: Array<{ name: 
   );
 };
 
+// Définition des périodes de temps disponibles
+const TIME_PERIODS = [
+  { id: 'week', label: 'Last 7 days', getDates: () => ({ start: subDays(new Date(), 7), end: new Date() }) },
+  { id: 'month', label: 'Last 30 days', getDates: () => ({ start: subDays(new Date(), 30), end: new Date() }) },
+  { id: 'quarter', label: 'Last 3 months', getDates: () => ({ start: subMonths(new Date(), 3), end: new Date() }) },
+  { id: 'year', label: 'This year', getDates: () => ({ start: startOfYear(new Date()), end: new Date() }) },
+  { id: 'all', label: 'All time', getDates: () => ({ start: null, end: new Date() }) },
+];
+
 export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
   const [activeTab, setActiveTab] = useState<'charts' | 'insights'>('charts');
   const [hasError, setHasError] = useState<boolean>(false);
+  const [timePeriod, setTimePeriod] = useState<string>('month'); // 'month' par défaut
+
+  // Obtenir les dates de début et de fin pour le filtre de période
+  const getFilterDates = () => {
+    const period = TIME_PERIODS.find(p => p.id === timePeriod) || TIME_PERIODS[1]; // Default to 'month'
+    return period.getDates();
+  };
+
+  // Filtrer les items en fonction de la période sélectionnée
+  const filteredItems = useMemo(() => {
+    const { start, end } = getFilterDates();
+    
+    if (!start) return items; // "All time"
+    
+    return items.filter(item => {
+      // Vérifier les sessions récentes
+      const hasSessions = item.progress?.sessions?.some(session => {
+        const sessionDate = new Date(session.startTime || session.date || '');
+        return !isNaN(sessionDate.getTime()) && isAfter(sessionDate, start);
+      });
+      
+      // Vérifier la date de création si elle existe
+      let isCreatedInRange = false;
+      if ('created_at' in item) {
+        // Utiliser assertion de type pour éviter l'erreur TS
+        const createdAt = (item as any).created_at;
+        if (createdAt && typeof createdAt === 'string') {
+          const creationDate = new Date(createdAt);
+          isCreatedInRange = !isNaN(creationDate.getTime()) && isAfter(creationDate, start);
+        }
+      }
+      
+      // Vérifier la date d'ajout (propriété plus standard)
+      if ('date_added' in item) {
+        const dateAdded = (item as any).date_added;
+        if (dateAdded && typeof dateAdded === 'string') {
+          const addedDate = new Date(dateAdded);
+          isCreatedInRange = isCreatedInRange || (!isNaN(addedDate.getTime()) && isAfter(addedDate, start));
+        }
+      }
+      
+      return hasSessions || isCreatedInRange;
+    });
+  }, [items, timePeriod]);
+
+  // Afficher la période active
+  const activePeriodLabel = useMemo(() => {
+    const period = TIME_PERIODS.find(p => p.id === timePeriod);
+    if (!period) return '';
+    
+    const { start, end } = period.getDates();
+    if (!start) return 'All time';
+    
+    return `${format(start, 'MMM d, yyyy')} - ${format(end, 'MMM d, yyyy')}`;
+  }, [timePeriod]);
 
   const analytics = useMemo<AnalyticsData>(() => {
     try {
+      // Utiliser filteredItems au lieu de items pour tous les calculs
       // Time spent per category (using actual session data)
-      const categoryData = items.reduce((acc, item) => {
+      const categoryData = filteredItems.reduce((acc, item) => {
         const category = item.category || "Uncategorized";
         
         // Calculate time from sessions
@@ -425,7 +499,7 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
       }));
 
       // Progress by difficulty
-      const difficultyData = items.reduce((acc, item) => {
+      const difficultyData = filteredItems.reduce((acc, item) => {
         const difficulty = item.difficulty || "medium";
         const progress = item.progress?.current ? 
           ((item.progress.current.hours * 60 + item.progress.current.minutes) / 
@@ -446,7 +520,7 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
         date.setDate(date.getDate() - i);
         const dateStr = date.toISOString().split('T')[0];
         
-        const stats = items.reduce((acc, item) => {
+        const stats = filteredItems.reduce((acc, item) => {
           const sessions = (item.progress?.sessions || [])
             .filter(session => session.startTime?.startsWith(dateStr));
           
@@ -467,7 +541,7 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
       }).reverse();
 
       // Completion metrics
-      const completionMetrics = items.reduce((acc, item) => {
+      const completionMetrics = filteredItems.reduce((acc, item) => {
         const status = item.status || "not_started";
         acc[status] = (acc[status] || 0) + 1;
         return acc;
@@ -476,14 +550,14 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
       // Learning focus (radar chart data)
       const focusMetrics = {
         consistency: Math.min(100, (dailyData.filter(d => d.hours > 0).length / 14) * 100),
-        completion: Math.min(100, (completionMetrics.completed || 0) / items.length * 100),
+        completion: Math.min(100, (completionMetrics.completed || 0) / filteredItems.length * 100),
         diversity: Math.min(100, Object.keys(categoryData).length * 20),
         engagement: Math.min(100, dailyData.reduce((sum, d) => sum + d.sessions, 0) / 14 * 50),
-        progress: Math.min(100, items.reduce((sum, item) => {
+        progress: Math.min(100, filteredItems.reduce((sum, item) => {
           const total = (item.progress?.total?.hours || 1) * 60 + (item.progress?.total?.minutes || 0);
           const current = (item.progress?.current?.hours || 0) * 60 + (item.progress?.current?.minutes || 0);
           return sum + (current / total) * 100;
-        }, 0) / items.length)
+        }, 0) / filteredItems.length)
       };
 
       return {
@@ -513,7 +587,7 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
         focusMetrics: []
       };
     }
-  }, [items]);
+  }, [filteredItems]); // Utiliser filteredItems au lieu de items
 
   // Handlers optimisés avec useCallback
   const switchToCharts = useCallback(() => setActiveTab('charts'), []);
@@ -591,34 +665,60 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
         </p>
       </div>
 
-      {/* Onglets pour basculer entre les graphiques et les insights - Design amélioré */}
-      <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-fit sticky top-0 z-10">
-        <button
-          onClick={switchToCharts}
-          className={cn(
-            "px-5 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2",
-            activeTab === 'charts' 
-              ? "bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400" 
-              : "hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300"
-          )}
-          aria-pressed={activeTab === 'charts'}
-        >
-          <BarChart3 className="w-4 h-4" />
-          <span>Graphiques</span>
-        </button>
-        <button
-          onClick={switchToInsights}
-          className={cn(
-            "px-5 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2",
-            activeTab === 'insights' 
-              ? "bg-white dark:bg-gray-700 shadow-sm text-purple-600 dark:text-purple-400" 
-              : "hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300"
-          )}
-          aria-pressed={activeTab === 'insights'}
-        >
-          <Lightbulb className="w-4 h-4" />
-          <span>Recommandations</span>
-        </button>
+      {/* Barre de contrôles */}
+      <div className="flex flex-wrap gap-3 items-center justify-between">
+        {/* Onglets pour basculer entre les graphiques et les insights */}
+        <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-fit sticky top-0 z-10">
+          <button
+            onClick={switchToCharts}
+            className={cn(
+              "px-5 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2",
+              activeTab === 'charts' 
+                ? "bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400" 
+                : "hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300"
+            )}
+            aria-pressed={activeTab === 'charts'}
+          >
+            <BarChart3 className="w-4 h-4" />
+            <span>Graphiques</span>
+          </button>
+          <button
+            onClick={switchToInsights}
+            className={cn(
+              "px-5 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2",
+              activeTab === 'insights' 
+                ? "bg-white dark:bg-gray-700 shadow-sm text-purple-600 dark:text-purple-400" 
+                : "hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300"
+            )}
+            aria-pressed={activeTab === 'insights'}
+          >
+            <Lightbulb className="w-4 h-4" />
+            <span>Recommandations</span>
+          </button>
+        </div>
+
+        {/* Sélecteur de période */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 gap-1.5">
+            <CalendarRange className="h-4 w-4" />
+            <span className="hidden sm:inline font-medium">{activePeriodLabel}</span>
+          </div>
+          <Select value={timePeriod} onValueChange={setTimePeriod}>
+            <SelectTrigger className="w-32 sm:w-40">
+              <div className="flex items-center gap-2">
+                <Filter className="h-3.5 w-3.5" />
+                <SelectValue placeholder="Time period" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              {TIME_PERIODS.map((period) => (
+                <SelectItem key={period.id} value={period.id}>
+                  {period.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Learning Goals - Design amélioré */}
@@ -646,6 +746,7 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
         <SummaryCard 
           title="Total Learning Time" 
           value={`${totalLearningHours}h`}
+          subtitle={timePeriod !== 'all' ? `during selected period` : undefined}
           icon={<Brain className="w-5 h-5 text-blue-600 dark:text-blue-400" strokeWidth={2} />}
           colorClass="text-blue-600 from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20"
         />
