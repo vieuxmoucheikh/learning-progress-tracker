@@ -205,20 +205,35 @@ const InsightsSection = ({ analytics, items }: { analytics: AnalyticsData, items
     return insights;
   }, [analytics, items]);
   
-  if (insights.length === 0) return null;
+  if (insights.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-16 text-center">
+        <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-full mb-4">
+          <Lightbulb className="w-10 h-10 text-purple-500" />
+        </div>
+        <h3 className="text-xl font-bold mb-2">Pas encore de recommandations</h3>
+        <p className="text-gray-500 dark:text-gray-400 max-w-md">
+          Continuez à enregistrer vos activités d'apprentissage pour recevoir des recommandations personnalisées.
+        </p>
+      </div>
+    );
+  }
   
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-medium">Recommandations personnalisées</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="space-y-6">
+      <h3 className="text-lg font-medium flex items-center gap-2">
+        <Lightbulb className="h-5 w-5 text-purple-500" />
+        <span>Recommandations personnalisées</span>
+      </h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {insights.map((insight, index) => (
-          <Card key={index} className="overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-800/50">
-            <CardContent className="p-4 flex items-start gap-4">
-              <div className="mt-1 p-2 rounded-full bg-white dark:bg-gray-800 shadow-sm">
+          <Card key={index} className="overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-800/50 hover:shadow-md transition-all">
+            <CardContent className="p-5 flex items-start gap-4">
+              <div className="mt-1 p-2.5 rounded-full bg-white dark:bg-gray-800 shadow">
                 {insight.icon}
               </div>
               <div>
-                <h4 className="font-medium">{insight.title}</h4>
+                <h4 className="font-medium text-base">{insight.title}</h4>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{insight.description}</p>
               </div>
             </CardContent>
@@ -576,31 +591,33 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
         </p>
       </div>
 
-      {/* Onglets pour basculer entre les graphiques et les insights */}
-      <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-fit">
+      {/* Onglets pour basculer entre les graphiques et les insights - Design amélioré */}
+      <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-fit sticky top-0 z-10">
         <button
           onClick={switchToCharts}
           className={cn(
-            "px-4 py-2 rounded-md text-sm font-medium transition-colors",
+            "px-5 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2",
             activeTab === 'charts' 
-              ? "bg-white dark:bg-gray-700 shadow-sm" 
-              : "hover:bg-white/50 dark:hover:bg-gray-700/50"
+              ? "bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400" 
+              : "hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300"
           )}
           aria-pressed={activeTab === 'charts'}
         >
-          Graphiques
+          <BarChart3 className="w-4 h-4" />
+          <span>Graphiques</span>
         </button>
         <button
           onClick={switchToInsights}
           className={cn(
-            "px-4 py-2 rounded-md text-sm font-medium transition-colors",
+            "px-5 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2",
             activeTab === 'insights' 
-              ? "bg-white dark:bg-gray-700 shadow-sm" 
-              : "hover:bg-white/50 dark:hover:bg-gray-700/50"
+              ? "bg-white dark:bg-gray-700 shadow-sm text-purple-600 dark:text-purple-400" 
+              : "hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300"
           )}
           aria-pressed={activeTab === 'insights'}
         >
-          Recommandations
+          <Lightbulb className="w-4 h-4" />
+          <span>Recommandations</span>
         </button>
       </div>
 
@@ -624,7 +641,7 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
         </Card>
       </ErrorBoundary>
 
-      {/* Summary Cards - Using the new component */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         <SummaryCard 
           title="Total Learning Time" 
@@ -655,68 +672,64 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
         />
       </div>
 
+      {/* Contenu conditionnel selon l'onglet actif */}
       {activeTab === 'charts' ? (
-        /* Charts Grid */
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Time by Category */}
-          <ErrorBoundary fallback={<p className="text-red-500">Erreur d'affichage du graphique de catégories</p>}>
-            <Card className="p-6 hover:shadow-md transition-shadow lg:col-span-2">
-              <div className="flex items-center gap-2 mb-6">
-                <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                  <PieChartIcon className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-                </div>
-                <h2 className="text-lg font-semibold">Time Spent by Category</h2>
-              </div>
-              <TimeByCategory categoryData={analytics.categoryData} />
-            </Card>
-          </ErrorBoundary>
-
-          {/* Learning Focus */}
-          <ErrorBoundary fallback={<p className="text-red-500">Erreur d'affichage du graphique radar</p>}>
-            <Card className="p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-2 mb-6">
-                <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-                  <Target className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
-                </div>
-                <h2 className="text-lg font-semibold">Learning Focus</h2>
-              </div>
-              <FocusRadar focusMetrics={analytics.focusMetrics} />
-            </Card>
-          </ErrorBoundary>
-
-          {/* Daily Activity */}
-          <ErrorBoundary fallback={<p className="text-red-500">Erreur d'affichage de l'activité quotidienne</p>}>
-            <Card className="p-6 hover:shadow-md transition-shadow lg:col-span-2">
-              <div className="flex items-center gap-2 mb-6">
-                <div className="p-1.5 bg-green-50 dark:bg-green-900/30 rounded-lg">
-                  <BarChart3 className="w-5 h-5 text-green-500 dark:text-green-400" />
-                </div>
-                <h2 className="text-lg font-semibold">Daily Activity (Past 14 Days)</h2>
-              </div>
-              <DailyActivity dailyData={analytics.dailyData} />
-            </Card>
-          </ErrorBoundary>
-
-          {/* Progress by Difficulty */}
-          <ErrorBoundary fallback={<p className="text-red-500">Erreur d'affichage de la progression par difficulté</p>}>
-            <Card className="p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-2 mb-6">
-                <div className="p-1.5 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
-                  <TrendingUp className="w-5 h-5 text-amber-500 dark:text-amber-400" />
-                </div>
-                <h2 className="text-lg font-semibold">Progress by Difficulty</h2>
-              </div>
-              <DifficultyProgress difficultyData={analytics.difficultyData} />
-            </Card>
-          </ErrorBoundary>
-        </div>
-      ) : (
-        /* Insights Section */
         <div className="space-y-8">
-          <ErrorBoundary fallback={<p className="text-red-500">Erreur lors du chargement des insights</p>}>
-            <InsightsSection analytics={analytics} items={items} />
-          </ErrorBoundary>
-          
+          {/* Charts Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Time by Category */}
+            <ErrorBoundary fallback={<p className="text-red-500">Erreur d'affichage du graphique de catégories</p>}>
+              <Card className="p-6 hover:shadow-md transition-shadow lg:col-span-2">
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                    <PieChartIcon className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                  </div>
+                  <h2 className="text-lg font-semibold">Time Spent by Category</h2>
+                </div>
+                <TimeByCategory categoryData={analytics.categoryData} />
+              </Card>
+            </ErrorBoundary>
+
+            {/* Learning Focus */}
+            <ErrorBoundary fallback={<p className="text-red-500">Erreur d'affichage du graphique radar</p>}>
+              <Card className="p-6 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+                    <Target className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+                  </div>
+                  <h2 className="text-lg font-semibold">Learning Focus</h2>
+                </div>
+                <FocusRadar focusMetrics={analytics.focusMetrics} />
+              </Card>
+            </ErrorBoundary>
+
+            {/* Daily Activity */}
+            <ErrorBoundary fallback={<p className="text-red-500">Erreur d'affichage de l'activité quotidienne</p>}>
+              <Card className="p-6 hover:shadow-md transition-shadow lg:col-span-2">
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="p-1.5 bg-green-50 dark:bg-green-900/30 rounded-lg">
+                    <BarChart3 className="w-5 h-5 text-green-500 dark:text-green-400" />
+                  </div>
+                  <h2 className="text-lg font-semibold">Daily Activity (Past 14 Days)</h2>
+                </div>
+                <DailyActivity dailyData={analytics.dailyData} />
+              </Card>
+            </ErrorBoundary>
+
+            {/* Progress by Difficulty */}
+            <ErrorBoundary fallback={<p className="text-red-500">Erreur d'affichage de la progression par difficulté</p>}>
+              <Card className="p-6 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="p-1.5 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
+                    <TrendingUp className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+                  </div>
+                  <h2 className="text-lg font-semibold">Progress by Difficulty</h2>
+                </div>
+                <DifficultyProgress difficultyData={analytics.difficultyData} />
+              </Card>
+            </ErrorBoundary>
+          </div>
+
           {/* Yearly Activity Heatmap */}
           <ErrorBoundary fallback={<p className="text-red-500">Erreur lors du chargement de l'activité annuelle</p>}>
             <Card className="p-4 md:p-6 hover:shadow-md transition-shadow overflow-hidden">
@@ -724,7 +737,7 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
                 <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
                   <Calendar className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                 </div>
-                <h2 className="text-lg font-semibold">Learning Insights</h2>
+                <h2 className="text-lg font-semibold">Yearly Activity Calendar</h2>
               </div>
               <div className="bg-white dark:bg-gray-800/30 rounded-md shadow-sm">
                 <YearlyActivityStats />
@@ -732,6 +745,11 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
             </Card>
           </ErrorBoundary>
         </div>
+      ) : (
+        /* Onglet Recommandations */
+        <ErrorBoundary fallback={<p className="text-red-500">Erreur lors du chargement des recommandations</p>}>
+          <InsightsSection analytics={analytics} items={items} />
+        </ErrorBoundary>
       )}
     </div>
   );
