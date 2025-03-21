@@ -699,27 +699,27 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
 
   return (
     <div className="space-y-8">
-      {/* En-tête de la page - Amélioré pour le mode sombre sur desktop */}
-      <div className="flex flex-col space-y-2 bg-gradient-to-r from-gray-900/20 to-gray-800/10 p-6 rounded-xl border border-gray-800/30 shadow-inner">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-50 drop-shadow-sm">
+      {/* En-tête de la page - Adapté pour les deux modes */}
+      <div className="flex flex-col space-y-2 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-900/20 dark:to-gray-800/10 p-6 rounded-xl border border-blue-200/30 dark:border-gray-800/30 shadow-inner">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-800 dark:text-gray-50 drop-shadow-sm">
           Learning Analytics
         </h1>
-        <p className="text-gray-300 text-lg max-w-3xl">
+        <p className="text-gray-600 dark:text-gray-300 text-lg max-w-3xl">
           Visualisez vos progrès et identifiez vos tendances d'apprentissage avec des données exploitables
         </p>
       </div>
 
       {/* Barre de contrôles */}
-      <div className="flex flex-wrap gap-3 items-center justify-between bg-gray-800/60 p-3 rounded-lg backdrop-blur-sm border border-gray-700/50 shadow-md">
+      <div className="flex flex-wrap gap-3 items-center justify-between bg-gray-100 dark:bg-gray-800/60 p-3 rounded-lg backdrop-blur-sm border border-gray-200 dark:border-gray-700/50 shadow-md">
         {/* Onglets pour basculer entre les graphiques et les insights */}
-        <div className="flex space-x-1 bg-gray-900/70 p-1 rounded-lg w-fit z-10">
+        <div className="flex space-x-1 bg-white/80 dark:bg-gray-900/70 p-1 rounded-lg w-fit z-10 shadow-sm">
           <button
             onClick={switchToCharts}
             className={cn(
               "px-5 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 relative",
               activeTab === 'charts' 
-                ? "bg-white dark:bg-gray-700 shadow-md text-blue-600 dark:text-blue-300 ring-4 ring-blue-200 dark:ring-blue-500/30" 
-                : "hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 active:bg-white/70 dark:active:bg-gray-700/70"
+                ? "bg-white dark:bg-gray-700 shadow-md text-blue-600 dark:text-blue-300 ring-4 ring-blue-50 dark:ring-blue-500/30" 
+                : "hover:bg-blue-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 active:bg-blue-100 dark:active:bg-gray-700/70"
             )}
             aria-pressed={activeTab === 'charts'}
             aria-label="Afficher les graphiques"
@@ -740,8 +740,8 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
             className={cn(
               "px-5 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 relative",
               activeTab === 'insights' 
-                ? "bg-white dark:bg-gray-700 shadow-md text-purple-600 dark:text-purple-300 ring-4 ring-purple-200 dark:ring-purple-500/30" 
-                : "hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 active:bg-white/70 dark:active:bg-gray-700/70"
+                ? "bg-white dark:bg-gray-700 shadow-md text-purple-600 dark:text-purple-300 ring-4 ring-purple-50 dark:ring-purple-500/30" 
+                : "hover:bg-purple-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 active:bg-purple-100 dark:active:bg-gray-700/70"
             )}
             aria-pressed={activeTab === 'insights'}
             aria-label="Afficher les recommandations"
@@ -760,15 +760,15 @@ export function AnalyticsTab({ items, isLoading = false }: AnalyticsTabProps) {
         </div>
 
         {/* Sélecteur de période */}
-        <div className="flex items-center gap-3 bg-gray-800 px-3 py-2 rounded-lg border border-gray-700/70">
-          <div className="flex items-center text-sm text-gray-300 gap-1.5 font-medium">
-            <CalendarRange className="h-4 w-4 text-blue-400" />
+        <div className="flex items-center gap-3 bg-white dark:bg-gray-800 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700/70">
+          <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 gap-1.5 font-medium">
+            <CalendarRange className="h-4 w-4 text-blue-500 dark:text-blue-400" />
             <span className="hidden sm:inline">{activePeriodLabel}</span>
           </div>
           <Select value={timePeriod} onValueChange={setTimePeriod}>
-            <SelectTrigger className="w-32 sm:w-40">
+            <SelectTrigger className="w-32 sm:w-40 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-2">
-                <Filter className="h-3.5 w-3.5" />
+                <Filter className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
                 <SelectValue placeholder="Time period" />
               </div>
             </SelectTrigger>
