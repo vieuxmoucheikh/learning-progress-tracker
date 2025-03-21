@@ -79,11 +79,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             class: 'font-bold text-gray-900', // Ceci s'applique à tous les niveaux de titre
           },
         },
-        bold: {
-          HTMLAttributes: {
-            class: 'font-bold text-gray-900 dark:text-white', // Ajout d'une classe explicite pour le gras
-          },
-        },
         bulletList: {
           keepMarks: true,
           keepAttributes: false,
@@ -256,27 +251,21 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         "rounded-lg border border-gray-200 dark:border-gray-700",
         "bg-white dark:bg-gray-800", // Fond sombre pour le mode sombre
         "relative flex flex-col",
-        "mobile-optimized", // Classe pour aider au ciblage mobile
         className
       )}>
         {editable && (
-          <div className="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm editor-toolbar">
-            <div className="flex flex-wrap gap-1 p-2 justify-center sm:justify-start">
+          <div className="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="flex flex-wrap gap-1 p-2">
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={() => editor.chain().focus().toggleBold().run()}
                 className={cn(
                   "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
-                  "sm:h-10 sm:w-10", // Augmentation de la taille sur desktop
-                  editor.isActive('bold') 
-                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 font-bold border border-blue-200 dark:border-blue-800" 
-                    : "hover:bg-blue-50 dark:hover:bg-blue-900/30",
-                  "mobile-editor-btn", // Classe pour ciblage mobile
-                  "transition-all duration-200"
+                  editor.isActive('bold') && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
                 )}
               >
-                <Bold className="h-4 w-4 sm:h-5 sm:w-5" />
+                <Bold className="h-4 w-4" />
               </Button>
               <Button
                 size="icon"
@@ -284,14 +273,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 onClick={() => editor.chain().focus().toggleItalic().run()}
                 className={cn(
                   "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
-                  "sm:h-10 sm:w-10", // Augmentation de la taille sur desktop
-                  editor.isActive('italic') 
-                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 italic border border-blue-200 dark:border-blue-800" 
-                    : "hover:bg-blue-50 dark:hover:bg-blue-900/30",
-                  "transition-all duration-200"
+                  editor.isActive('italic') && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
                 )}
               >
-                <Italic className="h-4 w-4 sm:h-5 sm:w-5" />
+                <Italic className="h-4 w-4" />
               </Button>
               <Button
                 size="icon"
@@ -299,14 +284,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 onClick={() => editor.chain().focus().toggleCode().run()}
                 className={cn(
                   "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
-                  "sm:h-10 sm:w-10", // Augmentation de la taille sur desktop
-                  editor.isActive('code') 
-                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 font-mono border border-blue-200 dark:border-blue-800" 
-                    : "hover:bg-blue-50 dark:hover:bg-blue-900/30",
-                  "transition-all duration-200"
+                  editor.isActive('code') && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
                 )}
               >
-                <CodeIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                <CodeIcon className="h-4 w-4" />
               </Button>
 
               <Popover>
@@ -314,22 +295,17 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   <Button
                     size="icon"
                     variant="ghost"
-                    className={cn(
-                      "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
-                      "sm:h-10 sm:w-10", // Augmentation de la taille sur desktop
-                      "hover:bg-blue-50 dark:hover:bg-blue-900/30 border-dashed border border-transparent hover:border-blue-300 dark:hover:border-blue-700",
-                      "transition-all duration-200"
-                    )}
+                    className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
                   >
-                    <Type className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <Type className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-64 p-2 dark:bg-gray-800 dark:border-gray-700 shadow-lg">
+                <PopoverContent className="w-64 p-2 dark:bg-gray-800 dark:border-gray-700">
                   <div className="grid grid-cols-10 gap-1">
                     {colors.map((color) => (
                       <button
                         key={color}
-                        className="w-5 h-5 sm:w-7 sm:h-7 rounded border border-gray-200 dark:border-gray-600 hover:scale-110 transition-transform shadow-sm"
+                        className="w-5 h-5 rounded border border-gray-200 dark:border-gray-600"
                         style={{ backgroundColor: color }}
                         onClick={() => editor.chain().focus().setColor(color).run()}
                       />
@@ -343,22 +319,17 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   <Button
                     size="icon"
                     variant="ghost"
-                    className={cn(
-                      "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
-                      "sm:h-10 sm:w-10", // Augmentation de la taille sur desktop
-                      "hover:bg-blue-50 dark:hover:bg-blue-900/30 border-dashed border border-transparent hover:border-blue-300 dark:hover:border-blue-700",
-                      "transition-all duration-200"
-                    )}
+                    className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
                   >
-                    <Palette className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <Palette className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-64 p-2 dark:bg-gray-800 dark:border-gray-700 shadow-lg">
+                <PopoverContent className="w-64 p-2">
                   <div className="grid grid-cols-10 gap-1">
                     {bgColors.map((color) => (
                       <button
                         key={color}
-                        className="w-5 h-5 sm:w-7 sm:h-7 rounded border border-gray-200 dark:border-gray-600 hover:scale-110 transition-transform shadow-sm"
+                        className="w-5 h-5 rounded border border-gray-200"
                         style={{ backgroundColor: color }}
                         onClick={() => editor.chain().focus().setHighlight({ color }).run()}
                       />
@@ -372,55 +343,86 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 variant="ghost"
                 onClick={() => editor.chain().focus().toggleBulletList().run()}
                 className={cn(
-                  "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
-                  "sm:h-10 sm:w-10", // Augmentation de la taille sur desktop
-                  editor.isActive('bulletList') 
-                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 border border-blue-200 dark:border-blue-800" 
-                    : "hover:bg-blue-50 dark:hover:bg-blue-900/30",
-                  "transition-all duration-200"
+                  "hover:bg-gray-100",
+                  editor.isActive('bulletList') && "bg-gray-100 text-gray-900"
                 )}
               >
-                <List className="h-4 w-4 sm:h-5 sm:w-5" />
+                <List className="h-4 w-4" />
               </Button>
-              
-              {/* Continuer le même style pour les autres boutons... */}
-              
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={() => editor.chain().focus().toggleOrderedList().run()}
                 className={cn(
-                  "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
-                  "sm:h-10 sm:w-10", // Augmentation de la taille sur desktop
-                  editor.isActive('orderedList') 
-                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 border border-blue-200 dark:border-blue-800" 
-                    : "hover:bg-blue-50 dark:hover:bg-blue-900/30",
-                  "transition-all duration-200"
+                  "hover:bg-gray-100",
+                  editor.isActive('orderedList') && "bg-gray-100 text-gray-900"
                 )}
               >
-                <ListOrdered className="h-4 w-4 sm:h-5 sm:w-5" />
+                <ListOrdered className="h-4 w-4" />
               </Button>
-              
-              {/* Continuer pour les autres boutons avec le même pattern... */}
-              
-              {/* Pour les boutons Heading, on peut ajouter une classe spéciale pour mieux les identifier */}
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => editor.chain().focus().toggleBlockquote().run()}
+                className={cn(
+                  "hover:bg-gray-100",
+                  editor.isActive('blockquote') && "bg-gray-100 text-gray-900"
+                )}
+              >
+                <Quote className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={toggleLink}
+                className={cn(
+                  "hover:bg-gray-100",
+                  editor.isActive('link') && "bg-gray-100 text-gray-900"
+                )}
+              >
+                <LinkIcon className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={addImage}
+                className="hover:bg-gray-100"
+              >
+                <ImageIcon className="h-4 w-4" />
+              </Button>
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
                 className={cn(
-                  "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
-                  "sm:h-10 sm:w-10", // Augmentation de la taille sur desktop
-                  editor.isActive('heading', { level: 1 }) 
-                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 font-bold border border-blue-200 dark:border-blue-800" 
-                    : "hover:bg-blue-50 dark:hover:bg-blue-900/30",
-                  "transition-all duration-200"
+                  "hover:bg-gray-100",
+                  editor.isActive('heading', { level: 1 }) && "bg-gray-100 text-gray-900"
                 )}
               >
-                <Heading1 className="h-4 w-4 sm:h-5 sm:w-5" />
+                <Heading1 className="h-4 w-4" />
               </Button>
-              
-              {/* Continuer pour les autres boutons Heading avec le même pattern... */}
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                className={cn(
+                  "hover:bg-gray-100",
+                  editor.isActive('heading', { level: 2 }) && "bg-gray-100 text-gray-900"
+                )}
+              >
+                <Heading2 className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+                className={cn(
+                  "hover:bg-gray-100",
+                  editor.isActive('heading', { level: 3 }) && "bg-gray-100 text-gray-900"
+                )}
+              >
+                <Heading3 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         )}
@@ -429,7 +431,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           className={cn(
                   "prose prose-sm max-w-none",
                   "bg-white dark:bg-gray-800 text-gray-900 dark:text-white", // Texte blanc en mode sombre
-                  "p-4 overflow-y-auto mobile-editor-content", // Ajout d'une classe pour ciblage mobile
+                  "p-4 overflow-y-auto",
                   "[&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:outline-none",
                   "[&_.ProseMirror]:dark:text-white", // Texte blanc pour l'éditeur en mode sombre
                   "[&_pre]:bg-gray-50 [&_pre]:text-gray-900 [&_pre]:border [&_pre]:border-gray-200 [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:my-4",
@@ -443,25 +445,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   "[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4",
                   "[&_p]:my-2 [&_p]:text-gray-900 [&_p]:dark:text-white", // Texte blanc pour les paragraphes
                   "[&_h1]:dark:text-white [&_h2]:dark:text-white [&_h3]:dark:text-white", // Texte blanc pour les titres
-                  "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4",
-                  // Styles améliorés pour mobile en mode clair
-                  "sm:text-base sm:leading-relaxed",
-                  "prose-h1:text-2xl prose-h1:font-bold prose-h1:mb-4 prose-h1:mt-6",
-                  "prose-h2:text-xl prose-h2:font-bold prose-h2:mb-3 prose-h2:mt-5",
-                  "prose-h3:text-lg prose-h3:font-bold prose-h3:mb-2 prose-h3:mt-4",
-                  "prose-p:my-3 prose-p:text-[1.05rem] prose-p:leading-relaxed",
-                  "prose-ul:pl-5 prose-ul:my-3 prose-ol:pl-5 prose-ol:my-3",
-                  "prose-li:my-1 prose-li:pl-1",
-                  "prose-img:my-4 prose-img:mx-auto prose-img:rounded-lg",
-                  "[&_.ProseMirror_strong]:font-bold [&_.ProseMirror_strong]:text-gray-900 [&_.ProseMirror_strong]:dark:text-white", // Ajouter cette ligne
-                  "[&_.ProseMirror_b]:font-bold [&_.ProseMirror_b]:text-gray-900 [&_.ProseMirror_b]:dark:text-white", // Ajouter cette ligne
-                  "prose-headings:font-bold", // Assurer que les entêtes sont en gras
-                  "prose-strong:font-bold prose-strong:text-black dark:prose-strong:text-white", // Renforcer le texte en gras
-                  "prose-em:italic prose-em:text-gray-800 dark:prose-em:text-gray-200", // Améliorer l'italique
-                  "[&_pre]:bg-gray-50 [&_pre]:dark:bg-gray-900 [&_pre]:border [&_pre]:rounded-md", // Améliorer les blocs de code
-                  "[&_code]:font-mono [&_code]:text-blue-600 [&_code]:dark:text-blue-400", // Améliorer le texte de code
-                  "[&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:pl-4", // Améliorer les citations
-                  "[&_q]:font-italic [&_q]:text-gray-700 [&_q]:dark:text-gray-300" // Améliorer les citations en ligne
+                  "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4"
                 )}
           
         />
