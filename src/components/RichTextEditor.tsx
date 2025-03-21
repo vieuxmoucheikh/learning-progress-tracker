@@ -129,13 +129,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         },
       }),
       TextStyle.configure({
-        // Configuration explicite pour assurer que les styles de couleur fonctionnent correctement
+        // Configuration correcte pour TextStyle
         HTMLAttributes: {
           class: 'custom-text-style',
         },
       }),
       ColorExtension.configure({
-        // Assurer que les attributs de style sont préservés
         types: ['textStyle'],
       }),
       Highlight.configure({
@@ -306,19 +305,23 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
+                    className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300 color-picker-button"
+                    title="Couleur du texte"
                   >
                     <Type className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-64 p-2 colors-popover dark:bg-gray-800 dark:border-gray-700">
-                  <div className="grid grid-cols-10 gap-1 colors-grid">
+                <PopoverContent className="w-64 p-2 color-picker-popover" align="start" sideOffset={5}>
+                  <div className="grid grid-cols-10 gap-1 color-grid">
                     {colors.map((color) => (
                       <button
                         key={color}
-                        className="color-button w-5 h-5 rounded border border-gray-200 dark:border-gray-600"
+                        className="w-5 h-5 rounded color-button"
                         style={{ backgroundColor: color }}
-                        onClick={() => editor.chain().focus().setColor(color).run()}
+                        onClick={() => {
+                          editor.chain().focus().setColor(color).run();
+                        }}
+                        title={color}
                       />
                     ))}
                   </div>
@@ -330,19 +333,23 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
+                    className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300 color-picker-button"
+                    title="Couleur de fond"
                   >
                     <Palette className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-64 p-2 colors-popover dark:bg-gray-800 dark:border-gray-700">
-                  <div className="grid grid-cols-10 gap-1 colors-grid">
+                <PopoverContent className="w-64 p-2 color-picker-popover" align="start" sideOffset={5}>
+                  <div className="grid grid-cols-10 gap-1 color-grid">
                     {bgColors.map((color) => (
                       <button
                         key={color}
-                        className="color-button w-5 h-5 rounded border border-gray-200 dark:border-gray-600"
+                        className="w-5 h-5 rounded color-button"
                         style={{ backgroundColor: color }}
-                        onClick={() => editor.chain().focus().setHighlight({ color }).run()}
+                        onClick={() => {
+                          editor.chain().focus().setHighlight({ color }).run();
+                        }}
+                        title={color}
                       />
                     ))}
                   </div>
