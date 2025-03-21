@@ -2285,3 +2285,108 @@ html[data-theme="dark"] [class*="prose"] strong {
 html[data-theme="dark"] [class*="editor"] [contenteditable="true"] {
   background-color: #1e293b !important;
 }
+
+/* ...existing code... */
+
+/* CORRECTIONS CRITIQUES POUR LA VISIBILITÉ DES COULEURS EN MODE SOMBRE */
+
+/* Préserver les styles de couleur personnalisés dans l'éditeur */
+html[data-theme="dark"] [style*="color:"],
+html[data-theme="dark"] [style*="color :"],
+html[data-theme="dark"] [style*="background-color"],
+html[data-theme="dark"] [style*="background:"],
+html[data-theme="dark"] [style*="background :"],
+html[data-theme="dark"] span[style],
+html[data-theme="dark"] p[style],
+html[data-theme="dark"] h1[style],
+html[data-theme="dark"] h2[style],
+html[data-theme="dark"] h3[style],
+html[data-theme="dark"] h4[style],
+html[data-theme="dark"] h5[style],
+html[data-theme="dark"] h6[style],
+html[data-theme="dark"] div[style],
+html[data-theme="dark"] strong[style],
+html[data-theme="dark"] em[style] {
+  color: inherit !important;
+  background-color: inherit !important;
+}
+
+/* Surcharger les règles génériques pour le contenu éditable */
+html[data-theme="dark"] .ProseMirror [style],
+html[data-theme="dark"] .ProseMirror span[style],
+html[data-theme="dark"] .ProseMirror p[style],
+html[data-theme="dark"] .ProseMirror div[style] {
+  color: inherit !important;
+  background-color: inherit !important;
+}
+
+/* Préserver les couleurs spécifiques pour l'extension TextStyle */
+html[data-theme="dark"] .ProseMirror .text-red { color: #f87171 !important; }
+html[data-theme="dark"] .ProseMirror .text-blue { color: #60a5fa !important; }
+html[data-theme="dark"] .ProseMirror .text-green { color: #4ade80 !important; }
+html[data-theme="dark"] .ProseMirror .text-yellow { color: #fbbf24 !important; }
+html[data-theme="dark"] .ProseMirror .text-purple { color: #a78bfa !important; }
+
+/* Préserver les surlignages par couleur */
+html[data-theme="dark"] .ProseMirror mark[style],
+html[data-theme="dark"] .ProseMirror span[data-highlight],
+html[data-theme="dark"] .ProseMirror mark[data-color] {
+  background-color: inherit !important; 
+  color: inherit !important;
+  mix-blend-mode: multiply !important;
+}
+
+/* Améliorer la visibilité des couleurs spécifiques de mise en évidence */
+html[data-theme="dark"] .ProseMirror mark[style*="background-color: rgb(254, 226, 226)"],
+html[data-theme="dark"] .ProseMirror mark[style*="background-color: #fee2e2"] {
+  background-color: rgba(254, 226, 226, 0.4) !important;
+}
+
+html[data-theme="dark"] .ProseMirror mark[style*="background-color: rgb(219, 234, 254)"],
+html[data-theme="dark"] .ProseMirror mark[style*="background-color: #dbeafe"] {
+  background-color: rgba(219, 234, 254, 0.4) !important;
+}
+
+html[data-theme="dark"] .ProseMirror mark[style*="background-color: rgb(220, 252, 231)"],
+html[data-theme="dark"] .ProseMirror mark[style*="background-color: #dcfce7"] {
+  background-color: rgba(220, 252, 231, 0.4) !important;
+}
+
+html[data-theme="dark"] .ProseMirror mark[style*="background-color: rgb(254, 249, 195)"],
+html[data-theme="dark"] .ProseMirror mark[style*="background-color: #fef9c3"] {
+  background-color: rgba(254, 249, 195, 0.4) !important;
+}
+
+/* Ne pas modifier les couleurs spécifiquement définies par l'utilisateur */
+html[data-theme="dark"] [style*="!important"] {
+  color: inherit !important;
+  background-color: inherit !important;
+}
+
+/* Assurer un bon contraste pour tous les éléments colorés en mode sombre */
+html[data-theme="dark"] [style*="color: white"],
+html[data-theme="dark"] [style*="color: #fff"],
+html[data-theme="dark"] [style*="color: #ffffff"],
+html[data-theme="dark"] [style*="color:#fff"],
+html[data-theme="dark"] [style*="color:#ffffff"] {
+  color: white !important;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Réglages de fond pour l'éditeur - PRIORITÉ MAXIMALE */
+html[data-theme="dark"] .rich-text-editor,
+html[data-theme="dark"] .rich-text-editor .ProseMirror,
+html[data-theme="dark"] .rich-text-editor div[contenteditable="true"] {
+  background-color: #1e293b !important;
+}
+
+/* CORRECTIF POUR LES COULEURS DE L'EXTENSION HIGHLIGHT */
+html[data-theme="dark"] .ProseMirror .has-highlight {
+  background-color: inherit !important; 
+}
+
+/* Spécial pour les palettes de couleurs */
+html[data-theme="dark"] .popover-content button,
+html[data-theme="dark"] .PopoverContent button {
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
