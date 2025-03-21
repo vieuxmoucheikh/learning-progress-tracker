@@ -153,88 +153,6 @@ const injectCriticalStyles = () => {
   }, 500);
 };
 
-// Injecter un style critique au runtime pour garantir la visibilité
-const injectCriticalVisibilityStyles = () => {
-  const styleElement = document.createElement('style');
-  styleElement.setAttribute('id', 'critical-visibility-fix');
-  styleElement.textContent = `
-    /* CORRECTIFS DE VISIBILITÉ CRITIQUE INJECTÉS */
-    html[data-theme="dark"] span.badge[variant="secondary"],
-    html[data-theme="dark"] .badge[variant="secondary"],
-    .dark span.badge[variant="secondary"],
-    .dark .badge[variant="secondary"] {
-      background: rgba(29, 78, 216, 0.95) !important;
-      color: white !important;
-      display: inline-flex !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      border: 2px solid #93c5fd !important;
-      font-weight: 700 !important;
-      padding: 0.25rem 0.75rem !important;
-      border-radius: 9999px !important;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2), 0 0 10px rgba(147, 197, 253, 0.5) !important;
-      position: relative !important;
-      z-index: 999 !important;
-      max-width: max-content !important;
-    }
-    
-    html[data-theme="dark"] [style*="background-color"],
-    html[data-theme="dark"] [style*="background"],
-    html[data-theme="dark"] mark,
-    .dark [style*="background-color"],
-    .dark [style*="background"],
-    .dark mark {
-      color: white !important;
-      filter: brightness(1.3) contrast(1.5) !important;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9) !important;
-      font-weight: 500 !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-      border-radius: 3px !important;
-      padding: 0 3px !important;
-      display: inline !important;
-    }
-    
-    html[data-theme="dark"] [style*="color"],
-    .dark [style*="color"] {
-      filter: brightness(1.8) saturate(1.5) contrast(1.4) !important;
-      text-shadow: 0 0 2px rgba(0, 0, 0, 0.9) !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-    }
-    
-    html[data-theme="dark"] q,
-    html[data-theme="dark"] blockquote,
-    html[data-theme="dark"] i,
-    html[data-theme="dark"] em,
-    .dark q,
-    .dark blockquote,
-    .dark i,
-    .dark em {
-      color: #f8fafc !important;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
-      font-weight: 500 !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-    }
-  `;
-  
-  document.head.appendChild(styleElement);
-  
-  // Force un redéclenchement du rendu des badges
-  setTimeout(() => {
-    const badges = document.querySelectorAll('.badge');
-    badges.forEach(badge => {
-      const parent = badge.parentElement;
-      if (parent) {
-        parent.style.display = 'none';
-        setTimeout(() => { parent.style.display = ''; }, 50);
-      }
-    });
-  }, 500);
-};
-
 // S'assurer que les styles sont injectés au chargement de la page
 if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', injectCriticalStyles);
@@ -245,19 +163,6 @@ if (typeof window !== 'undefined') {
   
   // Réinjecter les styles après un délai pour s'assurer qu'ils ne sont pas écrasés
   setTimeout(injectCriticalStyles, 1000);
-}
-
-// S'assurer que les styles sont injectés au chargement
-if (typeof window !== 'undefined') {
-  window.addEventListener('DOMContentLoaded', injectCriticalVisibilityStyles);
-  // Aussi injecter immédiatement au cas où le DOM est déjà chargé
-  if (document.readyState === 'interactive' || document.readyState === 'complete') {
-    injectCriticalVisibilityStyles();
-  }
-  
-  // Réinjecter périodiquement les styles pour s'assurer qu'ils ne sont pas écrasés
-  setTimeout(injectCriticalVisibilityStyles, 1000);
-  setTimeout(injectCriticalVisibilityStyles, 2000);
 }
 
 function Root() {
