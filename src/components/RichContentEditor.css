@@ -126,3 +126,87 @@
 .rich-content-editor button:focus:not(:focus-visible) {
   outline: none;
 }
+
+/* Styles pour améliorer la visibilité immédiate des couleurs dans l'éditeur TipTap */
+
+/* Garantir que les styles inline ne sont pas écrasés */
+.ProseMirror [style*="color:"] {
+  color: currentColor !important;
+}
+
+.ProseMirror [style*="background-color:"] {
+  background-color: currentColor !important;
+}
+
+/* Couleurs de texte spécifiques pour l'extension TextStyle */
+.ProseMirror .text-red { color: #f87171 !important; }
+.ProseMirror .text-blue { color: #60a5fa !important; }
+.ProseMirror .text-green { color: #4ade80 !important; }
+.ProseMirror .text-yellow { color: #fbbf24 !important; }
+.ProseMirror .text-purple { color: #a78bfa !important; }
+
+/* Styles pour le mode sombre */
+html[data-theme="dark"] .ProseMirror [style*="color:"] {
+  color: currentColor !important;
+}
+
+html[data-theme="dark"] .ProseMirror [style*="background-color:"] {
+  background-color: currentColor !important;
+  opacity: 0.85;
+  mix-blend-mode: screen;
+}
+
+/* Surcharger TailwindCSS qui peut interférer avec les styles */
+.ProseMirror [class*="text-"] {
+  color: inherit !important;
+}
+
+.ProseMirror [class*="bg-"] {
+  background-color: inherit !important;
+}
+
+/* Garantir que les couleurs de surbrillance restent visibles */
+.ProseMirror mark[style],
+.ProseMirror span[data-highlight="true"] {
+  background-color: inherit !important;
+}
+
+/* En mode sombre, ajuster le mode de fusion pour les couleurs claires */
+html[data-theme="dark"] .ProseMirror mark[style*="background-color: rgb(255"],
+html[data-theme="dark"] .ProseMirror mark[style*="background-color: #f"],
+html[data-theme="dark"] .ProseMirror mark[style*="background-color: #e"] {
+  mix-blend-mode: screen !important;
+  opacity: 0.7 !important;
+}
+
+/* Styles immédiats pour les extensions TipTap */
+.ProseMirror .has-text-color {
+  color: var(--tiptap-color) !important;
+}
+
+.ProseMirror .has-highlight {
+  background-color: var(--tiptap-highlight) !important;
+}
+
+/* Support pour les attributs data spécifiques de TipTap */
+.ProseMirror [data-color] {
+  color: attr(data-color) !important;
+}
+
+.ProseMirror [data-highlight-color] {
+  background-color: attr(data-highlight-color) !important;
+}
+
+/* Styles pour les textes colorés */
+.ProseMirror [style*="color:"] {
+  color: currentColor !important;
+  /* Ajoute automatiquement une classe virtuelle pour le ciblage CSS */
+  --has-color: true; 
+}
+
+/* Cible tous les éléments avec une couleur définie */
+.ProseMirror [style*="color:"]:not([data-color-processed]) {
+  position: relative;
+  /* Marquer l'élément comme traité pour éviter le traitement multiple */
+  --data-color-processed: true;
+}

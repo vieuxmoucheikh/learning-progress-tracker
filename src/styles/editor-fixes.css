@@ -99,3 +99,88 @@ html[data-theme="dark"] .ProseMirror [style] {
   color: inherit !important;
   background-color: inherit !important;
 }
+
+/* Modifications pour préserver les styles pendant l'édition active */
+
+/* Supprimer les règles qui pourraient interférer avec la visibilité pendant l'édition */
+.ProseMirror [style],
+.ProseMirror span[style],
+.ProseMirror p[style],
+.ProseMirror h1[style],
+.ProseMirror h2[style],
+.ProseMirror h3[style],
+.ProseMirror strong[style],
+.ProseMirror em[style],
+.ProseMirror li[style] {
+  color: unset !important;
+  background-color: unset !important;
+}
+
+/* Important: assurer que les couleurs spécifiées par l'extension Color sont visibles pendant l'édition */
+.ProseMirror [style*="color:"] {
+  color: var(--color) !important;
+}
+
+/* Important: assurer que les couleurs de fond sont visibles pendant l'édition */
+.ProseMirror mark[style*="background-color:"],
+.ProseMirror span[style*="background-color:"] {
+  background-color: var(--bg-color) !important;
+  mix-blend-mode: unset !important;
+}
+
+/* Règles spécifiques pour le mode sombre pendant l'édition */
+html[data-theme="dark"] .ProseMirror [style*="color:"] {
+  color: var(--color) !important;
+}
+
+html[data-theme="dark"] .ProseMirror mark[style*="background-color:"],
+html[data-theme="dark"] .ProseMirror span[style*="background-color:"] {
+  background-color: var(--bg-color) !important;
+  opacity: 0.85 !important;
+  mix-blend-mode: screen !important;
+}
+
+/* Forcer l'affichage des styles personnalisés pendant l'édition */
+.ProseMirror [style*="color:"] {
+  --color: attr(style color);
+}
+
+.ProseMirror [style*="background-color:"] {
+  --bg-color: attr(style background-color);
+}
+
+/* Réglages spécifiques pour les extensions TipTap pendant l'édition */
+.ProseMirror .has-highlight {
+  mix-blend-mode: unset !important;
+}
+
+html[data-theme="dark"] .ProseMirror .has-highlight {
+  mix-blend-mode: screen !important;
+}
+
+/* Correction spécifique pour les textes colorés pendant l'édition */
+.ProseMirror [data-text-color] {
+  color: attr(data-text-color) !important;
+}
+
+.ProseMirror [data-highlight-color] {
+  background-color: attr(data-highlight-color) !important;
+}
+
+/* Assurez-vous que les règles génériques n'interfèrent pas avec les couleurs pendant l'édition */
+html[data-theme="dark"] .ProseMirror p {
+  color: unset;  /* Laisser la couleur être déterminée par les styles inline */
+}
+
+/* Règles critiques pour la visibilité immédiate des styles en mode sombre pendant l'édition */
+html[data-theme="dark"] .ProseMirror [style]:not([style=""]) {
+  all: revert !important;  /* Reset complet pour les éléments stylisés */
+}
+
+html[data-theme="dark"] .ProseMirror [style*="color:"] {
+  color: currentColor !important;  /* Préserver la couleur actuelle */
+}
+
+html[data-theme="dark"] .ProseMirror [style*="background-color:"] {
+  background-color: currentColor !important;  /* Préserver la couleur de fond actuelle */
+}

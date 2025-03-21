@@ -171,12 +171,22 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           class: 'rounded bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 font-mono text-sm text-gray-900 dark:text-gray-100',
         },
       }),
-      TextStyle,
-      ColorExtension,
+      TextStyle.configure({
+        HTMLAttributes: {
+          class: 'styled-text', // Ajouter une classe pour faciliter le ciblage CSS
+        },
+      }),
+      // Correction de l'erreur de typage sur ColorExtension
+      ColorExtension.configure({
+        types: ['textStyle'],
+        // Supprimer l'option HTMLAttributes qui cause l'erreur
+      }),
       Highlight.configure({
         multicolor: true,
         HTMLAttributes: {
           class: 'has-highlight',
+          // Ajouter un data-attribute qui sera utilisé par CSS
+          'data-highlight': 'true', 
         },
       }),
     ],
@@ -318,6 +328,55 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     input.click();
   }, [editor]);
 
+  useEffect(() => {
+    if (!editor) return;
+    
+    // Fonction pour s'assurer que les styles sont visibles pendant l'édition
+    const updateStyleVisibility = () => {
+      // Sélectionner tous les éléments avec des styles dans l'éditeur
+      const styledElements = document.querySelectorAll('.ProseMirror [style*="color:"], .ProseMirror [style*="background-color:"]');
+      
+      styledElements.forEach(el => {
+        const style = el.getAttribute('style');
+        
+        // Extraire les valeurs de couleur et les stocker comme variables personnalisées
+        if (style && style.includes('color:')) {
+          const colorMatch = style.match(/color:\s*([^;]+)/);
+          if (colorMatch && colorMatch[1]) {
+            (el as HTMLElement).style.setProperty('--color', colorMatch[1]);
+          }
+        }
+        
+        if (style && style.includes('background-color:')) {
+          const bgColorMatch = style.match(/background-color:\s*([^;]+)/);
+          if (bgColorMatch && bgColorMatch[1]) {
+            (el as HTMLElement).style.setProperty('--bg-color', bgColorMatch[1]);
+          }
+        }
+      });
+    };
+    
+    // Observer les mutations dans l'éditeur pour mettre à jour la visibilité des styles
+    const observer = new MutationObserver(updateStyleVisibility);
+    
+    const editorElement = document.querySelector('.ProseMirror');
+    if (editorElement) {
+      observer.observe(editorElement, { 
+        attributes: true,
+        childList: true,
+        subtree: true,
+        attributeFilter: ['style']
+      });
+      
+      // Mise à jour initiale
+      updateStyleVisibility();
+    }
+    
+    return () => {
+      observer.disconnect();
+    };
+  }, [editor]);
+
   if (!editor) {
     return null;
   }
@@ -386,7 +445,17 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                         key={color}
                         className="w-5 h-5 rounded border border-gray-200 dark:border-gray-600"
                         style={{ backgroundColor: color }}
-                        onClick={() => editor.chain().focus().setColor(color).run()}
+                        onClick={() => {
+                          editor.chain().focus().setColor(color).run();
+                          // Mettre à jour immédiatement la visibilité des styles
+                          const styledElements = document.querySelectorAll('.ProseMirror [style*="color:"]');
+                          styledElements.forEach(el => {
+                            const style = el.getAttribute('style');
+                            if (style && style.includes(`color: ${color}`)) {
+                              (el as HTMLElement).style.setProperty('--color', color);
+                            }
+                          });
+                        }}
                       />
                     ))}
                   </div>
@@ -410,7 +479,17 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                         key={color}
                         className="w-5 h-5 rounded border border-gray-200 dark:border-gray-600"
                         style={{ backgroundColor: color }}
-                        onClick={() => editor.chain().focus().setHighlight({ color }).run()}
+                        onClick={() => {
+                          editor.chain().focus().setHighlight({ color }).run();
+                          // Mettre à jour immédiatement la visibilité des styles
+                          const styledElements = document.querySelectorAll('.ProseMirror [style*="background-color:"]');
+                          styledElements.forEach(el => {
+                            const style = el.getAttribute('style');
+                            if (style && style.includes(`background-color: ${color}`)) {
+                              (el as HTMLElement).style.setProperty('--bg-color', color);
+                            }
+                          });
+                        }}
                       />
                     ))}
                   </div>
@@ -535,6 +614,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4",
             "[&_mark]:dark:opacity-80",
             // Retrait des sélecteurs qui écrasent les styles personnalisés
+            "[&_.ProseMirror_[style*='color:']]:!color-important",  
+            "[&_.ProseMirror_[style*='background-color:']]:!background-important",
+            // Garantir que les couleurs appliquées sont immédiatement visibles
+            "[&_.has-text-color]:!color-preserve", 
+            "[&_.has-highlight]:!background-preserve"
           )}
         />
       </div>
