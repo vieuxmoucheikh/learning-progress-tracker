@@ -546,8 +546,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               className={cn(
                 "font-medium px-3 py-1",
                 "bg-blue-50 text-blue-700 hover:bg-blue-100",
-                "dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-800/40",
-                "border border-blue-200 dark:border-blue-800",
+                "dark:bg-blue-800/70 dark:text-blue-200 dark:hover:bg-blue-700",
+                "border border-blue-200 dark:border-blue-700",
                 "rounded-full",
                 "shadow-sm"
               )}

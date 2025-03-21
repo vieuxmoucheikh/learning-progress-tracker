@@ -213,20 +213,20 @@ export const LearningCardsPage = () => {
 
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className={cn(
-                "bg-white",
-                "text-gray-900",
-                "border-gray-200 hover:border-blue-300",
-                "focus:ring-2 focus:ring-blue-500 focus:ring-offset-1",
+                "bg-white dark:bg-gray-800",
+                "text-gray-900 dark:text-gray-100",
+                "border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600",
+                "focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 dark:focus:ring-offset-gray-800",
                 "shadow-sm",
                 "transition-all duration-200"
               )}>
-                <Filter className="w-4 h-4 mr-2 text-blue-500" />
+                <Filter className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" />
                 <SelectValue placeholder="Filter by category" />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                <SelectItem value="all" className="focus:bg-blue-50 focus:text-blue-600">All Categories</SelectItem>
+              <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
+                <SelectItem value="all" className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/50 dark:focus:text-blue-300">All Categories</SelectItem>
                 {categories.map((category) => (
-                  <SelectItem key={category} value={category} className="focus:bg-blue-50 focus:text-blue-600">
+                  <SelectItem key={category} value={category} className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/50 dark:focus:text-blue-300">
                     {category}
                   </SelectItem>
                 ))}
@@ -235,20 +235,20 @@ export const LearningCardsPage = () => {
 
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'updated' | 'created' | 'mastered')}>
               <SelectTrigger className={cn(
-                "bg-white",
-                "text-gray-900",
-                "border-gray-200 hover:border-blue-300",
-                "focus:ring-2 focus:ring-blue-500 focus:ring-offset-1",
+                "bg-white dark:bg-gray-800",
+                "text-gray-900 dark:text-gray-100",
+                "border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600",
+                "focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 dark:focus:ring-offset-gray-800",
                 "shadow-sm",
                 "transition-all duration-200"
               )}>
-                <Clock className="w-4 h-4 mr-2 text-blue-500" />
+                <Clock className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" />
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                <SelectItem value="updated" className="focus:bg-blue-50 focus:text-blue-600">Last Updated</SelectItem>
-                <SelectItem value="created" className="focus:bg-blue-50 focus:text-blue-600">Created Date</SelectItem>
-                <SelectItem value="mastered" className="focus:bg-blue-50 focus:text-blue-600">Mastered First</SelectItem>
+              <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
+                <SelectItem value="updated" className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/50 dark:focus:text-blue-300">Last Updated</SelectItem>
+                <SelectItem value="created" className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/50 dark:focus:text-blue-300">Created Date</SelectItem>
+                <SelectItem value="mastered" className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/50 dark:focus:text-blue-300">Mastered First</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -263,15 +263,15 @@ export const LearningCardsPage = () => {
                   className={cn(
                     "cursor-pointer transition-colors",
                     selectedTags.includes(tag)
-                      ? "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200"
-                      : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200",
+                      ? "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200 dark:bg-blue-800 dark:text-blue-200 dark:hover:bg-blue-700 dark:border-blue-700"
+                      : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:border-gray-700",
                     "py-1 px-3 rounded-full font-medium"
                   )}
                   onClick={() => toggleTag(tag)}
                 >
                   {tag}
                   {selectedTags.includes(tag) && (
-                    <X className="w-3 h-3 ml-1.5 text-blue-500" />
+                    <X className="w-3 h-3 ml-1.5 text-blue-500 dark:text-blue-300" />
                   )}
                 </Badge>
               ))}
