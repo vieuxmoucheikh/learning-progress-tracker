@@ -400,29 +400,19 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       "max-w-3xl mx-auto",
       "transform-gpu",
       mastered 
-        ? "bg-gradient-to-br from-emerald-50 to-white border-emerald-200 dark:from-emerald-950/40 dark:to-gray-900 dark:border-emerald-800/50" 
-        : "bg-white border-gray-200 hover:border-blue-300 dark:bg-gray-900 dark:border-gray-800 dark:hover:border-blue-700",
+        ? "bg-gradient-to-br from-emerald-50 to-white border-emerald-200" 
+        : "bg-white border-gray-200 hover:border-blue-300",
       "sm:rounded-xl",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
       mastered 
-        ? "border-emerald-300 shadow-emerald-100 dark:shadow-emerald-900/30" 
+        ? "border-emerald-300 shadow-emerald-100" 
         : isEditing 
-          ? "border-blue-400 shadow-md shadow-blue-100 dark:border-blue-700 dark:shadow-blue-900/30"
-          : "border-gray-200 hover:border-blue-300 shadow-md shadow-gray-100/50 dark:border-gray-800 dark:hover:border-blue-700 dark:shadow-gray-900/50",
+          ? "border-blue-400 shadow-md shadow-blue-100"
+          : "border-gray-200 hover:border-blue-300 shadow-md shadow-gray-100/50",
     )}>
-      <CardHeader className={cn(
-        "space-y-4 pb-4 px-4 sm:px-6",
-        mastered 
-          ? "bg-gradient-to-r from-emerald-50/50 to-transparent dark:from-emerald-900/20 dark:to-transparent"
-          : "bg-gradient-to-r from-gray-50/30 to-transparent dark:from-gray-800/30 dark:to-transparent"
-      )}>
+      <CardHeader className="space-y-4 pb-4 px-4 sm:px-6">
         {/* Title Section */}
-        <div className={cn(
-          "space-y-3",
-          mastered 
-            ? "border-b border-emerald-200 pb-4 dark:border-emerald-800/50" 
-            : "border-b border-gray-100 pb-4 dark:border-gray-800"
-        )}>
+        <div className="space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex-1 min-w-0">
               {isEditing ? (
@@ -431,11 +421,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   onChange={(e) => setTitle(e.target.value)}
                   className={cn(
                     "text-lg font-semibold",
-                    "bg-gray-50 dark:bg-gray-800",
-                    "text-gray-900 dark:text-gray-100",
-                    "border-gray-200 focus:border-blue-300 dark:border-gray-700 dark:focus:border-blue-600",
-                    "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:focus-visible:ring-blue-700 dark:focus-visible:ring-offset-gray-900",
-                    "placeholder:text-gray-400 dark:placeholder:text-gray-500",
+                    "bg-gray-50",
+                    "text-gray-900",
+                    "border-gray-200 focus:border-blue-300",
+                    "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1",
+                    "placeholder:text-gray-400",
                     "w-full sm:text-xl",
                     "transition-all duration-200"
                   )}
@@ -445,10 +435,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 <h3 
                   className={cn(
                     "text-xl sm:text-2xl font-semibold line-clamp-2 card-title",
+                    "text-gray-900",
                     "transition-colors",
-                    mastered 
-                      ? "text-emerald-800 dark:text-emerald-300 drop-shadow-sm" 
-                      : "text-gray-900 dark:text-gray-100",
+                    mastered ? "text-emerald-800" : "text-gray-900",
                   )}
                   onClick={() => setShowContent(!showContent)}
                 >
@@ -459,22 +448,19 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             
             <div className="flex items-center gap-2 sm:gap-3">
               {mastered && (
-                <div className="relative flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-full bg-yellow-100 dark:bg-yellow-900/40 animate-pulse opacity-60"></div>
-                  <Trophy className="w-6 h-6 text-yellow-600 dark:text-yellow-400 drop-shadow-sm z-10 relative" />
-                </div>
+                <Trophy className="w-5 h-5 text-yellow-500 animate-pulse" />
               )}
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowContent(!showContent)}
-                className="h-9 w-9 hover:bg-blue-100 rounded-lg text-blue-700 dark:hover:bg-blue-900/30 dark:text-blue-400"
+                className="h-9 w-9 hover:bg-blue-100 rounded-lg text-blue-700"
                 title={showContent ? "Hide content" : "Show content"}
               >
                 {showContent ? (
-                  <EyeOff className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <EyeOff className="w-5 h-5 text-blue-600" />
                 ) : (
-                  <Eye className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <Eye className="w-5 h-5 text-blue-600" />
                 )}
               </Button>
               <Button
@@ -487,32 +473,32 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     setIsEditing(true);
                   }
                 }}
-                className="h-9 w-9 hover:bg-blue-100 rounded-lg text-blue-700 dark:hover:bg-blue-900/30 dark:text-blue-400"
+                className="h-9 w-9 hover:bg-blue-100 rounded-lg text-blue-700"
                 title={isEditing ? "Save changes" : "Edit card"}
               >
                 {isEditing ? (
-                  <Save className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <Save className="w-5 h-5 text-blue-600" />
                 ) : (
-                  <Edit className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <Edit className="w-5 h-5 text-blue-600" />
                 )}
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleCopyContent}
-                className="h-9 w-9 hover:bg-blue-100 rounded-lg text-blue-700 dark:hover:bg-blue-900/30 dark:text-blue-400"
+                className="h-9 w-9 hover:bg-blue-100 rounded-lg text-blue-700"
                 title="Copy content"
               >
-                <Copy className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <Copy className="w-5 h-5 text-blue-600" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={exportToPdf}
-                className="h-9 w-9 hover:bg-blue-100 rounded-lg text-blue-700 dark:hover:bg-blue-900/30 dark:text-blue-400"
+                className="h-9 w-9 hover:bg-blue-100 rounded-lg text-blue-700"
                 title="Export to PDF"
               >
-                <Download className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <Download className="w-5 h-5 text-blue-600" />
               </Button>
             </div>
           </div>
@@ -526,28 +512,28 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               >
                 <SelectTrigger className={cn(
                   "w-full max-w-xs",
-                  "bg-gray-50 dark:bg-gray-900", // Fond plus foncé pour le contraste
-                  "border-gray-200 focus:border-blue-300 dark:border-gray-600 dark:focus:border-blue-500",
-                  "text-gray-900 dark:text-white", // Texte blanc pour un meilleur contraste
-                  "focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 dark:focus:ring-blue-500 dark:focus:ring-offset-gray-900",
+                  "bg-gray-50",
+                  "border-gray-200 focus:border-blue-300",
+                  "text-gray-900",
+                  "focus:ring-2 focus:ring-blue-500 focus:ring-offset-1",
                   "h-9",
                   "transition-all duration-200"
                 )}>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg">
+                <SelectContent className="bg-white border border-gray-200 shadow-lg">
                   <SelectGroup>
-                    <div className="px-2 py-1.5 text-sm font-medium text-gray-500 dark:text-gray-300">
+                    <div className="px-2 py-1.5 text-sm font-medium text-gray-500">
                       Categories
                     </div>
                     {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat} className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/60 dark:focus:text-blue-100">
+                      <SelectItem key={cat} value={cat} className="focus:bg-blue-50 focus:text-blue-600">
                         {cat}
                       </SelectItem>
                     ))}
                     {itemCategory && !categories.includes(itemCategory) && (
-                      <SelectItem value={itemCategory} className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/60 dark:focus:text-blue-100">
-                        {itemCategory} <span className="text-gray-500 dark:text-gray-400">(New)</span>
+                      <SelectItem value={itemCategory} className="focus:bg-blue-50 focus:text-blue-600">
+                        {itemCategory} <span className="text-gray-500">(New)</span>
                       </SelectItem>
                     )}
                   </SelectGroup>
@@ -559,11 +545,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               variant="secondary" 
               className={cn(
                 "font-medium px-3 py-1",
-                mastered 
-                  ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 dark:bg-emerald-800 dark:text-white dark:border-emerald-600 dark:hover:bg-emerald-700" 
-                  : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 dark:bg-blue-800 dark:text-white dark:border-blue-600 dark:hover:bg-blue-700",
+                "bg-blue-50 text-blue-700 hover:bg-blue-100",
+                "border border-blue-200",
                 "rounded-full",
-                "shadow-sm dark:shadow-black/20"
+                "shadow-sm"
               )}
             >
               {itemCategory}
@@ -580,39 +565,34 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         >
           {isEditing ? (
             <div className="space-y-4">
-              <div className="space-y-2 relative dark:bg-gray-800 rounded-lg">
+              <div className="space-y-2 relative">
                 <RichTextEditor
                   content={content}
                   onChange={setContent}
                   className={cn(
                     "min-h-[200px] rounded-lg",
                     "bg-gray-50 dark:bg-gray-800",
-                    "text-gray-900 dark:text-white", // Texte blanc en mode sombre
+                    "text-gray-900 dark:text-gray-100",
                     "border border-gray-200 dark:border-gray-700",
-                    "focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-blue-500",
+                    "focus-within:ring-2 focus-within:ring-blue-500",
                     "prose prose-sm sm:prose-base max-w-none dark:prose-invert",
                     "overflow-y-auto max-h-[60vh]",
-                    "prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-white",
-                    "prose-p:text-gray-700 dark:prose-p:text-white prose-p:leading-relaxed", // Texte blanc
-                    "prose-a:text-blue-600 dark:prose-a:text-blue-300 prose-a:no-underline hover:prose-a:underline",
-                    "prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-white",
-                    "prose-code:text-blue-600 dark:prose-code:text-blue-300 prose-code:bg-blue-50 dark:prose-code:bg-blue-900/50 prose-code:px-1 prose-code:rounded",
-                    "prose-pre:bg-gray-50 dark:prose-pre:bg-gray-950 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-700",
+                    "prose-headings:font-semibold prose-headings:text-gray-900",
+                    "prose-p:text-gray-700 prose-p:leading-relaxed",
+                    "prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline",
+                    "prose-strong:font-semibold prose-strong:text-gray-900",
+                    "prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:rounded",
+                    "prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200",
                     "prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto",
                     "prose-ul:list-disc prose-ol:list-decimal",
-                    "prose-li:marker:text-gray-400 dark:prose-li:marker:text-gray-400",
+                    "prose-li:marker:text-gray-400",
                     "[&_.tiptap]:min-h-[150px] [&_.tiptap]:p-4",
                     "[&_.tiptap.ProseMirror-focused]:outline-none",
                     "[&_.tiptap]:prose-sm [&_.tiptap]:sm:prose-base",
                     "[&_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_p.is-editor-empty:first-child]:before:text-gray-400",
                     "[&_.tiptap_p]:my-3 [&_.tiptap_h1]:my-4 [&_.tiptap_h2]:my-4 [&_.tiptap_h3]:my-3",
                     "[&_.tiptap_ul]:my-3 [&_.tiptap_ol]:my-3 [&_.tiptap_blockquote]:my-3",
-                    "[&_.tiptap_pre]:my-3 [&_.tiptap_hr]:my-4",
-                    "dark:[&_.ProseMirror]:text-white", // Texte blanc pour l'éditeur
-                    "dark:[&_.ProseMirror_p]:text-white", // Texte blanc pour les paragraphes
-                    "dark:[&_.ProseMirror_h1]:text-white", // Texte blanc pour les titres
-                    "dark:[&_.ProseMirror_h2]:text-white", // Texte blanc pour les titres
-                    "dark:[&_.ProseMirror_h3]:text-white"  // Texte blanc pour les titres
+                    "[&_.tiptap_pre]:my-3 [&_.tiptap_hr]:my-4"
                   )}
                 />
               </div>
@@ -624,7 +604,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     setContent(initialContent);
                     setTitle(initialTitle);
                   }}
-                  className="bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600"
+                  className="bg-white hover:bg-gray-50"
                 >
                   Cancel
                 </Button>
@@ -641,7 +621,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                       console.error('Error saving:', error);
                     }
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-700 dark:hover:bg-blue-600"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   Save Changes
                 </Button>
@@ -672,7 +652,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 dangerouslySetInnerHTML={{ __html: content }}
               />
               {!isZoomed && content.length > 300 && (
-                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none" />
+                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white dark:from-gray-800 to-transparent pointer-events-none" />
               )}
             </div>
           )}
@@ -684,11 +664,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           // Ajout d'une classe spécifique pour la section meta
           mastered && "mastered-meta"
         )}>
-          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-            <Clock className={cn(
-              "w-4 h-4",
-              mastered ? "text-emerald-500 dark:text-emerald-400" : ""
-            )} />
+          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+            <Clock className="w-4 h-4" />
             <span className="updated-text">Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</span>
           </div>
 
@@ -699,10 +676,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 variant="secondary"
                 className={cn(
                   "px-2 py-0.5",
-                  mastered
-                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/60 dark:text-emerald-200 dark:border-emerald-700/60"
-                    : "bg-white text-gray-700 border border-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700",
-                  "hover:bg-gray-100 dark:hover:bg-gray-700"
+                  "bg-white dark:bg-gray-800 dark:text-gray-200",
+                  "border border-gray-200 dark:border-gray-700",
+                  "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 )}
               >
                 {tag}
@@ -751,18 +727,18 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="bg-background dark:bg-gray-900 dark:border dark:border-gray-800">
+        <AlertDialogContent className="bg-background">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-semibold text-foreground dark:text-white">
+            <AlertDialogTitle className="text-xl font-semibold text-foreground">
               Delete Card
             </AlertDialogTitle>
-            <AlertDialogDescription className="mt-3 text-muted-foreground dark:text-gray-400">
+            <AlertDialogDescription className="mt-3 text-muted-foreground">
               <div className="space-y-3">
                 <p>
-                  Are you sure you want to delete <span className="font-medium text-foreground dark:text-white">"{title}"</span>?
+                  Are you sure you want to delete <span className="font-medium text-foreground">"{title}"</span>?
                 </p>
-                <div className="flex items-center gap-2 p-3 bg-amber-50 text-amber-800 rounded-lg border border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800/50">
-                  <AlertCircle className="h-5 w-5 text-amber-500 dark:text-amber-400 flex-shrink-0" />
+                <div className="flex items-center gap-2 p-3 bg-amber-50 text-amber-800 rounded-lg border border-amber-200">
+                  <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0" />
                   <p className="text-sm">
                     This action cannot be undone. The card will be permanently deleted.
                   </p>
@@ -771,10 +747,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-6">
-            <AlertDialogCancel className="dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700">Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={onDelete}
-              className="bg-red-600 text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600"
+              className="bg-red-600 text-white hover:bg-red-700"
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Delete Card
@@ -785,12 +761,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
       {/* Zoomed View Dialog */}
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto p-6 sm:p-8 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-800">
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto p-6 sm:p-8 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
           <DialogHeader>
             <DialogTitle className={cn(
               "text-2xl font-semibold",
               "text-gray-800 dark:text-white",
-              mastered && "text-emerald-700 dark:text-emerald-300"
             )}>
               {title}
             </DialogTitle>
@@ -799,15 +774,14 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             "prose prose-lg max-w-none mt-6",
             "dark:prose-invert",
             "prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-white",
-            "prose-p:text-gray-700 dark:prose-p:text-gray-300",
-            "prose-a:text-blue-600 dark:prose-a:text-blue-400",
+            "prose-p:text-gray-700 dark:prose-p:text-gray-200",
+            "prose-a:text-blue-600 dark:prose-a:text-blue-300",
             "prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-white",
-            "prose-code:text-blue-600 dark:prose-code:text-blue-400 dark:prose-code:bg-gray-800",
-            "prose-pre:bg-gray-50 dark:prose-pre:bg-gray-800 prose-pre:border dark:prose-pre:border-gray-700",
+            "prose-code:text-blue-600 dark:prose-code:text-blue-300 dark:prose-code:bg-gray-700",
+            "prose-pre:bg-gray-50 dark:prose-pre:bg-gray-700 prose-pre:border dark:prose-pre:border-gray-600",
             "prose-img:rounded-lg prose-img:shadow-lg prose-img:mx-auto",
             "prose-ul:list-disc prose-ol:list-decimal",
-            "prose-li:marker:text-gray-400 dark:prose-li:marker:text-gray-500",
-            mastered && "prose-p:text-emerald-950 dark:prose-p:text-emerald-300/90"
+            "prose-li:marker:text-gray-400 dark:prose-li:marker:text-gray-400"
           )} 
           dangerouslySetInnerHTML={{ __html: content }} 
           />

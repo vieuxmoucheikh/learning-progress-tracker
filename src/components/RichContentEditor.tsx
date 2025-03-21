@@ -59,21 +59,6 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
     return editor.isActive('textStyle', { class: classes[size] });
   };
 
-  // Fonction améliorée pour le gras
-  const toggleBoldEnhanced = () => {
-    editor.chain().focus().toggleBold().run();
-    
-    // Forcer une mise à jour du style si en mode gras
-    if (editor.isActive('bold')) {
-      editor.chain().focus()
-        .setMark('textStyle', { 
-          'class': 'font-extrabold mobile-bold-force',
-          'style': 'font-weight: 900 !important; color: black !important;'
-        })
-        .run();
-    }
-  };
-
   return (
     <div className="flex items-center flex-wrap gap-1 p-2 bg-white/95">
       {/* History Controls */}
@@ -142,10 +127,10 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         <Button
           size="icon"
           variant="ghost"
-          onClick={toggleBoldEnhanced} // Utiliser notre fonction améliorée
+          onClick={() => editor.chain().focus().toggleBold().run()}
           className={cn(
-            "h-8 w-8 hover:bg-gray-100 mobile-bold-button",
-            editor.isActive('bold') && "active bg-gray-100 text-gray-900 font-extrabold" // Ajouter active
+            "h-8 w-8 hover:bg-gray-100",
+            editor.isActive('bold') && "bg-gray-100 text-gray-900"
           )}
         >
           <BoldIcon className="h-4 w-4" />
@@ -298,12 +283,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
           },
         },
         codeBlock: false,
-        bold: {
-          HTMLAttributes: {
-            class: 'font-extrabold mobile-bold mobile-bold-force', // Classes plus fortes
-            style: 'font-weight: 900 !important; color: black !important;', // Style inline forcé
-          },
-        },
       }),
       Highlight,
       TaskList,
@@ -313,7 +292,7 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
           class: 'flex items-start gap-2',
         },
       }),
-      TextStyle, // Utiliser TextStyle sans configuration particulière
+      TextStyle,
     ],
     content,
     editable: isEditing,
@@ -335,16 +314,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
           "[&_p]:text-gray-900 [&_p]:my-2",
           "[&_ul]:list-disc [&_ul]:ml-4",
           "[&_ol]:list-decimal [&_ol]:ml-4",
-          "prose-strong:font-bold prose-strong:text-black", // Assurer que strong est bien en gras
-          "prose-b:font-bold prose-b:text-black", // Assurer que b est bien en gras
-          "[&_strong]:font-bold [&_strong]:text-black", // Sélecteur direct pour strong
-          "[&_b]:font-bold [&_b]:text-black", // Sélecteur direct pour b
-          "prose-strong:!font-extrabold prose-strong:!text-black", // Force avec !important
-          "prose-b:!font-extrabold prose-b:!text-black",
-          "[&_strong]:!font-extrabold [&_strong]:!text-black",
-          "[&_b]:!font-extrabold [&_b]:!text-black",
-          "[&_.mobile-bold]:!font-extrabold [&_.mobile-bold]:!text-black",
-          "[&_.mobile-bold-force]:!font-black [&_.mobile-bold-force]:!text-black",
         ),
       },
     },
@@ -395,16 +364,6 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
                 'prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-6',
                 'prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:my-4 prose-blockquote:italic prose-blockquote:text-gray-700 prose-blockquote:bg-blue-50/50',
                 'prose-code:bg-gray-50 prose-code:text-gray-900 prose-code:px-1 prose-code:rounded prose-code:font-mono prose-code:text-sm',
-                'prose-strong:font-bold prose-strong:text-black', // Assurer que les balises strong sont en gras
-                'prose-b:font-bold prose-b:text-black', // Assurer que les balises b sont en gras
-                '[&_strong]:font-bold [&_strong]:text-black', // Sélecteur direct pour strong
-                '[&_b]:font-bold [&_b]:text-black', // Sélecteur direct pour b
-                'prose-strong:!font-extrabold prose-strong:!text-black',
-                'prose-b:!font-extrabold prose-b:!text-black',
-                '[&_strong]:!font-extrabold [&_strong]:!text-black',
-                '[&_b]:!font-extrabold [&_b]:!text-black',
-                '[&_.mobile-bold]:!font-extrabold [&_.mobile-bold]:!text-black',
-                '[&_.mobile-bold-force]:!font-black [&_.mobile-bold-force]:!text-black',
               )}
             />
           </div>

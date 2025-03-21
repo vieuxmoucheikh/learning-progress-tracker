@@ -165,34 +165,34 @@ export const LearningCardsPage = () => {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="space-y-8">
-        {/* Enhanced Header Section for Dark Mode */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-gray-100 dark:border-gray-800">
+        {/* Enhanced Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-gray-100">
           <div>
             <div className="flex items-center gap-2">
-              <BookOpen className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-500 dark:from-blue-500 dark:via-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+              <BookOpen className="h-8 w-8 text-blue-600" />
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-500 bg-clip-text text-transparent">
                 Learning Cards
               </h1>
             </div>
-            <p className="text-gray-600 dark:text-gray-400 mt-2 text-sm md:text-base max-w-xl">
+            <p className="text-gray-600 mt-2 text-sm md:text-base max-w-xl">
               Create and organize your study notes, insights, and knowledge in beautiful cards. 
               Review them anytime to reinforce your learning.
             </p>
           </div>
           <Button 
             onClick={handleCreateCard} 
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 dark:from-blue-700 dark:to-indigo-700 dark:hover:from-blue-600 dark:hover:to-indigo-600 text-white shadow-lg shadow-blue-500/20 dark:shadow-blue-900/20 transition-all duration-200 px-5 py-2 h-auto"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/20 transition-all duration-200 px-5 py-2 h-auto"
           >
             <Plus className="w-4 h-4 mr-2" />
             New Card
           </Button>
         </div>
 
-        {/* Enhanced Filter Section for Dark Mode */}
+        {/* Enhanced Filter Section */}
         <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start p-5 bg-gray-50 dark:bg-gray-800/50 rounded-xl shadow-sm dark:shadow-gray-900/40">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start p-5 bg-gray-50 rounded-xl shadow-sm">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500 dark:text-blue-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500 w-4 h-4" />
               <Input
                 type="text"
                 placeholder="Search cards..."
@@ -200,12 +200,12 @@ export const LearningCardsPage = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={cn(
                   "pl-9",
-                  "bg-white dark:bg-gray-900",
-                  "text-gray-900 dark:text-gray-100",
-                  "border-gray-200 hover:border-blue-300 dark:border-gray-700 dark:hover:border-blue-600",
-                  "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:focus-visible:ring-blue-600 dark:focus-visible:ring-offset-gray-900",
-                  "placeholder:text-gray-500 dark:placeholder:text-gray-500",
-                  "shadow-sm dark:shadow-gray-950/20",
+                  "bg-white",
+                  "text-gray-900",
+                  "border-gray-200 hover:border-blue-300",
+                  "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1",
+                  "placeholder:text-gray-500",
+                  "shadow-sm",
                   "transition-all duration-200"
                 )}
               />
@@ -213,20 +213,20 @@ export const LearningCardsPage = () => {
 
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className={cn(
-                "bg-white dark:bg-gray-900",
-                "text-gray-900 dark:text-gray-100",
-                "border-gray-200 hover:border-blue-300 dark:border-gray-700 dark:hover:border-blue-600",
-                "focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 dark:focus:ring-blue-600 dark:focus:ring-offset-gray-900",
-                "shadow-sm dark:shadow-gray-950/20",
+                "bg-white",
+                "text-gray-900",
+                "border-gray-200 hover:border-blue-300",
+                "focus:ring-2 focus:ring-blue-500 focus:ring-offset-1",
+                "shadow-sm",
                 "transition-all duration-200"
               )}>
-                <Filter className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" />
+                <Filter className="w-4 h-4 mr-2 text-blue-500" />
                 <SelectValue placeholder="Filter by category" />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-lg">
-                <SelectItem value="all" className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/30 dark:focus:text-blue-400">All Categories</SelectItem>
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                <SelectItem value="all" className="focus:bg-blue-50 focus:text-blue-600">All Categories</SelectItem>
                 {categories.map((category) => (
-                  <SelectItem key={category} value={category} className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/30 dark:focus:text-blue-400">
+                  <SelectItem key={category} value={category} className="focus:bg-blue-50 focus:text-blue-600">
                     {category}
                   </SelectItem>
                 ))}
@@ -235,27 +235,27 @@ export const LearningCardsPage = () => {
 
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'updated' | 'created' | 'mastered')}>
               <SelectTrigger className={cn(
-                "bg-white dark:bg-gray-900",
-                "text-gray-900 dark:text-gray-100",
-                "border-gray-200 hover:border-blue-300 dark:border-gray-700 dark:hover:border-blue-600",
-                "focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 dark:focus:ring-blue-600 dark:focus:ring-offset-gray-900",
-                "shadow-sm dark:shadow-gray-950/20",
+                "bg-white",
+                "text-gray-900",
+                "border-gray-200 hover:border-blue-300",
+                "focus:ring-2 focus:ring-blue-500 focus:ring-offset-1",
+                "shadow-sm",
                 "transition-all duration-200"
               )}>
-                <Clock className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" />
+                <Clock className="w-4 h-4 mr-2 text-blue-500" />
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-lg">
-                <SelectItem value="updated" className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/30 dark:focus:text-blue-400">Last Updated</SelectItem>
-                <SelectItem value="created" className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/30 dark:focus:text-blue-400">Created Date</SelectItem>
-                <SelectItem value="mastered" className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/30 dark:focus:text-blue-400">Mastered First</SelectItem>
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                <SelectItem value="updated" className="focus:bg-blue-50 focus:text-blue-600">Last Updated</SelectItem>
+                <SelectItem value="created" className="focus:bg-blue-50 focus:text-blue-600">Created Date</SelectItem>
+                <SelectItem value="mastered" className="focus:bg-blue-50 focus:text-blue-600">Mastered First</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {allTags.length > 0 && (
-            <div className="flex flex-wrap gap-2 items-center p-4 bg-white dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-gray-900/20">
-              <TagIcon className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+            <div className="flex flex-wrap gap-2 items-center p-4 bg-white rounded-lg border border-gray-100 shadow-sm">
+              <TagIcon className="w-4 h-4 text-blue-500" />
               {allTags.map((tag) => (
                 <Badge
                   key={tag}
@@ -263,15 +263,15 @@ export const LearningCardsPage = () => {
                   className={cn(
                     "cursor-pointer transition-colors",
                     selectedTags.includes(tag)
-                      ? "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:hover:bg-blue-900/60 dark:border-blue-800"
-                      : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:border-gray-700",
+                      ? "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200"
+                      : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200",
                     "py-1 px-3 rounded-full font-medium"
                   )}
                   onClick={() => toggleTag(tag)}
                 >
                   {tag}
                   {selectedTags.includes(tag) && (
-                    <X className="w-3 h-3 ml-1.5 text-blue-500 dark:text-blue-400" />
+                    <X className="w-3 h-3 ml-1.5 text-blue-500" />
                   )}
                 </Badge>
               ))}
@@ -279,13 +279,13 @@ export const LearningCardsPage = () => {
           )}
         </div>
 
-        {/* Enhanced Card Grid for Dark Mode */}
+        {/* Enhanced Card Grid */}
         <div className="mt-8">
           {loading ? (
-            <div className="flex justify-center items-center min-h-[400px] bg-gray-50 dark:bg-gray-800/30 rounded-xl border border-gray-100 dark:border-gray-800">
+            <div className="flex justify-center items-center min-h-[400px] bg-gray-50 rounded-xl border border-gray-100">
               <div className="flex flex-col items-center gap-4">
-                <Loader2 className="w-10 h-10 animate-spin text-blue-500 dark:text-blue-400" />
-                <p className="text-gray-600 dark:text-gray-400 font-medium">Loading your cards...</p>
+                <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
+                <p className="text-gray-600 font-medium">Loading your cards...</p>
               </div>
             </div>
           ) : (
@@ -313,8 +313,8 @@ export const LearningCardsPage = () => {
           )}
 
           {!loading && filteredCards.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-gray-50 dark:bg-gray-800/30 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-gray-900/20">
-              <div className="text-gray-500 dark:text-gray-400 mb-6 max-w-md">
+            <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
+              <div className="text-gray-500 mb-6 max-w-md">
                 {searchTerm || selectedTags.length > 0 || selectedCategory !== 'all'
                   ? 'No cards match your filters. Try adjusting your search criteria or create a new card.'
                   : 'No cards yet. Create your first card to get started with your learning journey!'}
@@ -322,7 +322,7 @@ export const LearningCardsPage = () => {
               <Button
                 onClick={handleCreateCard}
                 variant="outline"
-                className="bg-white hover:bg-blue-50 border-gray-200 hover:border-blue-300 text-blue-600 hover:text-blue-700 dark:bg-gray-800 dark:hover:bg-blue-900/20 dark:border-gray-700 dark:hover:border-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-all duration-200"
+                className="bg-white hover:bg-blue-50 border-gray-200 hover:border-blue-300 text-blue-600 hover:text-blue-700 transition-all duration-200"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Card
