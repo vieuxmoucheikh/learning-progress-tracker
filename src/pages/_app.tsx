@@ -1,6 +1,7 @@
 import '@/styles/globals.css';
 import '@/styles/card-fixes.css';
 import '@/styles/editor-fixes.css'; // Importer les nouveaux styles d'éditeur
+import '@/styles/icon-fixes.css'; // Ajout du nouveau fichier CSS pour les icônes
 
 import type { AppProps } from 'next/app';
 import { ThemeProvider } from 'next-themes';

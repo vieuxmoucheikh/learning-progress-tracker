@@ -275,3 +275,94 @@ html[data-theme="dark"] [class*="badge"] svg {
   stroke-linecap: round !important;
   stroke-linejoin: round !important;
 }
+
+/* CORRECTIFS POUR LES ICÔNES */
+
+/* Force la visibilité de toutes les icônes SVG */
+svg {
+  display: inline-block !important;
+  vertical-align: middle !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Correctifs pour les icônes Lucide */
+.lucide,
+.lucide-icon,
+[data-lucide] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important;
+  overflow: visible !important;
+}
+
+/* Icônes dans les boutons - mode clair */
+html[data-theme="light"] button svg,
+html[data-theme="light"] a svg {
+  color: #475569 !important; /* slate-600 */
+}
+
+/* Icônes dans les boutons - mode sombre */
+html[data-theme="dark"] button svg,
+html[data-theme="dark"] a svg {
+  color: #e2e8f0 !important; /* slate-200 */
+}
+
+/* Icônes spécifiques par couleur - mode clair */
+html[data-theme="light"] button.text-blue-600 svg {
+  color: #2563eb !important; /* blue-600 */
+}
+
+html[data-theme="light"] button.text-emerald-600 svg {
+  color: #059669 !important; /* emerald-600 */
+}
+
+html[data-theme="light"] button.text-red-600 svg {
+  color: #dc2626 !important; /* red-600 */
+}
+
+/* Icônes spécifiques par couleur - mode sombre */
+html[data-theme="dark"] button.text-blue-400 svg,
+html[data-theme="dark"] button.dark\:text-blue-400 svg {
+  color: #60a5fa !important; /* blue-400 */
+}
+
+html[data-theme="dark"] button.text-emerald-400 svg,
+html[data-theme="dark"] button.dark\:text-emerald-400 svg {
+  color: #34d399 !important; /* emerald-400 */
+}
+
+html[data-theme="dark"] button.text-red-400 svg,
+html[data-theme="dark"] button.dark\:text-red-400 svg {
+  color: #f87171 !important; /* red-400 */
+}
+
+/* Ombres pour améliorer la visibilité des icônes */
+html[data-theme="dark"] svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)) !important;
+}
+
+/* Augmentation de la taille sur mobile */
+@media (max-width: 640px) {
+  .w-4.h-4, 
+  .h-4.w-4 {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  .w-5.h-5, 
+  .h-5.w-5 {
+    width: 20px !important;
+    height: 20px !important;
+  }
+}
+
+/* Icônes spécifiques pour l'éditeur de texte */
+html .rich-text-editor button svg,
+html .rich-content-editor button svg,
+html [class*="editor"] button svg {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}

@@ -191,3 +191,100 @@
     color: #64748b !important;
   }
 }
+
+/* CORRECTIFS POUR LA VISIBILITÉ DES ICÔNES */
+
+/* Styles universels pour assurer la visibilité des icônes */
+button svg,
+[role="button"] svg,
+.button svg,
+.icon,
+[class*="icon"] {
+  color: currentColor !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  z-index: 1 !important;
+  position: relative !important;
+}
+
+/* Amélioration du contraste des icônes en mode clair */
+html[data-theme="light"] button svg,
+html[data-theme="light"] [role="button"] svg {
+  filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.1)) !important;
+}
+
+/* Amélioration du contraste des icônes en mode sombre */
+html[data-theme="dark"] button svg,
+html[data-theme="dark"] [role="button"] svg {
+  filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.5)) !important;
+}
+
+/* Agrandissement des icônes sur les appareils mobiles */
+@media (max-width: 640px) {
+  button svg,
+  [role="button"] svg,
+  .button svg,
+  .icon,
+  [class*="icon"] {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    min-height: 18px !important;
+  }
+}
+
+/* Assurer la visibilité des icônes dans la barre d'outils de l'éditeur */
+.rich-text-editor button svg,
+[class*="rich-text-editor"] button svg,
+.rich-content-editor button svg {
+  opacity: 1 !important;
+}
+
+/* Mode clair - couleurs d'icônes plus contrastées */
+html[data-theme="light"] .rich-text-editor button svg,
+html[data-theme="light"] [class*="rich-text-editor"] button svg,
+html[data-theme="light"] .rich-content-editor button svg {
+  color: #334155 !important;
+}
+
+/* Mode sombre - couleurs d'icônes plus contrastées */
+html[data-theme="dark"] .rich-text-editor button svg,
+html[data-theme="dark"] [class*="rich-text-editor"] button svg,
+html[data-theme="dark"] .rich-content-editor button svg {
+  color: #e2e8f0 !important;
+}
+
+/* Amélioration de la visibilité des icônes spécifiques */
+.w-4, .h-4, .w-5, .h-5, .w-6, .h-6 {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Correction spécifique pour les icônes de la carte d'apprentissage */
+.card button svg,
+.learning-item-card button svg,
+.card [role="button"] svg,
+.learning-item-card [role="button"] svg {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Mode sombre - boutons avec icônes dans les cartes */
+html[data-theme="dark"] .card button,
+html[data-theme="dark"] .learning-item-card button {
+  color: #e2e8f0 !important;
+}
+
+/* Boutons spécifiques avec icônes en mode sombre */
+html[data-theme="dark"] .text-blue-600 svg {
+  color: #60a5fa !important;
+}
+
+html[data-theme="dark"] .text-emerald-600 svg {
+  color: #34d399 !important;
+}
+
+html[data-theme="dark"] .text-red-600 svg {
+  color: #f87171 !important;
+}
