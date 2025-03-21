@@ -361,4 +361,47 @@ html[data-theme="light"] [class*="badge"] svg {
     justify-content: center !important;
     gap: 0.5rem !important;
   }
+
+  /* Assurer que le texte en gras fonctionne correctement */
+  html[data-theme="light"] strong,
+  html[data-theme="light"] b,
+  html[data-theme="light"] .font-bold,
+  html[data-theme="light"] .font-semibold,
+  html[data-theme="light"] [class*="font-bold"],
+  html[data-theme="light"] [class*="font-semibold"],
+  html[data-theme="light"] h1, 
+  html[data-theme="light"] h2, 
+  html[data-theme="light"] h3,
+  html[data-theme="light"] h4,
+  html[data-theme="light"] h5,
+  html[data-theme="light"] h6 {
+    font-weight: bold !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  /* Correction spécifique pour les éléments en gras dans le contenu des cartes */
+  html[data-theme="light"] .prose strong,
+  html[data-theme="light"] .prose b,
+  html[data-theme="light"] .prose h1,
+  html[data-theme="light"] .prose h2,
+  html[data-theme="light"] .prose h3,
+  html[data-theme="light"] .prose h4,
+  html[data-theme="light"] [class*="prose"] strong,
+  html[data-theme="light"] [class*="prose"] b,
+  html[data-theme="light"] [class*="content"] strong,
+  html[data-theme="light"] [class*="content"] b {
+    font-weight: 700 !important;
+    color: #000000 !important;
+  }
+
+  /* S'assurer que l'éditeur préserve les styles en gras */
+  html[data-theme="light"] .ProseMirror strong,
+  html[data-theme="light"] .ProseMirror b,
+  html[data-theme="light"] [class*="ProseMirror"] strong,
+  html[data-theme="light"] [class*="ProseMirror"] b,
+  html[data-theme="light"] [contenteditable="true"] strong,
+  html[data-theme="light"] [contenteditable="true"] b {
+    font-weight: 700 !important;
+    color: #000000 !important;
+  }
 }

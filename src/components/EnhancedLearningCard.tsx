@@ -662,7 +662,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   "prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-white",
                   "prose-p:text-gray-700 dark:prose-p:text-gray-200", 
                   "prose-a:text-blue-600 dark:prose-a:text-blue-300",
-                  "prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-white",
+                  "prose-strong:font-bold prose-strong:text-gray-900 dark:prose-strong:text-white", // Changé semibold à bold
                   "prose-code:text-blue-600 dark:prose-code:text-blue-300",
                   "prose-pre:bg-gray-50 dark:prose-pre:bg-gray-800",
                   "prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto",
@@ -674,7 +674,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   "prose-headings:leading-tight",
                   // Ajout de classes spécifiques pour le contrôle du contenu des cartes maîtrisées
                   mastered && "mastered-content dark:prose-p:text-gray-900",
-                  !isZoomed && "max-h-[300px] overflow-hidden cursor-pointer"
+                  !isZoomed && "max-h-[300px] overflow-hidden cursor-pointer",
+                  // Ajout de ces règles spécifiques pour améliorer le texte en gras
+                  "prose-strong:!font-bold prose-strong:!text-black", // Utilisation de !important via Tailwind
+                  "prose-b:!font-bold prose-b:!text-black" // Support explicite pour les balises <b>
                 )}
                 dangerouslySetInnerHTML={{ __html: content }}
               />

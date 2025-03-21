@@ -79,6 +79,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             class: 'font-bold text-gray-900', // Ceci s'applique à tous les niveaux de titre
           },
         },
+        bold: {
+          HTMLAttributes: {
+            class: 'font-bold text-gray-900 dark:text-white', // Ajout d'une classe explicite pour le gras
+          },
+        },
         bulletList: {
           keepMarks: true,
           keepAttributes: false,
@@ -456,7 +461,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   "prose-p:my-3 prose-p:text-[1.05rem] prose-p:leading-relaxed",
                   "prose-ul:pl-5 prose-ul:my-3 prose-ol:pl-5 prose-ol:my-3",
                   "prose-li:my-1 prose-li:pl-1",
-                  "prose-img:my-4 prose-img:mx-auto prose-img:rounded-lg"
+                  "prose-img:my-4 prose-img:mx-auto prose-img:rounded-lg",
+                  "[&_.ProseMirror_strong]:font-bold [&_.ProseMirror_strong]:text-gray-900 [&_.ProseMirror_strong]:dark:text-white", // Ajouter cette ligne
+                  "[&_.ProseMirror_b]:font-bold [&_.ProseMirror_b]:text-gray-900 [&_.ProseMirror_b]:dark:text-white" // Ajouter cette ligne
                 )}
           
         />
