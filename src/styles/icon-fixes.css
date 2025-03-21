@@ -404,4 +404,81 @@ html[data-theme="light"] [class*="badge"] svg {
     font-weight: 700 !important;
     color: #000000 !important;
   }
+
+  /* CORRECTIFS POUR LES PROBLÈMES DE TEXTE EN MODE CLAIR SUR MOBILE */
+  /* CORRECTION POUR LES GUILLEMETS SIMPLES ET CARACTÈRES DE PONCTUATION */
+  html[data-theme="light"] .prose,
+  html[data-theme="light"] [class*="prose"],
+  html[data-theme="light"] .card-content,
+  html[data-theme="light"] .mobile-content-display,
+  html[data-theme="light"] [class*="content-display"],
+  html[data-theme="light"] [contenteditable="true"] {
+    text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
+    color: #000000 !important;
+  }
+
+  /* Assurez-vous que les guillemets et apostrophes soient bien visibles */
+  html[data-theme="light"] .prose *::before,
+  html[data-theme="light"] .prose *::after,
+  html[data-theme="light"] [class*="content-display"] *::before,
+  html[data-theme="light"] [class*="content-display"] *::after {
+    text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  /* Texte en citations rendu plus visible */
+  html[data-theme="light"] .prose q,
+  html[data-theme="light"] .prose blockquote,
+  html[data-theme="light"] [class*="content-display"] q,
+  html[data-theme="light"] [class*="content-display"] blockquote {
+    color: #000000 !important;
+    text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  /* Suppression des styles qui pourraient masquer les guillemets */
+  html[data-theme="light"] .prose p,
+  html[data-theme="light"] .prose span,
+  html[data-theme="light"] .prose div,
+  html[data-theme="light"] [class*="content-display"] p,
+  html[data-theme="light"] [class*="content-display"] span,
+  html[data-theme="light"] [class*="content-display"] div {
+    text-shadow: none !important;
+    color: #000000 !important;
+    letter-spacing: 0.01em !important;
+    font-weight: 400 !important;
+  }
+}
+
+/* CORRECTIFS SPÉCIFIQUES POUR LES TEXTES DANS L'ÉDITEUR ET LE CONTENU AFFICHÉ */
+.ProseMirror p, 
+.prose p,
+[contenteditable="true"] p {
+  line-height: 1.65 !important;
+  margin-bottom: 1em !important;
+}
+
+/* Assurer la bonne visibilité des apostrophes et guillemets */
+.ProseMirror span,
+.prose span,
+[contenteditable="true"] span {
+  font-feature-settings: "liga" 0, "calt" 0, "dlig" 0 !important;
+}
+
+/* Renforcer le texte formaté */
+.prose strong, .prose b,
+.ProseMirror strong, .ProseMirror b,
+[contenteditable="true"] strong, [contenteditable="true"] b,
+html[data-theme="light"] .prose strong, 
+html[data-theme="light"] .prose b {
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  color: #000000 !important;
+}
+
+html[data-theme="dark"] .prose strong, 
+html[data-theme="dark"] .prose b,
+html[data-theme="dark"] .ProseMirror strong, 
+html[data-theme="dark"] .ProseMirror b {
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.2) !important;
 }
