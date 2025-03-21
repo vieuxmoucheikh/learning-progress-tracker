@@ -103,6 +103,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             class: 'bg-gray-50 text-gray-900 px-1 rounded font-mono text-sm',
           },
         },
+        bold: {
+          HTMLAttributes: {
+            class: 'font-bold text-black mobile-bold', // Ajout de classe pour le texte en gras sur mobile
+          },
+        },
       }),
       Image.configure({
         inline: true,
@@ -261,8 +266,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 variant="ghost"
                 onClick={() => editor.chain().focus().toggleBold().run()}
                 className={cn(
-                  "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
-                  editor.isActive('bold') && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
+                  "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300 mobile-bold-button", // Ajout d'une classe pour cibler le bouton
+                  editor.isActive('bold') && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white font-bold"
                 )}
               >
                 <Bold className="h-4 w-4" />
@@ -445,7 +450,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   "[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4",
                   "[&_p]:my-2 [&_p]:text-gray-900 [&_p]:dark:text-white", // Texte blanc pour les paragraphes
                   "[&_h1]:dark:text-white [&_h2]:dark:text-white [&_h3]:dark:text-white", // Texte blanc pour les titres
-                  "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4"
+                  "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4",
+                  "[&_.ProseMirror_strong]:font-bold [&_.ProseMirror_strong]:text-black [&_.ProseMirror_strong]:dark:text-white", // Sélecteur direct pour strong
+                  "[&_.ProseMirror_b]:font-bold [&_.ProseMirror_b]:text-black [&_.ProseMirror_b]:dark:text-white" // Sélecteur direct pour b
                 )}
           
         />

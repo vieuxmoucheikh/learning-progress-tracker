@@ -126,3 +126,49 @@
 .rich-content-editor button:focus:not(:focus-visible) {
   outline: none;
 }
+
+/* Mobile-specific fixes - especially for bold text */
+@media (max-width: 768px) {
+  /* Ensure bold text appears bold on mobile */
+  .rich-content-editor strong,
+  .rich-content-editor b,
+  .rich-content-editor .ProseMirror strong,
+  .rich-content-editor .ProseMirror b,
+  .rich-content-editor [class*="font-bold"],
+  .rich-content-editor [class*="font-semibold"] {
+    font-weight: 700 !important;
+  }
+
+  /* Light mode specific bold text fix */
+  html[data-theme="light"] .rich-content-editor strong,
+  html[data-theme="light"] .rich-content-editor b,
+  html[data-theme="light"] .rich-content-editor .ProseMirror strong,
+  html[data-theme="light"] .rich-content-editor .ProseMirror b {
+    font-weight: 700 !important;
+    color: #000000 !important;
+  }
+
+  /* Dark mode specific bold text fix */
+  html[data-theme="dark"] .rich-content-editor strong,
+  html[data-theme="dark"] .rich-content-editor b,
+  html[data-theme="dark"] .rich-content-editor .ProseMirror strong,
+  html[data-theme="dark"] .rich-content-editor .ProseMirror b {
+    font-weight: 700 !important;
+    color: #ffffff !important;
+  }
+
+  /* Ensure buttons are visually distinct when active */
+  .mobile-bold-button:active {
+    background-color: rgba(59, 130, 246, 0.1) !important;
+  }
+}
+
+/* Ensure bold text is rendered correctly across all devices and browsers */
+.ProseMirror strong, 
+.ProseMirror b {
+  font-weight: 700 !important;
+}
+
+.mobile-bold {
+  font-weight: 700 !important;
+}

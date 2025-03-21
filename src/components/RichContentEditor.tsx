@@ -129,8 +129,8 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
           variant="ghost"
           onClick={() => editor.chain().focus().toggleBold().run()}
           className={cn(
-            "h-8 w-8 hover:bg-gray-100",
-            editor.isActive('bold') && "bg-gray-100 text-gray-900"
+            "h-8 w-8 hover:bg-gray-100 mobile-bold-button", // Ajout de la classe mobile-bold-button
+            editor.isActive('bold') && "bg-gray-100 text-gray-900 font-bold"
           )}
         >
           <BoldIcon className="h-4 w-4" />
@@ -283,6 +283,11 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
           },
         },
         codeBlock: false,
+        bold: {
+          HTMLAttributes: {
+            class: 'font-bold mobile-bold', // Ajout de la classe mobile-bold
+          },
+        },
       }),
       Highlight,
       TaskList,
@@ -314,6 +319,10 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
           "[&_p]:text-gray-900 [&_p]:my-2",
           "[&_ul]:list-disc [&_ul]:ml-4",
           "[&_ol]:list-decimal [&_ol]:ml-4",
+          "prose-strong:font-bold prose-strong:text-black", // Assurer que strong est bien en gras
+          "prose-b:font-bold prose-b:text-black", // Assurer que b est bien en gras
+          "[&_strong]:font-bold [&_strong]:text-black", // Sélecteur direct pour strong
+          "[&_b]:font-bold [&_b]:text-black", // Sélecteur direct pour b
         ),
       },
     },
@@ -364,6 +373,10 @@ export const RichContentEditor: React.FC<RichContentEditorProps> = ({
                 'prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-6',
                 'prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:my-4 prose-blockquote:italic prose-blockquote:text-gray-700 prose-blockquote:bg-blue-50/50',
                 'prose-code:bg-gray-50 prose-code:text-gray-900 prose-code:px-1 prose-code:rounded prose-code:font-mono prose-code:text-sm',
+                'prose-strong:font-bold prose-strong:text-black', // Assurer que les balises strong sont en gras
+                'prose-b:font-bold prose-b:text-black', // Assurer que les balises b sont en gras
+                '[&_strong]:font-bold [&_strong]:text-black', // Sélecteur direct pour strong
+                '[&_b]:font-bold [&_b]:text-black', // Sélecteur direct pour b
               )}
             />
           </div>

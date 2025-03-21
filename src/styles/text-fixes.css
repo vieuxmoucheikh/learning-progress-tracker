@@ -1,0 +1,95 @@
+/**
+ * CORRECTIFS PRIORITAIRES POUR LA VISIBILITÉ DU TEXTE EN GRAS SUR MOBILE 
+ * Ce fichier contient des correctifs spécifiques pour le texte en gras sur mobile,
+ * particulièrement en mode clair où le problème est prononcé.
+ */
+
+/* RÈGLES ULTRA-PRIORITAIRES POUR FORCER LE TEXTE EN GRAS - VERSION GLOBALE */
+strong, 
+b, 
+.font-bold, 
+.font-semibold,
+h1, h2, h3, h4, h5, h6 {
+  font-weight: bold !important;
+}
+
+/* RÈGLES SPÉCIFIQUES POUR LE MODE CLAIR SUR MOBILE */
+@media (max-width: 768px) {
+  html[data-theme="light"] strong,
+  html[data-theme="light"] b,
+  html[data-theme="light"] .font-bold,
+  html[data-theme="light"] .font-semibold,
+  html[data-theme="light"] [class*="font-bold"],
+  html[data-theme="light"] [class*="font-semibold"],
+  html[data-theme="light"] .prose strong,
+  html[data-theme="light"] .prose b,
+  html[data-theme="light"] [class*="prose"] strong,
+  html[data-theme="light"] [class*="prose"] b,
+  html[data-theme="light"] [class*="content"] strong,
+  html[data-theme="light"] [class*="content"] b,
+  html[data-theme="light"] h1, 
+  html[data-theme="light"] h2, 
+  html[data-theme="light"] h3,
+  html[data-theme="light"] h4,
+  html[data-theme="light"] h5,
+  html[data-theme="light"] h6 {
+    font-weight: 700 !important;
+    color: #000000 !important;
+    text-shadow: 0 0 0.2px rgba(0, 0, 0, 0.5) !important;
+    letter-spacing: -0.01em !important;
+  }
+  
+  /* Force également à l'intérieur de l'éditeur */
+  html[data-theme="light"] .ProseMirror strong,
+  html[data-theme="light"] .ProseMirror b,
+  html[data-theme="light"] [class*="ProseMirror"] strong,
+  html[data-theme="light"] [class*="ProseMirror"] b,
+  html[data-theme="light"] [contenteditable="true"] strong,
+  html[data-theme="light"] [contenteditable="true"] b {
+    font-weight: 700 !important;
+    color: #000000 !important;
+  }
+
+  /* Force le texte en gras dans les titres */
+  html[data-theme="light"] h1, 
+  html[data-theme="light"] h2, 
+  html[data-theme="light"] h3 {
+    font-weight: 800 !important;
+    color: #000000 !important;
+  }
+  
+  /* Règles très spécifiques pour les balises dans le contenu des cartes */
+  html[data-theme="light"] .prose-content strong,
+  html[data-theme="light"] .card-content strong,
+  html[data-theme="light"] .mobile-content-display strong {
+    font-weight: 700 !important;
+    color: #000000 !important;
+  }
+}
+
+/* Correctif pour l'affichage en gras dans l'éditeur de texte */
+.ProseMirror strong, 
+.ProseMirror b,
+.editor-content strong, 
+.editor-content b {
+  font-weight: 700 !important;
+}
+
+/* Version mobile - mode clair */
+@media (max-width: 768px) {
+  html[data-theme="light"] .ProseMirror strong, 
+  html[data-theme="light"] .ProseMirror b,
+  html[data-theme="light"] .editor-content strong, 
+  html[data-theme="light"] .editor-content b {
+    font-weight: 700 !important;
+    color: #000000 !important;
+  }
+  
+  /* Assurons-nous que la famille de police est appropriée pour le gras */
+  html[data-theme="light"] strong,
+  html[data-theme="light"] b,
+  html[data-theme="light"] .font-bold,
+  html[data-theme="light"] .font-semibold {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important;
+  }
+}
