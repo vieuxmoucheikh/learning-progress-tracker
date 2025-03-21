@@ -166,22 +166,22 @@ export const LearningCardsPage = () => {
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="space-y-8">
         {/* Enhanced Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-gray-100">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-gray-100 dark:border-gray-800">
           <div>
             <div className="flex items-center gap-2">
-              <BookOpen className="h-8 w-8 text-blue-600" />
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-500 bg-clip-text text-transparent">
+              <BookOpen className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-500 bg-clip-text text-transparent dark:from-blue-400 dark:via-blue-300 dark:to-indigo-400">
                 Learning Cards
               </h1>
             </div>
-            <p className="text-gray-600 mt-2 text-sm md:text-base max-w-xl">
+            <p className="text-gray-600 dark:text-gray-300 mt-2 text-sm md:text-base max-w-xl">
               Create and organize your study notes, insights, and knowledge in beautiful cards. 
               Review them anytime to reinforce your learning.
             </p>
           </div>
           <Button 
             onClick={handleCreateCard} 
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/20 transition-all duration-200 px-5 py-2 h-auto"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/20 dark:shadow-blue-700/20 transition-all duration-200 px-5 py-2 h-auto"
           >
             <Plus className="w-4 h-4 mr-2" />
             New Card
@@ -190,9 +190,9 @@ export const LearningCardsPage = () => {
 
         {/* Enhanced Filter Section */}
         <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start p-5 bg-gray-50 rounded-xl shadow-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start p-5 bg-gray-50 dark:bg-gray-800/50 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500 dark:text-blue-400 w-4 h-4" />
               <Input
                 type="text"
                 placeholder="Search cards..."
@@ -200,11 +200,11 @@ export const LearningCardsPage = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={cn(
                   "pl-9",
-                  "bg-white",
-                  "text-gray-900",
-                  "border-gray-200 hover:border-blue-300",
-                  "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1",
-                  "placeholder:text-gray-500",
+                  "bg-white dark:bg-gray-800",
+                  "text-gray-900 dark:text-gray-100",
+                  "border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600",
+                  "focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-600 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-gray-800",
+                  "placeholder:text-gray-500 dark:placeholder:text-gray-400",
                   "shadow-sm",
                   "transition-all duration-200"
                 )}
@@ -254,8 +254,8 @@ export const LearningCardsPage = () => {
           </div>
 
           {allTags.length > 0 && (
-            <div className="flex flex-wrap gap-2 items-center p-4 bg-white rounded-lg border border-gray-100 shadow-sm">
-              <TagIcon className="w-4 h-4 text-blue-500" />
+            <div className="flex flex-wrap gap-2 items-center p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
+              <TagIcon className="w-4 h-4 text-blue-500 dark:text-blue-400" />
               {allTags.map((tag) => (
                 <Badge
                   key={tag}
@@ -282,10 +282,10 @@ export const LearningCardsPage = () => {
         {/* Enhanced Card Grid */}
         <div className="mt-8">
           {loading ? (
-            <div className="flex justify-center items-center min-h-[400px] bg-gray-50 rounded-xl border border-gray-100">
+            <div className="flex justify-center items-center min-h-[400px] bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
               <div className="flex flex-col items-center gap-4">
-                <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
-                <p className="text-gray-600 font-medium">Loading your cards...</p>
+                <Loader2 className="w-10 h-10 animate-spin text-blue-500 dark:text-blue-400" />
+                <p className="text-gray-600 dark:text-gray-300 font-medium">Loading your cards...</p>
               </div>
             </div>
           ) : (
@@ -313,8 +313,8 @@ export const LearningCardsPage = () => {
           )}
 
           {!loading && filteredCards.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
-              <div className="text-gray-500 mb-6 max-w-md">
+            <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+              <div className="text-gray-500 dark:text-gray-400 mb-6 max-w-md">
                 {searchTerm || selectedTags.length > 0 || selectedCategory !== 'all'
                   ? 'No cards match your filters. Try adjusting your search criteria or create a new card.'
                   : 'No cards yet. Create your first card to get started with your learning journey!'}
@@ -322,7 +322,7 @@ export const LearningCardsPage = () => {
               <Button
                 onClick={handleCreateCard}
                 variant="outline"
-                className="bg-white hover:bg-blue-50 border-gray-200 hover:border-blue-300 text-blue-600 hover:text-blue-700 transition-all duration-200"
+                className="bg-white dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600 text-blue-600 dark:text-blue-300 hover:text-blue-700 dark:hover:text-blue-200 transition-all duration-200"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Card

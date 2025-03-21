@@ -1894,3 +1894,31 @@ html[data-theme="dark"] .text-xs.font-medium.bg-green-500\/10 {
   color: #334155;
   border-left: 3px solid #3b82f6;
 }
+
+/* Adding these styles for better dark mode category visibility */
+.dark .card-container .badge {
+  border-color: rgba(59, 130, 246, 0.5);
+  background-color: rgba(30, 58, 138, 0.3);
+  color: rgb(191, 219, 254);
+}
+
+.dark .card-container .badge:hover {
+  background-color: rgba(30, 64, 175, 0.4);
+}
+
+/* Ensure category badges have proper contrast in dark mode */
+.dark [data-radix-select-trigger] {
+  border-color: rgb(55, 65, 81);
+  background-color: rgb(31, 41, 55);
+  color: rgb(229, 231, 235);
+}
+
+.dark [data-radix-select-content] {
+  background-color: rgb(31, 41, 55);
+  border-color: rgb(55, 65, 81);
+}
+
+.dark [data-radix-select-item][data-highlighted] {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: rgb(191, 219, 254);
+}
