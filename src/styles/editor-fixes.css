@@ -182,3 +182,211 @@ html[data-theme="dark"] em {
   color: #e2e8f0 !important;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5) !important;
 }
+
+/* Correctifs pour l'éditeur de texte riche en mode sombre */
+
+/* CORRECTIFS CRITIQUES ULTRA-SPÉCIFIQUES POUR LES CATÉGORIES NON VISIBLES SUR DESKTOP */
+html[data-theme="dark"] span.badge[variant="secondary"],
+html[data-theme="dark"] .badge[variant="secondary"],
+html[data-theme="dark"] span.badge,
+html[data-theme="dark"] div.badge,
+html[data-theme="dark"] span.py-1,
+html[data-theme="dark"] span.px-3,
+html[data-theme="dark"] span.font-medium,
+html[data-theme="dark"] [class*="px-3"][class*="py-1"],
+html[data-theme="dark"] .flex-col .badge,
+html[data-theme="dark"] .sm\:flex-row .badge,
+.dark span.badge[variant="secondary"],
+.dark .badge[variant="secondary"],
+.dark span.badge,
+.dark div.badge {
+  /* Force l'affichage */
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  
+  /* Couleurs très contrastées */
+  background-color: rgba(29, 78, 216, 0.4) !important;
+  color: white !important;
+  border: 1px solid #3b82f6 !important;
+  
+  /* Style amélioré */
+  font-weight: 600 !important;
+  padding: 0.25rem 0.75rem !important;
+  border-radius: 9999px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  position: relative !important;
+  z-index: 50 !important;
+  max-width: max-content !important;
+}
+
+/* CORRECTIFS POUR LES TEXTES AVEC COULEUR D'ARRIÈRE-PLAN */
+html[data-theme="dark"] [style*="background"],
+html[data-theme="dark"] [style*="background-color"],
+html[data-theme="dark"] mark,
+.dark [style*="background"],
+.dark [style*="background-color"],
+.dark mark {
+  /* Base styles */
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9) !important;
+  
+  /* Improve contrast */
+  filter: brightness(1.25) contrast(1.4) !important;
+  border-radius: 2px !important;
+  padding: 0 2px !important;
+  
+  /* Force visibility */
+  opacity: 1 !important;
+  position: relative !important;
+}
+
+/* CORRECTIFS POUR LES TEXTES AVEC COULEUR SPÉCIFIQUE */
+html[data-theme="dark"] [style*="color"],
+.dark [style*="color"] {
+  /* Force la couleur à être visible */
+  opacity: 1 !important;
+  color: inherit !important;
+  filter: brightness(1.5) saturate(1.3) contrast(1.2) !important;
+  text-shadow: 0 0 1px black !important;
+}
+
+/* --------- SÉLECTEURS ULTRA-CIBLÉS POUR CATEGORIES --------- */
+/* Version desktop des badges de catégorie */
+@media (min-width: 640px) {
+  /* Target the category badge directly */
+  html[data-theme="dark"] div:first-child > .badge,
+  html[data-theme="dark"] .sm\:flex-row .badge,
+  html[data-theme="dark"] .card-title + .badge,
+  html[data-theme="dark"] h3 + .badge,
+  .dark div:first-child > .badge,
+  .dark .sm\:flex-row .badge,
+  .dark .card-title + .badge,
+  .dark h3 + .badge {
+    background-color: rgba(37, 99, 235, 0.5) !important;
+    color: white !important;
+    border: 2px solid #60a5fa !important;
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    font-weight: 700 !important;
+    font-size: 0.875rem !important;
+    padding: 0.375rem 0.875rem !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+    z-index: 100 !important;
+    position: relative !important;
+  }
+}
+
+/* --- CORRECTIFS POUR LES GUILLEMETS SIMPLES --- */
+html[data-theme="dark"] .tiptap q,
+html[data-theme="dark"] .ProseMirror q,
+html[data-theme="dark"] .tiptap blockquote,
+html[data-theme="dark"] .ProseMirror blockquote,
+html[data-theme="dark"] q,
+html[data-theme="dark"] blockquote,
+.dark .tiptap q,
+.dark .ProseMirror q,
+.dark .tiptap blockquote,
+.dark .ProseMirror blockquote,
+.dark q,
+.dark blockquote {
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7) !important;
+  background-color: rgba(59, 130, 246, 0.2) !important;
+  border-left-color: #3b82f6 !important;
+  border-left-width: 4px !important;
+  padding: 0.5rem 1rem !important;
+  margin: 1rem 0 !important;
+  filter: brightness(1.1) !important;
+  opacity: 1 !important;
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* --- CORRECTIFS POUR L'ÉDITEUR ET SON CONTENU --- */
+/* Force les textes à être visibles dans l'éditeur en mode sombre */
+html[data-theme="dark"] .tiptap,
+html[data-theme="dark"] .ProseMirror,
+html[data-theme="dark"] [class*="editor"],
+.dark .tiptap,
+.dark .ProseMirror,
+.dark [class*="editor"] {
+  color: #f3f4f6 !important;
+  background-color: #1e293b !important;
+}
+
+html[data-theme="dark"] .tiptap p,
+html[data-theme="dark"] .ProseMirror p,
+html[data-theme="dark"] [class*="editor"] p,
+.dark .tiptap p,
+.dark .ProseMirror p,
+.dark [class*="editor"] p {
+  color: #f3f4f6 !important;
+}
+
+/* --- SUPPORT DES DEUX SYNTAXES DE MODE SOMBRE --- */
+/* Support pour l'autre syntaxe courante de mode sombre */
+.dark .badge[variant="secondary"],
+.dark span.badge.py-1,
+.dark span.badge.font-medium,
+.dark span.badge.px-3 {
+  background-color: rgba(37, 99, 235, 0.5) !important;
+  color: white !important;
+  border: 1px solid #60a5fa !important;
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* --- COMPATIBILITÉ ENTRE LES DIFFÉRENTES VERSIONS DE TAILWIND --- */
+/* Pour tenir compte des versions variables de Tailwind */
+html[data-theme="dark"] .badge.inline-flex,
+html[data-theme="dark"] span.badge.inline-flex,
+html[data-theme="dark"] .badge.flex,
+html[data-theme="dark"] span.badge.flex,
+.dark .badge.inline-flex,
+.dark span.badge.inline-flex,
+.dark .badge.flex,
+.dark span.badge.flex {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Dernier recours: cibler tous les badges de catégorie par leur contenu et position */
+html[data-theme="dark"] .card span:not([class*="icon"]):not(.text-xs):not(.text-sm):not(.text-lg):not(.text-xl),
+.dark .card span:not([class*="icon"]):not(.text-xs):not(.text-sm):not(.text-lg):not(.text-xl) {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  color: white !important;
+}
+
+/* --- CORRECTIFS POUR LE SÉLECTEUR DE CATÉGORIE --- */
+html[data-theme="dark"] .select-trigger,
+html[data-theme="dark"] [class*="select-trigger"],
+.dark .select-trigger,
+.dark [class*="select-trigger"] {
+  background-color: #1e293b !important;
+  color: #f3f4f6 !important;
+  border-color: #475569 !important;
+}
+
+html[data-theme="dark"] .select-content,
+html[data-theme="dark"] [class*="select-content"],
+html[data-theme="dark"] .popover-content,
+html[data-theme="dark"] [class*="popover-content"],
+.dark .select-content,
+.dark [class*="select-content"],
+.dark .popover-content,
+.dark [class*="popover-content"] {
+  background-color: #1e293b !important;
+  color: #f3f4f6 !important;
+  border-color: #475569 !important;
+}
