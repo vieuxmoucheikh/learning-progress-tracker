@@ -404,13 +404,53 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         : "bg-white border-gray-200 hover:border-blue-300",
       "sm:rounded-xl",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
+      isEditing ? "!max-w-full lg:!max-w-5xl editing-mode-card fixed left-0 right-0 top-4 bottom-4 z-50 h-[calc(100vh-32px)] overflow-y-auto" : "",
       mastered 
         ? "border-emerald-300 shadow-emerald-100" 
         : isEditing 
           ? "border-blue-400 shadow-md shadow-blue-100"
           : "border-gray-200 hover:border-blue-300 shadow-md shadow-gray-100/50",
     )}>
-      <CardHeader className="space-y-4 pb-4 px-4 sm:px-6">
+      {isEditing && (
+        <div className="absolute top-3 right-3 z-10">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setIsEditing(false);
+              setContent(initialContent);
+              setTitle(initialTitle);
+            }}
+            className="bg-white hover:bg-gray-50 mr-2"
+          >
+            <X className="w-4 h-4 mr-2" />
+            Cancel
+          </Button>
+          <Button
+            size="sm"
+            onClick={async () => {
+              try {
+                await handleSave();
+                setIsEditing(false);
+                toast({
+                  title: "Success",
+                  description: "Card updated successfully",
+                });
+              } catch (error) {
+                console.error('Error saving:', error);
+              }
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Save className="w-4 h-4 mr-2" />
+            Save Changes
+          </Button>
+        </div>
+      )}
+      <CardHeader className={cn(
+        "space-y-4 pb-4 px-4 sm:px-6",
+        isEditing && "pt-16"
+      )}>
         {/* Title Section */}
         <div className="space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -572,13 +612,13 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   content={content}
                   onChange={setContent}
                   className={cn(
-                    "min-h-[200px] rounded-lg",
+                    "min-h-[300px] rounded-lg",
                     "bg-gray-50 dark:bg-gray-800",
                     "text-gray-900 dark:text-gray-100",
                     "border border-gray-200 dark:border-gray-700",
                     "focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-blue-400",
                     "prose prose-sm sm:prose-base max-w-none dark:prose-invert",
-                    "overflow-y-auto max-h-[60vh]",
+                    "overflow-y-auto max-h-[calc(100vh-300px)]",
                     "prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
                     "prose-p:text-gray-700 prose-p:leading-relaxed dark:prose-p:text-gray-300",
                     "prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline dark:prose-a:text-blue-400",
@@ -601,7 +641,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   )}
                 />
               </div>
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-2 hidden">
                 <Button
                   variant="outline"
                   onClick={() => {

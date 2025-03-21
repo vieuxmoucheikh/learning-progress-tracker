@@ -12,6 +12,7 @@ import './styles/critical-light-mode-fixes.css' // Ajout du fichier de correctif
 import '../public/emergency-mobile-fix.css' // Ajout du correctif d'urgence
 import './styles/card-fixes.css';
 import './styles/dark-mode-category-fixes.css'; // Ajout du nouveau fichier CSS
+import './styles/editor-fixes.css'; // Importation du fichier pour l'éditeur
 
 // Injecter un style critique pour assurer la visibilité des compteurs et statuts
 const injectCriticalStyles = () => {

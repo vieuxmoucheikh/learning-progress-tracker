@@ -65,3 +65,69 @@ html[data-theme="dark"] [class*="editor"] .tiptap {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7) !important;
   }
 }
+
+/* Styles améliorés pour la zone d'édition */
+
+/* Style pour la carte en mode édition */
+.editing-mode-card {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: calc(100% - 32px) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+  padding-bottom: 24px !important;
+}
+
+/* Pour les mobiles */
+@media (max-width: 768px) {
+  .editing-mode-card {
+    width: 95% !important;
+    max-height: 90vh !important;
+    border-radius: 12px !important;
+  }
+  
+  .editing-mode-card .RichTextEditor {
+    min-height: 350px !important;
+  }
+}
+
+/* Pour les tablettes */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .editing-mode-card {
+    width: 90% !important;
+    max-width: 800px !important;
+  }
+}
+
+/* Pour les grands écrans */
+@media (min-width: 1025px) {
+  .editing-mode-card {
+    width: 85% !important;
+    max-width: 1200px !important;
+  }
+}
+
+/* Amélioration de l'éditeur de texte riche */
+.editing-mode-card .tiptap {
+  min-height: 250px !important;
+  padding: 20px !important;
+}
+
+/* Amélioration des contrôles d'édition */
+.editing-mode-card .ProseMirror {
+  padding: 1rem !important;
+  min-height: 300px !important;
+}
+
+/* Style pour les boutons d'action en mode édition */
+.editing-mode-card .absolute.top-3.right-3.z-10 button {
+  padding: 0.5rem 1rem !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.editing-mode-card .absolute.top-3.right-3.z-10 button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
