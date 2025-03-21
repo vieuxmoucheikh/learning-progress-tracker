@@ -410,9 +410,16 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           ? "border-blue-400 shadow-md shadow-blue-100"
           : "border-gray-200 hover:border-blue-300 shadow-md shadow-gray-100/50",
     )}>
-      <CardHeader className="space-y-4 pb-4 px-4 sm:px-6">
+      <CardHeader className={cn(
+        "space-y-4 pb-4 px-4 sm:px-6",
+        mastered && "bg-gradient-to-r from-emerald-50/50 to-transparent",
+        !mastered && "bg-gradient-to-r from-gray-50/30 to-transparent"
+      )}>
         {/* Title Section */}
-        <div className="space-y-3">
+        <div className={cn(
+          "space-y-3",
+          mastered ? "border-b border-emerald-200 pb-4" : "border-b border-gray-100 pb-4"
+        )}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex-1 min-w-0">
               {isEditing ? (
@@ -437,7 +444,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     "text-xl sm:text-2xl font-semibold line-clamp-2 card-title",
                     "text-gray-900",
                     "transition-colors",
-                    mastered ? "text-emerald-800" : "text-gray-900",
+                    mastered 
+                      ? "text-emerald-800 drop-shadow-sm" 
+                      : "text-gray-900",
                   )}
                   onClick={() => setShowContent(!showContent)}
                 >
@@ -448,7 +457,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             
             <div className="flex items-center gap-2 sm:gap-3">
               {mastered && (
-                <Trophy className="w-5 h-5 text-yellow-500 animate-pulse" />
+                <div className="relative flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full bg-yellow-100 animate-pulse opacity-60"></div>
+                  <Trophy className="w-6 h-6 text-yellow-600 drop-shadow-sm z-10 relative" />
+                </div>
               )}
               <Button
                 variant="ghost"
@@ -545,8 +557,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               variant="secondary" 
               className={cn(
                 "font-medium px-3 py-1",
-                "bg-blue-50 text-blue-700 hover:bg-blue-100",
-                "border border-blue-200",
+                mastered 
+                  ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200" 
+                  : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200",
                 "rounded-full",
                 "shadow-sm"
               )}
@@ -665,7 +678,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           mastered && "mastered-meta"
         )}>
           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-            <Clock className="w-4 h-4" />
+            <Clock className={cn(
+              "w-4 h-4",
+              mastered && "text-emerald-500 dark:text-emerald-400"
+            )} />
             <span className="updated-text">Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</span>
           </div>
 
@@ -676,9 +692,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 variant="secondary"
                 className={cn(
                   "px-2 py-0.5",
-                  "bg-white dark:bg-gray-800 dark:text-gray-200",
-                  "border border-gray-200 dark:border-gray-700",
-                  "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  mastered
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800"
+                    : "bg-white dark:bg-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300",
+                  "hover:bg-gray-100 dark:hover:bg-gray-700"
                 )}
               >
                 {tag}
@@ -690,7 +707,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
 
       <CardFooter className={cn(
         "flex justify-between p-4 sm:p-6 gap-4",
-        "bg-gradient-to-b from-transparent via-gray-50/50 to-gray-100/50 dark:from-transparent dark:via-gray-800/30 dark:to-gray-900/30"
+        mastered
+          ? "bg-gradient-to-b from-transparent via-emerald-50/30 to-emerald-100/30 dark:from-transparent dark:via-emerald-900/20 dark:to-emerald-900/30"
+          : "bg-gradient-to-b from-transparent via-gray-50/50 to-gray-100/50 dark:from-transparent dark:via-gray-800/30 dark:to-gray-900/30"
       )}>
         <Button
           variant="ghost"

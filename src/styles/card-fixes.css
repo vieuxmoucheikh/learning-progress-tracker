@@ -1894,3 +1894,76 @@ html[data-theme="dark"] .text-xs.font-medium.bg-green-500\/10 {
   color: #334155;
   border-left: 3px solid #3b82f6;
 }
+
+/* ...existing code... */
+
+/* Améliorations pour les cartes maîtrisées */
+html[data-theme="light"] .mastered-content {
+  position: relative;
+}
+
+html[data-theme="light"] .mastered-content::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(to right, #10b981, #34d399, transparent);
+  border-radius: 6px 6px 0 0;
+  opacity: 0.7;
+}
+
+/* Animation subtile pour l'icône de trophée */
+html[data-theme="light"] .animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* Amélioration du titre de carte */
+html[data-theme="light"] .card-title {
+  position: relative;
+  padding-bottom: 0.25rem;
+  transition: all 0.3s ease;
+}
+
+html[data-theme="light"] .card:hover .card-title {
+  color: #1d4ed8;
+}
+
+/* Style spécial pour les titres des cartes maîtrisées */
+html[data-theme="light"] .mastered-content .card-title,
+html[data-theme="light"] .card-title.text-emerald-800 {
+  background: linear-gradient(to right, #059669, #10b981);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+
+/* Style amélioré pour les badges de catégorie */
+html[data-theme="light"] .badge {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  letter-spacing: 0.01em;
+}
+
+html[data-theme="light"] .bg-emerald-50.text-emerald-700 {
+  background: linear-gradient(to right, #d1fae5, #ecfdf5);
+}
+
+html[data-theme="light"] .bg-blue-50.text-blue-700 {
+  background: linear-gradient(to right, #dbeafe, #eff6ff);
+}
+
+/* Effet d'ombre pour la carte maîtrisée */
+html[data-theme="light"] .border-emerald-300.shadow-emerald-100 {
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
+}
