@@ -2285,3 +2285,335 @@ html[data-theme="dark"] [class*="prose"] strong {
 html[data-theme="dark"] [class*="editor"] [contenteditable="true"] {
   background-color: #1e293b !important;
 }
+
+/* ...existing code... */
+
+/* ====================================================
+   AMÉLIORATIONS SPÉCIFIQUES POUR MOBILE - MODE CLAIR
+   ==================================================== */
+
+@media (max-width: 640px) {
+  /* Styles généraux pour les cartes sur mobile en mode clair */
+  html[data-theme="light"] .card,
+  html[data-theme="light"] [class*="card-container"] > .card,
+  html[data-theme="light"] .learning-item-card > .card,
+  html[data-theme="light"] .learning-item-card > div > .card,
+  html[data-theme="light"] .item-wrapper .card {
+    margin: 0.75rem 0 1.5rem 0 !important;
+    border-radius: 16px !important;
+    border-width: 1px !important;
+    border-left-width: 8px !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.07) !important;
+  }
+
+  /* Animation de survol sur mobile - plus subtile */
+  html[data-theme="light"] .card:active,
+  html[data-theme="light"] [class*="card-container"] > .card:active,
+  html[data-theme="light"] .learning-item-card > .card:active {
+    transform: translateY(-2px) !important;
+    transition: transform 0.15s ease !important;
+  }
+
+  /* Marges intérieures réduites pour plus d'espace utilisable */
+  html[data-theme="light"] .card > div,
+  html[data-theme="light"] .learning-item-card > .card > div {
+    padding: 16px !important;
+  }
+
+  /* En-tête de carte plus compact */
+  html[data-theme="light"] .card-header,
+  html[data-theme="light"] .learning-item-card > .card > div:first-child {
+    border-bottom: 1px solid rgba(226, 232, 240, 0.7) !important;
+    padding-bottom: 12px !important;
+  }
+
+  /* Titres plus grands et plus lisibles */
+  html[data-theme="light"] .card h3,
+  html[data-theme="light"] .learning-item-card h3 {
+    font-size: 1.3rem !important;
+    line-height: 1.3 !important;
+    margin-bottom: 8px !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    word-break: break-word !important;
+  }
+
+  /* Boutons d'action plus grands et plus faciles à toucher */
+  html[data-theme="light"] .card button,
+  html[data-theme="light"] .learning-item-card button {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    border-radius: 8px !important;
+  }
+
+  /* Groupes de boutons mieux espacés */
+  html[data-theme="light"] .card .flex.gap-2,
+  html[data-theme="light"] .learning-item-card .flex.gap-2 {
+    gap: 8px !important;
+  }
+
+  /* Badges plus visibles */
+  html[data-theme="light"] .badge,
+  html[data-theme="light"] .card .badge,
+  html[data-theme="light"] .learning-item-card .badge {
+    font-size: 0.7rem !important;
+    padding: 6px 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    border-radius: 999px !important;
+  }
+
+  /* Badges de catégorie plus proéminents */
+  html[data-theme="light"] .badge.bg-blue-50,
+  html[data-theme="light"] .badge.bg-emerald-50 {
+    padding: 6px 12px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  /* Améliorations pour les cartes selon le statut en mode mobile */
+  /* En cours (bleu) */
+  html[data-theme="light"] .card[class*="border-blue-400"],
+  html[data-theme="light"] .card[class*="border-l-blue-400"] {
+    background: linear-gradient(145deg, #f5f9ff 0%, #ffffff 100%) !important;
+    border-color: #e0eaff !important;
+    border-left-color: #3b82f6 !important;
+  }
+
+  /* Terminé (vert) */
+  html[data-theme="light"] .card[class*="border-green-400"],
+  html[data-theme="light"] .card[class*="border-l-green-400"] {
+    background: linear-gradient(145deg, #f0fdf4 0%, #ffffff 100%) !important;
+    border-color: #dcfce7 !important;
+    border-left-color: #22c55e !important;
+  }
+
+  /* En pause (jaune) */
+  html[data-theme="light"] .card[class*="border-yellow-400"],
+  html[data-theme="light"] .card[class*="border-l-yellow-400"] {
+    background: linear-gradient(145deg, #fffbeb 0%, #ffffff 100%) !important;
+    border-color: #fef9c3 !important;
+    border-left-color: #facc15 !important;
+  }
+
+  /* Indicateur visuel pour le statut - coin coloré */
+  html[data-theme="light"] .card::after,
+  html[data-theme="light"] .learning-item-card > .card::after {
+    content: "";
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    border-bottom-left-radius: 10px !important;
+    z-index: 10 !important;
+  }
+
+  /* Couleurs de l'indicateur selon le statut */
+  html[data-theme="light"] .card[class*="border-blue-400"]::after {
+    background-color: #3b82f6 !important;
+  }
+
+  html[data-theme="light"] .card[class*="border-green-400"]::after {
+    background-color: #22c55e !important;
+  }
+
+  html[data-theme="light"] .card[class*="border-yellow-400"]::after {
+    background-color: #facc15 !important;
+  }
+
+  /* Modèle de contenu pour de meilleurs aperçus sur mobile */
+  html[data-theme="light"] .prose {
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Limite la hauteur des aperçus de contenu pour plus de lisibilité */
+  html[data-theme="light"] .learning-item-card .prose:not(.zoomed),
+  html[data-theme="light"] .card .prose:not(.zoomed) {
+    max-height: 150px !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+
+  /* Fondu du texte tronqué */
+  html[data-theme="light"] .learning-item-card .prose:not(.zoomed)::after,
+  html[data-theme="light"] .card .prose:not(.zoomed)::after {
+    content: "" !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 40px !important;
+    background: linear-gradient(to top, white, transparent) !important;
+    pointer-events: none !important;
+  }
+
+  /* Sections de tag mieux organisées */
+  html[data-theme="light"] .flex.flex-wrap.gap-2 {
+    margin-top: 8px !important;
+    gap: 6px !important;
+  }
+
+  /* Style pour les tags plus compacts */
+  html[data-theme="light"] .flex.flex-wrap.gap-2 .badge {
+    padding: 4px 8px !important;
+    font-size: 0.65rem !important;
+  }
+
+  /* Adapter l'espacement du pied de carte */
+  html[data-theme="light"] .card-footer,
+  html[data-theme="light"] .learning-item-card > .card > div:last-child {
+    padding-top: 12px !important;
+    background: linear-gradient(to bottom, transparent, rgba(249, 250, 251, 0.5)) !important;
+  }
+
+  /* Amélioration des "meta" informations */
+  html[data-theme="light"] .text-sm.text-gray-600,
+  html[data-theme="light"] .updated-text {
+    font-size: 0.75rem !important;
+    color: #64748b !important;
+  }
+
+  /* Sélecteur de catégorie - amélioration pour mobile */
+  html[data-theme="light"] .SelectTrigger,
+  html[data-theme="light"] select,
+  html[data-theme="light"] .select-trigger {
+    min-height: 44px !important;
+    border-radius: 8px !important;
+    padding: 0 12px !important;
+    background-color: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  /* Champs de recherche et d'édition - amélioration tactile */
+  html[data-theme="light"] input,
+  html[data-theme="light"] textarea {
+    min-height: 44px !important;
+    border-radius: 8px !important;
+    padding: 10px 12px !important;
+    font-size: 1rem !important;
+  }
+
+  /* Amélioration de l'éditeur de texte pour mobile */
+  html[data-theme="light"] .rich-text-editor {
+    border-radius: 8px !important;
+    overflow: hidden !important;
+  }
+
+  /* Barre d'outils de l'éditeur plus compacte et accessible */
+  html[data-theme="light"] .rich-text-editor .flex.flex-wrap.gap-1.p-2 {
+    padding: 8px 6px !important;
+    gap: 4px !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+  }
+
+  /* Boutons de la barre d'outils plus grands */
+  html[data-theme="light"] .rich-text-editor button {
+    height: 40px !important;
+    width: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Améliorer la visibilité des boutons Mastered et Delete */
+  html[data-theme="light"] button.text-sm {
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    height: 44px !important;
+    padding: 0 16px !important;
+  }
+
+  /* Bouton Mark as Mastered */
+  html[data-theme="light"] button[class*="text-emerald-600"],
+  html[data-theme="light"] button[class*="text-gray-600"] {
+    border: 1px solid #e2e8f0 !important;
+    background-color: #f8fafc !important;
+  }
+
+  /* Bouton Delete */
+  html[data-theme="light"] button[class*="text-red-600"] {
+    border: 1px solid #fee2e2 !important;
+    background-color: #fff5f5 !important;
+  }
+
+  /* Section de filtres plus compacte et tactile */
+  html[data-theme="light"] .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-3.gap-4 {
+    gap: 12px !important;
+  }
+
+  /* Amélioration des dialogues et modals pour mobile */
+  html[data-theme="light"] .dialog-content,
+  html[data-theme="light"] [role="dialog"] {
+    margin: 16px !important;
+    padding: 16px !important;
+    max-width: calc(100% - 32px) !important;
+    max-height: calc(100% - 80px) !important;
+    border-radius: 16px !important;
+  }
+  
+  /* Amélioration des boutons de dialogue */
+  html[data-theme="light"] .dialog-content button,
+  html[data-theme="light"] [role="dialog"] button {
+    height: 44px !important;
+    min-width: 80px !important;
+  }
+  
+  /* Les cartes maîtrisées ont un style spécial */
+  html[data-theme="light"] .mastered-content .card-title,
+  html[data-theme="light"] .mastered-card .card-title {
+    color: #059669 !important;
+  }
+  
+  /* Ajouter un indicateur de "maîtrisé" */
+  html[data-theme="light"] .mastered-content::before,
+  html[data-theme="light"] .card[class*="mastered"]::before {
+    content: "✓" !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    width: 24px !important;
+    height: 24px !important;
+    background-color: #10b981 !important;
+    color: white !important;
+    border-radius: 50% !important;
+    font-weight: bold !important;
+    font-size: 14px !important;
+    z-index: 10 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  }
+}
+
+/* Corrections spécifiques pour les filtres sur mobile */
+@media (max-width: 640px) {
+  /* Zone de filtres */
+  html[data-theme="light"] .bg-gray-50.dark\:bg-gray-800\/50.rounded-xl.shadow-sm {
+    padding: 12px !important;
+  }
+  
+  /* Champ de recherche */
+  html[data-theme="light"] .relative:has(input[type="text"]) {
+    margin-bottom: 10px !important;
+  }
+  
+  /* Style des badges de filtre */
+  html[data-theme="light"] .flex.flex-wrap.gap-2.items-center.p-4 {
+    padding: 12px !important;
+    gap: 6px !important;
+  }
+  
+  /* Message de résultats vides */
+  html[data-theme="light"] .flex.flex-col.items-center.justify-center.py-16 {
+    padding: 40px 16px !important;
+  }
+}
+
+/* ...existing code... */

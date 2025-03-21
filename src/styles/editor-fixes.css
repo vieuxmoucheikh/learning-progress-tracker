@@ -1,0 +1,193 @@
+/* AMÉLIORATIONS DE L'ÉDITEUR DE TEXTE POUR MOBILE */
+
+@media (max-width: 640px) {
+  /* Conteneur principal de l'éditeur */
+  .rich-text-editor,
+  [class*="rich-text-editor"] {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+  
+  /* Mode clair - Barre d'outils */
+  html[data-theme="light"] .rich-text-editor .sticky.top-0,
+  html[data-theme="light"] [class*="rich-text-editor"] .sticky.top-0 {
+    background-color: #f8fafc !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 6px 4px !important;
+  }
+  
+  /* Boutons de la barre d'outils plus grands et plus accessibles */
+  html[data-theme="light"] .rich-text-editor button,
+  html[data-theme="light"] [class*="rich-text-editor"] button {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    border-radius: 8px !important;
+    margin: 2px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Effet de survol des boutons */
+  html[data-theme="light"] .rich-text-editor button:hover,
+  html[data-theme="light"] [class*="rich-text-editor"] button:hover {
+    background-color: #eff6ff !important;
+  }
+  
+  /* Boutons actifs */
+  html[data-theme="light"] .rich-text-editor button[class*="bg-gray-100"],
+  html[data-theme="light"] [class*="rich-text-editor"] button[class*="bg-gray-100"] {
+    background-color: #dbeafe !important;
+    color: #1d4ed8 !important;
+  }
+  
+  /* Zone d'édition */
+  html[data-theme="light"] .rich-text-editor .ProseMirror,
+  html[data-theme="light"] [class*="rich-text-editor"] .ProseMirror,
+  html[data-theme="light"] .EditorContent {
+    padding: 16px !important;
+    min-height: 180px !important;
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
+  }
+  
+  /* Styles de base pour le texte dans l'éditeur */
+  html[data-theme="light"] .ProseMirror p {
+    margin-bottom: 12px !important;
+    line-height: 1.6 !important;
+  }
+  
+  /* Titres dans l'éditeur */
+  html[data-theme="light"] .ProseMirror h1 {
+    font-size: 1.5rem !important;
+    line-height: 1.3 !important;
+    margin-top: 20px !important;
+    margin-bottom: 12px !important;
+  }
+  
+  html[data-theme="light"] .ProseMirror h2 {
+    font-size: 1.3rem !important;
+    line-height: 1.3 !important;
+    margin-top: 18px !important;
+    margin-bottom: 10px !important;
+  }
+  
+  html[data-theme="light"] .ProseMirror h3 {
+    font-size: 1.1rem !important;
+    line-height: 1.3 !important;
+    margin-top: 16px !important;
+    margin-bottom: 8px !important;
+  }
+  
+  /* Listes dans l'éditeur */
+  html[data-theme="light"] .ProseMirror ul,
+  html[data-theme="light"] .ProseMirror ol {
+    padding-left: 24px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  html[data-theme="light"] .ProseMirror li {
+    margin-bottom: 4px !important;
+  }
+  
+  /* Citations dans l'éditeur */
+  html[data-theme="light"] .ProseMirror blockquote {
+    border-left: 3px solid #3b82f6 !important;
+    padding-left: 12px !important;
+    margin: 16px 0 !important;
+    font-style: italic !important;
+    color: #4b5563 !important;
+  }
+  
+  /* Code inline dans l'éditeur */
+  html[data-theme="light"] .ProseMirror code {
+    background-color: #f1f5f9 !important;
+    padding: 2px 4px !important;
+    border-radius: 4px !important;
+    font-family: monospace !important;
+    font-size: 0.9em !important;
+  }
+  
+  /* Popover pour les couleurs et autres options */
+  html[data-theme="light"] .PopoverContent,
+  html[data-theme="light"] [class*="PopoverContent"] {
+    border-radius: 12px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+    padding: 10px !important;
+  }
+  
+  /* Meilleur retour visuel lorsqu'on tape dans l'éditeur sur mobile */
+  @keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  
+  html[data-theme="light"] .ProseMirror.ProseMirror-focused {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+  }
+  
+  /* Placeholder plus visible */
+  html[data-theme="light"] [data-placeholder]::before {
+    color: #94a3b8 !important;
+    font-style: italic !important;
+  }
+}
+
+/* Mode sombre - Ajustements pour l'éditeur */
+@media (max-width: 640px) {
+  html[data-theme="dark"] .rich-text-editor,
+  html[data-theme="dark"] [class*="rich-text-editor"] {
+    border-color: #334155 !important;
+    background-color: #1e293b !important;
+  }
+  
+  html[data-theme="dark"] .rich-text-editor .sticky.top-0,
+  html[data-theme="dark"] [class*="rich-text-editor"] .sticky.top-0 {
+    background-color: #0f172a !important;
+    border-bottom-color: #334155 !important;
+  }
+  
+  html[data-theme="dark"] .rich-text-editor button,
+  html[data-theme="dark"] [class*="rich-text-editor"] button {
+    color: #e2e8f0 !important;
+  }
+  
+  html[data-theme="dark"] .rich-text-editor button:hover,
+  html[data-theme="dark"] [class*="rich-text-editor"] button:hover {
+    background-color: #1e3a8a !important;
+    color: white !important;
+  }
+  
+  html[data-theme="dark"] .rich-text-editor button[class*="bg-gray-100"],
+  html[data-theme="dark"] [class*="rich-text-editor"] button[class*="bg-gray-100"] {
+    background-color: #1e40af !important;
+    color: white !important;
+  }
+  
+  html[data-theme="dark"] .ProseMirror p,
+  html[data-theme="dark"] .ProseMirror h1,
+  html[data-theme="dark"] .ProseMirror h2,
+  html[data-theme="dark"] .ProseMirror h3,
+  html[data-theme="dark"] .ProseMirror li,
+  html[data-theme="dark"] .ProseMirror blockquote {
+    color: white !important;
+  }
+  
+  html[data-theme="dark"] .ProseMirror blockquote {
+    border-left-color: #3b82f6 !important;
+    color: #cbd5e1 !important;
+    background-color: rgba(30, 58, 138, 0.3) !important;
+  }
+  
+  html[data-theme="dark"] .ProseMirror code {
+    background-color: #0f172a !important;
+    color: #93c5fd !important;
+  }
+  
+  html[data-theme="dark"] [data-placeholder]::before {
+    color: #64748b !important;
+  }
+}
