@@ -1,0 +1,101 @@
+/* Styles pour préserver les couleurs personnalisées dans l'éditeur de texte */
+
+/* Mode clair: s'assurer que les couleurs personnalisées sont préservées */
+.ProseMirror [style*="color:"],
+.ProseMirror span[style*="color:"],
+.ProseMirror p[style*="color:"],
+.ProseMirror h1[style*="color:"],
+.ProseMirror h2[style*="color:"],
+.ProseMirror h3[style*="color:"],
+.ProseMirror strong[style*="color:"],
+.ProseMirror em[style*="color:"],
+.ProseMirror li[style*="color:"] {
+  color: inherit !important;
+}
+
+.ProseMirror [style*="background-color:"],
+.ProseMirror span[style*="background-color:"],
+.ProseMirror p[style*="background-color:"],
+.ProseMirror h1[style*="background-color:"],
+.ProseMirror h2[style*="background-color:"],
+.ProseMirror h3[style*="background-color:"],
+.ProseMirror strong[style*="background-color:"],
+.ProseMirror em[style*="background-color:"],
+.ProseMirror li[style*="background-color:"] {
+  background-color: inherit !important;
+}
+
+/* Mode sombre: s'assurer que les couleurs personnalisées sont préservées */
+html[data-theme="dark"] .ProseMirror [style*="color:"],
+html[data-theme="dark"] .ProseMirror span[style*="color:"],
+html[data-theme="dark"] .ProseMirror p[style*="color:"],
+html[data-theme="dark"] .ProseMirror h1[style*="color:"],
+html[data-theme="dark"] .ProseMirror h2[style*="color:"],
+html[data-theme="dark"] .ProseMirror h3[style*="color:"],
+html[data-theme="dark"] .ProseMirror strong[style*="color:"],
+html[data-theme="dark"] .ProseMirror em[style*="color:"],
+html[data-theme="dark"] .ProseMirror li[style*="color:"] {
+  color: inherit !important;
+}
+
+html[data-theme="dark"] .ProseMirror [style*="background-color:"],
+html[data-theme="dark"] .ProseMirror span[style*="background-color:"],
+html[data-theme="dark"] .ProseMirror p[style*="background-color:"],
+html[data-theme="dark"] .ProseMirror h1[style*="background-color:"],
+html[data-theme="dark"] .ProseMirror h2[style*="background-color:"],
+html[data-theme="dark"] .ProseMirror h3[style*="background-color:"],
+html[data-theme="dark"] .ProseMirror strong[style*="background-color:"],
+html[data-theme="dark"] .ProseMirror em[style*="background-color:"],
+html[data-theme="dark"] .ProseMirror li[style*="background-color:"] {
+  background-color: inherit !important;
+}
+
+/* Amélioration des surlignages */
+.ProseMirror mark[style],
+.ProseMirror span[data-highlight] {
+  background-color: inherit !important;
+  mix-blend-mode: multiply !important;
+}
+
+html[data-theme="dark"] .ProseMirror mark[style],
+html[data-theme="dark"] .ProseMirror span[data-highlight] {
+  mix-blend-mode: screen !important;
+  opacity: 0.85 !important;
+}
+
+/* Forcer des contrastes suffisants pour les couleurs claires sur fond sombre */
+html[data-theme="dark"] .ProseMirror [style*="color: #fff"],
+html[data-theme="dark"] .ProseMirror [style*="color: white"],
+html[data-theme="dark"] .ProseMirror [style*="color: #ffffff"],
+html[data-theme="dark"] .ProseMirror [style*="color:#fff"],
+html[data-theme="dark"] .ProseMirror [style*="color:#ffffff"],
+html[data-theme="dark"] .ProseMirror [style*="color:white"] {
+  text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Préserver les couleurs de fond claires avec opacité réduite en mode sombre */
+html[data-theme="dark"] .ProseMirror mark[style*="background-color: #f"],
+html[data-theme="dark"] .ProseMirror span[style*="background-color: #f"] {
+  opacity: 0.7 !important;
+  mix-blend-mode: screen !important;
+}
+
+/* Assurer que le mode de surbrillance fonctionne correctement */
+.has-highlight {
+  background-color: inherit !important;
+}
+
+/* Correction pour TipTap ColorExtension et Highlight */
+.ProseMirror .has-highlight {
+  background-color: inherit !important;
+}
+
+html[data-theme="dark"] .ProseMirror p[class] {
+  color: inherit !important;
+}
+
+/* Correction importante: fournir un mode de mixage compatible pour préserver la lisibilité des couleurs */
+html[data-theme="dark"] .ProseMirror [style] {
+  color: inherit !important;
+  background-color: inherit !important;
+}

@@ -241,6 +241,34 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     editor?.chain().focus().insertContent(sanitizedContent).run();
   };
 
+  // Fonction pour empêcher l'écrasement des couleurs personnalisées
+  useEffect(() => {
+    // Empêcher TailwindCSS d'écraser les styles de couleur dans l'éditeur
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+      .ProseMirror [style*="color:"] {
+        color: var(--tw-prose-body) !important;
+        color: unset !important;
+      }
+      .ProseMirror [style*="background-color:"] {
+        background-color: unset !important;
+      }
+      .ProseMirror mark[style], .ProseMirror span[data-highlight] {
+        background-color: unset !important;
+        mix-blend-mode: multiply;
+      }
+      html[data-theme="dark"] .ProseMirror mark[style], 
+      html[data-theme="dark"] .ProseMirror span[data-highlight] {
+        mix-blend-mode: screen;
+      }
+    `;
+    document.head.appendChild(styleElement);
+    
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
+
   useEffect(() => {
     const editorElement = document.querySelector('.editor');
     if (editorElement) {
@@ -502,13 +530,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             "[&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-2",
             "[&_a]:dark:text-blue-400",
             "[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4",
-            "[&_p]:my-2 [&_p]:text-gray-900 [&_p]:dark:text-white", // Texte blanc pour les paragraphes
+            "[&_p]:my-2", // Suppression des styles de couleur forcée pour les paragraphes
             "[&_h1]:dark:text-white [&_h2]:dark:text-white [&_h3]:dark:text-white", // Texte blanc pour les titres
             "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4",
-            "[&_mark]:dark:mix-blend-screen", // Amélioration des surlignages en mode sombre
             "[&_mark]:dark:opacity-80",
-            // Classes spéciales pour préserver les styles personnalisés
-            "[&_*[style]]:!text-current [&_*[style]]:!bg-current"
+            // Retrait des sélecteurs qui écrasent les styles personnalisés
           )}
         />
       </div>
