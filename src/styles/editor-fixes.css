@@ -1,0 +1,54 @@
+/* CORRECTIFS POUR L'ÉDITEUR DE TEXTE */
+
+/* Styles pour améliorer la visibilité du texte en gras */
+strong, 
+b,
+.font-bold,
+.font-semibold,
+.font-extrabold,
+[style*="font-weight: bold"],
+[style*="font-weight:bold"],
+[style*="font-weight: 700"],
+[style*="font-weight:700"],
+[style*="font-weight: 900"],
+[style*="font-weight:900"] {
+  font-weight: 900 !important;
+}
+
+/* Styles spécifiques pour le mode clair (problème principal) */
+@media (max-width: 768px) {
+  html[data-theme="light"] strong,
+  html[data-theme="light"] b,
+  html[data-theme="light"] .font-bold,
+  html[data-theme="light"] .font-semibold,
+  html[data-theme="light"] .font-extrabold,
+  html[data-theme="light"] [style*="font-weight: bold"],
+  html[data-theme="light"] [style*="font-weight:bold"],
+  html[data-theme="light"] [style*="font-weight: 700"],
+  html[data-theme="light"] [style*="font-weight:700"],
+  html[data-theme="light"] .ProseMirror strong,
+  html[data-theme="light"] .ProseMirror b,
+  html[data-theme="light"] [class*="ProseMirror"] strong,
+  html[data-theme="light"] [class*="ProseMirror"] b,
+  html[data-theme="light"] [contenteditable="true"] strong,
+  html[data-theme="light"] [contenteditable="true"] b,
+  html[data-theme="light"] .tiptap strong,
+  html[data-theme="light"] .tiptap b {
+    font-weight: 900 !important;
+    color: #000000 !important;
+    text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
+    background-color: rgba(255, 255, 0, 0.15) !important;
+    padding: 0 2px !important;
+    border-radius: 2px !important;
+  }
+
+  /* Amélioration du bouton de gras pour le rendre plus visible lorsqu'il est actif */
+  html[data-theme="light"] .mobile-bold-button.active,
+  html[data-theme="light"] [class*="mobile-bold-button"].active {
+    background-color: rgba(59, 130, 246, 0.3) !important;
+    color: #1d4ed8 !important;
+    font-weight: 700 !important;
+    border-radius: 4px !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
+  }
+}

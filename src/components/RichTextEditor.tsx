@@ -105,7 +105,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         },
         bold: {
           HTMLAttributes: {
-            class: 'font-bold text-black mobile-bold', // Ajout de classe pour le texte en gras sur mobile
+            class: 'font-bold text-black mobile-bold mobile-bold-force', // Ajout de classes plus fortes
+            style: 'font-weight: 900; color: black !important', // Force le style inline
           },
         },
       }),
@@ -133,8 +134,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           class: 'rounded bg-gray-200 px-1.5 py-0.5 font-mono text-sm',
         },
       }),
-      TextStyle,
-      ColorExtension,
+      TextStyle, // Utiliser TextStyle sans configuration particulière (supprimer la configuration incorrecte)
+      ColorExtension, // Si nécessaire, ajuster également la configuration
       Highlight.configure({
         multicolor: true,
       }),
@@ -185,6 +186,20 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           }
         }
         return false;
+      },
+      handleClick: (view, pos, event) => {
+        // Ajouter une gestion de clic pour forcer la mise à jour des styles
+        if (event.target instanceof HTMLElement) {
+          if (event.target.closest('[data-type="bold"]') || 
+              event.target.closest('.ProseMirror-selectednode')) {
+            // Forcer la mise à jour du style
+            const currentStyles = view.state.selection.$head.marks();
+            if (currentStyles.length > 0) {
+              view.updateState(view.state);
+            }
+          }
+        }
+        return false; // Continuer le traitement normal
       },
     },
   });
@@ -246,6 +261,30 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     input.click();
   }, [editor]);
 
+  // NOUVEAU: Modifier le comportement du bouton Bold pour le rendre plus fiable sur mobile
+  const toggleBold = useCallback(() => {
+    if (!editor) return;
+    
+    // Si déjà en gras, appliquer une force supplémentaire
+    if (editor.isActive('bold')) {
+      editor.chain().focus()
+        .unsetBold()
+        .run();
+        
+      // Reappliquer le gras avec un style encore plus fort
+      setTimeout(() => {
+        editor.chain().focus()
+          .setMark('textStyle', { 
+            'class': 'font-extrabold mobile-bold-force',
+            'style': 'font-weight: 900 !important; color: black !important;'
+          })
+          .run();
+      }, 50);
+    } else {
+      editor.chain().focus().toggleBold().run();
+    }
+  }, [editor]);
+
   if (!editor) {
     return null;
   }
@@ -264,10 +303,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
               <Button
                 size="icon"
                 variant="ghost"
-                onClick={() => editor.chain().focus().toggleBold().run()}
+                onClick={toggleBold} // Utiliser notre fonction personnalisée
                 className={cn(
-                  "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300 mobile-bold-button", // Ajout d'une classe pour cibler le bouton
-                  editor.isActive('bold') && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white font-bold"
+                  "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300 mobile-bold-button", 
+                  editor.isActive('bold') && "active bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white font-bold" // Ajouter la classe active
                 )}
               >
                 <Bold className="h-4 w-4" />
@@ -451,8 +490,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   "[&_p]:my-2 [&_p]:text-gray-900 [&_p]:dark:text-white", // Texte blanc pour les paragraphes
                   "[&_h1]:dark:text-white [&_h2]:dark:text-white [&_h3]:dark:text-white", // Texte blanc pour les titres
                   "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4",
-                  "[&_.ProseMirror_strong]:font-bold [&_.ProseMirror_strong]:text-black [&_.ProseMirror_strong]:dark:text-white", // Sélecteur direct pour strong
-                  "[&_.ProseMirror_b]:font-bold [&_.ProseMirror_b]:text-black [&_.ProseMirror_b]:dark:text-white" // Sélecteur direct pour b
+                  "[&_.ProseMirror_strong]:font-extrabold [&_.ProseMirror_strong]:!text-black [&_.ProseMirror_strong]:dark:!text-white", // Styles plus forts avec !important
+                  "[&_.ProseMirror_b]:font-extrabold [&_.ProseMirror_b]:!text-black [&_.ProseMirror_b]:dark:!text-white",
+                  "[&_.mobile-bold]:font-extrabold [&_.mobile-bold]:!text-black [&_.mobile-bold]:dark:!text-white",
+                  "[&_.mobile-bold-force]:font-black [&_.mobile-bold-force]:!text-black [&_.mobile-bold-force]:dark:!text-white",
+                  "prose-strong:!font-black prose-strong:!text-black dark:prose-strong:!text-white",
+                  "prose-b:!font-black prose-b:!text-black dark:prose-b:!text-white",
                 )}
           
         />

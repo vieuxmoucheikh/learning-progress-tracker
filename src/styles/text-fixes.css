@@ -93,3 +93,110 @@ h1, h2, h3, h4, h5, h6 {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important;
   }
 }
+
+/* CORRECTIFS CRITIQUES SPÉCIFIQUES POUR L'ÉDITION MOBILE */
+/* Ces règles ciblent spécifiquement le problème de visibilité du texte en gras en mode édition sur mobile */
+
+/* Sélecteurs ultra-spécifiques pour le texte en gras dans l'éditeur pendant l'édition */
+@media (max-width: 768px) {
+  /* Force le texte en gras à être VRAIMENT en gras et noir en mode clair */
+  html[data-theme="light"] .ProseMirror strong,
+  html[data-theme="light"] .ProseMirror b,
+  html[data-theme="light"] [class*="ProseMirror"] strong,
+  html[data-theme="light"] [class*="ProseMirror"] b,
+  html[data-theme="light"] .tiptap strong,
+  html[data-theme="light"] .tiptap b,
+  html[data-theme="light"] [contenteditable="true"] strong,
+  html[data-theme="light"] [contenteditable="true"] b {
+    font-weight: 900 !important;
+    color: #000000 !important;
+    background-color: rgba(255, 255, 0, 0.2) !important; /* Léger surlignage jaune pour renforcer la visibilité */
+    text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
+  }
+  
+  /* Force également lors de la sélection */
+  html[data-theme="light"] .ProseMirror [style*="font-weight: bold"],
+  html[data-theme="light"] .ProseMirror [style*="font-weight:bold"],
+  html[data-theme="light"] .tiptap [style*="font-weight: bold"],
+  html[data-theme="light"] .tiptap [style*="font-weight:bold"] {
+    font-weight: 900 !important;
+    color: #000000 !important;
+    background-color: rgba(255, 255, 0, 0.2) !important;
+  }
+
+  /* Correction pour les spans avec un style d'attribut inline */
+  html[data-theme="light"] .ProseMirror span[style],
+  html[data-theme="light"] .tiptap span[style] {
+    color: inherit !important;
+  }
+  
+  html[data-theme="light"] .ProseMirror span[style*="color"],
+  html[data-theme="light"] .tiptap span[style*="color"] {
+    color: attr(style) !important;
+  }
+  
+  /* Force les couleurs de texte personnalisées à s'afficher */
+  html[data-theme="light"] .ProseMirror [style*="color:"],
+  html[data-theme="light"] .ProseMirror [style*="color: "],
+  html[data-theme="light"] .tiptap [style*="color:"],
+  html[data-theme="light"] .tiptap [style*="color: "] {
+    color: attr(style) !important;
+  }
+
+  /* Spécifique aux attributs data-color de l'éditeur */
+  html[data-theme="light"] .ProseMirror [data-color],
+  html[data-theme="light"] .tiptap [data-color] {
+    color: attr(data-color) !important;
+  }
+}
+
+/* Force le bouton de gras à apparaître actif en mode clair mobile */
+@media (max-width: 768px) {
+  html[data-theme="light"] button.mobile-bold-button,
+  html[data-theme="light"] button[class*="mobile-bold-button"] {
+    position: relative !important;
+  }
+  
+  html[data-theme="light"] button.mobile-bold-button:active,
+  html[data-theme="light"] button.mobile-bold-button.active,
+  html[data-theme="light"] button[class*="mobile-bold-button"]:active,
+  html[data-theme="light"] button[class*="mobile-bold-button"].active {
+    background-color: rgba(59, 130, 246, 0.3) !important;
+    color: #1d4ed8 !important;
+    font-weight: 700 !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
+  }
+  
+  /* Ajoute un indicateur visuel au bouton quand il est actif */
+  html[data-theme="light"] button.mobile-bold-button.active::after,
+  html[data-theme="light"] button[class*="mobile-bold-button"].active::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 25%;
+    width: 50%;
+    height: 3px;
+    background-color: #2563eb !important;
+    border-radius: 2px;
+  }
+}
+
+/* CORRECTIFS CRITIQUES POUR LE TEXTE COLORÉ */
+@media (max-width: 768px) {
+  /* Forcer les couleurs à s'afficher correctement */
+  html[data-theme="light"] .ProseMirror [style*="color:"] *,
+  html[data-theme="light"] .tiptap [style*="color:"] * {
+    color: inherit !important;
+  }
+  
+  /* Force les couleurs de mise en surbrillance à s'afficher */
+  html[data-theme="light"] .ProseMirror [style*="background-color:"],
+  html[data-theme="light"] .ProseMirror [style*="background-color: "],
+  html[data-theme="light"] .tiptap [style*="background-color:"],
+  html[data-theme="light"] .tiptap [style*="background-color: "] {
+    background-color: attr(style) !important;
+    padding: 0 3px !important;
+    border-radius: 2px !important;
+  }
+}

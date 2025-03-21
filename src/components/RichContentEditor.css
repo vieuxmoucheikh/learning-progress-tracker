@@ -172,3 +172,92 @@
 .mobile-bold {
   font-weight: 700 !important;
 }
+
+/* CORRECTIFS CRITIQUES POUR LE TEXTE EN GRAS ET COLORÉ EN MODE ÉDITION */
+/* Styles extremes pour le mode mobile */
+@media (max-width: 768px) {
+  /* Force le gras à être ultra visible */
+  .rich-content-editor strong,
+  .rich-content-editor b,
+  .rich-content-editor .mobile-bold,
+  .rich-content-editor .mobile-bold-force,
+  .rich-content-editor .ProseMirror strong,
+  .rich-content-editor .ProseMirror b,
+  .rich-content-editor .font-bold,
+  .rich-content-editor .font-semibold,
+  .rich-content-editor .font-extrabold,
+  .rich-content-editor [style*="font-weight: bold"],
+  .rich-content-editor [style*="font-weight:bold"],
+  .rich-content-editor [style*="font-weight: 700"],
+  .rich-content-editor [style*="font-weight:700"] {
+    font-weight: 900 !important;
+    color: #000000 !important;
+    text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
+    background-color: rgba(255, 255, 0, 0.15) !important; /* Fond léger pour accentuer le gras */
+    padding: 0 2px !important;
+    border-radius: 2px !important;
+  }
+  
+  /* Mode clair spécifiquement */
+  html[data-theme="light"] .rich-content-editor strong,
+  html[data-theme="light"] .rich-content-editor b,
+  html[data-theme="light"] .rich-content-editor .mobile-bold,
+  html[data-theme="light"] .rich-content-editor .mobile-bold-force,
+  html[data-theme="light"] .rich-content-editor .ProseMirror strong,
+  html[data-theme="light"] .rich-content-editor .ProseMirror b {
+    font-weight: 900 !important;
+    color: #000000 !important;
+    text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.3) !important;
+    background-color: rgba(255, 255, 0, 0.15) !important;
+    padding: 0 2px !important;
+    border-radius: 2px !important;
+  }
+  
+  /* Correction pour les styles de texte avec couleur */
+  html[data-theme="light"] .rich-content-editor [style*="color:"],
+  html[data-theme="light"] .rich-content-editor [style*="color: "],
+  html[data-theme="light"] .rich-content-editor .ProseMirror [style*="color:"],
+  html[data-theme="light"] .rich-content-editor .ProseMirror [style*="color: "] {
+    font-weight: 600 !important;
+    text-shadow: 0 0 0.3px rgba(0, 0, 0, 0.3) !important;
+    padding: 0 2px !important;
+    border-radius: 2px !important;
+    border-bottom: 1px dashed currentColor !important;
+  }
+  
+  /* Assurer que le bouton Bold est clairement marqué comme actif/inactif */
+  html[data-theme="light"] .mobile-bold-button {
+    position: relative !important;
+  }
+  
+  html[data-theme="light"] .mobile-bold-button.active {
+    background-color: rgba(59, 130, 246, 0.3) !important;
+    color: #1d4ed8 !important;
+    font-weight: 700 !important;
+  }
+  
+  html[data-theme="light"] .mobile-bold-button.active::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 25%;
+    width: 50%;
+    height: 3px;
+    background-color: #2563eb !important;
+    border-radius: 2px;
+  }
+}
+
+/* Style pour le texte en gras */
+.mobile-bold,
+.mobile-bold-force,
+strong, 
+b {
+  font-weight: 900 !important;
+}
+
+/* Correction pour les couleurs de texte */
+[style*="color:"],
+[style*="color: "] {
+  color: attr(style) !important;
+}
