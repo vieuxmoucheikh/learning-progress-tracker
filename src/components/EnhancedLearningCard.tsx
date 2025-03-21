@@ -398,11 +398,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       "relative overflow-hidden transition-all duration-300 border-2",
       "hover:shadow-xl",
       "max-w-3xl mx-auto",
-      "transform-gpu",
+      "transform-gpu mobile-learning-card", // Ajout d'une classe pour ciblage mobile
       mastered 
         ? "bg-gradient-to-br from-emerald-50 to-white border-emerald-200 dark:from-emerald-950/40 dark:to-gray-900 dark:border-emerald-800/50" 
         : "bg-white border-gray-200 hover:border-blue-300 dark:bg-gray-900 dark:border-gray-800 dark:hover:border-blue-700",
-      "sm:rounded-xl",
+      "sm:rounded-xl rounded-xl", // Garantit des coins arrondis sur mobile aussi
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
       mastered 
         ? "border-emerald-300 shadow-emerald-100 dark:shadow-emerald-900/30" 
@@ -411,7 +411,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           : "border-gray-200 hover:border-blue-300 shadow-md shadow-gray-100/50 dark:border-gray-800 dark:hover:border-blue-700 dark:shadow-gray-900/50",
     )}>
       <CardHeader className={cn(
-        "space-y-4 pb-4 px-4 sm:px-6",
+        "space-y-4 pb-4 px-4 sm:px-6 mobile-card-header", // Ajout d'une classe pour ciblage mobile
         mastered 
           ? "bg-gradient-to-r from-emerald-50/50 to-transparent dark:from-emerald-900/20 dark:to-transparent"
           : "bg-gradient-to-r from-gray-50/30 to-transparent dark:from-gray-800/30 dark:to-transparent"
@@ -430,14 +430,15 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className={cn(
-                    "text-lg font-semibold",
+                    "text-lg font-semibold mobile-title-input", // Ajout d'une classe pour ciblage mobile
                     "bg-gray-50 dark:bg-gray-800",
                     "text-gray-900 dark:text-gray-100",
                     "border-gray-200 focus:border-blue-300 dark:border-gray-700 dark:focus:border-blue-600",
                     "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:focus-visible:ring-blue-700 dark:focus-visible:ring-offset-gray-900",
                     "placeholder:text-gray-400 dark:placeholder:text-gray-500",
-                    "w-full sm:text-xl",
-                    "transition-all duration-200"
+                    "w-full sm:text-xl text-xl", // Taille augmentée pour mobile
+                    "transition-all duration-200",
+                    "p-3", // Padding augmenté pour le toucher
                   )}
                   placeholder="Enter title..."
                 />
@@ -445,7 +446,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 <h3 
                   className={cn(
                     "text-xl sm:text-2xl font-semibold line-clamp-2 card-title",
-                    "transition-colors",
+                    "transition-colors mobile-card-title", // Ajout d'une classe pour ciblage mobile
+                    "text-xl", // Taille de base pour mobile
                     mastered 
                       ? "text-emerald-800 dark:text-emerald-300 drop-shadow-sm" 
                       : "text-gray-900 dark:text-gray-100",
@@ -457,7 +459,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               )}
             </div>
             
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 mobile-action-buttons"> {/* Classe pour ciblage mobile */}
               {mastered && (
                 <div className="relative flex items-center justify-center">
                   <div className="absolute inset-0 rounded-full bg-yellow-100 dark:bg-yellow-900/40 animate-pulse opacity-60"></div>
@@ -525,12 +527,12 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 onValueChange={handleUpdateCategory}
               >
                 <SelectTrigger className={cn(
-                  "w-full max-w-xs",
+                  "w-full max-w-xs mobile-category-select", // Ajout d'une classe pour ciblage mobile
                   "bg-gray-50 dark:bg-gray-900", // Fond plus foncé pour le contraste
                   "border-gray-200 focus:border-blue-300 dark:border-gray-600 dark:focus:border-blue-500",
                   "text-gray-900 dark:text-white", // Texte blanc pour un meilleur contraste
                   "focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 dark:focus:ring-blue-500 dark:focus:ring-offset-gray-900",
-                  "h-9",
+                  "h-10", // Hauteur accrue pour le toucher
                   "transition-all duration-200"
                 )}>
                   <SelectValue placeholder="Select category" />
@@ -558,12 +560,13 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             <Badge 
               variant="secondary" 
               className={cn(
-                "font-medium px-3 py-1",
+                "font-medium px-3 py-1 mobile-category-badge", // Ajout d'une classe pour ciblage mobile
                 mastered 
                   ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 dark:bg-emerald-800 dark:text-white dark:border-emerald-600 dark:hover:bg-emerald-700" 
                   : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 dark:bg-blue-800 dark:text-white dark:border-blue-600 dark:hover:bg-blue-700",
                 "rounded-full",
-                "shadow-sm dark:shadow-black/20"
+                "shadow-sm dark:shadow-black/20",
+                "text-sm" // Taille ajustée pour mobile
               )}
             >
               {itemCategory}
@@ -574,7 +577,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         {/* Content Section */}
         <div 
           className={cn(
-            "transition-all duration-300",
+            "transition-all duration-300 mobile-content-section", // Ajout d'une classe pour ciblage mobile
             !showContent && "hidden"
           )}
         >
@@ -585,7 +588,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   content={content}
                   onChange={setContent}
                   className={cn(
-                    "min-h-[200px] rounded-lg",
+                    "min-h-[200px] rounded-lg mobile-rich-editor", // Ajout d'une classe pour ciblage mobile
                     "bg-gray-50 dark:bg-gray-800",
                     "text-gray-900 dark:text-white", // Texte blanc en mode sombre
                     "border border-gray-200 dark:border-gray-700",
@@ -649,7 +652,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             </div>
           ) : (
             <div 
-              className="relative"
+              className="relative mobile-content-display" // Ajout d'une classe pour ciblage mobile
               onClick={() => !isZoomed && setIsZoomed(true)}
             >
               <div 
@@ -665,6 +668,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   "prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto",
                   "prose-ul:list-disc prose-ol:list-decimal",
                   "prose-li:marker:text-gray-400 dark:prose-li:marker:text-gray-400",
+                  // Styles améliorés pour mobile
+                  "prose-p:text-[1.05rem] prose-p:leading-relaxed",
+                  "prose-img:w-full",
+                  "prose-headings:leading-tight",
                   // Ajout de classes spécifiques pour le contrôle du contenu des cartes maîtrisées
                   mastered && "mastered-content dark:prose-p:text-gray-900",
                   !isZoomed && "max-h-[300px] overflow-hidden cursor-pointer"

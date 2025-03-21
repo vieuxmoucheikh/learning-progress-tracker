@@ -276,305 +276,89 @@ html[data-theme="dark"] [class*="badge"] svg {
   stroke-linejoin: round !important;
 }
 
-/* CORRECTIFS POUR LES ICÔNES */
+/* AMÉLIORATIONS DES ICÔNES EN MODE CLAIR SUR MOBILE */
 
-/* Force la visibilité de toutes les icônes SVG */
-svg {
-  display: inline-block !important;
-  vertical-align: middle !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+/* Styles globaux pour toutes les icônes en mode clair */
+html[data-theme="light"] svg, 
+html[data-theme="light"] svg path, 
+html[data-theme="light"] svg line, 
+html[data-theme="light"] svg polyline, 
+html[data-theme="light"] svg circle, 
+html[data-theme="light"] svg rect {
+  stroke-width: inherit !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  shape-rendering: geometricPrecision !important;
 }
 
-/* Correctifs pour les icônes Lucide */
-.lucide,
-.lucide-icon,
-[data-lucide] {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  vertical-align: middle !important;
-  overflow: visible !important;
+/* Styles spécifiques pour les icônes dans les cartes en mode clair */
+html[data-theme="light"] .card svg,
+html[data-theme="light"] .learning-item-card svg,
+html[data-theme="light"] .item-wrapper svg {
+  color: currentColor !important;
+  stroke: currentColor !important;
+  stroke-width: 2 !important;
 }
 
-/* Icônes dans les boutons - mode clair */
-html[data-theme="light"] button svg,
-html[data-theme="light"] a svg {
-  color: #475569 !important; /* slate-600 */
+/* Correction de l'apparence des icônes dans les badges en mode clair */
+html[data-theme="light"] .badge svg,
+html[data-theme="light"] [class*="badge"] svg {
+  stroke-width: 2 !important;
+  height: 0.9rem !important;
+  width: 0.9rem !important;
+  margin-right: 0.3rem !important;
+  vertical-align: -0.15em !important;
 }
 
-/* Icônes dans les boutons - mode sombre */
-html[data-theme="dark"] button svg,
-html[data-theme="dark"] a svg {
-  color: #e2e8f0 !important; /* slate-200 */
-}
-
-/* Icônes spécifiques par couleur - mode clair */
-html[data-theme="light"] button.text-blue-600 svg {
-  color: #2563eb !important; /* blue-600 */
-}
-
-html[data-theme="light"] button.text-emerald-600 svg {
-  color: #059669 !important; /* emerald-600 */
-}
-
-html[data-theme="light"] button.text-red-600 svg {
-  color: #dc2626 !important; /* red-600 */
-}
-
-/* Icônes spécifiques par couleur - mode sombre */
-html[data-theme="dark"] button.text-blue-400 svg,
-html[data-theme="dark"] button.dark\:text-blue-400 svg {
-  color: #60a5fa !important; /* blue-400 */
-}
-
-html[data-theme="dark"] button.text-emerald-400 svg,
-html[data-theme="dark"] button.dark\:text-emerald-400 svg {
-  color: #34d399 !important; /* emerald-400 */
-}
-
-html[data-theme="dark"] button.text-red-400 svg,
-html[data-theme="dark"] button.dark\:text-red-400 svg {
-  color: #f87171 !important; /* red-400 */
-}
-
-/* Ombres pour améliorer la visibilité des icônes */
-html[data-theme="dark"] svg {
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)) !important;
-}
-
-/* Augmentation de la taille sur mobile */
-@media (max-width: 640px) {
-  .w-4.h-4, 
-  .h-4.w-4 {
-    width: 18px !important;
-    height: 18px !important;
+/* MODE MOBILE - OPTIMISATIONS SPÉCIFIQUES POUR LE MODE CLAIR */
+@media (max-width: 768px) {
+  /* Icônes plus grandes et bien définies pour le toucher sur mobile */
+  html[data-theme="light"] button svg,
+  html[data-theme="light"] [role="button"] svg {
+    width: 22px !important;
+    height: 22px !important;
+    stroke-width: 2.2px !important;
   }
   
-  .w-5.h-5, 
-  .h-5.w-5 {
+  /* Icônes dans les cartes sur mobile en mode clair */
+  html[data-theme="light"] .card svg,
+  html[data-theme="light"] .learning-item-card svg,
+  html[data-theme="light"] .item-wrapper svg {
+    stroke-width: 2.2px !important;
+  }
+  
+  /* Icônes dans la barre d'outils de l'éditeur en mode clair */
+  html[data-theme="light"] .rich-text-editor button svg,
+  html[data-theme="light"] [class*="rich-text-editor"] button svg {
+    stroke-width: 2px !important;
     width: 20px !important;
     height: 20px !important;
   }
-}
-
-/* Icônes spécifiques pour l'éditeur de texte */
-html .rich-text-editor button svg,
-html .rich-content-editor button svg,
-html [class*="editor"] button svg {
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
-
-/* CORRECTIFS POUR LES ICÔNES DE L'ÉDITEUR DE TEXTE RICHE */
-
-/* Assurer que toutes les icônes de l'éditeur sont correctement visibles */
-.rich-text-editor button svg,
-.rich-content-editor button svg,
-[class*="editor"] button svg {
-  color: #334155 !important; /* Couleur par défaut pour toutes les icônes en mode clair */
-  fill: none !important;
-  stroke: currentColor !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-/* Mode sombre - Couleur des icônes dans l'éditeur */
-html[data-theme="dark"] .rich-text-editor button svg,
-html[data-theme="dark"] .rich-content-editor button svg,
-html[data-theme="dark"] [class*="editor"] button svg {
-  color: #e2e8f0 !important; /* Couleur plus claire pour le mode sombre */
-  fill: none !important;
-  stroke: currentColor !important;
-}
-
-/* Correction pour les boutons actifs dans l'éditeur */
-.rich-text-editor button[class*="bg-gray-100"] svg,
-.rich-content-editor button[class*="bg-gray-100"] svg,
-[class*="editor"] button[class*="bg-gray-100"] svg {
-  color: #1d4ed8 !important; /* Bleu plus prononcé pour les boutons actifs */
-}
-
-html[data-theme="dark"] .rich-text-editor button[class*="bg-gray-100"] svg,
-html[data-theme="dark"] .rich-content-editor button[class*="bg-gray-100"] svg,
-html[data-theme="dark"] [class*="editor"] button[class*="bg-gray-100"] svg {
-  color: #93c5fd !important; /* Bleu clair pour les boutons actifs en mode sombre */
-}
-
-/* Correction spécifique pour les icônes de couleur et de palette */
-.rich-text-editor button:has(.lucide-type) svg,
-.rich-content-editor button:has(.lucide-type) svg,
-[class*="editor"] button:has(.lucide-type) svg,
-.rich-text-editor button:has(.lucide-palette) svg,
-.rich-content-editor button:has(.lucide-palette) svg,
-[class*="editor"] button:has(.lucide-palette) svg {
-  color: #334155 !important;
-  fill: none !important;
-  stroke: currentColor !important;
-}
-
-html[data-theme="dark"] .rich-text-editor button:has(.lucide-type) svg,
-html[data-theme="dark"] .rich-content-editor button:has(.lucide-type) svg,
-html[data-theme="dark"] [class*="editor"] button:has(.lucide-type) svg,
-html[data-theme="dark"] .rich-text-editor button:has(.lucide-palette) svg,
-html[data-theme="dark"] .rich-content-editor button:has(.lucide-palette) svg,
-html[data-theme="dark"] [class*="editor"] button:has(.lucide-palette) svg {
-  color: #e2e8f0 !important;
-  fill: none !important;
-  stroke: currentColor !important;
-}
-
-/* Amélioration du hover pour les boutons de l'éditeur */
-.rich-text-editor button:hover svg,
-.rich-content-editor button:hover svg,
-[class*="editor"] button:hover svg {
-  color: #2563eb !important; /* Bleu sur hover en mode clair */
-}
-
-html[data-theme="dark"] .rich-text-editor button:hover svg,
-html[data-theme="dark"] .rich-content-editor button:hover svg,
-html[data-theme="dark"] [class*="editor"] button:hover svg {
-  color: #60a5fa !important; /* Bleu clair sur hover en mode sombre */
-}
-
-/* CORRECTION DES ICÔNES DANS LE MODE CLAIR MOBILE */
-
-/* Couleur des icônes des boutons principaux */
-html[data-theme="light"] button svg,
-html[data-theme="light"] a svg {
-  color: #475569 !important; /* slate-600 */
-  fill: none !important;
-  stroke: currentColor !important;
-  stroke-width: 1.5 !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-/* Couleurs spécifiques d'icônes en mode clair */
-html[data-theme="light"] button.text-blue-600 svg,
-html[data-theme="light"] a.text-blue-600 svg {
-  color: #2563eb !important; /* blue-600 */
-  stroke: #2563eb !important;
-}
-
-html[data-theme="light"] button.text-emerald-600 svg,
-html[data-theme="light"] a.text-emerald-600 svg {
-  color: #059669 !important; /* emerald-600 */
-  stroke: #059669 !important;
-}
-
-html[data-theme="light"] button.text-red-600 svg,
-html[data-theme="light"] a.text-red-600 svg {
-  color: #dc2626 !important; /* red-600 */
-  stroke: #dc2626 !important;
-}
-
-/* CORRECTIFS POUR LES ICÔNES DE L'ÉDITEUR */
-
-/* Icônes dans les palettes de couleurs */
-.color-picker-button svg {
-  color: #334155 !important; /* slate-700 */
-  stroke: currentColor !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-html[data-theme="dark"] .color-picker-button svg {
-  color: #e2e8f0 !important; /* slate-200 */
-}
-
-/* Mode mobile - Amélioration des icônes */
-@media (max-width: 640px) {
-  /* Icônes plus grandes et plus visibles */
-  button svg,
-  a svg,
-  [role="button"] svg {
-    width: 18px !important;
-    height: 18px !important;
-    stroke-width: 2px !important;
-    opacity: 1 !important;
-    visibility: visible !important;
+  
+  /* Augmentation de la visibilité des icônes fonctionnelles */
+  html[data-theme="light"] button[title="Delete item"] svg,
+  html[data-theme="light"] button[title="Mark as complete"] svg,
+  html[data-theme="light"] button[title="Mark as incomplete"] svg,
+  html[data-theme="light"] button[title="Start Session"] svg,
+  html[data-theme="light"] button[title="End Session"] svg {
+    stroke-width: 2.5px !important;
+    width: 24px !important;
+    height: 24px !important;
   }
   
-  /* Couleurs en mode clair */
-  html[data-theme="light"] .rich-text-editor button svg,
-  html[data-theme="light"] [class*="rich-text-editor"] button svg,
-  html[data-theme="light"] .rich-content-editor button svg {
-    color: #334155 !important; /* slate-700 */
-    stroke: #334155 !important;
+  /* Animations d'icônes subtiles en mode clair sur mobile */
+  html[data-theme="light"] button:active svg,
+  html[data-theme="light"] [role="button"]:active svg {
+    transform: scale(0.9) !important;
+    transition: transform 0.2s ease !important;
   }
   
-  /* Couleurs en mode sombre */
-  html[data-theme="dark"] .rich-text-editor button svg,
-  html[data-theme="dark"] [class*="rich-text-editor"] button svg,
-  html[data-theme="dark"] .rich-content-editor button svg {
-    color: #e2e8f0 !important; /* slate-200 */
-    stroke: #e2e8f0 !important;
+  /* Amélioration de l'alignement vertical des icônes avec le texte */
+  html[data-theme="light"] button,
+  html[data-theme="light"] [role="button"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
   }
-  
-  /* Couleurs pour les boutons spécifiques */
-  html[data-theme="light"] button.text-blue-600 svg,
-  html[data-theme="light"] a.text-blue-600 svg {
-    color: #2563eb !important;
-    stroke: #2563eb !important;
-  }
-  
-  html[data-theme="light"] button.text-emerald-600 svg,
-  html[data-theme="light"] a.text-emerald-600 svg {
-    color: #059669 !important;
-    stroke: #059669 !important;
-  }
-  
-  html[data-theme="light"] button.text-red-600 svg,
-  html[data-theme="light"] a.text-red-600 svg {
-    color: #dc2626 !important;
-    stroke: #dc2626 !important;
-  }
-}
-
-/* CORRECTIFS POUR LA PALETTE DE COULEURS */
-
-/* S'assurer que les palettes de couleurs sont visibles */
-.color-picker-popover {
-  background-color: white !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 8px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
-  padding: 8px !important;
-  z-index: 9999 !important;
-  position: absolute !important;
-  display: block !important;
-  width: auto !important;
-  min-width: 240px !important;
-}
-
-html[data-theme="dark"] .color-picker-popover {
-  background-color: #1e293b !important;
-  border-color: #334155 !important;
-}
-
-.color-grid {
-  display: grid !important;
-  grid-template-columns: repeat(10, 1fr) !important;
-  gap: 4px !important;
-}
-
-.color-button {
-  width: 20px !important;
-  height: 20px !important;
-  border-radius: 4px !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  cursor: pointer !important;
-  transition: transform 0.2s, box-shadow 0.2s !important;
-}
-
-.color-button:hover {
-  transform: scale(1.2) !important;
-  z-index: 1 !important;
-  box-shadow: 0 0 0 2px white, 0 0 0 4px currentColor !important;
-}
-
-html[data-theme="dark"] .color-button:hover {
-  box-shadow: 0 0 0 2px #1e293b, 0 0 0 4px currentColor !important;
 }

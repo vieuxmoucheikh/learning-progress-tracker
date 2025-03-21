@@ -128,20 +128,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           class: 'rounded bg-gray-200 px-1.5 py-0.5 font-mono text-sm',
         },
       }),
-      TextStyle.configure({
-        // Configuration correcte pour TextStyle
-        HTMLAttributes: {
-          class: 'custom-text-style',
-        },
-      }),
-      ColorExtension.configure({
-        types: ['textStyle'],
-      }),
+      TextStyle,
+      ColorExtension,
       Highlight.configure({
         multicolor: true,
-        HTMLAttributes: {
-          class: 'custom-highlight',
-        },
       }),
     ],
     content,
@@ -261,18 +251,20 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         "rounded-lg border border-gray-200 dark:border-gray-700",
         "bg-white dark:bg-gray-800", // Fond sombre pour le mode sombre
         "relative flex flex-col",
+        "mobile-optimized", // Classe pour aider au ciblage mobile
         className
       )}>
         {editable && (
-          <div className="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-            <div className="flex flex-wrap gap-1 p-2">
+          <div className="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm editor-toolbar">
+            <div className="flex flex-wrap gap-1 p-2 justify-center sm:justify-start">
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={() => editor.chain().focus().toggleBold().run()}
                 className={cn(
                   "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
-                  editor.isActive('bold') && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
+                  editor.isActive('bold') && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white",
+                  "mobile-editor-btn" // Classe pour ciblage mobile
                 )}
               >
                 <Bold className="h-4 w-4" />
@@ -305,23 +297,19 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300 color-picker-button"
-                    title="Couleur du texte"
+                    className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
                   >
                     <Type className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-64 p-2 color-picker-popover" align="start" sideOffset={5}>
-                  <div className="grid grid-cols-10 gap-1 color-grid">
+                <PopoverContent className="w-64 p-2 dark:bg-gray-800 dark:border-gray-700">
+                  <div className="grid grid-cols-10 gap-1">
                     {colors.map((color) => (
                       <button
                         key={color}
-                        className="w-5 h-5 rounded color-button"
+                        className="w-5 h-5 rounded border border-gray-200 dark:border-gray-600"
                         style={{ backgroundColor: color }}
-                        onClick={() => {
-                          editor.chain().focus().setColor(color).run();
-                        }}
-                        title={color}
+                        onClick={() => editor.chain().focus().setColor(color).run()}
                       />
                     ))}
                   </div>
@@ -333,23 +321,19 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300 color-picker-button"
-                    title="Couleur de fond"
+                    className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
                   >
                     <Palette className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-64 p-2 color-picker-popover" align="start" sideOffset={5}>
-                  <div className="grid grid-cols-10 gap-1 color-grid">
+                <PopoverContent className="w-64 p-2">
+                  <div className="grid grid-cols-10 gap-1">
                     {bgColors.map((color) => (
                       <button
                         key={color}
-                        className="w-5 h-5 rounded color-button"
+                        className="w-5 h-5 rounded border border-gray-200"
                         style={{ backgroundColor: color }}
-                        onClick={() => {
-                          editor.chain().focus().setHighlight({ color }).run();
-                        }}
-                        title={color}
+                        onClick={() => editor.chain().focus().setHighlight({ color }).run()}
                       />
                     ))}
                   </div>
@@ -449,7 +433,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           className={cn(
                   "prose prose-sm max-w-none",
                   "bg-white dark:bg-gray-800 text-gray-900 dark:text-white", // Texte blanc en mode sombre
-                  "p-4 overflow-y-auto",
+                  "p-4 overflow-y-auto mobile-editor-content", // Ajout d'une classe pour ciblage mobile
                   "[&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:outline-none",
                   "[&_.ProseMirror]:dark:text-white", // Texte blanc pour l'éditeur en mode sombre
                   "[&_pre]:bg-gray-50 [&_pre]:text-gray-900 [&_pre]:border [&_pre]:border-gray-200 [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:my-4",
@@ -463,7 +447,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   "[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4",
                   "[&_p]:my-2 [&_p]:text-gray-900 [&_p]:dark:text-white", // Texte blanc pour les paragraphes
                   "[&_h1]:dark:text-white [&_h2]:dark:text-white [&_h3]:dark:text-white", // Texte blanc pour les titres
-                  "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4"
+                  "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4",
+                  // Styles améliorés pour mobile en mode clair
+                  "sm:text-base sm:leading-relaxed",
+                  "prose-h1:text-2xl prose-h1:font-bold prose-h1:mb-4 prose-h1:mt-6",
+                  "prose-h2:text-xl prose-h2:font-bold prose-h2:mb-3 prose-h2:mt-5",
+                  "prose-h3:text-lg prose-h3:font-bold prose-h3:mb-2 prose-h3:mt-4",
+                  "prose-p:my-3 prose-p:text-[1.05rem] prose-p:leading-relaxed",
+                  "prose-ul:pl-5 prose-ul:my-3 prose-ol:pl-5 prose-ol:my-3",
+                  "prose-li:my-1 prose-li:pl-1",
+                  "prose-img:my-4 prose-img:mx-auto prose-img:rounded-lg"
                 )}
           
         />
