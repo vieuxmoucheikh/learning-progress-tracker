@@ -100,7 +100,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         },
         code: {
           HTMLAttributes: {
-            class: 'bg-gray-50 text-gray-900 px-1 rounded font-mono text-sm',
+            class: 'bg-gray-50 text-gray-900 px-1 rounded font-mono text-sm mobile-code', // Ajout de la classe mobile-code
           },
         },
         bold: {
@@ -135,7 +135,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         },
       }),
       TextStyle, // Utiliser TextStyle sans configuration particulière (supprimer la configuration incorrecte)
-      ColorExtension, // Si nécessaire, ajuster également la configuration
+      ColorExtension.configure({
+        types: ['textStyle'],
+      }),
       Highlight.configure({
         multicolor: true,
       }),
@@ -200,6 +202,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           }
         }
         return false; // Continuer le traitement normal
+      },
+      transformPastedHTML(html) {
+        // Traitement spécial pour les guillemets simples et les couleurs
+        return html.replace(/'/g, "'").replace(/style="color:/g, 'style="color: ');
       },
     },
   });
@@ -285,6 +291,26 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   }, [editor]);
 
+  // Fonction pour appliquer une couleur de texte de façon plus robuste
+  const applyTextColor = useCallback((color: string) => {
+    if (!editor) return;
+    
+    editor.chain().focus()
+      .setColor(color)
+      .run();
+    
+    // Forcer la mise à jour du style pour une meilleure visibilité sur mobile
+    setTimeout(() => {
+      const selection = editor.state.selection;
+      if (selection) {
+        editor.commands.setTextSelection({
+          from: selection.from,
+          to: selection.to
+        });
+      }
+    }, 50);
+  }, [editor]);
+
   if (!editor) {
     return null;
   }
@@ -339,7 +365,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
+                    className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300 mobile-color-button"
                   >
                     <Type className="h-4 w-4" />
                   </Button>
@@ -349,9 +375,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                     {colors.map((color) => (
                       <button
                         key={color}
-                        className="w-5 h-5 rounded border border-gray-200 dark:border-gray-600"
+                        className="w-5 h-5 rounded border border-gray-200 dark:border-gray-600 mobile-color-option"
                         style={{ backgroundColor: color }}
-                        onClick={() => editor.chain().focus().setColor(color).run()}
+                        onClick={() => applyTextColor(color)}
                       />
                     ))}
                   </div>
@@ -480,7 +506,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   "[&_.ProseMirror]:dark:text-white", // Texte blanc pour l'éditeur en mode sombre
                   "[&_pre]:bg-gray-50 [&_pre]:text-gray-900 [&_pre]:border [&_pre]:border-gray-200 [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:my-4",
                   "[&_pre]:dark:bg-gray-900 [&_pre]:dark:text-gray-100 [&_pre]:dark:border-gray-700",
-                  "[&_code]:bg-gray-50 [&_code]:text-gray-900 [&_code]:px-1 [&_code]:rounded [&_code]:font-mono [&_code]:text-sm",
+                  "[&_code]:bg-gray-50 [&_code]:text-gray-900 [&_code]:px-1 [&_code]:rounded [&_code]:font-mono [&_code]:text-sm [&_code]:mobile-code",
                   "[&_code]:dark:bg-gray-900 [&_code]:dark:text-gray-100",
                   "[&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:pl-4 [&_blockquote]:my-4 [&_blockquote]:italic [&_blockquote]:text-gray-700 [&_blockquote]:bg-blue-50/50",
                   "[&_blockquote]:dark:text-gray-300 [&_blockquote]:dark:bg-blue-900/30 [&_blockquote]:dark:border-blue-500",
@@ -496,6 +522,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   "[&_.mobile-bold-force]:font-black [&_.mobile-bold-force]:!text-black [&_.mobile-bold-force]:dark:!text-white",
                   "prose-strong:!font-black prose-strong:!text-black dark:prose-strong:!text-white",
                   "prose-b:!font-black prose-b:!text-black dark:prose-b:!text-white",
+                  "[&_span[style*='color']]:mobile-colored-text", // Ajouter une classe pour le texte coloré
+                  "[&_span[data-color]]:mobile-colored-text", // Ajouter une classe pour le texte coloré avec data-color
                 )}
           
         />

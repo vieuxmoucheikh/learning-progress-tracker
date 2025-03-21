@@ -200,3 +200,77 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 2px !important;
   }
 }
+
+/* CORRECTIFS POUR LES GUILLEMETS SIMPLES ET LES COULEURS DE TEXTE SUR MOBILE */
+@media (max-width: 768px) {
+  /* Forcer l'affichage correct des guillemets simples */
+  html[data-theme="light"] .ProseMirror *,
+  html[data-theme="light"] .tiptap *,
+  html[data-theme="light"] [contenteditable="true"] * {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important;
+  }
+
+  /* Assurer que le texte en guillemets simples est visible */
+  html[data-theme="light"] .ProseMirror *::before,
+  html[data-theme="light"] .ProseMirror *::after,
+  html[data-theme="light"] .tiptap *::before,
+  html[data-theme="light"] .tiptap *::after,
+  html[data-theme="light"] [contenteditable="true"] *::before,
+  html[data-theme="light"] [contenteditable="true"] *::after {
+    color: inherit !important;
+    opacity: 1 !important;
+  }
+
+  /* Style spécifique pour les éléments de code qui contiennent souvent des guillemets */
+  html[data-theme="light"] .mobile-code,
+  html[data-theme="light"] .ProseMirror code,
+  html[data-theme="light"] .tiptap code,
+  html[data-theme="light"] [contenteditable="true"] code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace !important;
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    color: #000000 !important;
+    padding: 0.2em 0.4em !important;
+    border-radius: 3px !important;
+    font-weight: normal !important;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Améliorer l'affichage des couleurs de texte */
+  html[data-theme="light"] .mobile-colored-text,
+  html[data-theme="light"] [style*="color:"],
+  html[data-theme="light"] [data-color] {
+    display: inline-block !important;
+    padding: 0 3px !important;
+    border-radius: 3px !important;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1) !important;
+    position: relative !important;
+  }
+
+  /* S'assurer que les attributs de style inline sont appliqués correctement */
+  html[data-theme="light"] span[style*="color:"] {
+    background-color: rgba(255, 255, 255, 0.75) !important;
+    text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  /* Amélioration de la visibilité des couleurs spécifiques */
+  html[data-theme="light"] span[style*="color: red"],
+  html[data-theme="light"] span[style*="color: #ff0000"],
+  html[data-theme="light"] span[data-color="#ff0000"] {
+    color: #cc0000 !important;
+    text-shadow: 0 0 0.5px rgba(204, 0, 0, 0.5) !important;
+  }
+
+  html[data-theme="light"] span[style*="color: blue"],
+  html[data-theme="light"] span[style*="color: #0000ff"],
+  html[data-theme="light"] span[data-color="#0000ff"] {
+    color: #0000cc !important;
+    text-shadow: 0 0 0.5px rgba(0, 0, 204, 0.5) !important;
+  }
+
+  /* Garantir que les guillemets simples sont visibles à l'intérieur des éléments */
+  html[data-theme="light"] .ProseMirror *,
+  html[data-theme="light"] .tiptap *,
+  html[data-theme="light"] [contenteditable="true"] * {
+    white-space: pre-wrap !important;
+  }
+}

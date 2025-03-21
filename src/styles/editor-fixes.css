@@ -52,3 +52,82 @@ b,
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
   }
 }
+
+/* CORRECTIFS SUPPLÉMENTAIRES POUR LES GUILLEMETS ET LES COULEURS DE TEXTE */
+/* Ce code garantit l'affichage correct sur mobile en mode clair */
+
+/* Style pour le picker de couleur et ses boutons */
+.mobile-color-button {
+  position: relative !important;
+}
+
+.mobile-color-button:active,
+.mobile-color-button.active {
+  background-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.mobile-color-option {
+  position: relative !important;
+  overflow: hidden !important;
+  transition: transform 0.2s ease-in-out !important;
+}
+
+.mobile-color-option:active {
+  transform: scale(1.2) !important;
+}
+
+/* Assurer la visibilité correcte du texte coloré */
+@media (max-width: 768px) {
+  html[data-theme="light"] [style*="color:"],
+  html[data-theme="light"] [data-color] {
+    text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.2) !important;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* Traitement spécial pour les guillemets simples */
+  html[data-theme="light"] .ProseMirror,
+  html[data-theme="light"] .tiptap,
+  html[data-theme="light"] [contenteditable="true"] {
+    font-variant-ligatures: none !important; /* Désactiver les ligatures pour éviter des problèmes d'affichage */
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+  
+  /* Style spécial pour s'assurer que les codes avec guillemets sont visibles */
+  html[data-theme="light"] .ProseMirror code,
+  html[data-theme="light"] .tiptap code,
+  html[data-theme="light"] [contenteditable="true"] code {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important; 
+    color: #000000 !important;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace !important;
+    padding: 0.2em 0.4em !important;
+    border-radius: 3px !important;
+    font-size: 90% !important;
+  }
+  
+  /* Assurer la visibilité des éléments qui contiennent souvent des guillemets simples */
+  html[data-theme="light"] .ProseMirror *, 
+  html[data-theme="light"] .tiptap *,
+  html[data-theme="light"] [contenteditable="true"] * {
+    color: #000000 !important;
+  }
+  
+  /* Force la visibilité des textes colorés */
+  html[data-theme="light"] .ProseMirror [style*="color:"] *,
+  html[data-theme="light"] .tiptap [style*="color:"] *,
+  html[data-theme="light"] [contenteditable="true"] [style*="color:"] * {
+    color: inherit !important;
+  }
+}
+
+/* Renforcement de la visibilité des guillemets simples */
+@supports (-webkit-overflow-scrolling: touch) {
+  /* Correctifs spécifiques pour iOS */
+  .ProseMirror code,
+  .tiptap code,
+  [contenteditable="true"] code {
+    font-family: "SFMono-Regular", Consolas, Menlo, monospace !important;
+    -webkit-font-smoothing: antialiased !important;
+  }
+}
