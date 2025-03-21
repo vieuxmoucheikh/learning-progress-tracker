@@ -1863,3 +1863,34 @@ html[data-theme="dark"] .text-xs.font-medium.bg-green-500\/10 {
 }
 
 /* ...existing code... */
+
+/* Learning Cards Page Enhancements */
+.card-container {
+  transition: all 0.3s ease;
+}
+
+.card-container:hover {
+  transform: translateY(-2px);
+}
+
+/* Enhanced styling for badges in the filters section */
+.badge-filter {
+  transition: all 0.2s ease;
+  border-radius: 9999px;
+  font-weight: 500;
+}
+
+.badge-filter:hover {
+  transform: scale(1.05);
+}
+
+/* Gradient effect for card section headers */
+.section-header {
+  background: linear-gradient(to right, #f8fafc, #f1f5f9);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #334155;
+  border-left: 3px solid #3b82f6;
+}

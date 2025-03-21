@@ -23,7 +23,8 @@ import {
   Clock,
   Bookmark,
   BookmarkCheck,
-  AlertCircle
+  AlertCircle,
+  Copy
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import type { EnhancedLearningCard as CardType, NewEnhancedLearningCard } from '@/types';
@@ -395,17 +396,19 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   return (
     <Card className={cn(
       "relative overflow-hidden transition-all duration-300 border-2",
-      "hover:shadow-lg hover:shadow-blue-300/50",
+      "hover:shadow-xl",
       "max-w-3xl mx-auto",
       "transform-gpu",
-      mastered ? "bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-50 dark:to-white" : "bg-white dark:bg-gray-800",
+      mastered 
+        ? "bg-gradient-to-br from-emerald-50 to-white border-emerald-200" 
+        : "bg-white border-gray-200 hover:border-blue-300",
       "sm:rounded-xl",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
       mastered 
-        ? "border-emerald-400 mastered-card" 
+        ? "border-emerald-300 shadow-emerald-100" 
         : isEditing 
-          ? "border-blue-500 shadow-md shadow-blue-300/50"
-          : "border-blue-400 hover:border-blue-500 shadow-md",
+          ? "border-blue-400 shadow-md shadow-blue-100"
+          : "border-gray-200 hover:border-blue-300 shadow-md shadow-gray-100/50",
     )}>
       <CardHeader className="space-y-4 pb-4 px-4 sm:px-6">
         {/* Title Section */}
@@ -418,12 +421,13 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   onChange={(e) => setTitle(e.target.value)}
                   className={cn(
                     "text-lg font-semibold",
-                    "bg-gray-50 dark:bg-gray-800",
-                    "text-gray-900 dark:text-gray-100",
-                    "border-gray-200 dark:border-gray-600",
-                    "focus-visible:ring-2 focus-visible:ring-blue-500",
-                    "placeholder:text-gray-400 dark:placeholder:text-gray-500",
-                    "w-full sm:text-xl"
+                    "bg-gray-50",
+                    "text-gray-900",
+                    "border-gray-200 focus:border-blue-300",
+                    "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1",
+                    "placeholder:text-gray-400",
+                    "w-full sm:text-xl",
+                    "transition-all duration-200"
                   )}
                   placeholder="Enter title..."
                 />
@@ -432,8 +436,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   className={cn(
                     "text-xl sm:text-2xl font-semibold line-clamp-2 card-title",
                     "text-gray-900",
-                    // Optimisation pour la visibilité du titre même quand marqué comme maîtrisé
-                    mastered ? "dark:text-gray-900" : "dark:text-white",
+                    "transition-colors",
+                    mastered ? "text-emerald-800" : "text-gray-900",
                   )}
                   onClick={() => setShowContent(!showContent)}
                 >
@@ -450,13 +454,13 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowContent(!showContent)}
-                className="h-9 w-9 hover:bg-blue-100 rounded-lg dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-white"
+                className="h-9 w-9 hover:bg-blue-100 rounded-lg text-blue-700"
                 title={showContent ? "Hide content" : "Show content"}
               >
                 {showContent ? (
-                  <EyeOff className="w-5 h-5 text-blue-900 dark:text-blue-400" />
+                  <EyeOff className="w-5 h-5 text-blue-600" />
                 ) : (
-                  <Eye className="w-5 h-5 text-blue-900 dark:text-blue-400" />
+                  <Eye className="w-5 h-5 text-blue-600" />
                 )}
               </Button>
               <Button
@@ -469,23 +473,32 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     setIsEditing(true);
                   }
                 }}
-                className="h-9 w-9 hover:bg-blue-100 rounded-lg dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-white"
+                className="h-9 w-9 hover:bg-blue-100 rounded-lg text-blue-700"
                 title={isEditing ? "Save changes" : "Edit card"}
               >
                 {isEditing ? (
-                  <Save className="w-5 h-5 text-blue-900 dark:text-blue-400" />
+                  <Save className="w-5 h-5 text-blue-600" />
                 ) : (
-                  <Edit className="w-5 h-5 text-blue-900 dark:text-blue-400" />
+                  <Edit className="w-5 h-5 text-blue-600" />
                 )}
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
+                onClick={handleCopyContent}
+                className="h-9 w-9 hover:bg-blue-100 rounded-lg text-blue-700"
+                title="Copy content"
+              >
+                <Copy className="w-5 h-5 text-blue-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={exportToPdf}
-                className="h-9 w-9 hover:bg-blue-100 rounded-lg dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-white"
+                className="h-9 w-9 hover:bg-blue-100 rounded-lg text-blue-700"
                 title="Export to PDF"
               >
-                <Download className="w-5 h-5 text-blue-900 dark:text-blue-400" />
+                <Download className="w-5 h-5 text-blue-600" />
               </Button>
             </div>
           </div>
@@ -499,27 +512,28 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               >
                 <SelectTrigger className={cn(
                   "w-full max-w-xs",
-                  "bg-gray-50 dark:bg-gray-800",
-                  "border-gray-200 dark:border-gray-700",
-                  "text-gray-900 dark:text-gray-100",
-                  "focus:ring-2 focus:ring-blue-500",
-                  "h-9"
+                  "bg-gray-50",
+                  "border-gray-200 focus:border-blue-300",
+                  "text-gray-900",
+                  "focus:ring-2 focus:ring-blue-500 focus:ring-offset-1",
+                  "h-9",
+                  "transition-all duration-200"
                 )}>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <SelectContent className="bg-white border border-gray-200 shadow-lg">
                   <SelectGroup>
-                    <div className="px-2 py-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">
+                    <div className="px-2 py-1.5 text-sm font-medium text-gray-500">
                       Categories
                     </div>
                     {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat} className="text-gray-900 dark:text-gray-100">
+                      <SelectItem key={cat} value={cat} className="focus:bg-blue-50 focus:text-blue-600">
                         {cat}
                       </SelectItem>
                     ))}
                     {itemCategory && !categories.includes(itemCategory) && (
-                      <SelectItem value={itemCategory} className="text-gray-900 dark:text-gray-100">
-                        {itemCategory} <span className="text-gray-500 dark:text-gray-400">(New)</span>
+                      <SelectItem value={itemCategory} className="focus:bg-blue-50 focus:text-blue-600">
+                        {itemCategory} <span className="text-gray-500">(New)</span>
                       </SelectItem>
                     )}
                   </SelectGroup>
@@ -530,10 +544,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
             <Badge 
               variant="secondary" 
               className={cn(
-                "font-medium px-2 py-0.5",
-                "bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300",
-                "border border-blue-200 dark:border-blue-800/50",
-                "rounded-full"
+                "font-medium px-3 py-1",
+                "bg-blue-50 text-blue-700 hover:bg-blue-100",
+                "border border-blue-200",
+                "rounded-full",
+                "shadow-sm"
               )}
             >
               {itemCategory}
