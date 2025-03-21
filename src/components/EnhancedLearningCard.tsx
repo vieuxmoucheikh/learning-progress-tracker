@@ -560,8 +560,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               className={cn(
                 "font-medium px-3 py-1",
                 mastered 
-                  ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800/50 dark:hover:bg-emerald-900/40" 
-                  : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800/50 dark:hover:bg-blue-900/40",
+                  ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 dark:bg-emerald-900/70 dark:text-emerald-200 dark:border-emerald-600/70 dark:hover:bg-emerald-800/80" 
+                  : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 dark:bg-blue-900/70 dark:text-blue-200 dark:border-blue-600/70 dark:hover:bg-blue-800/80",
                 "rounded-full",
                 "shadow-sm"
               )}
@@ -586,28 +586,30 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                   onChange={setContent}
                   className={cn(
                     "min-h-[200px] rounded-lg",
-                    "bg-gray-50 dark:bg-gray-800",
+                    "bg-gray-50 dark:bg-gray-800/80",
                     "text-gray-900 dark:text-gray-100",
                     "border border-gray-200 dark:border-gray-700",
-                    "focus-within:ring-2 focus-within:ring-blue-500",
+                    "focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-blue-600",
                     "prose prose-sm sm:prose-base max-w-none dark:prose-invert",
                     "overflow-y-auto max-h-[60vh]",
-                    "prose-headings:font-semibold prose-headings:text-gray-900",
-                    "prose-p:text-gray-700 prose-p:leading-relaxed",
-                    "prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline",
-                    "prose-strong:font-semibold prose-strong:text-gray-900",
-                    "prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:rounded",
-                    "prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200",
+                    "prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
+                    "prose-p:text-gray-700 dark:prose-p:text-gray-200 prose-p:leading-relaxed",
+                    "prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline",
+                    "prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-gray-100",
+                    "prose-code:text-blue-600 dark:prose-code:text-blue-400 prose-code:bg-blue-50 dark:prose-code:bg-blue-900/40 prose-code:px-1 prose-code:rounded",
+                    "prose-pre:bg-gray-50 dark:prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-700",
                     "prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto",
                     "prose-ul:list-disc prose-ol:list-decimal",
-                    "prose-li:marker:text-gray-400",
+                    "prose-li:marker:text-gray-400 dark:prose-li:marker:text-gray-500",
                     "[&_.tiptap]:min-h-[150px] [&_.tiptap]:p-4",
                     "[&_.tiptap.ProseMirror-focused]:outline-none",
                     "[&_.tiptap]:prose-sm [&_.tiptap]:sm:prose-base",
-                    "[&_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_p.is-editor-empty:first-child]:before:text-gray-400",
+                    "[&_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_p.is-editor-empty:first-child]:before:text-gray-400 dark:[&_p.is-editor-empty:first-child]:before:text-gray-500",
                     "[&_.tiptap_p]:my-3 [&_.tiptap_h1]:my-4 [&_.tiptap_h2]:my-4 [&_.tiptap_h3]:my-3",
                     "[&_.tiptap_ul]:my-3 [&_.tiptap_ol]:my-3 [&_.tiptap_blockquote]:my-3",
-                    "[&_.tiptap_pre]:my-3 [&_.tiptap_hr]:my-4"
+                    "[&_.tiptap_pre]:my-3 [&_.tiptap_hr]:my-4",
+                    "dark:[&_.tiptap_*]:text-gray-200",
+                    "dark:[&_.ProseMirror]:text-gray-200"
                   )}
                 />
               </div>
@@ -619,7 +621,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     setContent(initialContent);
                     setTitle(initialTitle);
                   }}
-                  className="bg-white hover:bg-gray-50"
+                  className="bg-white hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </Button>
@@ -636,7 +638,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                       console.error('Error saving:', error);
                     }
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-700 dark:hover:bg-blue-600"
                 >
                   Save Changes
                 </Button>
@@ -679,8 +681,11 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           // Ajout d'une classe spécifique pour la section meta
           mastered && "mastered-meta"
         )}>
-          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-            <Clock className="w-4 h-4" />
+          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <Clock className={cn(
+              "w-4 h-4",
+              mastered ? "text-emerald-500 dark:text-emerald-400" : ""
+            )} />
             <span className="updated-text">Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</span>
           </div>
 
@@ -691,9 +696,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 variant="secondary"
                 className={cn(
                   "px-2 py-0.5",
-                  "bg-white dark:bg-gray-800 dark:text-gray-200",
-                  "border border-gray-200 dark:border-gray-700",
-                  "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  mastered
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/60 dark:text-emerald-200 dark:border-emerald-700/60"
+                    : "bg-white text-gray-700 border border-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700",
+                  "hover:bg-gray-100 dark:hover:bg-gray-700"
                 )}
               >
                 {tag}

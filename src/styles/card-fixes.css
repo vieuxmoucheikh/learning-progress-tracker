@@ -2040,3 +2040,115 @@ html[data-theme="dark"] .mastered-text {
   font-weight: 500;
   letter-spacing: 0.01em;
 }
+
+/* ...existing code... */
+
+/* AMÉLIORATIONS SPÉCIFIQUES POUR LA VISIBILITÉ EN MODE SOMBRE */
+
+/* Amélioration du contraste des catégories en mode sombre */
+html[data-theme="dark"] .bg-blue-900\/30,
+html[data-theme="dark"] .bg-emerald-900\/30,
+html[data-theme="dark"] .bg-blue-900\/40,
+html[data-theme="dark"] .bg-emerald-900\/40 {
+  background-color: rgba(30, 58, 138, 0.7) !important; /* Plus opaque pour un meilleur contraste */
+}
+
+html[data-theme="dark"] .dark\:bg-blue-900\/30,
+html[data-theme="dark"] .dark\:bg-emerald-900\/30,
+html[data-theme="dark"] .dark\:bg-blue-900\/40,
+html[data-theme="dark"] .dark\:bg-emerald-900\/40 {
+  background-color: rgba(30, 58, 138, 0.7) !important;
+}
+
+html[data-theme="dark"] .dark\:text-blue-300,
+html[data-theme="dark"] .dark\:text-emerald-300 {
+  color: #93c5fd !important; /* Plus clair et plus lumineux pour un meilleur contraste */
+}
+
+/* Amélioration des couleurs dans l'éditeur de texte riche en mode sombre */
+html[data-theme="dark"] .ProseMirror {
+  color: #e2e8f0 !important; /* Texte plus clair en mode sombre */
+}
+
+html[data-theme="dark"] .ProseMirror h1,
+html[data-theme="dark"] .ProseMirror h2,
+html[data-theme="dark"] .ProseMirror h3,
+html[data-theme="dark"] .ProseMirror h4,
+html[data-theme="dark"] .ProseMirror h5,
+html[data-theme="dark"] .ProseMirror h6 {
+  color: #f8fafc !important; /* Titres encore plus clairs pour un meilleur contraste */
+}
+
+html[data-theme="dark"] .ProseMirror p,
+html[data-theme="dark"] .ProseMirror li,
+html[data-theme="dark"] .ProseMirror blockquote {
+  color: #e2e8f0 !important; /* Couleur du texte normale */
+}
+
+html[data-theme="dark"] .ProseMirror a {
+  color: #60a5fa !important; /* Liens plus clairs */
+}
+
+html[data-theme="dark"] .ProseMirror code {
+  color: #93c5fd !important; /* Code plus clair */
+  background-color: rgba(30, 58, 138, 0.4) !important; /* Fond bleu foncé pour le code */
+}
+
+/* Amélioration spécifique du sélecteur de catégorie en mode sombre */
+html[data-theme="dark"] .SelectTrigger,
+html[data-theme="dark"] .select-trigger {
+  background-color: #1e293b !important; /* Fond plus foncé */
+  color: #e2e8f0 !important; /* Texte plus clair */
+  border-color: #334155 !important; /* Bordure plus visible */
+}
+
+html[data-theme="dark"] .SelectContent,
+html[data-theme="dark"] .select-content {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-color: #334155 !important;
+}
+
+html[data-theme="dark"] .SelectItem,
+html[data-theme="dark"] .select-item {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .SelectItem:hover,
+html[data-theme="dark"] .select-item:hover {
+  background-color: rgba(59, 130, 246, 0.3) !important;
+  color: #93c5fd !important;
+}
+
+/* Correction spécifique pour le placeholder dans l'éditeur */
+html[data-theme="dark"] [data-placeholder]::before {
+  color: #64748b !important;
+}
+
+/* Amélioration des badges de statut */
+html[data-theme="dark"] .badge,
+html[data-theme="dark"] span[class*="badge"] {
+  background-color: rgba(30, 64, 175, 0.7) !important;
+  color: #bfdbfe !important;
+  border-color: #3b82f6 !important;
+  border-width: 1px !important;
+  font-weight: 600 !important;
+}
+
+/* Correction spécifique pour les badges mastered */
+html[data-theme="dark"] .mastered-content .badge,
+html[data-theme="dark"] .mastered-meta .badge {
+  background-color: rgba(5, 150, 105, 0.7) !important;
+  color: #a7f3d0 !important;
+  border-color: #10b981 !important;
+}
+
+/* Amélioration de la visibilité du bouton Delete en mode sombre */
+html[data-theme="dark"] button[class*="text-red-600"] {
+  color: #f87171 !important; /* Rouge plus clair pour meilleur contraste */
+}
+
+html[data-theme="dark"] button[class*="text-red-600"]:hover {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  color: #fca5a5 !important;
+}
