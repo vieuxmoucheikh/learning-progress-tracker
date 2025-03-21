@@ -126,3 +126,63 @@
 .rich-content-editor button:focus:not(:focus-visible) {
   outline: none;
 }
+
+/* Ajout de styles spécifiques pour le mode sombre */
+.dark .rich-content-editor {
+  color-scheme: dark;
+}
+
+.dark .rich-content-editor th {
+  background-color: #374151;
+  color: #e5e7eb;
+  border-color: #4b5563;
+}
+
+.dark .rich-content-editor td {
+  border-color: #4b5563;
+  color: #e5e7eb;
+}
+
+.dark .rich-content-editor .ProseMirror p.is-editor-empty:first-child::before {
+  color: #6b7280;
+}
+
+.dark .rich-content-editor blockquote {
+  border-left-color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #e5e7eb;
+}
+
+.dark .rich-content-editor pre {
+  background-color: #1f2937;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+/* Correction pour les textes colorés en mode sombre */
+.dark .rich-content-editor [style*="color"] {
+  color: inherit !important;
+  filter: brightness(1.35) saturate(1.1) !important;
+}
+
+/* Correction pour le surlignage en mode sombre */
+.dark .rich-content-editor mark,
+.dark .rich-content-editor [style*="background-color"] {
+  color: #e5e7eb !important;
+  filter: brightness(0.8) saturate(1.2) !important;
+}
+
+/* Meilleure visibilité pour le texte dans les listes en mode sombre */
+.dark .rich-content-editor ul li,
+.dark .rich-content-editor ol li {
+  color: #e5e7eb;
+}
+
+/* Style pour les tâches en mode sombre */
+.dark .rich-content-editor ul[data-type="taskList"] li {
+  color: #e5e7eb;
+}
+
+.dark .rich-content-editor button:focus-visible {
+  outline-color: #3b82f6;
+}

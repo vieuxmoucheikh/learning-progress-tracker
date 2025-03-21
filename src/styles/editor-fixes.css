@@ -1,0 +1,67 @@
+/* Correctifs pour l'éditeur de texte riche en mode sombre */
+
+/* Correction de la visibilité des textes colorés en mode sombre */
+html[data-theme="dark"] [class*="editor"] [style*="color"] {
+  filter: brightness(1.35) saturate(1.2) contrast(1.1) !important;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Surlignages/highlights plus visibles en mode sombre */
+html[data-theme="dark"] [class*="editor"] mark,
+html[data-theme="dark"] [class*="editor"] [style*="background-color"] {
+  color: #f3f4f6 !important;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Amélioration des contrastes pour les badges et catégories en mode sombre */
+html[data-theme="dark"] .badge,
+html[data-theme="dark"] [class*="badge"] {
+  color: #f3f4f6 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+html[data-theme="dark"] [class*="category"],
+html[data-theme="dark"] [class*="select-trigger"] {
+  background-color: #1e293b !important;
+  color: #f3f4f6 !important;
+  border-color: #475569 !important;
+}
+
+html[data-theme="dark"] [class*="select-content"],
+html[data-theme="dark"] [class*="popover-content"] {
+  background-color: #1e293b !important;
+  color: #f3f4f6 !important;
+  border-color: #475569 !important;
+}
+
+/* Amélioration des contrastes pour le texte et les boutons dans l'éditeur */
+html[data-theme="dark"] [class*="editor"] button,
+html[data-theme="dark"] [class*="editor"] .button {
+  color: #f3f4f6 !important;
+}
+
+html[data-theme="dark"] [class*="editor"] .ProseMirror,
+html[data-theme="dark"] [class*="editor"] .tiptap {
+  color: #f3f4f6 !important;
+  background-color: #1e293b !important;
+}
+
+/* Correction pour l'affichage sur mobile */
+@media (max-width: 768px) {
+  html[data-theme="dark"] [class*="editor"] [style*="color"],
+  html[data-theme="dark"] .ProseMirror [style*="color"],
+  html[data-theme="dark"] .tiptap [style*="color"] {
+    color: #f3f4f6 !important;
+    filter: brightness(1.5) saturate(1.3) !important;
+  }
+
+  html[data-theme="dark"] [class*="category"],
+  html[data-theme="dark"] .badge,
+  html[data-theme="dark"] [class*="badge"] {
+    color: #f3f4f6 !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    background-color: rgba(30, 41, 59, 0.8) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7) !important;
+  }
+}

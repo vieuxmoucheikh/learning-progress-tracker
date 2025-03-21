@@ -37,14 +37,15 @@ import DOMPurify from 'dompurify';
 
 const lowlightInstance = createLowlight(common);
 
+// Modification des palettes de couleurs pour une meilleure visibilité en mode sombre
 const colors = [
-  '#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3', '#ffffff',
-  '#980000', '#ff0000', '#ff9900', '#ffff00', '#00ff00', '#00ffff', '#4a86e8', '#0000ff', '#9900ff', '#ff00ff',
-  '#e6b8af', '#f4cccc', '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#c9daf8', '#cfe2f3', '#d9d2e9', '#ead1dc',
+  '#ffffff', '#f3f3f3', '#efefef', '#d9d9d9', '#cccccc', '#b7b7b7', '#999999', '#666666', '#434343', '#000000',
+  '#ff8a8a', '#ff5252', '#ff7043', '#ffab40', '#ffeb3b', '#c6ff00', '#69f0ae', '#40c4ff', '#448aff', '#b388ff',
+  '#f48fb1', '#e91e63', '#f44336', '#ff9800', '#ffc107', '#8bc34a', '#4caf50', '#03a9f4', '#2196f3', '#673ab7',
 ];
 
 const bgColors = [
-  '#ffffff', '#f3f3f3', '#efefef', '#d9d9d9', '#cccccc', '#b7b7b7', '#999999', '#666666', '#434343', '#000000',
+  '#ffffff', '#f8f9fa', '#e9ecef', '#dee2e6', '#ced4da', '#adb5bd', '#6c757d', '#495057', '#343a40', '#212529',
   '#ffebee', '#fce4ec', '#f3e5f5', '#ede7f6', '#e8eaf6', '#e3f2fd', '#e1f5fe', '#e0f7fa', '#e0f2f1', '#e8f5e9',
 ];
 
@@ -248,12 +249,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   return (
     <div className={cn(
       "rounded-lg border border-gray-200",
-      "bg-white",
+      "bg-white dark:bg-gray-800", // Ajout du style dark pour l'arrière-plan
       "relative flex flex-col",
       className
     )}>
       {editable && (
-        <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div className="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="flex flex-wrap gap-1 p-2">
             <Button
               size="icon"
@@ -294,20 +295,28 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="hover:bg-gray-100"
+                  className="hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <Type className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-64 p-2">
+              <PopoverContent className="w-64 p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <div className="grid grid-cols-10 gap-1">
                   {colors.map((color) => (
                     <button
                       key={color}
-                      className="w-5 h-5 rounded border border-gray-200"
+                      className="w-5 h-5 rounded border border-gray-200 dark:border-gray-600 relative hover:scale-110 transition-transform"
                       style={{ backgroundColor: color }}
                       onClick={() => editor.chain().focus().setColor(color).run()}
-                    />
+                      title={color}
+                    >
+                      {/* Indicateur de sélection */}
+                      {editor.isActive('textStyle', { color }) && (
+                        <span className="absolute inset-0 flex items-center justify-center">
+                          <span className="w-2 h-2 bg-gray-800 dark:bg-white rounded-full"></span>
+                        </span>
+                      )}
+                    </button>
                   ))}
                 </div>
               </PopoverContent>
@@ -318,20 +327,28 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="hover:bg-gray-100"
+                  className="hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <Palette className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-64 p-2">
+              <PopoverContent className="w-64 p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <div className="grid grid-cols-10 gap-1">
                   {bgColors.map((color) => (
                     <button
                       key={color}
-                      className="w-5 h-5 rounded border border-gray-200"
+                      className="w-5 h-5 rounded border border-gray-200 dark:border-gray-600 relative hover:scale-110 transition-transform"
                       style={{ backgroundColor: color }}
                       onClick={() => editor.chain().focus().setHighlight({ color }).run()}
-                    />
+                      title={color}
+                    >
+                      {/* Indicateur de sélection */}
+                      {editor.isActive('highlight', { color }) && (
+                        <span className="absolute inset-0 flex items-center justify-center">
+                          <span className="w-2 h-2 bg-gray-800 dark:bg-white rounded-full"></span>
+                        </span>
+                      )}
+                    </button>
                   ))}
                 </div>
               </PopoverContent>
@@ -429,16 +446,23 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         editor={editor} 
         className={cn(
                 "prose prose-sm max-w-none",
-                "bg-white text-gray-900",
+                "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100",
                 "p-4 overflow-y-auto",
                 "[&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:outline-none",
                 "[&_pre]:bg-gray-50 [&_pre]:text-gray-900 [&_pre]:border [&_pre]:border-gray-200 [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:my-4",
+                "[&_pre]:dark:bg-gray-700 [&_pre]:dark:text-gray-100 [&_pre]:dark:border-gray-600",
                 "[&_code]:bg-gray-50 [&_code]:text-gray-900 [&_code]:px-1 [&_code]:rounded [&_code]:font-mono [&_code]:text-sm",
+                "[&_code]:dark:bg-gray-700 [&_code]:dark:text-gray-100",
                 "[&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:pl-4 [&_blockquote]:my-4 [&_blockquote]:italic [&_blockquote]:text-gray-700 [&_blockquote]:bg-blue-50/50",
+                "[&_blockquote]:dark:text-gray-300 [&_blockquote]:dark:bg-blue-900/20 [&_blockquote]:dark:border-blue-400",
                 "[&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-2",
+                "[&_a]:dark:text-blue-400",
                 "[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4",
-                "[&_p]:my-2 [&_p]:text-gray-900",
-                "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4"
+                "[&_p]:my-2 [&_p]:text-gray-900 [&_p]:dark:text-gray-100",
+                "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4",
+                // Amélioration pour le surlignage et les couleurs en mode sombre
+                "[&_mark]:dark:text-gray-100",
+                "[&_[style*='color']]:dark:text-opacity-100",
               )}
         
       />

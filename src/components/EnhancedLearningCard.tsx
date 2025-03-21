@@ -512,28 +512,28 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               >
                 <SelectTrigger className={cn(
                   "w-full max-w-xs",
-                  "bg-gray-50",
-                  "border-gray-200 focus:border-blue-300",
-                  "text-gray-900",
-                  "focus:ring-2 focus:ring-blue-500 focus:ring-offset-1",
+                  "bg-gray-50 dark:bg-gray-700",
+                  "border-gray-200 focus:border-blue-300 dark:border-gray-600 dark:focus:border-blue-500",
+                  "text-gray-900 dark:text-gray-100",
+                  "focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 dark:focus:ring-offset-gray-800",
                   "h-9",
                   "transition-all duration-200"
                 )}>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
                   <SelectGroup>
-                    <div className="px-2 py-1.5 text-sm font-medium text-gray-500">
+                    <div className="px-2 py-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">
                       Categories
                     </div>
                     {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat} className="focus:bg-blue-50 focus:text-blue-600">
+                      <SelectItem key={cat} value={cat} className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/30 dark:focus:text-blue-300">
                         {cat}
                       </SelectItem>
                     ))}
                     {itemCategory && !categories.includes(itemCategory) && (
-                      <SelectItem value={itemCategory} className="focus:bg-blue-50 focus:text-blue-600">
-                        {itemCategory} <span className="text-gray-500">(New)</span>
+                      <SelectItem value={itemCategory} className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/30 dark:focus:text-blue-300">
+                        {itemCategory} <span className="text-gray-500 dark:text-gray-400">(New)</span>
                       </SelectItem>
                     )}
                   </SelectGroup>
@@ -546,7 +546,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               className={cn(
                 "font-medium px-3 py-1",
                 "bg-blue-50 text-blue-700 hover:bg-blue-100",
-                "border border-blue-200",
+                "dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-800/40",
+                "border border-blue-200 dark:border-blue-800",
                 "rounded-full",
                 "shadow-sm"
               )}
@@ -574,25 +575,28 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     "bg-gray-50 dark:bg-gray-800",
                     "text-gray-900 dark:text-gray-100",
                     "border border-gray-200 dark:border-gray-700",
-                    "focus-within:ring-2 focus-within:ring-blue-500",
+                    "focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-blue-400",
                     "prose prose-sm sm:prose-base max-w-none dark:prose-invert",
                     "overflow-y-auto max-h-[60vh]",
-                    "prose-headings:font-semibold prose-headings:text-gray-900",
-                    "prose-p:text-gray-700 prose-p:leading-relaxed",
-                    "prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline",
-                    "prose-strong:font-semibold prose-strong:text-gray-900",
-                    "prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:rounded",
-                    "prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200",
+                    "prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
+                    "prose-p:text-gray-700 prose-p:leading-relaxed dark:prose-p:text-gray-300",
+                    "prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline dark:prose-a:text-blue-400",
+                    "prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-gray-100",
+                    "prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:rounded dark:prose-code:bg-gray-700 dark:prose-code:text-blue-300",
+                    "prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:bg-gray-700 dark:prose-pre:border-gray-600",
                     "prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto",
                     "prose-ul:list-disc prose-ol:list-decimal",
-                    "prose-li:marker:text-gray-400",
+                    "prose-li:marker:text-gray-400 dark:prose-li:marker:text-gray-500",
                     "[&_.tiptap]:min-h-[150px] [&_.tiptap]:p-4",
                     "[&_.tiptap.ProseMirror-focused]:outline-none",
                     "[&_.tiptap]:prose-sm [&_.tiptap]:sm:prose-base",
                     "[&_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_p.is-editor-empty:first-child]:before:text-gray-400",
                     "[&_.tiptap_p]:my-3 [&_.tiptap_h1]:my-4 [&_.tiptap_h2]:my-4 [&_.tiptap_h3]:my-3",
                     "[&_.tiptap_ul]:my-3 [&_.tiptap_ol]:my-3 [&_.tiptap_blockquote]:my-3",
-                    "[&_.tiptap_pre]:my-3 [&_.tiptap_hr]:my-4"
+                    "[&_.tiptap_pre]:my-3 [&_.tiptap_hr]:my-4",
+                    // Amélioration pour les textes colorés et surlignés en mode sombre
+                    "[&_[style*='color']]:dark:text-opacity-100 [&_[style*='color']]:dark:!important",
+                    "[&_mark]:dark:!text-gray-100 [&_mark]:dark:contrast-125"
                   )}
                 />
               </div>
@@ -676,9 +680,9 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 variant="secondary"
                 className={cn(
                   "px-2 py-0.5",
-                  "bg-white dark:bg-gray-800 dark:text-gray-200",
-                  "border border-gray-200 dark:border-gray-700",
-                  "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  "bg-white dark:bg-gray-700",
+                  "border border-gray-200 dark:border-gray-600",
+                  "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
                 )}
               >
                 {tag}
