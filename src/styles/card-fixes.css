@@ -1897,73 +1897,146 @@ html[data-theme="dark"] .text-xs.font-medium.bg-green-500\/10 {
 
 /* ...existing code... */
 
-/* Améliorations pour les cartes maîtrisées */
-html[data-theme="light"] .mastered-content {
-  position: relative;
-}
-
-html[data-theme="light"] .mastered-content::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(to right, #10b981, #34d399, transparent);
-  border-radius: 6px 6px 0 0;
-  opacity: 0.7;
-}
-
-/* Animation subtile pour l'icône de trophée */
-html[data-theme="light"] .animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 0.3;
-  }
-}
-
-/* Amélioration du titre de carte */
-html[data-theme="light"] .card-title {
-  position: relative;
-  padding-bottom: 0.25rem;
+/* Dark mode improvements for Learning Cards */
+html[data-theme="dark"] .card-container {
   transition: all 0.3s ease;
 }
 
-html[data-theme="light"] .card:hover .card-title {
-  color: #1d4ed8;
+html[data-theme="dark"] .card-container:hover {
+  transform: translateY(-4px);
 }
 
-/* Style spécial pour les titres des cartes maîtrisées */
-html[data-theme="light"] .mastered-content .card-title,
-html[data-theme="light"] .card-title.text-emerald-800 {
-  background: linear-gradient(to right, #059669, #10b981);
+/* Enhanced trophy icon in dark mode */
+html[data-theme="dark"] .animate-pulse {
+  animation: darkPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes darkPulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* Enhanced card title in dark mode */
+html[data-theme="dark"] .card-title {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  letter-spacing: -0.01em;
+}
+
+html[data-theme="dark"] .card:hover .card-title {
+  color: #60a5fa; /* blue-400 */
+}
+
+/* Special style for mastered card titles in dark mode */
+html[data-theme="dark"] .mastered-content .card-title,
+html[data-theme="dark"] .text-emerald-300 {
+  background: linear-gradient(to right, #059669, #34d399);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-  font-weight: 700;
+  text-shadow: none;
 }
 
-/* Style amélioré pour les badges de catégorie */
-html[data-theme="light"] .badge {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+/* Enhanced content formatting in dark mode */
+html[data-theme="dark"] .prose-invert {
+  --tw-prose-body: #d1d5db;
+  --tw-prose-headings: #f3f4f6;
+  --tw-prose-lead: #e5e7eb;
+  --tw-prose-links: #93c5fd;
+  --tw-prose-bold: #f3f4f6;
+  --tw-prose-counters: #9ca3af;
+  --tw-prose-bullets: #4b5563;
+  --tw-prose-hr: #374151;
+  --tw-prose-quotes: #f3f4f6;
+  --tw-prose-quote-borders: #374151;
+  --tw-prose-captions: #9ca3af;
+  --tw-prose-code: #93c5fd;
+  --tw-prose-pre-code: #d1d5db;
+  --tw-prose-pre-bg: #1f2937;
+  --tw-prose-th-borders: #4b5563;
+  --tw-prose-td-borders: #374151;
+}
+
+/* Enhanced input fields and buttons in dark mode */
+html[data-theme="dark"] .bg-gray-900 {
+  background-color: #111827;
+}
+
+html[data-theme="dark"] .border-gray-700 {
+  border-color: #374151;
+}
+
+html[data-theme="dark"] .focus-visible\:ring-blue-600:focus-visible {
+  --tw-ring-color: #2563eb;
+  --tw-ring-offset-color: #111827;
+}
+
+/* Improved badge styling for dark mode */
+html[data-theme="dark"] .badge {
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme="dark"] .bg-blue-900\/40 {
+  background-color: rgba(30, 58, 138, 0.4);
+}
+
+html[data-theme="dark"] .bg-emerald-900\/40 {
+  background-color: rgba(6, 78, 59, 0.4);
+}
+
+/* Adjust mastered card styling for dark mode */
+html[data-theme="dark"] .border-emerald-800\/50 {
+  border-color: rgba(6, 95, 70, 0.5);
+}
+
+html[data-theme="dark"] .from-emerald-950\/40 {
+  --tw-gradient-from: rgba(2, 44, 34, 0.4);
+}
+
+/* Enhance dark mode gradients and shadows */
+html[data-theme="dark"] .shadow-gray-900\/20 {
+  --tw-shadow-color: rgba(17, 24, 39, 0.2);
+}
+
+html[data-theme="dark"] .shadow-gray-950\/20 {
+  --tw-shadow-color: rgba(3, 7, 18, 0.2);
+}
+
+/* Create a subtle glow effect for mastered cards in dark mode */
+html[data-theme="dark"] .border-emerald-800\/50 {
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+}
+
+/* Extra styles for learning cards page */
+html[data-theme="dark"] .bg-gradient-to-r.from-blue-500.via-blue-400.to-indigo-400 {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Add page-level background in dark mode */
+html[data-theme="dark"] body {
+  background: linear-gradient(to bottom, #0f172a, #1e293b);
+  min-height: 100vh;
+}
+
+/* Dark mode dialog improvements */
+html[data-theme="dark"] .dialog-content,
+html[data-theme="dark"] [role="dialog"] {
+  background-color: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+}
+
+/* Card zoom effect in dark mode */
+html[data-theme="dark"] .transform.scale-105 {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Special dark mode styling for the mastered state badge */
+html[data-theme="dark"] .mastered-text {
+  font-weight: 500;
   letter-spacing: 0.01em;
-}
-
-html[data-theme="light"] .bg-emerald-50.text-emerald-700 {
-  background: linear-gradient(to right, #d1fae5, #ecfdf5);
-}
-
-html[data-theme="light"] .bg-blue-50.text-blue-700 {
-  background: linear-gradient(to right, #dbeafe, #eff6ff);
-}
-
-/* Effet d'ombre pour la carte maîtrisée */
-html[data-theme="light"] .border-emerald-300.shadow-emerald-100 {
-  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
 }
