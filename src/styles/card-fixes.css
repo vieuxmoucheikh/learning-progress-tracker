@@ -2152,3 +2152,136 @@ html[data-theme="dark"] button[class*="text-red-600"]:hover {
   background-color: rgba(239, 68, 68, 0.2) !important;
   color: #fca5a5 !important;
 }
+
+/* ...existing code... */
+
+/* CORRECTIFS CRITIQUES POUR LA VISIBILITÉ DU CONTENU EN MODE SOMBRE */
+
+/* Correction forte pour le contenu éditable */
+html[data-theme="dark"] .ProseMirror,
+html[data-theme="dark"] [class*="ProseMirror"],
+html[data-theme="dark"] [contenteditable="true"] {
+  color: white !important;
+  background-color: #1e293b !important;
+}
+
+html[data-theme="dark"] .ProseMirror p,
+html[data-theme="dark"] .ProseMirror h1,
+html[data-theme="dark"] .ProseMirror h2,
+html[data-theme="dark"] .ProseMirror h3,
+html[data-theme="dark"] .ProseMirror li,
+html[data-theme="dark"] .ProseMirror div,
+html[data-theme="dark"] .ProseMirror span {
+  color: white !important;
+}
+
+/* Assurez-vous que l'éditeur ait un fond visible */
+html[data-theme="dark"] .rich-text-editor,
+html[data-theme="dark"] [class*="rich-text-editor"] {
+  background-color: #1e293b !important;
+  border-color: #475569 !important;
+}
+
+/* Badges de catégorie hautement contrastés en mode sombre */
+html[data-theme="dark"] .badge,
+html[data-theme="dark"] [class*="badge"] {
+  color: white !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+html[data-theme="dark"] .dark\:bg-blue-900\/70,
+html[data-theme="dark"] .dark\:bg-emerald-900\/70,
+html[data-theme="dark"] .dark\:bg-blue-800,
+html[data-theme="dark"] .dark\:bg-emerald-800 {
+  background-color: rgba(30, 64, 175, 0.95) !important;
+  border-color: rgba(30, 64, 175, 1) !important;
+}
+
+html[data-theme="dark"] .badge.dark\:text-blue-200,
+html[data-theme="dark"] .badge.dark\:text-emerald-200,
+html[data-theme="dark"] .badge.dark\:text-white {
+  color: white !important;
+}
+
+/* Amélioration spécifique pour le menu de sélection */
+html[data-theme="dark"] [role="combobox"],
+html[data-theme="dark"] .select-trigger,
+html[data-theme="dark"] .SelectTrigger {
+  background-color: #1e293b !important;
+  color: white !important;
+  border-color: #475569 !important;
+}
+
+html[data-theme="dark"] [role="listbox"],
+html[data-theme="dark"] .select-content,
+html[data-theme="dark"] .SelectContent {
+  background-color: #1e293b !important;
+  color: white !important;
+  border-color: #475569 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+}
+
+html[data-theme="dark"] [role="option"],
+html[data-theme="dark"] .select-item,
+html[data-theme="dark"] .SelectItem {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] [role="option"]:hover,
+html[data-theme="dark"] [role="option"]:focus,
+html[data-theme="dark"] .select-item:hover,
+html[data-theme="dark"] .select-item:focus,
+html[data-theme="dark"] .SelectItem:hover,
+html[data-theme="dark"] .SelectItem:focus {
+  background-color: rgba(59, 130, 246, 0.5) !important;
+  color: white !important;
+}
+
+/* Force tous les champs d'entrée en mode sombre à avoir un texte blanc */
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] [contenteditable="true"] {
+  color: white !important;
+}
+
+/* Applique un style distinctif à tous les indicateurs de catégorie */
+html[data-theme="dark"] .dark\:bg-blue-800,
+html[data-theme="dark"] .dark\:bg-emerald-800 {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Style spécial pour les boutons dans l'éditeur en mode sombre */
+html[data-theme="dark"] .rich-text-editor button,
+html[data-theme="dark"] [class*="rich-text-editor"] button {
+  color: #e2e8f0 !important;
+  background-color: transparent !important;
+}
+
+html[data-theme="dark"] .rich-text-editor button:hover,
+html[data-theme="dark"] [class*="rich-text-editor"] button:hover {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+  color: white !important;
+}
+
+/* Assurez-vous que tous les contenus dans l'éditeur sont visibles */
+html[data-theme="dark"] [class*="prose"] * {
+  color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] [class*="prose"] h1,
+html[data-theme="dark"] [class*="prose"] h2,
+html[data-theme="dark"] [class*="prose"] h3,
+html[data-theme="dark"] [class*="prose"] h4,
+html[data-theme="dark"] [class*="prose"] h5,
+html[data-theme="dark"] [class*="prose"] h6,
+html[data-theme="dark"] [class*="prose"] strong {
+  color: white !important;
+}
+
+/* Assurez-vous que le fond reste foncé pour l'éditeur */
+html[data-theme="dark"] [class*="editor"] [contenteditable="true"] {
+  background-color: #1e293b !important;
+}

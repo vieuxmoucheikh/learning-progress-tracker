@@ -248,21 +248,21 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   return (
     <div className={cn("rich-text-editor", className)}>
       <div className={cn(
-        "rounded-lg border border-gray-200",
-        "bg-white",
+        "rounded-lg border border-gray-200 dark:border-gray-700",
+        "bg-white dark:bg-gray-800", // Fond sombre pour le mode sombre
         "relative flex flex-col",
         className
       )}>
         {editable && (
-          <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+          <div className="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
             <div className="flex flex-wrap gap-1 p-2">
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={() => editor.chain().focus().toggleBold().run()}
                 className={cn(
-                  "hover:bg-gray-100",
-                  editor.isActive('bold') && "bg-gray-100 text-gray-900"
+                  "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
+                  editor.isActive('bold') && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
                 )}
               >
                 <Bold className="h-4 w-4" />
@@ -272,8 +272,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 variant="ghost"
                 onClick={() => editor.chain().focus().toggleItalic().run()}
                 className={cn(
-                  "hover:bg-gray-100",
-                  editor.isActive('italic') && "bg-gray-100 text-gray-900"
+                  "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
+                  editor.isActive('italic') && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
                 )}
               >
                 <Italic className="h-4 w-4" />
@@ -283,8 +283,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 variant="ghost"
                 onClick={() => editor.chain().focus().toggleCode().run()}
                 className={cn(
-                  "hover:bg-gray-100",
-                  editor.isActive('code') && "bg-gray-100 text-gray-900"
+                  "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
+                  editor.isActive('code') && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
                 )}
               >
                 <CodeIcon className="h-4 w-4" />
@@ -295,17 +295,17 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="hover:bg-gray-100"
+                    className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
                   >
                     <Type className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-64 p-2">
+                <PopoverContent className="w-64 p-2 dark:bg-gray-800 dark:border-gray-700">
                   <div className="grid grid-cols-10 gap-1">
                     {colors.map((color) => (
                       <button
                         key={color}
-                        className="w-5 h-5 rounded border border-gray-200"
+                        className="w-5 h-5 rounded border border-gray-200 dark:border-gray-600"
                         style={{ backgroundColor: color }}
                         onClick={() => editor.chain().focus().setColor(color).run()}
                       />
@@ -319,7 +319,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="hover:bg-gray-100"
+                    className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
                   >
                     <Palette className="h-4 w-4" />
                   </Button>
@@ -430,15 +430,21 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           editor={editor} 
           className={cn(
                   "prose prose-sm max-w-none",
-                  "bg-white text-gray-900",
+                  "bg-white dark:bg-gray-800 text-gray-900 dark:text-white", // Texte blanc en mode sombre
                   "p-4 overflow-y-auto",
                   "[&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:outline-none",
+                  "[&_.ProseMirror]:dark:text-white", // Texte blanc pour l'éditeur en mode sombre
                   "[&_pre]:bg-gray-50 [&_pre]:text-gray-900 [&_pre]:border [&_pre]:border-gray-200 [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:my-4",
+                  "[&_pre]:dark:bg-gray-900 [&_pre]:dark:text-gray-100 [&_pre]:dark:border-gray-700",
                   "[&_code]:bg-gray-50 [&_code]:text-gray-900 [&_code]:px-1 [&_code]:rounded [&_code]:font-mono [&_code]:text-sm",
+                  "[&_code]:dark:bg-gray-900 [&_code]:dark:text-gray-100",
                   "[&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:pl-4 [&_blockquote]:my-4 [&_blockquote]:italic [&_blockquote]:text-gray-700 [&_blockquote]:bg-blue-50/50",
+                  "[&_blockquote]:dark:text-gray-300 [&_blockquote]:dark:bg-blue-900/30 [&_blockquote]:dark:border-blue-500",
                   "[&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-2",
+                  "[&_a]:dark:text-blue-400",
                   "[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4",
-                  "[&_p]:my-2 [&_p]:text-gray-900",
+                  "[&_p]:my-2 [&_p]:text-gray-900 [&_p]:dark:text-white", // Texte blanc pour les paragraphes
+                  "[&_h1]:dark:text-white [&_h2]:dark:text-white [&_h3]:dark:text-white", // Texte blanc pour les titres
                   "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4"
                 )}
           

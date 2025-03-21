@@ -526,27 +526,27 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               >
                 <SelectTrigger className={cn(
                   "w-full max-w-xs",
-                  "bg-gray-50 dark:bg-gray-800",
-                  "border-gray-200 focus:border-blue-300 dark:border-gray-700 dark:focus:border-blue-600",
-                  "text-gray-900 dark:text-gray-100",
-                  "focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 dark:focus:ring-blue-700 dark:focus:ring-offset-gray-900",
+                  "bg-gray-50 dark:bg-gray-900", // Fond plus foncé pour le contraste
+                  "border-gray-200 focus:border-blue-300 dark:border-gray-600 dark:focus:border-blue-500",
+                  "text-gray-900 dark:text-white", // Texte blanc pour un meilleur contraste
+                  "focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 dark:focus:ring-blue-500 dark:focus:ring-offset-gray-900",
                   "h-9",
                   "transition-all duration-200"
                 )}>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
+                <SelectContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg">
                   <SelectGroup>
-                    <div className="px-2 py-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">
+                    <div className="px-2 py-1.5 text-sm font-medium text-gray-500 dark:text-gray-300">
                       Categories
                     </div>
                     {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat} className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/30 dark:focus:text-blue-300">
+                      <SelectItem key={cat} value={cat} className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/60 dark:focus:text-blue-100">
                         {cat}
                       </SelectItem>
                     ))}
                     {itemCategory && !categories.includes(itemCategory) && (
-                      <SelectItem value={itemCategory} className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/30 dark:focus:text-blue-300">
+                      <SelectItem value={itemCategory} className="focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-900/60 dark:focus:text-blue-100">
                         {itemCategory} <span className="text-gray-500 dark:text-gray-400">(New)</span>
                       </SelectItem>
                     )}
@@ -560,10 +560,10 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               className={cn(
                 "font-medium px-3 py-1",
                 mastered 
-                  ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 dark:bg-emerald-900/70 dark:text-emerald-200 dark:border-emerald-600/70 dark:hover:bg-emerald-800/80" 
-                  : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 dark:bg-blue-900/70 dark:text-blue-200 dark:border-blue-600/70 dark:hover:bg-blue-800/80",
+                  ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 dark:bg-emerald-800 dark:text-white dark:border-emerald-600 dark:hover:bg-emerald-700" 
+                  : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 dark:bg-blue-800 dark:text-white dark:border-blue-600 dark:hover:bg-blue-700",
                 "rounded-full",
-                "shadow-sm"
+                "shadow-sm dark:shadow-black/20"
               )}
             >
               {itemCategory}
@@ -580,36 +580,39 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         >
           {isEditing ? (
             <div className="space-y-4">
-              <div className="space-y-2 relative">
+              <div className="space-y-2 relative dark:bg-gray-800 rounded-lg">
                 <RichTextEditor
                   content={content}
                   onChange={setContent}
                   className={cn(
                     "min-h-[200px] rounded-lg",
-                    "bg-gray-50 dark:bg-gray-800/80",
-                    "text-gray-900 dark:text-gray-100",
+                    "bg-gray-50 dark:bg-gray-800",
+                    "text-gray-900 dark:text-white", // Texte blanc en mode sombre
                     "border border-gray-200 dark:border-gray-700",
-                    "focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-blue-600",
+                    "focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-blue-500",
                     "prose prose-sm sm:prose-base max-w-none dark:prose-invert",
                     "overflow-y-auto max-h-[60vh]",
-                    "prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
-                    "prose-p:text-gray-700 dark:prose-p:text-gray-200 prose-p:leading-relaxed",
-                    "prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline",
-                    "prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-gray-100",
-                    "prose-code:text-blue-600 dark:prose-code:text-blue-400 prose-code:bg-blue-50 dark:prose-code:bg-blue-900/40 prose-code:px-1 prose-code:rounded",
-                    "prose-pre:bg-gray-50 dark:prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-700",
+                    "prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-white",
+                    "prose-p:text-gray-700 dark:prose-p:text-white prose-p:leading-relaxed", // Texte blanc
+                    "prose-a:text-blue-600 dark:prose-a:text-blue-300 prose-a:no-underline hover:prose-a:underline",
+                    "prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-white",
+                    "prose-code:text-blue-600 dark:prose-code:text-blue-300 prose-code:bg-blue-50 dark:prose-code:bg-blue-900/50 prose-code:px-1 prose-code:rounded",
+                    "prose-pre:bg-gray-50 dark:prose-pre:bg-gray-950 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-700",
                     "prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto",
                     "prose-ul:list-disc prose-ol:list-decimal",
-                    "prose-li:marker:text-gray-400 dark:prose-li:marker:text-gray-500",
+                    "prose-li:marker:text-gray-400 dark:prose-li:marker:text-gray-400",
                     "[&_.tiptap]:min-h-[150px] [&_.tiptap]:p-4",
                     "[&_.tiptap.ProseMirror-focused]:outline-none",
                     "[&_.tiptap]:prose-sm [&_.tiptap]:sm:prose-base",
-                    "[&_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_p.is-editor-empty:first-child]:before:text-gray-400 dark:[&_p.is-editor-empty:first-child]:before:text-gray-500",
+                    "[&_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_p.is-editor-empty:first-child]:before:text-gray-400",
                     "[&_.tiptap_p]:my-3 [&_.tiptap_h1]:my-4 [&_.tiptap_h2]:my-4 [&_.tiptap_h3]:my-3",
                     "[&_.tiptap_ul]:my-3 [&_.tiptap_ol]:my-3 [&_.tiptap_blockquote]:my-3",
                     "[&_.tiptap_pre]:my-3 [&_.tiptap_hr]:my-4",
-                    "dark:[&_.tiptap_*]:text-gray-200",
-                    "dark:[&_.ProseMirror]:text-gray-200"
+                    "dark:[&_.ProseMirror]:text-white", // Texte blanc pour l'éditeur
+                    "dark:[&_.ProseMirror_p]:text-white", // Texte blanc pour les paragraphes
+                    "dark:[&_.ProseMirror_h1]:text-white", // Texte blanc pour les titres
+                    "dark:[&_.ProseMirror_h2]:text-white", // Texte blanc pour les titres
+                    "dark:[&_.ProseMirror_h3]:text-white"  // Texte blanc pour les titres
                   )}
                 />
               </div>
@@ -621,7 +624,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     setContent(initialContent);
                     setTitle(initialTitle);
                   }}
-                  className="bg-white hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-700"
+                  className="bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600"
                 >
                   Cancel
                 </Button>
