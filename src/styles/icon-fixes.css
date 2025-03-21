@@ -366,3 +366,74 @@ html [class*="editor"] button svg {
   opacity: 1 !important;
   pointer-events: auto !important;
 }
+
+/* CORRECTIFS POUR LES ICÔNES DE L'ÉDITEUR DE TEXTE RICHE */
+
+/* Assurer que toutes les icônes de l'éditeur sont correctement visibles */
+.rich-text-editor button svg,
+.rich-content-editor button svg,
+[class*="editor"] button svg {
+  color: #334155 !important; /* Couleur par défaut pour toutes les icônes en mode clair */
+  fill: none !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Mode sombre - Couleur des icônes dans l'éditeur */
+html[data-theme="dark"] .rich-text-editor button svg,
+html[data-theme="dark"] .rich-content-editor button svg,
+html[data-theme="dark"] [class*="editor"] button svg {
+  color: #e2e8f0 !important; /* Couleur plus claire pour le mode sombre */
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+/* Correction pour les boutons actifs dans l'éditeur */
+.rich-text-editor button[class*="bg-gray-100"] svg,
+.rich-content-editor button[class*="bg-gray-100"] svg,
+[class*="editor"] button[class*="bg-gray-100"] svg {
+  color: #1d4ed8 !important; /* Bleu plus prononcé pour les boutons actifs */
+}
+
+html[data-theme="dark"] .rich-text-editor button[class*="bg-gray-100"] svg,
+html[data-theme="dark"] .rich-content-editor button[class*="bg-gray-100"] svg,
+html[data-theme="dark"] [class*="editor"] button[class*="bg-gray-100"] svg {
+  color: #93c5fd !important; /* Bleu clair pour les boutons actifs en mode sombre */
+}
+
+/* Correction spécifique pour les icônes de couleur et de palette */
+.rich-text-editor button:has(.lucide-type) svg,
+.rich-content-editor button:has(.lucide-type) svg,
+[class*="editor"] button:has(.lucide-type) svg,
+.rich-text-editor button:has(.lucide-palette) svg,
+.rich-content-editor button:has(.lucide-palette) svg,
+[class*="editor"] button:has(.lucide-palette) svg {
+  color: #334155 !important;
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+html[data-theme="dark"] .rich-text-editor button:has(.lucide-type) svg,
+html[data-theme="dark"] .rich-content-editor button:has(.lucide-type) svg,
+html[data-theme="dark"] [class*="editor"] button:has(.lucide-type) svg,
+html[data-theme="dark"] .rich-text-editor button:has(.lucide-palette) svg,
+html[data-theme="dark"] .rich-content-editor button:has(.lucide-palette) svg,
+html[data-theme="dark"] [class*="editor"] button:has(.lucide-palette) svg {
+  color: #e2e8f0 !important;
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+/* Amélioration du hover pour les boutons de l'éditeur */
+.rich-text-editor button:hover svg,
+.rich-content-editor button:hover svg,
+[class*="editor"] button:hover svg {
+  color: #2563eb !important; /* Bleu sur hover en mode clair */
+}
+
+html[data-theme="dark"] .rich-text-editor button:hover svg,
+html[data-theme="dark"] .rich-content-editor button:hover svg,
+html[data-theme="dark"] [class*="editor"] button:hover svg {
+  color: #60a5fa !important; /* Bleu clair sur hover en mode sombre */
+}

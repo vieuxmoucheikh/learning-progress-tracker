@@ -128,10 +128,21 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           class: 'rounded bg-gray-200 px-1.5 py-0.5 font-mono text-sm',
         },
       }),
-      TextStyle,
-      ColorExtension,
+      TextStyle.configure({
+        // Configuration explicite pour assurer que les styles de couleur fonctionnent correctement
+        HTMLAttributes: {
+          class: 'custom-text-style',
+        },
+      }),
+      ColorExtension.configure({
+        // Assurer que les attributs de style sont préservés
+        types: ['textStyle'],
+      }),
       Highlight.configure({
         multicolor: true,
+        HTMLAttributes: {
+          class: 'custom-highlight',
+        },
       }),
     ],
     content,
@@ -300,12 +311,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                     <Type className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-64 p-2 dark:bg-gray-800 dark:border-gray-700">
-                  <div className="grid grid-cols-10 gap-1">
+                <PopoverContent className="w-64 p-2 colors-popover dark:bg-gray-800 dark:border-gray-700">
+                  <div className="grid grid-cols-10 gap-1 colors-grid">
                     {colors.map((color) => (
                       <button
                         key={color}
-                        className="w-5 h-5 rounded border border-gray-200 dark:border-gray-600"
+                        className="color-button w-5 h-5 rounded border border-gray-200 dark:border-gray-600"
                         style={{ backgroundColor: color }}
                         onClick={() => editor.chain().focus().setColor(color).run()}
                       />
@@ -324,12 +335,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                     <Palette className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-64 p-2">
-                  <div className="grid grid-cols-10 gap-1">
+                <PopoverContent className="w-64 p-2 colors-popover dark:bg-gray-800 dark:border-gray-700">
+                  <div className="grid grid-cols-10 gap-1 colors-grid">
                     {bgColors.map((color) => (
                       <button
                         key={color}
-                        className="w-5 h-5 rounded border border-gray-200"
+                        className="color-button w-5 h-5 rounded border border-gray-200 dark:border-gray-600"
                         style={{ backgroundColor: color }}
                         onClick={() => editor.chain().focus().setHighlight({ color }).run()}
                       />

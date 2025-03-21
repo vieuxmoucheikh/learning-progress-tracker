@@ -288,3 +288,93 @@ html[data-theme="dark"] .text-emerald-600 svg {
 html[data-theme="dark"] .text-red-600 svg {
   color: #f87171 !important;
 }
+
+/* CORRECTIFS POUR LES POPOVER DE PALETTE DE COULEURS */
+
+/* Mode clair - Améliorations du popover de couleurs */
+html[data-theme="light"] .PopoverContent,
+html[data-theme="light"] [class*="PopoverContent"] {
+  border-radius: 12px !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  padding: 10px !important;
+  background-color: white !important; /* Fond blanc explicite pour le popover */
+  z-index: 9999 !important; /* S'assurer que le popover est au-dessus des autres éléments */
+}
+
+/* Mode sombre - Améliorations du popover de couleurs */
+html[data-theme="dark"] .PopoverContent,
+html[data-theme="dark"] [class*="PopoverContent"] {
+  border-radius: 12px !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
+  padding: 10px !important;
+  background-color: #1e293b !important; /* Fond sombre pour les popover en mode sombre */
+  z-index: 9999 !important;
+}
+
+/* Styles pour les boutons de couleur dans les popover */
+.PopoverContent button,
+[class*="PopoverContent"] button {
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  margin: 2px !important;
+  transition: transform 0.15s ease !important;
+}
+
+.PopoverContent button:hover,
+[class*="PopoverContent"] button:hover {
+  transform: scale(1.1) !important;
+  z-index: 1 !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8), 0 0 0 4px rgba(59, 130, 246, 0.5) !important;
+}
+
+/* CORRECTIFS POUR LA VISIBILITÉ DU TEXTE COLORÉ */
+
+/* Assurer que le texte coloré est toujours visible en mode clair */
+html[data-theme="light"] .ProseMirror [style*="color:"] {
+  text-shadow: 0 0 0 rgba(0, 0, 0, 0.1) !important; /* Légère ombre pour améliorer la lisibilité */
+  background-color: transparent !important; /* Éviter les problèmes de superposition */
+}
+
+/* Assurer que le texte coloré est toujours visible en mode sombre avec une ombre de texte adaptée */
+html[data-theme="dark"] .ProseMirror [style*="color:"] {
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.8) !important; /* Ombre plus prononcée en mode sombre */
+  background-color: transparent !important;
+}
+
+/* Assurer que le texte surligné est toujours bien visible */
+html .ProseMirror mark[style*="background-color:"] {
+  display: inline !important;
+  padding: 0 2px !important;
+  border-radius: 2px !important;
+  color: currentColor !important; /* Respecter la couleur du texte actuelle */
+}
+
+/* CORRECTIFS POUR L'AFFICHAGE DES PALETTES DE COULEURS */
+
+/* Grille de couleurs plus visible et mieux espacée */
+.PopoverContent .grid,
+[class*="PopoverContent"] .grid {
+  display: grid !important;
+  grid-template-columns: repeat(10, 1fr) !important;
+  gap: 4px !important;
+  padding: 4px !important;
+}
+
+/* Amélioration de l'apparence des boutons de couleur */
+.PopoverContent .grid button,
+[class*="PopoverContent"] .grid button {
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Effet visuel au survol des boutons de couleur */
+.PopoverContent .grid button:hover,
+[class*="PopoverContent"] .grid button:hover {
+  transform: scale(1.2) !important;
+  z-index: 10 !important;
+  transition: transform 0.15s ease !important;
+}
