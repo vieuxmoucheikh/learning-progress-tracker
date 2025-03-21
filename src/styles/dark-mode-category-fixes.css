@@ -1,0 +1,116 @@
+/* Correctifs pour les problèmes de visibilité des catégories en mode sombre */
+
+/* Styles prioritaires pour les badges de catégorie en mode sombre */
+html[data-theme="dark"] .category-badge,
+.dark .category-badge,
+html[data-theme="dark"] .badge.category-badge,
+.dark .badge.category-badge {
+  background-color: rgba(30, 64, 175, 0.9) !important;
+  color: white !important;
+  border: 2px solid rgb(96, 165, 250) !important;
+  font-weight: 700 !important;
+  padding: 0.4rem 0.8rem !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: inline-flex !important;
+  min-height: 28px !important;
+  min-width: max-content !important;
+  border-radius: 999px !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Styles pour les badges de catégorie dans les cartes d'apprentissage en mode sombre */
+html[data-theme="dark"] .EnhancedLearningCard .badge[variant="secondary"],
+.dark .EnhancedLearningCard .badge[variant="secondary"],
+html[data-theme="dark"] [class*="EnhancedLearningCard"] .badge,
+.dark [class*="EnhancedLearningCard"] .badge {
+  background-color: rgba(30, 64, 175, 0.9) !important;
+  color: white !important;
+  border: 2px solid rgb(96, 165, 250) !important;
+  font-weight: 700 !important;
+  padding: 0.4rem 0.8rem !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: inline-flex !important;
+}
+
+/* Correctifs pour le sélecteur de catégories */
+html[data-theme="dark"] [data-radix-select-trigger],
+.dark [data-radix-select-trigger] {
+  background-color: rgba(31, 41, 55, 0.95) !important;
+  border-color: rgba(96, 165, 250, 0.5) !important;
+  color: rgb(229, 231, 235) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+}
+
+html[data-theme="dark"] [data-radix-select-content],
+.dark [data-radix-select-content] {
+  background-color: rgb(31, 41, 55) !important;
+  border-color: rgba(96, 165, 250, 0.5) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+html[data-theme="dark"] [data-radix-select-item][data-highlighted],
+.dark [data-radix-select-item][data-highlighted] {
+  background-color: rgba(59, 130, 246, 0.6) !important;
+  color: white !important;
+}
+
+/* Correctifs pour les tags dans le filtre */
+html[data-theme="dark"] .badge.cursor-pointer,
+.dark .badge.cursor-pointer {
+  background-color: rgba(31, 41, 55, 0.95) !important;
+  color: rgb(209, 213, 219) !important;
+  border-color: rgba(75, 85, 99, 0.95) !important;
+  border-width: 1px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] .badge.cursor-pointer:hover,
+.dark .badge.cursor-pointer:hover {
+  background-color: rgba(55, 65, 81, 0.95) !important;
+}
+
+html[data-theme="dark"] .badge.cursor-pointer.bg-blue-100,
+.dark .badge.cursor-pointer.bg-blue-100,
+html[data-theme="dark"] .badge.cursor-pointer[class*="bg-blue"],
+.dark .badge.cursor-pointer[class*="bg-blue"] {
+  background-color: rgba(37, 99, 235, 0.8) !important;
+  color: white !important;
+  border-color: rgb(96, 165, 250) !important;
+  border-width: 2px !important;
+}
+
+/* Correctifs pour les contenus des menus déroulants */
+html[data-theme="dark"] .SelectContent,
+.dark .SelectContent,
+html[data-theme="dark"] [class*="SelectContent"],
+.dark [class*="SelectContent"] {
+  background-color: rgb(31, 41, 55) !important;
+  border-color: rgba(96, 165, 250, 0.5) !important;
+  color: white !important;
+}
+
+/* Force les styles sur desktop */
+@media (min-width: 768px) {
+  html[data-theme="dark"] .category-badge,
+  .dark .category-badge,
+  html[data-theme="dark"] .badge.category-badge,
+  .dark .badge.category-badge,
+  html[data-theme="dark"] .EnhancedLearningCard .badge,
+  .dark .EnhancedLearningCard .badge {
+    background-color: rgba(30, 64, 175, 0.9) !important;
+    color: white !important;
+    border: 2px solid rgb(96, 165, 250) !important;
+    font-weight: 700 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: inline-flex !important;
+  }
+}

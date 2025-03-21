@@ -10,6 +10,8 @@ import Dashboard from './pages/dashboard'
 import './styles/global-ui-enhancements.css'
 import './styles/critical-light-mode-fixes.css' // Ajout du fichier de correctifs critiques
 import '../public/emergency-mobile-fix.css' // Ajout du correctif d'urgence
+import './styles/card-fixes.css';
+import './styles/dark-mode-category-fixes.css'; // Ajout du nouveau fichier CSS
 
 // Injecter un style critique pour assurer la visibilité des compteurs et statuts
 const injectCriticalStyles = () => {

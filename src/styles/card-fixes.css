@@ -1922,3 +1922,189 @@ html[data-theme="dark"] .text-xs.font-medium.bg-green-500\/10 {
   background-color: rgba(59, 130, 246, 0.2);
   color: rgb(191, 219, 254);
 }
+
+/* ...existing code... */
+
+/* CORRECTIFS CRITIQUES POUR LA VISIBILITÉ DES CATÉGORIES EN MODE SOMBRE SUR DESKTOP */
+/* Ces règles ont une spécificité très élevée pour s'assurer qu'elles s'appliquent en priorité */
+
+/* Style de base pour tous les badges de catégorie en mode sombre */
+html[data-theme="dark"] .badge,
+.dark .badge,
+html[data-theme="dark"] [class*="badge"],
+.dark [class*="badge"],
+html[data-theme="dark"] span[class*="badge"],
+.dark span[class*="badge"] {
+  background-color: rgba(30, 58, 138, 0.7) !important;
+  color: rgb(219, 234, 254) !important;
+  border-color: rgba(59, 130, 246, 0.7) !important;
+  border-width: 1px !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Style pour les badges de catégorie dans les cartes d'apprentissage en mode sombre */
+html[data-theme="dark"] .card-container .badge,
+.dark .card-container .badge,
+html[data-theme="dark"] .EnhancedLearningCard .badge,
+.dark .EnhancedLearningCard .badge,
+html[data-theme="dark"] [class*="card"] .badge,
+.dark [class*="card"] .badge {
+  background-color: rgba(30, 64, 175, 0.85) !important;
+  color: rgb(219, 234, 254) !important;
+  border-color: rgb(59, 130, 246) !important;
+  border-width: 2px !important;
+  padding: 0.35rem 0.75rem !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Style spécifique pour les badges de catégorie au survol */
+html[data-theme="dark"] .badge:hover,
+.dark .badge:hover,
+html[data-theme="dark"] [class*="badge"]:hover,
+.dark [class*="badge"]:hover,
+html[data-theme="dark"] .card-container .badge:hover,
+.dark .card-container .badge:hover {
+  background-color: rgba(37, 99, 235, 0.9) !important;
+  color: white !important;
+  border-color: rgb(96, 165, 250) !important;
+}
+
+/* Style pour les sélecteurs de catégories */
+html[data-theme="dark"] [data-radix-select-trigger],
+.dark [data-radix-select-trigger] {
+  background-color: rgba(31, 41, 55, 0.95) !important;
+  border-color: rgba(55, 65, 81, 0.95) !important;
+  color: rgb(229, 231, 235) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+}
+
+html[data-theme="dark"] [data-radix-select-content],
+.dark [data-radix-select-content] {
+  background-color: rgb(31, 41, 55) !important;
+  border-color: rgb(55, 65, 81) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+html[data-theme="dark"] [data-radix-select-item],
+.dark [data-radix-select-item] {
+  color: rgb(229, 231, 235) !important;
+}
+
+html[data-theme="dark"] [data-radix-select-item][data-highlighted],
+.dark [data-radix-select-item][data-highlighted] {
+  background-color: rgba(59, 130, 246, 0.4) !important;
+  color: rgb(219, 234, 254) !important;
+}
+
+/* Style spécifique pour les badges de catégorie dans EnhancedLearningCard */
+html[data-theme="dark"] .EnhancedLearningCard .badge[variant="secondary"],
+.dark .EnhancedLearningCard .badge[variant="secondary"],
+html[data-theme="dark"] [class*="EnhancedLearningCard"] .badge,
+.dark [class*="EnhancedLearningCard"] .badge {
+  background-color: rgba(37, 99, 235, 0.8) !important;
+  color: white !important;
+  border-color: rgb(96, 165, 250) !important;
+  border-width: 2px !important;
+  font-weight: 700 !important;
+  padding: 0.4rem 0.8rem !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Force l'affichage des badges de catégorie avec une priorité élevée */
+html[data-theme="dark"] .badge.font-medium.px-3.py-1,
+.dark .badge.font-medium.px-3.py-1,
+html[data-theme="dark"] [class*="badge"].font-medium,
+.dark [class*="badge"].font-medium,
+html[data-theme="dark"] span[class*="badge"].font-medium,
+.dark span[class*="badge"].font-medium {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background-color: rgba(30, 64, 175, 0.9) !important;
+  color: white !important;
+  border-color: rgb(96, 165, 250) !important;
+  border-width: 2px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+  min-height: 28px !important;
+  min-width: max-content !important;
+  border-radius: 999px !important;
+  padding: 4px 10px !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Hack pour forcer l'affichage avec !important */
+@media (min-width: 768px) {
+  html[data-theme="dark"] .badge,
+  .dark .badge,
+  html[data-theme="dark"] [class*="badge"],
+  .dark [class*="badge"] {
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: inline-flex !important;
+  }
+}
+
+/* Style spécifique pour les filtres de catégorie en mode sombre */
+html[data-theme="dark"] [class*="SelectTrigger"],
+.dark [class*="SelectTrigger"],
+html[data-theme="dark"] [class*="select-trigger"],
+.dark [class*="select-trigger"] {
+  background-color: rgba(31, 41, 55, 0.95) !important;
+  border-color: rgba(75, 85, 99, 0.95) !important;
+  color: rgb(229, 231, 235) !important;
+}
+
+html[data-theme="dark"] [class*="SelectContent"],
+.dark [class*="SelectContent"],
+html[data-theme="dark"] [class*="select-content"],
+.dark [class*="select-content"] {
+  background-color: rgb(31, 41, 55) !important;
+  border-color: rgb(75, 85, 99) !important;
+}
+
+html[data-theme="dark"] [class*="SelectItem"],
+.dark [class*="SelectItem"],
+html[data-theme="dark"] [class*="select-item"],
+.dark [class*="select-item"] {
+  color: rgb(229, 231, 235) !important;
+}
+
+html[data-theme="dark"] [class*="SelectItem"]:hover,
+.dark [class*="SelectItem"]:hover,
+html[data-theme="dark"] [class*="select-item"]:hover,
+.dark [class*="select-item"]:hover {
+  background-color: rgba(59, 130, 246, 0.4) !important;
+  color: rgb(219, 234, 254) !important;
+}
+
+/* Correctifs ultra-critiques pour les tags dans le filtre */
+html[data-theme="dark"] .tag-filter,
+.dark .tag-filter,
+html[data-theme="dark"] [class*="tag-filter"],
+.dark [class*="tag-filter"],
+html[data-theme="dark"] .badge.cursor-pointer,
+.dark .badge.cursor-pointer {
+  background-color: rgba(31, 41, 55, 0.95) !important;
+  color: rgb(209, 213, 219) !important;
+  border-color: rgba(75, 85, 99, 0.95) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: inline-flex !important;
+}
+
+html[data-theme="dark"] .badge.cursor-pointer.bg-blue-100,
+.dark .badge.cursor-pointer.bg-blue-100,
+html[data-theme="dark"] .badge.cursor-pointer[class*="bg-blue"],
+.dark .badge.cursor-pointer[class*="bg-blue"] {
+  background-color: rgba(37, 99, 235, 0.8) !important;
+  color: white !important;
+  border-color: rgb(96, 165, 250) !important;
+}
+/* ...existing code... */
