@@ -1,33 +1,60 @@
 /* Correctifs pour l'éditeur de texte riche en mode sombre */
 
 /* Correction de la visibilité des textes colorés en mode sombre */
-html[data-theme="dark"] [class*="editor"] [style*="color"] {
+html[data-theme="dark"] [class*="editor"] [style*="color"],
+html[data-theme="dark"] .ProseMirror [style*="color"],
+html[data-theme="dark"] .tiptap [style*="color"] {
   filter: brightness(1.35) saturate(1.2) contrast(1.1) !important;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.5) !important;
+  color: inherit !important; /* Assure que le texte utilise sa propre couleur */
 }
 
 /* Surlignages/highlights plus visibles en mode sombre */
 html[data-theme="dark"] [class*="editor"] mark,
-html[data-theme="dark"] [class*="editor"] [style*="background-color"] {
+html[data-theme="dark"] [class*="editor"] [style*="background-color"],
+html[data-theme="dark"] .ProseMirror mark,
+html[data-theme="dark"] .ProseMirror [style*="background-color"],
+html[data-theme="dark"] .tiptap mark,
+html[data-theme="dark"] .tiptap [style*="background-color"] {
   color: #f3f4f6 !important;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.8) !important;
+  filter: brightness(0.85) saturate(1.2) !important;
 }
 
-/* Amélioration des contrastes pour les badges et catégories en mode sombre */
+/* Amélioration des contrastes pour les badges et catégories en mode sombre - DESKTOP */
 html[data-theme="dark"] .badge,
-html[data-theme="dark"] [class*="badge"] {
+html[data-theme="dark"] [class*="badge"],
+html[data-theme="dark"] span.badge,
+html[data-theme="dark"] div.badge {
   color: #f3f4f6 !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  background-color: rgba(30, 41, 59, 0.95) !important;
 }
 
+/* Correction pour les catégories sur desktop */
 html[data-theme="dark"] [class*="category"],
-html[data-theme="dark"] [class*="select-trigger"] {
+html[data-theme="dark"] [class*="select-trigger"],
+html[data-theme="dark"] span[class*="badge"],
+html[data-theme="dark"] div[class*="badge"] {
   background-color: #1e293b !important;
   color: #f3f4f6 !important;
   border-color: #475569 !important;
+  font-weight: 600 !important;
 }
 
+/* Style spécifique pour les catégories (sélecteur très précis) */
+html[data-theme="dark"] span.badge[variant="secondary"],
+html[data-theme="dark"] span.badge.py-1,
+html[data-theme="dark"] span.badge.font-medium,
+html[data-theme="dark"] span.badge.px-3 {
+  background-color: rgba(30, 64, 175, 0.3) !important;
+  color: #93c5fd !important;
+  border: 1px solid #1e40af !important;
+  padding: 0.25rem 0.75rem !important;
+}
+
+/* Style pour les popover et select */
 html[data-theme="dark"] [class*="select-content"],
 html[data-theme="dark"] [class*="popover-content"] {
   background-color: #1e293b !important;
@@ -47,6 +74,43 @@ html[data-theme="dark"] [class*="editor"] .tiptap {
   background-color: #1e293b !important;
 }
 
+/* Correction pour les citations et textes entre guillemets */
+html[data-theme="dark"] blockquote,
+html[data-theme="dark"] [class*="editor"] blockquote,
+html[data-theme="dark"] .ProseMirror blockquote,
+html[data-theme="dark"] .tiptap blockquote,
+html[data-theme="dark"] q,
+html[data-theme="dark"] [class*="editor"] q,
+html[data-theme="dark"] .ProseMirror q,
+html[data-theme="dark"] .tiptap q {
+  color: #e2e8f0 !important;
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  border-left-color: #3b82f6 !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Correction pour le texte en italique qui contient des guillemets */
+html[data-theme="dark"] i,
+html[data-theme="dark"] em,
+html[data-theme="dark"] [class*="editor"] i,
+html[data-theme="dark"] [class*="editor"] em,
+html[data-theme="dark"] .ProseMirror i,
+html[data-theme="dark"] .ProseMirror em,
+html[data-theme="dark"] .tiptap i,
+html[data-theme="dark"] .tiptap em {
+  color: #e2e8f0 !important;
+}
+
+/* Correction pour les textes avec arrière-plan coloré */
+html[data-theme="dark"] [style*="background"],
+html[data-theme="dark"] [class*="editor"] [style*="background"],
+html[data-theme="dark"] .ProseMirror [style*="background"],
+html[data-theme="dark"] .tiptap [style*="background"] {
+  color: #f3f4f6 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7) !important;
+  filter: brightness(1.2) contrast(1.2) !important;
+}
+
 /* Correction pour l'affichage sur mobile */
 @media (max-width: 768px) {
   html[data-theme="dark"] [class*="editor"] [style*="color"],
@@ -64,4 +128,51 @@ html[data-theme="dark"] [class*="editor"] .tiptap {
     background-color: rgba(30, 41, 59, 0.8) !important;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7) !important;
   }
+}
+
+/* Force l'application des styles pour desktop */
+@media (min-width: 769px) {
+  html[data-theme="dark"] span.badge[variant="secondary"],
+  html[data-theme="dark"] span.badge.py-1,
+  html[data-theme="dark"] span.badge.font-medium,
+  html[data-theme="dark"] span.badge.px-3 {
+    background-color: rgba(30, 64, 175, 0.3) !important;
+    color: #93c5fd !important;
+    border: 1px solid #1e40af !important;
+    padding: 0.25rem 0.75rem !important;
+    visibility: visible !important;
+    display: inline-flex !important;
+  }
+
+  /* Style pour les textes colorés/surlignés sur desktop */
+  html[data-theme="dark"] [style*="color"],
+  html[data-theme="dark"] [style*="background-color"] {
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6) !important;
+    filter: brightness(1.3) contrast(1.2) saturate(1.1) !important;
+  }
+}
+
+/* CORRECTIFS ULTRA-SPÉCIFIQUES POUR LES CATÉGORIES */
+/* Ces sélecteurs sont très spécifiques pour s'assurer qu'ils ont la priorité */
+html[data-theme="dark"] span.badge.font-medium.px-3.py-1,
+html[data-theme="dark"] div > .badge.py-1.border,
+html[data-theme="dark"] .flex-col.sm\:flex-row .badge {
+  background-color: rgba(30, 64, 175, 0.4) !important;
+  color: #93c5fd !important;
+  border: 1px solid #1e40af !important;
+  font-weight: 600 !important;
+  padding: 0.25rem 0.75rem !important;
+  visibility: visible !important;
+  display: inline-flex !important;
+  opacity: 1 !important;
+}
+
+/* Correction pour les guillemets et l'italique */
+html[data-theme="dark"] q,
+html[data-theme="dark"] blockquote,
+html[data-theme="dark"] cite,
+html[data-theme="dark"] i,
+html[data-theme="dark"] em {
+  color: #e2e8f0 !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5) !important;
 }

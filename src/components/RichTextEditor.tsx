@@ -96,12 +96,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         },
         blockquote: {
           HTMLAttributes: {
-            class: 'border-l-4 border-blue-500 pl-4 my-4 italic text-gray-700 bg-blue-50/50',
+            class: 'border-l-4 border-blue-500 pl-4 my-4 italic text-gray-700 bg-blue-50/50 dark:text-gray-200 dark:bg-blue-900/20 dark:border-blue-500',
           },
         },
         code: {
           HTMLAttributes: {
-            class: 'bg-gray-50 text-gray-900 px-1 rounded font-mono text-sm',
+            class: 'bg-gray-50 text-gray-900 px-1 rounded font-mono text-sm dark:bg-gray-700 dark:text-gray-100',
           },
         },
       }),
@@ -133,6 +133,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       ColorExtension,
       Highlight.configure({
         multicolor: true,
+        HTMLAttributes: {
+          class: 'dark:text-white'
+        }
       }),
     ],
     content,
@@ -248,7 +251,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   return (
     <div className={cn(
-      "rounded-lg border border-gray-200",
+      "rounded-lg border border-gray-200 dark:border-gray-700",
       "bg-white dark:bg-gray-800", // Ajout du style dark pour l'arrière-plan
       "relative flex flex-col",
       className
@@ -460,9 +463,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 "[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4",
                 "[&_p]:my-2 [&_p]:text-gray-900 [&_p]:dark:text-gray-100",
                 "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4",
-                // Amélioration pour le surlignage et les couleurs en mode sombre
-                "[&_mark]:dark:text-gray-100",
-                "[&_[style*='color']]:dark:text-opacity-100",
+                // Corrections pour le mode sombre
+                "[&_mark]:dark:text-gray-100 [&_mark]:dark:brightness-110",
+                "[&_[style*='color']]:dark:text-opacity-100 [&_[style*='color']]:dark:brightness-125",
+                "[&_[style*='background-color']]:dark:text-gray-100 [&_[style*='background-color']]:dark:contrast-125",
+                "[&_q]:dark:text-gray-200 [&_q]:dark:brightness-110",
+                "[&_i]:dark:text-gray-200 [&_i]:dark:brightness-110",
+                "[&_em]:dark:text-gray-200 [&_em]:dark:brightness-110"
               )}
         
       />
