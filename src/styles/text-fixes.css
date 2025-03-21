@@ -274,3 +274,162 @@ h1, h2, h3, h4, h5, h6 {
     white-space: pre-wrap !important;
   }
 }
+
+/* CORRECTIFS UNIVERSELS POUR LES COULEURS DE TEXTE */
+/* Ces règles s'appliquent à tous les modes et appareils */
+
+/* Règle de base pour tous les éléments de texte coloré */
+[style*="color:"],
+[data-color],
+.colored-text,
+.text-color-custom {
+  display: inline !important;
+  position: relative !important;
+  color: var(--text-color, inherit) !important;
+}
+
+/* Utilisation de l'attribut style inline directement */
+[style*="color: #ff0000"],
+[style*="color:#ff0000"],
+[data-color="#ff0000"] {
+  --text-color: #e00 !important;
+  text-shadow: 0 0 0.5px rgba(255, 0, 0, 0.2) !important;
+}
+
+[style*="color: #0000ff"],
+[style*="color:#0000ff"],
+[data-color="#0000ff"] {
+  --text-color: #00f !important;
+  text-shadow: 0 0 0.5px rgba(0, 0, 255, 0.2) !important;
+}
+
+[style*="color: #00ff00"],
+[style*="color:#00ff00"],
+[data-color="#00ff00"] {
+  --text-color: #090 !important;
+  text-shadow: 0 0 0.5px rgba(0, 255, 0, 0.2) !important;
+}
+
+[style*="color: #ffff00"],
+[style*="color:#ffff00"],
+[data-color="#ffff00"] {
+  --text-color: #990 !important;
+  text-shadow: 0 0 0.5px rgba(255, 255, 0, 0.2) !important;
+}
+
+/* Mode sombre - ajustements pour une meilleure lisibilité */
+@media (prefers-color-scheme: dark) {
+  [style*="color: #ff0000"],
+  [style*="color:#ff0000"],
+  [data-color="#ff0000"] {
+    --text-color: #f66 !important;
+  }
+
+  [style*="color: #0000ff"],
+  [style*="color:#0000ff"],
+  [data-color="#0000ff"] {
+    --text-color: #66f !important;
+  }
+
+  [style*="color: #00ff00"], 
+  [style*="color:#00ff00"],
+  [data-color="#00ff00"] {
+    --text-color: #6f6 !important;
+  }
+
+  [style*="color: #ffff00"],
+  [style*="color:#ffff00"],
+  [data-color="#ffff00"] {
+    --text-color: #ff6 !important;
+  }
+}
+
+/* Mode sombre explicite */
+html[data-theme="dark"] [style*="color: #ff0000"],
+html[data-theme="dark"] [style*="color:#ff0000"],
+html[data-theme="dark"] [data-color="#ff0000"] {
+  --text-color: #f66 !important;
+}
+
+html[data-theme="dark"] [style*="color: #0000ff"],
+html[data-theme="dark"] [style*="color:#0000ff"],
+html[data-theme="dark"] [data-color="#0000ff"] {
+  --text-color: #66f !important;
+}
+
+html[data-theme="dark"] [style*="color: #00ff00"],
+html[data-theme="dark"] [style*="color:#00ff00"],
+html[data-theme="dark"] [data-color="#00ff00"] {
+  --text-color: #6f6 !important;
+}
+
+html[data-theme="dark"] [style*="color: #ffff00"],
+html[data-theme="dark"] [style*="color:#ffff00"],
+html[data-theme="dark"] [data-color="#ffff00"] {
+  --text-color: #ff6 !important;
+}
+
+/* Couleurs explicites pour les dispositifs mobiles */
+@media (max-width: 768px) {
+  /* Tous les éléments de texte coloré sur mobile */
+  [style*="color:"],
+  [data-color],
+  .colored-text,
+  .text-color-custom {
+    display: inline-block !important;
+    padding: 0 1px !important;
+    border-radius: 2px !important;
+    position: relative !important;
+  }
+  
+  /* Mode clair sur mobile */
+  html[data-theme="light"] [style*="color:"],
+  html[data-theme="light"] [data-color],
+  html[data-theme="light"] .colored-text,
+  html[data-theme="light"] .text-color-custom {
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+  }
+  
+  /* Mode sombre sur mobile */
+  html[data-theme="dark"] [style*="color:"],
+  html[data-theme="dark"] [data-color],
+  html[data-theme="dark"] .colored-text,
+  html[data-theme="dark"] .text-color-custom {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  /* Couleurs de base courantes */
+  html[data-theme="light"] [style*="color: #ff0000"],
+  html[data-theme="light"] [style*="color:#ff0000"],
+  html[data-theme="light"] [data-color="#ff0000"] {
+    color: #c00 !important;
+  }
+  
+  html[data-theme="light"] [style*="color: #0000ff"],
+  html[data-theme="light"] [style*="color:#0000ff"],
+  html[data-theme="light"] [data-color="#0000ff"] {
+    color: #00c !important;
+  }
+  
+  html[data-theme="light"] [style*="color: #00ff00"],
+  html[data-theme="light"] [style*="color:#00ff00"],
+  html[data-theme="light"] [data-color="#00ff00"] {
+    color: #090 !important;
+  }
+  
+  html[data-theme="light"] [style*="color: #ffff00"],
+  html[data-theme="light"] [style*="color:#ffff00"],
+  html[data-theme="light"] [data-color="#ffff00"] {
+    color: #990 !important;
+  }
+}
+
+/* iOS Safari - Correctifs spécifiques */
+@supports (-webkit-touch-callout: none) {
+  [style*="color:"],
+  [data-color],
+  .colored-text,
+  .text-color-custom {
+    -webkit-text-fill-color: var(--text-color, inherit) !important;
+  }
+}
