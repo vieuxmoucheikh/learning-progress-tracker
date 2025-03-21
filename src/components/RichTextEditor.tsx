@@ -8,7 +8,7 @@ import TextStyle from '@tiptap/extension-text-style';
 import { Color as ColorExtension } from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
 import { common, createLowlight } from 'lowlight';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import {
   Bold,
@@ -37,28 +37,15 @@ import DOMPurify from 'dompurify';
 
 const lowlightInstance = createLowlight(common);
 
-// Nous définissons deux palettes de couleurs: une pour le mode clair et une pour le mode sombre
-const lightModeColors = [
+const colors = [
   '#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3', '#ffffff',
   '#980000', '#ff0000', '#ff9900', '#ffff00', '#00ff00', '#00ffff', '#4a86e8', '#0000ff', '#9900ff', '#ff00ff',
   '#e6b8af', '#f4cccc', '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#c9daf8', '#cfe2f3', '#d9d2e9', '#ead1dc',
 ];
 
-const darkModeColors = [
-  '#ffffff', '#e2e8f0', '#cbd5e1', '#94a3b8', '#64748b', '#475569', '#334155', '#1e293b', '#0f172a', '#020617',
-  '#fecaca', '#f87171', '#ef4444', '#fca5a5', '#fee2e2', '#bfdbfe', '#60a5fa', '#3b82f6', '#93c5fd', '#dbeafe',
-  '#bbf7d0', '#4ade80', '#22c55e', '#86efac', '#dcfce7', '#fde68a', '#facc15', '#eab308', '#fcd34d', '#fef3c7',
-];
-
-// Également deux palettes pour les surligneurs
-const lightModeBgColors = [
+const bgColors = [
   '#ffffff', '#f3f3f3', '#efefef', '#d9d9d9', '#cccccc', '#b7b7b7', '#999999', '#666666', '#434343', '#000000',
   '#ffebee', '#fce4ec', '#f3e5f5', '#ede7f6', '#e8eaf6', '#e3f2fd', '#e1f5fe', '#e0f7fa', '#e0f2f1', '#e8f5e9',
-];
-
-const darkModeBgColors = [
-  '#1e293b', '#334155', '#475569', '#64748b', '#94a3b8', '#cbd5e1', '#e2e8f0', '#f1f5f9', '#f8fafc', '#ffffff',
-  '#fef2f2', '#fee2e2', '#fecaca', '#fca5a5', '#eff6ff', '#dbeafe', '#bfdbfe', '#93c5fd', '#f0fdf4', '#dcfce7',
 ];
 
 interface RichTextEditorProps {
@@ -74,36 +61,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   editable = true,
   className,
 }) => {
-  // Détection du mode sombre
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  
-  useEffect(() => {
-    // Détection du mode sombre
-    const checkDarkMode = () => {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      setIsDarkMode(isDark);
-    };
-    
-    checkDarkMode();
-    
-    // Observer pour les changements de mode
-    const observer = new MutationObserver(mutations => {
-      mutations.forEach(mutation => {
-        if (mutation.attributeName === 'data-theme') {
-          checkDarkMode();
-        }
-      });
-    });
-    
-    observer.observe(document.documentElement, { attributes: true });
-    
-    return () => observer.disconnect();
-  }, []);
-  
-  // Utiliser la palette appropriée selon le mode
-  const colors = isDarkMode ? darkModeColors : lightModeColors;
-  const bgColors = isDarkMode ? darkModeBgColors : lightModeBgColors;
-
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -111,15 +68,15 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           levels: [1, 2, 3],
           HTMLAttributes: {
             'h1': {
-              class: 'text-2xl font-bold text-gray-900 dark:text-white my-4',
+              class: 'text-2xl font-bold text-gray-900 my-4',
             },
             'h2': {
-              class: 'text-xl font-bold text-gray-900 dark:text-white my-3',
+              class: 'text-xl font-bold text-gray-900 my-3',
             },
             'h3': {
-              class: 'text-lg font-bold text-gray-900 dark:text-white my-2',
+              class: 'text-lg font-bold text-gray-900 my-2',
             },
-            class: 'font-bold text-gray-900 dark:text-white',
+            class: 'font-bold text-gray-900', // Ceci s'applique à tous les niveaux de titre
           },
         },
         bulletList: {
@@ -138,12 +95,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         },
         blockquote: {
           HTMLAttributes: {
-            class: 'border-l-4 border-blue-500 pl-4 my-4 italic text-gray-700 dark:text-gray-300 bg-blue-50/50 dark:bg-blue-900/20',
+            class: 'border-l-4 border-blue-500 pl-4 my-4 italic text-gray-700 bg-blue-50/50',
           },
         },
         code: {
           HTMLAttributes: {
-            class: 'bg-gray-50 text-gray-900 dark:bg-gray-800 dark:text-gray-100 px-1 rounded font-mono text-sm',
+            class: 'bg-gray-50 text-gray-900 px-1 rounded font-mono text-sm',
           },
         },
       }),
@@ -157,27 +114,24 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-blue-600 dark:text-blue-400 underline underline-offset-2',
+          class: 'text-blue-600 underline underline-offset-2',
         },
       }),
       CodeBlockLowlight.configure({
         lowlight: lowlightInstance,
         HTMLAttributes: {
-          class: 'bg-gray-50 text-gray-900 dark:bg-gray-800 dark:text-gray-100 p-4 rounded-md border border-gray-200 dark:border-gray-700 font-mono text-sm my-4',
+          class: 'bg-gray-50 text-gray-900 p-4 rounded-md border border-gray-200 font-mono text-sm my-4',
         },
       }),
       Code.configure({
         HTMLAttributes: {
-          class: 'rounded bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 font-mono text-sm text-gray-900 dark:text-gray-100',
+          class: 'rounded bg-gray-200 px-1.5 py-0.5 font-mono text-sm',
         },
       }),
       TextStyle,
       ColorExtension,
       Highlight.configure({
         multicolor: true,
-        HTMLAttributes: {
-          class: 'has-highlight',
-        },
       }),
     ],
     content,
@@ -191,15 +145,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         class: cn(
           "prose prose-sm max-w-none",
           "min-h-[100px] outline-none",
-          "dark:prose-invert",
-          "[&_p]:text-gray-900 [&_p]:dark:text-white [&_p]:my-2",
-          "[&_h1]:text-gray-900 [&_h1]:dark:text-white",
-          "[&_h2]:text-gray-900 [&_h2]:dark:text-white",
-          "[&_h3]:text-gray-900 [&_h3]:dark:text-white",
+          "[&_p]:text-gray-900 [&_p]:my-2",
           "[&_ul]:list-disc [&_ul]:ml-4",
           "[&_ol]:list-decimal [&_ol]:ml-4"
         ),
-      },
+      }
+      ,
       handleDrop: (view, event, slice, moved) => {
         if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
           const file = event.dataTransfer.files[0];
@@ -237,7 +188,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     const clipboardEvent = event as ClipboardEvent;
     event.preventDefault();
     const text = clipboardEvent.clipboardData?.getData('text/plain');
-    const sanitizedContent = text ? DOMPurify.sanitize(text) : '';
+    const sanitizedContent = text ? DOMPurify.sanitize(text) : ''; // Sanitize the clipboard content
     editor?.chain().focus().insertContent(sanitizedContent).run();
   };
 
@@ -316,7 +267,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
               >
                 <Bold className="h-4 w-4" />
               </Button>
-              
               <Button
                 size="icon"
                 variant="ghost"
@@ -328,7 +278,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
               >
                 <Italic className="h-4 w-4" />
               </Button>
-              
               <Button
                 size="icon"
                 variant="ghost"
@@ -351,7 +300,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                     <Type className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-64 p-2 dark:bg-gray-800 dark:border-gray-700 shadow-lg">
+                <PopoverContent className="w-64 p-2 dark:bg-gray-800 dark:border-gray-700">
                   <div className="grid grid-cols-10 gap-1">
                     {colors.map((color) => (
                       <button
@@ -375,12 +324,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                     <Palette className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-64 p-2 dark:bg-gray-800 dark:border-gray-700 shadow-lg">
+                <PopoverContent className="w-64 p-2">
                   <div className="grid grid-cols-10 gap-1">
                     {bgColors.map((color) => (
                       <button
                         key={color}
-                        className="w-5 h-5 rounded border border-gray-200 dark:border-gray-600"
+                        className="w-5 h-5 rounded border border-gray-200"
                         style={{ backgroundColor: color }}
                         onClick={() => editor.chain().focus().setHighlight({ color }).run()}
                       />
@@ -394,89 +343,82 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 variant="ghost"
                 onClick={() => editor.chain().focus().toggleBulletList().run()}
                 className={cn(
-                  "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
-                  editor.isActive('bulletList') && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
+                  "hover:bg-gray-100",
+                  editor.isActive('bulletList') && "bg-gray-100 text-gray-900"
                 )}
               >
                 <List className="h-4 w-4" />
               </Button>
-              
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={() => editor.chain().focus().toggleOrderedList().run()}
                 className={cn(
-                  "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
-                  editor.isActive('orderedList') && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
+                  "hover:bg-gray-100",
+                  editor.isActive('orderedList') && "bg-gray-100 text-gray-900"
                 )}
               >
                 <ListOrdered className="h-4 w-4" />
               </Button>
-              
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={() => editor.chain().focus().toggleBlockquote().run()}
                 className={cn(
-                  "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
-                  editor.isActive('blockquote') && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
+                  "hover:bg-gray-100",
+                  editor.isActive('blockquote') && "bg-gray-100 text-gray-900"
                 )}
               >
                 <Quote className="h-4 w-4" />
               </Button>
-              
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={toggleLink}
                 className={cn(
-                  "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
-                  editor.isActive('link') && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
+                  "hover:bg-gray-100",
+                  editor.isActive('link') && "bg-gray-100 text-gray-900"
                 )}
               >
                 <LinkIcon className="h-4 w-4" />
               </Button>
-              
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={addImage}
-                className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
+                className="hover:bg-gray-100"
               >
                 <ImageIcon className="h-4 w-4" />
               </Button>
-              
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
                 className={cn(
-                  "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
-                  editor.isActive('heading', { level: 1 }) && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
+                  "hover:bg-gray-100",
+                  editor.isActive('heading', { level: 1 }) && "bg-gray-100 text-gray-900"
                 )}
               >
                 <Heading1 className="h-4 w-4" />
               </Button>
-              
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
                 className={cn(
-                  "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
-                  editor.isActive('heading', { level: 2 }) && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
+                  "hover:bg-gray-100",
+                  editor.isActive('heading', { level: 2 }) && "bg-gray-100 text-gray-900"
                 )}
               >
                 <Heading2 className="h-4 w-4" />
               </Button>
-              
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
                 className={cn(
-                  "hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300",
-                  editor.isActive('heading', { level: 3 }) && "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
+                  "hover:bg-gray-100",
+                  editor.isActive('heading', { level: 3 }) && "bg-gray-100 text-gray-900"
                 )}
               >
                 <Heading3 className="h-4 w-4" />
@@ -484,32 +426,28 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             </div>
           </div>
         )}
-        
         <EditorContent 
           editor={editor} 
           className={cn(
-            "prose prose-sm max-w-none",
-            "bg-white dark:bg-gray-800 text-gray-900 dark:text-white", // Texte blanc en mode sombre
-            "p-4 overflow-y-auto",
-            "[&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:outline-none",
-            "[&_.ProseMirror]:dark:text-white", // Texte blanc pour l'éditeur en mode sombre
-            "[&_pre]:bg-gray-50 [&_pre]:text-gray-900 [&_pre]:border [&_pre]:border-gray-200 [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:my-4",
-            "[&_pre]:dark:bg-gray-900 [&_pre]:dark:text-gray-100 [&_pre]:dark:border-gray-700",
-            "[&_code]:bg-gray-50 [&_code]:text-gray-900 [&_code]:px-1 [&_code]:rounded [&_code]:font-mono [&_code]:text-sm",
-            "[&_code]:dark:bg-gray-900 [&_code]:dark:text-gray-100",
-            "[&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:pl-4 [&_blockquote]:my-4 [&_blockquote]:italic [&_blockquote]:text-gray-700 [&_blockquote]:bg-blue-50/50",
-            "[&_blockquote]:dark:text-gray-300 [&_blockquote]:dark:bg-blue-900/30 [&_blockquote]:dark:border-blue-500",
-            "[&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-2",
-            "[&_a]:dark:text-blue-400",
-            "[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4",
-            "[&_p]:my-2 [&_p]:text-gray-900 [&_p]:dark:text-white", // Texte blanc pour les paragraphes
-            "[&_h1]:dark:text-white [&_h2]:dark:text-white [&_h3]:dark:text-white", // Texte blanc pour les titres
-            "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4",
-            "[&_mark]:dark:mix-blend-screen", // Amélioration des surlignages en mode sombre
-            "[&_mark]:dark:opacity-80",
-            // Classes spéciales pour préserver les styles personnalisés
-            "[&_*[style]]:!text-current [&_*[style]]:!bg-current"
-          )}
+                  "prose prose-sm max-w-none",
+                  "bg-white dark:bg-gray-800 text-gray-900 dark:text-white", // Texte blanc en mode sombre
+                  "p-4 overflow-y-auto",
+                  "[&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:outline-none",
+                  "[&_.ProseMirror]:dark:text-white", // Texte blanc pour l'éditeur en mode sombre
+                  "[&_pre]:bg-gray-50 [&_pre]:text-gray-900 [&_pre]:border [&_pre]:border-gray-200 [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:my-4",
+                  "[&_pre]:dark:bg-gray-900 [&_pre]:dark:text-gray-100 [&_pre]:dark:border-gray-700",
+                  "[&_code]:bg-gray-50 [&_code]:text-gray-900 [&_code]:px-1 [&_code]:rounded [&_code]:font-mono [&_code]:text-sm",
+                  "[&_code]:dark:bg-gray-900 [&_code]:dark:text-gray-100",
+                  "[&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:pl-4 [&_blockquote]:my-4 [&_blockquote]:italic [&_blockquote]:text-gray-700 [&_blockquote]:bg-blue-50/50",
+                  "[&_blockquote]:dark:text-gray-300 [&_blockquote]:dark:bg-blue-900/30 [&_blockquote]:dark:border-blue-500",
+                  "[&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-2",
+                  "[&_a]:dark:text-blue-400",
+                  "[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4",
+                  "[&_p]:my-2 [&_p]:text-gray-900 [&_p]:dark:text-white", // Texte blanc pour les paragraphes
+                  "[&_h1]:dark:text-white [&_h2]:dark:text-white [&_h3]:dark:text-white", // Texte blanc pour les titres
+                  "[&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-4"
+                )}
+          
         />
       </div>
     </div>
