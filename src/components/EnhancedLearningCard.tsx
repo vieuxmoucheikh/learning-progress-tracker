@@ -549,15 +549,12 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                 "dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-800/40",
                 "border border-blue-200 dark:border-blue-800",
                 "rounded-full",
-                "shadow-sm",
-                "category-badge", // Ajout d'une classe spécifique pour ciblage CSS
-                "inline-flex items-center justify-center" // Assure que le badge est affiché correctement
+                "shadow-sm"
               )}
             >
               {itemCategory}
             </Badge>
           ) : null}
-
         </div>
 
         {/* Content Section */}

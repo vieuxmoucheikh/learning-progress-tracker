@@ -21,7 +21,7 @@ html[data-theme="dark"] .tiptap [style*="background-color"] {
   filter: brightness(0.85) saturate(1.2) !important;
 }
 
-/* Amélioration des contrastes pour les badges et catégories en mode sombre - DESKTOP */
+/* Amélioration des contrastes pour les badges et catégories en mode sombre */
 html[data-theme="dark"] .badge,
 html[data-theme="dark"] [class*="badge"],
 html[data-theme="dark"] span.badge,
@@ -30,9 +30,11 @@ html[data-theme="dark"] div.badge {
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
   background-color: rgba(30, 41, 59, 0.95) !important;
+  display: inline-flex !important;
+  visibility: visible !important;
 }
 
-/* Correction pour les catégories sur desktop */
+/* Correction spécifique pour les catégories sur desktop */
 html[data-theme="dark"] [class*="category"],
 html[data-theme="dark"] [class*="select-trigger"],
 html[data-theme="dark"] span[class*="badge"],
@@ -41,6 +43,8 @@ html[data-theme="dark"] div[class*="badge"] {
   color: #f3f4f6 !important;
   border-color: #475569 !important;
   font-weight: 600 !important;
+  display: inline-flex !important;
+  visibility: visible !important;
 }
 
 /* Style spécifique pour les catégories (sélecteur très précis) */
@@ -52,6 +56,8 @@ html[data-theme="dark"] span.badge.px-3 {
   color: #93c5fd !important;
   border: 1px solid #1e40af !important;
   padding: 0.25rem 0.75rem !important;
+  display: inline-flex !important;
+  visibility: visible !important;
 }
 
 /* Style pour les popover et select */
