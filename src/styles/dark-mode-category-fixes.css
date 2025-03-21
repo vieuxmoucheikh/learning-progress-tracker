@@ -1,5 +1,6 @@
-/* Correctifs pour les problèmes de visibilité des catégories en mode sombre */
+/* Correctifs pour les problèmes de visibilité des catégories en mode sombre ET clair */
 
+/* ========== MODE SOMBRE - DARK MODE ========== */
 /* Styles prioritaires pour les badges de catégorie en mode sombre */
 html[data-theme="dark"] .category-badge,
 .dark .category-badge,
@@ -113,4 +114,141 @@ html[data-theme="dark"] [class*="SelectContent"],
     opacity: 1 !important;
     display: inline-flex !important;
   }
+}
+
+/* ========== MODE CLAIR - LIGHT MODE ========== */
+/* Styles prioritaires pour les badges de catégorie en mode clair */
+html[data-theme="light"] .category-badge,
+.light .category-badge,
+html[data-theme="light"] .badge.category-badge,
+.light .badge.category-badge {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  color: rgb(30, 64, 175) !important;
+  border: 2px solid rgba(59, 130, 246, 0.5) !important;
+  font-weight: 700 !important;
+  padding: 0.4rem 0.8rem !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: inline-flex !important;
+  min-height: 28px !important;
+  min-width: max-content !important;
+  border-radius: 999px !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Styles pour les badges de catégorie dans les cartes d'apprentissage en mode clair */
+html[data-theme="light"] .EnhancedLearningCard .badge[variant="secondary"],
+.light .EnhancedLearningCard .badge[variant="secondary"],
+html[data-theme="light"] [class*="EnhancedLearningCard"] .badge,
+.light [class*="EnhancedLearningCard"] .badge {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  color: rgb(30, 64, 175) !important;
+  border: 2px solid rgba(59, 130, 246, 0.5) !important;
+  font-weight: 700 !important;
+  padding: 0.4rem 0.8rem !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: inline-flex !important;
+}
+
+/* Styles au survol pour les badges en mode clair */
+html[data-theme="light"] .badge:hover,
+.light .badge:hover,
+html[data-theme="light"] [class*="badge"]:hover,
+.light [class*="badge"]:hover,
+html[data-theme="light"] .card-container .badge:hover,
+.light .card-container .badge:hover {
+  background-color: rgba(59, 130, 246, 0.25) !important;
+  color: rgb(37, 99, 235) !important;
+  border-color: rgba(59, 130, 246, 0.7) !important;
+}
+
+/* Correctifs pour le sélecteur de catégories en mode clair */
+html[data-theme="light"] [data-radix-select-trigger],
+.light [data-radix-select-trigger] {
+  background-color: rgb(255, 255, 255) !important;
+  border-color: rgba(203, 213, 225, 0.8) !important;
+  color: rgb(15, 23, 42) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
+}
+
+html[data-theme="light"] [data-radix-select-content],
+.light [data-radix-select-content] {
+  background-color: rgb(255, 255, 255) !important;
+  border-color: rgba(203, 213, 225, 0.8) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+html[data-theme="light"] [data-radix-select-item][data-highlighted],
+.light [data-radix-select-item][data-highlighted] {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  color: rgb(37, 99, 235) !important;
+}
+
+/* Correctifs pour les tags dans le filtre en mode clair */
+html[data-theme="light"] .badge.cursor-pointer,
+.light .badge.cursor-pointer {
+  background-color: rgb(248, 250, 252) !important;
+  color: rgb(51, 65, 85) !important;
+  border-color: rgba(203, 213, 225, 0.8) !important;
+  border-width: 1px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="light"] .badge.cursor-pointer:hover,
+.light .badge.cursor-pointer:hover {
+  background-color: rgb(241, 245, 249) !important;
+}
+
+html[data-theme="light"] .badge.cursor-pointer.bg-blue-100,
+.light .badge.cursor-pointer.bg-blue-100,
+html[data-theme="light"] .badge.cursor-pointer[class*="bg-blue"],
+.light .badge.cursor-pointer[class*="bg-blue"] {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  color: rgb(37, 99, 235) !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
+  border-width: 2px !important;
+}
+
+/* Force les styles sur desktop en mode clair */
+@media (min-width: 768px) {
+  html[data-theme="light"] .category-badge,
+  .light .category-badge,
+  html[data-theme="light"] .badge.category-badge,
+  .light .badge.category-badge,
+  html[data-theme="light"] .EnhancedLearningCard .badge,
+  .light .EnhancedLearningCard .badge {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+    color: rgb(30, 64, 175) !important;
+    border: 2px solid rgba(59, 130, 246, 0.5) !important;
+    font-weight: 700 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: inline-flex !important;
+  }
+}
+
+/* Amélioration des boutons d'action en mode clair */
+html[data-theme="light"] button.bg-blue-600,
+.light button.bg-blue-600,
+html[data-theme="light"] button[class*="bg-blue"],
+.light button[class*="bg-blue"] {
+  background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.25) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+html[data-theme="light"] button.bg-blue-600:hover,
+.light button.bg-blue-600:hover,
+html[data-theme="light"] button[class*="bg-blue"]:hover,
+.light button[class*="bg-blue"]:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  box-shadow: 0 6px 8px rgba(37, 99, 235, 0.3) !important;
 }

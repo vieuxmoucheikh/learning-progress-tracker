@@ -19,6 +19,8 @@ const injectCriticalStyles = () => {
   styleElement.setAttribute('id', 'critical-status-counters-fix');
   styleElement.textContent = `
     /* CORRECTIFS INJECTÉS DIRECTEMENT POUR LES STATUTS ET COMPTEURS */
+    
+    /* ========== MODE SOMBRE - DARK MODE ========== */
     html[data-theme="dark"] .badge.capitalize.font-medium {
       font-weight: 700 !important;
       padding: 4px 10px !important;
@@ -136,6 +138,74 @@ const injectCriticalStyles = () => {
     html[data-theme="dark"] span.text-xs.font-medium.bg-green-500\\/10 {
       background-color: rgba(22, 163, 74, 1) !important;
       border-color: #4ade80 !important;
+    }
+    
+    /* ========== MODE CLAIR - LIGHT MODE ========== */
+    /* Styles pour les badges de catégorie */
+    html[data-theme="light"] .category-badge,
+    .light .category-badge {
+      background-color: rgba(59, 130, 246, 0.15) !important;
+      color: rgb(30, 64, 175) !important;
+      border: 2px solid rgba(59, 130, 246, 0.5) !important;
+      font-weight: 700 !important;
+      padding: 0.35rem 0.75rem !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border-radius: 9999px !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+    }
+    
+    /* Status badges in light mode */
+    html[data-theme="light"] .badge.capitalize.font-medium {
+      font-weight: 700 !important;
+      padding: 4px 10px !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.05em !important;
+      border-width: 2px !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+    }
+    
+    /* In Progress, On Hold, Completed avec fonds contrastés en mode clair */
+    html[data-theme="light"] .badge:contains("In Progress") {
+      background-color: rgba(59, 130, 246, 0.15) !important;
+      color: rgb(30, 64, 175) !important;
+      border-color: rgba(59, 130, 246, 0.5) !important;
+    }
+    
+    html[data-theme="light"] .badge:contains("On Hold") {
+      background-color: rgba(245, 158, 11, 0.15) !important;
+      color: rgb(180, 83, 9) !important;
+      border-color: rgba(245, 158, 11, 0.5) !important;
+    }
+    
+    html[data-theme="light"] .badge:contains("Completed") {
+      background-color: rgba(34, 197, 94, 0.15) !important;
+      color: rgb(22, 101, 52) !important;
+      border-color: rgba(34, 197, 94, 0.5) !important;
+    }
+    
+    /* Correction pour les sélecteurs de catégories en mode clair */
+    html[data-theme="light"] [class*="SelectTrigger"],
+    .light [class*="SelectTrigger"] {
+      background-color: white !important;
+      border-color: rgba(203, 213, 225, 0.8) !important;
+      color: rgb(15, 23, 42) !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    }
+    
+    html[data-theme="light"] [class*="SelectTrigger"]:hover,
+    .light [class*="SelectTrigger"]:hover {
+      border-color: rgba(59, 130, 246, 0.5) !important;
+    }
+    
+    html[data-theme="light"] [class*="SelectContent"],
+    .light [class*="SelectContent"] {
+      background-color: white !important;
+      border-color: rgba(203, 213, 225, 0.8) !important;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
     }
   `;
   
