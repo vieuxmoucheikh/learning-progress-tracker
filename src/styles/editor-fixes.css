@@ -119,10 +119,11 @@ html[data-theme="dark"] [class*="editor"] .tiptap {
 /* Correction pour prendre en compte la barre de navigation sur desktop */
 @media (min-width: 1024px) {
   .editing-mode-card {
-    width: calc(100% - 290px) !important; /* Ajustement pour la barre latérale */
-    left: 265px !important; /* Distance depuis la gauche pour aligner avec la barre latérale */
-    right: 24px !important;
-    max-width: calc(100vw - 330px) !important;
+    width: calc(100% - 310px) !important; /* Augmenté de 290px à 310px */
+    left: 265px !important; 
+    right: 30px !important; /* Augmenté de 24px à 30px */
+    max-width: calc(100vw - 350px) !important; /* Augmenté de 330px à 350px */
+    margin-right: 15px !important; /* Ajouté une marge pour s'assurer que tout est visible */
   }
 }
 
@@ -148,21 +149,24 @@ html[data-theme="dark"] [class*="editor"] .tiptap {
     height: 100vh !important;
     padding-top: 60px !important; /* Espace pour les boutons */
     -webkit-overflow-scrolling: touch !important;
+    overflow: auto !important; 
+    transform: none !important;
+    z-index: 9999 !important;
   }
 
   /* Repositionner les boutons pour l'accès facile sur mobile */
   .editing-mode-card .absolute.top-3.right-3.z-10 {
     position: fixed !important;
-    top: 10px !important;
-    right: 10px !important;
+    top: 5px !important;
+    right: 5px !important;
     z-index: 10000 !important;
     display: flex !important;
     justify-content: flex-end !important;
     width: auto !important;
-    background-color: rgba(255, 255, 255, 0.9) !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
     padding: 8px !important;
     border-radius: 8px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
   }
 
   /* Améliorations essentielles pour l'éditeur sur mobile */
@@ -170,9 +174,16 @@ html[data-theme="dark"] [class*="editor"] .tiptap {
   .editing-mode-card [class*="RichTextEditor"],
   .editing-mode-card [class*="rich-editor"] {
     min-height: 300px !important;
+    height: calc(80vh - 150px) !important;
     touch-action: auto !important;
     -webkit-user-select: text !important;
     user-select: text !important;
+    -webkit-tap-highlight-color: rgba(59, 130, 246, 0.3) !important;
+    background-color: white !important;
+    padding: 16px !important;
+    border: 1px solid rgba(203, 213, 225, 0.5) !important;
+    border-radius: 8px !important;
+    margin: 12px !important;
   }
   
   /* Rendre l'éditeur utilisable sur mobile */
@@ -180,21 +191,74 @@ html[data-theme="dark"] [class*="editor"] .tiptap {
   .editing-mode-card .ProseMirror,
   .editing-mode-card [contenteditable="true"] {
     min-height: 250px !important;
+    height: calc(70vh - 150px) !important;
     touch-action: auto !important;
     -webkit-user-select: text !important;
     user-select: text !important;
+    -webkit-touch-callout: default !important;
     caret-color: #3b82f6 !important;
-    -webkit-tap-highlight-color: rgba(59, 130, 246, 0.2) !important;
+    -webkit-tap-highlight-color: rgba(59, 130, 246, 0.3) !important;
+    outline: none !important;
+    background-color: white !important;
+    font-size: 16px !important; /* Taille de police optimale pour l'édition mobile */
+    line-height: 1.5 !important;
+    padding: 12px !important;
   }
   
   /* Mode sombre sur mobile */
   html[data-theme="dark"] .editing-mode-card .absolute.top-3.right-3.z-10 {
-    background-color: rgba(17, 24, 39, 0.9) !important;
+    background-color: rgba(17, 24, 39, 0.95) !important;
   }
   
   html[data-theme="dark"] .editing-mode-card .tiptap,
   html[data-theme="dark"] .editing-mode-card .ProseMirror {
     color: #f8fafc !important;
+  }
+
+  /* S'assurer que le titre est éditable sur mobile */
+  .editing-mode-card input[type="text"],
+  .editing-mode-card input.text-lg {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    font-size: 18px !important;
+    padding: 12px !important;
+    height: 50px !important;
+    border-radius: 8px !important;
+    margin: 12px !important;
+    background-color: white !important;
+  }
+  
+  /* Assurer que le clavier virtuel s'affiche */
+  .editing-mode-card input,
+  .editing-mode-card textarea,
+  .editing-mode-card [contenteditable="true"] {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    -webkit-appearance: textfield !important;
+    appearance: textfield !important;
+  }
+  
+  /* Mode sombre sur mobile */
+  html[data-theme="dark"] .editing-mode-card .RichTextEditor,
+  html[data-theme="dark"] .editing-mode-card [class*="RichTextEditor"],
+  html[data-theme="dark"] .editing-mode-card .tiptap,
+  html[data-theme="dark"] .editing-mode-card .ProseMirror {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #475569 !important;
+  }
+  
+  html[data-theme="dark"] .editing-mode-card input[type="text"],
+  html[data-theme="dark"] .editing-mode-card input.text-lg {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #475569 !important;
+  }
+  
+  html[data-theme="dark"] .editing-mode-card .absolute.top-3.right-3.z-10 {
+    background-color: rgba(17, 24, 39, 0.95) !important;
   }
 }
 
@@ -206,6 +270,18 @@ html[data-theme="dark"] [class*="editor"] .tiptap {
   user-select: text !important;
   -webkit-tap-highlight-color: rgba(59, 130, 246, 0.2) !important;
   touch-action: manipulation !important;
+}
+
+/* Fix critique pour l'interaction tactile en mode édition */
+.ProseMirror, 
+.tiptap, 
+[contenteditable="true"] {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  -webkit-tap-highlight-color: rgba(59, 130, 246, 0.3) !important;
+  touch-action: manipulation !important;
+  cursor: text !important;
+  outline: none !important;
 }
 
 /* Amélioration de la visibilité du curseur */

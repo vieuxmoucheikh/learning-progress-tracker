@@ -381,54 +381,83 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
   // Fix for mobile input focus and editing
   useEffect(() => {
     if (isEditing) {
-      const handleFocus = () => {
-        // Small delay to ensure the viewport has adjusted
-        setTimeout(() => {
-          window.scrollTo(0, window.scrollY);
-        }, 100);
-      };
-
-      // Make content editable on mobile
-      const enableMobileEditing = () => {
-        // Find all editable elements
-        const editableElements = document.querySelectorAll('.ProseMirror, .tiptap, [contenteditable="true"]');
+      // Fonction pour fixer les problèmes d'édition sur mobile
+      const fixMobileEditing = () => {
+        // Force un rafraîchissement des éléments éditables
+        const editableElements = document.querySelectorAll('.ProseMirror, .tiptap, [contenteditable="true"], .editing-mode-card input[type="text"]');
         
         editableElements.forEach(el => {
-          // Force element to be editable
           if (el instanceof HTMLElement) {
+            // Force les attributs qui permettent l'édition tactile
             el.setAttribute('contenteditable', 'true');
             el.style.webkitUserSelect = 'text';
             el.style.userSelect = 'text';
             el.style.touchAction = 'auto';
+            el.style.cursor = 'text';
+            
+            // Ajouter une interaction spécifique pour afficher le clavier virtuel
+            el.addEventListener('touchstart', function(e) {
+              // Ne pas bloquer le toucher
+              e.stopPropagation();
+            }, { passive: true });
+            
+            // Forcer le focus sur les éléments tappés
+            el.addEventListener('click', function() {
+              this.focus();
+            });
+          }
+        });
+        
+        // Correction spécifique pour l'éditeur TipTap
+        const tiptapElements = document.querySelectorAll('.tiptap');
+        tiptapElements.forEach(el => {
+          if (el instanceof HTMLElement) {
+            // S'assurer que l'élément est prêt pour l'édition
+            el.style.position = 'relative';
+            el.style.zIndex = '5';
+          }
+        });
+        
+        // Correction pour l'input du titre
+        const titleInputs = document.querySelectorAll('.editing-mode-card input[type="text"]');
+        titleInputs.forEach(input => {
+          if (input instanceof HTMLElement) {
+            input.style.zIndex = '5';
+            input.style.position = 'relative';
           }
         });
 
-        // Fix for iOS keyboard issues
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        if (isMobile) {
-          document.body.style.height = '100%';
-          document.body.style.width = '100%';
-          document.body.style.position = 'fixed';
-          document.body.style.overflow = 'hidden';
+        // Désactiver temporairement le scroll pour éviter les problèmes de clavier virtuel
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.height = '100%';
+        
+        // Réactiver le scroll après un court délai
+        setTimeout(() => {
+          document.body.style.overflow = '';
+          document.body.style.position = '';
+          document.body.style.width = '';
+          document.body.style.height = '';
+        }, 100);
+      };
 
-          setTimeout(() => {
-            document.body.style.height = '';
-            document.body.style.width = '';
-            document.body.style.position = '';
-            document.body.style.overflow = '';
-          }, 300);
-        }
+      // Appliquer les correctifs immédiatement et après un délai
+      fixMobileEditing();
+      setTimeout(fixMobileEditing, 300);
+      setTimeout(fixMobileEditing, 1000); // Appliquer à nouveau pour être sûr
+      
+      // Fonction pour gérer le focus
+      const handleFocus = () => {
+        fixMobileEditing();
       };
 
       document.addEventListener('focusin', handleFocus);
       
-      // Apply mobile editing fixes when editor is opened
-      enableMobileEditing();
-      // Also apply after a delay to ensure editor is fully loaded
-      setTimeout(enableMobileEditing, 500);
-
       return () => {
         document.removeEventListener('focusin', handleFocus);
+        document.body.style.overflow = '';
+        document.body.style.position = '';
       };
     }
   }, [isEditing]);
@@ -444,7 +473,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         : "bg-white border-gray-200 hover:border-blue-300",
       "sm:rounded-xl",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
-      isEditing ? "editing-mode-card" : "",
+      isEditing ? "editing-mode-card mobile-editing-enabled" : "", // Ajout d'une classe pour cibler les styles mobiles
       mastered 
         ? "border-emerald-300 shadow-emerald-100" 
         : isEditing 
@@ -647,12 +676,12 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         >
           {isEditing ? (
             <div className="space-y-4">
-              <div className="space-y-2 relative">
+              <div className="space-y-2 relative mobile-editor-container"> {/* Ajout d'une classe pour cibler le conteneur */}
                 <RichTextEditor
                   content={content}
                   onChange={setContent}
                   className={cn(
-                    "min-h-[300px] rounded-lg",
+                    "min-h-[300px] rounded-lg mobile-editor", // Ajout d'une classe pour le ciblage mobile
                     "bg-gray-50 dark:bg-gray-800",
                     "text-gray-900 dark:text-gray-100",
                     "border border-gray-200 dark:border-gray-700",

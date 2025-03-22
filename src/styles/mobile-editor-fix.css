@@ -1,0 +1,94 @@
+/* Correctifs d'urgence pour l'édition mobile */
+
+/* Style pour les éléments éditables sur mobile */
+@media (max-width: 768px) {
+  /* Force l'édition tactile sur tous les éléments éditables */
+  [contenteditable="true"],
+  textarea,
+  input[type="text"],
+  .ProseMirror,
+  .tiptap {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    -webkit-appearance: textfield !important;
+    appearance: textfield !important;
+    -webkit-touch-callout: default !important;
+    touch-action: auto !important;
+    cursor: text !important;
+    caret-color: #3b82f6 !important;
+    outline: none !important;
+  }
+  
+  /* Force le comportement normal des touches et du curseur */
+  .mobile-editing-enabled [contenteditable="true"],
+  .mobile-editing-enabled textarea,
+  .mobile-editing-enabled input[type="text"],
+  .mobile-editing-enabled .ProseMirror,
+  .mobile-editing-enabled .tiptap {
+    position: relative !important;
+    z-index: 10 !important;
+    font-size: 16px !important; /* Taille de police optimale pour l'édition mobile */
+    line-height: 1.5 !important;
+    padding: 12px !important;
+    background-color: white !important;
+    border: 1px solid rgba(203, 213, 225, 0.5) !important;
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    -webkit-touch-callout: text !important;
+  }
+  
+  /* Ajustements pour le mode sombre */
+  html[data-theme="dark"] .mobile-editing-enabled [contenteditable="true"],
+  html[data-theme="dark"] .mobile-editing-enabled textarea,
+  html[data-theme="dark"] .mobile-editing-enabled input[type="text"],
+  html[data-theme="dark"] .mobile-editing-enabled .ProseMirror,
+  html[data-theme="dark"] .mobile-editing-enabled .tiptap {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #475569 !important;
+  }
+}
+
+/* Correctifs pour garantir la visibilité et le focus */
+.mobile-editor-container .tiptap,
+.mobile-editor-container .ProseMirror {
+  position: relative !important;
+  z-index: 5 !important;
+  min-height: 250px !important;
+}
+
+@media (max-width: 768px) {
+  /* Faire apparaître le clavier virtuel sur les appareils mobiles */
+  .mobile-editor-container {
+    touch-action: auto !important;
+    cursor: text !important;
+    position: relative !important;
+    z-index: 5 !important;
+  }
+  
+  /* Garantir un espace suffisant pour la saisie */
+  .mobile-editing-enabled .RichTextEditor,
+  .mobile-editing-enabled [class*="rich-editor"],
+  .mobile-editor {
+    min-height: 60vh !important;
+    max-height: none !important;
+    overflow: auto !important;
+  }
+  
+  /* Assurer que la fenêtre d'édition est bien positionnée */
+  .editing-mode-card {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    margin: 0 !important;
+    padding: 50px 0 0 0 !important;
+    border-radius: 0 !important;
+    overflow: auto !important;
+    overscroll-behavior: none !important;
+  }
+}
