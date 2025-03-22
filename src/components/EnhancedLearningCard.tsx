@@ -467,6 +467,116 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
     }
   }, [isEditing]);
 
+  // Solution ultime pour le problème d'édition sur mobile
+  useEffect(() => {
+    if (isEditing) {
+      // Fonction pour rendre l'éditeur utilisable sur mobile
+      const makeEditorMobileAccessible = () => {
+        // Verrouillez le scroll de la page
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.height = '100%';
+        
+        // Sélectionnez l'éditeur
+        const editor = document.querySelector('.ProseMirror') as HTMLElement;
+        const titleInput = document.querySelector('.editing-mode-card input[type="text"]') as HTMLElement;
+        const editorContainer = document.querySelector('.editing-mode-card .tiptap') as HTMLElement;
+        
+        if (editor) {
+          // Rendre l'éditeur pleinement fonctionnel
+          editor.setAttribute('contenteditable', 'true');
+          editor.style.userSelect = 'text';
+          editor.style.webkitUserSelect = 'text';
+          // Utiliser setProperty pour les propriétés non standard
+          editor.style.setProperty('-webkit-user-select', 'text');
+          editor.style.setProperty('-webkit-touch-callout', 'default');
+          editor.style.cursor = 'text';
+          editor.style.touchAction = 'auto';
+          editor.style.caretColor = '#3b82f6';
+          editor.style.zIndex = '9999999';
+          editor.style.position = 'relative';
+          
+          // Réinitialiser l'éditeur pour le forcer à se recharger
+          const html = editor.innerHTML;
+          editor.innerHTML = '';
+          setTimeout(() => {
+            if (editor) editor.innerHTML = html;
+          }, 50);
+          
+          // Force le focus après un délai
+          setTimeout(() => {
+            if (editor) {
+              editor.focus();
+              // Créer un événement de clic
+              const clickEvent = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                view: window
+              });
+              editor.dispatchEvent(clickEvent);
+            }
+          }, 100);
+        }
+        
+        if (editorContainer) {
+          editorContainer.style.minHeight = '60vh';
+          editorContainer.style.position = 'relative';
+          editorContainer.style.zIndex = '999999';
+        }
+        
+        if (titleInput) {
+          titleInput.style.zIndex = '999999';
+          titleInput.style.position = 'relative';
+        }
+        
+        // S'assurer que les conteneurs sont également clickables
+        const containers = document.querySelectorAll('.editing-mode-card .space-y-4, .editing-mode-card .space-y-2, .editing-mode-card [class*="space-y"]');
+        containers.forEach(container => {
+          if (container instanceof HTMLElement) {
+            container.style.position = 'relative';
+            container.style.zIndex = '99999';
+          }
+        });
+        
+        // Assurer que les boutons sont accessibles
+        const buttons = document.querySelectorAll('.editing-mode-card button');
+        buttons.forEach(button => {
+          if (button instanceof HTMLElement) {
+            button.style.minHeight = '44px';
+            button.style.minWidth = '44px';
+            button.style.position = 'relative';
+            button.style.zIndex = '9999999';
+          }
+        });
+      };
+      
+      // Implémenter immédiatement et après un court délai
+      makeEditorMobileAccessible();
+      setTimeout(makeEditorMobileAccessible, 100);
+      setTimeout(makeEditorMobileAccessible, 300);
+      setTimeout(makeEditorMobileAccessible, 1000);
+      
+      // S'assurer que l'éditeur reste accessible quand on clique dessus
+      const handleAnyClick = () => {
+        makeEditorMobileAccessible();
+      };
+      
+      document.addEventListener('click', handleAnyClick, { capture: true });
+      document.addEventListener('touchstart', handleAnyClick, { capture: true });
+      
+      // Nettoyage au démontage
+      return () => {
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+        document.removeEventListener('click', handleAnyClick, { capture: true });
+        document.removeEventListener('touchstart', handleAnyClick, { capture: true });
+      };
+    }
+  }, [isEditing]);
+
   return (
     <Card className={cn(
       "relative overflow-hidden transition-all duration-300 border-2",
@@ -478,7 +588,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         : "bg-white border-gray-200 hover:border-blue-300",
       "sm:rounded-xl",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
-      isEditing ? "editing-mode-card mobile-editing-activated" : "", // Ajout d'une classe pour cibler spécifiquement
+      isEditing ? "editing-mode-card mobile-editing-activated ultra-mobile-fix" : "", // Ajout d'une classe pour ciblage
       mastered 
         ? "border-emerald-300 shadow-emerald-100" 
         : isEditing 
@@ -680,13 +790,13 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           )}
         >
           {isEditing ? (
-            <div className="space-y-4 editing-content-wrapper">
-              <div className="space-y-2 relative editor-container">
+            <div className="space-y-4 editing-content-wrapper mobile-editing-container">
+              <div className="space-y-2 relative editor-container mobile-editor-wrapper">
                 <RichTextEditor
                   content={content}
                   onChange={setContent}
                   className={cn(
-                    "min-h-[300px] rounded-lg mobile-editor-fix",
+                    "min-h-[300px] rounded-lg mobile-editor-fix ultimate-mobile-fix",
                     "bg-gray-50 dark:bg-gray-800",
                     "text-gray-900 dark:text-gray-100",
                     "border border-gray-200 dark:border-gray-700",
