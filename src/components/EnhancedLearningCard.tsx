@@ -378,7 +378,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       });
   }, [title, content, itemCategory, updatedAt, tags, media]);
 
-  // Fix for mobile input focus
+  // Fix for mobile input focus and editing
   useEffect(() => {
     if (isEditing) {
       const handleFocus = () => {
@@ -388,8 +388,48 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         }, 100);
       };
 
+      // Make content editable on mobile
+      const enableMobileEditing = () => {
+        // Find all editable elements
+        const editableElements = document.querySelectorAll('.ProseMirror, .tiptap, [contenteditable="true"]');
+        
+        editableElements.forEach(el => {
+          // Force element to be editable
+          if (el instanceof HTMLElement) {
+            el.setAttribute('contenteditable', 'true');
+            el.style.webkitUserSelect = 'text';
+            el.style.userSelect = 'text';
+            el.style.touchAction = 'auto';
+          }
+        });
+
+        // Fix for iOS keyboard issues
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+          document.body.style.height = '100%';
+          document.body.style.width = '100%';
+          document.body.style.position = 'fixed';
+          document.body.style.overflow = 'hidden';
+
+          setTimeout(() => {
+            document.body.style.height = '';
+            document.body.style.width = '';
+            document.body.style.position = '';
+            document.body.style.overflow = '';
+          }, 300);
+        }
+      };
+
       document.addEventListener('focusin', handleFocus);
-      return () => document.removeEventListener('focusin', handleFocus);
+      
+      // Apply mobile editing fixes when editor is opened
+      enableMobileEditing();
+      // Also apply after a delay to ensure editor is fully loaded
+      setTimeout(enableMobileEditing, 500);
+
+      return () => {
+        document.removeEventListener('focusin', handleFocus);
+      };
     }
   }, [isEditing]);
 
@@ -404,7 +444,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         : "bg-white border-gray-200 hover:border-blue-300",
       "sm:rounded-xl",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
-      isEditing ? "!max-w-full lg:!max-w-5xl editing-mode-card fixed left-0 right-0 top-4 bottom-4 z-50 h-[calc(100vh-32px)] overflow-y-auto" : "",
+      isEditing ? "editing-mode-card" : "",
       mastered 
         ? "border-emerald-300 shadow-emerald-100" 
         : isEditing 
@@ -421,7 +461,7 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
               setContent(initialContent);
               setTitle(initialTitle);
             }}
-            className="bg-white hover:bg-gray-50 mr-2"
+            className="bg-white hover:bg-gray-50 mr-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200"
           >
             <X className="w-4 h-4 mr-2" />
             Cancel
@@ -619,25 +659,8 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
                     "focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-blue-400",
                     "prose prose-sm sm:prose-base max-w-none dark:prose-invert",
                     "overflow-y-auto max-h-[calc(100vh-300px)]",
-                    "prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
-                    "prose-p:text-gray-700 prose-p:leading-relaxed dark:prose-p:text-gray-300",
-                    "prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline dark:prose-a:text-blue-400",
-                    "prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-gray-100",
-                    "prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:rounded dark:prose-code:bg-gray-700 dark:prose-code:text-blue-300",
-                    "prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:bg-gray-700 dark:prose-pre:border-gray-600",
-                    "prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto",
-                    "prose-ul:list-disc prose-ol:list-decimal",
-                    "prose-li:marker:text-gray-400 dark:prose-li:marker:text-gray-500",
-                    "[&_.tiptap]:min-h-[150px] [&_.tiptap]:p-4",
-                    "[&_.tiptap.ProseMirror-focused]:outline-none",
-                    "[&_.tiptap]:prose-sm [&_.tiptap]:sm:prose-base",
-                    "[&_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_p.is-editor-empty:first-child]:before:text-gray-400",
-                    "[&_.tiptap_p]:my-3 [&_.tiptap_h1]:my-4 [&_.tiptap_h2]:my-4 [&_.tiptap_h3]:my-3",
-                    "[&_.tiptap_ul]:my-3 [&_.tiptap_ol]:my-3 [&_.tiptap_blockquote]:my-3",
-                    "[&_.tiptap_pre]:my-3 [&_.tiptap_hr]:my-4",
-                    // Amélioration pour les textes colorés et surlignés en mode sombre
-                    "[&_[style*='color']]:dark:text-opacity-100 [&_[style*='color']]:dark:!important",
-                    "[&_mark]:dark:!text-gray-100 [&_mark]:dark:contrast-125"
+                    "mobile-edit-enabled" // Ajout d'une classe pour identifier l'éditeur mobile
+                    // ...existing code...
                   )}
                 />
               </div>
