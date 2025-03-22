@@ -378,202 +378,18 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
       });
   }, [title, content, itemCategory, updatedAt, tags, media]);
 
-  // Fix for mobile input focus and editing
+  // Fix for mobile input focus
   useEffect(() => {
     if (isEditing) {
-      // Fonction pour fixer les problèmes d'édition sur mobile
-      const enableMobileEditing = () => {
-        // Désactiver le scroll du body pour éviter les problèmes avec le clavier virtuel
-        document.body.style.overflow = 'hidden';
-        document.body.style.position = 'fixed';
-        document.body.style.width = '100%';
-        document.body.style.height = '100%';
-        
-        // Trouver tous les éléments éditables
-        const editableElements = document.querySelectorAll('.ProseMirror, .tiptap, [contenteditable="true"], .editing-mode-card input[type="text"]');
-        
-        editableElements.forEach(el => {
-          if (el instanceof HTMLElement) {
-            // Configurer pour l'édition mobile
-            el.style.position = 'relative';
-            el.style.zIndex = '100001';
-            el.style.pointerEvents = 'auto';
-            el.style.touchAction = 'auto';
-            el.setAttribute('contenteditable', 'true');
-            
-            // Empêcher la propagation des événements pour éviter les clics à travers
-            el.addEventListener('touchstart', (e) => {
-              e.stopPropagation();
-            }, { capture: true });
-            
-            el.addEventListener('click', (e) => {
-              e.stopPropagation();
-              // Focus forcé sur l'élément
-              if (el.className.includes('ProseMirror') || el.className.includes('tiptap')) {
-                el.focus();
-              }
-            }, { capture: true });
-          }
-        });
-        
-        // Assurer que les conteneurs parents sont également cliquables
-        const containers = document.querySelectorAll('.editing-mode-card .space-y-4, .editing-mode-card .space-y-2');
-        containers.forEach(container => {
-          if (container instanceof HTMLElement) {
-            container.style.position = 'relative';
-            container.style.zIndex = '100000';
-            container.style.pointerEvents = 'auto';
-            container.style.touchAction = 'auto';
-          }
-        });
-
-        // Forcer le rendu des champs d'édition
-        const proseMirror = document.querySelector('.ProseMirror');
-        if (proseMirror instanceof HTMLElement) {
-          // Assurer que l'élément est activé pour l'édition
-          proseMirror.setAttribute('contenteditable', 'true');
-          
-          // Force repaint to ensure it's properly rendered
-          proseMirror.style.display = 'none';
-          setTimeout(() => {
-            if (proseMirror) proseMirror.style.display = 'block';
-          }, 0);
-        }
-      };
-
-      // Appliquer la correction immédiatement
-      enableMobileEditing();
-      
-      // Réappliquer après un court délai pour s'assurer que le DOM est complètement chargé
-      setTimeout(enableMobileEditing, 100);
-      setTimeout(enableMobileEditing, 500);
-      
-      // Corriger au focus
       const handleFocus = () => {
-        // Réappliquer les correctifs
-        setTimeout(enableMobileEditing, 50);
+        // Small delay to ensure the viewport has adjusted
+        setTimeout(() => {
+          window.scrollTo(0, window.scrollY);
+        }, 100);
       };
-      
-      document.addEventListener('focusin', handleFocus);
-      
-      return () => {
-        // Cleanup
-        document.removeEventListener('focusin', handleFocus);
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.width = '';
-        document.body.style.height = '';
-      };
-    }
-  }, [isEditing]);
 
-  // Solution ultime pour le problème d'édition sur mobile
-  useEffect(() => {
-    if (isEditing) {
-      // Fonction pour rendre l'éditeur utilisable sur mobile
-      const makeEditorMobileAccessible = () => {
-        // Verrouillez le scroll de la page
-        document.body.style.overflow = 'hidden';
-        document.body.style.position = 'fixed';
-        document.body.style.width = '100%';
-        document.body.style.height = '100%';
-        
-        // Sélectionnez l'éditeur
-        const editor = document.querySelector('.ProseMirror') as HTMLElement;
-        const titleInput = document.querySelector('.editing-mode-card input[type="text"]') as HTMLElement;
-        const editorContainer = document.querySelector('.editing-mode-card .tiptap') as HTMLElement;
-        
-        if (editor) {
-          // Rendre l'éditeur pleinement fonctionnel
-          editor.setAttribute('contenteditable', 'true');
-          editor.style.userSelect = 'text';
-          editor.style.webkitUserSelect = 'text';
-          // Utiliser setProperty pour les propriétés non standard
-          editor.style.setProperty('-webkit-user-select', 'text');
-          editor.style.setProperty('-webkit-touch-callout', 'default');
-          editor.style.cursor = 'text';
-          editor.style.touchAction = 'auto';
-          editor.style.caretColor = '#3b82f6';
-          editor.style.zIndex = '9999999';
-          editor.style.position = 'relative';
-          
-          // Réinitialiser l'éditeur pour le forcer à se recharger
-          const html = editor.innerHTML;
-          editor.innerHTML = '';
-          setTimeout(() => {
-            if (editor) editor.innerHTML = html;
-          }, 50);
-          
-          // Force le focus après un délai
-          setTimeout(() => {
-            if (editor) {
-              editor.focus();
-              // Créer un événement de clic
-              const clickEvent = new MouseEvent('click', {
-                bubbles: true,
-                cancelable: true,
-                view: window
-              });
-              editor.dispatchEvent(clickEvent);
-            }
-          }, 100);
-        }
-        
-        if (editorContainer) {
-          editorContainer.style.minHeight = '60vh';
-          editorContainer.style.position = 'relative';
-          editorContainer.style.zIndex = '999999';
-        }
-        
-        if (titleInput) {
-          titleInput.style.zIndex = '999999';
-          titleInput.style.position = 'relative';
-        }
-        
-        // S'assurer que les conteneurs sont également clickables
-        const containers = document.querySelectorAll('.editing-mode-card .space-y-4, .editing-mode-card .space-y-2, .editing-mode-card [class*="space-y"]');
-        containers.forEach(container => {
-          if (container instanceof HTMLElement) {
-            container.style.position = 'relative';
-            container.style.zIndex = '99999';
-          }
-        });
-        
-        // Assurer que les boutons sont accessibles
-        const buttons = document.querySelectorAll('.editing-mode-card button');
-        buttons.forEach(button => {
-          if (button instanceof HTMLElement) {
-            button.style.minHeight = '44px';
-            button.style.minWidth = '44px';
-            button.style.position = 'relative';
-            button.style.zIndex = '9999999';
-          }
-        });
-      };
-      
-      // Implémenter immédiatement et après un court délai
-      makeEditorMobileAccessible();
-      setTimeout(makeEditorMobileAccessible, 100);
-      setTimeout(makeEditorMobileAccessible, 300);
-      setTimeout(makeEditorMobileAccessible, 1000);
-      
-      // S'assurer que l'éditeur reste accessible quand on clique dessus
-      const handleAnyClick = () => {
-        makeEditorMobileAccessible();
-      };
-      
-      document.addEventListener('click', handleAnyClick, { capture: true });
-      document.addEventListener('touchstart', handleAnyClick, { capture: true });
-      
-      // Nettoyage au démontage
-      return () => {
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.width = '';
-        document.body.style.height = '';
-        document.removeEventListener('click', handleAnyClick, { capture: true });
-        document.removeEventListener('touchstart', handleAnyClick, { capture: true });
-      };
+      document.addEventListener('focusin', handleFocus);
+      return () => document.removeEventListener('focusin', handleFocus);
     }
   }, [isEditing]);
 
@@ -588,53 +404,13 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
         : "bg-white border-gray-200 hover:border-blue-300",
       "sm:rounded-xl",
       isZoomed ? "transform scale-105 shadow-xl z-10" : "",
-      isEditing ? "editing-mode-card mobile-editing-activated ultra-mobile-fix" : "", // Ajout d'une classe pour ciblage
       mastered 
         ? "border-emerald-300 shadow-emerald-100" 
         : isEditing 
           ? "border-blue-400 shadow-md shadow-blue-100"
           : "border-gray-200 hover:border-blue-300 shadow-md shadow-gray-100/50",
     )}>
-      {isEditing && (
-        <div className="absolute top-3 right-3 z-10">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setIsEditing(false);
-              setContent(initialContent);
-              setTitle(initialTitle);
-            }}
-            className="bg-white hover:bg-gray-50 mr-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200"
-          >
-            <X className="w-4 h-4 mr-2" />
-            Cancel
-          </Button>
-          <Button
-            size="sm"
-            onClick={async () => {
-              try {
-                await handleSave();
-                setIsEditing(false);
-                toast({
-                  title: "Success",
-                  description: "Card updated successfully",
-                });
-              } catch (error) {
-                console.error('Error saving:', error);
-              }
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <Save className="w-4 h-4 mr-2" />
-            Save Changes
-          </Button>
-        </div>
-      )}
-      <CardHeader className={cn(
-        "space-y-4 pb-4 px-4 sm:px-6",
-        isEditing && "pt-16"
-      )}>
+      <CardHeader className="space-y-4 pb-4 px-4 sm:px-6">
         {/* Title Section */}
         <div className="space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -790,25 +566,42 @@ export const EnhancedLearningCard: React.FC<EnhancedLearningCardProps> = ({
           )}
         >
           {isEditing ? (
-            <div className="space-y-4 editing-content-wrapper mobile-editing-container">
-              <div className="space-y-2 relative editor-container mobile-editor-wrapper">
+            <div className="space-y-4">
+              <div className="space-y-2 relative">
                 <RichTextEditor
                   content={content}
                   onChange={setContent}
                   className={cn(
-                    "min-h-[300px] rounded-lg mobile-editor-fix ultimate-mobile-fix",
+                    "min-h-[200px] rounded-lg",
                     "bg-gray-50 dark:bg-gray-800",
                     "text-gray-900 dark:text-gray-100",
                     "border border-gray-200 dark:border-gray-700",
                     "focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-blue-400",
                     "prose prose-sm sm:prose-base max-w-none dark:prose-invert",
-                    "overflow-y-auto max-h-[calc(100vh-300px)]",
-                    "mobile-edit-enabled" // Ajout d'une classe pour identifier l'éditeur mobile
-                    // ...existing code...
+                    "overflow-y-auto max-h-[60vh]",
+                    "prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-gray-100",
+                    "prose-p:text-gray-700 prose-p:leading-relaxed dark:prose-p:text-gray-300",
+                    "prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline dark:prose-a:text-blue-400",
+                    "prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-gray-100",
+                    "prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:rounded dark:prose-code:bg-gray-700 dark:prose-code:text-blue-300",
+                    "prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:bg-gray-700 dark:prose-pre:border-gray-600",
+                    "prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto",
+                    "prose-ul:list-disc prose-ol:list-decimal",
+                    "prose-li:marker:text-gray-400 dark:prose-li:marker:text-gray-500",
+                    "[&_.tiptap]:min-h-[150px] [&_.tiptap]:p-4",
+                    "[&_.tiptap.ProseMirror-focused]:outline-none",
+                    "[&_.tiptap]:prose-sm [&_.tiptap]:sm:prose-base",
+                    "[&_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_p.is-editor-empty:first-child]:before:text-gray-400",
+                    "[&_.tiptap_p]:my-3 [&_.tiptap_h1]:my-4 [&_.tiptap_h2]:my-4 [&_.tiptap_h3]:my-3",
+                    "[&_.tiptap_ul]:my-3 [&_.tiptap_ol]:my-3 [&_.tiptap_blockquote]:my-3",
+                    "[&_.tiptap_pre]:my-3 [&_.tiptap_hr]:my-4",
+                    // Amélioration pour les textes colorés et surlignés en mode sombre
+                    "[&_[style*='color']]:dark:text-opacity-100 [&_[style*='color']]:dark:!important",
+                    "[&_mark]:dark:!text-gray-100 [&_mark]:dark:contrast-125"
                   )}
                 />
               </div>
-              <div className="flex justify-end gap-2 hidden">
+              <div className="flex justify-end gap-2">
                 <Button
                   variant="outline"
                   onClick={() => {
