@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import '../styles/mobile-light-mode-fixes.css';
 import '../styles/critical-light-mode-fixes.css';
 import '../styles/theme-transition.css';
@@ -47,8 +47,6 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
     
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
-      // Apply transitioning class before changing theme
-      document.documentElement.classList.add('theme-transitioning');
       setTheme(e.matches ? 'dark' : 'light');
     };
     
@@ -56,20 +54,20 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [enableSystem]);
 
-  // Memoized function to apply theme changes
-  const applyThemeChanges = useCallback((newTheme: Theme) => {
-    // Set transitioning class to prevent unwanted animations
+  // Apply theme changes when theme state changes
+  useEffect(() => {
+    // Add transitioning class to disable animations during theme change
     document.documentElement.classList.add('theme-transitioning');
     
     // Set attribute on html element
     const attrName = attribute || 'data-theme';
-    document.documentElement.setAttribute(attrName, newTheme);
+    document.documentElement.setAttribute(attrName, theme);
     
     // Store the preference
-    localStorage.setItem('theme', newTheme);
+    localStorage.setItem('theme', theme);
     
     // Add specific class for styling targeting
-    if (newTheme === 'dark') {
+    if (theme === 'dark') {
       document.documentElement.classList.add('dark');
       document.documentElement.classList.remove('light');
     } else {
@@ -79,36 +77,21 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
 
     // Handle special styling for mobile
     const isMobile = window.innerWidth <= 768;
-    if (newTheme === 'light' && isMobile) {
+    if (theme === 'light' && isMobile) {
       document.documentElement.classList.add('mobile-light-theme');
     } else {
       document.documentElement.classList.remove('mobile-light-theme');
     }
     
-    // Remove transitioning class after a short delay to allow styles to be applied
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          document.documentElement.classList.remove('theme-transitioning');
-        }, 200);
-      });
-    });
-  }, [attribute]);
-  
-  // Apply theme changes when theme state changes
-  useEffect(() => {
-    applyThemeChanges(theme);
+    // Simple approach: remove transitioning class after a short delay
+    setTimeout(() => {
+      document.documentElement.classList.remove('theme-transitioning');
+    }, 100);
     
   }, [theme, attribute]);
 
   const toggleTheme = () => {
-    // Apply transitioning class immediately before state update
-    document.documentElement.classList.add('theme-transitioning');
-    
-    setTheme(prevTheme => {
-      const newTheme = prevTheme === 'light' ? 'dark' : 'light';
-      return newTheme;
-    });
+    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
   };
 
   const isDark = theme === 'dark';
