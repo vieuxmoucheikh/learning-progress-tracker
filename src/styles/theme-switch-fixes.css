@@ -1,56 +1,23 @@
 /**
- * Complete hiding approach for theme switching
- * Ensures ALL elements are hidden during theme changes
+ * Enhanced fixes for theme switching
+ * Focused on smooth transitions without layout shifts or flickering
  */
 
-/* During theme transition, completely hide ALL content */
-.theme-transitioning {
-  pointer-events: none !important;
-}
-
-/* Hide everything to prevent any flashing elements */
-.theme-transitioning body,
-.theme-transitioning #root,
-.theme-transitioning #root > *,
-.theme-transitioning header,
-.theme-transitioning nav,
-.theme-transitioning main,
-.theme-transitioning footer,
-.theme-transitioning button,
-.theme-transitioning [role="button"],
-.theme-transitioning a,
-.theme-transitioning div,
-.theme-transitioning span {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  transition: none !important;
-  animation: none !important;
-}
-
-/* After theme is applied, fade content back in */
-html:not(.theme-transitioning) body,
-html:not(.theme-transitioning) #root,
-html:not(.theme-transitioning) button,
-html:not(.theme-transitioning) [role="button"],
-html:not(.theme-transitioning) a {
-  transition: opacity 300ms ease-in !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* Disable all transitions during theme change */
+/* Disable transitions during theme change to prevent weird effects */
 .theme-transitioning * {
   transition: none !important;
   animation: none !important;
-  /* Prevent any content flash */
+  /* Prevent content flash */
   will-change: auto;
 }
 
-/* Even the theme toggle button should not transition during theme change */
-.theme-transitioning .theme-toggle-button,
+/* Exception for the theme toggle button to keep its transitions */
+.theme-transitioning .theme-toggle-button {
+  transition: background-color 0.2s ease !important;
+}
+
 .theme-transitioning .theme-toggle-button * {
-  transition: none !important;
-  animation: none !important;
+  transition: opacity 0.2s ease, color 0.2s ease !important;
 }
 
 /* Styles for the theme toggle button */
@@ -89,44 +56,38 @@ html:not(.theme-transitioning) a {
 
 /* Fix for mobile devices */
 @media (max-width: 768px) {
-  /* Ensure consistent button size */
   .theme-toggle-button {
     min-width: 6.5rem !important;
   }
   
-  /* Longer fade-in for mobile devices */
-  html:not(.theme-transitioning) body,
-  html:not(.theme-transitioning) #root,
-  html:not(.theme-transitioning) button,
-  html:not(.theme-transitioning) [role="button"],
-  html:not(.theme-transitioning) a {
-    transition: opacity 400ms ease-in !important;
-  }
-  
   /* Prevent layout shifts on mobile */
-  html, body, #root {
+  .theme-transitioning body {
     min-height: 100vh;
-    width: 100%;
-    overflow-x: hidden !important;
   }
   
-  /* Extra hiding for problematic elements on mobile */
-  .theme-transitioning header,
-  .theme-transitioning nav,
-  .theme-transitioning [role="navigation"],
+  /* Prevent flickering on mobile */
+  html[data-theme="light"] body,
+  html[data-theme="dark"] body {
+    transition: background-color 0.2s ease-out;
+  }
+  
+  /* Ensure cards maintain their appearance during transitions */
+  html[data-theme="light"] .card,
+  html[data-theme="dark"] .card,
+  html[data-theme="light"] [class*="card"],
+  html[data-theme="dark"] [class*="card"] {
+    transition: background-color 0.2s ease-out, border-color 0.2s ease-out, box-shadow 0.2s ease-out;
+  }
+  
+  /* Prevent FOUC (Flash of Unstyled Content) */
+  .theme-transitioning .card,
+  .theme-transitioning [class*="card"],
   .theme-transitioning button,
   .theme-transitioning [role="button"],
-  .theme-transitioning a {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-  
-  /* Prevent any transitions on mobile during theme change */
-  .theme-transitioning * {
-    transition: none !important;
-    animation: none !important;
-    transform: none !important;
+  .theme-transitioning .badge,
+  .theme-transitioning [class*="badge"] {
+    opacity: 0.99; /* Slight opacity change to force GPU rendering */
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 }
