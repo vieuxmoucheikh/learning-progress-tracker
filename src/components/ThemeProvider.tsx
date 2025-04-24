@@ -56,8 +56,12 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
 
   // Apply theme changes when theme state changes
   useEffect(() => {
-    // Add transitioning class to disable animations during theme change
+    // First, add transitioning class to disable animations during theme change
     document.documentElement.classList.add('theme-transitioning');
+    
+    // Force a reflow to ensure the transitioning class is applied before changes
+    // This helps prevent flickering
+    document.documentElement.offsetHeight;
     
     // Set attribute on html element
     const attrName = attribute || 'data-theme';
@@ -83,20 +87,40 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
       document.documentElement.classList.remove('mobile-light-theme');
     }
     
-    // Two-phase approach for smoother transitions:
+    // Force another reflow to ensure all changes are applied
+    document.documentElement.offsetHeight;
+    
+    // Three-phase approach for smoother transitions:
     // 1. Apply theme changes immediately with transitions disabled
-    // 2. Re-enable transitions after a short delay
+    // 2. Wait for browser to process the changes
+    // 3. Re-enable transitions after changes are fully applied
+    
+    // For mobile, use a longer delay to ensure styles are fully applied
+    const delay = isMobile ? 300 : 100;
+    
     setTimeout(() => {
-      // Use requestAnimationFrame to ensure changes are applied in the next paint cycle
+      // Use double requestAnimationFrame to ensure we're in a new paint cycle
       requestAnimationFrame(() => {
-        document.documentElement.classList.remove('theme-transitioning');
+        requestAnimationFrame(() => {
+          document.documentElement.classList.remove('theme-transitioning');
+        });
       });
-    }, 150);
+    }, delay);
     
   }, [theme, attribute]);
 
   const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    setTheme(prevTheme => {
+      const newTheme = prevTheme === 'light' ? 'dark' : 'light';
+      
+      // Dispatch theme change event for our helper script
+      const themeChangeEvent = new CustomEvent('themeChanged', {
+        detail: { theme: newTheme }
+      });
+      document.dispatchEvent(themeChangeEvent);
+      
+      return newTheme;
+    });
   };
 
   const isDark = theme === 'dark';

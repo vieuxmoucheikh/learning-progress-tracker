@@ -1,12 +1,14 @@
 /**
- * Improved fixes for theme switching
- * Focused on smooth transitions without layout shifts
+ * Enhanced fixes for theme switching
+ * Focused on smooth transitions without layout shifts or flickering
  */
 
-/* Disable most transitions during theme change to prevent weird effects */
+/* Disable transitions during theme change to prevent weird effects */
 .theme-transitioning * {
   transition: none !important;
   animation: none !important;
+  /* Prevent content flash */
+  will-change: auto;
 }
 
 /* Exception for the theme toggle button to keep its transitions */
@@ -61,5 +63,31 @@
   /* Prevent layout shifts on mobile */
   .theme-transitioning body {
     min-height: 100vh;
+  }
+  
+  /* Prevent flickering on mobile */
+  html[data-theme="light"] body,
+  html[data-theme="dark"] body {
+    transition: background-color 0.2s ease-out;
+  }
+  
+  /* Ensure cards maintain their appearance during transitions */
+  html[data-theme="light"] .card,
+  html[data-theme="dark"] .card,
+  html[data-theme="light"] [class*="card"],
+  html[data-theme="dark"] [class*="card"] {
+    transition: background-color 0.2s ease-out, border-color 0.2s ease-out, box-shadow 0.2s ease-out;
+  }
+  
+  /* Prevent FOUC (Flash of Unstyled Content) */
+  .theme-transitioning .card,
+  .theme-transitioning [class*="card"],
+  .theme-transitioning button,
+  .theme-transitioning [role="button"],
+  .theme-transitioning .badge,
+  .theme-transitioning [class*="badge"] {
+    opacity: 0.99; /* Slight opacity change to force GPU rendering */
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 }

@@ -90,6 +90,15 @@
   /* Prevent layout shifts by keeping dimensions stable */
   min-height: var(--min-height, inherit);
   min-width: var(--min-width, inherit);
+  /* Prevent FOUC (Flash of Unstyled Content) */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  /* Force hardware acceleration */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  /* Prevent text rendering issues */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Styles Mobile */
@@ -103,11 +112,32 @@
   .card, [class*="card"] {
     --min-height: auto;
     --min-width: auto;
+    /* Force hardware acceleration on mobile for smoother transitions */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
   
   /* Empêcher les sauts de mise en page pour les badges et boutons */
   .badge, button, [role="button"] {
     --min-height: auto;
     --min-width: auto;
+  }
+  
+  /* Prevent flickering on mobile */
+  .theme-transitioning {
+    -webkit-animation: none !important;
+    animation: none !important;
+  }
+  
+  /* Ensure smooth transition after theme change */
+  html:not(.theme-transitioning) [data-theme] {
+    transition: background-color 0.2s ease-out;
+  }
+  
+  /* Prevent layout shifts during transition */
+  body {
+    min-height: 100vh;
   }
 }
