@@ -1,21 +1,38 @@
 /**
- * Minimal fixes for theme switching
- * Simplified to avoid display issues
+ * Improved fixes for theme switching
+ * Focused on smooth transitions without layout shifts
  */
 
-/* Disable all transitions during theme change to prevent weird effects */
+/* Disable most transitions during theme change to prevent weird effects */
 .theme-transitioning * {
   transition: none !important;
   animation: none !important;
 }
 
-/* Only apply basic styles for the theme toggle button */
+/* Exception for the theme toggle button to keep its transitions */
+.theme-transitioning .theme-toggle-button {
+  transition: background-color 0.2s ease !important;
+}
+
+.theme-transitioning .theme-toggle-button * {
+  transition: opacity 0.2s ease, color 0.2s ease !important;
+}
+
+/* Styles for the theme toggle button */
 .theme-toggle-button {
   position: relative;
   overflow: hidden;
+  min-width: 6.5rem !important;
+  height: 2rem !important;
+  transition: background-color 0.3s ease;
 }
 
-/* Simple animation for the theme toggle button */
+/* Indicator bar transition */
+.theme-toggle-button > div:last-child {
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+/* Ripple effect for the toggle button */
 .theme-toggle-button::after {
   content: '';
   position: absolute;
@@ -33,4 +50,16 @@
   transform: scale(2);
   opacity: 0.3;
   transition: 0s;
+}
+
+/* Fix for mobile devices */
+@media (max-width: 768px) {
+  .theme-toggle-button {
+    min-width: 6.5rem !important;
+  }
+  
+  /* Prevent layout shifts on mobile */
+  .theme-transitioning body {
+    min-height: 100vh;
+  }
 }

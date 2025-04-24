@@ -83,10 +83,15 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
       document.documentElement.classList.remove('mobile-light-theme');
     }
     
-    // Simple approach: remove transitioning class after a short delay
+    // Two-phase approach for smoother transitions:
+    // 1. Apply theme changes immediately with transitions disabled
+    // 2. Re-enable transitions after a short delay
     setTimeout(() => {
-      document.documentElement.classList.remove('theme-transitioning');
-    }, 100);
+      // Use requestAnimationFrame to ensure changes are applied in the next paint cycle
+      requestAnimationFrame(() => {
+        document.documentElement.classList.remove('theme-transitioning');
+      });
+    }, 150);
     
   }, [theme, attribute]);
 
