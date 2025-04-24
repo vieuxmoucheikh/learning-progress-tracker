@@ -54,23 +54,19 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [enableSystem]);
 
-  // Apply theme changes when theme state changes
+  // Apply theme changes when theme state changes - simplified approach
   useEffect(() => {
-    // First, add transitioning class to disable animations during theme change
+    // 1. Add transitioning class to disable animations
     document.documentElement.classList.add('theme-transitioning');
     
-    // Force a reflow to ensure the transitioning class is applied before changes
-    // This helps prevent flickering
-    document.documentElement.offsetHeight;
-    
-    // Set attribute on html element
+    // 2. Set attribute on html element
     const attrName = attribute || 'data-theme';
     document.documentElement.setAttribute(attrName, theme);
     
-    // Store the preference
+    // 3. Store the preference
     localStorage.setItem('theme', theme);
     
-    // Add specific class for styling targeting
+    // 4. Add specific class for styling targeting
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
       document.documentElement.classList.remove('light');
@@ -79,7 +75,7 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
       document.documentElement.classList.remove('dark');
     }
 
-    // Handle special styling for mobile
+    // 5. Handle special styling for mobile
     const isMobile = window.innerWidth <= 768;
     if (theme === 'light' && isMobile) {
       document.documentElement.classList.add('mobile-light-theme');
@@ -87,29 +83,20 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
       document.documentElement.classList.remove('mobile-light-theme');
     }
     
-    // Force another reflow to ensure all changes are applied
-    document.documentElement.offsetHeight;
-    
-    // Three-phase approach for smoother transitions:
-    // 1. Apply theme changes immediately with transitions disabled
-    // 2. Wait for browser to process the changes
-    // 3. Re-enable transitions after changes are fully applied
-    
-    // For mobile, use a longer delay to ensure styles are fully applied
-    const delay = isMobile ? 300 : 100;
+    // 6. Re-enable transitions after a minimal delay
+    // Use a shorter delay for a snappier feel
+    const delay = isMobile ? 100 : 50;
     
     setTimeout(() => {
-      // Use double requestAnimationFrame to ensure we're in a new paint cycle
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          document.documentElement.classList.remove('theme-transitioning');
-        });
-      });
+      document.documentElement.classList.remove('theme-transitioning');
     }, delay);
     
   }, [theme, attribute]);
 
   const toggleTheme = () => {
+    // Apply transitioning class immediately before state update for instant response
+    document.documentElement.classList.add('theme-transitioning');
+    
     setTheme(prevTheme => {
       const newTheme = prevTheme === 'light' ? 'dark' : 'light';
       
