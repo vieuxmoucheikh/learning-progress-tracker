@@ -56,11 +56,10 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
 
   // Apply theme changes when theme state changes
   useEffect(() => {
-    // First, add transitioning class to disable animations during theme change
+    // First, add transitioning class to hide content during theme change
     document.documentElement.classList.add('theme-transitioning');
     
     // Force a reflow to ensure the transitioning class is applied before changes
-    // This helps prevent flickering
     document.documentElement.offsetHeight;
     
     // Set attribute on html element
@@ -90,22 +89,17 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
     // Force another reflow to ensure all changes are applied
     document.documentElement.offsetHeight;
     
-    // Three-phase approach for smoother transitions:
-    // 1. Apply theme changes immediately with transitions disabled
-    // 2. Wait for browser to process the changes
-    // 3. Re-enable transitions after changes are fully applied
-    
     // For mobile, use a longer delay to ensure styles are fully applied
-    const delay = isMobile ? 300 : 100;
+    const delay = isMobile ? 400 : 200;
     
-    setTimeout(() => {
-      // Use double requestAnimationFrame to ensure we're in a new paint cycle
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          document.documentElement.classList.remove('theme-transitioning');
-        });
-      });
+    // Use a timeout to ensure all style calculations are complete
+    const timer = setTimeout(() => {
+      // Remove the transitioning class to reveal content with new theme
+      document.documentElement.classList.remove('theme-transitioning');
     }, delay);
+    
+    // Cleanup function to clear timeout if component unmounts
+    return () => clearTimeout(timer);
     
   }, [theme, attribute]);
 
