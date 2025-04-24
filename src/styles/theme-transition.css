@@ -3,14 +3,15 @@
  * Optimisé pour des transitions fluides entre le mode clair et sombre
  */
 
-/* Transition globale pour les éléments communs */
-:root:not(.theme-transitioning) {
+/* Variables globales pour les transitions */
+:root {
   --transition-duration: 300ms;
   --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
   --transition-delay: 0ms;
+  --transition-property: background-color, color, border-color, box-shadow, fill, stroke;
 }
 
-/* Éléments avec transition fluide */
+/* Éléments avec transition fluide - appliqué seulement quand pas en transition */
 :root:not(.theme-transitioning) body,
 :root:not(.theme-transitioning) .card,
 :root:not(.theme-transitioning) [class*="card"],
@@ -25,11 +26,10 @@
 :root:not(.theme-transitioning) select,
 :root:not(.theme-transitioning) .badge,
 :root:not(.theme-transitioning) [class*="badge"] {
-  transition: 
-    background-color var(--transition-duration) var(--transition-timing) var(--transition-delay),
-    color var(--transition-duration) var(--transition-timing) var(--transition-delay),
-    border-color var(--transition-duration) var(--transition-timing) var(--transition-delay),
-    box-shadow var(--transition-duration) var(--transition-timing) var(--transition-delay);
+  transition-property: var(--transition-property);
+  transition-duration: var(--transition-duration);
+  transition-timing-function: var(--transition-timing);
+  will-change: background-color, color, border-color, box-shadow;
 }
 
 /* Transition spécifique pour les textes */
@@ -42,17 +42,18 @@
 :root:not(.theme-transitioning) p,
 :root:not(.theme-transitioning) span,
 :root:not(.theme-transitioning) a {
-  transition: color var(--transition-duration) var(--transition-timing) var(--transition-delay);
+  transition: color var(--transition-duration) var(--transition-timing);
+  will-change: color;
 }
 
 /* Transition pour les icônes et SVG */
 :root:not(.theme-transitioning) svg,
 :root:not(.theme-transitioning) [class*="icon"],
 :root:not(.theme-transitioning) [class*="lucide"] {
-  transition: 
-    color var(--transition-duration) var(--transition-timing) var(--transition-delay),
-    fill var(--transition-duration) var(--transition-timing) var(--transition-delay),
-    stroke var(--transition-duration) var(--transition-timing) var(--transition-delay);
+  transition-property: color, fill, stroke;
+  transition-duration: var(--transition-duration);
+  transition-timing-function: var(--transition-timing);
+  will-change: color, fill, stroke;
 }
 
 /* Animation du bouton de changement de thème */
@@ -85,12 +86,28 @@
 /* Désactivation des transitions pendant le changement de thème */
 .theme-transitioning * {
   transition: none !important;
+  animation: none !important;
+  /* Prevent layout shifts by keeping dimensions stable */
+  min-height: var(--min-height, inherit);
+  min-width: var(--min-width, inherit);
 }
 
 /* Styles Mobile */
 @media (max-width: 768px) {
   /* Optimisation pour mobile */
-  :root:not(.theme-transitioning) {
+  :root {
     --transition-duration: 200ms;
+  }
+  
+  /* Assurer que les cartes ne changent pas de taille lors du changement de thème */
+  .card, [class*="card"] {
+    --min-height: auto;
+    --min-width: auto;
+  }
+  
+  /* Empêcher les sauts de mise en page pour les badges et boutons */
+  .badge, button, [role="button"] {
+    --min-height: auto;
+    --min-width: auto;
   }
 }

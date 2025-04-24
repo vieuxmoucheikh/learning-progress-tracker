@@ -1,6 +1,9 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import '../styles/mobile-light-mode-fixes.css';
-import '../styles/critical-light-mode-fixes.css'; // Ajout de nos correctifs critiques
+import '../styles/critical-light-mode-fixes.css';
+import '../styles/theme-transition.css';
+import '../styles/theme-sync.css';
+import '../styles/theme-switch-fixes.css';
 
 type Theme = 'light' | 'dark';
 
@@ -44,6 +47,8 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
     
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
+      // Apply transitioning class before changing theme
+      document.documentElement.classList.add('theme-transitioning');
       setTheme(e.matches ? 'dark' : 'light');
     };
     
@@ -51,20 +56,20 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [enableSystem]);
 
-  // Apply theme changes to document
-  useEffect(() => {
-    // Apply theme transitioning class
+  // Memoized function to apply theme changes
+  const applyThemeChanges = useCallback((newTheme: Theme) => {
+    // Set transitioning class to prevent unwanted animations
     document.documentElement.classList.add('theme-transitioning');
     
-    // Set attribute on html element - typically data-theme
+    // Set attribute on html element
     const attrName = attribute || 'data-theme';
-    document.documentElement.setAttribute(attrName, theme);
+    document.documentElement.setAttribute(attrName, newTheme);
     
     // Store the preference
-    localStorage.setItem('theme', theme);
+    localStorage.setItem('theme', newTheme);
     
     // Add specific class for styling targeting
-    if (theme === 'dark') {
+    if (newTheme === 'dark') {
       document.documentElement.classList.add('dark');
       document.documentElement.classList.remove('light');
     } else {
@@ -74,27 +79,36 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
 
     // Handle special styling for mobile
     const isMobile = window.innerWidth <= 768;
-    if (theme === 'light' && isMobile) {
+    if (newTheme === 'light' && isMobile) {
       document.documentElement.classList.add('mobile-light-theme');
     } else {
       document.documentElement.classList.remove('mobile-light-theme');
     }
     
-    // Apply theme smoothly
-    const applyTheme = () => {
-      // Remove transitioning class after styles are applied
-      setTimeout(() => {
-        document.documentElement.classList.remove('theme-transitioning');
-      }, 150);
-    };
-    
-    // Apply with a slight delay to allow CSS transitions to work
-    setTimeout(applyTheme, 10);
+    // Remove transitioning class after a short delay to allow styles to be applied
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          document.documentElement.classList.remove('theme-transitioning');
+        }, 200);
+      });
+    });
+  }, [attribute]);
+  
+  // Apply theme changes when theme state changes
+  useEffect(() => {
+    applyThemeChanges(theme);
     
   }, [theme, attribute]);
 
   const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    // Apply transitioning class immediately before state update
+    document.documentElement.classList.add('theme-transitioning');
+    
+    setTheme(prevTheme => {
+      const newTheme = prevTheme === 'light' ? 'dark' : 'light';
+      return newTheme;
+    });
   };
 
   const isDark = theme === 'dark';
