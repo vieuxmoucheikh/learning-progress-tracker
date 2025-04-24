@@ -104,17 +104,26 @@ export function ThemeProvider({ children, attribute, defaultTheme, enableSystem 
   }, [theme, attribute]);
 
   const toggleTheme = () => {
-    setTheme(prevTheme => {
-      const newTheme = prevTheme === 'light' ? 'dark' : 'light';
-      
-      // Dispatch theme change event for our helper script
-      const themeChangeEvent = new CustomEvent('themeChanged', {
-        detail: { theme: newTheme }
+    // Add transitioning class immediately before state update
+    document.documentElement.classList.add('theme-transitioning');
+    
+    // Force a reflow to ensure the transitioning class is applied
+    document.documentElement.offsetHeight;
+    
+    // Set a brief timeout to ensure all elements are hidden
+    setTimeout(() => {
+      setTheme(prevTheme => {
+        const newTheme = prevTheme === 'light' ? 'dark' : 'light';
+        
+        // Dispatch theme change event for our helper script
+        const themeChangeEvent = new CustomEvent('themeChanged', {
+          detail: { theme: newTheme }
+        });
+        document.dispatchEvent(themeChangeEvent);
+        
+        return newTheme;
       });
-      document.dispatchEvent(themeChangeEvent);
-      
-      return newTheme;
-    });
+    }, 10);
   };
 
   const isDark = theme === 'dark';

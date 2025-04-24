@@ -9,21 +9,52 @@
     const style = document.createElement('style');
     style.id = 'critical-theme-styles';
     style.textContent = `
-      /* Immediately hide content during theme transition */
-      .theme-transitioning body {
+      /* Immediately hide ALL content during theme transition */
+      .theme-transitioning {
+        pointer-events: none !important;
+      }
+      
+      /* Hide everything */
+      .theme-transitioning * {
         opacity: 0 !important;
-        transition: opacity 0ms !important;
+        visibility: hidden !important;
+        transition: none !important;
+        animation: none !important;
+      }
+      
+      /* Specifically target navigation buttons like sign up */
+      .theme-transitioning header,
+      .theme-transitioning nav,
+      .theme-transitioning button,
+      .theme-transitioning [role="button"],
+      .theme-transitioning a,
+      .theme-transitioning [class*="sign"],
+      .theme-transitioning [class*="login"],
+      .theme-transitioning [class*="auth"] {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        position: absolute !important;
+        transform: translateX(-9999px) !important;
       }
       
       /* Ensure content appears smoothly after theme is applied */
-      body:not(.theme-transitioning) {
+      body:not(.theme-transitioning),
+      html:not(.theme-transitioning) #root,
+      html:not(.theme-transitioning) button,
+      html:not(.theme-transitioning) [role="button"],
+      html:not(.theme-transitioning) a {
         transition: opacity 300ms ease-in !important;
+        visibility: visible !important;
+        opacity: 1 !important;
       }
       
       /* Prevent any layout shifts */
       html, body, #root {
         min-height: 100vh;
         width: 100%;
+        overflow-x: hidden !important;
       }
     `;
     document.head.appendChild(style);

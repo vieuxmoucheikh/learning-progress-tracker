@@ -1,18 +1,41 @@
 /**
- * Radical approach for theme switching
- * Uses opacity transitions for perfectly clean theme changes
+ * Complete hiding approach for theme switching
+ * Ensures ALL elements are hidden during theme changes
  */
 
-/* During theme transition, completely hide content */
-.theme-transitioning body {
+/* During theme transition, completely hide ALL content */
+.theme-transitioning {
+  pointer-events: none !important;
+}
+
+/* Hide everything to prevent any flashing elements */
+.theme-transitioning body,
+.theme-transitioning #root,
+.theme-transitioning #root > *,
+.theme-transitioning header,
+.theme-transitioning nav,
+.theme-transitioning main,
+.theme-transitioning footer,
+.theme-transitioning button,
+.theme-transitioning [role="button"],
+.theme-transitioning a,
+.theme-transitioning div,
+.theme-transitioning span {
   opacity: 0 !important;
-  transition: opacity 0ms !important;
+  visibility: hidden !important;
+  transition: none !important;
+  animation: none !important;
 }
 
 /* After theme is applied, fade content back in */
-body:not(.theme-transitioning) {
-  opacity: 1 !important;
+html:not(.theme-transitioning) body,
+html:not(.theme-transitioning) #root,
+html:not(.theme-transitioning) button,
+html:not(.theme-transitioning) [role="button"],
+html:not(.theme-transitioning) a {
   transition: opacity 300ms ease-in !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* Disable all transitions during theme change */
@@ -72,7 +95,11 @@ body:not(.theme-transitioning) {
   }
   
   /* Longer fade-in for mobile devices */
-  body:not(.theme-transitioning) {
+  html:not(.theme-transitioning) body,
+  html:not(.theme-transitioning) #root,
+  html:not(.theme-transitioning) button,
+  html:not(.theme-transitioning) [role="button"],
+  html:not(.theme-transitioning) a {
     transition: opacity 400ms ease-in !important;
   }
   
@@ -80,16 +107,20 @@ body:not(.theme-transitioning) {
   html, body, #root {
     min-height: 100vh;
     width: 100%;
+    overflow-x: hidden !important;
   }
   
-  /* Ensure content is fully hidden during transition */
-  .theme-transitioning body {
+  /* Extra hiding for problematic elements on mobile */
+  .theme-transitioning header,
+  .theme-transitioning nav,
+  .theme-transitioning [role="navigation"],
+  .theme-transitioning button,
+  .theme-transitioning [role="button"],
+  .theme-transitioning a {
+    display: none !important;
+    opacity: 0 !important;
     visibility: hidden !important;
-  }
-  
-  /* Ensure content is visible after transition */
-  body:not(.theme-transitioning) {
-    visibility: visible !important;
+    pointer-events: none !important;
   }
   
   /* Prevent any transitions on mobile during theme change */
