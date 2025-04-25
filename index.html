@@ -152,11 +152,69 @@
     >
     <div id="root"></div>
 
-    <!-- Script de correction du mode clair, chargé de manière critique -->
-    <script type="module" src="/light-mode-fixer.js"></script>
+    <!-- Scripts are loaded as assets rather than modules to avoid Vite build issues -->
+    <script>
+      // Inline light mode fixer to avoid external file dependency
+      (function() {
+        // Check if we're in light mode
+        const isLightMode = () => {
+          const storedTheme = localStorage.getItem('theme');
+          if (storedTheme === 'light') return true;
+          if (storedTheme === 'dark') return false;
+          
+          // Check system preference if no stored preference
+          return window.matchMedia && !window.matchMedia('(prefers-color-scheme: dark)').matches;
+        };
 
-    <!-- Script d'application des styles pour les cartes -->
-    <script type="module" src="/card-styler.js"></script>
+        // Apply light mode fixes
+        const applyLightModeFixes = () => {
+          if (isLightMode()) {
+            // Add light mode class to html element
+            document.documentElement.classList.add('light');
+            document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
+            
+            // Apply critical light mode styles
+            const style = document.createElement('style');
+            style.textContent = `
+              body, #root {
+                background-color: #f8fafc !important;
+                color: #0f172a !important;
+              }
+              
+              .card, [class*="Card"], [class*="-card"] {
+                background-color: #ffffff !important;
+                border: 1px solid rgba(0, 0, 0, 0.1) !important;
+              }
+            `;
+            document.head.appendChild(style);
+          }
+        };
+
+        // Run immediately
+        applyLightModeFixes();
+        
+        // Also run when DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', applyLightModeFixes);
+      })();
+      
+      // Inline card styler
+      document.addEventListener('DOMContentLoaded', function() {
+        // Select all learning cards
+        const cards = document.querySelectorAll('.learning-item-card > .card, .item-wrapper > .card');
+        
+        // Apply styles to each card
+        cards.forEach(card => {
+          card.style.border = '3px solid #cbd5e1';
+          card.style.borderLeftWidth = '8px';
+          card.style.borderLeftColor = '#3b82f6';
+          card.style.borderRadius = '18px';
+          card.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.1)';
+          card.style.overflow = 'hidden';
+          card.style.marginBottom = '32px';
+        });
+      });
+    </script>
 
     <!-- Script de détection préliminaire du thème -->
     <script>
