@@ -1,0 +1,91 @@
+/* Force calendar indicators to be visible in light mode on mobile */
+@media (max-width: 768px) {
+  /* Target all calendar cells that have activity indicators */
+  html[data-theme="light"] [class*="calendar"] [class*="activity"]::after,
+  html[data-theme="light"] [class*="calendar"] [class*="has-activity"]::after,
+  html[data-theme="light"] [class*="calendar"] [data-activity="true"]::after,
+  html[data-theme="light"] [class*="calendar"] [class*="items-"]::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: 2px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 12px !important;
+    height: 12px !important;
+    border-radius: 50% !important;
+    background-color: #3b82f6 !important; /* Blue */
+    border: 2px solid white !important;
+    box-shadow: 0 0 6px rgba(59, 130, 246, 1) !important;
+    z-index: 9999 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    pointer-events: none !important;
+  }
+
+  /* Completed activities - Green */
+  html[data-theme="light"] [class*="calendar"] [class*="completed"]::after,
+  html[data-theme="light"] [class*="calendar"] [data-completed="true"]::after {
+    background-color: #10b981 !important; /* Green */
+    box-shadow: 0 0 6px rgba(16, 185, 129, 1) !important;
+  }
+
+  /* Active/in-progress activities - Amber */
+  html[data-theme="light"] [class*="calendar"] [class*="active"]::after,
+  html[data-theme="light"] [class*="calendar"] [class*="in-progress"]::after,
+  html[data-theme="light"] [class*="calendar"] [data-active="true"]::after {
+    background-color: #f59e0b !important; /* Amber */
+    box-shadow: 0 0 6px rgba(245, 158, 11, 1) !important;
+  }
+
+  /* Many activities - Purple and larger */
+  html[data-theme="light"] [class*="calendar"] [class*="many-activities"]::after,
+  html[data-theme="light"] [class*="calendar"] [data-many-activities="true"]::after,
+  html[data-theme="light"] [class*="calendar"] [class*="items-3"]::after,
+  html[data-theme="light"] [class*="calendar"] [class*="items-4"]::after,
+  html[data-theme="light"] [class*="calendar"] [class*="items-5"]::after {
+    background-color: #8b5cf6 !important; /* Purple */
+    width: 14px !important;
+    height: 14px !important;
+    box-shadow: 0 0 6px rgba(139, 92, 246, 1) !important;
+  }
+
+  /* Add a second indicator for days with multiple types of activities */
+  html[data-theme="light"] [class*="calendar"] [class*="has-completed"][class*="has-active"]::before,
+  html[data-theme="light"] [class*="calendar"] [data-completed="true"][data-active="true"]::before {
+    content: '' !important;
+    position: absolute !important;
+    bottom: 2px !important;
+    left: calc(50% + 8px) !important;
+    width: 12px !important;
+    height: 12px !important;
+    border-radius: 50% !important;
+    background-color: #10b981 !important; /* Green */
+    border: 2px solid white !important;
+    box-shadow: 0 0 6px rgba(16, 185, 129, 1) !important;
+    z-index: 9999 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    pointer-events: none !important;
+  }
+
+  /* Adjust the position of the first indicator when there are two */
+  html[data-theme="light"] [class*="calendar"] [class*="has-completed"][class*="has-active"]::after,
+  html[data-theme="light"] [class*="calendar"] [data-completed="true"][data-active="true"]::after {
+    left: calc(50% - 8px) !important;
+  }
+
+  /* Make sure calendar cells have position relative for absolute positioning to work */
+  html[data-theme="light"] [class*="calendar"] td,
+  html[data-theme="light"] [class*="calendar"] [role="gridcell"] {
+    position: relative !important;
+  }
+
+  /* Override any other styles that might be hiding the indicators */
+  html[data-theme="light"] [class*="calendar"] *::after,
+  html[data-theme="light"] [class*="calendar"] *::before {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+}
