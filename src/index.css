@@ -294,7 +294,7 @@ pre {
 /* Ensure proper contrast for all UI elements */
 .dark input::placeholder,
 .dark textarea::placeholder {
-  @apply text-gray-400;
+  color: #9ca3af; /* Direct color value instead of @apply text-gray-400 */
 }
 
 .light input::placeholder,
