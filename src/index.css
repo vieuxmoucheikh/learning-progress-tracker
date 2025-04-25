@@ -1,8 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Importer les corrections pour le mode clair sur mobile après les directives Tailwind */
+/* All imports must be at the top of the file */
 @import './styles/mobile-light-mode-fixes.css';
 @import './styles/critical-light-mode-fixes.css';
 @import './styles/global-ui-enhancements.css';
@@ -14,9 +10,12 @@
 @import './components/Calendar.css';
 @import './components/StatusBadge.css';
 @import './components/PomodoroTimer.css';
-
-/* Importer les corrections pour le mode clair sur mobile */
 @import '../public/mobile-light-mode.css';
+
+/* Tailwind directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
   :root {
