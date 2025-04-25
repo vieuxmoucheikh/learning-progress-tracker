@@ -1,93 +1,53 @@
 /**
- * Enhanced fixes for theme switching
- * Focused on smooth transitions without layout shifts or flickering
+ * Simplified theme switching fixes
+ * Focus on clean transitions with no visual artifacts
  */
 
-/* Disable transitions during theme change to prevent weird effects */
+/* Complete freeze of all animations and transitions during theme change */
 .theme-transitioning * {
   transition: none !important;
   animation: none !important;
-  /* Prevent content flash */
+  /* Prevent any style calculations during transition */
   will-change: auto;
+  /* Ensure no text rendering changes occur */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Exception for the theme toggle button to keep its transitions */
-.theme-transitioning .theme-toggle-button {
-  transition: background-color 0.2s ease !important;
-}
+/* No exceptions - even the toggle button should freeze during transition */
 
-.theme-transitioning .theme-toggle-button * {
-  transition: opacity 0.2s ease, color 0.2s ease !important;
-}
-
-/* Styles for the theme toggle button */
+/* Simple styles for the theme toggle button - no fancy effects */
 .theme-toggle-button {
   position: relative;
   overflow: hidden;
   min-width: 6.5rem !important;
   height: 2rem !important;
-  transition: background-color 0.3s ease;
 }
 
-/* Indicator bar transition */
-.theme-toggle-button > div:last-child {
-  transition: transform 0.3s ease, background-color 0.3s ease;
-}
-
-/* Ripple effect for the toggle button */
-.theme-toggle-button::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
-  opacity: 0;
-  transform: scale(0);
-  pointer-events: none;
-}
-
-.theme-toggle-button:active::after {
-  transform: scale(2);
-  opacity: 0.3;
-  transition: 0s;
-}
-
-/* Fix for mobile devices */
+/* Special handling for mobile */
 @media (max-width: 768px) {
-  .theme-toggle-button {
-    min-width: 6.5rem !important;
+  /* Prevent any transitions on mobile during theme change */
+  .theme-transitioning * {
+    transition: none !important;
+    animation: none !important;
   }
   
-  /* Prevent layout shifts on mobile */
-  .theme-transitioning body {
+  /* Ensure the page doesn't jump */
+  body {
     min-height: 100vh;
   }
   
-  /* Prevent flickering on mobile */
+  /* Prevent any background color transitions on mobile */
   html[data-theme="light"] body,
   html[data-theme="dark"] body {
-    transition: background-color 0.2s ease-out;
+    transition: none;
   }
   
-  /* Ensure cards maintain their appearance during transitions */
+  /* Prevent any card transitions on mobile */
   html[data-theme="light"] .card,
   html[data-theme="dark"] .card,
   html[data-theme="light"] [class*="card"],
   html[data-theme="dark"] [class*="card"] {
-    transition: background-color 0.2s ease-out, border-color 0.2s ease-out, box-shadow 0.2s ease-out;
-  }
-  
-  /* Prevent FOUC (Flash of Unstyled Content) */
-  .theme-transitioning .card,
-  .theme-transitioning [class*="card"],
-  .theme-transitioning button,
-  .theme-transitioning [role="button"],
-  .theme-transitioning .badge,
-  .theme-transitioning [class*="badge"] {
-    opacity: 0.99; /* Slight opacity change to force GPU rendering */
-    transform: translateZ(0);
-    backface-visibility: hidden;
+    transition: none;
   }
 }
