@@ -20,26 +20,45 @@
     border: 1px solid #60a5fa !important;
   }
 
-  /* Improve activity indicators */
+  /* Improve activity indicators - make them much more visible */
   html[data-theme="light"] [class*="calendar"] [class*="activity"]::after {
     content: '' !important;
     position: absolute !important;
     bottom: 3px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
-    width: 6px !important;
-    height: 6px !important;
+    width: 8px !important;
+    height: 8px !important;
     border-radius: 50% !important;
     background-color: #3b82f6 !important;
-    box-shadow: 0 0 3px rgba(59, 130, 246, 0.5) !important;
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.8) !important;
+    z-index: 10 !important;
   }
 
   /* Improve many activities indicators */
   html[data-theme="light"] [class*="calendar"] [class*="many-activities"]::after {
     background-color: #8b5cf6 !important; /* Violet for more activities */
-    width: 8px !important;
-    height: 8px !important;
-    box-shadow: 0 0 3px rgba(139, 92, 246, 0.5) !important;
+    width: 10px !important;
+    height: 10px !important;
+    box-shadow: 0 0 5px rgba(139, 92, 246, 0.8) !important;
+  }
+  
+  /* Specific styles for different activity types */
+  html[data-theme="light"] [class*="calendar"] [class*="completed-activity"]::after,
+  html[data-theme="light"] [class*="calendar"] [class*="completed"]::after {
+    background-color: #10b981 !important; /* Green for completed */
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.8) !important;
+  }
+  
+  html[data-theme="light"] [class*="calendar"] [class*="active-activity"]::after,
+  html[data-theme="light"] [class*="calendar"] [class*="in-progress"]::after {
+    background-color: #f59e0b !important; /* Amber for active/in progress */
+    box-shadow: 0 0 5px rgba(245, 158, 11, 0.8) !important;
+  }
+  
+  /* Add a border around the indicators to make them stand out more */
+  html[data-theme="light"] [class*="calendar"] [class*="activity"]::after {
+    border: 1px solid white !important;
   }
 
   /* Improve calendar day cells */

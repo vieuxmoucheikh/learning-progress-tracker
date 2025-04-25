@@ -35,41 +35,70 @@
         today.style.border = '1px solid #60a5fa';
       });
       
-      // Améliorer les indicateurs d'activité
+      // Améliorer les indicateurs d'activité - version renforcée pour une meilleure visibilité
       const activityIndicators = calendar.querySelectorAll('[class*="activity"]');
       activityIndicators.forEach(indicator => {
-        // Vérifier si l'élément a déjà un pseudo-élément ::after
-        const style = window.getComputedStyle(indicator, '::after');
-        if (style) {
-          // Ajouter un style inline pour renforcer la visibilité
-          indicator.style.position = 'relative';
+        // Ajouter un style inline pour renforcer la visibilité
+        indicator.style.position = 'relative';
+        
+        // Supprimer les points d'activité existants pour éviter les doublons
+        const existingDots = indicator.querySelectorAll('.activity-dot-js');
+        existingDots.forEach(dot => dot.remove());
+        
+        // Créer un élément pour les indicateurs d'activité
+        const activityDot = document.createElement('div');
+        activityDot.classList.add('activity-dot-js');
+        activityDot.style.position = 'absolute';
+        activityDot.style.bottom = '3px';
+        activityDot.style.left = '50%';
+        activityDot.style.transform = 'translateX(-50%)';
+        activityDot.style.width = '8px';
+        activityDot.style.height = '8px';
+        activityDot.style.borderRadius = '50%';
+        activityDot.style.backgroundColor = '#3b82f6'; // Bleu par défaut
+        activityDot.style.boxShadow = '0 0 5px rgba(59, 130, 246, 0.8)';
+        activityDot.style.zIndex = '10';
+        activityDot.style.border = '1px solid white';
+        
+        // Déterminer le type d'activité et appliquer la couleur appropriée
+        if (indicator.classList.contains('many-activities') || indicator.className.includes('many-activities')) {
+          // Beaucoup d'activités - violet
+          activityDot.style.backgroundColor = '#8b5cf6';
+          activityDot.style.width = '10px';
+          activityDot.style.height = '10px';
+          activityDot.style.boxShadow = '0 0 5px rgba(139, 92, 246, 0.8)';
+        } else if (indicator.classList.contains('completed-activity') || indicator.className.includes('completed')) {
+          // Activités complétées - vert
+          activityDot.style.backgroundColor = '#10b981';
+          activityDot.style.boxShadow = '0 0 5px rgba(16, 185, 129, 0.8)';
+        } else if (indicator.classList.contains('active-activity') || indicator.className.includes('in-progress')) {
+          // Activités actives/en cours - ambre
+          activityDot.style.backgroundColor = '#f59e0b';
+          activityDot.style.boxShadow = '0 0 5px rgba(245, 158, 11, 0.8)';
+        }
+        
+        // Ajouter le point d'activité
+        indicator.appendChild(activityDot);
+        
+        // Ajouter un second indicateur si nécessaire pour les jours avec plusieurs types d'activités
+        if ((indicator.classList.contains('has-completed') && indicator.classList.contains('has-active')) ||
+            (indicator.className.includes('completed') && indicator.className.includes('active'))) {
+          const secondDot = document.createElement('div');
+          secondDot.classList.add('activity-dot-js', 'second-dot');
+          secondDot.style.position = 'absolute';
+          secondDot.style.bottom = '3px';
+          secondDot.style.left = 'calc(50% + 6px)';
+          secondDot.style.width = '8px';
+          secondDot.style.height = '8px';
+          secondDot.style.borderRadius = '50%';
+          secondDot.style.backgroundColor = '#10b981'; // Vert pour complété
+          secondDot.style.boxShadow = '0 0 5px rgba(16, 185, 129, 0.8)';
+          secondDot.style.zIndex = '10';
+          secondDot.style.border = '1px solid white';
+          indicator.appendChild(secondDot);
           
-          // Créer un élément pour simuler le ::after (car on ne peut pas cibler directement les pseudo-éléments en JS)
-          const activityDot = document.createElement('div');
-          activityDot.style.position = 'absolute';
-          activityDot.style.bottom = '3px';
-          activityDot.style.left = '50%';
-          activityDot.style.transform = 'translateX(-50%)';
-          activityDot.style.width = '6px';
-          activityDot.style.height = '6px';
-          activityDot.style.borderRadius = '50%';
-          activityDot.style.backgroundColor = '#3b82f6';
-          activityDot.style.boxShadow = '0 0 3px rgba(59, 130, 246, 0.5)';
-          activityDot.style.zIndex = '5';
-          
-          // Vérifier si l'élément a beaucoup d'activités
-          if (indicator.classList.contains('many-activities') || indicator.className.includes('many-activities')) {
-            activityDot.style.backgroundColor = '#8b5cf6';
-            activityDot.style.width = '8px';
-            activityDot.style.height = '8px';
-            activityDot.style.boxShadow = '0 0 3px rgba(139, 92, 246, 0.5)';
-          }
-          
-          // Ajouter le point d'activité seulement s'il n'existe pas déjà
-          if (!indicator.querySelector('.activity-dot-js')) {
-            activityDot.classList.add('activity-dot-js');
-            indicator.appendChild(activityDot);
-          }
+          // Déplacer le premier point vers la gauche
+          activityDot.style.left = 'calc(50% - 6px)';
         }
       });
       
