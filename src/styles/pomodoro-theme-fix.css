@@ -1,0 +1,130 @@
+/**
+ * Pomodoro Theme Consistency Fixes
+ * Ensures buttons and UI elements maintain proper colors when switching themes
+ */
+
+/* Fix for button colors in light mode */
+html[data-theme="light"] .pomodoro-timer button.bg-blue-500,
+html[data-theme="light"] .pomodoro-timer button.bg-blue-500:hover,
+html[data-theme="light"] .pomodoro-timer button.bg-blue-600,
+html[data-theme="light"] .pomodoro-timer button[name="start"],
+html[data-theme="light"] .pomodoro-timer button[name="pause"] {
+  background-color: var(--blue-500, #3b82f6) !important;
+  color: white !important;
+  border-color: var(--blue-600, #2563eb) !important;
+}
+
+html[data-theme="light"] .pomodoro-timer button.bg-blue-500:hover,
+html[data-theme="light"] .pomodoro-timer button[name="start"]:hover,
+html[data-theme="light"] .pomodoro-timer button[name="pause"]:hover {
+  background-color: var(--blue-600, #2563eb) !important;
+}
+
+/* Fix for skip button in light mode */
+html[data-theme="light"] .pomodoro-timer button[name="skip"] {
+  background-color: var(--slate-700, #334155) !important;
+  color: white !important;
+  border-color: var(--slate-600, #475569) !important;
+}
+
+html[data-theme="light"] .pomodoro-timer button[name="skip"]:hover {
+  background-color: var(--slate-600, #475569) !important;
+}
+
+/* Fix for settings button in light mode */
+html[data-theme="light"] .pomodoro-timer button[name="settings"] {
+  background-color: var(--slate-700, #334155) !important;
+  color: white !important;
+  border-color: var(--slate-600, #475569) !important;
+}
+
+html[data-theme="light"] .pomodoro-timer button[name="settings"]:hover {
+  background-color: var(--slate-600, #475569) !important;
+}
+
+/* Fix for tooltip colors in light mode */
+html[data-theme="light"] .pomodoro-timer [role="tooltip"] {
+  background-color: var(--blue-600, #2563eb) !important;
+  color: white !important;
+  border-color: var(--blue-700, #1d4ed8) !important;
+}
+
+/* Fix for task buttons in light mode */
+html[data-theme="light"] .pomodoro-timer li button.bg-blue-500,
+html[data-theme="light"] .pomodoro-timer li button.bg-blue-500\/20 {
+  background-color: var(--blue-500, #3b82f6) !important;
+  color: white !important;
+}
+
+html[data-theme="light"] .pomodoro-timer li button.bg-blue-500:hover {
+  background-color: var(--blue-600, #2563eb) !important;
+}
+
+html[data-theme="light"] .pomodoro-timer li button.bg-blue-500\/20 {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+  color: var(--blue-700, #1d4ed8) !important;
+}
+
+html[data-theme="light"] .pomodoro-timer li button.bg-blue-500\/20:hover {
+  background-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Fix for pomodoro status badge in light mode */
+html[data-theme="light"] .pomodoro-timer .pomodoro-status > div {
+  background-color: var(--blue-600, #2563eb) !important;
+}
+
+/* Fix for progress indicators in light mode */
+html[data-theme="light"] .pomodoro-timer progress::-webkit-progress-value,
+html[data-theme="light"] .pomodoro-timer .progress-value {
+  background-color: var(--blue-500, #3b82f6) !important;
+}
+
+/* Fix for timer display in light mode */
+html[data-theme="light"] .pomodoro-timer .timer-display {
+  color: var(--slate-900, #0f172a) !important;
+}
+
+/* Fix for timer background in light mode */
+html[data-theme="light"] .pomodoro-timer [class*="bg-blue-400"],
+html[data-theme="light"] .pomodoro-timer [class*="bg-blue-500"] {
+  background-color: var(--blue-500, #3b82f6) !important;
+}
+
+/* Fix for task card backgrounds in light mode */
+html[data-theme="light"] .pomodoro-timer li {
+  background-color: white !important;
+  border-color: var(--slate-200, #e2e8f0) !important;
+}
+
+html[data-theme="light"] .pomodoro-timer li:hover {
+  background-color: var(--slate-50, #f8fafc) !important;
+}
+
+/* Fix for checkbox in light mode */
+html[data-theme="light"] .pomodoro-timer [data-state="checked"] {
+  background-color: var(--blue-500, #3b82f6) !important;
+  border-color: var(--blue-600, #2563eb) !important;
+}
+
+/* Fix for theme transition */
+.theme-transitioning .pomodoro-timer button,
+.theme-transitioning .pomodoro-timer [role="tooltip"],
+.theme-transitioning .pomodoro-timer li,
+.theme-transitioning .pomodoro-timer .pomodoro-status > div {
+  transition: none !important;
+}
+
+/* Ensure consistent colors when switching back to dark mode */
+html[data-theme="dark"] .pomodoro-timer button.bg-blue-500,
+html[data-theme="dark"] .pomodoro-timer button[name="start"],
+html[data-theme="dark"] .pomodoro-timer button[name="pause"] {
+  background-color: var(--blue-500, #3b82f6) !important;
+  color: white !important;
+}
+
+html[data-theme="dark"] .pomodoro-timer button.bg-blue-500:hover,
+html[data-theme="dark"] .pomodoro-timer button[name="start"]:hover,
+html[data-theme="dark"] .pomodoro-timer button[name="pause"]:hover {
+  background-color: var(--blue-600, #2563eb) !important;
+}

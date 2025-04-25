@@ -4,6 +4,8 @@ import '../styles/critical-light-mode-fixes.css';
 import '../styles/theme-transition.css';
 import '../styles/theme-sync.css';
 import '../styles/theme-switch-fixes.css';
+import '../styles/pomodoro-theme-fix.css';
+import '../styles/pomodoro-color-override.css';
 
 type Theme = 'light' | 'dark';
 
