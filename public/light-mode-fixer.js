@@ -2,6 +2,123 @@
  * Script pour corriger les problèmes de mode clair sur mobile et assurer une transition fluide
  */
 (function() {
+  function fixCalendarLightMode() {
+    // Sélectionner les éléments du calendrier
+    const calendarElements = document.querySelectorAll('[class*="calendar"]');
+    
+    // Appliquer les styles spécifiques au calendrier
+    calendarElements.forEach(calendar => {
+      // Assurer que le fond du calendrier est blanc
+      calendar.style.backgroundColor = '#ffffff';
+      calendar.style.borderRadius = '12px';
+      calendar.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.08)';
+      calendar.style.border = '1px solid rgba(0, 0, 0, 0.06)';
+      calendar.style.overflow = 'hidden';
+      
+      // Améliorer les jours sélectionnés
+      const selectedDays = calendar.querySelectorAll('[role="gridcell"] button[data-state="active"], td button.selected, [class*="selected"]');
+      selectedDays.forEach(day => {
+        day.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+        day.style.color = 'white';
+        day.style.fontWeight = '700';
+        day.style.boxShadow = '0 2px 8px rgba(37, 99, 235, 0.3)';
+        day.style.border = '2px solid #2563eb';
+      });
+      
+      // Améliorer les jours d'aujourd'hui
+      const todayElements = calendar.querySelectorAll('[class*="today"]');
+      todayElements.forEach(today => {
+        today.style.background = 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)';
+        today.style.color = '#1e40af';
+        today.style.fontWeight = '700';
+        today.style.boxShadow = '0 2px 6px rgba(37, 99, 235, 0.2)';
+        today.style.border = '1px solid #60a5fa';
+      });
+      
+      // Améliorer les indicateurs d'activité
+      const activityIndicators = calendar.querySelectorAll('[class*="activity"]');
+      activityIndicators.forEach(indicator => {
+        // Vérifier si l'élément a déjà un pseudo-élément ::after
+        const style = window.getComputedStyle(indicator, '::after');
+        if (style) {
+          // Ajouter un style inline pour renforcer la visibilité
+          indicator.style.position = 'relative';
+          
+          // Créer un élément pour simuler le ::after (car on ne peut pas cibler directement les pseudo-éléments en JS)
+          const activityDot = document.createElement('div');
+          activityDot.style.position = 'absolute';
+          activityDot.style.bottom = '3px';
+          activityDot.style.left = '50%';
+          activityDot.style.transform = 'translateX(-50%)';
+          activityDot.style.width = '6px';
+          activityDot.style.height = '6px';
+          activityDot.style.borderRadius = '50%';
+          activityDot.style.backgroundColor = '#3b82f6';
+          activityDot.style.boxShadow = '0 0 3px rgba(59, 130, 246, 0.5)';
+          activityDot.style.zIndex = '5';
+          
+          // Vérifier si l'élément a beaucoup d'activités
+          if (indicator.classList.contains('many-activities') || indicator.className.includes('many-activities')) {
+            activityDot.style.backgroundColor = '#8b5cf6';
+            activityDot.style.width = '8px';
+            activityDot.style.height = '8px';
+            activityDot.style.boxShadow = '0 0 3px rgba(139, 92, 246, 0.5)';
+          }
+          
+          // Ajouter le point d'activité seulement s'il n'existe pas déjà
+          if (!indicator.querySelector('.activity-dot-js')) {
+            activityDot.classList.add('activity-dot-js');
+            indicator.appendChild(activityDot);
+          }
+        }
+      });
+      
+      // Améliorer les cellules de jour
+      const dayCells = calendar.querySelectorAll('td');
+      dayCells.forEach(cell => {
+        cell.style.position = 'relative';
+        cell.style.textAlign = 'center';
+        cell.style.padding = '0.5rem';
+        cell.style.borderRadius = '8px';
+        cell.style.transition = 'all 0.2s ease';
+        
+        // Améliorer les boutons de jour
+        const dayButton = cell.querySelector('button');
+        if (dayButton) {
+          dayButton.style.width = '36px';
+          dayButton.style.height = '36px';
+          dayButton.style.borderRadius = '50%';
+          dayButton.style.display = 'flex';
+          dayButton.style.alignItems = 'center';
+          dayButton.style.justifyContent = 'center';
+          dayButton.style.margin = '0 auto';
+          dayButton.style.fontWeight = '500';
+          dayButton.style.position = 'relative';
+          dayButton.style.zIndex = '1';
+          
+          // Ajouter un effet de survol
+          dayButton.addEventListener('mouseenter', function() {
+            if (!dayButton.classList.contains('selected') && 
+                !dayButton.hasAttribute('data-state') && 
+                !dayButton.parentElement.classList.contains('today')) {
+              dayButton.style.backgroundColor = '#e0e7ff';
+              dayButton.style.color = '#4f46e5';
+            }
+          });
+          
+          dayButton.addEventListener('mouseleave', function() {
+            if (!dayButton.classList.contains('selected') && 
+                !dayButton.hasAttribute('data-state') && 
+                !dayButton.parentElement.classList.contains('today')) {
+              dayButton.style.backgroundColor = '';
+              dayButton.style.color = '';
+            }
+          });
+        }
+      });
+    });
+  }
+
   function fixLightMode() {
     // Détecter si on est en mode clair
     const isLightMode = document.documentElement.getAttribute('data-theme') === 'light';
@@ -35,6 +152,9 @@
         '[class*="border-blue-"]',
         '[class*="border-emerald-"]'
       ];
+      
+      // Améliorer le calendrier en mode clair sur mobile
+      fixCalendarLightMode();
       
       // Sélectionner toutes les cartes
       const cards = document.querySelectorAll(cardSelectors.join(','));
