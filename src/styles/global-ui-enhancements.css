@@ -145,9 +145,13 @@ button:active,
 }
 
 .dark .text-gray-300,
-.dark .text-gray-400,
 .dark .text-gray-500 {
   color: var(--text-secondary) !important;
+}
+
+/* Fix for circular dependency */
+.dark .text-gray-400 {
+  color: #e2e8f0 !important; /* Using direct color value instead of @apply */
 }
 
 .dark h1, 
