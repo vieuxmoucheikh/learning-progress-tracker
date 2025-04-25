@@ -20,7 +20,6 @@ export const TabNavigation: React.FC<TabNavProps> = ({ activeTab, onTabChange })
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const activeTabRef = useRef<HTMLButtonElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const lastTouchX = useRef<number | null>(null);
   
   // Liste des onglets avec leurs icônes et descriptions
   const tabs = [
@@ -68,59 +67,35 @@ export const TabNavigation: React.FC<TabNavProps> = ({ activeTab, onTabChange })
     },
   ];
 
-  // Gestion du scroll vers l'onglet actif sur mobile
+  // Scroll to active tab when it changes or on mobile resize
   useEffect(() => {
-    if (isMobile && activeTabRef.current && scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const activeTab = activeTabRef.current;
-      
-      // Calculer la position de défilement pour centrer l'élément
-      const scrollLeft = activeTab.offsetLeft - (container.clientWidth / 2) + (activeTab.clientWidth / 2);
-      
-      // Appliquer le défilement avec une animation fluide
-      // Utiliser requestAnimationFrame pour une animation plus fluide
-      requestAnimationFrame(() => {
-        container.scrollTo({
-          left: scrollLeft,
-          behavior: 'smooth'
-        });
-      });
+    if (activeTabRef.current && scrollContainerRef.current) {
+      setTimeout(() => {
+        if (activeTabRef.current && scrollContainerRef.current) {
+          // Simple direct scrolling without animations or calculations
+          activeTabRef.current.scrollIntoView({ 
+            inline: 'center',
+            block: 'nearest'
+          });
+        }
+      }, 100); // Short delay to ensure rendering is complete
     }
   }, [activeTab, isMobile]);
 
-  // Détection des changements de taille d'écran pour les adaptations responsive
+  // Handle window resize
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      const newIsMobile = window.innerWidth < 768;
+      setIsMobile(newIsMobile);
     };
     
     window.addEventListener('resize', handleResize);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Gestion du défilement tactile horizontal sur mobile
-  const handleTouchStart = (e: React.TouchEvent) => {
-    lastTouchX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (scrollContainerRef.current && lastTouchX.current !== null) {
-      const touchXDiff = lastTouchX.current - e.touches[0].clientX;
-      scrollContainerRef.current.scrollLeft += touchXDiff;
-      lastTouchX.current = e.touches[0].clientX;
-      
-      // Prevent default to avoid page scrolling while swiping the tabs
-      if (Math.abs(touchXDiff) > 5) {
-        e.preventDefault();
-      }
-    }
-  };
-  
-  const handleTouchEnd = () => {
-    lastTouchX.current = null;
+  // Simple tab click handler
+  const handleTabClick = (tabId: string) => {
+    onTabChange(tabId);
   };
 
   return (
@@ -131,13 +106,10 @@ export const TabNavigation: React.FC<TabNavProps> = ({ activeTab, onTabChange })
         </div>
       </div>
       
+      {/* Simplified navigation items container */}
       <div 
         className="tab-navigation-items" 
         ref={scrollContainerRef}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
         role="tablist"
         aria-orientation={isMobile ? "horizontal" : "vertical"}
         aria-label="Navigation principale"
@@ -146,12 +118,8 @@ export const TabNavigation: React.FC<TabNavProps> = ({ activeTab, onTabChange })
           <button
             key={tab.id}
             ref={tab.id === activeTab ? activeTabRef : null}
-            onClick={() => onTabChange(tab.id)}
-            className={`
-              tab-navigation-item
-              ${activeTab === tab.id ? 'active' : ''}
-              flex items-center gap-2 transition-all
-            `}
+            onClick={() => handleTabClick(tab.id)}
+            className={`tab-navigation-item ${activeTab === tab.id ? 'active' : ''}`}
             style={{ '--item-index': index } as React.CSSProperties}
             tabIndex={0}
             aria-current={activeTab === tab.id ? 'page' : undefined}

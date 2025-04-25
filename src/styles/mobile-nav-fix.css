@@ -1,0 +1,65 @@
+/* 
+ * Mobile Navigation Fix
+ * This file contains specific fixes for mobile navigation scrolling issues
+ */
+
+/* Basic mobile navigation styles */
+@media (max-width: 767px) {
+  /* Force hardware acceleration for smoother scrolling */
+  .tab-navigation-items {
+    -webkit-overflow-scrolling: auto !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    padding: 0.5rem !important;
+    scroll-behavior: auto !important;
+    /* Force hardware acceleration */
+    transform: translateZ(0) !important;
+    will-change: scroll-position !important;
+    /* Ensure proper spacing */
+    gap: 0.5rem !important;
+  }
+
+  /* Hide scrollbar */
+  .tab-navigation-items::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  /* Ensure tab items are properly sized */
+  .tab-navigation-item {
+    flex: 0 0 auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    margin: 0 0.25rem !important;
+    padding: 0.65rem 0.85rem !important;
+    border-radius: 10px !important;
+    min-width: auto !important;
+    /* Improve touch target */
+    touch-action: manipulation !important;
+  }
+
+  /* Ensure container doesn't interfere with scrolling */
+  .tab-navigation-container {
+    overflow: visible !important;
+  }
+  
+  /* Ensure active tab is visible */
+  .tab-navigation-item.active {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+  }
+}
+
+/* iOS specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .tab-navigation-items {
+    -webkit-overflow-scrolling: touch !important;
+  }
+}

@@ -13,6 +13,7 @@ import '../public/emergency-mobile-fix.css' // Ajout du correctif d'urgence
 import './styles/card-fixes.css';
 import './styles/dark-mode-category-fixes.css'; // Ajout du nouveau fichier CSS
 import './styles/mobile-scroll-fixes.css'; // Ajout des correctifs pour le défilement mobile
+import './styles/mobile-nav-fix.css'; // Nouveau correctif pour la navigation mobile
 
 // Injecter un style critique pour assurer la visibilité des compteurs et statuts
 const injectCriticalStyles = () => {
