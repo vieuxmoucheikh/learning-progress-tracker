@@ -1,0 +1,59 @@
+/* Direct fix for calendar indicators in light mode on mobile */
+@media (max-width: 768px) {
+  /* Target the activity indicators container */
+  html[data-theme="light"] [class*="calendar"] .absolute.bottom-1.right-1.flex.flex-wrap.justify-end.gap-1 {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 9999 !important;
+  }
+  
+  /* Target the individual indicators */
+  html[data-theme="light"] [class*="calendar"] .w-2.h-2.bg-blue-500,
+  html[data-theme="light"] [class*="calendar"] .w-2.h-2.bg-green-500,
+  html[data-theme="light"] [class*="calendar"] .w-2.h-2.bg-gray-500,
+  html[data-theme="light"] [class*="calendar"] .w-2.h-2.bg-yellow-500 {
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 50% !important;
+    border: 1px solid white !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
+  }
+  
+  /* Blue indicator for active tasks */
+  html[data-theme="light"] [class*="calendar"] .w-2.h-2.bg-blue-500 {
+    background-color: #3b82f6 !important;
+    box-shadow: 0 0 4px rgba(59, 130, 246, 0.8) !important;
+  }
+  
+  /* Green indicator for completed tasks */
+  html[data-theme="light"] [class*="calendar"] .w-2.h-2.bg-green-500 {
+    background-color: #10b981 !important;
+    box-shadow: 0 0 4px rgba(16, 185, 129, 0.8) !important;
+  }
+  
+  /* Gray indicator for archived tasks */
+  html[data-theme="light"] [class*="calendar"] .w-2.h-2.bg-gray-500 {
+    background-color: #6b7280 !important;
+    box-shadow: 0 0 4px rgba(107, 114, 128, 0.8) !important;
+  }
+  
+  /* Yellow indicator for sessions */
+  html[data-theme="light"] [class*="calendar"] .w-2.h-2.bg-yellow-500 {
+    background-color: #f59e0b !important;
+    box-shadow: 0 0 4px rgba(245, 158, 11, 0.8) !important;
+  }
+  
+  /* Remove any weird blue points that might be showing up */
+  html[data-theme="light"] [class*="calendar"] *::after,
+  html[data-theme="light"] [class*="calendar"] *::before {
+    display: none !important;
+  }
+  
+  /* But keep the actual indicators */
+  html[data-theme="light"] [class*="calendar"] .w-2.h-2 {
+    display: block !important;
+  }
+}
