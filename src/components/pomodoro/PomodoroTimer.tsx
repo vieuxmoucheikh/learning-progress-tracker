@@ -1588,7 +1588,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     setCurrentTask("");
                                 }
                             }}
-                            className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20 border-blue-600/50 transition-colors"
+                            className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20"
                         >
                             Add
                         </Button>
@@ -1652,17 +1652,17 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                         <Button
                                             onClick={() => setTaskActive(task.id)}
                                             className={cn(
-                                                "transition-colors duration-200",
+                                                "transition-all duration-200",
                                                 activeTaskId === task.id
-                                                    ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20 border-blue-600/50"
-                                                    : "bg-blue-500/20 text-blue-100 hover:bg-blue-500/30 border-blue-500/30"
+                                                    ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+                                                    : "bg-blue-500/20 text-blue-100 hover:bg-blue-500/30"
                                             )}
                                         >
                                             {activeTaskId === task.id ? "Active" : "Start"}
                                         </Button>
                                         <Button
                                             onClick={() => removeTask(task.id)}
-                                            className="h-9 px-3 bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-red-100 border border-red-500/30 rounded-md transition-colors"
+                                            className="h-9 px-3 bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-red-100 border border-red-500/30 rounded-md"
                                         >
                                             <X className="h-4 w-4" />
                                         </Button>
@@ -1688,17 +1688,17 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     onClick={handleButtonClick}
                                     disabled={!activeTaskId}
                                     className={cn(
-                                        "w-24 transition-colors duration-300 shadow-lg rounded-full",
+                                        "w-24 transition-all duration-300 shadow-lg rounded-full",
                                         isActive
-                                            ? "bg-blue-500 hover:bg-blue-600 text-white shadow-blue-500/30 border-blue-600/50"
-                                            : "bg-green-500 hover:bg-green-600 text-white shadow-green-500/30 border-green-600/50",
+                                            ? "bg-blue-500 hover:bg-blue-600 shadow-blue-500/30"
+                                            : "bg-green-500 hover:bg-green-600 shadow-green-500/30",
                                         !activeTaskId && "opacity-50"
                                     )}
                                 >
                                     {isActive ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent className="bg-blue-600/90 text-white border-blue-700/80 shadow-lg">
+                            <TooltipContent className="bg-blue-600 text-white border-blue-700">
                                 {activeTaskId ? `Space to ${isActive ? 'Pause' : 'Start'}` : 'Select a task first'}
                             </TooltipContent> 
                         </Tooltip>
@@ -1708,12 +1708,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     name="skip"
                                     onClick={handleButtonClick}
                                     disabled={!activeTaskId || !isActive}
-                                    className="bg-blue-500/20 text-blue-100 hover:bg-blue-500/30 border-blue-500/30 rounded-full transition-colors"
+                                    className="border-slate-600/50 hover:border-slate-500 hover:bg-slate-700/50 rounded-full"
                                 >
                                     <SkipForwardIcon className="h-6 w-6" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent className="bg-blue-600/90 text-white border-blue-700/80 shadow-lg">
+                            <TooltipContent className="bg-blue-600 text-white border-blue-700">
                                 Press 'S' to Skip
                             </TooltipContent>
                         </Tooltip>
@@ -1722,12 +1722,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                 <Button
                                     name="settings"
                                     onClick={() => setSettingsOpen(true)}
-                                    className="bg-blue-500/20 text-blue-100 hover:bg-blue-500/30 border-blue-500/30 rounded-full transition-colors"
+                                    className="border-slate-600/50 hover:border-slate-500 hover:bg-slate-700/50 rounded-full"
                                 >
                                     <Settings2Icon className="h-6 w-6" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent className="bg-blue-600/90 text-white border-blue-700/80 shadow-lg">
+                            <TooltipContent className="bg-blue-600 text-white border-blue-700">
                                 Settings
                             </TooltipContent>
                         </Tooltip>

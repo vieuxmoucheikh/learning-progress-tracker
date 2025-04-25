@@ -2,7 +2,7 @@
 <html lang="fr">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="icon" href="/favicon.ico" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
@@ -12,12 +12,12 @@
       name="description"
       content="Application de suivi d'apprentissage - Organisez et suivez vos études et projets"
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link rel="apple-touch-icon" href="/logo192.png" />
+    <link rel="manifest" href="/manifest.json" />
 
     <!-- Préchargement des CSS critiques pour éviter le flash de contenu non stylisé -->
-    <link rel="preload" href="%PUBLIC_URL%/mobile-light-mode.css" as="style" />
-    <link rel="stylesheet" href="%PUBLIC_URL%/mobile-light-mode.css" />
+    <link rel="preload" href="/mobile-light-mode.css" as="style" />
+    <link rel="stylesheet" href="/mobile-light-mode.css" />
 
     <!-- Styles inline critiques pour les cartes -->
     <style>
@@ -43,7 +43,7 @@
     <meta name="format-detection" content="telephone=no" />
 
     <!-- Préchargement du script de correction du mode clair -->
-    <link rel="preload" href="%PUBLIC_URL%/light-mode-fixer.js" as="script" />
+    <link rel="preload" href="/light-mode-fixer.js" as="script" />
 
     <title>Learning Tracker</title>
 
@@ -153,10 +153,10 @@
     <div id="root"></div>
 
     <!-- Script de correction du mode clair, chargé de manière critique -->
-    <script src="%PUBLIC_URL%/light-mode-fixer.js"></script>
+    <script src="/light-mode-fixer.js"></script>
 
     <!-- Script d'application des styles pour les cartes -->
-    <script src="%PUBLIC_URL%/card-styler.js"></script>
+    <script src="/card-styler.js"></script>
 
     <!-- Script de détection préliminaire du thème -->
     <script>
@@ -173,5 +173,8 @@
         document.documentElement.classList.add(theme);
       })();
     </script>
+    
+    <!-- Reference to the main entry point for Vite -->
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
