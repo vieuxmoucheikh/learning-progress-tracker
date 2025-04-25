@@ -102,14 +102,74 @@
         }
       });
       
-      // Améliorer les cellules de jour
-      const dayCells = calendar.querySelectorAll('td');
+      // Améliorer les cellules de jour avec des couleurs spécifiques
+      const dayCells = calendar.querySelectorAll('td, [role="gridcell"]');
       dayCells.forEach(cell => {
         cell.style.position = 'relative';
         cell.style.textAlign = 'center';
         cell.style.padding = '0.5rem';
         cell.style.borderRadius = '8px';
         cell.style.transition = 'all 0.2s ease';
+        
+        // Appliquer des couleurs spécifiques en fonction des classes ou attributs
+        // Jour sélectionné
+        if (cell.classList.contains('selected') || 
+            cell.getAttribute('aria-selected') === 'true' || 
+            cell.querySelector('[data-state="active"]') || 
+            cell.querySelector('.selected')) {
+          cell.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+          cell.style.color = 'white';
+          cell.style.fontWeight = '700';
+          cell.style.boxShadow = '0 2px 8px rgba(37, 99, 235, 0.3)';
+        }
+        // Aujourd'hui
+        else if (cell.classList.contains('today') || cell.className.includes('today')) {
+          cell.style.background = 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)';
+          cell.style.color = '#1e40af';
+          cell.style.fontWeight = '700';
+          cell.style.boxShadow = '0 2px 6px rgba(37, 99, 235, 0.2)';
+        }
+        // Jours avec beaucoup d'activités (5+)
+        else if (cell.classList.contains('has-many-items') || 
+                 cell.className.includes('items-5') || 
+                 cell.className.includes('items-6') || 
+                 cell.className.includes('items-7')) {
+          cell.style.background = 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)';
+          cell.style.color = 'white';
+        }
+        // Jours avec 3-4 activités
+        else if (cell.className.includes('items-3') || cell.className.includes('items-4')) {
+          cell.style.background = 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)';
+          cell.style.color = 'white';
+        }
+        // Jours avec 2 activités
+        else if (cell.className.includes('items-2')) {
+          cell.style.background = 'linear-gradient(135deg, #86efac 0%, #4ade80 100%)';
+          cell.style.color = '#166534';
+        }
+        // Jours avec 1 activité
+        else if (cell.className.includes('items-1') || 
+                 cell.classList.contains('has-activity') || 
+                 cell.className.includes('activity')) {
+          cell.style.background = 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)';
+          cell.style.color = '#166534';
+        }
+        // Jours avec sessions mais pas d'activités
+        else if (cell.classList.contains('has-sessions') || cell.className.includes('sessions')) {
+          cell.style.background = 'linear-gradient(135deg, #fef9c3 0%, #fef08a 100%)';
+          cell.style.color = '#854d0e';
+        }
+        // Jours hors du mois courant
+        else if (cell.classList.contains('outside-month') || 
+                 cell.className.includes('outside') || 
+                 cell.className.includes('muted')) {
+          cell.style.backgroundColor = '#f8fafc';
+          cell.style.color = '#94a3b8';
+        }
+        // Jours normaux
+        else {
+          cell.style.backgroundColor = 'white';
+        }
         
         // Améliorer les boutons de jour
         const dayButton = cell.querySelector('button');
