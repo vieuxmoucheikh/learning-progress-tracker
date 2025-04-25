@@ -1863,14 +1863,14 @@ function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; is
             </div>
         </div>
     );
-}
+} 
 
 // Modifier le composant TaskProgress pour recevoir les settings
 function TaskProgress({ task, settings }: { task: Task; settings: PomodoroSettings | null }) {
     const { streakPercentage, dailyGoalPercentage } = getProgressStats(task, settings);
     const dailyGoal = settings?.daily_goal ?? 8; // Fix TypeScript error by using nullish coalescing operator
     
-    // Initialize metrics if they don't exist
+    // Initialize metrics if they don't exist at all
     const metrics = task.metrics || { completedPomodoros: 0, currentStreak: 0, totalMinutes: 0 };
     
     return (
