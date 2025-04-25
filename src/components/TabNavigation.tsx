@@ -78,9 +78,12 @@ export const TabNavigation: React.FC<TabNavProps> = ({ activeTab, onTabChange })
       const scrollLeft = activeTab.offsetLeft - (container.clientWidth / 2) + (activeTab.clientWidth / 2);
       
       // Appliquer le défilement avec une animation fluide
-      container.scrollTo({
-        left: scrollLeft,
-        behavior: 'smooth'
+      // Utiliser requestAnimationFrame pour une animation plus fluide
+      requestAnimationFrame(() => {
+        container.scrollTo({
+          left: scrollLeft,
+          behavior: 'smooth'
+        });
       });
     }
   }, [activeTab, isMobile]);
@@ -108,7 +111,16 @@ export const TabNavigation: React.FC<TabNavProps> = ({ activeTab, onTabChange })
       const touchXDiff = lastTouchX.current - e.touches[0].clientX;
       scrollContainerRef.current.scrollLeft += touchXDiff;
       lastTouchX.current = e.touches[0].clientX;
+      
+      // Prevent default to avoid page scrolling while swiping the tabs
+      if (Math.abs(touchXDiff) > 5) {
+        e.preventDefault();
+      }
     }
+  };
+  
+  const handleTouchEnd = () => {
+    lastTouchX.current = null;
   };
 
   return (
@@ -124,6 +136,8 @@ export const TabNavigation: React.FC<TabNavProps> = ({ activeTab, onTabChange })
         ref={scrollContainerRef}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
         role="tablist"
         aria-orientation={isMobile ? "horizontal" : "vertical"}
         aria-label="Navigation principale"

@@ -1,0 +1,79 @@
+/* Mobile scroll fixes for smoother navigation experience */
+
+/* Improve scrolling on mobile devices */
+@media (max-width: 767px) {
+  /* Prevent body scrolling when interacting with tab navigation */
+  body.tab-navigation-active {
+    overflow: hidden;
+  }
+
+  /* Enhanced scrolling for tab navigation */
+  .tab-navigation-items {
+    /* Improved momentum-based scrolling */
+    -webkit-overflow-scrolling: touch;
+    
+    /* Better scroll snapping */
+    scroll-snap-type: x mandatory;
+    
+    /* Prevent scroll chaining */
+    overscroll-behavior-x: contain;
+    
+    /* Ensure smooth scrolling */
+    scroll-behavior: smooth;
+    
+    /* Optimize rendering performance */
+    will-change: scroll-position;
+    
+    /* Prevent content from being cut off */
+    padding-bottom: 0.5rem;
+    
+    /* Ensure proper spacing */
+    margin-bottom: 0.25rem;
+  }
+
+  /* Improve tab item touch targets */
+  .tab-navigation-item {
+    /* Allow horizontal panning but prevent vertical scrolling interference */
+    touch-action: pan-x;
+    
+    /* Ensure proper scroll snapping */
+    scroll-snap-align: center;
+    
+    /* Increase touch target size slightly */
+    padding: 0.75rem 0.9rem;
+    
+    /* Improve tap feedback */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Ensure smooth transitions */
+  .tab-navigation-container {
+    /* Prevent any overflow issues */
+    overflow: visible;
+    
+    /* Ensure hardware acceleration */
+    transform: translateZ(0);
+    
+    /* Improve rendering performance */
+    backface-visibility: hidden;
+  }
+}
+
+/* Prevent scrolling issues in iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  .tab-navigation-items {
+    /* Additional iOS-specific fixes */
+    -webkit-overflow-scrolling: touch;
+    
+    /* Prevent elastic scrolling */
+    overscroll-behavior-x: none;
+  }
+}
+
+/* Prevent scrolling issues in Android Chrome */
+@supports not (-webkit-touch-callout: none) {
+  .tab-navigation-items {
+    /* Android-specific fixes */
+    scrollbar-width: none;
+  }
+}

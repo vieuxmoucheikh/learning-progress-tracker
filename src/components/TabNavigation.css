@@ -107,6 +107,12 @@
   gap: 0.375rem;
   mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
   -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  /* Improved momentum scrolling */
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  /* Prevent content from being cut off */
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.25rem;
 }
 
 .tab-navigation-items::-webkit-scrollbar {
@@ -134,6 +140,8 @@
   transition: all 0.3s ease;
   will-change: transform, background-color, box-shadow;
   user-select: none;
+  /* Improved touch target */
+  touch-action: pan-x;
 }
 
 /* Effet de superposition */
@@ -312,8 +320,8 @@
     top: 0;
     padding-bottom: 0.5rem;
     z-index: 40;
-    background: linear-gradient(165deg, var(--menu-bg-mobile-from, #1e293b) 0%, var(--menu-bg-mobile-to, #0f172a) 100%);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    /* Prevent any overflow issues */
+    overflow: visible;
   }
   
   .mobile-logo-container {
