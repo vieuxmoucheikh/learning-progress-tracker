@@ -89,11 +89,12 @@
       }
     </style>
     <!-- Fix pour le calendrier en mode clair sur mobile -->
-    <link rel="stylesheet" href="/calendar-mobile-light-fix.css">
-    <!-- Fix pour forcer les couleurs du calendrier en mode clair sur mobile -->
-    <link rel="stylesheet" href="/calendar-color-force.css">
-    <!-- Fix direct pour les indicateurs du calendrier en mode clair sur mobile -->
-    <link rel="stylesheet" href="/direct-calendar-fix.css">
+    <link rel="stylesheet" href="/mobile-light-mode.css" />
+    <link rel="stylesheet" href="/calendar-mobile-light-fix.css" />
+    <link rel="stylesheet" href="/direct-calendar-fix.css" />
+    <link rel="stylesheet" href="/calendar-indicators-override.css" />
+    <!-- Fix agressif pour les indicateurs du calendrier -->
+    <link rel="stylesheet" href="/calendar-force-indicators.css" />
   </head>
   <body>
     <div id="root"></div>
@@ -102,7 +103,9 @@
     <script src="/light-mode-fixer.js"></script>
     <!-- Ajout du script de correction des compteurs -->
     <script src="/counter-fix.js"></script>
-    <!-- Script pour corriger les indicateurs de tâches sur le calendrier en mode clair sur mobile -->
-    <script src="/task-indicators-fix.js"></script>
+    <!-- Script pour corriger directement les indicateurs de tâches sur le calendrier en mode clair sur mobile -->
+    <script src="/calendar-direct-fix.js"></script>
+    <!-- Script agressif pour forcer les indicateurs du calendrier -->
+    <script src="/calendar-indicator-force.js"></script>
   </body>
 </html>
