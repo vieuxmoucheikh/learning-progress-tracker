@@ -1,69 +1,143 @@
 /**
- * Simplified theme transition styles
- * Optimized for clean, minimal transitions between light and dark modes
+ * Styles de transition pour le changement de thème
+ * Optimisé pour des transitions fluides entre le mode clair et sombre
  */
 
-/* Global transition variables */
+/* Variables globales pour les transitions */
 :root {
-  --transition-duration: 200ms;
-  --transition-timing: ease;
-  --transition-property: background-color, color, border-color, box-shadow;
+  --transition-duration: 300ms;
+  --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-delay: 0ms;
+  --transition-property: background-color, color, border-color, box-shadow, fill, stroke;
 }
 
-/* Apply transitions only when not in transitioning state */
+/* Éléments avec transition fluide - appliqué seulement quand pas en transition */
 :root:not(.theme-transitioning) body,
 :root:not(.theme-transitioning) .card,
 :root:not(.theme-transitioning) [class*="card"],
+:root:not(.theme-transitioning) section,
+:root:not(.theme-transitioning) aside,
+:root:not(.theme-transitioning) nav,
+:root:not(.theme-transitioning) header,
+:root:not(.theme-transitioning) footer,
 :root:not(.theme-transitioning) button,
-:root:not(.theme-transitioning) .badge {
-  transition: var(--transition-property) var(--transition-duration) var(--transition-timing);
+:root:not(.theme-transitioning) input,
+:root:not(.theme-transitioning) textarea,
+:root:not(.theme-transitioning) select,
+:root:not(.theme-transitioning) .badge,
+:root:not(.theme-transitioning) [class*="badge"] {
+  transition-property: var(--transition-property);
+  transition-duration: var(--transition-duration);
+  transition-timing-function: var(--transition-timing);
+  will-change: background-color, color, border-color, box-shadow;
 }
 
-/* Simple text transitions */
+/* Transition spécifique pour les textes */
 :root:not(.theme-transitioning) h1,
 :root:not(.theme-transitioning) h2,
 :root:not(.theme-transitioning) h3,
+:root:not(.theme-transitioning) h4,
+:root:not(.theme-transitioning) h5,
+:root:not(.theme-transitioning) h6,
 :root:not(.theme-transitioning) p,
 :root:not(.theme-transitioning) span,
 :root:not(.theme-transitioning) a {
   transition: color var(--transition-duration) var(--transition-timing);
+  will-change: color;
 }
 
-/* Icon transitions */
+/* Transition pour les icônes et SVG */
 :root:not(.theme-transitioning) svg,
 :root:not(.theme-transitioning) [class*="icon"],
 :root:not(.theme-transitioning) [class*="lucide"] {
-  transition: color var(--transition-duration) var(--transition-timing),
-              fill var(--transition-duration) var(--transition-timing),
-              stroke var(--transition-duration) var(--transition-timing);
+  transition-property: color, fill, stroke;
+  transition-duration: var(--transition-duration);
+  transition-timing-function: var(--transition-timing);
+  will-change: color, fill, stroke;
 }
 
-/* Theme toggle button - simplified */
+/* Animation du bouton de changement de thème */
 .theme-toggle-button {
   position: relative;
   overflow: hidden;
-  transition: background-color 200ms ease;
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Disable transitions during theme change */
+.theme-toggle-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+  opacity: 0;
+  transform: scale(0);
+  transition: transform 500ms ease, opacity 300ms ease;
+  pointer-events: none;
+}
+
+.theme-toggle-button:active::after {
+  transform: scale(2);
+  opacity: 0.3;
+  transition: 0s;
+}
+
+/* Désactivation des transitions pendant le changement de thème */
 .theme-transitioning * {
   transition: none !important;
   animation: none !important;
+  /* Prevent layout shifts by keeping dimensions stable */
+  min-height: var(--min-height, inherit);
+  min-width: var(--min-width, inherit);
+  /* Prevent FOUC (Flash of Unstyled Content) */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  /* Force hardware acceleration */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  /* Prevent text rendering issues */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Mobile optimizations */
+/* Styles Mobile */
 @media (max-width: 768px) {
+  /* Optimisation pour mobile */
   :root {
-    --transition-duration: 150ms;
+    --transition-duration: 200ms;
+  }
+  
+  /* Assurer que les cartes ne changent pas de taille lors du changement de thème */
+  .card, [class*="card"] {
+    --min-height: auto;
+    --min-width: auto;
+    /* Force hardware acceleration on mobile for smoother transitions */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  
+  /* Empêcher les sauts de mise en page pour les badges et boutons */
+  .badge, button, [role="button"] {
+    --min-height: auto;
+    --min-width: auto;
+  }
+  
+  /* Prevent flickering on mobile */
+  .theme-transitioning {
+    -webkit-animation: none !important;
+    animation: none !important;
+  }
+  
+  /* Ensure smooth transition after theme change */
+  html:not(.theme-transitioning) [data-theme] {
+    transition: background-color 0.2s ease-out;
   }
   
   /* Prevent layout shifts during transition */
   body {
     min-height: 100vh;
-  }
-  
-  /* Simplified mobile transitions */
-  html:not(.theme-transitioning) [data-theme] {
-    transition: background-color 0.15s ease-out;
   }
 }

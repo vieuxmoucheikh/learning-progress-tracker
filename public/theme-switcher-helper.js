@@ -1,23 +1,26 @@
 /**
- * Enhanced Theme Switcher Helper
- * Ensures instant theme application with no flicker or layout shifts
+ * Theme Switcher Helper
+ * This script helps ensure smooth theme transitions without flickering or layout shifts
  */
 
 (function() {
-  // Apply theme immediately on page load before any rendering
-  function applyThemeImmediately() {
-    // Get stored theme or use system preference
-    const storedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const theme = storedTheme || (systemPrefersDark ? 'dark' : 'light');
-    
-    // Add transitioning class to block animations during initial render
+  // Check if we're coming from a theme switch
+  const isThemeSwitching = sessionStorage.getItem('theme-switching') === 'true';
+  
+  if (isThemeSwitching) {
+    // Add transitioning class immediately on page load
     document.documentElement.classList.add('theme-transitioning');
     
-    // Apply theme attributes and classes
-    document.documentElement.setAttribute('data-theme', theme);
+    // Clear the flag
+    sessionStorage.removeItem('theme-switching');
     
-    if (theme === 'dark') {
+    // Get the current theme
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    
+    // Apply theme immediately
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    
+    if (currentTheme === 'dark') {
       document.documentElement.classList.add('dark');
       document.documentElement.classList.remove('light');
     } else {
@@ -27,45 +30,22 @@
     
     // Handle mobile specific classes
     const isMobile = window.innerWidth <= 768;
-    if (theme === 'light' && isMobile) {
+    if (currentTheme === 'light' && isMobile) {
       document.documentElement.classList.add('mobile-light-theme');
     } else {
       document.documentElement.classList.remove('mobile-light-theme');
     }
     
-    // Store the theme for consistency
-    if (!storedTheme) {
-      localStorage.setItem('theme', theme);
-    }
-  }
-  
-  // Apply theme immediately
-  applyThemeImmediately();
-  
-  // Remove transitioning class after DOM is fully loaded
-  document.addEventListener('DOMContentLoaded', () => {
-    // Short delay to ensure styles are applied
+    // Remove transitioning class after a delay
     setTimeout(() => {
-      document.documentElement.classList.remove('theme-transitioning');
-    }, 50);
-  });
-  
-  // Handle theme changes between page navigations
-  document.addEventListener('themeChanged', (e) => {
-    // Store that we're in the middle of a theme change
-    sessionStorage.setItem('theme-switching', 'true');
-    // Store the new theme for immediate application on next page load
-    if (e.detail && e.detail.theme) {
-      localStorage.setItem('theme', e.detail.theme);
-    }
-  });
-  
-  // If we're coming from a theme switch, ensure smooth transition
-  if (sessionStorage.getItem('theme-switching') === 'true') {
-    sessionStorage.removeItem('theme-switching');
-    // Force a repaint to ensure clean transition
-    document.body.style.display = 'none';
-    document.body.offsetHeight; // Force reflow
-    document.body.style.display = '';
+      requestAnimationFrame(() => {
+        document.documentElement.classList.remove('theme-transitioning');
+      });
+    }, 300);
   }
+  
+  // Listen for theme changes to set the flag for page refreshes/navigations
+  document.addEventListener('themeChanged', () => {
+    sessionStorage.setItem('theme-switching', 'true');
+  });
 })();
