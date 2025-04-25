@@ -1,0 +1,45 @@
+/**
+ * Responsive fixes for mobile and tablet devices
+ */
+
+/* Mobile fixes */
+@media (max-width: 768px) {
+  /* Improve card readability on mobile */
+  .card, 
+  [class*="Card"],
+  [class*="-card"] {
+    padding: 16px !important;
+    margin-bottom: 16px !important;
+  }
+
+  /* Ensure proper spacing for mobile */
+  .container {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Fix button sizes on mobile */
+  button {
+    min-height: 40px;
+  }
+
+  /* Improve form elements on mobile */
+  input, 
+  select, 
+  textarea {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+}
+
+/* Tablet fixes */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Adjust layout for tablets */
+  .container {
+    max-width: 95% !important;
+  }
+}
+
+/* Fix for any screen size */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
