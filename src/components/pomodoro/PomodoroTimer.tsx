@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { useTheme } from "@/components/ThemeProvider";
 import Progress from '@/components/ui/progress';
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -161,6 +162,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
     const [oscillator, setOscillator] = useState<OscillatorNode | null>(null);
     const [isCompleted, setIsCompleted] = useState(false);
+    const { isDark } = useTheme();
     const [pomodoroCount, setPomodoroCount] = useState(0); // Ajouter ce state
     // Using standard interval instead of Web Worker for better build compatibility
 
@@ -1609,7 +1611,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                 return true;
                             })
                             .map(task => (
-                                <li key={task.id} className="flex items-center gap-3 p-4 rounded-xl transition-all duration-200 bg-slate-800/40 hover:bg-slate-800/60 border border-slate-700/30">
+                                <li key={task.id} className={cn(
+                                    "flex items-center gap-3 p-4 rounded-xl transition-all duration-200",
+                                    isDark 
+                                        ? "bg-slate-800/40 hover:bg-slate-800/60 border border-slate-700/30" 
+                                        : "bg-slate-100 hover:bg-slate-200 border border-slate-300"
+                                )}>
                                     <Checkbox
                                         checked={task.completed}
                                         onChange={() => toggleTask(task.id)}
@@ -1618,7 +1625,9 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     <div className="flex-1 min-w-0">
                                         <div className={cn(
                                             "font-medium truncate",
-                                            task.completed ? "text-slate-400 line-through" : "text-blue-100"
+                                            task.completed 
+                                                ? "text-slate-400 line-through" 
+                                                : isDark ? "text-blue-100" : "text-blue-800"
                                         )}>
                                             {task.text}
                                             {task.completed && task.metrics && task.metrics.completedPomodoros >= (settings?.daily_goal ?? 8) && (
@@ -1629,7 +1638,10 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                             )}
                                         </div>
                                         {activeTaskId === task.id && task.metrics && (
-                                            <div className="text-xs text-blue-200 mt-1 flex items-center gap-2">
+                                            <div className={cn(
+                                                "text-xs mt-1 flex items-center gap-2",
+                                                isDark ? "text-blue-200" : "text-blue-700"
+                                            )}>
                                                 <span className="flex items-center gap-1">
                                                     <Clock className="w-3 h-3" />
                                                     {formatTotalTime(task.metrics.totalMinutes)}
@@ -1702,7 +1714,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     name="skip"
                                     onClick={handleButtonClick}
                                     disabled={!activeTaskId || !isActive}
-                                    className="bg-blue-500/20 border-blue-500/50 hover:border-blue-500 hover:bg-blue-500/30 text-blue-100 rounded-full"
+                                    className={cn(
+                                        "rounded-full",
+                                        isDark 
+                                            ? "bg-blue-500/20 border-blue-500/50 hover:border-blue-500 hover:bg-blue-500/30 text-blue-100" 
+                                            : "bg-blue-600 border-blue-700 hover:bg-blue-700 text-white"
+                                    )}
                                 >
                                     <SkipForwardIcon className="h-6 w-6" />
                                 </Button>
@@ -1716,7 +1733,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                 <Button
                                     name="settings"
                                     onClick={() => setSettingsOpen(true)}
-                                    className="bg-blue-500/20 border-blue-500/50 hover:border-blue-500 hover:bg-blue-500/30 text-blue-100 rounded-full"
+                                    className={cn(
+                                        "rounded-full",
+                                        isDark 
+                                            ? "bg-blue-500/20 border-blue-500/50 hover:border-blue-500 hover:bg-blue-500/30 text-blue-100" 
+                                            : "bg-blue-600 border-blue-700 hover:bg-blue-700 text-white"
+                                    )}
                                 >
                                     <Settings2Icon className="h-6 w-6" />
                                 </Button>
