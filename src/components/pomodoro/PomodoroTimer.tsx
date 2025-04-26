@@ -1702,7 +1702,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     name="skip"
                                     onClick={handleButtonClick}
                                     disabled={!activeTaskId || !isActive}
-                                    className="border-slate-600/50 hover:border-slate-500 hover:bg-slate-700/50 rounded-full"
+                                    className="bg-blue-500/20 border-blue-500/50 hover:border-blue-500 hover:bg-blue-500/30 text-blue-100 rounded-full"
                                 >
                                     <SkipForwardIcon className="h-6 w-6" />
                                 </Button>
@@ -1716,7 +1716,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                 <Button
                                     name="settings"
                                     onClick={() => setSettingsOpen(true)}
-                                    className="border-slate-600/50 hover:border-slate-500 hover:bg-slate-700/50 rounded-full"
+                                    className="bg-blue-500/20 border-blue-500/50 hover:border-blue-500 hover:bg-blue-500/30 text-blue-100 rounded-full"
                                 >
                                     <Settings2Icon className="h-6 w-6" />
                                 </Button>
