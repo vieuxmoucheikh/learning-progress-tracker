@@ -1,0 +1,71 @@
+/* 
+ * Vertical Scroll Fix
+ * This file contains specific fixes for vertical scrolling issues when using the tab navigation
+ */
+
+/* Ensure body can scroll properly */
+body {
+  overscroll-behavior-y: auto !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Fix for mobile navigation */
+@media (max-width: 767px) {
+  /* Prevent tab navigation from interfering with vertical scrolling */
+  .tab-navigation-container {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 40 !important;
+    background: linear-gradient(160deg, var(--menu-bg-gradient-from, #1e293b) 0%, var(--menu-bg-gradient-to, #0f172a) 100%) !important;
+  }
+  
+  /* Ensure tab navigation items only scroll horizontally */
+  .tab-navigation-items {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x !important;
+    max-width: 100% !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  
+  /* Hide scrollbar */
+  .tab-navigation-items::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  
+  /* Ensure main content area can scroll properly */
+  #root > div, 
+  main,
+  [role="main"],
+  .main-content,
+  .content-area,
+  .page-content {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    height: auto !important;
+    min-height: calc(100vh - 120px) !important;
+  }
+}
+
+/* iOS specific fixes */
+@supports (-webkit-touch-callout: none) {
+  body {
+    /* Prevent elastic scrolling on iOS */
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+  }
+  
+  /* Ensure content area fills the viewport */
+  #root {
+    height: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
