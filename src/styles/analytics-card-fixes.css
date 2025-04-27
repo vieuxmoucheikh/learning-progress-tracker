@@ -157,6 +157,24 @@ html.dark .analytics-stat-card.purple-card svg {
   pointer-events: none !important;
 }
 
+/* Year selector styling */
+.year-selector {
+  background: linear-gradient(135deg, #e0f2fe 0%, #bfdbfe 100%) !important;
+  color: #1e40af !important;
+  font-weight: 700 !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 8px !important;
+  padding: 6px 12px !important;
+}
+
+html.dark .year-selector {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%) !important;
+  color: white !important;
+  border: 1px solid rgba(96, 165, 250, 0.4) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
 /* Mobile-specific enhancements */
 @media (max-width: 768px) {
   .analytics-stat-card {

@@ -190,7 +190,7 @@ export function YearlyActivityHeatmap({
         >
           <ChevronLeft className="h-4 w-4 text-blue-500" />
         </Button>
-        <div className="text-xl font-extrabold bg-gradient-to-br from-blue-100 to-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-200 px-4 py-1.5 rounded-lg shadow-sm border border-blue-200 dark:border-blue-800">
+        <div className="text-xl year-selector">
           {selectedYear}
         </div>
         <Button
