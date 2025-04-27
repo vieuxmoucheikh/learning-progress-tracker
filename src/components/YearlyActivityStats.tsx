@@ -235,26 +235,26 @@ export const YearlyActivityStats: React.FC = () => {
           <div className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-3 gap-2">
-              <div className="bg-white dark:bg-blue-600 p-2.5 rounded-lg border border-blue-200 dark:border-blue-500 shadow-md">
+              <div className="bg-blue-50 dark:bg-blue-600 p-2.5 rounded-lg border border-blue-200 dark:border-blue-500 shadow-md">
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-blue-600 dark:text-white" />
-                  <p className="text-sm text-black dark:text-white font-medium">Total Activities</p>
+                  <p className="text-sm text-blue-800 dark:text-white font-medium">Total Activities</p>
                 </div>
-                <p className="text-lg font-semibold mt-0.5 text-black dark:text-white">{totalActivities}</p>
+                <p className="text-lg font-semibold mt-0.5 text-blue-900 dark:text-white">{totalActivities}</p>
               </div>
-              <div className="bg-white dark:bg-emerald-600 p-2.5 rounded-lg border border-emerald-200 dark:border-emerald-500 shadow-md">
+              <div className="bg-emerald-50 dark:bg-emerald-600 p-2.5 rounded-lg border border-emerald-200 dark:border-emerald-500 shadow-md">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-emerald-600 dark:text-white" />
-                  <p className="text-sm text-black dark:text-white font-medium">Active Days</p>
+                  <p className="text-sm text-emerald-800 dark:text-white font-medium">Active Days</p>
                 </div>
-                <p className="text-lg font-semibold mt-0.5 text-black dark:text-white">{activeDays}</p>
+                <p className="text-lg font-semibold mt-0.5 text-emerald-900 dark:text-white">{activeDays}</p>
               </div>
-              <div className="bg-white dark:bg-purple-600 p-2.5 rounded-lg border border-purple-200 dark:border-purple-500 shadow-md">
+              <div className="bg-purple-50 dark:bg-purple-600 p-2.5 rounded-lg border border-purple-200 dark:border-purple-500 shadow-md">
                 <div className="flex items-center gap-2">
                   <BarChart2 className="w-4 h-4 text-purple-600 dark:text-white" />
-                  <p className="text-sm text-black dark:text-white font-medium">Average Per Day</p>
+                  <p className="text-sm text-purple-800 dark:text-white font-medium">Average Per Day</p>
                 </div>
-                <p className="text-lg font-semibold mt-0.5 text-black dark:text-white">{averagePerDay}</p>
+                <p className="text-lg font-semibold mt-0.5 text-purple-900 dark:text-white">{averagePerDay}</p>
               </div>
             </div>
 
