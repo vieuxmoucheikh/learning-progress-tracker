@@ -236,26 +236,26 @@ export const YearlyActivityStats: React.FC = () => {
           <div className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-3 gap-2">
-              <div className="analytics-stat-card blue-card p-2.5 rounded-lg shadow-md">
+              <div className="analytics-stat-card blue-card p-2.5 rounded-lg shadow-md" style={{backgroundColor: 'var(--blue-bg, #dbeafe)'}}>
                 <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-blue-600" />
-                  <p className="text-sm text-blue-800 font-medium card-title">Total Activities</p>
+                  <Activity className="w-4 h-4 text-blue-600" style={{color: 'var(--blue-icon, #3b82f6)'}} />
+                  <p className="text-sm font-medium card-title" style={{color: 'var(--blue-text, #1e40af)'}}>Total Activities</p>
                 </div>
-                <p className="text-lg font-semibold mt-0.5 text-blue-900 card-value">{totalActivities}</p>
+                <p className="text-lg font-semibold mt-0.5 card-value" style={{color: 'var(--blue-value, #1e3a8a)'}}>{totalActivities}</p>
               </div>
-              <div className="analytics-stat-card emerald-card p-2.5 rounded-lg shadow-md">
+              <div className="analytics-stat-card emerald-card p-2.5 rounded-lg shadow-md" style={{backgroundColor: 'var(--emerald-bg, #d1fae5)'}}>
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-emerald-600" />
-                  <p className="text-sm text-emerald-800 font-medium card-title">Active Days</p>
+                  <Calendar className="w-4 h-4 text-emerald-600" style={{color: 'var(--emerald-icon, #10b981)'}} />
+                  <p className="text-sm font-medium card-title" style={{color: 'var(--emerald-text, #065f46)'}}>Active Days</p>
                 </div>
-                <p className="text-lg font-semibold mt-0.5 text-emerald-900 card-value">{activeDays}</p>
+                <p className="text-lg font-semibold mt-0.5 card-value" style={{color: 'var(--emerald-value, #064e3b)'}}>{activeDays}</p>
               </div>
-              <div className="analytics-stat-card purple-card p-2.5 rounded-lg shadow-md">
+              <div className="analytics-stat-card purple-card p-2.5 rounded-lg shadow-md" style={{backgroundColor: 'var(--purple-bg, #f5f3ff)'}}>
                 <div className="flex items-center gap-2">
-                  <BarChart2 className="w-4 h-4 text-purple-600" />
-                  <p className="text-sm text-purple-800 font-medium card-title">Average Per Day</p>
+                  <BarChart2 className="w-4 h-4 text-purple-600" style={{color: 'var(--purple-icon, #8b5cf6)'}} />
+                  <p className="text-sm font-medium card-title" style={{color: 'var(--purple-text, #5b21b6)'}}>Average Per Day</p>
                 </div>
-                <p className="text-lg font-semibold mt-0.5 text-purple-900 card-value">{averagePerDay}</p>
+                <p className="text-lg font-semibold mt-0.5 card-value" style={{color: 'var(--purple-value, #4c1d95)'}}>{averagePerDay}</p>
               </div>
             </div>
 
