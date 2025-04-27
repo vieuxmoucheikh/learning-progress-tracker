@@ -1957,7 +1957,7 @@ function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; is
                         r="45%"
                         className={cn(
                             "fill-none",
-                            isDark ? "stroke-slate-700/50" : "stroke-slate-200"
+                            isDark ? "stroke-gray-800" : "stroke-slate-200"
                         )}
                         strokeWidth="12"
                     />
@@ -1970,7 +1970,7 @@ function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; is
                         stroke={isBreak 
                             ? isDark ? "url(#gradientBreakDark)" : "url(#gradientBreakLight)" 
                             : isDark ? "url(#gradientFocusDark)" : "url(#gradientFocusLight)"}
-                        strokeWidth="12"
+                        strokeWidth="14"
                         strokeDasharray={circumference}
                         strokeDashoffset={circumference - (progress / 100) * circumference}
                         strokeLinecap="round"
@@ -1983,8 +1983,8 @@ function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; is
                             <stop offset="100%" stopColor="#3B82F6" />
                         </linearGradient>
                         <linearGradient id="gradientFocusDark" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#3B82F6" />
-                            <stop offset="100%" stopColor="#60A5FA" />
+                            <stop offset="0%" stopColor="#2563EB" />
+                            <stop offset="100%" stopColor="#93C5FD" />
                         </linearGradient>
                         
                         {/* Break gradients */}
@@ -1993,8 +1993,8 @@ function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; is
                             <stop offset="100%" stopColor="#10B981" />
                         </linearGradient>
                         <linearGradient id="gradientBreakDark" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#10B981" />
-                            <stop offset="100%" stopColor="#34D399" />
+                            <stop offset="0%" stopColor="#059669" />
+                            <stop offset="100%" stopColor="#6EE7B7" />
                         </linearGradient>
                     </defs>
                 </svg>
