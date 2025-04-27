@@ -1957,46 +1957,43 @@ function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; is
                         r="45%"
                         className={cn(
                             "fill-none",
-                            isDark ? "stroke-gray-800" : "stroke-slate-200"
+                            isDark ? "stroke-gray-900" : "stroke-slate-200"
                         )}
-                        strokeWidth="12"
+                        strokeWidth="10"
                     />
-                    {/* Progress Ring with Gradient */}
+                    {/* Progress Ring - Solid Color */}
                     <circle
                         cx="50%"
                         cy="50%"
                         r="45%"
-                        className="fill-none transition-all duration-500"
-                        stroke={isBreak 
-                            ? isDark ? "url(#gradientBreakDark)" : "url(#gradientBreakLight)" 
-                            : isDark ? "url(#gradientFocusDark)" : "url(#gradientFocusLight)"}
-                        strokeWidth="14"
+                        className={cn(
+                            "fill-none transition-all duration-500",
+                            isBreak
+                                ? isDark ? "stroke-emerald-400" : "stroke-emerald-600"
+                                : isDark ? "stroke-blue-400" : "stroke-blue-600"
+                        )}
+                        strokeWidth="16"
                         strokeDasharray={circumference}
                         strokeDashoffset={circumference - (progress / 100) * circumference}
                         strokeLinecap="round"
                     />
-                    {/* Gradient Definitions */}
-                    <defs>
-                        {/* Focus gradients (work session) */}
-                        <linearGradient id="gradientFocusLight" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#2563EB" />
-                            <stop offset="100%" stopColor="#3B82F6" />
-                        </linearGradient>
-                        <linearGradient id="gradientFocusDark" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#2563EB" />
-                            <stop offset="100%" stopColor="#93C5FD" />
-                        </linearGradient>
-                        
-                        {/* Break gradients */}
-                        <linearGradient id="gradientBreakLight" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#059669" />
-                            <stop offset="100%" stopColor="#10B981" />
-                        </linearGradient>
-                        <linearGradient id="gradientBreakDark" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#059669" />
-                            <stop offset="100%" stopColor="#6EE7B7" />
-                        </linearGradient>
-                    </defs>
+                    {/* Add a subtle glow effect for dark mode */}
+                    {isDark && (
+                        <circle
+                            cx="50%"
+                            cy="50%"
+                            r="45%"
+                            className={cn(
+                                "fill-none opacity-30",
+                                isBreak ? "stroke-emerald-300" : "stroke-blue-300"
+                            )}
+                            strokeWidth="20"
+                            strokeDasharray={circumference}
+                            strokeDashoffset={circumference - (progress / 100) * circumference}
+                            strokeLinecap="round"
+                            filter="blur(4px)"
+                        />
+                    )}
                 </svg>
                 
                 {/* Timer Display - Centered inside the circle */}
