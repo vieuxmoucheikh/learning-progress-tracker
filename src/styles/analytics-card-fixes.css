@@ -103,53 +103,42 @@
   box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3) !important;
 }
 
-/* Dark mode styles with lighter pastel gradients (matching mobile) */
+/* Dark mode styles with softer gradients */
 html.dark .analytics-stat-card.blue-card {
-  background: linear-gradient(135deg, #93c5fd 0%, #bfdbfe 100%) !important;
-  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.3), 0 8px 12px -2px rgba(0, 0, 0, 0.1) !important;
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%) !important;
+  box-shadow: inset 0 0 0 1px rgba(191, 219, 254, 0.2), 0 8px 12px -2px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1) !important;
 }
 
 html.dark .analytics-stat-card.emerald-card {
-  background: linear-gradient(135deg, #6ee7b7 0%, #a7f3d0 100%) !important;
-  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.3), 0 8px 12px -2px rgba(0, 0, 0, 0.1) !important;
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%) !important;
+  box-shadow: inset 0 0 0 1px rgba(167, 243, 208, 0.2), 0 8px 12px -2px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1) !important;
 }
 
 html.dark .analytics-stat-card.purple-card {
-  background: linear-gradient(135deg, #c4b5fd 0%, #ddd6fe 100%) !important;
-  box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.3), 0 8px 12px -2px rgba(0, 0, 0, 0.1) !important;
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%) !important;
+  box-shadow: inset 0 0 0 1px rgba(216, 180, 254, 0.2), 0 8px 12px -2px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Dark mode text colors - using darker text for better contrast on light backgrounds */
-html.dark .analytics-stat-card.blue-card .card-title,
-html.dark .analytics-stat-card.blue-card .card-value {
-  color: #1e3a8a !important; /* Dark blue */
+/* Dark mode text and icon colors - no text shadow */
+html.dark .analytics-stat-card .card-title,
+html.dark .analytics-stat-card .card-value {
+  color: white !important;
 }
 
-html.dark .analytics-stat-card.emerald-card .card-title,
-html.dark .analytics-stat-card.emerald-card .card-value {
-  color: #064e3b !important; /* Dark green */
-}
-
-html.dark .analytics-stat-card.purple-card .card-title,
-html.dark .analytics-stat-card.purple-card .card-value {
-  color: #4c1d95 !important; /* Dark purple */
-}
-
-/* Icon styling for dark mode */
 html.dark .analytics-stat-card.blue-card svg {
-  background-color: #1e3a8a !important;
+  background-color: rgba(255, 255, 255, 0.25) !important;
   color: white !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
 html.dark .analytics-stat-card.emerald-card svg {
-  background-color: #064e3b !important;
+  background-color: rgba(255, 255, 255, 0.25) !important;
   color: white !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
 html.dark .analytics-stat-card.purple-card svg {
-  background-color: #4c1d95 !important;
+  background-color: rgba(255, 255, 255, 0.25) !important;
   color: white !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
 }
@@ -197,9 +186,50 @@ html.dark .analytics-stat-card.purple-card svg {
     background: linear-gradient(135deg, #f5f3ff 0%, #d8b4fe 100%) !important;
   }
   
-  /* Mobile-specific sizing adjustments only - other styles now match desktop */
-  html.dark .analytics-stat-card svg {
-    width: 18px !important;
-    height: 18px !important;
+  /* Dark mode colors on mobile - much lighter pastel backgrounds */
+  html.dark .analytics-stat-card.blue-card {
+    background: linear-gradient(135deg, #93c5fd 0%, #bfdbfe 100%) !important;
+    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.3), 0 8px 12px -2px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  html.dark .analytics-stat-card.emerald-card {
+    background: linear-gradient(135deg, #6ee7b7 0%, #a7f3d0 100%) !important;
+    box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.3), 0 8px 12px -2px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  html.dark .analytics-stat-card.purple-card {
+    background: linear-gradient(135deg, #c4b5fd 0%, #ddd6fe 100%) !important;
+    box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.3), 0 8px 12px -2px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* Ensure text is clearly visible on mobile dark mode - using darker text colors for better contrast */
+  html.dark .analytics-stat-card.blue-card .card-title,
+  html.dark .analytics-stat-card.blue-card .card-value {
+    color: #1e3a8a !important; /* Dark blue */
+  }
+  
+  html.dark .analytics-stat-card.emerald-card .card-title,
+  html.dark .analytics-stat-card.emerald-card .card-value {
+    color: #064e3b !important; /* Dark green */
+  }
+  
+  html.dark .analytics-stat-card.purple-card .card-title,
+  html.dark .analytics-stat-card.purple-card .card-value {
+    color: #4c1d95 !important; /* Dark purple */
+  }
+  
+  html.dark .analytics-stat-card.blue-card svg {
+    background-color: #1e3a8a !important;
+    color: white !important;
+  }
+  
+  html.dark .analytics-stat-card.emerald-card svg {
+    background-color: #064e3b !important;
+    color: white !important;
+  }
+  
+  html.dark .analytics-stat-card.purple-card svg {
+    background-color: #4c1d95 !important;
+    color: white !important;
   }
 }
