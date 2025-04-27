@@ -1,32 +1,64 @@
-/* Analytics card fixes for both light and dark modes on all devices */
+/* Enhanced Analytics Card Design */
 .analytics-stat-card {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
 
-/* Light mode styles - Desktop and Mobile */
+.analytics-stat-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Card content layout */
+.analytics-stat-card .flex {
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+/* Icon styling */
+.analytics-stat-card svg {
+  width: 20px !important;
+  height: 20px !important;
+  padding: 3px !important;
+  border-radius: 50% !important;
+}
+
+/* Title styling */
+.analytics-stat-card .card-title {
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.025em !important;
+}
+
+/* Value styling */
+.analytics-stat-card .card-value {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  margin-top: 8px !important;
+  margin-left: 30px !important; /* Align with title + icon */
+}
+
+/* Light mode styles with subtle gradients */
 .analytics-stat-card.blue-card {
-  background-color: #dbeafe !important;
-  background-image: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%) !important;
-  border: 1px solid #bfdbfe !important;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
 }
 
 .analytics-stat-card.emerald-card {
-  background-color: #d1fae5 !important;
-  background-image: linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%) !important;
-  border: 1px solid #a7f3d0 !important;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
 }
 
 .analytics-stat-card.purple-card {
-  background-color: #e9d5ff !important;
-  background-image: linear-gradient(135deg, #e9d5ff 0%, #f5f3ff 100%) !important;
-  border: 1px solid #d8b4fe !important;
+  background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%) !important;
+  border: 1px solid rgba(139, 92, 246, 0.3) !important;
 }
 
-/* Text colors for light mode */
-.analytics-stat-card .card-title {
-  color: #1e40af !important; /* dark blue */
-}
-
+/* Light mode text and icon colors */
 .analytics-stat-card.blue-card .card-title {
   color: #1e40af !important;
 }
@@ -52,67 +84,111 @@
 }
 
 .analytics-stat-card.blue-card svg {
-  color: #2563eb !important;
+  color: white !important;
+  background-color: #3b82f6 !important;
 }
 
 .analytics-stat-card.emerald-card svg {
-  color: #10b981 !important;
+  color: white !important;
+  background-color: #10b981 !important;
 }
 
 .analytics-stat-card.purple-card svg {
-  color: #8b5cf6 !important;
+  color: white !important;
+  background-color: #8b5cf6 !important;
 }
 
-/* Dark mode styles with !important to override any conflicting styles */
+/* Dark mode styles with elegant gradients */
 html.dark .analytics-stat-card.blue-card {
-  background-color: #2563eb !important;
-  background-image: none !important;
-  border: 1px solid #3b82f6 !important;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%) !important;
+  border: 1px solid rgba(96, 165, 250, 0.4) !important;
 }
 
 html.dark .analytics-stat-card.emerald-card {
-  background-color: #059669 !important;
-  background-image: none !important;
-  border: 1px solid #10b981 !important;
+  background: linear-gradient(135deg, #065f46 0%, #10b981 100%) !important;
+  border: 1px solid rgba(52, 211, 153, 0.4) !important;
 }
 
 html.dark .analytics-stat-card.purple-card {
-  background-color: #7c3aed !important;
-  background-image: none !important;
-  border: 1px solid #8b5cf6 !important;
+  background: linear-gradient(135deg, #5b21b6 0%, #8b5cf6 100%) !important;
+  border: 1px solid rgba(167, 139, 250, 0.4) !important;
 }
 
+/* Dark mode text and icon colors */
 html.dark .analytics-stat-card .card-title,
-html.dark .analytics-stat-card .card-value,
-html.dark .analytics-stat-card svg {
+html.dark .analytics-stat-card .card-value {
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+html.dark .analytics-stat-card.blue-card svg {
+  background-color: rgba(255, 255, 255, 0.2) !important;
   color: white !important;
 }
 
-/* Mobile-specific fixes */
+html.dark .analytics-stat-card.emerald-card svg {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+html.dark .analytics-stat-card.purple-card svg {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+/* Add subtle pattern overlay for more depth */
+.analytics-stat-card::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-image: radial-gradient(circle at 15% 15%, rgba(255, 255, 255, 0.15) 5%, transparent 5.5%) !important;
+  background-size: 8px 8px !important;
+  opacity: 0.5 !important;
+  pointer-events: none !important;
+}
+
+/* Mobile-specific enhancements */
 @media (max-width: 768px) {
-  /* Ensure light mode has colors on mobile */
+  .analytics-stat-card {
+    padding: 12px !important;
+  }
+  
+  .analytics-stat-card .card-value {
+    font-size: 1.25rem !important;
+    margin-left: 25px !important;
+  }
+  
+  .analytics-stat-card svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  /* Ensure light mode has proper colors on mobile */
   .analytics-stat-card.blue-card {
-    background-color: #dbeafe !important;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
   }
   
   .analytics-stat-card.emerald-card {
-    background-color: #d1fae5 !important;
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
   }
   
   .analytics-stat-card.purple-card {
-    background-color: #e9d5ff !important;
+    background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%) !important;
   }
   
-  /* Ensure dark mode has colors on mobile */
+  /* Ensure dark mode has proper colors on mobile */
   html.dark .analytics-stat-card.blue-card {
-    background-color: #2563eb !important;
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%) !important;
   }
   
   html.dark .analytics-stat-card.emerald-card {
-    background-color: #059669 !important;
+    background: linear-gradient(135deg, #065f46 0%, #10b981 100%) !important;
   }
   
   html.dark .analytics-stat-card.purple-card {
-    background-color: #7c3aed !important;
+    background: linear-gradient(135deg, #5b21b6 0%, #8b5cf6 100%) !important;
   }
 }
