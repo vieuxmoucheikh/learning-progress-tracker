@@ -235,23 +235,23 @@ export const YearlyActivityStats: React.FC = () => {
           <div className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-3 gap-2">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:bg-blue-800 p-2.5 rounded-lg border border-blue-200/50 dark:border-blue-600">
+              <div className="bg-white dark:bg-blue-600 p-2.5 rounded-lg border border-blue-200 dark:border-blue-500 shadow-md">
                 <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-blue-500 dark:text-blue-300" />
+                  <Activity className="w-4 h-4 text-blue-600 dark:text-white" />
                   <p className="text-sm text-black dark:text-white font-medium">Total Activities</p>
                 </div>
                 <p className="text-lg font-semibold mt-0.5 text-black dark:text-white">{totalActivities}</p>
               </div>
-              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:bg-emerald-800 p-2.5 rounded-lg border border-emerald-200/50 dark:border-emerald-600">
+              <div className="bg-white dark:bg-emerald-600 p-2.5 rounded-lg border border-emerald-200 dark:border-emerald-500 shadow-md">
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-emerald-500 dark:text-emerald-300" />
+                  <Calendar className="w-4 h-4 text-emerald-600 dark:text-white" />
                   <p className="text-sm text-black dark:text-white font-medium">Active Days</p>
                 </div>
                 <p className="text-lg font-semibold mt-0.5 text-black dark:text-white">{activeDays}</p>
               </div>
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:bg-purple-800 p-2.5 rounded-lg border border-purple-200/50 dark:border-purple-600">
+              <div className="bg-white dark:bg-purple-600 p-2.5 rounded-lg border border-purple-200 dark:border-purple-500 shadow-md">
                 <div className="flex items-center gap-2">
-                  <BarChart2 className="w-4 h-4 text-purple-500 dark:text-purple-300" />
+                  <BarChart2 className="w-4 h-4 text-purple-600 dark:text-white" />
                   <p className="text-sm text-black dark:text-white font-medium">Average Per Day</p>
                 </div>
                 <p className="text-lg font-semibold mt-0.5 text-black dark:text-white">{averagePerDay}</p>
