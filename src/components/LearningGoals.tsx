@@ -664,17 +664,19 @@ export default function LearningGoals({ items }: Props) {
                 {newGoal.targetDate ? format(newGoal.targetDate, "PPP") : <span>Pick a date</span>}
               </Button>
               {showCalendar && (
-                <div className="pt-2 relative">
-                  <Calendar
-                    mode="single"
-                    selected={newGoal.targetDate}
-                    onSelect={(date) => {
-                      setNewGoal(prev => ({ ...prev, targetDate: date }));
-                      setShowCalendar(false);
-                    }}
-                    fromDate={new Date()}
-                    className="learning-goals-calendar"
-                  />
+                <div className="pt-2 relative" style={{ position: 'relative', zIndex: 100 }}>
+                  <div className="absolute top-0 left-0 right-0">
+                    <Calendar
+                      mode="single"
+                      selected={newGoal.targetDate}
+                      onSelect={(date) => {
+                        setNewGoal(prev => ({ ...prev, targetDate: date }));
+                        setShowCalendar(false);
+                      }}
+                      fromDate={new Date()}
+                      className="learning-goals-calendar"
+                    />
+                  </div>
                 </div>
               )}
             </div>

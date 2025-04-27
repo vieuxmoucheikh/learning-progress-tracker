@@ -218,18 +218,19 @@ html.dark .year-selector {
 
 /* Calendar styling for Learning Goals */
 .learning-goals-calendar {
-  background-color: var(--blue-bg) !important;
-  border: 1px solid rgba(59, 130, 246, 0.3) !important;
-  border-radius: 12px !important;
+  background-color: var(--background) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
   padding: 1rem !important;
   width: 100% !important;
   max-width: 350px !important;
   margin: 0 auto !important;
-  z-index: 50 !important;
+  z-index: 999 !important; /* Higher z-index to ensure visibility */
   position: absolute !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
+  display: block !important;
 }
 
 .learning-goals-calendar .rdp-months {
@@ -237,34 +238,36 @@ html.dark .year-selector {
 }
 
 .learning-goals-calendar .rdp-caption {
-  background-color: rgba(59, 130, 246, 0.1) !important;
+  background-color: var(--muted) !important;
   border-radius: 8px !important;
   margin-bottom: 0.75rem !important;
 }
 
 .learning-goals-calendar .rdp-caption_label {
   font-weight: 700 !important;
-  color: var(--blue-text) !important;
+  color: var(--foreground) !important;
 }
 
 .learning-goals-calendar .rdp-button:hover:not([disabled]) {
-  background-color: rgba(59, 130, 246, 0.15) !important;
+  background-color: var(--accent) !important;
 }
 
 .learning-goals-calendar .rdp-day_selected,
+.learning-goals-calendar .rdp-day_selected:focus-visible,
 .learning-goals-calendar .rdp-day_selected:hover {
-  background-color: var(--blue-icon) !important;
+  background-color: var(--primary) !important;
   color: white !important;
+  font-weight: bold !important;
 }
 
 .learning-goals-calendar .rdp-day_today {
-  border: 1px solid var(--blue-icon) !important;
+  border: 1px solid var(--primary) !important;
   font-weight: 700 !important;
 }
 
 html.dark .learning-goals-calendar {
-  background-color: #1e293b !important;
-  border-color: rgba(59, 130, 246, 0.5) !important;
+  background-color: var(--background) !important;
+  border-color: var(--border) !important;
 }
 
 html.dark .learning-goals-calendar .rdp-caption {
