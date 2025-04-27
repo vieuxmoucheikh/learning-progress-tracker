@@ -650,7 +650,10 @@ export default function LearningGoals({ items }: Props) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Target Date</label>
+              <label className="text-sm font-semibold text-foreground flex items-center">
+                <span>Target Date</span>
+                <span className="text-destructive ml-1">*</span>
+              </label>
               <Button
                 type="button"
                 variant="outline"
@@ -663,22 +666,27 @@ export default function LearningGoals({ items }: Props) {
                 <LucideCalendar className="mr-2 h-4 w-4" />
                 {newGoal.targetDate ? format(newGoal.targetDate, "PPP") : <span>Pick a date</span>}
               </Button>
+              <p className="text-xs text-muted-foreground">Set a realistic deadline for your learning goal</p>
               {showCalendar && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-[1000]" onClick={() => setShowCalendar(false)}>
-                  <div className="relative bg-card p-4 rounded-lg shadow-lg border border-border" onClick={(e) => e.stopPropagation()}>
+                  <div className="relative bg-card p-4 rounded-lg shadow-lg border border-border w-[350px]" onClick={(e) => e.stopPropagation()}>
                     <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-medium">Select Date</h3>
+                      <h3 className="font-medium text-foreground">Select Target Date</h3>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowCalendar(false)}>
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
+                    <p className="text-xs text-muted-foreground mb-3">Choose a target date for completing this learning goal</p>
                     <Calendar
                       mode="single"
                       selected={newGoal.targetDate}
                       onSelect={(date) => {
                         setNewGoal(prev => ({ ...prev, targetDate: date }));
-                        setShowCalendar(false);
                       }}
+                      disabled={{
+                        before: new Date(),
+                      }}
+                      initialFocus
                       fromDate={new Date()}
                       className="custom-calendar"
                       classNames={{
