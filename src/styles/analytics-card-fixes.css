@@ -216,6 +216,138 @@ html.dark .year-selector {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
+/* Calendar styling for Learning Goals */
+.learning-goals-calendar {
+  background-color: var(--blue-bg) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  padding: 1rem !important;
+  width: 100% !important;
+  max-width: 350px !important;
+  margin: 0 auto !important;
+  z-index: 50 !important;
+  position: absolute !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}
+
+.learning-goals-calendar .rdp-months {
+  justify-content: center !important;
+}
+
+.learning-goals-calendar .rdp-caption {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  border-radius: 8px !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.learning-goals-calendar .rdp-caption_label {
+  font-weight: 700 !important;
+  color: var(--blue-text) !important;
+}
+
+.learning-goals-calendar .rdp-button:hover:not([disabled]) {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+.learning-goals-calendar .rdp-day_selected,
+.learning-goals-calendar .rdp-day_selected:hover {
+  background-color: var(--blue-icon) !important;
+  color: white !important;
+}
+
+.learning-goals-calendar .rdp-day_today {
+  border: 1px solid var(--blue-icon) !important;
+  font-weight: 700 !important;
+}
+
+html.dark .learning-goals-calendar {
+  background-color: #1e293b !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+html.dark .learning-goals-calendar .rdp-caption {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+html.dark .learning-goals-calendar .rdp-caption_label {
+  color: white !important;
+}
+
+html.dark .learning-goals-calendar .rdp-button {
+  color: #e2e8f0 !important;
+}
+
+html.dark .learning-goals-calendar .rdp-day_today {
+  border-color: var(--blue-icon) !important;
+  color: white !important;
+}
+
+html.dark .learning-goals-calendar .rdp-button:hover:not([disabled]) {
+  background-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Goal dialog styling */
+.goal-dialog-content {
+  background-color: var(--blue-bg, #f8fafc) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+  border-radius: 12px !important;
+}
+
+html.dark .goal-dialog-content {
+  background-color: #1e293b !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.goal-input {
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  border-radius: 8px !important;
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  transition: all 0.2s ease !important;
+}
+
+.goal-input:focus {
+  border-color: var(--blue-icon) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+html.dark .goal-input {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  color: white !important;
+}
+
+html.dark .goal-input:focus {
+  border-color: var(--blue-icon) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
+}
+
+.date-picker-button {
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  background: linear-gradient(to right, rgba(219, 234, 254, 0.5), rgba(191, 219, 254, 0.5)) !important;
+  border-radius: 8px !important;
+  color: var(--blue-text) !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.date-picker-button:hover {
+  background: linear-gradient(to right, rgba(219, 234, 254, 0.8), rgba(191, 219, 254, 0.8)) !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+html.dark .date-picker-button {
+  background: linear-gradient(to right, rgba(30, 58, 138, 0.3), rgba(59, 130, 246, 0.3)) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  color: white !important;
+}
+
+html.dark .date-picker-button:hover {
+  background: linear-gradient(to right, rgba(30, 58, 138, 0.5), rgba(59, 130, 246, 0.5)) !important;
+  border-color: rgba(59, 130, 246, 0.6) !important;
+}
+
 /* Mobile-specific enhancements */
 @media (max-width: 768px) {
   /* Override CSS variables for mobile dark mode */
