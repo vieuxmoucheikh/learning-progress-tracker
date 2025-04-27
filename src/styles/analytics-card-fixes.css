@@ -219,17 +219,20 @@ html.dark .analytics-stat-card.purple-card svg {
   }
   
   html.dark .analytics-stat-card.blue-card svg {
-    background-color: #1e3a8a !important;
-    color: white !important;
+    background-color: rgba(59, 130, 246, 0.2) !important;
+    color: #1e3a8a !important;
+    box-shadow: none !important;
   }
   
   html.dark .analytics-stat-card.emerald-card svg {
-    background-color: #064e3b !important;
-    color: white !important;
+    background-color: rgba(16, 185, 129, 0.2) !important;
+    color: #064e3b !important;
+    box-shadow: none !important;
   }
   
   html.dark .analytics-stat-card.purple-card svg {
-    background-color: #4c1d95 !important;
-    color: white !important;
+    background-color: rgba(139, 92, 246, 0.2) !important;
+    color: #4c1d95 !important;
+    box-shadow: none !important;
   }
 }
