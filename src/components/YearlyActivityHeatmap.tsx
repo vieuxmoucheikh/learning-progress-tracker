@@ -157,12 +157,12 @@ export function YearlyActivityHeatmap({
     return labels;
   }, [weeks, selectedYear]);
 
-  // Améliorer la fonction getColorForCount pour des couleurs plus visibles
+  // Améliorer la fonction getColorForCount pour des couleurs plus visibles en mode sombre
   const getColorForCount = (count: number) => {
     if (count === 0) return 'bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600';
-    if (count === 1) return 'bg-emerald-400 hover:bg-emerald-500 dark:bg-emerald-400 dark:hover:bg-emerald-300 border-2 border-emerald-500 dark:border-emerald-500';
-    if (count <= 3) return 'bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-400 border-2 border-emerald-600 dark:border-emerald-600';
-    return 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 border-2 border-emerald-700 dark:border-emerald-700';
+    if (count === 1) return 'bg-emerald-400 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 border-2 border-emerald-500 dark:border-emerald-600';
+    if (count <= 3) return 'bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-500 border-2 border-emerald-600 dark:border-emerald-700';
+    return 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 border-2 border-emerald-700 dark:border-emerald-800';
   };
 
   // State pour gérer le tooltip mobile
@@ -314,9 +314,9 @@ export function YearlyActivityHeatmap({
         <div className="flex items-center gap-2 mt-5 justify-end">
           <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Less</span>
           <div className="w-4 h-4 rounded-sm bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600" />
-          <div className="w-4 h-4 rounded-sm bg-emerald-400 dark:bg-emerald-400 border-2 border-emerald-500 dark:border-emerald-500" />
-          <div className="w-4 h-4 rounded-sm bg-emerald-500 dark:bg-emerald-500 border-2 border-emerald-600 dark:border-emerald-600" />
-          <div className="w-4 h-4 rounded-sm bg-emerald-600 dark:bg-emerald-600 border-2 border-emerald-700 dark:border-emerald-700" />
+          <div className="w-4 h-4 rounded-sm bg-emerald-400 dark:bg-emerald-500 border-2 border-emerald-500 dark:border-emerald-600" />
+          <div className="w-4 h-4 rounded-sm bg-emerald-500 dark:bg-emerald-600 border-2 border-emerald-600 dark:border-emerald-700" />
+          <div className="w-4 h-4 rounded-sm bg-emerald-600 dark:bg-emerald-700 border-2 border-emerald-700 dark:border-emerald-800" />
           <span className="text-sm font-bold text-gray-700 dark:text-gray-300">More</span>
         </div>
       </div>
