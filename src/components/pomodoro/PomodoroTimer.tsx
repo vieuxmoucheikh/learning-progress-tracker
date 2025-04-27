@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { useTheme } from "@/components/ThemeProvider";
-import Progress from '@/components/ui/progress';
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label"; // Update import to use named export
@@ -22,7 +21,7 @@ import {
 } from '@/lib/database';
 import { PomodoroSettings, PomodoroStats } from '@/types';
 import { PomodoroSettingsDialog } from './PomodoroSettingsDialog';
-import { PlayIcon, PauseIcon, SkipForwardIcon, Settings2Icon, Brain, Target, Trophy } from 'lucide-react';
+import { PlayIcon, PauseIcon, SkipForwardIcon, Settings2Icon, Target, Trophy } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -45,14 +44,15 @@ interface Task {
     updated_at?: string;
 }
 
-interface PomodoroSettingsDialogProps {
+// This interface is used by the PomodoroSettingsDialog component
+type PomodoroSettingsDialogProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     setTime: (time: number) => void;
     onSettingsUpdate: (newSettings: PomodoroSettings) => void;
     initialSettings: PomodoroSettings | null;
     isActive: boolean;
-}
+};
 
 interface PomodoroTimerProps {
     onSessionComplete?: (sessionData: { duration: number; label: string; type: 'work' | 'break' }) => void;
@@ -1680,32 +1680,41 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                             {task.text}
                                             {task.completed && task.metrics && task.metrics.completedPomodoros >= (settings?.daily_goal ?? 8) && (
                                                 <svg className="absolute inset-0 w-full h-full rotate-90" viewBox="0 0 100 100">
-                                                    <circle
-                                                        className={cn(
-                                                            "stroke-current",
-                                                            isDark ? "text-slate-800" : "text-slate-200"
-                                                        )}
-                                                        strokeWidth="2"
-                                                        fill="transparent"
-                                                        r="48"
-                                                        cx="50"
-                                                        cy="50"
-                                                    />
-                                                    <circle
-                                                        className={cn(
-                                                            "stroke-current transition-all duration-300",
-                                                            isBreak 
-                                                                ? isDark ? "text-emerald-500" : "text-emerald-600" 
-                                                                : isDark ? "text-blue-500" : "text-blue-600"
-                                                        )}
-                                                        strokeWidth="4"
-                                                        strokeLinecap="round"
-                                                        fill="transparent"
-                                                        r="48"
-                                                        cx="50"
-                                                        cy="50"
-                                                        strokeDasharray={`${progress} 100`}
-                                                    />
+                                                    {/* Calculate progress percentage based on completed pomodoros */}
+                                                    {(() => {
+                                                        const dailyGoalValue = settings?.daily_goal ?? 8;
+                                                        const taskProgress = Math.min(100, (task.metrics.completedPomodoros / dailyGoalValue) * 100);
+                                                        return (
+                                                            <>
+                                                                <circle
+                                                                    className={cn(
+                                                                        "stroke-current",
+                                                                        isDark ? "text-slate-800" : "text-slate-200"
+                                                                    )}
+                                                                    strokeWidth="2"
+                                                                    fill="transparent"
+                                                                    r="48"
+                                                                    cx="50"
+                                                                    cy="50"
+                                                                />
+                                                                <circle
+                                                                    className={cn(
+                                                                        "stroke-current transition-all duration-300",
+                                                                        isBreak 
+                                                                            ? isDark ? "text-emerald-500" : "text-emerald-600" 
+                                                                            : isDark ? "text-blue-500" : "text-blue-600"
+                                                                    )}
+                                                                    strokeWidth="4"
+                                                                    strokeLinecap="round"
+                                                                    fill="transparent"
+                                                                    r="48"
+                                                                    cx="50"
+                                                                    cy="50"
+                                                                    strokeDasharray={`${taskProgress} 100`}
+                                                                />
+                                                            </>
+                                                        );
+                                                    })()} 
                                                 </svg>
                                             )}
                                         </div>
@@ -1789,7 +1798,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     {isActive ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent className="bg-blue-700 text-white border-blue-800 shadow-lg">
+                            <TooltipContent className={cn(
+                                "shadow-lg",
+                                isDark 
+                                    ? "bg-blue-700 text-white border-blue-800" 
+                                    : "bg-blue-50 text-blue-800 border-blue-200"
+                            )}>
                                 {activeTaskId ? `Space to ${isActive ? 'Pause' : 'Start'}` : 'Select a task first'}
                             </TooltipContent> 
                         </Tooltip>
@@ -1809,7 +1823,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     <SkipForwardIcon className="h-6 w-6" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent className="bg-blue-700 text-white border-blue-800 shadow-lg">
+                            <TooltipContent className={cn(
+                                "shadow-lg",
+                                isDark 
+                                    ? "bg-blue-700 text-white border-blue-800" 
+                                    : "bg-blue-50 text-blue-800 border-blue-200"
+                            )}>
                                 Press 'S' to Skip
                             </TooltipContent>
                         </Tooltip>
@@ -1828,7 +1847,12 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     <Settings2Icon className="h-6 w-6" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent className="bg-blue-700 text-white border-blue-800 shadow-lg">
+                            <TooltipContent className={cn(
+                                "shadow-lg",
+                                isDark 
+                                    ? "bg-blue-700 text-white border-blue-800" 
+                                    : "bg-blue-50 text-blue-800 border-blue-200"
+                            )}>
                                 Settings
                             </TooltipContent>
                         </Tooltip>
@@ -1878,6 +1902,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 }
 
 function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; isActive: boolean; totalTime: number; isBreak: boolean }) {
+    const { isDark } = useTheme();
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
     const progress = ((totalTime - time) / totalTime) * 100;
@@ -1983,6 +2008,7 @@ function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; is
 
 // Modifier le composant TaskProgress pour recevoir les settings
 function TaskProgress({ task, settings }: { task: Task; settings: PomodoroSettings | null }) {
+    const { isDark } = useTheme();
     const { streakPercentage, dailyGoalPercentage } = getProgressStats(task, settings);
     const dailyGoal = settings?.daily_goal ?? 8; // Fix TypeScript error by using nullish coalescing operator
     
@@ -1990,14 +2016,28 @@ function TaskProgress({ task, settings }: { task: Task; settings: PomodoroSettin
     const metrics = task.metrics || { completedPomodoros: 0, currentStreak: 0, totalMinutes: 0 };
     
     return (
-        <div className="p-6 rounded-xl bg-blue-600/20 border border-blue-400/30 shadow-lg">
+        <div className={cn(
+            "p-6 rounded-xl shadow-lg",
+            isDark 
+                ? "bg-blue-600/20 border border-blue-400/30" 
+                : "bg-blue-100/50 border border-blue-300"
+        )}>
             <div className="flex items-center justify-between mb-4">
                 <div className="text-sm font-medium">
-                    <span className="text-blue-300">Current Task:</span>
-                    <span className="ml-2 text-blue-100">{task.text}</span>
+                    <span className={cn(
+                        isDark ? "text-blue-300" : "text-blue-700"
+                    )}>Current Task:</span>
+                    <span className={cn(
+                        "ml-2",
+                        isDark ? "text-blue-100" : "text-blue-900"
+                    )}>{task.text}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Badge className="bg-blue-500/20 text-blue-200 border-blue-400/30">
+                    <Badge className={cn(
+                        isDark 
+                            ? "bg-blue-500/20 text-blue-200 border-blue-400/30" 
+                            : "bg-blue-200 text-blue-800 border-blue-300"
+                    )}>
                         {metrics.completedPomodoros} pomodoros
                     </Badge>
                 </div>
@@ -2008,10 +2048,19 @@ function TaskProgress({ task, settings }: { task: Task; settings: PomodoroSettin
                 {/* Daily Goal Progress Bar */}
                 <div>
                     <div className="flex justify-between mb-1">
-                        <span className="text-xs text-blue-300">Daily Goal</span>
-                        <span className="text-xs text-blue-200">{metrics.completedPomodoros} / {dailyGoal}</span>
+                        <span className={cn(
+                            "text-xs",
+                            isDark ? "text-blue-300" : "text-blue-700"
+                        )}>Daily Goal</span>
+                        <span className={cn(
+                            "text-xs",
+                            isDark ? "text-blue-200" : "text-blue-600"
+                        )}>{metrics.completedPomodoros} / {dailyGoal}</span>
                     </div>
-                    <div className="w-full bg-blue-500/10 rounded-full h-2.5 overflow-hidden">
+                    <div className={cn(
+                        "w-full rounded-full h-2.5 overflow-hidden",
+                        isDark ? "bg-blue-500/10" : "bg-blue-200/50"
+                    )}>
                         <div 
                             className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2.5 rounded-full transition-all duration-500 ease-out"
                             style={{ width: `${dailyGoalPercentage}%` }}
@@ -2022,10 +2071,19 @@ function TaskProgress({ task, settings }: { task: Task; settings: PomodoroSettin
                 {/* Streak Progress Bar */}
                 <div>
                     <div className="flex justify-between mb-1">
-                        <span className="text-xs text-blue-300">Current Streak</span>
-                        <span className="text-xs text-blue-200">{metrics.currentStreak} consecutive</span>
+                        <span className={cn(
+                            "text-xs",
+                            isDark ? "text-blue-300" : "text-blue-700"
+                        )}>Current Streak</span>
+                        <span className={cn(
+                            "text-xs",
+                            isDark ? "text-blue-200" : "text-blue-600"
+                        )}>{metrics.currentStreak} consecutive</span>
                     </div>
-                    <div className="w-full bg-blue-500/10 rounded-full h-2.5 overflow-hidden">
+                    <div className={cn(
+                        "w-full rounded-full h-2.5 overflow-hidden",
+                        isDark ? "bg-blue-500/10" : "bg-blue-200/50"
+                    )}>
                         <div 
                             className="bg-gradient-to-r from-green-500 to-emerald-500 h-2.5 rounded-full transition-all duration-500 ease-out"
                             style={{ width: `${streakPercentage}%` }}
@@ -2035,14 +2093,25 @@ function TaskProgress({ task, settings }: { task: Task; settings: PomodoroSettin
             </div>
             
             <div className="flex justify-between items-center">
-                <div className="text-sm text-blue-200">
+                <div className={cn(
+                    "text-sm",
+                    isDark ? "text-blue-200" : "text-blue-700"
+                )}>
                     <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
+                        <Clock className={cn(
+                            "w-3 h-3",
+                            isDark ? "text-blue-300" : "text-blue-600"
+                        )} />
                         {formatTotalTime(metrics.totalMinutes)} total focus time
                     </span>
                 </div>
                 <div>
-                    <span className="text-xs font-medium text-blue-200 bg-blue-500/20 px-2 py-1 rounded-full">
+                    <span className={cn(
+                        "text-xs font-medium px-2 py-1 rounded-full",
+                        isDark 
+                            ? "text-blue-200 bg-blue-500/20" 
+                            : "text-blue-700 bg-blue-200"
+                    )}>
                         {getMotivationalMessage(metrics.currentStreak)}
                     </span>
                 </div>
