@@ -204,19 +204,22 @@ html.dark .year-selector {
     background: linear-gradient(135deg, #f5f3ff 0%, #d8b4fe 100%) !important;
   }
   
-  /* Dark mode colors on mobile - much lighter pastel backgrounds */
+  /* Dark mode colors on mobile - much lighter backgrounds with high contrast */
   html.dark .analytics-stat-card.blue-card {
-    background: linear-gradient(135deg, #93c5fd 0%, #bfdbfe 100%) !important;
+    background-color: #dbeafe !important;
+    background-image: none !important;
     box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.3), 0 8px 12px -2px rgba(0, 0, 0, 0.1) !important;
   }
   
   html.dark .analytics-stat-card.emerald-card {
-    background: linear-gradient(135deg, #6ee7b7 0%, #a7f3d0 100%) !important;
+    background-color: #d1fae5 !important;
+    background-image: none !important;
     box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.3), 0 8px 12px -2px rgba(0, 0, 0, 0.1) !important;
   }
   
   html.dark .analytics-stat-card.purple-card {
-    background: linear-gradient(135deg, #c4b5fd 0%, #ddd6fe 100%) !important;
+    background-color: #f5f3ff !important;
+    background-image: none !important;
     box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.3), 0 8px 12px -2px rgba(0, 0, 0, 0.1) !important;
   }
   
@@ -237,17 +240,17 @@ html.dark .year-selector {
   }
   
   html.dark .analytics-stat-card.blue-card svg {
-    background-color: #1e3a8a !important;
+    background-color: #3b82f6 !important;
     color: white !important;
   }
   
   html.dark .analytics-stat-card.emerald-card svg {
-    background-color: #064e3b !important;
+    background-color: #10b981 !important;
     color: white !important;
   }
   
   html.dark .analytics-stat-card.purple-card svg {
-    background-color: #4c1d95 !important;
+    background-color: #8b5cf6 !important;
     color: white !important;
   }
 }
