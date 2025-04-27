@@ -1554,7 +1554,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
 
     return (
         <Card className={cn(
-            "p-3 md:p-5 max-w-md mx-auto backdrop-blur-sm shadow-2xl rounded-xl overflow-hidden h-[calc(100vh-2rem)] flex flex-col",
+            "p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm shadow-2xl rounded-xl mt-8 overflow-hidden",
             isDark 
                 ? "bg-gradient-to-br from-slate-900/95 to-slate-800/95 border-slate-700/40" 
                 : "bg-gradient-to-br from-white to-slate-50 border-slate-200"
@@ -1562,10 +1562,10 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
             {/* Decorative elements */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -ml-16 -mb-16"></div>
-            <div className="pomodoro-timer flex flex-col flex-grow space-y-4 md:space-y-5 overflow-hidden">
-                <div className="pomodoro-status flex justify-center items-center mb-2 md:mb-3 relative z-10">
+            <div className="pomodoro-timer space-y-6 md:space-y-8">
+                <div className="pomodoro-status flex justify-center items-center mb-6 relative z-10">
                     <div className={cn(
-                        "px-4 py-1.5 rounded-full shadow-lg backdrop-blur-sm transition-all duration-300",
+                        "px-5 py-2 rounded-full shadow-lg backdrop-blur-sm transition-all duration-300",
                         isBreak
                             ? isDark ? "bg-emerald-600/90" : "bg-emerald-500"
                             : isDark ? "bg-blue-600/90" : "bg-blue-500"
@@ -1582,14 +1582,14 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     </div>
                 </div>
                 <div className="w-full">
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-2 mb-4">
                         <Input
                             type="text"
                             value={currentTask}
                             onChange={(e) => setCurrentTask(e.target.value)}
                             placeholder="Add a new task..."
                             className={cn(
-                                "flex h-9 w-full rounded-md px-3 py-1 text-sm ring-offset-background file:border-0",
+                                "flex h-10 w-full rounded-md px-3 py-2 text-sm ring-offset-background file:border-0",
                                 "file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none",
                                 "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                                 "disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200",
@@ -1599,9 +1599,25 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             )}
                             id="new-task-input"
                         />
+                        <Button
+                            onClick={() => {
+                                if (currentTask.trim()) {
+                                    addTask(currentTask);
+                                    setCurrentTask("");
+                                }
+                            }}
+                            className={cn(
+                                "text-white shadow-lg transition-all duration-200",
+                                isDark 
+                                    ? "bg-blue-500 hover:bg-blue-600 shadow-blue-500/20" 
+                                    : "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20"
+                            )}
+                        >
+                            Add
+                        </Button>
                     </div>
-                    <div className="flex justify-between items-center mb-2">
-                        <div className="text-base font-medium transition-all duration-300">
+                    <div className="flex justify-between items-center mb-4">
+                        <div className="text-lg font-medium transition-all duration-300">
                             <span className={isDark ? "text-blue-300" : "text-blue-600"}>Current Task:</span>
                             <span className={cn(
                                 "ml-2", 
@@ -1612,7 +1628,6 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         </div>
                         <div className="flex items-center gap-2">
                             <Badge className={cn(
-                                "text-xs",
                                 isDark 
                                     ? "bg-blue-500/30 text-blue-200 border-blue-400/30" 
                                     : "bg-blue-100 text-blue-700 border-blue-200"
@@ -1621,7 +1636,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             </Badge>
                         </div>
                     </div>
-                    <ul className="space-y-1.5 overflow-y-auto flex-grow" style={{ maxHeight: 'calc(30vh)' }}>
+                    <ul className="space-y-2">
                         {tasks
                             .filter(task => {
                                 // Only show completed tasks if showCompletedTasks is true
@@ -1752,7 +1767,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             ))}
                     </ul>
                 </div> 
-                <div className="relative mb-4 z-10" ref={timerRef}>
+                <div className="relative mb-8 z-10" ref={timerRef}>
                     <TimerDisplay
                         time={time}
                         isActive={isActive}
@@ -1760,7 +1775,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         isBreak={isBreak}
                     />
                 </div>
-                <div className="flex justify-center gap-4 mb-2 relative z-10">
+                <div className="flex justify-center gap-4 mb-6 relative z-10">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -1769,7 +1784,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     onClick={handleButtonClick}
                                     disabled={!activeTaskId}
                                     className={cn(
-                                        "w-20 transition-all duration-300 shadow-lg rounded-full",
+                                        "w-24 transition-all duration-300 shadow-lg rounded-full",
                                         isActive
                                             ? isDark 
                                                 ? "bg-blue-500 hover:bg-blue-600 shadow-blue-500/30" 
@@ -1844,7 +1859,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                     </TooltipProvider>
                 </div>
                 {activeTaskId && (
-                    <div className="mt-2">
+                    <div className="mt-6">
                         {/* Only render TaskProgress if we can find the active task */}
                         {tasks.find(t => t.id === activeTaskId) && (
                             <TaskProgress 
@@ -1902,7 +1917,7 @@ function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; is
     }, [isBreak]);
 
     return (
-        <div className="relative flex justify-center items-center my-4 z-10">
+        <div className="relative flex justify-center items-center my-8 z-10">
             {/* Animated Background Rings */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div
@@ -1932,7 +1947,7 @@ function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; is
             </div>
             
             {/* Container for both the progress ring and timer display */}
-            <div className="relative w-[220px] md:w-[280px] h-[220px] md:h-[280px] flex items-center justify-center">
+            <div className="relative w-[260px] md:w-[340px] h-[260px] md:h-[340px] flex items-center justify-center">
                 {/* Progress Ring */}
                 <svg className="absolute w-full h-full -rotate-90 pointer-events-none">
                     {/* Background Ring */}
