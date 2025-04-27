@@ -664,8 +664,8 @@ export default function LearningGoals({ items }: Props) {
                 {newGoal.targetDate ? format(newGoal.targetDate, "PPP") : <span>Pick a date</span>}
               </Button>
               {showCalendar && (
-                <div className="pt-2 relative" style={{ position: 'relative', zIndex: 100 }}>
-                  <div className="absolute top-0 left-0 right-0">
+                <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-[1000]" onClick={() => setShowCalendar(false)}>
+                  <div className="relative bg-background p-4 rounded-lg shadow-lg" onClick={(e) => e.stopPropagation()}>
                     <Calendar
                       mode="single"
                       selected={newGoal.targetDate}
@@ -674,7 +674,7 @@ export default function LearningGoals({ items }: Props) {
                         setShowCalendar(false);
                       }}
                       fromDate={new Date()}
-                      className="learning-goals-calendar"
+                      className="border-none shadow-none"
                     />
                   </div>
                 </div>
