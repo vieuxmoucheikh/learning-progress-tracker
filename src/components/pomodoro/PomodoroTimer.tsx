@@ -1917,12 +1917,12 @@ function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; is
     }, [isBreak]);
 
     return (
-        <div className="relative flex justify-center items-center my-12 md:my-8 z-10">
+        <div className="relative flex justify-center items-center my-8 z-10">
             {/* Animated Background Rings */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div
                     className={cn(
-                        "absolute w-[280px] md:w-[320px] h-[280px] md:h-[320px] rounded-full opacity-20 blur-xl transition-all duration-500",
+                        "absolute w-[280px] md:w-[340px] h-[280px] md:h-[340px] rounded-full opacity-20 blur-xl transition-all duration-500",
                         isBreak
                             ? isActive ? "bg-emerald-400" : "bg-emerald-500"
                             : isActive ? "bg-blue-400" : "bg-blue-500"
@@ -1930,7 +1930,7 @@ function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; is
                 />
                 <div
                      className={cn(
-                         "absolute w-[240px] md:w-[280px] h-[240px] md:h-[280px] rounded-full blur-xl transition-all duration-500",
+                         "absolute w-[240px] md:w-[300px] h-[240px] md:h-[300px] rounded-full blur-xl transition-all duration-500",
                          isBreak
                             ? isActive ? "bg-teal-400" : "bg-teal-500"
                             : isActive ? "bg-indigo-400" : "bg-indigo-500"
@@ -1938,69 +1938,77 @@ function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; is
                 />
                 <div
                      className={cn(
-                         "absolute w-[200px] md:w-[240px] h-[200px] md:h-[240px] rounded-full blur-lg transition-all duration-500 opacity-30",
+                         "absolute w-[200px] md:w-[260px] h-[200px] md:h-[260px] rounded-full blur-lg transition-all duration-500 opacity-30",
                          isBreak
                             ? isActive ? "bg-cyan-400" : "bg-cyan-500"
                             : isActive ? "bg-violet-400" : "bg-violet-500"
                      )}
                 />
             </div>
-            {/* Progress Ring */}
-            <svg className="absolute w-[260px] md:w-[300px] h-[260px] md:h-[300px] -rotate-90 pointer-events-none">
-                {/* Background Ring */}
-                <circle
-                    cx="130"
-                    cy="130"
-                    r="100"
-                    className="stroke-white/10 fill-none"
-                    strokeWidth="12"
-                />
-                {/* Progress Ring with Gradient */}
-                <circle
-                    cx="130"
-                    cy="130"
-                    r="100"
-                    className="fill-none transition-all duration-500"
-                    stroke={isActive ? "url(#gradientFocus)" : "url(#gradientBreak)"}
-                    strokeWidth="12"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={circumference - (progress / 100) * circumference}
-                    strokeLinecap="round"
-                />
-                {/* Gradient Definitions */}
-                <defs>
-                    <linearGradient id="gradientFocus" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#3B82F6" />
-                        <stop offset="100%" stopColor="#60A5FA" />
-                    </linearGradient>
-                    <linearGradient id="gradientBreak" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#818CF8" />
-                        <stop offset="100%" stopColor="#A5B4FC" />
-                    </linearGradient>
-                </defs>
-            </svg>
-            {/* Timer Display */}
-            <div className="relative z-10 flex flex-col items-center transition-all duration-300">
-                <div className={cn(
-                    "text-7xl md:text-8xl font-bold mb-2 transition-all duration-300",
-                    isDark ? "text-white" : "text-slate-800"
-                )}>
-                    <span className="text-blue-100">{String(minutes).padStart(2, '0')}</span>
-                    <span className="mx-2 text-blue-200">:</span>
-                    <span className="text-blue-100">{String(seconds).padStart(2, '0')}</span>
+            
+            {/* Container for both the progress ring and timer display */}
+            <div className="relative w-[260px] md:w-[340px] h-[260px] md:h-[340px] flex items-center justify-center">
+                {/* Progress Ring */}
+                <svg className="absolute w-full h-full -rotate-90 pointer-events-none">
+                    {/* Background Ring */}
+                    <circle
+                        cx="50%"
+                        cy="50%"
+                        r="45%"
+                        className="stroke-white/10 fill-none"
+                        strokeWidth="12"
+                    />
+                    {/* Progress Ring with Gradient */}
+                    <circle
+                        cx="50%"
+                        cy="50%"
+                        r="45%"
+                        className="fill-none transition-all duration-500"
+                        stroke={isActive ? "url(#gradientFocus)" : "url(#gradientBreak)"}
+                        strokeWidth="12"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={circumference - (progress / 100) * circumference}
+                        strokeLinecap="round"
+                    />
+                    {/* Gradient Definitions */}
+                    <defs>
+                        <linearGradient id="gradientFocus" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#3B82F6" />
+                            <stop offset="100%" stopColor="#60A5FA" />
+                        </linearGradient>
+                        <linearGradient id="gradientBreak" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#818CF8" />
+                            <stop offset="100%" stopColor="#A5B4FC" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                
+                {/* Timer Display - Centered inside the circle */}
+                <div className="relative z-10 flex flex-col items-center justify-center transition-all duration-300">
+                    <div className={cn(
+                        "text-6xl md:text-7xl font-bold transition-all duration-300",
+                        isDark ? "text-white" : "text-slate-800"
+                    )}>
+                        <span className="text-blue-100">{String(minutes).padStart(2, '0')}</span>
+                        <span className="mx-1 text-blue-200">:</span>
+                        <span className="text-blue-100">{String(seconds).padStart(2, '0')}</span>
+                    </div>
+                    <AnimatePresence mode="wait">
+                        <motion.span
+                            key={periodType}
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            transition={{ duration: 0.2 }}
+                            className={cn(
+                                "text-sm font-medium mt-2",
+                                isDark ? "text-blue-200" : "text-blue-600"
+                            )}
+                        >
+                            {`${periodType} Time`}
+                        </motion.span>
+                    </AnimatePresence>
                 </div>
-                <AnimatePresence mode="wait">
-                    <motion.span
-                        key={periodType} // Utiliser periodType comme clé pour l'animation
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        transition={{ duration: 0.2 }}
-                        className="text-sm font-medium mt-4"
-                    >
-                        {`${periodType} Time`}
-                    </motion.span>
-                </AnimatePresence>
             </div>
         </div>
     );
