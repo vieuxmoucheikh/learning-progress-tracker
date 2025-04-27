@@ -61,6 +61,11 @@ export default function LearningGoals({ items }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [goalToDelete, setGoalToDelete] = useState<LearningGoal | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isAddingSession, setIsAddingSession] = useState(false);
+  const [sessionDate, setSessionDate] = useState<Date | undefined>(new Date());
+  const [sessionHours, setSessionHours] = useState(0);
+  const [sessionMinutes, setSessionMinutes] = useState(0);
+  const [showSessionCalendar, setShowSessionCalendar] = useState(false);
   const [newGoal, setNewGoal] = useState<{
     title: string;
     targetDate: Date | undefined;
@@ -521,89 +526,133 @@ export default function LearningGoals({ items }: Props) {
           const currentStatus = getGoalStatus(goal);
 
           return (
-            <Card key={goal.id} className="p-4 space-y-4 relative group">
-              <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+            <Card key={goal.id} className="p-6 relative group overflow-hidden border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-md">
+              {/* Status indicator stripe at the top */}
+              <div className={clsx(
+                'absolute top-0 left-0 w-full h-1',
+                currentStatus === 'completed' ? 'bg-green-500' :
+                currentStatus === 'overdue' ? 'bg-red-500' : 'bg-blue-500'
+              )} />
+              
+              {/* Action buttons */}
+              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="icon"
-                  className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                  className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background"
+                  onClick={() => {
+                    // Open add session dialog
+                    setSelectedGoal(goal);
+                    setIsAddingSession(true);
+                  }}
+                >
+                  <Plus className="h-4 w-4 text-primary" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background/90"
                   onClick={() => {
                     setGoalToDelete(goal);
                     setShowDeleteConfirm(true);
                   }}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4 text-red-500" />
                 </Button>
               </div>
-              <div className="flex justify-between items-start">
+              
+              {/* Header with title and status */}
+              <div className="flex justify-between items-start mb-4">
                 <div className="space-y-1">
-                  <h3 className="font-medium text-lg">{goal.title}</h3>
-                  <p className="text-sm text-gray-500">{goal.category}</p>
+                  <h3 className="font-semibold text-xl">{goal.title}</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block w-3 h-3 rounded-full bg-primary/70"></span>
+                    <p className="text-sm text-muted-foreground font-medium">{goal.category}</p>
+                  </div>
                 </div>
                 <div className={clsx(
-                  'px-2 py-1 rounded-full text-xs font-medium',
+                  'px-3 py-1 rounded-full text-xs font-semibold',
                   getStatusColor(currentStatus)
                 )}>
                   {currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <Target className={clsx('h-4 w-4', getPriorityColor(goal.priority))} />
-                  <span>{goal.targetHours}h target</span>
+              {/* Progress visualization */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="text-sm font-medium">
+                    Progress
+                  </div>
+                  <div className="text-sm font-semibold">
+                    {Math.round(progressPercentage)}%
+                  </div>
                 </div>
-
-                <div className="flex items-center gap-2 text-sm">
-                  <Clock className="h-4 w-4 text-gray-500" />
-                  <span>{progress}h spent</span>
-                </div>
-
-                <div className="flex items-center gap-2 text-sm">
-                  <LucideCalendar className="h-4 w-4 text-gray-500" />
-                  <span>{getRemainingTime(goal.targetDate)}</span>
-                </div>
-
-                <div className="flex items-center gap-2 text-sm">
-                  <Clock className={clsx('h-4 w-4', getDailyHoursColor(calculateMinHoursPerDay(goal)))} />
-                  <span>
-                    <span className={getDailyHoursColor(calculateMinHoursPerDay(goal))}>
-                      {calculateMinHoursPerDay(goal)}h/day needed
-                    </span>
-                    {' '}
-                    <span className="text-xs text-gray-500">
-                      ({getDailyHoursLabel(calculateMinHoursPerDay(goal))})
-                    </span>
-                    {calculateMinHoursPerDay(goal) > 4 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="ml-2 h-6 px-2 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-                        onClick={() => handleAdjustmentSuggestion(goal)}
-                      >
-                        Suggest Adjustment
-                      </Button>
+                <div className="h-3 w-full bg-muted rounded-full overflow-hidden">
+                  <div 
+                    style={{ width: `${progressPercentage}%` }}
+                    className={clsx(
+                      'h-full rounded-full transition-all duration-500',
+                      currentStatus === 'completed' ? 'bg-green-500' :
+                      currentStatus === 'overdue' ? 'bg-red-500' : 'bg-primary'
                     )}
-                  </span>
+                  />
                 </div>
+              </div>
 
-                <div className="relative pt-1">
-                  <div className="flex mb-2 items-center justify-between">
-                    <div className="text-xs font-semibold inline-block text-blue-600">
-                      {Math.round(progressPercentage)}% Complete
-                    </div>
+              {/* Stats grid */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Target className={clsx('h-4 w-4', getPriorityColor(goal.priority))} />
+                    <span className="text-xs font-medium text-muted-foreground">Target</span>
                   </div>
-                  <div className="overflow-hidden h-2 text-xs flex rounded bg-blue-100">
-                    <div
-                      style={{ width: `${progressPercentage}%` }}
-                      className={clsx(
-                        'shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center transition-all duration-500',
-                        currentStatus === 'completed' ? 'bg-green-500' :
-                        currentStatus === 'overdue' ? 'bg-red-500' : 'bg-blue-500'
-                      )}
-                    />
-                  </div>
+                  <p className="text-lg font-semibold">{goal.targetHours}h</p>
                 </div>
+                
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-xs font-medium text-muted-foreground">Spent</span>
+                  </div>
+                  <p className="text-lg font-semibold">{progress}h</p>
+                </div>
+                
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <LucideCalendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-xs font-medium text-muted-foreground">Deadline</span>
+                  </div>
+                  <p className="text-sm font-semibold">{getRemainingTime(goal.targetDate)}</p>
+                </div>
+                
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Clock className={clsx('h-4 w-4', getDailyHoursColor(calculateMinHoursPerDay(goal)))} />
+                    <span className="text-xs font-medium text-muted-foreground">Daily Goal</span>
+                  </div>
+                  <p className={clsx('text-sm font-semibold', getDailyHoursColor(calculateMinHoursPerDay(goal)))}>
+                    {calculateMinHoursPerDay(goal)}h/day
+                  </p>
+                </div>
+              </div>
+              
+              {/* Action buttons */}
+              <div className="flex justify-between items-center">
+                <div className="text-xs text-muted-foreground">
+                  Priority: <span className={clsx('font-medium', getPriorityColor(goal.priority))}>{goal.priority.charAt(0).toUpperCase() + goal.priority.slice(1)}</span>
+                </div>
+                
+                {calculateMinHoursPerDay(goal) > 4 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-8 border-primary/30 text-primary hover:bg-primary/10"
+                    onClick={() => handleAdjustmentSuggestion(goal)}
+                  >
+                    Suggest Adjustment
+                  </Button>
+                )}
               </div>
             </Card>
           );
@@ -650,10 +699,7 @@ export default function LearningGoals({ items }: Props) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground flex items-center">
-                <span>Target Date</span>
-                <span className="text-destructive ml-1">*</span>
-              </label>
+              <label className="text-sm font-semibold text-foreground">Target Date</label>
               <Button
                 type="button"
                 variant="outline"
@@ -666,27 +712,22 @@ export default function LearningGoals({ items }: Props) {
                 <LucideCalendar className="mr-2 h-4 w-4" />
                 {newGoal.targetDate ? format(newGoal.targetDate, "PPP") : <span>Pick a date</span>}
               </Button>
-              <p className="text-xs text-muted-foreground">Set a realistic deadline for your learning goal</p>
               {showCalendar && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-[1000]" onClick={() => setShowCalendar(false)}>
-                  <div className="relative bg-card p-4 rounded-lg shadow-lg border border-border w-[350px]" onClick={(e) => e.stopPropagation()}>
+                  <div className="relative bg-card p-4 rounded-lg shadow-lg border border-border" onClick={(e) => e.stopPropagation()}>
                     <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-medium text-foreground">Select Target Date</h3>
+                      <h3 className="font-medium">Select Date</h3>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowCalendar(false)}>
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
-                    <p className="text-xs text-muted-foreground mb-3">Choose a target date for completing this learning goal</p>
                     <Calendar
                       mode="single"
                       selected={newGoal.targetDate}
                       onSelect={(date) => {
                         setNewGoal(prev => ({ ...prev, targetDate: date }));
+                        setShowCalendar(false);
                       }}
-                      disabled={{
-                        before: new Date(),
-                      }}
-                      initialFocus
                       fromDate={new Date()}
                       className="custom-calendar"
                       classNames={{
@@ -766,40 +807,159 @@ export default function LearningGoals({ items }: Props) {
 
       {/* Adjustment Dialog */}
       <Dialog open={showAdjustmentDialog} onOpenChange={setShowAdjustmentDialog}>
-        <DialogContent className="sm:max-w-[425px] goal-dialog-content">
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Goal Adjustment Suggestion</DialogTitle>
+            <DialogTitle>Suggested Adjustment</DialogTitle>
             <DialogDescription>
-              {suggestedAdjustment?.reason}
+              Based on your current progress, we suggest the following adjustment.
             </DialogDescription>
           </DialogHeader>
-
-          <div className="py-4">
-            {suggestedAdjustment?.type === 'deadline' ? (
-              <p>
-                Extend the deadline from {suggestedAdjustment.currentValue} to {suggestedAdjustment.suggestedValue} days 
-                to achieve a more manageable pace of 4 hours per day.
-              </p>
-            ) : (
-              <p>
-                Adjust the target from {suggestedAdjustment?.currentValue} to {suggestedAdjustment?.suggestedValue} hours 
-                to maintain a reasonable daily commitment.
-              </p>
-            )}
-          </div>
-
+          {suggestedAdjustment && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Current Target Hours: <span className="font-bold">{suggestedAdjustment.currentValue}h</span></p>
+                <p className="text-sm font-medium">Suggested Target Hours: <span className="font-bold text-green-600">{suggestedAdjustment.suggestedValue}h</span></p>
+                <p className="text-sm text-muted-foreground mt-4">{suggestedAdjustment.reason}</p>
+              </div>
+            </div>
+          )}
           <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAdjustmentDialog(false)}>Cancel</Button>
+            <Button onClick={applyAdjustment}>Apply Adjustment</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Session Dialog */}
+      <Dialog open={isAddingSession} onOpenChange={setIsAddingSession}>
+        <DialogContent className="sm:max-w-[500px] goal-dialog-content p-0 sm:p-6 sm:pt-4">
+          <DialogHeader className="space-y-3 pb-4 border-b border-border px-4 sm:px-0">
+            <DialogTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Add Learning Session
+            </DialogTitle>
+            <DialogDescription className="text-base text-muted-foreground">
+              {selectedGoal && (
+                <>Record time spent on <span className="font-medium text-foreground">{selectedGoal.title}</span></>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="p-4 sm:p-0 space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground">Session Date</label>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowSessionCalendar(!showSessionCalendar)}
+                className={clsx(
+                  "w-full pl-3 text-left date-picker-button",
+                  !sessionDate && "text-muted-foreground"
+                )}
+              >
+                <LucideCalendar className="mr-2 h-4 w-4" />
+                {sessionDate ? format(sessionDate, "PPP") : <span>Pick a date</span>}
+              </Button>
+              {showSessionCalendar && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-[1000]" onClick={() => setShowSessionCalendar(false)}>
+                  <div className="relative bg-card p-4 rounded-lg shadow-lg border border-border" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="font-medium">Select Date</h3>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowSessionCalendar(false)}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Calendar
+                      mode="single"
+                      selected={sessionDate}
+                      onSelect={(date) => {
+                        setSessionDate(date);
+                        setShowSessionCalendar(false);
+                      }}
+                      className="custom-calendar"
+                      classNames={{
+                        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                        month: "space-y-4",
+                        caption: "flex justify-center pt-1 relative items-center",
+                        caption_label: "text-sm font-medium",
+                        nav: "space-x-1 flex items-center",
+                        nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+                        nav_button_previous: "absolute left-1",
+                        nav_button_next: "absolute right-1",
+                        table: "w-full border-collapse space-y-1",
+                        head_row: "flex",
+                        head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+                        row: "flex w-full mt-2",
+                        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                        day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md",
+                        day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                        day_today: "bg-accent text-accent-foreground",
+                        day_outside: "text-muted-foreground opacity-50",
+                        day_disabled: "text-muted-foreground opacity-50",
+                        day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                        day_hidden: "invisible",
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Hours</label>
+                <Input
+                  type="number"
+                  value={sessionHours}
+                  onChange={e => setSessionHours(parseInt(e.target.value) || 0)}
+                  min={0}
+                  max={24}
+                  className="goal-input"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Minutes</label>
+                <Input
+                  type="number"
+                  value={sessionMinutes}
+                  onChange={e => setSessionMinutes(parseInt(e.target.value) || 0)}
+                  min={0}
+                  max={59}
+                  className="goal-input"
+                />
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter className="px-4 sm:px-0">
             <Button
               variant="outline"
-              onClick={() => setShowAdjustmentDialog(false)}
+              onClick={() => {
+                setIsAddingSession(false);
+                setSessionHours(0);
+                setSessionMinutes(0);
+                setSessionDate(new Date());
+              }}
             >
-              Keep Current Goal
+              Cancel
             </Button>
             <Button
-              onClick={applyAdjustment}
-              className="bg-blue-500 hover:bg-blue-600 text-white"
+              onClick={() => {
+                if (selectedGoal && sessionDate) {
+                  const duration = { hours: sessionHours, minutes: sessionMinutes };
+                  addSessionToGoal(selectedGoal.id, format(sessionDate, 'yyyy-MM-dd'), duration);
+                  setIsAddingSession(false);
+                  setSessionHours(0);
+                  setSessionMinutes(0);
+                  toast({
+                    title: "Session Added",
+                    description: `Added ${sessionHours}h ${sessionMinutes}m to ${selectedGoal.title}`,
+                  });
+                }
+              }}
+              disabled={!selectedGoal || !sessionDate || (sessionHours === 0 && sessionMinutes === 0)}
             >
-              Apply Adjustment
+              Add Session
             </Button>
           </DialogFooter>
         </DialogContent>
