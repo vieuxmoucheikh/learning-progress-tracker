@@ -1,18 +1,22 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Search, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import LearningItemCard from "./LearningItemCard";
 import { CustomSelect, SelectOption } from "./ui/select";
 import type { LearningItem } from '@/types';
-import { clsx } from "clsx";
 
 type StatusFilterType = 'all' | 'active' | 'completed';
 
 interface StatusFilterProps {
   selectedStatus: StatusFilterType;
   onChange: (status: StatusFilterType) => void;
+}
+
+interface CategoryFilterProps {
+  selectedCategory: string;
+  onChange: (category: string) => void;
+  options: SelectOption[];
 }
 
 const StatusFilter: React.FC<StatusFilterProps> = ({ selectedStatus, onChange }) => {
@@ -29,6 +33,19 @@ const StatusFilter: React.FC<StatusFilterProps> = ({ selectedStatus, onChange })
         onValueChange={(value) => onChange(value as StatusFilterType)}
         options={options}
         className="w-[140px]"
+      />
+    </div>
+  );
+};
+
+const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onChange, options }) => {
+  return (
+    <div className="flex items-center">
+      <CustomSelect
+        value={selectedCategory}
+        onValueChange={(value) => onChange(value)}
+        options={options}
+        className="w-[160px]"
       />
     </div>
   );
@@ -76,8 +93,8 @@ export function ItemsTab({
     }
     
     const categories = items
-      .filter(item => item && item.category) // Filtrer les éléments null/undefined et sans catégorie
-      .map(item => item.category)
+      .filter(item => item && typeof item.category === 'string') // Ensure category is a string
+      .map(item => item.category as string) // Type assertion since we filtered for strings
       .filter(Boolean); // Filtre supplémentaire pour s'assurer qu'il n'y a pas de valeurs falsy
     
     const uniqueCategories = Array.from(new Set(categories)).sort();
@@ -86,9 +103,7 @@ export function ItemsTab({
       { value: 'all', label: 'All Categories' },
       ...uniqueCategories.map(category => ({
         value: category,
-        label: typeof category === 'string' 
-          ? category.charAt(0).toUpperCase() + category.slice(1)
-          : 'Unknown' // Fallback
+        label: category.charAt(0).toUpperCase() + category.slice(1)
       }))
     ];
   }, [items]);
@@ -152,6 +167,11 @@ export function ItemsTab({
           
           <div className="flex gap-2">
             <StatusFilter selectedStatus={filterStatus} onChange={setFilterStatus} />
+            <CategoryFilter 
+              selectedCategory={selectedCategoryFilter} 
+              onChange={setSelectedCategoryFilter} 
+              options={categoryOptions} 
+            />
             
             <Button 
               variant="default" 
