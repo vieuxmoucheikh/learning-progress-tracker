@@ -1,0 +1,42 @@
+/* Analytics card fixes for dark mode */
+.analytics-stat-card {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Light mode styles */
+.analytics-stat-card.blue-card {
+  background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+  border: 1px solid #bfdbfe;
+}
+
+.analytics-stat-card.emerald-card {
+  background: linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%);
+  border: 1px solid #a7f3d0;
+}
+
+.analytics-stat-card.purple-card {
+  background: linear-gradient(135deg, #e9d5ff 0%, #f5f3ff 100%);
+  border: 1px solid #d8b4fe;
+}
+
+/* Dark mode styles with !important to override any conflicting styles */
+html.dark .analytics-stat-card.blue-card {
+  background: #2563eb !important;
+  border: 1px solid #3b82f6 !important;
+}
+
+html.dark .analytics-stat-card.emerald-card {
+  background: #059669 !important;
+  border: 1px solid #10b981 !important;
+}
+
+html.dark .analytics-stat-card.purple-card {
+  background: #7c3aed !important;
+  border: 1px solid #8b5cf6 !important;
+}
+
+html.dark .analytics-stat-card .card-title,
+html.dark .analytics-stat-card .card-value,
+html.dark .analytics-stat-card svg {
+  color: white !important;
+}
