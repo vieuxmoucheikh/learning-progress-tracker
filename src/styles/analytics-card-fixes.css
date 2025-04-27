@@ -1,16 +1,17 @@
-/* Enhanced Analytics Card Design */
+/* Refined Analytics Card Design */
 .analytics-stat-card {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 8px 12px -2px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03) !important;
   border-radius: 12px !important;
   padding: 16px !important;
   transition: transform 0.2s ease, box-shadow 0.2s ease !important;
   position: relative !important;
   overflow: hidden !important;
+  border: none !important;
 }
 
 .analytics-stat-card:hover {
   transform: translateY(-2px) !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 12px 16px -2px rgba(0, 0, 0, 0.1), 0 6px 8px -4px rgba(0, 0, 0, 0.05) !important;
 }
 
 /* Card content layout */
@@ -23,15 +24,16 @@
 .analytics-stat-card svg {
   width: 20px !important;
   height: 20px !important;
-  padding: 3px !important;
+  padding: 4px !important;
   border-radius: 50% !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Title styling */
 .analytics-stat-card .card-title {
   font-size: 0.875rem !important;
   font-weight: 600 !important;
-  letter-spacing: 0.025em !important;
+  letter-spacing: 0.01em !important;
 }
 
 /* Value styling */
@@ -42,20 +44,20 @@
   margin-left: 30px !important; /* Align with title + icon */
 }
 
-/* Light mode styles with subtle gradients */
+/* Light mode styles with softer gradients */
 .analytics-stat-card.blue-card {
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
-  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  background: linear-gradient(135deg, #e0f2fe 0%, #bfdbfe 100%) !important;
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.15), 0 8px 12px -2px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03) !important;
 }
 
 .analytics-stat-card.emerald-card {
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
-  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  background: linear-gradient(135deg, #ecfdf5 0%, #a7f3d0 100%) !important;
+  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.15), 0 8px 12px -2px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03) !important;
 }
 
 .analytics-stat-card.purple-card {
-  background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%) !important;
-  border: 1px solid rgba(139, 92, 246, 0.3) !important;
+  background: linear-gradient(135deg, #f5f3ff 0%, #d8b4fe 100%) !important;
+  box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.15), 0 8px 12px -2px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03) !important;
 }
 
 /* Light mode text and icon colors */
@@ -86,54 +88,59 @@
 .analytics-stat-card.blue-card svg {
   color: white !important;
   background-color: #3b82f6 !important;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3) !important;
 }
 
 .analytics-stat-card.emerald-card svg {
   color: white !important;
   background-color: #10b981 !important;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3) !important;
 }
 
 .analytics-stat-card.purple-card svg {
   color: white !important;
   background-color: #8b5cf6 !important;
+  box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3) !important;
 }
 
-/* Dark mode styles with elegant gradients */
+/* Dark mode styles with softer gradients */
 html.dark .analytics-stat-card.blue-card {
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%) !important;
-  border: 1px solid rgba(96, 165, 250, 0.4) !important;
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%) !important;
+  box-shadow: inset 0 0 0 1px rgba(191, 219, 254, 0.2), 0 8px 12px -2px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1) !important;
 }
 
 html.dark .analytics-stat-card.emerald-card {
-  background: linear-gradient(135deg, #065f46 0%, #10b981 100%) !important;
-  border: 1px solid rgba(52, 211, 153, 0.4) !important;
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%) !important;
+  box-shadow: inset 0 0 0 1px rgba(167, 243, 208, 0.2), 0 8px 12px -2px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1) !important;
 }
 
 html.dark .analytics-stat-card.purple-card {
-  background: linear-gradient(135deg, #5b21b6 0%, #8b5cf6 100%) !important;
-  border: 1px solid rgba(167, 139, 250, 0.4) !important;
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%) !important;
+  box-shadow: inset 0 0 0 1px rgba(216, 180, 254, 0.2), 0 8px 12px -2px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Dark mode text and icon colors */
+/* Dark mode text and icon colors - no text shadow */
 html.dark .analytics-stat-card .card-title,
 html.dark .analytics-stat-card .card-value {
   color: white !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
 }
 
 html.dark .analytics-stat-card.blue-card svg {
-  background-color: rgba(255, 255, 255, 0.2) !important;
+  background-color: rgba(255, 255, 255, 0.25) !important;
   color: white !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
 html.dark .analytics-stat-card.emerald-card svg {
-  background-color: rgba(255, 255, 255, 0.2) !important;
+  background-color: rgba(255, 255, 255, 0.25) !important;
   color: white !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
 html.dark .analytics-stat-card.purple-card svg {
-  background-color: rgba(255, 255, 255, 0.2) !important;
+  background-color: rgba(255, 255, 255, 0.25) !important;
   color: white !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* Add subtle pattern overlay for more depth */
@@ -144,7 +151,7 @@ html.dark .analytics-stat-card.purple-card svg {
   left: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  background-image: radial-gradient(circle at 15% 15%, rgba(255, 255, 255, 0.15) 5%, transparent 5.5%) !important;
+  background-image: radial-gradient(circle at 15% 15%, rgba(255, 255, 255, 0.1) 5%, transparent 5.5%) !important;
   background-size: 8px 8px !important;
   opacity: 0.5 !important;
   pointer-events: none !important;
@@ -166,29 +173,40 @@ html.dark .analytics-stat-card.purple-card svg {
     height: 18px !important;
   }
   
-  /* Ensure light mode has proper colors on mobile */
+  /* Light mode colors on mobile */
   .analytics-stat-card.blue-card {
-    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+    background: linear-gradient(135deg, #e0f2fe 0%, #bfdbfe 100%) !important;
   }
   
   .analytics-stat-card.emerald-card {
-    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
+    background: linear-gradient(135deg, #ecfdf5 0%, #a7f3d0 100%) !important;
   }
   
   .analytics-stat-card.purple-card {
-    background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%) !important;
+    background: linear-gradient(135deg, #f5f3ff 0%, #d8b4fe 100%) !important;
   }
   
-  /* Ensure dark mode has proper colors on mobile */
+  /* Dark mode colors on mobile - brighter, no black backgrounds */
   html.dark .analytics-stat-card.blue-card {
-    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%) !important;
+    background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%) !important;
   }
   
   html.dark .analytics-stat-card.emerald-card {
-    background: linear-gradient(135deg, #065f46 0%, #10b981 100%) !important;
+    background: linear-gradient(135deg, #34d399 0%, #6ee7b7 100%) !important;
   }
   
   html.dark .analytics-stat-card.purple-card {
-    background: linear-gradient(135deg, #5b21b6 0%, #8b5cf6 100%) !important;
+    background: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%) !important;
+  }
+  
+  /* Ensure text is clearly visible on mobile dark mode */
+  html.dark .analytics-stat-card .card-title,
+  html.dark .analytics-stat-card .card-value {
+    color: #1e293b !important; /* Dark slate color that works on light backgrounds */
+  }
+  
+  html.dark .analytics-stat-card svg {
+    background-color: #1e293b !important;
+    color: white !important;
   }
 }
