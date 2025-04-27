@@ -1553,12 +1553,28 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
     }, [settings, audioContext]);
 
     return (
-        <Card className="p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm bg-slate-900/90 border-slate-700/30 shadow-2xl rounded-xl mt-8">
+        <Card className={cn(
+            "p-4 md:p-6 max-w-md mx-auto backdrop-blur-sm shadow-2xl rounded-xl mt-8 overflow-hidden",
+            isDark 
+                ? "bg-gradient-to-br from-slate-900/95 to-slate-800/95 border-slate-700/40" 
+                : "bg-gradient-to-br from-white to-slate-50 border-slate-200"
+        )}>
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -ml-16 -mb-16"></div>
             <div className="pomodoro-timer space-y-6 md:space-y-8">
-                <div className="pomodoro-status flex justify-center items-center mb-2">
-                    <div className="px-4 py-1.5 rounded-full shadow-lg bg-blue-600/90 backdrop-blur-sm">
+                <div className="pomodoro-status flex justify-center items-center mb-6 relative z-10">
+                    <div className={cn(
+                        "px-5 py-2 rounded-full shadow-lg backdrop-blur-sm transition-all duration-300",
+                        isBreak
+                            ? isDark ? "bg-emerald-600/90" : "bg-emerald-500"
+                            : isDark ? "bg-blue-600/90" : "bg-blue-500"
+                    )}>
                         <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full animate-pulse bg-blue-300" />
+                            <div className={cn(
+                                "w-2 h-2 rounded-full animate-pulse",
+                                isBreak ? "bg-emerald-200" : "bg-blue-200"
+                            )} />
                             <span className="text-sm font-medium text-white">
                                 {isBreak ? "Break Time" : "Focus Time"}
                             </span>
@@ -1572,9 +1588,15 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             value={currentTask}
                             onChange={(e) => setCurrentTask(e.target.value)}
                             placeholder="Add a new task..."
-                            className="flex h-10 w-full rounded-md border border-slate-600/50 bg-slate-800/90 px-3 py-2
-                            text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium
-                            placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-blue-50"
+                            className={cn(
+                                "flex h-10 w-full rounded-md px-3 py-2 text-sm ring-offset-background file:border-0",
+                                "file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none",
+                                "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+                                "disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200",
+                                isDark 
+                                    ? "border border-slate-600/50 bg-slate-800/90 placeholder:text-slate-400 text-blue-50" 
+                                    : "border border-slate-300 bg-white/90 placeholder:text-slate-400 text-slate-800"
+                            )}
                             id="new-task-input"
                         />
                         <Button
@@ -1584,18 +1606,32 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     setCurrentTask("");
                                 }
                             }}
-                            className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+                            className={cn(
+                                "text-white shadow-lg transition-all duration-200",
+                                isDark 
+                                    ? "bg-blue-500 hover:bg-blue-600 shadow-blue-500/20" 
+                                    : "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20"
+                            )}
                         >
                             Add
                         </Button>
                     </div>
                     <div className="flex justify-between items-center mb-4">
-                        <div className="text-sm font-medium">
-                            <span className="text-blue-300">Current Task:</span>
-                            <span className="ml-2 text-blue-100">{currentTask || "No task selected"}</span>
+                        <div className="text-lg font-medium transition-all duration-300">
+                            <span className={isDark ? "text-blue-300" : "text-blue-600"}>Current Task:</span>
+                            <span className={cn(
+                                "ml-2", 
+                                isDark ? "text-blue-100" : "text-blue-800"
+                            )}>{activeTaskId && tasks.find(t => t.id === activeTaskId) 
+                                ? tasks.find(t => t.id === activeTaskId)!.text 
+                                : "No task selected"}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Badge className="bg-blue-500/30 text-blue-200 border-blue-400/30">
+                            <Badge className={cn(
+                                isDark 
+                                    ? "bg-blue-500/30 text-blue-200 border-blue-400/30" 
+                                    : "bg-blue-100 text-blue-700 border-blue-200"
+                            )}>
                                 {tasks.length > 0 ? tasks.filter(t => !t.completed).length : 0} active tasks
                             </Badge>
                         </div>
@@ -1612,15 +1648,27 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             })
                             .map(task => (
                                 <li key={task.id} className={cn(
-                                    "flex items-center gap-3 p-4 rounded-xl transition-all duration-200",
+                                    "flex items-center gap-3 p-4 rounded-xl transition-all duration-200 relative overflow-hidden group",
                                     isDark 
                                         ? "bg-slate-800/40 hover:bg-slate-800/60 border border-slate-700/30" 
-                                        : "bg-slate-100 hover:bg-slate-200 border border-slate-300"
+                                        : "bg-white hover:bg-slate-50 border border-slate-200 shadow-sm"
                                 )}>
+                                    {/* Task highlight effect */}
+                                    {activeTaskId === task.id && (
+                                        <div className={cn(
+                                            "absolute left-0 top-0 h-full w-1 transition-all duration-300",
+                                            isDark ? "bg-blue-500" : "bg-blue-600"
+                                        )}></div>
+                                    )}
                                     <Checkbox
                                         checked={task.completed}
                                         onChange={() => toggleTask(task.id)}
-                                        className="data-[state=checked]:bg-blue-500"
+                                        className={cn(
+                                            "transition-all duration-200",
+                                            isDark 
+                                                ? "data-[state=checked]:bg-blue-500" 
+                                                : "data-[state=checked]:bg-blue-600"
+                                        )}
                                     />
                                     <div className="flex-1 min-w-0">
                                         <div className={cn(
@@ -1631,10 +1679,34 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                         )}>
                                             {task.text}
                                             {task.completed && task.metrics && task.metrics.completedPomodoros >= (settings?.daily_goal ?? 8) && (
-                                                <Badge className="ml-2 bg-green-600 text-white">
-                                                    <Trophy className="h-3 w-3 mr-1" />
-                                                    Completed!
-                                                </Badge>
+                                                <svg className="absolute inset-0 w-full h-full rotate-90" viewBox="0 0 100 100">
+                                                    <circle
+                                                        className={cn(
+                                                            "stroke-current",
+                                                            isDark ? "text-slate-800" : "text-slate-200"
+                                                        )}
+                                                        strokeWidth="2"
+                                                        fill="transparent"
+                                                        r="48"
+                                                        cx="50"
+                                                        cy="50"
+                                                    />
+                                                    <circle
+                                                        className={cn(
+                                                            "stroke-current transition-all duration-300",
+                                                            isBreak 
+                                                                ? isDark ? "text-emerald-500" : "text-emerald-600" 
+                                                                : isDark ? "text-blue-500" : "text-blue-600"
+                                                        )}
+                                                        strokeWidth="4"
+                                                        strokeLinecap="round"
+                                                        fill="transparent"
+                                                        r="48"
+                                                        cx="50"
+                                                        cy="50"
+                                                        strokeDasharray={`${progress} 100`}
+                                                    />
+                                                </svg>
                                             )}
                                         </div>
                                         {activeTaskId === task.id && task.metrics && (
@@ -1658,17 +1730,26 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                         <Button
                                             onClick={() => setTaskActive(task.id)}
                                             className={cn(
-                                                "transition-all duration-200",
+                                                "transition-all duration-200 rounded-lg",
                                                 activeTaskId === task.id
-                                                    ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20"
-                                                    : "bg-blue-500/20 text-blue-100 hover:bg-blue-500/30"
+                                                    ? isDark 
+                                                        ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20" 
+                                                        : "bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20"
+                                                    : isDark 
+                                                        ? "bg-blue-500/20 text-blue-100 hover:bg-blue-500/30" 
+                                                        : "bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200"
                                             )}
                                         >
                                             {activeTaskId === task.id ? "Active" : "Start"}
                                         </Button>
                                         <Button
                                             onClick={() => removeTask(task.id)}
-                                            className="h-9 px-3 bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-red-100 border border-red-500/30 rounded-md"
+                                            className={cn(
+                                                "h-9 px-3 rounded-md transition-all duration-200",
+                                                isDark 
+                                                    ? "bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-red-100 border border-red-500/30" 
+                                                    : "bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700 border border-red-200"
+                                            )}
                                         >
                                             <X className="h-4 w-4" />
                                         </Button>
@@ -1677,7 +1758,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                             ))}
                     </ul>
                 </div> 
-                <div className="relative mb-8" ref={timerRef}>
+                <div className="relative mb-8 z-10" ref={timerRef}>
                     <TimerDisplay
                         time={time}
                         isActive={isActive}
@@ -1685,7 +1766,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                         isBreak={isBreak}
                     />
                 </div>
-                <div className="flex justify-center gap-4 mb-4">
+                <div className="flex justify-center gap-4 mb-6 relative z-10">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -1696,15 +1777,19 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     className={cn(
                                         "w-24 transition-all duration-300 shadow-lg rounded-full",
                                         isActive
-                                            ? "bg-blue-500 hover:bg-blue-600 shadow-blue-500/30"
-                                            : "bg-green-500 hover:bg-green-600 shadow-green-500/30",
+                                            ? isDark 
+                                                ? "bg-blue-500 hover:bg-blue-600 shadow-blue-500/30" 
+                                                : "bg-blue-600 hover:bg-blue-700 shadow-blue-600/30"
+                                            : isDark 
+                                                ? "bg-green-500 hover:bg-green-600 shadow-green-500/30" 
+                                                : "bg-green-600 hover:bg-green-700 shadow-green-600/30",
                                         !activeTaskId && "opacity-50"
                                     )}
                                 >
                                     {isActive ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent className="bg-blue-600 text-white border-blue-700">
+                            <TooltipContent className="bg-blue-700 text-white border-blue-800 shadow-lg">
                                 {activeTaskId ? `Space to ${isActive ? 'Pause' : 'Start'}` : 'Select a task first'}
                             </TooltipContent> 
                         </Tooltip>
@@ -1715,7 +1800,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     onClick={handleButtonClick}
                                     disabled={!activeTaskId || !isActive}
                                     className={cn(
-                                        "rounded-full",
+                                        "rounded-full transition-all duration-200 shadow-md",
                                         isDark 
                                             ? "bg-blue-500/20 border-blue-500/50 hover:border-blue-500 hover:bg-blue-500/30 text-blue-100" 
                                             : "bg-blue-600 border-blue-700 hover:bg-blue-700 text-white"
@@ -1724,7 +1809,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     <SkipForwardIcon className="h-6 w-6" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent className="bg-blue-600 text-white border-blue-700">
+                            <TooltipContent className="bg-blue-700 text-white border-blue-800 shadow-lg">
                                 Press 'S' to Skip
                             </TooltipContent>
                         </Tooltip>
@@ -1734,7 +1819,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     name="settings"
                                     onClick={() => setSettingsOpen(true)}
                                     className={cn(
-                                        "rounded-full",
+                                        "rounded-full transition-all duration-200 shadow-md",
                                         isDark 
                                             ? "bg-blue-500/20 border-blue-500/50 hover:border-blue-500 hover:bg-blue-500/30 text-blue-100" 
                                             : "bg-blue-600 border-blue-700 hover:bg-blue-700 text-white"
@@ -1743,7 +1828,7 @@ export function PomodoroTimer({ }: PomodoroTimerProps) {
                                     <Settings2Icon className="h-6 w-6" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent className="bg-blue-600 text-white border-blue-700">
+                            <TooltipContent className="bg-blue-700 text-white border-blue-800 shadow-lg">
                                 Settings
                             </TooltipContent>
                         </Tooltip>
@@ -1807,20 +1892,32 @@ function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; is
     }, [isBreak]);
 
     return (
-        <div className="relative flex justify-center items-center my-12 md:my-8">
+        <div className="relative flex justify-center items-center my-12 md:my-8 z-10">
             {/* Animated Background Rings */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div
                     className={cn(
-                        "absolute w-[280px] md:w-[320px] h-[280px] md:h-[320px] rounded-full opacity-20 blur-xl",
-                        isActive ? "bg-blue-400" : "bg-blue-500"
+                        "absolute w-[280px] md:w-[320px] h-[280px] md:h-[320px] rounded-full opacity-20 blur-xl transition-all duration-500",
+                        isBreak
+                            ? isActive ? "bg-emerald-400" : "bg-emerald-500"
+                            : isActive ? "bg-blue-400" : "bg-blue-500"
                     )}
                 />
                 <div
-                    className={cn(
-                        "absolute w-[240px] md:w-[280px] h-[240px] md:h-[280px] rounded-full blur-xl",
-                        isActive ? "bg-indigo-400" : "bg-indigo-500"
-                    )}
+                     className={cn(
+                         "absolute w-[240px] md:w-[280px] h-[240px] md:h-[280px] rounded-full blur-xl transition-all duration-500",
+                         isBreak
+                            ? isActive ? "bg-teal-400" : "bg-teal-500"
+                            : isActive ? "bg-indigo-400" : "bg-indigo-500"
+                     )}
+                />
+                <div
+                     className={cn(
+                         "absolute w-[200px] md:w-[240px] h-[200px] md:h-[240px] rounded-full blur-lg transition-all duration-500 opacity-30",
+                         isBreak
+                            ? isActive ? "bg-cyan-400" : "bg-cyan-500"
+                            : isActive ? "bg-violet-400" : "bg-violet-500"
+                     )}
                 />
             </div>
             {/* Progress Ring */}
@@ -1858,8 +1955,11 @@ function TimerDisplay({ time, isActive, totalTime, isBreak }: { time: number; is
                 </defs>
             </svg>
             {/* Timer Display */}
-            <div className="relative flex flex-col items-center z-10">
-                <div className="text-6xl md:text-8xl font-mono font-bold tracking-tight flex items-center">
+            <div className="relative z-10 flex flex-col items-center transition-all duration-300">
+                <div className={cn(
+                    "text-7xl md:text-8xl font-bold mb-2 transition-all duration-300",
+                    isDark ? "text-white" : "text-slate-800"
+                )}>
                     <span className="text-blue-100">{String(minutes).padStart(2, '0')}</span>
                     <span className="mx-2 text-blue-200">:</span>
                     <span className="text-blue-100">{String(seconds).padStart(2, '0')}</span>
