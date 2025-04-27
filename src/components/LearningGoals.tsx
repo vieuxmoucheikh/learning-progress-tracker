@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
-import { Plus, Trash2, Target, Clock, LucideCalendar } from 'lucide-react';
+import { Plus, Trash2, Target, Clock, LucideCalendar, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { addGoal, deleteGoal, getGoals, updateGoal, addSession } from '@/lib/database';
 import { LearningItem } from '@/types';
@@ -665,7 +665,13 @@ export default function LearningGoals({ items }: Props) {
               </Button>
               {showCalendar && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-[1000]" onClick={() => setShowCalendar(false)}>
-                  <div className="relative bg-background p-4 rounded-lg shadow-lg" onClick={(e) => e.stopPropagation()}>
+                  <div className="relative bg-card p-4 rounded-lg shadow-lg border border-border" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="font-medium">Select Date</h3>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowCalendar(false)}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
                     <Calendar
                       mode="single"
                       selected={newGoal.targetDate}
@@ -674,7 +680,29 @@ export default function LearningGoals({ items }: Props) {
                         setShowCalendar(false);
                       }}
                       fromDate={new Date()}
-                      className="border-none shadow-none"
+                      className="custom-calendar"
+                      classNames={{
+                        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                        month: "space-y-4",
+                        caption: "flex justify-center pt-1 relative items-center",
+                        caption_label: "text-sm font-medium",
+                        nav: "space-x-1 flex items-center",
+                        nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+                        nav_button_previous: "absolute left-1",
+                        nav_button_next: "absolute right-1",
+                        table: "w-full border-collapse space-y-1",
+                        head_row: "flex",
+                        head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+                        row: "flex w-full mt-2",
+                        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                        day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md",
+                        day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                        day_today: "bg-accent text-accent-foreground",
+                        day_outside: "text-muted-foreground opacity-50",
+                        day_disabled: "text-muted-foreground opacity-50",
+                        day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                        day_hidden: "invisible",
+                      }}
                     />
                   </div>
                 </div>

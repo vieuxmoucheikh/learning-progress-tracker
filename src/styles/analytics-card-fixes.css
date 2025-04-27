@@ -217,20 +217,57 @@ html.dark .year-selector {
 }
 
 /* Calendar styling for Learning Goals */
-.learning-goals-calendar {
-  background-color: var(--background) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 8px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-  padding: 1rem !important;
+.custom-calendar {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
   width: 100% !important;
-  max-width: 350px !important;
   margin: 0 auto !important;
-  z-index: 999 !important; /* Higher z-index to ensure visibility */
-  position: absolute !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  display: block !important;
+}
+
+.custom-calendar .rdp {
+  --rdp-cell-size: 40px;
+  --rdp-accent-color: var(--primary);
+  --rdp-background-color: var(--accent);
+  --rdp-accent-color-dark: var(--primary);
+  --rdp-background-color-dark: var(--accent);
+  --rdp-outline: 2px solid var(--primary);
+  --rdp-outline-selected: 2px solid var(--primary);
+  margin: 0;
+}
+
+.custom-calendar .rdp-months {
+  background-color: transparent;
+}
+
+.custom-calendar .rdp-caption {
+  background-color: transparent;
+  padding: 0;
+}
+
+.custom-calendar .rdp-head_cell {
+  color: var(--muted-foreground);
+  font-weight: 500;
+  font-size: 0.8rem;
+}
+
+.custom-calendar .rdp-day {
+  color: var(--foreground);
+  font-size: 0.875rem;
+  border-radius: 4px;
+}
+
+.custom-calendar .rdp-day_selected {
+  background-color: var(--primary);
+  color: white;
+  font-weight: 600;
+}
+
+.custom-calendar .rdp-day_today {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+  font-weight: 600;
 }
 
 .learning-goals-calendar .rdp-months {
