@@ -323,6 +323,23 @@ export default function LearningGoals({ items }: Props) {
     if (diffDays <= 0) return remainingHours; // If overdue, show total remaining hours
     return Math.round((remainingHours / diffDays) * 10) / 10; // Round to 1 decimal place
   };
+  
+  // Format daily goal to show minutes when hours is small
+  const formatDailyGoal = (hoursPerDay: number) => {
+    if (hoursPerDay < 0.1) {
+      // Convert to minutes if less than 0.1 hours
+      const minutes = Math.round(hoursPerDay * 60);
+      return `${minutes}m/day`;
+    } else if (hoursPerDay < 1) {
+      // Show both hours and minutes for values between 0.1 and 1
+      const hours = Math.floor(hoursPerDay);
+      const minutes = Math.round((hoursPerDay - hours) * 60);
+      return `${minutes}m/day`;
+    } else {
+      // Show hours with one decimal place for values >= 1
+      return `${hoursPerDay}h/day`;
+    }
+  };
 
   const getGoalStatus = (goal: LearningGoal): 'active' | 'completed' | 'overdue' => {
     const hoursSpent = calculateProgress(goal.category);
@@ -617,7 +634,7 @@ export default function LearningGoals({ items }: Props) {
                       <span className="text-xs font-medium text-muted-foreground">Daily Goal</span>
                     </div>
                     <p className={clsx('text-sm font-semibold', getDailyHoursColor(calculateMinHoursPerDay(goal)))}>
-                      {calculateMinHoursPerDay(goal)}h/day
+                      {formatDailyGoal(calculateMinHoursPerDay(goal))}
                     </p>
                   </div>
                 </div>
