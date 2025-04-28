@@ -61,11 +61,7 @@ export default function LearningGoals({ items }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [goalToDelete, setGoalToDelete] = useState<LearningGoal | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isAddingSession, setIsAddingSession] = useState(false);
-  const [sessionDate, setSessionDate] = useState<Date | undefined>(new Date());
-  const [sessionHours, setSessionHours] = useState(0);
-  const [sessionMinutes, setSessionMinutes] = useState(0);
-  const [showSessionCalendar, setShowSessionCalendar] = useState(false);
+
   const [newGoal, setNewGoal] = useState<{
     title: string;
     targetDate: Date | undefined;
@@ -248,21 +244,16 @@ export default function LearningGoals({ items }: Props) {
     }
   };
 
-  // Add session handling with enhanced metrics integration
+  // Add session handling
   const addSessionToGoal = async (goalId: string, date: string, duration: { hours: number; minutes: number }) => {
     try {
-      // Calculate total minutes for better metrics
-      const totalMinutes = duration.hours * 60 + duration.minutes;
-      if (totalMinutes <= 0) {
-        throw new Error('Session duration must be greater than zero');
-      }
-      
-      console.log('Adding session:', { goalId, date, duration, totalMinutes: totalMinutes });
+      console.log('Adding session:', { goalId, date, duration });
       const session = await addSession(goalId, { date, duration });
       console.log('Session added:', session);
 
       // Update the local state
       const updatedGoals = await getGoals();
+      console.log('Updated goals:', updatedGoals);
       
       // Transform the fetched goals to match the LearningGoal interface
       const typedGoals: LearningGoal[] = updatedGoals.map((goal: any) => ({
@@ -297,26 +288,6 @@ export default function LearningGoals({ items }: Props) {
       
       setGoals(typedGoals);
       
-      // Find the updated goal to provide better feedback
-      const updatedGoal = typedGoals.find(g => g.id === goalId);
-      if (updatedGoal) {
-        // Calculate new progress metrics
-        const newProgress = calculateGoalProgress(updatedGoal);
-        const progressPercentage = Math.min(100, (newProgress / updatedGoal.targetHours) * 100);
-        const remainingHours = Math.max(0, updatedGoal.targetHours - newProgress);
-        
-        // Return enhanced session data with metrics
-        return {
-          ...session,
-          metrics: {
-            totalProgress: newProgress,
-            progressPercentage: Math.round(progressPercentage),
-            remainingHours: remainingHours,
-            sessionContribution: duration.hours + (duration.minutes / 60)
-          }
-        };
-      }
-      
       return session;
     } catch (error) {
       console.error('Error adding session:', error);
@@ -324,42 +295,12 @@ export default function LearningGoals({ items }: Props) {
     }
   };
 
-  // Get unique categories from items and goals
-  const allCategories = [...items.map(item => item.category || 'Uncategorized'), ...goals.map(goal => goal.category || 'Uncategorized')];
-  const categories = Array.from(new Set(allCategories)).filter(Boolean);
+  // Calculate progress for a specific category
 
-  // Calculate progress for a goal directly from its sessions
-  const calculateGoalProgress = (goal: LearningGoal) => {
-    let totalMinutes = 0;
-    
-    // Check for sessions in the progress object
-    if (goal.progress?.sessions) {
-      totalMinutes += goal.progress.sessions.reduce((total, session) => {
-        if (session.duration) {
-          return total + (session.duration.hours * 60 + session.duration.minutes);
-        }
-        return total;
-      }, 0);
-    }
-    
-    // Also check for sessions in the sessions array
-    if (goal.sessions) {
-      totalMinutes += goal.sessions.reduce((total, session) => {
-        if (session.duration) {
-          return total + (session.duration.hours * 60 + session.duration.minutes);
-        }
-        return total;
-      }, 0);
-    }
-    
-    return Math.round(totalMinutes / 60 * 100) / 100;
-  };
 
-  // Calculate progress for a category by combining items and goals
   const calculateProgress = (category: string) => {
-    // Calculate from items (legacy data)
     const categoryItems = items.filter(item => item.category === category);
-    const itemsMinutes = categoryItems.reduce((acc, item) => {
+    const totalMinutes = categoryItems.reduce((acc, item) => {
       const sessionMinutes = (item.progress?.sessions || []).reduce((total, session) => {
         if (session.duration) {
           return total + (session.duration.hours * 60 + session.duration.minutes);
@@ -368,15 +309,7 @@ export default function LearningGoals({ items }: Props) {
       }, 0);
       return acc + sessionMinutes;
     }, 0);
-    
-    // Calculate from goals for the same category
-    const categoryGoals = goals.filter(goal => goal.category === category);
-    const goalsMinutes = categoryGoals.reduce((acc, goal) => {
-      return acc + (calculateGoalProgress(goal) * 60); // Convert hours back to minutes
-    }, 0);
-    
-    // Combine both sources of progress
-    return Math.round((itemsMinutes + goalsMinutes) / 60 * 100) / 100;
+    return Math.round(totalMinutes / 60 * 100) / 100;
   };
 
   const calculateMinHoursPerDay = (goal: LearningGoal) => {
@@ -584,37 +517,25 @@ export default function LearningGoals({ items }: Props) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {goals.map(goal => {
-          const progress = calculateGoalProgress(goal);
+          const progress = calculateProgress(goal.category);
           const progressPercentage = Math.min(100, (progress / goal.targetHours) * 100);
           const currentStatus = getGoalStatus(goal);
 
           return (
-            <Card key={goal.id} className="p-6 relative group overflow-hidden border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-md">
+            <Card key={goal.id} className="relative group overflow-hidden border border-border/40 hover:border-primary/40 transition-all duration-300 hover:shadow-lg">
               {/* Status indicator stripe at the top */}
               <div className={clsx(
-                'absolute top-0 left-0 w-full h-1',
-                currentStatus === 'completed' ? 'bg-green-500' :
-                currentStatus === 'overdue' ? 'bg-red-500' : 'bg-blue-500'
+                'absolute top-0 left-0 w-full h-1.5',
+                currentStatus === 'completed' ? 'bg-gradient-to-r from-green-400 to-green-600' :
+                currentStatus === 'overdue' ? 'bg-gradient-to-r from-red-400 to-red-600' : 'bg-gradient-to-r from-blue-400 to-blue-600'
               )} />
               
-              {/* Action buttons */}
-              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+              {/* Action button */}
+              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background"
-                  onClick={() => {
-                    // Open add session dialog
-                    setSelectedGoal(goal);
-                    setIsAddingSession(true);
-                  }}
-                >
-                  <Plus className="h-4 w-4 text-primary" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background/90"
+                  className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background/90 border-border/50"
                   onClick={() => {
                     setGoalToDelete(goal);
                     setShowDeleteConfirm(true);
@@ -624,98 +545,100 @@ export default function LearningGoals({ items }: Props) {
                 </Button>
               </div>
               
-              {/* Header with title and status */}
-              <div className="flex justify-between items-start mb-4">
-                <div className="space-y-1">
-                  <h3 className="font-semibold text-xl">{goal.title}</h3>
-                  <div className="flex items-center gap-2">
-                    <span className="inline-block w-3 h-3 rounded-full bg-primary/70"></span>
-                    <p className="text-sm text-muted-foreground font-medium">{goal.category}</p>
+              <div className="p-6 pt-7">
+                {/* Header with title and status */}
+                <div className="flex justify-between items-start mb-5">
+                  <div className="space-y-1.5">
+                    <h3 className="font-semibold text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">{goal.title}</h3>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block w-2.5 h-2.5 rounded-full bg-primary/70"></span>
+                      <p className="text-sm text-muted-foreground font-medium">{goal.category}</p>
+                    </div>
+                  </div>
+                  <div className={clsx(
+                    'px-3 py-1 rounded-full text-xs font-semibold shadow-sm',
+                    getStatusColor(currentStatus)
+                  )}>
+                    {currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}
                   </div>
                 </div>
-                <div className={clsx(
-                  'px-3 py-1 rounded-full text-xs font-semibold',
-                  getStatusColor(currentStatus)
-                )}>
-                  {currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}
-                </div>
-              </div>
 
-              {/* Progress visualization */}
-              <div className="mb-6">
-                <div className="flex justify-between items-center mb-2">
-                  <div className="text-sm font-medium">
-                    Progress
+                {/* Progress visualization */}
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="text-sm font-medium text-muted-foreground">
+                      Progress
+                    </div>
+                    <div className="text-sm font-semibold">
+                      {Math.round(progressPercentage)}%
+                    </div>
                   </div>
-                  <div className="text-sm font-semibold">
-                    {Math.round(progressPercentage)}%
+                  <div className="h-2.5 w-full bg-muted/60 rounded-full overflow-hidden">
+                    <div 
+                      style={{ width: `${progressPercentage}%` }}
+                      className={clsx(
+                        'h-full rounded-full transition-all duration-500',
+                        currentStatus === 'completed' ? 'bg-gradient-to-r from-green-400 to-green-600' :
+                        currentStatus === 'overdue' ? 'bg-gradient-to-r from-red-400 to-red-600' : 'bg-gradient-to-r from-blue-400 to-blue-600'
+                      )}
+                    />
                   </div>
                 </div>
-                <div className="h-3 w-full bg-muted rounded-full overflow-hidden">
-                  <div 
-                    style={{ width: `${progressPercentage}%` }}
-                    className={clsx(
-                      'h-full rounded-full transition-all duration-500',
-                      currentStatus === 'completed' ? 'bg-green-500' :
-                      currentStatus === 'overdue' ? 'bg-red-500' : 'bg-primary'
-                    )}
-                  />
-                </div>
-              </div>
 
-              {/* Stats grid */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Target className={clsx('h-4 w-4', getPriorityColor(goal.priority))} />
-                    <span className="text-xs font-medium text-muted-foreground">Target</span>
+                {/* Stats grid */}
+                <div className="grid grid-cols-2 gap-4 mb-5">
+                  <div className="bg-muted/30 hover:bg-muted/40 transition-colors duration-200 rounded-xl p-3.5 border border-border/20">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Target className={clsx('h-4 w-4', getPriorityColor(goal.priority))} />
+                      <span className="text-xs font-medium text-muted-foreground">Target</span>
+                    </div>
+                    <p className="text-lg font-semibold">{goal.targetHours}h</p>
                   </div>
-                  <p className="text-lg font-semibold">{goal.targetHours}h</p>
+                  
+                  <div className="bg-muted/30 hover:bg-muted/40 transition-colors duration-200 rounded-xl p-3.5 border border-border/20">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-xs font-medium text-muted-foreground">Spent</span>
+                    </div>
+                    <p className="text-lg font-semibold">{progress}h</p>
+                  </div>
+                  
+                  <div className="bg-muted/30 hover:bg-muted/40 transition-colors duration-200 rounded-xl p-3.5 border border-border/20">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <LucideCalendar className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-xs font-medium text-muted-foreground">Deadline</span>
+                    </div>
+                    <p className="text-sm font-semibold">{getRemainingTime(goal.targetDate)}</p>
+                  </div>
+                  
+                  <div className="bg-muted/30 hover:bg-muted/40 transition-colors duration-200 rounded-xl p-3.5 border border-border/20">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Clock className={clsx('h-4 w-4', getDailyHoursColor(calculateMinHoursPerDay(goal)))} />
+                      <span className="text-xs font-medium text-muted-foreground">Daily Goal</span>
+                    </div>
+                    <p className={clsx('text-sm font-semibold', getDailyHoursColor(calculateMinHoursPerDay(goal)))}>
+                      {calculateMinHoursPerDay(goal)}h/day
+                    </p>
+                  </div>
                 </div>
                 
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-xs font-medium text-muted-foreground">Spent</span>
+                {/* Action buttons */}
+                <div className="flex justify-between items-center pt-1 border-t border-border/30">
+                  <div className="text-xs text-muted-foreground">
+                    Priority: <span className={clsx('font-medium', getPriorityColor(goal.priority))}>{goal.priority.charAt(0).toUpperCase() + goal.priority.slice(1)}</span>
                   </div>
-                  <p className="text-lg font-semibold">{progress}h</p>
+                  
+                  {calculateMinHoursPerDay(goal) > 4 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-8 border-primary/30 text-primary hover:bg-primary/10"
+                      onClick={() => handleAdjustmentSuggestion(goal)}
+                    >
+                      Suggest Adjustment
+                    </Button>
+                  )}
                 </div>
-                
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <LucideCalendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-xs font-medium text-muted-foreground">Deadline</span>
-                  </div>
-                  <p className="text-sm font-semibold">{getRemainingTime(goal.targetDate)}</p>
-                </div>
-                
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Clock className={clsx('h-4 w-4', getDailyHoursColor(calculateMinHoursPerDay(goal)))} />
-                    <span className="text-xs font-medium text-muted-foreground">Daily Goal</span>
-                  </div>
-                  <p className={clsx('text-sm font-semibold', getDailyHoursColor(calculateMinHoursPerDay(goal)))}>
-                    {calculateMinHoursPerDay(goal)}h/day
-                  </p>
-                </div>
-              </div>
-              
-              {/* Action buttons */}
-              <div className="flex justify-between items-center">
-                <div className="text-xs text-muted-foreground">
-                  Priority: <span className={clsx('font-medium', getPriorityColor(goal.priority))}>{goal.priority.charAt(0).toUpperCase() + goal.priority.slice(1)}</span>
-                </div>
-                
-                {calculateMinHoursPerDay(goal) > 4 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs h-8 border-primary/30 text-primary hover:bg-primary/10"
-                    onClick={() => handleAdjustmentSuggestion(goal)}
-                  >
-                    Suggest Adjustment
-                  </Button>
-                )}
               </div>
             </Card>
           );
@@ -893,171 +816,7 @@ export default function LearningGoals({ items }: Props) {
         </DialogContent>
       </Dialog>
 
-      {/* Add Session Dialog */}
-      <Dialog open={isAddingSession} onOpenChange={setIsAddingSession}>
-        <DialogContent className="sm:max-w-[500px] goal-dialog-content p-0 sm:p-6 sm:pt-4">
-          <DialogHeader className="space-y-3 pb-4 border-b border-border px-4 sm:px-0">
-            <DialogTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Add Learning Session
-            </DialogTitle>
-            <DialogDescription className="text-base text-muted-foreground">
-              {selectedGoal && (
-                <>Record time spent on <span className="font-medium text-foreground">{selectedGoal.title}</span></>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="p-4 sm:p-0 space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Session Date</label>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowSessionCalendar(!showSessionCalendar)}
-                className={clsx(
-                  "w-full pl-3 text-left date-picker-button",
-                  !sessionDate && "text-muted-foreground"
-                )}
-              >
-                <LucideCalendar className="mr-2 h-4 w-4" />
-                {sessionDate ? format(sessionDate, "PPP") : <span>Pick a date</span>}
-              </Button>
-              {showSessionCalendar && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-[1000]" onClick={() => setShowSessionCalendar(false)}>
-                  <div className="relative bg-card p-4 rounded-lg shadow-lg border border-border" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-medium">Select Date</h3>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowSessionCalendar(false)}>
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <Calendar
-                      mode="single"
-                      selected={sessionDate}
-                      onSelect={(date) => {
-                        setSessionDate(date);
-                        setShowSessionCalendar(false);
-                      }}
-                      className="custom-calendar"
-                      classNames={{
-                        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                        month: "space-y-4",
-                        caption: "flex justify-center pt-1 relative items-center",
-                        caption_label: "text-sm font-medium",
-                        nav: "space-x-1 flex items-center",
-                        nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
-                        nav_button_previous: "absolute left-1",
-                        nav_button_next: "absolute right-1",
-                        table: "w-full border-collapse space-y-1",
-                        head_row: "flex",
-                        head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
-                        row: "flex w-full mt-2",
-                        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                        day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md",
-                        day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-                        day_today: "bg-accent text-accent-foreground",
-                        day_outside: "text-muted-foreground opacity-50",
-                        day_disabled: "text-muted-foreground opacity-50",
-                        day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
-                        day_hidden: "invisible",
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Hours</label>
-                <Input
-                  type="number"
-                  value={sessionHours}
-                  onChange={e => setSessionHours(parseInt(e.target.value) || 0)}
-                  min={0}
-                  max={24}
-                  className="goal-input"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Minutes</label>
-                <Input
-                  type="number"
-                  value={sessionMinutes}
-                  onChange={e => setSessionMinutes(parseInt(e.target.value) || 0)}
-                  min={0}
-                  max={59}
-                  className="goal-input"
-                />
-              </div>
-            </div>
-          </div>
-          
-          <DialogFooter className="px-4 sm:px-0">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsAddingSession(false);
-                setSessionHours(0);
-                setSessionMinutes(0);
-                setSessionDate(new Date());
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={async () => {
-                if (selectedGoal && sessionDate) {
-                  try {
-                    const duration = { hours: sessionHours, minutes: sessionMinutes };
-                    const result = await addSessionToGoal(selectedGoal.id, format(sessionDate, 'yyyy-MM-dd'), duration);
-                    
-                    // Get the metrics from the result if available
-                    const metrics = 'metrics' in result ? result.metrics : undefined;
-                    
-                    setIsAddingSession(false);
-                    setSessionHours(0);
-                    setSessionMinutes(0);
-                    
-                    if (metrics) {
-                      // Enhanced toast with metrics
-                      toast({
-                        title: "Session Added Successfully",
-                        description: (
-                          <div className="space-y-2">
-                            <p>Added {sessionHours}h {sessionMinutes}m to {selectedGoal.title}</p>
-                            <div className="text-xs space-y-1 mt-2">
-                              <p>Total progress: {metrics.totalProgress.toFixed(1)}h ({metrics.progressPercentage}%)</p>
-                              <p>Remaining: {metrics.remainingHours.toFixed(1)}h</p>
-                            </div>
-                          </div>
-                        ),
-                        className: "session-added-toast",
-                      });
-                    } else {
-                      // Fallback toast
-                      toast({
-                        title: "Session Added",
-                        description: `Added ${sessionHours}h ${sessionMinutes}m to ${selectedGoal.title}`,
-                      });
-                    }
-                  } catch (error) {
-                    toast({
-                      title: "Error",
-                      description: error instanceof Error ? error.message : "Failed to add session",
-                      variant: "destructive",
-                    });
-                  }
-                }
-              }}
-              disabled={!selectedGoal || !sessionDate || (sessionHours === 0 && sessionMinutes === 0)}
-            >
-              Add Session
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
     </div>
   );
 }
