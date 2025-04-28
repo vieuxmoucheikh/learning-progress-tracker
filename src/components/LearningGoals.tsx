@@ -248,16 +248,21 @@ export default function LearningGoals({ items }: Props) {
     }
   };
 
-  // Add session handling
+  // Add session handling with enhanced metrics integration
   const addSessionToGoal = async (goalId: string, date: string, duration: { hours: number; minutes: number }) => {
     try {
-      console.log('Adding session:', { goalId, date, duration });
+      // Calculate total minutes for better metrics
+      const totalMinutes = duration.hours * 60 + duration.minutes;
+      if (totalMinutes <= 0) {
+        throw new Error('Session duration must be greater than zero');
+      }
+      
+      console.log('Adding session:', { goalId, date, duration, totalMinutes: totalMinutes });
       const session = await addSession(goalId, { date, duration });
       console.log('Session added:', session);
 
       // Update the local state
       const updatedGoals = await getGoals();
-      console.log('Updated goals:', updatedGoals);
       
       // Transform the fetched goals to match the LearningGoal interface
       const typedGoals: LearningGoal[] = updatedGoals.map((goal: any) => ({
@@ -292,6 +297,26 @@ export default function LearningGoals({ items }: Props) {
       
       setGoals(typedGoals);
       
+      // Find the updated goal to provide better feedback
+      const updatedGoal = typedGoals.find(g => g.id === goalId);
+      if (updatedGoal) {
+        // Calculate new progress metrics
+        const newProgress = calculateGoalProgress(updatedGoal);
+        const progressPercentage = Math.min(100, (newProgress / updatedGoal.targetHours) * 100);
+        const remainingHours = Math.max(0, updatedGoal.targetHours - newProgress);
+        
+        // Return enhanced session data with metrics
+        return {
+          ...session,
+          metrics: {
+            totalProgress: newProgress,
+            progressPercentage: Math.round(progressPercentage),
+            remainingHours: remainingHours,
+            sessionContribution: duration.hours + (duration.minutes / 60)
+          }
+        };
+      }
+      
       return session;
     } catch (error) {
       console.error('Error adding session:', error);
@@ -299,12 +324,42 @@ export default function LearningGoals({ items }: Props) {
     }
   };
 
-  // Get unique categories from items
-  const categories = Array.from(new Set(items.map(item => item.category || 'Uncategorized'))).filter(Boolean);
+  // Get unique categories from items and goals
+  const allCategories = [...items.map(item => item.category || 'Uncategorized'), ...goals.map(goal => goal.category || 'Uncategorized')];
+  const categories = Array.from(new Set(allCategories)).filter(Boolean);
 
+  // Calculate progress for a goal directly from its sessions
+  const calculateGoalProgress = (goal: LearningGoal) => {
+    let totalMinutes = 0;
+    
+    // Check for sessions in the progress object
+    if (goal.progress?.sessions) {
+      totalMinutes += goal.progress.sessions.reduce((total, session) => {
+        if (session.duration) {
+          return total + (session.duration.hours * 60 + session.duration.minutes);
+        }
+        return total;
+      }, 0);
+    }
+    
+    // Also check for sessions in the sessions array
+    if (goal.sessions) {
+      totalMinutes += goal.sessions.reduce((total, session) => {
+        if (session.duration) {
+          return total + (session.duration.hours * 60 + session.duration.minutes);
+        }
+        return total;
+      }, 0);
+    }
+    
+    return Math.round(totalMinutes / 60 * 100) / 100;
+  };
+
+  // Calculate progress for a category by combining items and goals
   const calculateProgress = (category: string) => {
+    // Calculate from items (legacy data)
     const categoryItems = items.filter(item => item.category === category);
-    const totalMinutes = categoryItems.reduce((acc, item) => {
+    const itemsMinutes = categoryItems.reduce((acc, item) => {
       const sessionMinutes = (item.progress?.sessions || []).reduce((total, session) => {
         if (session.duration) {
           return total + (session.duration.hours * 60 + session.duration.minutes);
@@ -313,7 +368,15 @@ export default function LearningGoals({ items }: Props) {
       }, 0);
       return acc + sessionMinutes;
     }, 0);
-    return Math.round(totalMinutes / 60 * 100) / 100;
+    
+    // Calculate from goals for the same category
+    const categoryGoals = goals.filter(goal => goal.category === category);
+    const goalsMinutes = categoryGoals.reduce((acc, goal) => {
+      return acc + (calculateGoalProgress(goal) * 60); // Convert hours back to minutes
+    }, 0);
+    
+    // Combine both sources of progress
+    return Math.round((itemsMinutes + goalsMinutes) / 60 * 100) / 100;
   };
 
   const calculateMinHoursPerDay = (goal: LearningGoal) => {
@@ -521,7 +584,7 @@ export default function LearningGoals({ items }: Props) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {goals.map(goal => {
-          const progress = calculateProgress(goal.category);
+          const progress = calculateGoalProgress(goal);
           const progressPercentage = Math.min(100, (progress / goal.targetHours) * 100);
           const currentStatus = getGoalStatus(goal);
 
@@ -944,17 +1007,48 @@ export default function LearningGoals({ items }: Props) {
               Cancel
             </Button>
             <Button
-              onClick={() => {
+              onClick={async () => {
                 if (selectedGoal && sessionDate) {
-                  const duration = { hours: sessionHours, minutes: sessionMinutes };
-                  addSessionToGoal(selectedGoal.id, format(sessionDate, 'yyyy-MM-dd'), duration);
-                  setIsAddingSession(false);
-                  setSessionHours(0);
-                  setSessionMinutes(0);
-                  toast({
-                    title: "Session Added",
-                    description: `Added ${sessionHours}h ${sessionMinutes}m to ${selectedGoal.title}`,
-                  });
+                  try {
+                    const duration = { hours: sessionHours, minutes: sessionMinutes };
+                    const result = await addSessionToGoal(selectedGoal.id, format(sessionDate, 'yyyy-MM-dd'), duration);
+                    
+                    // Get the metrics from the result if available
+                    const metrics = 'metrics' in result ? result.metrics : undefined;
+                    
+                    setIsAddingSession(false);
+                    setSessionHours(0);
+                    setSessionMinutes(0);
+                    
+                    if (metrics) {
+                      // Enhanced toast with metrics
+                      toast({
+                        title: "Session Added Successfully",
+                        description: (
+                          <div className="space-y-2">
+                            <p>Added {sessionHours}h {sessionMinutes}m to {selectedGoal.title}</p>
+                            <div className="text-xs space-y-1 mt-2">
+                              <p>Total progress: {metrics.totalProgress.toFixed(1)}h ({metrics.progressPercentage}%)</p>
+                              <p>Remaining: {metrics.remainingHours.toFixed(1)}h</p>
+                            </div>
+                          </div>
+                        ),
+                        className: "session-added-toast",
+                      });
+                    } else {
+                      // Fallback toast
+                      toast({
+                        title: "Session Added",
+                        description: `Added ${sessionHours}h ${sessionMinutes}m to ${selectedGoal.title}`,
+                      });
+                    }
+                  } catch (error) {
+                    toast({
+                      title: "Error",
+                      description: error instanceof Error ? error.message : "Failed to add session",
+                      variant: "destructive",
+                    });
+                  }
                 }
               }}
               disabled={!selectedGoal || !sessionDate || (sessionHours === 0 && sessionMinutes === 0)}
