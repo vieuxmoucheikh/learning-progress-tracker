@@ -64,6 +64,7 @@ interface DeckSummary {
   reviewStatus: string;
   lastStudied: string | null;
   nextDue: string | null;
+  masteredCount: number;
 }
 
 const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ 
@@ -120,6 +121,10 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               return nextReview <= today;
             }) || [];
             
+            // Count mastered cards
+            const masteredCards = cards?.filter(card => card.mastered) || [];
+            const masteredCount = masteredCards.length;
+            
             // Get last studied date - find the most recent review date across all cards
             const lastStudied = cards?.reduce((latest, card) => {
               if (!card.last_reviewed) return latest;
@@ -163,7 +168,8 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               dueToday: dueCards.length,
               reviewStatus,
               lastStudied: lastStudied ? lastStudied.toISOString() : undefined,
-              nextDue: nextDue ? nextDue.toISOString() : undefined
+              nextDue: nextDue ? nextDue.toISOString() : undefined,
+              masteredCount
             };
           })
         );
@@ -188,41 +194,40 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   
   // Get deck summary from props or local state
   const getDeckSummary = (deckId: string): DeckSummary => {
-    // First, try to find the summary from the props
-    const summaryFromProps = deckSummaries.find(s => s.deckId === deckId);
-    if (summaryFromProps) {
-      return {
-        deckId: summaryFromProps.deckId,
-        total: summaryFromProps.total || 0,
-        dueToday: summaryFromProps.dueToday || 0,
-        reviewStatus: summaryFromProps.reviewStatus || 'not-started',
-        lastStudied: summaryFromProps.lastStudied,
-        nextDue: summaryFromProps.nextDue
-      };
+    // First check if we have the summary in props
+    if (deckSummaries && deckSummaries.length > 0) {
+      const propSummary = deckSummaries.find(s => s.deckId === deckId);
+      if (propSummary) return propSummary;
     }
-
-    // If not found in props, try to find in local state
-    const summaryFromState = deckSummariesState.find(s => s.deckId === deckId);
-    if (summaryFromState) {
-      return {
-        deckId: summaryFromState.deckId,
-        total: summaryFromState.total || 0,
-        dueToday: summaryFromState.dueToday || 0,
-        reviewStatus: summaryFromState.reviewStatus || 'not-started',
-        lastStudied: summaryFromState.lastStudied,
-        nextDue: summaryFromState.nextDue
-      };
-    }
-
-    // If not found anywhere, return default values
+    
+    // Then check local state
+    const stateSummary = deckSummariesState.find(s => s.deckId === deckId);
+    if (stateSummary) return stateSummary;
+    
+    // Return default summary if not found
     return {
       deckId,
       total: 0,
       dueToday: 0,
       reviewStatus: 'not-started',
       lastStudied: null,
-      nextDue: null
+      nextDue: null,
+      masteredCount: 0
     };
+  };
+
+  // Calculate mastered percentage for a deck
+  const getMasteredPercentage = (deckId: string): number => {
+    const summary = getDeckSummary(deckId);
+    if (!summary || summary.total === 0) return 0;
+    
+    // If we have masteredCount in the summary, use it
+    if (summary.masteredCount !== undefined) {
+      return Math.round((summary.masteredCount / summary.total) * 100);
+    }
+    
+    // Otherwise return 0
+    return 0;
   };
 
   const handleCreateDeckSubmit = () => {
@@ -308,76 +313,103 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
 
   const renderDeckCard = (deck: FlashcardDeck) => {
     const summary = getDeckSummary(deck.id);
+    const masteredPercentage = getMasteredPercentage(deck.id);
     
     return (
-      <Card key={deck.id} className="overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all w-full bg-white dark:bg-gray-800">
-        <CardHeader className="pb-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/20">
+      <Card key={deck.id} className="overflow-hidden border border-gray-200 dark:border-gray-700 transition-all hover:shadow-md">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 pb-4">
           <div className="flex justify-between items-start">
-            <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 break-words">{deck.name}</CardTitle>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8 flex-shrink-0 ml-2"
-                  disabled={isLoading}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Deck</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to delete "{deck.name}"? This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700">
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction 
-                    onClick={() => handleDeleteDeck(deck)} 
-                    className="bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:hover:bg-red-700"
-                  >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-100">{deck.name}</CardTitle>
+            <div className="flex space-x-1">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <Trash2 className="h-4 w-4 text-red-500" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete the "{deck.name}" deck and all its flashcards.
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDeleteDeck(deck)}>
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0"
+                onClick={() => handleEditDeck(deck.id)}
+              >
+                <Edit className="h-4 w-4 text-gray-500" />
+              </Button>
+            </div>
           </div>
-          <CardDescription className="line-clamp-2 text-gray-600 dark:text-gray-400">{deck.description || 'No description provided'}</CardDescription>
+          <CardDescription className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+            {deck.description || 'No description provided'}
+          </CardDescription>
         </CardHeader>
-        <CardContent className="pt-4">
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="flex flex-col items-center justify-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 rounded-lg border border-blue-200 dark:border-blue-800/50 shadow-sm">
-              <p className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">Total Cards</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{summary.total}</p>
+        <CardContent className="pt-4 pb-2">
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-2">
+                <div className="bg-blue-100 dark:bg-blue-900 rounded-full p-1.5">
+                  <Library className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <span className="text-sm text-gray-600 dark:text-gray-300">Total Cards</span>
+              </div>
+              <span className="font-medium text-gray-800 dark:text-gray-200">{summary.total}</span>
             </div>
-            <div className="flex flex-col items-center justify-center p-3 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/20 rounded-lg border border-amber-200 dark:border-amber-800/50 shadow-sm">
-              <p className="text-xs text-amber-700 dark:text-amber-300 font-medium mb-1">Due Today</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{summary.dueToday}</p>
+            
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-2">
+                <div className="bg-amber-100 dark:bg-amber-900 rounded-full p-1.5">
+                  <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                </div>
+                <span className="text-sm text-gray-600 dark:text-gray-300">Due Today</span>
+              </div>
+              <span className="font-medium text-gray-800 dark:text-gray-200">{summary.dueToday}</span>
             </div>
-          </div>
-           
-          <div className="flex flex-wrap gap-2 mb-3">
-            {summary.reviewStatus && (
-              <Badge variant={getReviewStatusBadge(summary.reviewStatus)} className="text-xs px-2 py-1 rounded-md">
+            
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-2">
+                <div className="bg-green-100 dark:bg-green-900 rounded-full p-1.5">
+                  <Star className="h-4 w-4 text-green-600 dark:text-green-400" />
+                </div>
+                <span className="text-sm text-gray-600 dark:text-gray-300">Mastered</span>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium text-gray-800 dark:text-gray-200 mr-2">
+                  {masteredPercentage}%
+                </span>
+                <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-green-500 rounded-full" 
+                    style={{ width: `${masteredPercentage}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-2">
+                <div className="bg-purple-100 dark:bg-purple-900 rounded-full p-1.5">
+                  <RefreshCw className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                </div>
+                <span className="text-sm text-gray-600 dark:text-gray-300">Status</span>
+              </div>
+              <Badge variant={getReviewStatusBadge(summary.reviewStatus)}>
                 {formatReviewStatus(summary.reviewStatus)}
-              </Badge> 
-            )}
-            {summary.nextDue && (
-              <Badge variant="outline" className="text-xs px-2 py-1 text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/70 border-gray-200 dark:border-gray-700 rounded-md">
-                <Clock className="w-3 h-3 mr-1" />
-                Next: {new Date(summary.nextDue).toLocaleDateString()} 
               </Badge>
-            )}
-            {summary.lastStudied && (
-              <Badge variant="outline" className="text-xs px-2 py-1 text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/70 border-gray-200 dark:border-gray-700 rounded-md">
-                <Clock className="w-3 h-3 mr-1" />
-                Last: {new Date(summary.lastStudied).toLocaleDateString()}
-              </Badge>
-            )}
+            </div>
           </div>
         </CardContent>
         <CardFooter className="pt-0 flex gap-2 flex-wrap bg-gradient-to-b from-transparent to-gray-50 dark:to-gray-800/30">
@@ -415,7 +447,16 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   };
 
   const getTotalNotStartedCards = () => {
-    return deckSummariesState.reduce((total, summary) => total + summary.total, 0);
+    return deckSummariesState.reduce((total, summary) => {
+      // Count only cards that have never been studied (no last_reviewed date)
+      // We need to check if the summary has a reviewStatus property and if it's 'not-started'
+      if (summary.reviewStatus === 'not-started') {
+        return total + summary.total;
+      }
+      // For decks that have been partially studied, we need to calculate the difference
+      // between total cards and cards that are due (which have been studied before)
+      return total + Math.max(0, summary.total - summary.dueToday);
+    }, 0);
   };
 
   const hasDueCards = getTotalDueCards() > 0;
@@ -587,11 +628,14 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                 <Star className="h-5 w-5 text-blue-700 dark:text-blue-200" />
               </div>
               <div>
-                <h3 className="text-lg font-medium text-blue-800 dark:text-blue-200">New Cards Available</h3>
+                <h3 className="text-lg font-medium text-blue-800 dark:text-blue-200">New Cards to Learn</h3>
                 {getTotalNotStartedCards() === 1 ? (
-                  <p className="text-sm text-blue-700 dark:text-blue-300">You have 1 new card to start learning.</p>
+                  <p className="text-sm text-blue-700 dark:text-blue-300">You have 1 new card that hasn't been studied yet.</p>
                 ) : (
-                  <p className="text-sm text-blue-700 dark:text-blue-300">You have {getTotalNotStartedCards()} new cards to start learning.</p>
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    You have {getTotalNotStartedCards()} new cards that haven't been studied yet. 
+                    <span className="ml-1 font-medium">Start learning them today!</span>
+                  </p>
                 )}
               </div>
             </div>
