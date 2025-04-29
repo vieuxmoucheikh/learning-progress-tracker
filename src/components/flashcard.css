@@ -30,6 +30,50 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
+/* Card hover effects */
+.flashcard-item {
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.flashcard-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.dark .flashcard-item:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* Card content container effects */
+.content-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+}
+
+.content-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: linear-gradient(to top, rgba(249, 250, 251, 1), rgba(249, 250, 251, 0));
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.content-container.has-overflow::after {
+  opacity: 1;
+}
+
+.dark .content-container::after {
+  background: linear-gradient(to top, rgba(17, 24, 39, 1), rgba(17, 24, 39, 0));
+}
+
 /* Enhanced flashcard content styling */
 .flashcard-content {
   line-height: 1.6;

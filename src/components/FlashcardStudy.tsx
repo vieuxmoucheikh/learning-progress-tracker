@@ -460,8 +460,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
 
             <div className="flex-grow flex flex-col">
               <div 
-                className={`relative h-[450px] rounded-xl shadow-lg transition-all duration-500 transform cursor-pointer
-                  ${isFlipped ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-800'} border border-gray-200 dark:border-gray-700`}
+                className={`relative h-[450px] rounded-xl shadow-lg transition-all duration-500 transform cursor-pointer flashcard-item
+                  ${isFlipped ? 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20' : 'bg-white dark:bg-gray-800'} border border-gray-200 dark:border-gray-700`}
                 style={{ perspective: '1000px' }}
                 onClick={() => setIsFlipped(!isFlipped)}
                 ref={cardRef}
@@ -503,7 +503,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
               >
                 <div className="grid grid-cols-4 gap-2">
                   <Button
-                    className="bg-red-600 hover:bg-red-700 text-white"
+                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-sm hover:shadow-md transition-all"
                     onClick={() => handleRate(1)}
                     disabled={!isFlipped}
                   >
@@ -511,15 +511,15 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
                     Hard
                   </Button>
                   <Button
-                    className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                    className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white shadow-sm hover:shadow-md transition-all"
                     onClick={() => handleRate(2)}
                     disabled={!isFlipped}
                   >
-                    <Repeat className="h-4 w-4 mr-2" />
+                    <RotateCcw className="h-4 w-4 mr-2" />
                     Medium
                   </Button>
                   <Button
-                    className="bg-green-600 hover:bg-green-700 text-white"
+                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-sm hover:shadow-md transition-all"
                     onClick={() => handleRate(3)}
                     disabled={!isFlipped}
                   >
@@ -527,12 +527,12 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
                     Easy
                   </Button>
                   <Button
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-sm hover:shadow-md transition-all"
                     onClick={() => handleRate(4)}
                     disabled={!isFlipped}
                   >
                     <Check className="h-4 w-4 mr-2" />
-                    Master
+                    Mastered
                   </Button>
                 </div>
                 <div className="text-xs text-center text-gray-500 dark:text-gray-400">
