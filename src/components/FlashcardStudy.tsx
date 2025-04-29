@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Card } from './ui/card';
 import * as Progress from '@radix-ui/react-progress';
 import { useToast } from './ui/use-toast';
-import { ArrowLeft, Repeat, ThumbsUp, ThumbsDown, Check, Keyboard, Tag, BarChart, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Repeat, ThumbsUp, ThumbsDown, Check, Keyboard, Tag, BarChart } from 'lucide-react';
 import { calculateNextReview, submitReview } from '../lib/flashcards';
 import type { Flashcard } from '../types';
 import { Badge } from './ui/badge';
@@ -130,8 +130,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
 
   // Render card content with HTML
   const renderCardContent = (content: string) => {
-    if (!content) return null;
-    return <div dangerouslySetInnerHTML={{ __html: content }} className="content-container" />;
+    return <div dangerouslySetInnerHTML={{ __html: content }} />;
   };
 
   const handleRate = async (quality: number) => {
@@ -461,8 +460,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
 
             <div className="flex-grow flex flex-col">
               <div 
-                className={`relative h-[450px] rounded-xl shadow-lg transition-all duration-500 transform cursor-pointer flashcard-item
-                  ${isFlipped ? 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20' : 'bg-white dark:bg-gray-800'} border border-gray-200 dark:border-gray-700`}
+                className={`relative h-[450px] rounded-xl shadow-lg transition-all duration-500 transform cursor-pointer
+                  ${isFlipped ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-800'} border border-gray-200 dark:border-gray-700`}
                 style={{ perspective: '1000px' }}
                 onClick={() => setIsFlipped(!isFlipped)}
                 ref={cardRef}
@@ -473,8 +472,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
                 >
                   <div className="h-full flex flex-col">
                     <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">Front</div>
-                    <div className="flex-1 overflow-y-auto custom-scrollbar" style={{ maxHeight: 'calc(100% - 60px)' }}>
-                      <div className="text-lg flashcard-content p-1">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar">
+                      <div className="text-lg flashcard-content">
                         {renderCardContent(cards[currentCardIndex].front_content)}
                       </div>
                     </div>
@@ -490,8 +489,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
                 >
                   <div className="h-full flex flex-col">
                     <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">Back</div>
-                    <div className="flex-1 overflow-y-auto custom-scrollbar" style={{ maxHeight: 'calc(100% - 30px)' }}>
-                      <div className="text-lg flashcard-content p-1">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar">
+                      <div className="text-lg flashcard-content">
                         {renderCardContent(cards[currentCardIndex].back_content)}
                       </div>
                     </div>
@@ -504,7 +503,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
               >
                 <div className="grid grid-cols-4 gap-2">
                   <Button
-                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-sm hover:shadow-md transition-all"
+                    className="bg-red-600 hover:bg-red-700 text-white"
                     onClick={() => handleRate(1)}
                     disabled={!isFlipped}
                   >
@@ -512,15 +511,15 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
                     Hard
                   </Button>
                   <Button
-                    className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white shadow-sm hover:shadow-md transition-all"
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white"
                     onClick={() => handleRate(2)}
                     disabled={!isFlipped}
                   >
-                    <RotateCcw className="h-4 w-4 mr-2" />
+                    <Repeat className="h-4 w-4 mr-2" />
                     Medium
                   </Button>
                   <Button
-                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-sm hover:shadow-md transition-all"
+                    className="bg-green-600 hover:bg-green-700 text-white"
                     onClick={() => handleRate(3)}
                     disabled={!isFlipped}
                   >
@@ -528,12 +527,12 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
                     Easy
                   </Button>
                   <Button
-                    className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-sm hover:shadow-md transition-all"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
                     onClick={() => handleRate(4)}
                     disabled={!isFlipped}
                   >
                     <Check className="h-4 w-4 mr-2" />
-                    Mastered
+                    Master
                   </Button>
                 </div>
                 <div className="text-xs text-center text-gray-500 dark:text-gray-400">
@@ -552,7 +551,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
               />
             </Progress.Root>
 
-            <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <div className="text-sm text-gray-600 dark:text-gray-300">
                 <div className="flex justify-between mb-2">
                   <span>Session Progress:</span>

@@ -37,28 +37,6 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
     loadCards();
   }, [deckId]);
   
-  // Add overflow detection for content containers
-  useEffect(() => {
-    const checkOverflow = () => {
-      filteredCards.forEach(card => {
-        const frontContainer = document.getElementById(`front-content-${card.id}`);
-        const backContainer = document.getElementById(`back-content-${card.id}`);
-        
-        if (frontContainer && frontContainer.scrollHeight > frontContainer.clientHeight) {
-          frontContainer.classList.add('has-overflow');
-        }
-        
-        if (backContainer && backContainer.scrollHeight > backContainer.clientHeight) {
-          backContainer.classList.add('has-overflow');
-        }
-      });
-    };
-    
-    // Run after a short delay to ensure content is rendered
-    const timer = setTimeout(checkOverflow, 300);
-    return () => clearTimeout(timer);
-  }, [filteredCards]);
-  
   // Automatically open the add card dialog if shouldOpenAddDialog is true
   useEffect(() => {
     if (shouldOpenAddDialog) {
@@ -238,21 +216,10 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
         </div>
       </div>
       
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <h2 className="text-xl font-semibold">Flashcards</h2>
-          <div className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-sm rounded-full">
-            {filteredCards.length} {filteredCards.length === 1 ? 'card' : 'cards'}
-          </div>
-          {searchQuery && (
-            <div className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 text-sm rounded-full flex items-center gap-1">
-              <Search className="h-3 w-3" />
-              Filtered
-            </div>
-          )}
-        </div>
+      <div className="mb-4">
+        <h2 className="text-xl font-semibold mb-2">Flashcards</h2>
         <p className="text-gray-600 dark:text-gray-400">
-          {searchQuery ? `Showing results for "${searchQuery}"` : 'All cards in this deck'}
+          {filteredCards.length} {filteredCards.length === 1 ? 'card' : 'cards'} {searchQuery && 'matching your search'}
         </p>
       </div>
 
@@ -260,7 +227,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
         {filteredCards.map(card => (
           <div 
             key={card.id} 
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all p-6 border border-gray-200 dark:border-gray-700 flashcard-item"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all p-6 border border-gray-200 dark:border-gray-700"
           >
             <div className="flex flex-col md:flex-row gap-6">
               <div className="flex-1 space-y-4">
@@ -268,7 +235,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
                   <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
                     Front Side <span className="text-xs text-gray-500 dark:text-gray-400">(Question)</span>
                   </h3>
-                  <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-md border border-gray-100 dark:border-gray-800 max-h-[250px] overflow-y-auto custom-scrollbar content-container" id={`front-content-${card.id}`}>
+                  <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-md border border-gray-100 dark:border-gray-800 max-h-[250px] overflow-y-auto custom-scrollbar">
                     <div className="text-gray-700 dark:text-gray-300 flashcard-content">
                       <div dangerouslySetInnerHTML={{ __html: card.front_content }} />
                     </div>
@@ -279,7 +246,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
                   <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
                     Back Side <span className="text-xs text-gray-500 dark:text-gray-400">(Answer)</span>
                   </h3>
-                  <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-md border border-gray-100 dark:border-gray-800 max-h-[300px] overflow-y-auto custom-scrollbar content-container" id={`back-content-${card.id}`}>
+                  <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-md border border-gray-100 dark:border-gray-800 max-h-[300px] overflow-y-auto custom-scrollbar">
                     <div className="text-gray-700 dark:text-gray-300 flashcard-content">
                       <div dangerouslySetInnerHTML={{ __html: card.back_content }} />
                     </div>

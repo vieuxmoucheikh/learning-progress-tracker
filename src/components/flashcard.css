@@ -1,7 +1,6 @@
 /* Custom scrollbar styles */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -10,16 +9,12 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.5);
-  border: 2px solid transparent;
-  background-clip: padding-box;
+  background: rgba(0, 0, 0, 0.3);
 }
 
 /* Dark mode scrollbar */
@@ -28,69 +23,11 @@
 }
 
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border: 2px solid transparent;
-  background-clip: padding-box;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-
-/* Firefox scrollbar support */
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.05);
-}
-
-.dark .custom-scrollbar {
-  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
-}
-
-/* Card hover effects */
-.flashcard-item {
-  transition: all 0.3s ease;
-  transform-origin: center;
-}
-
-.flashcard-item:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-.dark .flashcard-item:hover {
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
-}
-
-/* Card content container effects */
-.content-container {
-  position: relative;
-  overflow: hidden;
-  border-radius: 0.375rem;
-  transition: all 0.2s ease;
-}
-
-.content-container::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 20px;
-  background: linear-gradient(to top, rgba(249, 250, 251, 1), rgba(249, 250, 251, 0));
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.content-container.has-overflow::after {
-  opacity: 1;
-}
-
-.dark .content-container::after {
-  background: linear-gradient(to top, rgba(17, 24, 39, 1), rgba(17, 24, 39, 0));
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* Enhanced flashcard content styling */
