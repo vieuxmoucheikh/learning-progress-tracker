@@ -476,7 +476,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
                 className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
               />
             </div>
-          </div>
+          </div> 
           <DialogFooter>
             <Button 
               variant="outline" 
