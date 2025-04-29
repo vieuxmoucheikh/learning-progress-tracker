@@ -45,6 +45,7 @@ import {
 } from "lucide-react";
 import { FlashcardDeck } from '@/types';
 import { supabase } from '@/lib/supabase';
+import { createFlashcard } from '@/lib/flashcards';
 
 interface FlashcardDecksProps {
   decks: FlashcardDeck[];
@@ -84,6 +85,9 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   const [deckSummariesState, setDeckSummaries] = useState<DeckSummary[]>([]);
   const [localDecks, setLocalDecks] = useState<FlashcardDeck[]>(decks);
   const [isEditingDeck, setIsEditingDeck] = useState(false);
+  const [isAddingCard, setIsAddingCard] = useState(false);
+  const [cardFormData, setCardFormData] = useState({ front: '', back: '' });
+  const [selectedDeckForCard, setSelectedDeckForCard] = useState<string | null>(null);
   
   // Initialize local decks from props
   useEffect(() => {
@@ -425,16 +429,10 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             size="sm"
             className="flex-1 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
             onClick={() => {
-              // Navigate to card management view
-              if (onSelectDeck) {
-                onSelectDeck(deck.id);
-                // Signal to parent that we want to open the add dialog
-                if (onRefreshMetrics) {
-                  // We're using onRefreshMetrics as a side channel to communicate
-                  // that we want to open the add dialog
-                  onRefreshMetrics();
-                }
-              }
+              // Open the add card dialog directly
+              setSelectedDeckForCard(deck.id);
+              setCardFormData({ front: '', back: '' });
+              setIsAddingCard(true);
             }}
           >
             <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Card
@@ -616,6 +614,102 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm hover:shadow-md transition-all"
             >
               {isLoading ? 'Saving...' : selectedDeckId ? 'Update Deck' : 'Create Deck'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Card Dialog */}
+      <Dialog open={isAddingCard} onOpenChange={setIsAddingCard}>
+        <DialogContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+          <DialogHeader>
+            <DialogTitle>Create New Flashcard</DialogTitle>
+            <DialogDescription>
+              Add a new flashcard to your deck. Front side is the question, back side is the answer.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Front Side (Question)</h4>
+              <Textarea
+                value={cardFormData.front}
+                onChange={(e) => setCardFormData({ ...cardFormData, front: e.target.value })}
+                placeholder="Enter the question or prompt"
+                className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 min-h-[100px]"
+              />
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Back Side (Answer)</h4>
+              <Textarea
+                value={cardFormData.back}
+                onChange={(e) => setCardFormData({ ...cardFormData, back: e.target.value })}
+                placeholder="Enter the answer or explanation"
+                className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 min-h-[100px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setCardFormData({ front: '', back: '' });
+                setSelectedDeckForCard(null);
+                setIsAddingCard(false);
+              }}
+              className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={async () => {
+                if (!cardFormData.front.trim() || !cardFormData.back.trim() || !selectedDeckForCard) {
+                  toast({
+                    title: "Error",
+                    description: "Please fill in both front and back sides of the flashcard",
+                    variant: "destructive"
+                  });
+                  return;
+                }
+                
+                setIsLoading(true);
+                
+                try {
+                  // Create the flashcard
+                  await createFlashcard({
+                    deckId: selectedDeckForCard,
+                    frontContent: cardFormData.front.trim(),
+                    backContent: cardFormData.back.trim()
+                  });
+                  
+                  // Reset form and close dialog
+                  setCardFormData({ front: '', back: '' });
+                  setSelectedDeckForCard(null);
+                  setIsAddingCard(false);
+                  
+                  // Refresh deck metrics to update card counts
+                  if (onRefreshMetrics) {
+                    onRefreshMetrics();
+                  }
+                  
+                  toast({
+                    title: "Success",
+                    description: "Flashcard created successfully",
+                  });
+                } catch (error) {
+                  console.error('Error creating flashcard:', error);
+                  toast({
+                    title: "Error",
+                    description: "Failed to create flashcard",
+                    variant: "destructive"
+                  });
+                } finally {
+                  setIsLoading(false);
+                }
+              }} 
+              disabled={isLoading || !cardFormData.front.trim() || !cardFormData.back.trim()}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm hover:shadow-md transition-all"
+            >
+              {isLoading ? 'Creating...' : 'Create Flashcard'}
             </Button>
           </DialogFooter>
         </DialogContent>
