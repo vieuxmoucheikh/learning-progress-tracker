@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Card } from './ui/card';
 import * as Progress from '@radix-ui/react-progress';
 import { useToast } from './ui/use-toast';
-import { ArrowLeft, Repeat, ThumbsUp, ThumbsDown, Check, Keyboard, Tag, BarChart } from 'lucide-react';
+import { ArrowLeft, Repeat, ThumbsUp, ThumbsDown, Check, Keyboard, Tag, BarChart, RotateCcw } from 'lucide-react';
 import { calculateNextReview, submitReview } from '../lib/flashcards';
 import type { Flashcard } from '../types';
 import { Badge } from './ui/badge';
