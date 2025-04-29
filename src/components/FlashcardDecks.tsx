@@ -41,11 +41,15 @@ import {
   RefreshCw, 
   Star, 
   BookOpen,
-  Trash2
+  Trash2,
+  Tag,
+  Info
 } from "lucide-react";
 import { FlashcardDeck } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { createFlashcard } from '@/lib/flashcards';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface FlashcardDecksProps {
   decks: FlashcardDeck[];
@@ -86,8 +90,9 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   const [localDecks, setLocalDecks] = useState<FlashcardDeck[]>(decks);
   const [isEditingDeck, setIsEditingDeck] = useState(false);
   const [isAddingCard, setIsAddingCard] = useState(false);
-  const [cardFormData, setCardFormData] = useState({ front: '', back: '' });
+  const [cardFormData, setCardFormData] = useState({ front: '', back: '', tags: '' });
   const [selectedDeckForCard, setSelectedDeckForCard] = useState<string | null>(null);
+  const [showCardTips, setShowCardTips] = useState(false);
   
   // Initialize local decks from props
   useEffect(() => {
@@ -431,7 +436,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             onClick={() => {
               // Open the add card dialog directly
               setSelectedDeckForCard(deck.id);
-              setCardFormData({ front: '', back: '' });
+              setCardFormData({ front: '', back: '', tags: '' });
               setIsAddingCard(true);
             }}
           >
@@ -621,30 +626,88 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
 
       {/* Add Card Dialog */}
       <Dialog open={isAddingCard} onOpenChange={setIsAddingCard}>
-        <DialogContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+        <DialogContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 max-w-3xl">
           <DialogHeader>
             <DialogTitle>Create New Flashcard</DialogTitle>
-            <DialogDescription>
-              Add a new flashcard to your deck. Front side is the question, back side is the answer.
+            <DialogDescription className="flex items-center justify-between">
+              <span>Add a new flashcard to your deck. Front side is the question, back side is the answer.</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1" 
+                onClick={() => setShowCardTips(!showCardTips)}
+              >
+                <Info className="h-4 w-4" />
+                Tips
+              </Button>
             </DialogDescription>
           </DialogHeader>
+          
+          {showCardTips && (
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md mb-4 text-sm">
+              <h4 className="font-medium mb-1 text-blue-800 dark:text-blue-300">Tips for effective flashcards:</h4>
+              <ul className="list-disc pl-5 space-y-1 text-blue-700 dark:text-blue-400">
+                <li>Keep questions clear and specific</li>
+                <li>Use formatting to highlight important information</li>
+                <li>Add images or code snippets when relevant</li>
+                <li>Break complex topics into multiple cards</li>
+                <li>Add tags to organize your cards by topic</li>
+              </ul>
+            </div>
+          )}
+          
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <h4 className="text-sm font-medium">Front Side (Question)</h4>
-              <Textarea
-                value={cardFormData.front}
-                onChange={(e) => setCardFormData({ ...cardFormData, front: e.target.value })}
-                placeholder="Enter the question or prompt"
-                className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 min-h-[100px]"
-              />
+              <div className="border border-gray-200 dark:border-gray-700 rounded-md">
+                <ReactQuill
+                  theme="snow"
+                  value={cardFormData.front}
+                  onChange={(value) => setCardFormData({ ...cardFormData, front: value })}
+                  placeholder="Enter the question or prompt"
+                  modules={{
+                    toolbar: [
+                      [{ 'header': [1, 2, 3, false] }],
+                      ['bold', 'italic', 'underline', 'strike'],
+                      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                      ['blockquote', 'code-block'],
+                      ['link', 'image'],
+                      ['clean']
+                    ],
+                  }}
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <h4 className="text-sm font-medium">Back Side (Answer)</h4>
-              <Textarea
-                value={cardFormData.back}
-                onChange={(e) => setCardFormData({ ...cardFormData, back: e.target.value })}
-                placeholder="Enter the answer or explanation"
-                className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 min-h-[100px]"
+              <div className="border border-gray-200 dark:border-gray-700 rounded-md">
+                <ReactQuill
+                  theme="snow"
+                  value={cardFormData.back}
+                  onChange={(value) => setCardFormData({ ...cardFormData, back: value })}
+                  placeholder="Enter the answer or explanation"
+                  modules={{
+                    toolbar: [
+                      [{ 'header': [1, 2, 3, false] }],
+                      ['bold', 'italic', 'underline', 'strike'],
+                      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                      ['blockquote', 'code-block'],
+                      ['link', 'image'],
+                      ['clean']
+                    ],
+                  }}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium flex items-center gap-1">
+                <Tag className="h-4 w-4" /> Tags (optional)
+              </h4>
+              <Input
+                value={cardFormData.tags}
+                onChange={(e) => setCardFormData({ ...cardFormData, tags: e.target.value })}
+                placeholder="Enter tags separated by commas (e.g., math, algebra, equations)"
+                className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
               />
             </div>
           </div>
@@ -652,7 +715,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             <Button 
               variant="outline" 
               onClick={() => {
-                setCardFormData({ front: '', back: '' });
+                setCardFormData({ front: '', back: '', tags: '' });
                 setSelectedDeckForCard(null);
                 setIsAddingCard(false);
               }}
@@ -674,15 +737,29 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                 setIsLoading(true);
                 
                 try {
-                  // Create the flashcard
-                  await createFlashcard({
-                    deckId: selectedDeckForCard,
-                    frontContent: cardFormData.front.trim(),
-                    backContent: cardFormData.back.trim()
-                  });
+                  // Process tags if provided
+                  const tags = cardFormData.tags
+                    ? cardFormData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+                    : [];
+                  
+                  // Create the flashcard with tags
+                  const { data, error } = await supabase
+                    .from('flashcards')
+                    .insert([
+                      {
+                        deck_id: selectedDeckForCard,
+                        front_content: cardFormData.front.trim(),
+                        back_content: cardFormData.back.trim(),
+                        tags: tags.length > 0 ? tags : null,
+                        created_at: new Date().toISOString()
+                      }
+                    ])
+                    .select();
+                  
+                  if (error) throw error;
                   
                   // Reset form and close dialog
-                  setCardFormData({ front: '', back: '' });
+                  setCardFormData({ front: '', back: '', tags: '' });
                   setSelectedDeckForCard(null);
                   setIsAddingCard(false);
                   

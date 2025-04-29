@@ -224,6 +224,7 @@ export interface Flashcard {
   repetitions?: number;
   mastered: boolean;
   review_count?: number;
+  tags?: string[];
 }
 
 export interface FlashcardReview {
