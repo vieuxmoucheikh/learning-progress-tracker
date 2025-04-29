@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import ReactQuill from 'react-quill';
 import { useToast } from './ui/use-toast';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
-import { Plus, Trash2, ArrowLeft, Search, Tag, Info, Calendar, Clock, CheckCircle } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, Search, Tag, Info, Calendar, Clock, CheckCircle, Edit } from 'lucide-react';
 import { createFlashcard } from '../lib/flashcards';
 import type { Flashcard } from '../types';
 import { supabase } from '../lib/supabase';
@@ -216,18 +216,52 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
         </div>
       </div>
       
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold mb-2">Flashcards</h2>
+      <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+        <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
+          Flashcards
+          <span className="text-sm font-normal text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
+            {filteredCards.length} {filteredCards.length === 1 ? 'card' : 'cards'}
+          </span>
+        </h2>
         <p className="text-gray-600 dark:text-gray-400">
-          {filteredCards.length} {filteredCards.length === 1 ? 'card' : 'cards'} {searchQuery && 'matching your search'}
+          {searchQuery ? `Showing cards matching "${searchQuery}"` : 'Manage your flashcards by adding, editing, or removing cards from this deck.'}
         </p>
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md border border-blue-100 dark:border-blue-800 flex items-center gap-3">
+            <div className="bg-blue-100 dark:bg-blue-800 p-2 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600 dark:text-blue-400"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+            </div>
+            <div>
+              <div className="font-medium text-blue-800 dark:text-blue-300">Total Cards</div>
+              <div className="text-blue-600 dark:text-blue-400">{cards.length}</div>
+            </div>
+          </div>
+          <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-md border border-green-100 dark:border-green-800 flex items-center gap-3">
+            <div className="bg-green-100 dark:bg-green-800 p-2 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600 dark:text-green-400"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <div>
+              <div className="font-medium text-green-800 dark:text-green-300">Mastered</div>
+              <div className="text-green-600 dark:text-green-400">{cards.filter(card => card.mastered).length}</div>
+            </div>
+          </div>
+          <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-md border border-purple-100 dark:border-purple-800 flex items-center gap-3">
+            <div className="bg-purple-100 dark:bg-purple-800 p-2 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-600 dark:text-purple-400"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <div>
+              <div className="font-medium text-purple-800 dark:text-purple-300">Due for Review</div>
+              <div className="text-purple-600 dark:text-purple-400">{cards.filter(card => !card.mastered && card.next_review && new Date(card.next_review) <= new Date()).length}</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="space-y-6">
         {filteredCards.map(card => (
           <div 
             key={card.id} 
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all p-6 border border-gray-200 dark:border-gray-700"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all p-6 border border-gray-200 dark:border-gray-700 group"
           >
             <div className="flex flex-col md:flex-row gap-6">
               <div className="flex-1 space-y-4">
@@ -256,38 +290,59 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
               
               <div className="md:w-64 space-y-4">
                 <div className="flex justify-between items-start">
-                  <div className="flex-1"></div>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Flashcard</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete this flashcard? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDeleteCard(card.id)}
-                          className="bg-red-600 text-white hover:bg-red-700"
+                  <div className="flex-1 flex items-center gap-2">
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700/50 px-2 py-0.5 rounded">
+                      Card ID: {card.id.substring(0, 8)}...
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 h-8 w-8"
+                      title="Edit Card"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8"
                         >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Flashcard</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete this flashcard? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteCard(card.id)}
+                            className="bg-red-600 text-white hover:bg-red-700"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
                 
-                <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-md border border-gray-100 dark:border-gray-800 space-y-3">
+                <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-md border border-gray-100 dark:border-gray-800 space-y-3 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-16 h-16 overflow-hidden">
+                    {card.mastered && (
+                      <div className="bg-green-500 text-white text-xs font-bold py-1 rotate-45 transform origin-bottom-right absolute top-0 right-0 w-32 text-center shadow-sm">
+                        MASTERED
+                      </div>
+                    )}
+                  </div>
                   <div className="flex items-start gap-2">
                     <Calendar className="h-4 w-4 text-gray-500 mt-0.5" />
                     <div>
@@ -476,7 +531,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
                 className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
               />
             </div>
-          </div> 
+          </div>
           <DialogFooter>
             <Button 
               variant="outline" 
