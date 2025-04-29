@@ -81,11 +81,13 @@ export const deleteDeck = async (deckId: string) => {
 export const createFlashcard = async ({
   deckId,
   frontContent,
-  backContent
+  backContent,
+  tags = []
 }: {
   deckId: string;
   frontContent: string;
   backContent: string;
+  tags?: string[];
 }): Promise<any> => {
   try {
     const { data: userData } = await supabase.auth.getUser();
@@ -100,6 +102,7 @@ export const createFlashcard = async ({
         deck_id: deckId,
         front_content: frontContent.trim(),
         back_content: backContent.trim(),
+        tags,
         review_interval: 0,
         ease_factor: 2.5,
         repetitions: 0,
