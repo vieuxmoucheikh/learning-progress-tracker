@@ -130,7 +130,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
 
   // Render card content with HTML
   const renderCardContent = (content: string) => {
-    return <div dangerouslySetInnerHTML={{ __html: content }} />;
+    if (!content) return null;
+    return <div dangerouslySetInnerHTML={{ __html: content }} className="content-container" />;
   };
 
   const handleRate = async (quality: number) => {
@@ -472,8 +473,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
                 >
                   <div className="h-full flex flex-col">
                     <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">Front</div>
-                    <div className="flex-1 overflow-y-auto custom-scrollbar">
-                      <div className="text-lg flashcard-content">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar" style={{ maxHeight: 'calc(100% - 60px)' }}>
+                      <div className="text-lg flashcard-content p-1">
                         {renderCardContent(cards[currentCardIndex].front_content)}
                       </div>
                     </div>
@@ -489,8 +490,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
                 >
                   <div className="h-full flex flex-col">
                     <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">Back</div>
-                    <div className="flex-1 overflow-y-auto custom-scrollbar">
-                      <div className="text-lg flashcard-content">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar" style={{ maxHeight: 'calc(100% - 30px)' }}>
+                      <div className="text-lg flashcard-content p-1">
                         {renderCardContent(cards[currentCardIndex].back_content)}
                       </div>
                     </div>
@@ -551,7 +552,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
               />
             </Progress.Root>
 
-            <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
               <div className="text-sm text-gray-600 dark:text-gray-300">
                 <div className="flex justify-between mb-2">
                   <span>Session Progress:</span>
