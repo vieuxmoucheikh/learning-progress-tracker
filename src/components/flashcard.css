@@ -1,0 +1,125 @@
+/* Custom scrollbar styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode scrollbar */
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Enhanced flashcard content styling */
+.flashcard-content {
+  line-height: 1.6;
+}
+
+.flashcard-content h1, 
+.flashcard-content h2, 
+.flashcard-content h3 {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+}
+
+.flashcard-content h1 {
+  font-size: 1.5em;
+}
+
+.flashcard-content h2 {
+  font-size: 1.3em;
+}
+
+.flashcard-content h3 {
+  font-size: 1.1em;
+}
+
+.flashcard-content p {
+  margin-bottom: 0.75em;
+}
+
+.flashcard-content ul, 
+.flashcard-content ol {
+  margin-left: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.flashcard-content li {
+  margin-bottom: 0.25em;
+}
+
+.flashcard-content pre {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.75em;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin-bottom: 0.75em;
+}
+
+.dark .flashcard-content pre {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.flashcard-content code {
+  font-family: monospace;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.dark .flashcard-content code {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.flashcard-content img {
+  max-width: 100%;
+  height: auto;
+  margin: 0.75em 0;
+  border-radius: 4px;
+}
+
+.flashcard-content blockquote {
+  border-left: 3px solid #e2e8f0;
+  padding-left: 1em;
+  margin-left: 0;
+  margin-right: 0;
+  font-style: italic;
+  color: #64748b;
+}
+
+.dark .flashcard-content blockquote {
+  border-left-color: #475569;
+  color: #94a3b8;
+}
+
+/* Animation for better user experience */
+@keyframes highlight {
+  0% { background-color: rgba(59, 130, 246, 0.1); }
+  100% { background-color: transparent; }
+}
+
+.flashcard-content .highlight {
+  animation: highlight 2s ease-out;
+}

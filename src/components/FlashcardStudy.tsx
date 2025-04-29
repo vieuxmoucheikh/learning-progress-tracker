@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { Button } from './ui/button';
+import { Card } from './ui/card';
 import * as Progress from '@radix-ui/react-progress';
 import { useToast } from './ui/use-toast';
 import { ArrowLeft, Repeat, ThumbsUp, ThumbsDown, Check, Keyboard, Tag, BarChart } from 'lucide-react';
@@ -8,6 +9,8 @@ import { calculateNextReview, submitReview } from '../lib/flashcards';
 import type { Flashcard } from '../types';
 import { Badge } from './ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
+
+import './flashcard.css';
 
 interface FlashcardStudyProps {
   deckId: string;
@@ -457,8 +460,8 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
 
             <div className="flex-grow flex flex-col">
               <div 
-                className={`relative h-96 rounded-xl shadow-lg transition-all duration-500 transform cursor-pointer
-                  ${isFlipped ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-800'}`}
+                className={`relative h-[450px] rounded-xl shadow-lg transition-all duration-500 transform cursor-pointer
+                  ${isFlipped ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-800'} border border-gray-200 dark:border-gray-700`}
                 style={{ perspective: '1000px' }}
                 onClick={() => setIsFlipped(!isFlipped)}
                 ref={cardRef}
@@ -469,7 +472,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
                 >
                   <div className="h-full flex flex-col">
                     <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">Front</div>
-                    <div className="flex-1 overflow-y-auto">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar">
                       <div className="text-lg flashcard-content">
                         {renderCardContent(cards[currentCardIndex].front_content)}
                       </div>
@@ -486,7 +489,7 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
                 >
                   <div className="h-full flex flex-col">
                     <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">Back</div>
-                    <div className="flex-1 overflow-y-auto">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar">
                       <div className="text-lg flashcard-content">
                         {renderCardContent(cards[currentCardIndex].back_content)}
                       </div>

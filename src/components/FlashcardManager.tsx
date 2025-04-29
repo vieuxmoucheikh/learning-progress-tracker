@@ -10,6 +10,7 @@ import { createFlashcard } from '../lib/flashcards';
 import type { Flashcard } from '../types';
 import { supabase } from '../lib/supabase';
 import { Badge } from './ui/badge';
+import './flashcard.css';
 
 interface FlashcardManagerProps {
   deckId: string;
@@ -234,7 +235,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
                   <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
                     Front Side <span className="text-xs text-gray-500 dark:text-gray-400">(Question)</span>
                   </h3>
-                  <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-md border border-gray-100 dark:border-gray-800">
+                  <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-md border border-gray-100 dark:border-gray-800 max-h-[250px] overflow-y-auto custom-scrollbar">
                     <div className="text-gray-700 dark:text-gray-300 flashcard-content">
                       <div dangerouslySetInnerHTML={{ __html: card.front_content }} />
                     </div>
@@ -245,7 +246,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
                   <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
                     Back Side <span className="text-xs text-gray-500 dark:text-gray-400">(Answer)</span>
                   </h3>
-                  <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-md border border-gray-100 dark:border-gray-800">
+                  <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-md border border-gray-100 dark:border-gray-800 max-h-[300px] overflow-y-auto custom-scrollbar">
                     <div className="text-gray-700 dark:text-gray-300 flashcard-content">
                       <div dangerouslySetInnerHTML={{ __html: card.back_content }} />
                     </div>
