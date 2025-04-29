@@ -350,6 +350,7 @@ export const getDecksSummary = async () => {
       
       // Manually calculate the summary since we're using raw SQL approach
       const now = new Date();
+      const masteredCards = data.filter(card => card.mastered);
       const summary = {
         total: data.length,
         due_today: data.filter(card => 
@@ -357,6 +358,7 @@ export const getDecksSummary = async () => {
           card.next_review && 
           new Date(card.next_review) <= now
         ).length,
+        mastered_count: masteredCards.length,
         next_due: data
           .filter(card => 
             !card.mastered && 
@@ -394,6 +396,7 @@ export const getDecksSummary = async () => {
         description: deck.description,
         total: summary.total || 0,
         dueToday: summary.due_today || 0,
+        masteredCount: summary.mastered_count || 0,
         nextDue: summary.next_due,
         lastStudied: summary.last_studied,
         reviewStatus,

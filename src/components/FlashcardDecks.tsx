@@ -612,9 +612,9 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               <div>
                 <h3 className="text-lg font-medium text-amber-800 dark:text-amber-200">Cards Due for Review</h3>
                 {getTotalDueCards() === 1 ? (
-                  <p className="text-sm text-amber-700 dark:text-amber-300">You have 1 card that needs to be reviewed today.</p>
+                  <p className="text-sm text-amber-700 dark:text-amber-300">You have 1 card that needs to be reviewed.</p>
                 ) : (
-                  <p className="text-sm text-amber-700 dark:text-amber-300">You have {getTotalDueCards()} cards that need to be reviewed today.</p>
+                  <p className="text-sm text-amber-700 dark:text-amber-300">You have {getTotalDueCards()} cards that need to be reviewed.</p>
                 )}
               </div>
             </div>

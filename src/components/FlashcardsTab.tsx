@@ -104,7 +104,8 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
                 dueToday: summary.dueToday,
                 reviewStatus: summary.reviewStatus as 'not-started' | 'up-to-date' | 'due-soon' | 'overdue',
                 lastStudied: summary.lastStudied || null,
-                nextDue: summary.nextDue || null
+                nextDue: summary.nextDue || null,
+                masteredCount: summary.masteredCount || 0
               }
             };
           }
@@ -115,7 +116,8 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
               dueToday: 0,
               reviewStatus: 'not-started' as const,
               lastStudied: null,
-              nextDue: null
+              nextDue: null,
+              masteredCount: 0
             }
           };
         });

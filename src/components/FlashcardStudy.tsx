@@ -157,15 +157,16 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
         variant: toastVariant
       });
 
+      // Update deck metrics immediately after each review, especially important for mastered cards
+      if (onUpdateDeckMetrics) {
+        console.log('Updating deck metrics after review, mastered:', mastered);
+        onUpdateDeckMetrics();
+      }
+      
       // Move to next card
       if (currentCardIndex < cards.length - 1) {
         setCurrentCardIndex(prev => prev + 1);
         setIsFlipped(false);
-        
-        // Update deck metrics after each review
-        if (onUpdateDeckMetrics) {
-          onUpdateDeckMetrics();
-        }
       } else {
         // Session complete
         toast({
