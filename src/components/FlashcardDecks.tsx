@@ -266,31 +266,29 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         setDeckFormData({ name: '', description: '' });
         setIsCreatingDeck(false);
         setSelectedDeckId(null);
-        setIsLoading(false);
         
         toast({
           title: "Success",
           description: "Deck updated successfully",
         });
-        
-        return;
       }
+    } else {
+      // Otherwise, create a new deck
+      onAddDeck({
+        name: deckFormData.name.trim(),
+        description: deckFormData.description.trim()
+      });
+      
+      setDeckFormData({ name: '', description: '' });
+      setIsCreatingDeck(false);
+      
+      toast({
+        title: "Success",
+        description: "Deck created successfully",
+      });
     }
     
-    // Otherwise, create a new deck
-    onAddDeck({
-      name: deckFormData.name.trim(),
-      description: deckFormData.description.trim()
-    });
-    
-    setDeckFormData({ name: '', description: '' });
-    setIsCreatingDeck(false);
     setIsLoading(false);
-    
-    toast({
-      title: "Success",
-      description: "Deck created successfully",
-    });
   };
 
   const handleDeleteDeck = (deck: FlashcardDeck) => {
@@ -307,7 +305,8 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         description: deck.description || ''
       });
       setSelectedDeckId(deckId);
-      setIsEditingDeck(true);
+      // Open the dialog by setting isCreatingDeck to true
+      setIsCreatingDeck(true);
     }
   };
 
@@ -544,7 +543,17 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       </div>
 
       {/* Create/Edit Deck Dialog */}
-      <Dialog open={isCreatingDeck} onOpenChange={setIsCreatingDeck}>
+      <Dialog 
+        open={isCreatingDeck} 
+        onOpenChange={(open) => {
+          setIsCreatingDeck(open);
+          if (!open) {
+            // Reset form when dialog is closed
+            setSelectedDeckId(null);
+            setDeckFormData({ name: '', description: '' });
+          }
+        }}
+      >
         <DialogContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
           <DialogHeader>
             <DialogTitle>{selectedDeckId ? 'Edit Deck' : 'Create New Deck'}</DialogTitle>
