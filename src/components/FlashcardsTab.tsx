@@ -29,6 +29,7 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
   const [view, setView] = useState<View>('decks');
   const [localDecks, setLocalDecks] = useState<FlashcardDeck[]>(flashcards);
   const [deckSummaries, setDeckSummaries] = useState<any[]>([]);
+  const [shouldOpenAddDialog, setShouldOpenAddDialog] = useState(false);
   const { toast } = useToast();
 
   // Update local decks when flashcards prop changes
@@ -41,11 +42,13 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
   const handleSelectDeck = (deckId: string) => {
     setSelectedDeckId(deckId);
     setView('manage');
+    // We don't set shouldOpenAddDialog here anymore
   };
 
   const handleBackToDecks = () => {
     setView('decks');
     setSelectedDeckId(null);
+    setShouldOpenAddDialog(false); // Reset the dialog state
     refreshDeckMetrics();
   };
 
@@ -68,6 +71,12 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
 
   // Function to refresh deck metrics after reviews
   const refreshDeckMetrics = async () => {
+    // If we're in the decks view and about to navigate to manage view,
+    // this is a signal from the Add Card button
+    if (view === 'decks' && selectedDeckId) {
+      setShouldOpenAddDialog(true);
+    }
+    
     console.log('Refreshing deck metrics...');
     try {
       // First, fetch the updated deck summaries
@@ -180,6 +189,7 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
           deckId={selectedDeckId}
           onBackToDecks={handleBackToDecks}
           onUpdateDeckMetrics={refreshDeckMetrics}
+          shouldOpenAddDialog={shouldOpenAddDialog}
         />
       )}
     </div>

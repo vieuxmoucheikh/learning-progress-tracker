@@ -14,12 +14,14 @@ interface FlashcardManagerProps {
   deckId: string;
   onBackToDecks: () => void;
   onUpdateDeckMetrics?: () => void;
+  shouldOpenAddDialog?: boolean;
 }
 
 export const FlashcardManager: React.FC<FlashcardManagerProps> = ({ 
   deckId, 
   onBackToDecks,
-  onUpdateDeckMetrics 
+  onUpdateDeckMetrics,
+  shouldOpenAddDialog = false
 }) => {
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [filteredCards, setFilteredCards] = useState<Flashcard[]>([]);
@@ -31,6 +33,13 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
   useEffect(() => {
     loadCards();
   }, [deckId]);
+  
+  // Automatically open the add card dialog if shouldOpenAddDialog is true
+  useEffect(() => {
+    if (shouldOpenAddDialog) {
+      setIsCreating(true);
+    }
+  }, [shouldOpenAddDialog]);
 
   useEffect(() => {
     const filtered = cards.filter(card => 

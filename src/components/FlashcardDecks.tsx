@@ -48,7 +48,7 @@ import { supabase } from '@/lib/supabase';
 
 interface FlashcardDecksProps {
   decks: FlashcardDeck[];
-  onSelectDeck?: (deckId: string) => void;
+  onSelectDeck?: (deckId: string, shouldAddCard?: boolean) => void;
   onAddDeck: (data: { name: string; description: string }) => void;
   onStudyDeck: (deckId: string) => void;
   onEditDeck: (deckId: string, data: { name: string; description: string }) => void;
@@ -416,15 +416,26 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             variant="outline" 
             size="sm"
             className="flex-1 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-            onClick={() => handleEditDeck(deck.id)}
+            onClick={() => onSelectDeck?.(deck.id)}
           >
-            <Edit className="w-3.5 h-3.5 mr-1.5" /> Edit
+            <Library className="w-3.5 h-3.5 mr-1.5" /> Manage Cards
           </Button>
           <Button 
             variant="outline" 
             size="sm"
             className="flex-1 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-            onClick={() => onSelectDeck && onSelectDeck(deck.id)}
+            onClick={() => {
+              // Navigate to card management view
+              if (onSelectDeck) {
+                onSelectDeck(deck.id);
+                // Signal to parent that we want to open the add dialog
+                if (onRefreshMetrics) {
+                  // We're using onRefreshMetrics as a side channel to communicate
+                  // that we want to open the add dialog
+                  onRefreshMetrics();
+                }
+              }
+            }}
           >
             <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Card
           </Button>
