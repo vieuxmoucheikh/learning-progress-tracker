@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
+import ReactQuill from 'react-quill';
 import { useToast } from './ui/use-toast';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
 import { Plus, Trash2 } from 'lucide-react';
@@ -211,12 +212,12 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
             <div className="flex justify-between items-start mb-4">
               <div className="flex-1">
                 <div className="font-medium mb-2">Front:</div>
-                <div className="text-gray-700 mb-4 whitespace-pre-wrap">
-                  {card.front_content}
+                <div className="text-gray-700 flashcard-content">
+                  <div dangerouslySetInnerHTML={{ __html: card.front_content }} />
                 </div>
-                <div className="font-medium mb-2">Back:</div>
-                <div className="text-gray-700 whitespace-pre-wrap">
-                  {card.back_content}
+                <div className="font-medium mb-2 mt-4">Back:</div>
+                <div className="text-gray-700 flashcard-content">
+                  <div dangerouslySetInnerHTML={{ __html: card.back_content }} />
                 </div>
               </div>
               <AlertDialog>
@@ -279,29 +280,61 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
         </div>
       )}
 
-      <Dialog open={isCreating} onOpenChange={setIsCreating}>
-        <DialogContent>
+      <Dialog open={isCreating} onOpenChange={(open) => {
+        if (!open) {
+          setFormData({ front: '', back: '' });
+          setIsCreating(false);
+        }
+      }}>
+        <DialogContent className="max-w-[90vw] md:max-w-3xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
           <DialogHeader>
             <DialogTitle>Create New Flashcard</DialogTitle>
+            <DialogDescription>
+              Create a new flashcard for your deck. Front side is the question, back side is the answer.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            <div>
-              <label className="text-sm font-medium">Front</label>
-              <Textarea
-                value={formData.front}
-                onChange={(e) => setFormData(prev => ({ ...prev, front: e.target.value }))}
-                placeholder="Enter the front content"
-                className="mt-1"
-              />
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Front Side (Question)</h4>
+              <div className="border border-gray-200 dark:border-gray-700 rounded-md">
+                <ReactQuill
+                  theme="snow"
+                  value={formData.front}
+                  onChange={(value) => setFormData(prev => ({ ...prev, front: value }))}
+                  placeholder="Enter the question or prompt"
+                  modules={{
+                    toolbar: [
+                      [{ 'header': [1, 2, 3, false] }],
+                      ['bold', 'italic', 'underline', 'strike'],
+                      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                      ['blockquote', 'code-block'],
+                      ['link', 'image'],
+                      ['clean']
+                    ],
+                  }}
+                />
+              </div>
             </div>
-            <div>
-              <label className="text-sm font-medium">Back</label>
-              <Textarea
-                value={formData.back}
-                onChange={(e) => setFormData(prev => ({ ...prev, back: e.target.value }))}
-                placeholder="Enter the back content"
-                className="mt-1"
-              />
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Back Side (Answer)</h4>
+              <div className="border border-gray-200 dark:border-gray-700 rounded-md">
+                <ReactQuill
+                  theme="snow"
+                  value={formData.back}
+                  onChange={(value) => setFormData(prev => ({ ...prev, back: value }))}
+                  placeholder="Enter the answer or explanation"
+                  modules={{
+                    toolbar: [
+                      [{ 'header': [1, 2, 3, false] }],
+                      ['bold', 'italic', 'underline', 'strike'],
+                      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                      ['blockquote', 'code-block'],
+                      ['link', 'image'],
+                      ['clean']
+                    ],
+                  }}
+                />
+              </div>
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsCreating(false)}>
