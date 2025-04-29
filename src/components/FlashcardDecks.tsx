@@ -625,8 +625,14 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       </Dialog>
 
       {/* Add Card Dialog */}
-      <Dialog open={isAddingCard} onOpenChange={setIsAddingCard}>
-        <DialogContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 max-w-3xl">
+      <Dialog open={isAddingCard} onOpenChange={(open) => {
+        if (!open) {
+          setCardFormData({ front: '', back: '', tags: '' });
+          setSelectedDeckForCard(null);
+          setIsAddingCard(false);
+        }
+      }}>
+        <DialogContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 max-w-[90vw] md:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Flashcard</DialogTitle>
             <DialogDescription className="flex items-center justify-between">
