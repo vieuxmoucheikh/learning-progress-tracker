@@ -29,6 +29,8 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
   const [filteredCards, setFilteredCards] = useState<Flashcard[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentCardId, setCurrentCardId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ front: '', back: '', tags: '' });
   const [showCardTips, setShowCardTips] = useState(false);
   const { toast } = useToast();
@@ -120,6 +122,73 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
       toast({
         title: "Error",
         description: "Failed to create flashcard",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const handleUpdateCard = async () => {
+    if (!currentCardId || !formData.front.trim() || !formData.back.trim()) {
+      toast({
+        title: "Error",
+        description: "Both front and back content are required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Process tags if provided
+      const tagArray = formData.tags 
+        ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
+        : [];
+
+      const { error } = await supabase
+        .from('flashcards')
+        .update({
+          front_content: formData.front,
+          back_content: formData.back,
+          tags: tagArray
+        })
+        .eq('id', currentCardId);
+
+      if (error) throw error;
+
+      // Update the card in the local state
+      const updatedCards = cards.map(card => {
+        if (card.id === currentCardId) {
+          return {
+            ...card,
+            front_content: formData.front,
+            back_content: formData.back,
+            tags: tagArray
+          };
+        }
+        return card;
+      });
+
+      setCards(updatedCards);
+      setFormData({ front: '', back: '', tags: '' });
+      setCurrentCardId(null);
+      setIsEditing(false);
+      
+      // Immediately update deck metrics after updating a card
+      if (onUpdateDeckMetrics) {
+        setTimeout(() => {
+          onUpdateDeckMetrics();
+        }, 100);
+      }
+      
+      toast({
+        title: "Success",
+        description: "Flashcard updated successfully",
+        variant: "default"
+      });
+    } catch (error) {
+      console.error('Error updating flashcard:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update flashcard",
         variant: "destructive"
       });
     }
@@ -290,17 +359,22 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
               
               <div className="md:w-64 space-y-4">
                 <div className="flex justify-between items-start">
-                  <div className="flex-1 flex items-center gap-2">
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700/50 px-2 py-0.5 rounded">
-                      Card ID: {card.id.substring(0, 8)}...
-                    </span>
-                  </div>
+                  <div className="flex-1"></div>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button
                       variant="ghost"
                       size="icon"
                       className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 h-8 w-8"
                       title="Edit Card"
+                      onClick={() => {
+                        setCurrentCardId(card.id);
+                        setFormData({
+                          front: card.front_content,
+                          back: card.back_content,
+                          tags: card.tags ? card.tags.join(', ') : ''
+                        });
+                        setIsEditing(true);
+                      }}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -441,15 +515,17 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
         </div>
       )}
 
-      <Dialog open={isCreating} onOpenChange={(open) => {
+      <Dialog open={isCreating || isEditing} onOpenChange={(open) => {
         if (!open) {
           setFormData({ front: '', back: '', tags: '' });
           setIsCreating(false);
+          setIsEditing(false);
+          setCurrentCardId(null);
         }
       }}>
         <DialogContent className="max-w-[90vw] md:max-w-3xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle>Create New Flashcard</DialogTitle>
+            <DialogTitle>{isEditing ? 'Edit Flashcard' : 'Create New Flashcard'}</DialogTitle>
             <DialogDescription className="flex items-center justify-between">
               <span>Add a new flashcard to your deck. Front side is the question, back side is the answer.</span>
               <Button 
@@ -544,11 +620,11 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
               Cancel
             </Button>
             <Button 
-              onClick={handleCreateCard}
+              onClick={isEditing ? handleUpdateCard : handleCreateCard}
               disabled={!formData.front.trim() || !formData.back.trim()}
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm hover:shadow-md transition-all"
             >
-              Create Card
+              {isEditing ? 'Update Card' : 'Create Card'}
             </Button>
           </DialogFooter>
         </DialogContent>
