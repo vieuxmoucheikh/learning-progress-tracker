@@ -523,110 +523,190 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
           setCurrentCardId(null);
         }
       }}>
-        <DialogContent className="max-w-[90vw] md:max-w-3xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
-          <DialogHeader>
-            <DialogTitle>{isEditing ? 'Edit Flashcard' : 'Create New Flashcard'}</DialogTitle>
-            <DialogDescription className="flex items-center justify-between">
-              <span>Add a new flashcard to your deck. Front side is the question, back side is the answer.</span>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex items-center gap-1 border-gray-200 dark:border-gray-700" 
-                onClick={() => setShowCardTips(!showCardTips)}
-              >
-                <Info className="h-4 w-4" />
-                Tips
-              </Button>
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="max-w-[95vw] md:max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 p-0">
+          <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+            <DialogHeader>
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-xl font-bold">{isEditing ? 'Edit Flashcard' : 'Create New Flashcard'}</DialogTitle>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="flex items-center gap-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" 
+                  onClick={() => setShowCardTips(!showCardTips)}
+                >
+                  <Info className="h-4 w-4" />
+                  {showCardTips ? 'Hide Tips' : 'Show Tips'}
+                </Button>
+              </div>
+              <DialogDescription className="mt-1">
+                {isEditing ? 'Update your flashcard content and tags.' : 'Add a new flashcard to your deck. Front side is the question, back side is the answer.'}
+              </DialogDescription>
+            </DialogHeader>
+          </div>
           
           {showCardTips && (
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md mb-4 text-sm">
-              <h4 className="font-medium mb-2 text-blue-800 dark:text-blue-300">Tips for effective flashcards:</h4>
-              <ul className="list-disc pl-5 space-y-1 text-blue-700 dark:text-blue-400">
-                <li>Keep questions clear and specific</li>
-                <li>Use formatting to highlight important information</li>
-                <li>Add images or code snippets when relevant</li>
-                <li>Break complex topics into multiple cards</li>
-                <li>Add tags to organize your cards by topic</li>
-              </ul>
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 border-b border-blue-100 dark:border-blue-800">
+              <h4 className="font-medium mb-3 text-blue-800 dark:text-blue-300 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                Tips for effective flashcards
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-md border border-blue-100 dark:border-blue-800 shadow-sm">
+                  <h5 className="font-medium text-blue-700 dark:text-blue-300 mb-2">Content Structure</h5>
+                  <ul className="list-disc pl-5 space-y-1 text-blue-700 dark:text-blue-400 text-sm">
+                    <li>Keep questions clear and specific</li>
+                    <li>Use formatting to highlight important information</li>
+                    <li>Break complex topics into multiple cards</li>
+                    <li>Use the Feynman technique: explain concepts simply</li>
+                  </ul>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-md border border-blue-100 dark:border-blue-800 shadow-sm">
+                  <h5 className="font-medium text-blue-700 dark:text-blue-300 mb-2">Media & Organization</h5>
+                  <ul className="list-disc pl-5 space-y-1 text-blue-700 dark:text-blue-400 text-sm">
+                    <li>Add images or code snippets when relevant</li>
+                    <li>Use tags to organize your cards by topic</li>
+                    <li>Create connections between related concepts</li>
+                    <li>Review cards regularly for better retention</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="mt-4 text-sm text-blue-600 dark:text-blue-400 italic">
+                <strong>Pro tip:</strong> For code examples, use the code-block button in the editor toolbar to format them properly.
+              </div>
             </div>
           )}
           
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium">Front Side (Question)</h4>
-              <div className="border border-gray-200 dark:border-gray-700 rounded-md">
-                <ReactQuill
-                  theme="snow"
-                  value={formData.front}
-                  onChange={(value) => setFormData({ ...formData, front: value })}
-                  placeholder="Enter the question or prompt"
-                  modules={{
-                    toolbar: [
-                      [{ 'header': [1, 2, 3, false] }],
-                      ['bold', 'italic', 'underline', 'strike'],
-                      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                      ['blockquote', 'code-block'],
-                      ['link', 'image'],
-                      ['clean']
-                    ],
-                  }}
-                />
+          <div className="p-6 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium flex items-center gap-2">
+                    <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">Q</div>
+                    Front Side (Question)
+                  </h4>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {formData.front ? formData.front.replace(/<[^>]*>/g, '').length : 0} characters
+                  </div>
+                </div>
+                <div className="border border-gray-200 dark:border-gray-700 rounded-md shadow-sm">
+                  <ReactQuill
+                    theme="snow"
+                    value={formData.front}
+                    onChange={(value) => setFormData({ ...formData, front: value })}
+                    placeholder="Enter the question or prompt"
+                    modules={{
+                      toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['blockquote', 'code-block'],
+                        ['link', 'image'],
+                        ['clean']
+                      ],
+                    }}
+                    className="min-h-[200px]"
+                  />
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+                  Good questions are clear, specific, and focus on a single concept.
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium flex items-center gap-2">
+                    <div className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">A</div>
+                    Back Side (Answer)
+                  </h4>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {formData.back ? formData.back.replace(/<[^>]*>/g, '').length : 0} characters
+                  </div>
+                </div>
+                <div className="border border-gray-200 dark:border-gray-700 rounded-md shadow-sm">
+                  <ReactQuill
+                    theme="snow"
+                    value={formData.back}
+                    onChange={(value) => setFormData({ ...formData, back: value })}
+                    placeholder="Enter the answer or explanation"
+                    modules={{
+                      toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['blockquote', 'code-block'],
+                        ['link', 'image'],
+                        ['clean']
+                      ],
+                    }}
+                    className="min-h-[200px]"
+                  />
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+                  Good answers are comprehensive but concise, with key points highlighted.
+                </div>
               </div>
             </div>
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium">Back Side (Answer)</h4>
-              <div className="border border-gray-200 dark:border-gray-700 rounded-md">
-                <ReactQuill
-                  theme="snow"
-                  value={formData.back}
-                  onChange={(value) => setFormData({ ...formData, back: value })}
-                  placeholder="Enter the answer or explanation"
-                  modules={{
-                    toolbar: [
-                      [{ 'header': [1, 2, 3, false] }],
-                      ['bold', 'italic', 'underline', 'strike'],
-                      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                      ['blockquote', 'code-block'],
-                      ['link', 'image'],
-                      ['clean']
-                    ],
-                  }}
+            
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium flex items-center gap-2">
+                  <Tag className="h-4 w-4 text-purple-500" /> 
+                  Tags (optional)
+                </h4>
+                <Input
+                  value={formData.tags}
+                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                  placeholder="Enter tags separated by commas (e.g., math, algebra, equations)"
+                  className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm"
                 />
+                <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                  Tags help organize your cards and make them easier to find later.
+                </div>
+                
+                {formData.tags && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {formData.tags.split(',').map((tag, index) => (
+                      tag.trim() && (
+                        <Badge key={index} variant="outline" className="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800">
+                          {tag.trim()}
+                        </Badge>
+                      )
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium flex items-center gap-1">
-                <Tag className="h-4 w-4" /> Tags (optional)
-              </h4>
-              <Input
-                value={formData.tags}
-                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                placeholder="Enter tags separated by commas (e.g., math, algebra, equations)"
-                className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
-              />
             </div>
           </div>
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setFormData({ front: '', back: '', tags: '' });
-                setIsCreating(false);
-              }}
-              className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={isEditing ? handleUpdateCard : handleCreateCard}
-              disabled={!formData.front.trim() || !formData.back.trim()}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm hover:shadow-md transition-all"
-            >
-              {isEditing ? 'Update Card' : 'Create Card'}
-            </Button>
-          </DialogFooter>
+          <div className="sticky bottom-0 z-10 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-red-500"></div>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                {!formData.front.trim() || !formData.back.trim() ? 'Both question and answer are required' : 'Ready to save'}
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setFormData({ front: '', back: '', tags: '' });
+                  setIsCreating(false);
+                  setIsEditing(false);
+                  setCurrentCardId(null);
+                }}
+                className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={isEditing ? handleUpdateCard : handleCreateCard}
+                disabled={!formData.front.trim() || !formData.back.trim()}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm hover:shadow-md transition-all px-6"
+              >
+                {isEditing ? 'Update Card' : 'Create Card'}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
