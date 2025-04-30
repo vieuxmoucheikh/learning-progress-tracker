@@ -320,7 +320,8 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
             </div>
             <div>
               <div className="font-medium text-purple-800 dark:text-purple-300">Cards Due for Review</div>
-              <div className="text-purple-600 dark:text-purple-400">{cards.filter(card => !card.mastered).length}</div>
+              <div className="text-purple-600 dark:text-purple-400">{cards.filter(card => !card.mastered && card.next_review && new Date(card.next_review) <= new Date()).length}</div>
+              <div className="text-xs text-purple-500 dark:text-purple-400 mt-1">Out of {cards.filter(card => !card.mastered).length} non-mastered cards</div>
             </div>
           </div>
         </div>
