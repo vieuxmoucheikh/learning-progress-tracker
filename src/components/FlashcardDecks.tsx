@@ -38,16 +38,17 @@ import {
   Play, 
   PlusCircle, 
   Plus, 
-  RefreshCw, 
   Star, 
   BookOpen,
   Trash2,
   Tag,
-  Info
+  Info,
+  BarChart,
+  Layers,
+  CheckCircle
 } from "lucide-react";
 import { FlashcardDeck } from '@/types';
 import { supabase } from '@/lib/supabase';
-import { createFlashcard } from '@/lib/flashcards';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
@@ -88,7 +89,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
   const [deckSummariesState, setDeckSummaries] = useState<DeckSummary[]>([]);
   const [localDecks, setLocalDecks] = useState<FlashcardDeck[]>(decks);
-  const [isEditingDeck, setIsEditingDeck] = useState(false);
+  // State for editing deck is handled through selectedDeckId
   const [isAddingCard, setIsAddingCard] = useState(false);
   const [cardFormData, setCardFormData] = useState({ front: '', back: '', tags: '' });
   const [selectedDeckForCard, setSelectedDeckForCard] = useState<string | null>(null);
@@ -306,7 +307,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     setIsLoading(false);
   };
 
-  const handleEditDeck = (deckId: string) => {
+  const handleEditDeck = async (deckId: string) => {
     const deck = localDecks.find(d => d.id === deckId);
     if (deck) {
       setDeckFormData({
@@ -324,11 +325,11 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     const masteredPercentage = getMasteredPercentage(deck.id);
     
     return (
-      <Card key={deck.id} className="overflow-hidden border border-gray-200 dark:border-gray-700 transition-all hover:shadow-md">
-        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 pb-4">
+      <Card key={deck.id} className="overflow-hidden border border-gray-200 dark:border-gray-700 transition-all hover:shadow-md hover:translate-y-[-2px] group">
+        <CardHeader className="bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-900/10 dark:to-indigo-900/10 pb-4 border-b border-gray-100 dark:border-gray-800">
           <div className="flex justify-between items-start">
-            <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-100">{deck.name}</CardTitle>
-            <div className="flex space-x-1">
+            <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{deck.name}</CardTitle>
+            <div className="flex space-x-1 opacity-70 group-hover:opacity-100 transition-opacity">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -366,7 +367,12 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-4 pb-2">
-          <div className="space-y-4">
+          <div className="space-y-4 relative">
+            {summary.masteredCount > 0 && summary.total > 0 && masteredPercentage >= 50 && (
+              <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold py-1 px-2 rounded-full shadow-sm">
+                {masteredPercentage}% Mastered
+              </div>
+            )}
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-2">
                 <div className="bg-blue-100 dark:bg-blue-900 rounded-full p-1.5">
@@ -410,7 +416,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-2">
                 <div className="bg-purple-100 dark:bg-purple-900 rounded-full p-1.5">
-                  <RefreshCw className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  <BarChart className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                 </div>
                 <span className="text-sm text-gray-600 dark:text-gray-300">Status</span>
               </div>
@@ -420,11 +426,11 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             </div>
           </div>
         </CardContent>
-        <CardFooter className="pt-0 flex gap-2 flex-wrap bg-gradient-to-b from-transparent to-gray-50 dark:to-gray-800/30">
+        <CardFooter className="pt-3 flex gap-2 flex-wrap bg-gradient-to-b from-transparent to-gray-50 dark:to-gray-800/30 border-t border-gray-100 dark:border-gray-800">
           <Button 
             variant="outline" 
             size="sm"
-            className="flex-1 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="flex-1 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
             onClick={() => onSelectDeck?.(deck.id)}
           >
             <Library className="w-3.5 h-3.5 mr-1.5" /> Manage Cards
@@ -432,7 +438,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           <Button 
             variant="outline" 
             size="sm"
-            className="flex-1 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="flex-1 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400 hover:border-green-200 dark:hover:border-green-800 transition-colors"
             onClick={() => {
               // Open the add card dialog directly
               setSelectedDeckForCard(deck.id);
@@ -445,7 +451,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           <Button 
             variant="default" 
             size="sm"
-            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm hover:shadow-md transition-all"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm hover:shadow-md transition-all font-medium"
             onClick={() => onStudyDeck(deck.id)}
           >
             <Play className="w-3.5 h-3.5 mr-1.5" /> Study
@@ -505,24 +511,10 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     }
   };
 
-  const syncData = () => {
-    setIsLoading(true);
-    
-    if (onRefreshMetrics) {
-      onRefreshMetrics();
-    }
-    
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Sync Complete",
-        description: "Your flashcard data has been synchronized across all devices.",
-      });
-    }, 1000);
-  };
+  // Removed syncData function as it's no longer needed
 
   return (
-    <div className="w-full max-w-full">
+    <div className="w-full max-w-full space-y-6">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold flex items-center gap-2">
@@ -530,16 +522,6 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           Flashcards
         </h2>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={syncData}
-            disabled={isLoading}
-            className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-          >
-            <RefreshCw className="w-4 h-4 mr-1.5" />
-            Refresh
-          </Button>
           <Button 
             variant="default" 
             size="sm"
@@ -840,15 +822,42 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         )}
       </div>
 
-      <div className="border-b pb-1 mb-4">
-        <h3 className="text-xl font-semibold flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-          Your Flashcard Decks
-        </h3>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700 mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+          <h3 className="text-xl font-semibold flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            Your Flashcard Decks
+          </h3>
+          
+          <div className="flex flex-wrap gap-3">
+            <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full">
+              <Layers className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span className="text-sm font-medium text-blue-700 dark:text-blue-300">{localDecks.length} {localDecks.length === 1 ? 'Deck' : 'Decks'}</span>
+            </div>
+            
+            <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-full">
+              <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+              <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                {deckSummariesState.reduce((sum, deck) => sum + deck.masteredCount, 0)} Mastered
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-full">
+              <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                {getTotalDueCards()} Due
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <p className="text-gray-600 dark:text-gray-400 text-sm">
+          Create and manage your flashcard decks. Click on a deck to view its cards or start a study session.
+        </p>
       </div>
 
       {/* Deck Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {localDecks.map(deck => renderDeckCard(deck))}
       </div>
     </div>
