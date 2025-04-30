@@ -845,7 +845,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-full">
               <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
               <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
-                {getTotalDueCards()} Due
+                {deckSummariesState.reduce((sum, deck) => sum + deck.total, 0)} Total
               </span>
             </div>
           </div>
