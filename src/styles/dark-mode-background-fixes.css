@@ -33,6 +33,24 @@ html[data-theme="dark"] [class*="bg-amber-800"],
   border-color: hsl(43, 83%, 25%) !important;
 }
 
+/* Fix for green (mastered) stat boxes in dark mode */
+html[data-theme="dark"] .bg-green-50,
+.dark .bg-green-50,
+html[data-theme="dark"] [class*="bg-green-900"],
+.dark [class*="bg-green-900"] {
+  background-color: hsl(142, 76%, 15%) !important;
+  border-color: hsl(142, 76%, 25%) !important;
+}
+
+/* Fix for purple (non-mastered) stat boxes in dark mode */
+html[data-theme="dark"] .bg-purple-50,
+.dark .bg-purple-50,
+html[data-theme="dark"] [class*="bg-purple-900"],
+.dark [class*="bg-purple-900"] {
+  background-color: hsl(270, 76%, 15%) !important;
+  border-color: hsl(270, 76%, 25%) !important;
+}
+
 /* Fix for gray backgrounds in dark mode */
 html[data-theme="dark"] .bg-gray-50,
 .dark .bg-gray-50,
@@ -70,6 +88,32 @@ html[data-theme="dark"] .text-gray-600,
 html[data-theme="dark"] [class*="text-gray-"],
 .dark [class*="text-gray-"] {
   color: hsl(215, 20%, 85%) !important;
+}
+
+/* Fix for green text in dark mode */
+html[data-theme="dark"] .text-green-800,
+.dark .text-green-800,
+html[data-theme="dark"] .text-green-700,
+.dark .text-green-700,
+html[data-theme="dark"] .text-green-600,
+.dark .text-green-600,
+html[data-theme="dark"] [class*="text-green-"],
+.dark [class*="text-green-"] {
+  color: hsl(142, 94%, 85%) !important;
+}
+
+/* Fix for purple text in dark mode */
+html[data-theme="dark"] .text-purple-800,
+.dark .text-purple-800,
+html[data-theme="dark"] .text-purple-700,
+.dark .text-purple-700,
+html[data-theme="dark"] .text-purple-600,
+.dark .text-purple-600,
+html[data-theme="dark"] .text-purple-500,
+.dark .text-purple-500,
+html[data-theme="dark"] [class*="text-purple-"],
+.dark [class*="text-purple-"] {
+  color: hsl(270, 94%, 85%) !important;
 }
 
 /* Fix for icons in dark mode */
