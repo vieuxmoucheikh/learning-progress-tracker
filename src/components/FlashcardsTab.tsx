@@ -169,6 +169,7 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
               <Button
                 variant="outline"
                 onClick={handleBackToDecks}
+                className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300"
               >
                 Back to Decks
               </Button>
