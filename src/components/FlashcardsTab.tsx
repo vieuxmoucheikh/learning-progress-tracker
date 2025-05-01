@@ -57,9 +57,7 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
     refreshDeckMetrics();
   };
 
-  const handleManageCards = () => {
-    setView('manage');
-  };
+  // handleManageCards is already defined above
 
   const handleFinishStudy = () => {
     setView('decks');
@@ -176,7 +174,7 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
               </Button>
               <Button
                 variant="outline"
-                onClick={handleManageCards}
+                onClick={() => selectedDeckId && handleManageCards(selectedDeckId)}
               >
                 Manage Cards
               </Button>
