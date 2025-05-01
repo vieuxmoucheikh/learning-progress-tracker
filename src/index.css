@@ -6,6 +6,7 @@
 @import './styles/theme-sync.css';
 @import './styles/card-fixes.css';
 @import './styles/card-force-styles.css'; /* Nouveau fichier de styles forcés */
+@import './styles/dark-mode-background-fixes.css'; /* Fix for dark mode backgrounds */
 @import './components/LearningItemCard.css';
 @import './components/Calendar.css';
 @import './components/StatusBadge.css';

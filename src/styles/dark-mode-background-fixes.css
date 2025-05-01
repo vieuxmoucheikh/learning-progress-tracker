@@ -1,0 +1,91 @@
+/* Dark Mode Background Fixes - Ensuring proper background colors in dark mode */
+
+/* Fix for card backgrounds in dark mode */
+html[data-theme="dark"] .card,
+.dark .card,
+html[data-theme="dark"] [class*="card"],
+.dark [class*="card"],
+html[data-theme="dark"] [class*="Card"],
+.dark [class*="Card"] {
+  background-color: hsl(222.2, 84%, 4.9%) !important;
+  border-color: hsl(217.2, 32.6%, 17.5%) !important;
+}
+
+/* Fix for blue stat boxes in dark mode */
+html[data-theme="dark"] .bg-blue-50,
+.dark .bg-blue-50,
+html[data-theme="dark"] [class*="bg-blue-900"],
+.dark [class*="bg-blue-900"],
+html[data-theme="dark"] [class*="bg-blue-800"],
+.dark [class*="bg-blue-800"] {
+  background-color: hsl(221, 83%, 15%) !important;
+  border-color: hsl(221, 83%, 25%) !important;
+}
+
+/* Fix for amber stat boxes in dark mode */
+html[data-theme="dark"] .bg-amber-50,
+.dark .bg-amber-50,
+html[data-theme="dark"] [class*="bg-amber-900"],
+.dark [class*="bg-amber-900"],
+html[data-theme="dark"] [class*="bg-amber-800"],
+.dark [class*="bg-amber-800"] {
+  background-color: hsl(43, 83%, 15%) !important;
+  border-color: hsl(43, 83%, 25%) !important;
+}
+
+/* Fix for gray backgrounds in dark mode */
+html[data-theme="dark"] .bg-gray-50,
+.dark .bg-gray-50,
+html[data-theme="dark"] [class*="bg-gray-800"],
+.dark [class*="bg-gray-800"],
+html[data-theme="dark"] [class*="bg-gray-900"],
+.dark [class*="bg-gray-900"] {
+  background-color: hsl(215, 28%, 17%) !important;
+  border-color: hsl(215, 28%, 25%) !important;
+}
+
+/* Fix for text colors in dark mode */
+html[data-theme="dark"] .text-blue-700,
+.dark .text-blue-700,
+html[data-theme="dark"] .text-blue-600,
+.dark .text-blue-600,
+html[data-theme="dark"] [class*="text-blue-"],
+.dark [class*="text-blue-"] {
+  color: hsl(213, 94%, 85%) !important;
+}
+
+html[data-theme="dark"] .text-amber-700,
+.dark .text-amber-700,
+html[data-theme="dark"] .text-amber-600,
+.dark .text-amber-600,
+html[data-theme="dark"] [class*="text-amber-"],
+.dark [class*="text-amber-"] {
+  color: hsl(43, 94%, 85%) !important;
+}
+
+html[data-theme="dark"] .text-gray-700,
+.dark .text-gray-700,
+html[data-theme="dark"] .text-gray-600,
+.dark .text-gray-600,
+html[data-theme="dark"] [class*="text-gray-"],
+.dark [class*="text-gray-"] {
+  color: hsl(215, 20%, 85%) !important;
+}
+
+/* Fix for icons in dark mode */
+html[data-theme="dark"] svg,
+.dark svg {
+  color: inherit !important;
+}
+
+/* Fix for progress bars in dark mode */
+html[data-theme="dark"] .bg-gradient-to-r,
+.dark .bg-gradient-to-r {
+  background: linear-gradient(to right, hsl(160, 84%, 39%), hsl(142, 71%, 45%)) !important;
+}
+
+/* Fix for progress bar backgrounds in dark mode */
+html[data-theme="dark"] .bg-gray-200,
+.dark .bg-gray-200 {
+  background-color: hsl(215, 28%, 25%) !important;
+}
