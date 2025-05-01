@@ -325,10 +325,10 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     const masteredPercentage = getMasteredPercentage(deck.id);
     
     return (
-      <Card key={deck.id} className="overflow-hidden border border-gray-200 dark:border-gray-700 transition-all hover:shadow-md hover:translate-y-[-2px] group">
-        <CardHeader className="bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-900/10 dark:to-indigo-900/10 pb-4 border-b border-gray-100 dark:border-gray-800">
+      <Card key={deck.id} className="overflow-hidden border border-gray-200 dark:border-gray-600 transition-all hover:shadow-md hover:translate-y-[-2px] group">
+        <CardHeader className="bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-900/30 dark:to-indigo-900/30 pb-4 border-b border-gray-100 dark:border-gray-700">
           <div className="flex justify-between items-start">
-            <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{deck.name}</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">{deck.name}</CardTitle>
             <div className="flex space-x-1 opacity-70 group-hover:opacity-100 transition-opacity">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -362,7 +362,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               </Button>
             </div>
           </div>
-          <CardDescription className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+          <CardDescription className="text-sm text-gray-500 dark:text-gray-300 line-clamp-2">
             {deck.description || 'No description provided'}
           </CardDescription>
         </CardHeader>
@@ -375,33 +375,33 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             )}
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-2">
-                <div className="bg-blue-100 dark:bg-blue-900 rounded-full p-1.5">
-                  <Library className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <div className="bg-blue-100 dark:bg-blue-800 rounded-full p-1.5">
+                  <Library className="h-4 w-4 text-blue-600 dark:text-blue-300" />
                 </div>
-                <span className="text-sm text-gray-600 dark:text-gray-300">Total Cards</span>
+                <span className="text-sm text-gray-600 dark:text-gray-200">Total Cards</span>
               </div>
-              <span className="font-medium text-gray-800 dark:text-gray-200">{summary.total}</span>
+              <span className="font-medium text-gray-800 dark:text-white">{summary.total}</span>
             </div>
             
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-2">
-                <div className="bg-amber-100 dark:bg-amber-900 rounded-full p-1.5">
-                  <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <div className="bg-amber-100 dark:bg-amber-800 rounded-full p-1.5">
+                  <Clock className="h-4 w-4 text-amber-600 dark:text-amber-300" />
                 </div>
-                <span className="text-sm text-gray-600 dark:text-gray-300">Due Today</span>
+                <span className="text-sm text-gray-600 dark:text-gray-200">Due Today</span>
               </div>
-              <span className="font-medium text-gray-800 dark:text-gray-200">{summary.dueToday}</span>
+              <span className="font-medium text-gray-800 dark:text-white">{summary.dueToday}</span>
             </div>
             
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-2">
-                <div className="bg-green-100 dark:bg-green-900 rounded-full p-1.5">
-                  <Star className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <div className="bg-green-100 dark:bg-green-800 rounded-full p-1.5">
+                  <Star className="h-4 w-4 text-green-600 dark:text-green-300" />
                 </div>
-                <span className="text-sm text-gray-600 dark:text-gray-300">Mastered</span>
+                <span className="text-sm text-gray-600 dark:text-gray-200">Mastered</span>
               </div>
               <div className="flex items-center">
-                <span className="font-medium text-gray-800 dark:text-gray-200 mr-2">
+                <span className="font-medium text-gray-800 dark:text-white mr-2">
                   {masteredPercentage}%
                 </span>
                 <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -415,10 +415,10 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-2">
-                <div className="bg-purple-100 dark:bg-purple-900 rounded-full p-1.5">
-                  <BarChart className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                <div className="bg-purple-100 dark:bg-purple-800 rounded-full p-1.5">
+                  <BarChart className="h-4 w-4 text-purple-600 dark:text-purple-300" />
                 </div>
-                <span className="text-sm text-gray-600 dark:text-gray-300">Status</span>
+                <span className="text-sm text-gray-600 dark:text-gray-200">Status</span>
               </div>
               <Badge variant={getReviewStatusBadge(summary.reviewStatus)}>
                 {formatReviewStatus(summary.reviewStatus)}
@@ -426,11 +426,11 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             </div>
           </div>
         </CardContent>
-        <CardFooter className="pt-3 flex gap-2 flex-wrap bg-gradient-to-b from-transparent to-gray-50 dark:to-gray-800/30 border-t border-gray-100 dark:border-gray-800">
+        <CardFooter className="pt-3 flex gap-2 flex-wrap bg-gradient-to-b from-transparent to-gray-50 dark:to-gray-800/50 border-t border-gray-100 dark:border-gray-700">
           <Button 
             variant="outline" 
             size="sm"
-            className="flex-1 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
+            className="flex-1 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/40 hover:text-blue-600 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-colors"
             onClick={() => onSelectDeck?.(deck.id)}
           >
             <Library className="w-3.5 h-3.5 mr-1.5" /> Manage Cards
@@ -438,7 +438,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           <Button 
             variant="outline" 
             size="sm"
-            className="flex-1 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400 hover:border-green-200 dark:hover:border-green-800 transition-colors"
+            className="flex-1 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-green-50 dark:hover:bg-green-900/40 hover:text-green-600 dark:hover:text-green-300 hover:border-green-200 dark:hover:border-green-700 transition-colors"
             onClick={() => {
               // Open the add card dialog directly
               setSelectedDeckForCard(deck.id);
@@ -451,7 +451,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           <Button 
             variant="default" 
             size="sm"
-            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm hover:shadow-md transition-all font-medium"
+            className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-sm hover:shadow-md transition-all font-medium"
             onClick={() => onStudyDeck(deck.id)}
           >
             <Play className="w-3.5 h-3.5 mr-1.5" /> Study
@@ -461,9 +461,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     );
   };
 
-  const getTotalDueCards = () => {
-    return deckSummariesState.reduce((total, summary) => total + summary.dueToday, 0);
-  };
+  // Removed unused getTotalDueCards function
   
   const getTotalNonMasteredCards = () => {
     return deckSummariesState.reduce((total, summary) => total + (summary.total - summary.masteredCount), 0);
@@ -787,17 +785,17 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       {/* Review Alert Messages */}
       <div className="space-y-4 mb-6">
         {hasDueCards && (
-          <div className="bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/20 border border-amber-200 dark:border-amber-800/50 shadow-sm p-4 rounded-lg transition-all hover:shadow-md">
+          <div className="bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-800/40 dark:to-amber-700/30 border border-amber-200 dark:border-amber-700 shadow-sm p-4 rounded-lg transition-all hover:shadow-md">
             <div className="flex items-center gap-3">
               <div className="bg-amber-200 dark:bg-amber-700 rounded-full p-2 flex-shrink-0">
                 <Clock className="h-5 w-5 text-amber-700 dark:text-amber-200" />
               </div>
               <div>
-                <h3 className="text-lg font-medium text-amber-800 dark:text-amber-200">Cards Due for Review</h3>
+                <h3 className="text-lg font-medium text-amber-800 dark:text-amber-100">Cards Due for Review</h3>
                 {getTotalNonMasteredCards() === 1 ? (
-                  <p className="text-sm text-amber-700 dark:text-amber-300">You have 1 card that needs to be reviewed.</p>
+                  <p className="text-sm text-amber-700 dark:text-amber-200">You have 1 card that needs to be reviewed.</p>
                 ) : (
-                  <p className="text-sm text-amber-700 dark:text-amber-300">You have {getTotalNonMasteredCards()} cards that need to be reviewed.</p>
+                  <p className="text-sm text-amber-700 dark:text-amber-200">You have {getTotalNonMasteredCards()} cards that need to be reviewed.</p>
                 )}
               </div>
             </div>
@@ -805,20 +803,17 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         )}
         
         {hasNewCards && (
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800/50 shadow-sm p-4 rounded-lg transition-all hover:shadow-md">
+          <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-800/40 dark:to-blue-700/30 border border-blue-200 dark:border-blue-700 shadow-sm p-4 rounded-lg transition-all hover:shadow-md">
             <div className="flex items-center gap-3">
               <div className="bg-blue-200 dark:bg-blue-700 rounded-full p-2 flex-shrink-0">
                 <Star className="h-5 w-5 text-blue-700 dark:text-blue-200" />
               </div>
               <div>
-                <h3 className="text-lg font-medium text-blue-800 dark:text-blue-200">New Cards to Learn</h3>
+                <h3 className="text-lg font-medium text-blue-800 dark:text-blue-100">New Cards to Learn</h3>
                 {getTotalNotStartedCards() === 1 ? (
-                  <p className="text-sm text-blue-700 dark:text-blue-300">You have 1 new card that hasn't been studied yet.</p>
+                  <p className="text-sm text-blue-700 dark:text-blue-200">You have 1 new card that hasn't been studied yet.</p>
                 ) : (
-                  <p className="text-sm text-blue-700 dark:text-blue-300">
-                    You have {getTotalNotStartedCards()} new cards that haven't been studied yet. 
-                    <span className="ml-1 font-medium">Start learning them today!</span>
-                  </p>
+                  <p className="text-sm text-blue-700 dark:text-blue-200">You have {getTotalNotStartedCards()} new cards that haven't been studied yet.</p>
                 )}
               </div>
             </div>
