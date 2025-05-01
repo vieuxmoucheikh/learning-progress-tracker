@@ -63,9 +63,9 @@ import { formatDate } from '../lib/date';
 interface FlashcardDecksProps {
   decks: FlashcardDeck[];
   onSelectDeck?: (deckId: string, shouldAddCard?: boolean) => void;
-  onAddDeck: (data: { name: string; description: string }) => void;
+  onAddDeck: (data: { name: string; description: string; category: string }) => void;
   onStudyDeck: (deckId: string) => void;
-  onEditDeck: (deckId: string, data: { name: string; description: string }) => void;
+  onEditDeck: (deckId: string, data: { name: string; description: string; category?: string }) => void;
   onDeleteDeck: (deckId: string) => void;
   onManageCards?: (deckId: string) => void;
   deckSummaries?: any[];
@@ -83,6 +83,12 @@ interface DeckSummary {
   masteredCount: number;
 }
 
+interface DeckFormData {
+  name: string;
+  description: string;
+  category: string;
+}
+
 const FlashcardDecks: React.FC<FlashcardDecksProps> = ({ 
   decks, 
   onSelectDeck, 
@@ -96,7 +102,10 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
 }) => {
   const [isCreatingDeck, setIsCreatingDeck] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [deckFormData, setDeckFormData] = useState({ name: '', description: '' });
+  const [deckFormData, setDeckFormData] = useState<DeckFormData>({ name: '', description: '', category: '' });
+  const [existingCategories, setExistingCategories] = useState<string[]>([]);
+  const [customCategory, setCustomCategory] = useState('');
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
   const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
   const [deckSummariesState, setDeckSummaries] = useState<DeckSummary[]>([]);
   const [localDecks, setLocalDecks] = useState<FlashcardDeck[]>(decks);
@@ -110,6 +119,29 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   useEffect(() => {
     setLocalDecks(decks);
   }, [decks]);
+
+  // Fetch existing categories from learning items
+  const fetchCategories = async () => {
+    try {
+      const { data: items, error } = await supabase
+        .from('learning_items')
+        .select('category');
+      
+      if (error) throw error;
+      
+      const categories = new Set(items.map(item => item.category));
+      setExistingCategories(Array.from(categories).filter(Boolean).sort());
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+  
+  // Fetch categories when creating a deck
+  useEffect(() => {
+    if (isCreatingDeck) {
+      fetchCategories();
+    }
+  }, [isCreatingDeck]);
   
   // Fetch actual deck summaries from the database
   useEffect(() => {
@@ -273,7 +305,8 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         const updatedDeck = {
           ...deckToEdit,
           name: deckFormData.name.trim(),
-          description: deckFormData.description.trim()
+          description: deckFormData.description.trim(),
+          category: deckFormData.category.trim()
         };
         
         // Update the deck object in the localDecks state
@@ -282,11 +315,12 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         // Call the parent component's edit handler with the deck ID and updated data
         onEditDeck(selectedDeckId, {
           name: deckFormData.name.trim(),
-          description: deckFormData.description.trim()
+          description: deckFormData.description.trim(),
+          category: deckFormData.category.trim()
         });
         
         // Reset form and state
-        setDeckFormData({ name: '', description: '' });
+        setDeckFormData({ name: '', description: '', category: '' });
         setIsCreatingDeck(false);
         setSelectedDeckId(null);
         
@@ -297,12 +331,16 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       }
     } else {
       // Otherwise, create a new deck
+      // Determine the final category value
+      const finalCategory = showCustomCategory ? customCategory.trim() : deckFormData.category.trim();
+      
       onAddDeck({
         name: deckFormData.name.trim(),
-        description: deckFormData.description.trim()
+        description: deckFormData.description.trim(),
+        category: finalCategory
       });
       
-      setDeckFormData({ name: '', description: '' });
+      setDeckFormData({ name: '', description: '', category: '' });
       setIsCreatingDeck(false);
       
       toast({
@@ -325,8 +363,18 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     if (deck) {
       setDeckFormData({
         name: deck.name,
-        description: deck.description || ''
+        description: deck.description || '',
+        category: deck.category || ''
       });
+      
+      // If the deck has a category that's not in our list, show custom category field
+      if (deck.category && !existingCategories.includes(deck.category)) {
+        setCustomCategory(deck.category);
+        setShowCustomCategory(true);
+      } else {
+        setCustomCategory('');
+        setShowCustomCategory(false);
+      }
       setSelectedDeckId(deckId);
       // Open the dialog by setting isCreatingDeck to true
       setIsCreatingDeck(true);
@@ -335,7 +383,8 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
 
   const renderDeckCard = (deck: FlashcardDeck) => {
     const summary = getDeckSummary(deck.id);
-    const masteredPercentage = getMasteredPercentage(deck.id);
+    // Calculate mastery percentage for display
+    const masteryPercentage = getMasteredPercentage(deck.id);
     
     // Determine status badge
     let statusBadge = null;
@@ -463,13 +512,13 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium text-gray-800 dark:text-gray-100">Mastery Progress</span>
               <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-300">
-                {Math.round((summary.masteredCount / summary.total) * 100)}%
+                {masteryPercentage}%
               </span>
             </div>
-            <div className="h-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden shadow-inner">
+            <div className="mt-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
               <div 
-                className="h-full bg-gradient-to-r from-emerald-400 to-green-500 dark:from-emerald-400 dark:to-green-300" 
-                style={{ width: `${Math.round((summary.masteredCount / summary.total) * 100)}%` }}
+                className="bg-green-500 dark:bg-green-600 h-2.5 rounded-full" 
+                style={{ width: `${masteryPercentage}%` }}
               ></div>
             </div>
             <div className="flex justify-between mt-2">
@@ -505,7 +554,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           <Button 
             variant="default"
             size="sm"
-            className="w-full flex items-center justify-center gap-1.5 text-sm bg-blue-500 hover:bg-blue-600 text-white shadow-sm hover:shadow transition-all"
+            className="w-full flex items-center justify-center gap-1.5 text-sm bg-blue-500 hover:bg-blue-600 text-white shadow-sm hover:shadow-md transition-all"
             onClick={() => {
               // Open the add card dialog directly
               setSelectedDeckForCard(deck.id);
@@ -587,7 +636,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             variant="default" 
             size="sm"
             onClick={() => {
-              setDeckFormData({ name: '', description: '' });
+              setDeckFormData({ name: '', description: '', category: '' });
               setSelectedDeckId(null);
               setIsCreatingDeck(true);
             }}
@@ -607,7 +656,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           if (!open) {
             // Reset form when dialog is closed
             setSelectedDeckId(null);
-            setDeckFormData({ name: '', description: '' });
+            setDeckFormData({ name: '', description: '', category: '' });
           }
         }}
       >
@@ -643,12 +692,70 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                 className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 min-h-[100px]"
               />
             </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Category
+              </label>
+              <div className="space-y-3">
+                {!showCustomCategory ? (
+                  <div className="flex flex-col space-y-2">
+                    <select
+                      value={deckFormData.category}
+                      onChange={(e) => setDeckFormData({ ...deckFormData, category: e.target.value })}
+                      className="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
+                    >
+                      <option value="">Select a category (optional)</option>
+                      {existingCategories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        setShowCustomCategory(true);
+                        setDeckFormData({ ...deckFormData, category: '' });
+                      }}
+                      className="self-start text-xs"
+                    >
+                      + Add custom category
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex gap-2">
+                      <Input
+                        value={customCategory}
+                        onChange={(e) => setCustomCategory(e.target.value)}
+                        placeholder="Enter custom category"
+                        className="flex-1 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                      />
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setShowCustomCategory(false);
+                          setCustomCategory('');
+                        }}
+                        className="self-start"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
           <DialogFooter>
             <Button 
               variant="outline" 
               onClick={() => {
-                setDeckFormData({ name: '', description: '' });
+                setDeckFormData({ name: '', description: '', category: '' });
                 setSelectedDeckId(null);
                 setIsCreatingDeck(false);
               }}

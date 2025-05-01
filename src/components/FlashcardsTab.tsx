@@ -12,9 +12,9 @@ type View = 'decks' | 'study' | 'manage';
 
 interface FlashcardsTabProps {
   flashcards: FlashcardDeck[];
-  onAddDeck: (data: { name: string; description: string }) => void;
+  onAddDeck: (data: { name: string; description: string; category?: string }) => void;
   onStudyDeck: (deckId: string) => void;
-  onEditDeck: (deckId: string, data: { name: string; description: string }) => void;
+  onEditDeck: (deckId: string, data: { name: string; description: string; category?: string }) => void;
   onDeleteDeck: (deckId: string) => void;
 }
 

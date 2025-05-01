@@ -794,11 +794,12 @@ export default function App() {
     setShowAddDialog(true);
   };
 
-  const handleAddFlashcardDeck = async (data: { name: string; description: string }) => {
+  const handleAddFlashcardDeck = async (data: { name: string; description: string; category?: string }) => {
     try {
       const newDeck = await createDeck({
         name: data.name,
-        description: data.description
+        description: data.description,
+        category: data.category || ''
       });
       
       // Update state with the new deck
@@ -869,7 +870,7 @@ export default function App() {
     }
   };
 
-  const handleEditFlashcardDeck = async (deckId: string, deckData: { name: string; description: string }) => {
+  const handleEditFlashcardDeck = async (deckId: string, deckData: { name: string; description: string; category?: string }) => {
     try {
       // Find the deck to edit in the current state
       const deckToEdit = flashcardDecks.find(d => d.id === deckId);
@@ -887,7 +888,8 @@ export default function App() {
         .from('flashcard_decks')
         .update({
           name: deckData.name,
-          description: deckData.description || ''
+          description: deckData.description || '',
+          category: deckData.category || ''
         })
         .eq('id', deckId);
       
