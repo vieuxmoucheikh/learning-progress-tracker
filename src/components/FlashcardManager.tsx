@@ -241,7 +241,7 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
     } else if (diffDays === 1) {
       return 'Yesterday';
     } else if (diffDays < 7) {
-      return `${diffDays} days ago`;
+      return `In ${diffDays} days`;
     } else if (diffDays < 30) {
       return `${Math.floor(diffDays / 7)} weeks ago`;
     } else {
