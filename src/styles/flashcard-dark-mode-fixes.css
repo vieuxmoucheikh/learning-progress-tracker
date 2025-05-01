@@ -1,0 +1,114 @@
+/* Flashcard Dark Mode Fixes */
+
+/* Card backgrounds and borders */
+.dark .flashcard-deck-card {
+  background-color: hsl(222, 47%, 11%);
+  border-color: hsl(220, 13%, 40%);
+}
+
+/* Card headers */
+.dark .flashcard-deck-header {
+  background: linear-gradient(to right, hsla(224, 76%, 15%, 0.7), hsla(226, 70%, 17%, 0.7));
+  border-color: hsl(220, 13%, 40%);
+}
+
+.dark .flashcard-deck-title {
+  color: white;
+}
+
+.dark .flashcard-deck-description {
+  color: hsl(220, 13%, 75%);
+}
+
+/* Icon containers */
+.dark .flashcard-icon-container {
+  background-color: hsla(224, 76%, 20%, 1);
+}
+
+.dark .flashcard-icon-blue {
+  color: hsl(210, 100%, 80%);
+}
+
+.dark .flashcard-icon-amber {
+  color: hsl(39, 100%, 80%);
+}
+
+.dark .flashcard-icon-green {
+  color: hsl(142, 76%, 80%);
+}
+
+.dark .flashcard-icon-purple {
+  color: hsl(270, 76%, 80%);
+}
+
+/* Text labels */
+.dark .flashcard-label {
+  color: white;
+}
+
+.dark .flashcard-value {
+  color: white;
+  font-weight: 500;
+}
+
+/* Card footers */
+.dark .flashcard-footer {
+  background: linear-gradient(to bottom, transparent, hsla(224, 76%, 12%, 0.8));
+  border-color: hsl(220, 13%, 40%);
+}
+
+/* Buttons */
+.dark .flashcard-button {
+  border-color: hsl(220, 13%, 40%);
+  color: white;
+}
+
+.dark .flashcard-button-blue:hover {
+  background-color: hsla(224, 76%, 20%, 0.8);
+  color: hsl(210, 100%, 80%);
+  border-color: hsl(210, 100%, 40%);
+}
+
+.dark .flashcard-button-green:hover {
+  background-color: hsla(142, 76%, 15%, 0.8);
+  color: hsl(142, 76%, 80%);
+  border-color: hsl(142, 76%, 40%);
+}
+
+.dark .flashcard-study-button {
+  background: linear-gradient(to right, hsl(210, 100%, 45%), hsl(226, 70%, 45%));
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dark .flashcard-study-button:hover {
+  background: linear-gradient(to right, hsl(210, 100%, 40%), hsl(226, 70%, 40%));
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+}
+
+/* Notification banners */
+.dark .flashcard-banner-amber {
+  background: linear-gradient(to right, hsla(39, 100%, 30%, 0.7), hsla(39, 100%, 25%, 0.7));
+  border-color: hsl(39, 100%, 40%);
+}
+
+.dark .flashcard-banner-blue {
+  background: linear-gradient(to right, hsla(210, 100%, 30%, 0.7), hsla(210, 100%, 25%, 0.7));
+  border-color: hsl(210, 100%, 40%);
+}
+
+.dark .flashcard-banner-icon-container {
+  background-color: hsla(var(--banner-hue), 100%, 25%, 1);
+}
+
+.dark .flashcard-banner-icon {
+  color: hsla(var(--banner-hue), 100%, 85%, 1);
+}
+
+.dark .flashcard-banner-title {
+  color: hsla(var(--banner-hue), 100%, 90%, 1);
+  font-weight: 500;
+}
+
+.dark .flashcard-banner-text {
+  color: hsla(var(--banner-hue), 100%, 85%, 1);
+}
