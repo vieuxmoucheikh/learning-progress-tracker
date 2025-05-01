@@ -406,7 +406,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             <div className="flex items-center gap-1.5 mb-2">
               <CalendarDays className="h-4 w-4 text-gray-500 dark:text-gray-400" />
               <span className="text-xs text-gray-500 dark:text-gray-400">
-                {nextReviewDate}
+                Next Review: {nextReviewDate}
               </span>
             </div>
           )}
@@ -434,6 +434,16 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                 <Clock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
                 <span className="text-xs text-amber-600 dark:text-amber-400">Cards Due</span>
               </div>
+              {summary.due > 0 && (
+                <div className="w-full mt-1 pt-1 border-t border-amber-200 dark:border-amber-800">
+                  <div className="flex justify-between items-center text-xxs text-amber-600 dark:text-amber-500">
+                    <span>{Math.round((summary.due / summary.total) * 100)}% of deck</span>
+                    {summary.dueToday > 0 && (
+                      <span className="font-medium">{summary.dueToday} today</span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           
@@ -443,11 +453,15 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                 <span className="font-medium text-gray-700 dark:text-gray-300">Mastery Progress</span>
                 <span className="font-medium text-emerald-600 dark:text-emerald-400">{masteredPercentage}%</span>
               </div>
-              <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden dark:bg-gray-800 shadow-inner">
+              <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden dark:bg-gray-800 shadow-inner">
                 <div 
                   className="h-full bg-gradient-to-r from-emerald-400 to-green-500 rounded-full shadow-sm" 
                   style={{ width: `${masteredPercentage}%` }}
                 ></div>
+              </div>
+              <div className="flex justify-between mt-1.5 text-xxs text-gray-500 dark:text-gray-400">
+                <span>{summary.masteredCount} mastered</span>
+                <span>{summary.total - summary.masteredCount} to learn</span>
               </div>
             </div>
           )}

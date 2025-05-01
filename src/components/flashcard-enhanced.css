@@ -1,5 +1,11 @@
 /* Enhanced Flashcard System Styles */
 
+/* Extra small text size */
+.text-xxs {
+  font-size: 0.65rem;
+  line-height: 1rem;
+}
+
 /* Custom scrollbar styles */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
