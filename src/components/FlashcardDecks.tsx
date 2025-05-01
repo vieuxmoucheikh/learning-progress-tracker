@@ -52,6 +52,7 @@ import { supabase } from '@/lib/supabase';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './flashcard.css';
+import './flashcard-enhanced.css';
 
 interface FlashcardDecksProps {
   decks: FlashcardDeck[];
@@ -326,137 +327,133 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     const masteredPercentage = getMasteredPercentage(deck.id);
     
     return (
-      <Card key={deck.id} className="overflow-hidden border border-gray-200 dark:border-gray-500 transition-all hover:shadow-md hover:translate-y-[-2px] group bg-white flashcard-deck-card">
-        <CardHeader className="bg-gradient-to-r from-blue-50/50 to-indigo-50/50 pb-4 border-b border-gray-100 flashcard-deck-header">
+      <Card key={deck.id} className="flashcard-deck-card h-full flex flex-col overflow-hidden hover:shadow-lg transition-all">
+        <CardHeader className="pb-3 space-y-3">
           <div className="flex justify-between items-start">
-            <CardTitle className="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors flashcard-deck-title">{deck.name}</CardTitle>
-            <div className="flex space-x-1 opacity-70 group-hover:opacity-100 transition-opacity">
+            <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-50">{deck.name}</CardTitle>
+            <div className="flex space-x-1">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <Trash2 className="h-4 w-4 text-red-500" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20">
+                    <Trash2 className="h-4 w-4 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400" />
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
+                <AlertDialogContent className="border border-gray-200 dark:border-gray-700 shadow-lg">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will permanently delete the "{deck.name}" deck and all its flashcards.
-                      This action cannot be undone.
+                    <AlertDialogTitle className="text-gray-900 dark:text-gray-50">Delete Deck</AlertDialogTitle>
+                    <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
+                      Are you sure you want to delete this deck? This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => handleDeleteDeck(deck)}>
+                    <AlertDialogCancel className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">Cancel</AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={() => handleDeleteDeck(deck)}
+                      className="bg-red-500 hover:bg-red-600 text-white dark:bg-red-600 dark:hover:bg-red-700"
+                    >
                       Delete
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
+              
               <Button 
                 variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0"
+                size="icon" 
+                className="h-8 w-8 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20" 
                 onClick={() => handleEditDeck(deck.id)}
               >
-                <Edit className="h-4 w-4 text-gray-500" />
+                <Edit className="h-4 w-4 text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400" />
               </Button>
             </div>
           </div>
-          <CardDescription className="text-sm text-gray-500 line-clamp-2 flashcard-deck-description">
-            {deck.description || 'No description provided'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-4 pb-2">
-          <div className="space-y-4 relative">
-            {summary.masteredCount > 0 && summary.total > 0 && masteredPercentage >= 50 && (
-              <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold py-1 px-2 rounded-full shadow-sm">
-                {masteredPercentage}% Mastered
+          
+          <div className="flex flex-wrap items-center gap-2">
+            {summary.reviewStatus && (
+              <div className={`status-badge ${
+                summary.reviewStatus === 'up-to-date' ? 'status-badge-up-to-date' : 
+                summary.reviewStatus === 'due-soon' ? 'status-badge-due-soon' : 
+                summary.reviewStatus === 'overdue' ? 'status-badge-overdue' : 
+                'status-badge-not-started'}`}
+              >
+                {formatReviewStatus(summary.reviewStatus)}
               </div>
             )}
-            <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-2">
-                <div className="bg-blue-100 rounded-full p-1.5 flashcard-icon-container">
-                  <Library className="h-4 w-4 text-blue-600 flashcard-icon-blue" />
-                </div>
-                <span className="text-sm text-gray-600 flashcard-label">Total Cards</span>
-              </div>
-              <span className="font-medium text-gray-800 flashcard-value">{summary.total}</span>
-            </div>
             
-            <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-2">
-                <div className="bg-amber-100 rounded-full p-1.5 flashcard-icon-container">
-                  <Clock className="h-4 w-4 text-amber-600 flashcard-icon-amber" />
-                </div>
-                <span className="text-sm text-gray-600 flashcard-label">Due Today</span>
+            {summary.dueToday > 0 && (
+              <div className="status-badge status-badge-due-soon">
+                <Clock className="h-3.5 w-3.5" />
+                {summary.dueToday} due today
               </div>
-              <span className="font-medium text-gray-800 flashcard-value">{summary.dueToday}</span>
-            </div>
-            
-            <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-2">
-                <div className="bg-green-100 rounded-full p-1.5 flashcard-icon-container">
-                  <Star className="h-4 w-4 text-green-600 flashcard-icon-green" />
-                </div>
-                <span className="text-sm text-gray-600 flashcard-label">Mastered</span>
+            )}
+          </div>
+        </CardHeader>
+        
+        <CardContent className="pb-3 flex-grow">
+          <CardDescription className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 min-h-[3rem]">
+            {deck.description || "No description provided."}
+          </CardDescription>
+          
+          <div className="mt-4 space-y-3">
+            <div className="flashcard-stats">
+              <div className="flashcard-stat-item">
+                <Library className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+                <span>{summary.total || 0} cards</span>
               </div>
-              <div className="flex items-center">
-                <span className="font-medium text-gray-800 mr-2 flashcard-value">
-                  {masteredPercentage}%
-                </span>
-                <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-green-500 rounded-full" 
-                    style={{ width: `${masteredPercentage}%` }}
-                  ></div>
-                </div>
+              
+              <div className="flashcard-stat-item">
+                <CheckCircle className="h-3.5 w-3.5 text-green-500 dark:text-green-400" />
+                <span>{summary.masteredCount || 0} mastered</span>
               </div>
-            </div>
-            
-            <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-2">
-                <div className="bg-purple-100 rounded-full p-1.5 flashcard-icon-container">
-                  <BarChart className="h-4 w-4 text-purple-600 flashcard-icon-purple" />
+              
+              {summary.lastStudied && (
+                <div className="flashcard-stat-item">
+                  <Clock className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400" />
+                  <span>{new Date(summary.lastStudied).toLocaleDateString()}</span>
                 </div>
-                <span className="text-sm text-gray-600 flashcard-label">Status</span>
-              </div>
-              <Badge variant={getReviewStatusBadge(summary.reviewStatus)}>
-                {formatReviewStatus(summary.reviewStatus)}
-              </Badge>
+              )}
             </div>
           </div>
+          
+          {summary.total > 0 && (
+            <div className="mt-4">
+              <div className="flex justify-between text-sm mb-2">
+                <span className="text-gray-600 dark:text-gray-400">Mastery Progress</span>
+                <span className="font-medium text-gray-800 dark:text-gray-200">{masteredPercentage}%</span>
+              </div>
+              <div className="flashcard-progress-container">
+                <div 
+                  className="flashcard-progress-bar bg-gradient-to-r from-green-400 to-green-500 dark:from-green-500 dark:to-green-600" 
+                  style={{ width: `${masteredPercentage}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
         </CardContent>
-        <CardFooter className="pt-3 flex gap-2 flex-wrap bg-gradient-to-b from-transparent to-gray-50 border-t border-gray-100 flashcard-footer">
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="flex-1 border-gray-200 text-gray-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors flashcard-button flashcard-button-blue"
-            onClick={() => onSelectDeck?.(deck.id)}
-          >
-            <Library className="w-3.5 h-3.5 mr-1.5" /> Manage Cards
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="flex-1 border-gray-200 text-gray-700 hover:bg-green-50 hover:text-green-600 hover:border-green-200 transition-colors flashcard-button flashcard-button-green"
-            onClick={() => {
-              // Open the add card dialog directly
-              setSelectedDeckForCard(deck.id);
-              setCardFormData({ front: '', back: '', tags: '' });
-              setIsAddingCard(true);
-            }}
-          >
-            <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Card
-          </Button>
-          <Button 
-            variant="default" 
-            size="sm"
-            className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-md hover:shadow-lg transition-all font-medium flashcard-study-button"
-            onClick={() => onStudyDeck(deck.id)}
-          >
-            <Play className="w-3.5 h-3.5 mr-1.5" /> Study
-          </Button>
+        
+        <CardFooter className="pt-2">
+          <div className="flex flex-col w-full space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <Button 
+                variant="outline" 
+                className="flex items-center justify-center gap-1.5 text-sm border-gray-200 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:border-gray-600 dark:hover:bg-gray-800/50 transition-colors"
+                onClick={() => onSelectDeck && onSelectDeck(deck.id)}
+              >
+                <PlusCircle className="h-4 w-4" />
+                Add Cards
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className={`flex items-center justify-center gap-1.5 text-sm border-blue-200 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-800 dark:hover:border-blue-700 dark:hover:bg-blue-900/30 transition-colors ${summary.total === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={() => summary.total > 0 ? onStudyDeck(deck.id) : null}
+                disabled={summary.total === 0}
+              >
+                <Play className="h-4 w-4" />
+                Study
+              </Button>
+            </div>
+          </div>
         </CardFooter>
       </Card>
     );
@@ -519,12 +516,12 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   return (
     <div className="w-full max-w-full space-y-6">
       {/* Header Section */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 flashcard-deck-header">
+        <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-900 dark:text-gray-50">
           <Library className="w-6 h-6 text-blue-600 dark:text-blue-400" />
           Flashcards
         </h2>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flashcard-deck-actions">
           <Button 
             variant="default" 
             size="sm"
@@ -786,17 +783,17 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       {/* Review Alert Messages */}
       <div className="space-y-4 mb-6">
         {hasDueCards && (
-          <div className="bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-200 shadow-sm p-4 rounded-lg transition-all hover:shadow-md flashcard-banner-amber" style={{"--banner-hue": "39"} as React.CSSProperties}>
+          <div className="flashcard-banner bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 border border-amber-200 dark:border-amber-800/30 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="bg-amber-200 rounded-full p-2 flex-shrink-0 flashcard-banner-icon-container">
-                <Clock className="h-5 w-5 text-amber-700 flashcard-banner-icon" />
+              <div className="flashcard-banner-icon-container bg-amber-200 dark:bg-amber-700/30">
+                <Clock className="h-5 w-5 text-amber-700 dark:text-amber-400" />
               </div>
               <div>
-                <h3 className="text-lg font-medium text-amber-800 flashcard-banner-title">Cards Due for Review</h3>
+                <h3 className="text-lg font-medium text-amber-800 dark:text-amber-300">Cards Due for Review</h3>
                 {getTotalNonMasteredCards() === 1 ? (
-                  <p className="text-sm text-amber-700 flashcard-banner-text">You have 1 card that needs to be reviewed.</p>
+                  <p className="text-sm text-amber-700 dark:text-amber-400">You have 1 card that needs to be reviewed.</p>
                 ) : (
-                  <p className="text-sm text-amber-700 flashcard-banner-text">You have {getTotalNonMasteredCards()} cards that need to be reviewed.</p>
+                  <p className="text-sm text-amber-700 dark:text-amber-400">You have {getTotalNonMasteredCards()} cards that need to be reviewed.</p>
                 )}
               </div>
             </div>
@@ -804,17 +801,17 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         )}
         
         {hasNewCards && (
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 shadow-sm p-4 rounded-lg transition-all hover:shadow-md flashcard-banner-blue" style={{"--banner-hue": "210"} as React.CSSProperties}>
+          <div className="flashcard-banner bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800/30 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="bg-blue-200 rounded-full p-2 flex-shrink-0 flashcard-banner-icon-container">
-                <Star className="h-5 w-5 text-blue-700 flashcard-banner-icon" />
+              <div className="flashcard-banner-icon-container bg-blue-200 dark:bg-blue-700/30">
+                <Star className="h-5 w-5 text-blue-700 dark:text-blue-400" />
               </div>
               <div>
-                <h3 className="text-lg font-medium text-blue-800 flashcard-banner-title">New Cards to Learn</h3>
+                <h3 className="text-lg font-medium text-blue-800 dark:text-blue-300">New Cards to Learn</h3>
                 {getTotalNotStartedCards() === 1 ? (
-                  <p className="text-sm text-blue-700 flashcard-banner-text">You have 1 new card that hasn't been studied yet.</p>
+                  <p className="text-sm text-blue-700 dark:text-blue-400">You have 1 new card that hasn't been studied yet.</p>
                 ) : (
-                  <p className="text-sm text-blue-700 flashcard-banner-text">You have {getTotalNotStartedCards()} new cards that haven't been studied yet.</p>
+                  <p className="text-sm text-blue-700 dark:text-blue-400">You have {getTotalNotStartedCards()} new cards that haven't been studied yet.</p>
                 )}
               </div>
             </div>
@@ -824,27 +821,27 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700 mb-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-          <h3 className="text-xl font-semibold flex items-center gap-2">
+          <h3 className="text-xl font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-50">
             <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             Your Flashcard Decks
           </h3>
           
           <div className="flex flex-wrap gap-3">
-            <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full">
+            <div className="flashcard-stat-item">
               <Layers className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-sm font-medium text-blue-700 dark:text-blue-300">{localDecks.length} {localDecks.length === 1 ? 'Deck' : 'Decks'}</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{localDecks.length} {localDecks.length === 1 ? 'Deck' : 'Decks'}</span>
             </div>
             
-            <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-full">
+            <div className="flashcard-stat-item">
               <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
-              <span className="text-sm font-medium text-green-700 dark:text-green-300">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {deckSummariesState.reduce((sum, deck) => sum + deck.masteredCount, 0)} Mastered
               </span>
             </div>
             
-            <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-full">
+            <div className="flashcard-stat-item">
               <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-              <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {deckSummariesState.reduce((sum, deck) => sum + deck.total, 0)} Total
               </span>
             </div>
@@ -857,11 +854,11 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       </div>
 
       {/* Deck Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="flashcard-deck-grid">
         {localDecks.map(deck => renderDeckCard(deck))}
       </div>
     </div>
   );
 };
 
-export default FlashcardDecks; 
+export default FlashcardDecks;

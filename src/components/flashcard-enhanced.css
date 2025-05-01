@@ -1,0 +1,439 @@
+/* Enhanced Flashcard System Styles */
+
+/* Custom scrollbar styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Dark mode scrollbar */
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Flashcard Deck Grid */
+.flashcard-deck-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .flashcard-deck-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+}
+
+/* Flashcard Deck Card */
+.flashcard-deck-card {
+  position: relative;
+  transition: all 0.2s ease-in-out;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.dark .flashcard-deck-card {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.flashcard-deck-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.dark .flashcard-deck-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+/* Flashcard Content */
+.flashcard-content {
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+.flashcard-content h1, 
+.flashcard-content h2, 
+.flashcard-content h3 {
+  margin-top: 0.75em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.dark .flashcard-content h1,
+.dark .flashcard-content h2,
+.dark .flashcard-content h3 {
+  color: #e2e8f0;
+}
+
+.flashcard-content h1 {
+  font-size: 1.5em;
+}
+
+.flashcard-content h2 {
+  font-size: 1.3em;
+}
+
+.flashcard-content h3 {
+  font-size: 1.1em;
+}
+
+.flashcard-content p {
+  margin-bottom: 0.75em;
+}
+
+.flashcard-content ul, 
+.flashcard-content ol {
+  margin-left: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.flashcard-content li {
+  margin-bottom: 0.5em;
+}
+
+.flashcard-content pre {
+  background: rgba(0, 0, 0, 0.04);
+  padding: 0.75em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-bottom: 0.75em;
+}
+
+.dark .flashcard-content pre {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.flashcard-content code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.dark .flashcard-content code {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.flashcard-content img {
+  max-width: 100%;
+  height: auto;
+  margin: 0.75em 0;
+  border-radius: 6px;
+}
+
+.flashcard-content blockquote {
+  border-left: 3px solid #cbd5e1;
+  padding-left: 1em;
+  margin-left: 0;
+  margin-right: 0;
+  font-style: italic;
+  color: #475569;
+}
+
+.dark .flashcard-content blockquote {
+  border-left-color: #475569;
+  color: #94a3b8;
+}
+
+/* Status badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  gap: 0.375rem;
+}
+
+.status-badge-up-to-date {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: rgb(22, 163, 74);
+}
+
+.dark .status-badge-up-to-date {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: rgb(74, 222, 128);
+}
+
+.status-badge-due-soon {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: rgb(217, 119, 6);
+}
+
+.dark .status-badge-due-soon {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: rgb(251, 191, 36);
+}
+
+.status-badge-overdue {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: rgb(220, 38, 38);
+}
+
+.dark .status-badge-overdue {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: rgb(248, 113, 113);
+}
+
+.status-badge-not-started {
+  background-color: rgba(99, 102, 241, 0.1);
+  color: rgb(79, 70, 229);
+}
+
+.dark .status-badge-not-started {
+  background-color: rgba(99, 102, 241, 0.15);
+  color: rgb(129, 140, 248);
+}
+
+/* Progress bar */
+.flashcard-progress-container {
+  height: 6px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.dark .flashcard-progress-container {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.flashcard-progress-bar {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+/* Flashcard study mode */
+.flashcard-study-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.flashcard-card {
+  perspective: 1000px;
+  height: 400px;
+  max-height: 60vh;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .flashcard-card {
+    height: 300px;
+  }
+}
+
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 0.75rem;
+}
+
+.flashcard-flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+
+.flashcard-front, .flashcard-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  overflow-y: auto;
+}
+
+.flashcard-front {
+  background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);
+  color: #1e293b;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark .flashcard-front {
+  background: linear-gradient(to bottom right, #1e293b, #0f172a);
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.flashcard-back {
+  background: linear-gradient(to bottom right, #f0f9ff, #e0f2fe);
+  color: #0c4a6e;
+  transform: rotateY(180deg);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark .flashcard-back {
+  background: linear-gradient(to bottom right, #0c4a6e, #082f49);
+  color: #bae6fd;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Flashcard control buttons */
+.flashcard-controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 640px) {
+  .flashcard-controls {
+    flex-direction: column;
+  }
+}
+
+.flashcard-control-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+/* Animation for better user experience */
+@keyframes highlight {
+  0% { background-color: rgba(59, 130, 246, 0.1); }
+  100% { background-color: transparent; }
+}
+
+.flashcard-content .highlight {
+  animation: highlight 2s ease-out;
+}
+
+/* Card stats and metrics */
+.flashcard-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.flashcard-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  background-color: rgba(0, 0, 0, 0.03);
+  font-size: 0.875rem;
+}
+
+.dark .flashcard-stat-item {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+  .flashcard-deck-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .flashcard-deck-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* Banner styles */
+.flashcard-banner {
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.flashcard-banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.dark .flashcard-banner:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+.flashcard-banner-icon-container {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+}
+
+/* Quill editor customizations */
+.ql-editor {
+  min-height: 150px;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.dark .ql-toolbar {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .ql-container {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .ql-editor {
+  color: #e2e8f0;
+}
+
+.dark .ql-picker-label,
+.dark .ql-picker-item {
+  color: #e2e8f0 !important;
+}
+
+.dark .ql-stroke {
+  stroke: #e2e8f0 !important;
+}
+
+.dark .ql-fill {
+  fill: #e2e8f0 !important;
+}
+
+.dark .ql-picker-options {
+  background-color: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
