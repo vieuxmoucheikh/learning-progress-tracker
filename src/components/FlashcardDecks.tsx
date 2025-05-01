@@ -309,14 +309,25 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           category: deckFormData.category.trim()
         };
         
+        // In the simplified UI, the name and category are the same
+        const deckName = showCustomCategory ? customCategory.trim() : deckFormData.name.trim();
+        
+        // Create the updated deck object
+        const updatedDeckWithName = {
+          ...deckToEdit,
+          name: deckName,
+          description: deckFormData.description.trim(),
+          category: deckName // Category is the same as the name
+        };
+        
         // Update the deck object in the localDecks state
-        setLocalDecks(prev => prev.map(d => d.id === selectedDeckId ? updatedDeck : d));
+        setLocalDecks(prev => prev.map(d => d.id === selectedDeckId ? updatedDeckWithName : d));
         
         // Call the parent component's edit handler with the deck ID and updated data
         onEditDeck(selectedDeckId, {
-          name: deckFormData.name.trim(),
+          name: deckName,
           description: deckFormData.description.trim(),
-          category: deckFormData.category.trim()
+          category: deckName // Category is the same as the name
         });
         
         // Reset form and state
@@ -331,13 +342,13 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       }
     } else {
       // Otherwise, create a new deck
-      // Determine the final category value
-      const finalCategory = showCustomCategory ? customCategory.trim() : deckFormData.category.trim();
+      // In the simplified UI, the name and category are the same
+      const deckName = showCustomCategory ? customCategory.trim() : deckFormData.name.trim();
       
       onAddDeck({
-        name: deckFormData.name.trim(),
+        name: deckName,
         description: deckFormData.description.trim(),
-        category: finalCategory
+        category: deckName // Category is the same as the name
       });
       
       setDeckFormData({ name: '', description: '', category: '' });
@@ -361,20 +372,24 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   const handleEditDeck = async (deckId: string) => {
     const deck = localDecks.find(d => d.id === deckId);
     if (deck) {
+      // In our simplified UI, we use the deck name as the category
+      const deckName = deck.name;
+      
       setDeckFormData({
-        name: deck.name,
+        name: deckName,
         description: deck.description || '',
-        category: deck.category || ''
+        category: deckName // Category is the same as the name
       });
       
-      // If the deck has a category that's not in our list, show custom category field
-      if (deck.category && !existingCategories.includes(deck.category)) {
-        setCustomCategory(deck.category);
+      // If the deck name is not in our list of categories, show custom input
+      if (!existingCategories.includes(deckName)) {
+        setCustomCategory(deckName);
         setShowCustomCategory(true);
       } else {
         setCustomCategory('');
         setShowCustomCategory(false);
       }
+      
       setSelectedDeckId(deckId);
       // Open the dialog by setting isCreatingDeck to true
       setIsCreatingDeck(true);
@@ -672,13 +687,42 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               <label htmlFor="deck-name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Deck Name
               </label>
-              <Input
-                id="deck-name"
-                value={deckFormData.name}
-                onChange={(e) => setDeckFormData({ ...deckFormData, name: e.target.value })}
-                placeholder="Enter deck name"
-                className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
-              />
+              <div className="flex flex-col space-y-2">
+                <select
+                  value={deckFormData.name}
+                  onChange={(e) => {
+                    if (e.target.value === "__custom__") {
+                      // If custom option is selected, don't change the name yet
+                      setShowCustomCategory(true);
+                    } else {
+                      setDeckFormData({ ...deckFormData, name: e.target.value, category: e.target.value });
+                      setShowCustomCategory(false);
+                    }
+                  }}
+                  className="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
+                >
+                  <option value="">Select a category or enter a new name</option>
+                  {existingCategories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                  <option value="__custom__">+ Enter custom name</option>
+                </select>
+                {showCustomCategory && (
+                  <Input
+                    id="deck-name-custom"
+                    value={customCategory}
+                    onChange={(e) => {
+                      setCustomCategory(e.target.value);
+                      setDeckFormData({ ...deckFormData, name: e.target.value, category: e.target.value });
+                    }}
+                    placeholder="Enter custom deck name"
+                    className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                    autoFocus
+                  />
+                )}
+              </div>
             </div>
             <div className="space-y-2">
               <label htmlFor="deck-description" className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -692,64 +736,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                 className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 min-h-[100px]"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Category
-              </label>
-              <div className="space-y-3">
-                {!showCustomCategory ? (
-                  <div className="flex flex-col space-y-2">
-                    <select
-                      value={deckFormData.category}
-                      onChange={(e) => setDeckFormData({ ...deckFormData, category: e.target.value })}
-                      className="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-                    >
-                      <option value="">Select a category (optional)</option>
-                      {existingCategories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </select>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => {
-                        setShowCustomCategory(true);
-                        setDeckFormData({ ...deckFormData, category: '' });
-                      }}
-                      className="self-start text-xs"
-                    >
-                      + Add custom category
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col space-y-2">
-                    <div className="flex gap-2">
-                      <Input
-                        value={customCategory}
-                        onChange={(e) => setCustomCategory(e.target.value)}
-                        placeholder="Enter custom category"
-                        className="flex-1 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
-                      />
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => {
-                          setShowCustomCategory(false);
-                          setCustomCategory('');
-                        }}
-                        className="self-start"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+
           </div>
           <DialogFooter>
             <Button 
