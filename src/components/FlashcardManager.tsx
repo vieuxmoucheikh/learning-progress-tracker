@@ -319,9 +319,9 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-600 dark:text-purple-400"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             </div>
             <div>
-              <div className="font-medium text-purple-800 dark:text-purple-300">Cards Due for Review</div>
-              <div className="text-purple-600 dark:text-purple-400">{cards.filter(card => !card.mastered).length}</div>
-              <div className="text-xs text-purple-500 dark:text-purple-400 mt-1">Non-mastered cards that need attention</div>
+              <div className="font-medium text-purple-800 dark:text-purple-300">Non-Mastered Cards</div>
+              <div className="text-purple-600 dark:text-purple-400">{cards.length - cards.filter(card => card.mastered).length}</div>
+              <div className="text-xs text-purple-500 dark:text-purple-400 mt-1">Cards that still need to be reviewed</div>
             </div>
           </div>
         </div>
