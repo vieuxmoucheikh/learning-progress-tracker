@@ -32,20 +32,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import { 
+  Check, 
+  CheckCircle, 
   Clock, 
+  CreditCard, 
   Edit, 
   Library, 
+  MoreHorizontal, 
   Play, 
-  PlusCircle, 
   Plus, 
+  PlusCircle, 
   Star, 
+  Trash, 
+  CalendarDays, 
+  Globe, 
   BookOpen,
   Trash2,
   Tag,
   Info,
   BarChart,
-  Layers,
-  CheckCircle
+  Layers
 } from "lucide-react";
 import { FlashcardDeck } from '@/types';
 import { supabase } from '@/lib/supabase';
@@ -53,6 +59,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './flashcard.css';
 import './flashcard-enhanced.css';
+import { formatDate } from '../lib/date';
 
 interface FlashcardDecksProps {
   decks: FlashcardDeck[];
@@ -69,6 +76,7 @@ interface DeckSummary {
   deckId: string;
   total: number;
   dueToday: number;
+  due: number;
   reviewStatus: string;
   lastStudied: string | null;
   nextDue: string | null;
@@ -178,6 +186,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               deckId: deck.id,
               total,
               dueToday: dueCards.length,
+              due: dueCards.length, // Add the due property with the same value as dueToday
               reviewStatus,
               lastStudied: lastStudied ? lastStudied.toISOString() : undefined,
               nextDue: nextDue ? nextDue.toISOString() : undefined,
@@ -221,6 +230,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       deckId,
       total: 0,
       dueToday: 0,
+      due: 0,
       reviewStatus: 'not-started',
       lastStudied: null,
       nextDue: null,
@@ -389,41 +399,63 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           </div>
         </CardHeader>
         
-        <CardContent className="pb-3 flex-grow">
-          <CardDescription className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 min-h-[3rem]">
-            {deck.description || "No description provided."}
-          </CardDescription>
-          
-          <div className="mt-4 space-y-3">
-            <div className="flashcard-stats">
-              <div className="flashcard-stat-item">
-                <Library className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
-                <span>{summary.total || 0} cards</span>
-              </div>
-              
-              <div className="flashcard-stat-item">
-                <CheckCircle className="h-3.5 w-3.5 text-green-500 dark:text-green-400" />
-                <span>{summary.masteredCount || 0} mastered</span>
-              </div>
-              
-              {summary.lastStudied && (
-                <div className="flashcard-stat-item">
-                  <Clock className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400" />
-                  <span>{new Date(summary.lastStudied).toLocaleDateString()}</span>
-                </div>
+        <CardContent className="flex-grow p-4 pt-0">
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center gap-1.5">
+              <CalendarDays className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {formatDate(deck.created_at || new Date().toISOString())}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              {deck.is_public && (
+                <Badge variant="outline" className="text-xs py-0 h-5 border-green-200 text-green-700 bg-green-50 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
+                  <Globe className="h-3 w-3 mr-1" />
+                  Public
+                </Badge>
+              )}
+              {deck.is_favorite && (
+                <Badge variant="outline" className="text-xs py-0 h-5 border-amber-200 text-amber-700 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-400">
+                  <Star className="h-3 w-3 mr-1 fill-amber-500" />
+                  Favorite
+                </Badge>
               )}
             </div>
           </div>
           
-          {summary.total > 0 && (
-            <div className="mt-4">
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-600 dark:text-gray-400">Mastery Progress</span>
-                <span className="font-medium text-gray-800 dark:text-gray-200">{masteredPercentage}%</span>
+          <h3 className="font-semibold text-lg mb-2 line-clamp-1 text-gray-900 dark:text-gray-100">{deck.name}</h3>
+          
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
+            {deck.description || "No description provided."}
+          </p>
+          
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800">
+              <div className="flex items-center gap-1.5 mb-1">
+                <CreditCard className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">{summary.total}</span>
               </div>
-              <div className="flashcard-progress-container">
+              <span className="text-xs text-blue-600 dark:text-blue-400">Total Cards</span>
+            </div>
+            
+            <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <span className="text-sm font-medium text-amber-700 dark:text-amber-300">{summary.due}</span>
+              </div>
+              <span className="text-xs text-amber-600 dark:text-amber-400">Cards Due</span>
+            </div>
+          </div>
+          
+          {summary.total > 0 && (
+            <div className="mt-auto">
+              <div className="flex justify-between text-xs mb-1.5">
+                <span className="font-medium text-gray-700 dark:text-gray-300">Mastery Progress</span>
+                <span className="font-medium text-emerald-600 dark:text-emerald-400">{masteredPercentage}%</span>
+              </div>
+              <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden dark:bg-gray-800 shadow-inner">
                 <div 
-                  className="flashcard-progress-bar bg-gradient-to-r from-green-400 to-green-500 dark:from-green-500 dark:to-green-600" 
+                  className="h-full bg-gradient-to-r from-emerald-400 to-green-500 rounded-full shadow-sm" 
                   style={{ width: `${masteredPercentage}%` }}
                 ></div>
               </div>
@@ -457,7 +489,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             <Button 
               variant="default" 
               size="sm"
-              className="w-full flex items-center justify-center gap-1.5 text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm hover:shadow-md transition-all"
+              className="w-full flex items-center justify-center gap-1.5 text-sm bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 hover:from-blue-700 hover:via-indigo-600 hover:to-purple-700 text-white shadow-sm hover:shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] font-medium"
               onClick={() => {
                 // Open the add card dialog directly
                 setSelectedDeckForCard(deck.id);
@@ -465,8 +497,8 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                 setIsAddingCard(true);
               }}
             >
-              <PlusCircle className="h-4 w-4" />
-              Add Card
+              <PlusCircle className="h-4 w-4 mr-1 animate-pulse" />
+              Add New Card
             </Button>
           </div>
         </CardFooter>

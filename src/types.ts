@@ -202,9 +202,13 @@ export interface FlashcardDeck {
   created_at: string;
   updated_at?: string;
   user_id: string;
+  is_public?: boolean;
+  is_favorite?: boolean;
   summary?: {
     total: number;
     dueToday: number;
+    due?: number;
+    masteredCount?: number;
     reviewStatus: 'not-started' | 'up-to-date' | 'due-soon' | 'overdue';
     lastStudied: string | null;
     nextDue: string | null;
