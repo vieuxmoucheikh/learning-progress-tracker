@@ -388,7 +388,16 @@ export const FlashcardStudy: React.FC<FlashcardStudyProps> = ({
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               You're all caught up with this deck. Check back later when more cards are due for review.
             </p>
-            <Button onClick={onBackToDecks} className="mx-auto">
+            <Button 
+              onClick={onBackToDecks} 
+              variant="outline"
+              className="mx-auto border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+              style={{
+                backgroundColor: 'var(--background)',
+                borderColor: 'var(--border)',
+                color: 'var(--foreground)'
+              }}
+            >
               <ArrowLeft className="h-4 w-4 mr-2" /> Back to Decks
             </Button>
           </div>

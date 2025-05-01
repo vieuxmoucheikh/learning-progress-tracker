@@ -24,28 +24,44 @@
 /* Mobile specific fixes */
 @media (max-width: 768px) {
   .ql-toolbar.ql-snow {
-    padding: 4px !important;
+    padding: 6px !important;
   }
   
   .ql-toolbar.ql-snow .ql-formats {
-    margin-right: 2px !important;
+    margin-right: 4px !important;
   }
   
-  .ql-toolbar.ql-snow button,
-  .ql-toolbar.ql-snow .ql-picker {
-    width: 20px !important;
-    height: 20px !important;
-    padding: 0 !important;
+  /* Make regular buttons a bit larger */
+  .ql-toolbar.ql-snow button {
+    width: 24px !important;
+    height: 24px !important;
+    padding: 2px !important;
   }
   
   .ql-toolbar.ql-snow button svg {
-    width: 14px !important;
-    height: 14px !important;
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  /* Make the header dropdown significantly larger */
+  .ql-toolbar.ql-snow .ql-picker.ql-header {
+    width: auto !important;
+    height: 24px !important;
   }
   
   .ql-toolbar.ql-snow .ql-picker-label {
-    padding: 0 2px !important;
-    font-size: 12px !important;
+    padding: 0 8px !important;
+    font-size: 14px !important;
+  }
+  
+  /* Ensure dropdown text is visible */
+  .ql-toolbar.ql-snow .ql-picker-options {
+    padding: 4px !important;
+  }
+  
+  .ql-toolbar.ql-snow .ql-picker-item {
+    padding: 5px 8px !important;
+    font-size: 14px !important;
   }
   
   .dark .ql-toolbar.ql-snow {
