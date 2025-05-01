@@ -380,24 +380,38 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             {deck.is_favorite && (
               <Star className="h-5 w-5 fill-amber-400 stroke-amber-500" />
             )}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open menu</span>
-                  <MoreHorizontal className="h-4 w-4" />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20" 
+              onClick={() => handleEditDeck(deck.id)}
+            >
+              <Edit className="h-4 w-4 text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400" />
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20">
+                  <Trash2 className="h-4 w-4 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleEditDeck(deck.id)}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleDeleteDeck(deck)}>
-                  <Trash className="mr-2 h-4 w-4" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="border border-gray-200 dark:border-gray-700 shadow-lg">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-gray-900 dark:text-gray-50">Delete Deck</AlertDialogTitle>
+                  <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
+                    Are you sure you want to delete this deck? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={() => handleDeleteDeck(deck)}
+                    className="bg-red-500 hover:bg-red-600 text-white dark:bg-red-600 dark:hover:bg-red-700"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </CardHeader>
         
@@ -429,17 +443,17 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             </div>
             
             <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800">
-              <span className="text-lg font-semibold text-amber-700 dark:text-amber-300">{summary.due}</span>
+              <span className="text-lg font-semibold text-amber-700 dark:text-amber-300">{summary.dueToday}</span>
               <div className="flex items-center gap-1">
                 <Clock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-                <span className="text-xs text-amber-600 dark:text-amber-400">Cards Due</span>
+                <span className="text-xs text-amber-600 dark:text-amber-400">Cards Due Today</span>
               </div>
-              {summary.due > 0 && (
+              {summary.dueToday > 0 && (
                 <div className="w-full mt-1 pt-1 border-t border-amber-200 dark:border-amber-800">
                   <div className="flex justify-between items-center text-xxs text-amber-600 dark:text-amber-500">
-                    <span>{Math.round((summary.due / summary.total) * 100)}% of deck</span>
-                    {summary.dueToday > 0 && (
-                      <span className="font-medium">{summary.dueToday} today</span>
+                    <span>{Math.round((summary.dueToday / summary.total) * 100)}% of deck</span>
+                    {summary.due > summary.dueToday && (
+                      <span className="font-medium">+{summary.due - summary.dueToday} upcoming</span>
                     )}
                   </div>
                 </div>
