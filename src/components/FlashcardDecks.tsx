@@ -464,6 +464,10 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   const getTotalDueCards = () => {
     return deckSummariesState.reduce((total, summary) => total + summary.dueToday, 0);
   };
+  
+  const getTotalNonMasteredCards = () => {
+    return deckSummariesState.reduce((total, summary) => total + (summary.total - summary.masteredCount), 0);
+  };
 
   const getTotalNotStartedCards = () => {
     return deckSummariesState.reduce((total, summary) => {
@@ -478,7 +482,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     }, 0);
   };
 
-  const hasDueCards = getTotalDueCards() > 0;
+  const hasDueCards = getTotalNonMasteredCards() > 0;
   const hasNewCards = getTotalNotStartedCards() > 0;
 
   const getReviewStatusBadge = (status: string) => {
@@ -790,10 +794,10 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               </div>
               <div>
                 <h3 className="text-lg font-medium text-amber-800 dark:text-amber-200">Cards Due for Review</h3>
-                {getTotalDueCards() === 1 ? (
+                {getTotalNonMasteredCards() === 1 ? (
                   <p className="text-sm text-amber-700 dark:text-amber-300">You have 1 card that needs to be reviewed.</p>
                 ) : (
-                  <p className="text-sm text-amber-700 dark:text-amber-300">You have {getTotalDueCards()} cards that need to be reviewed.</p>
+                  <p className="text-sm text-amber-700 dark:text-amber-300">You have {getTotalNonMasteredCards()} cards that need to be reviewed.</p>
                 )}
               </div>
             </div>
