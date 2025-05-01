@@ -52,7 +52,6 @@ import { supabase } from '@/lib/supabase';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './flashcard.css';
-import '../styles/flashcard-dark-mode-fixes.css';
 
 interface FlashcardDecksProps {
   decks: FlashcardDeck[];
