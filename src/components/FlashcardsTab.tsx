@@ -38,11 +38,16 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
     refreshDeckMetrics();
   }, [flashcards]);
 
-  // This function is used when a deck is selected from the decks list
+  // This function is used when a deck is selected from the decks list for studying
   const handleSelectDeck = (deckId: string) => {
     setSelectedDeckId(deckId);
+    setView('study');
+  };
+
+  // This function is used when the Manage Cards button is clicked
+  const handleManageCards = (deckId: string) => {
+    setSelectedDeckId(deckId);
     setView('manage');
-    // We don't set shouldOpenAddDialog here anymore
   };
 
   const handleBackToDecks = () => {
@@ -154,6 +159,7 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
           onEditDeck={onEditDeck}
           onDeleteDeck={onDeleteDeck}
           onAddDeck={onAddDeck}
+          onManageCards={handleManageCards}
           deckSummaries={deckSummaries}
           onRefreshMetrics={refreshDeckMetrics}
         />

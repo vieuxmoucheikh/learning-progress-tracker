@@ -9,11 +9,12 @@ import {
 } from "@/components/ui/card";
 import { 
   Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle 
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -26,19 +27,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import { 
-  Check, 
   CheckCircle, 
   Clock, 
   CreditCard, 
@@ -51,13 +45,12 @@ import {
   Star, 
   Trash, 
   CalendarDays, 
-  Globe, 
   BookOpen,
   Trash2,
   Tag,
   Info,
-  BarChart,
-  Layers
+  Layers,
+  ListChecks
 } from "lucide-react";
 import { FlashcardDeck } from '@/types';
 import { supabase } from '@/lib/supabase';
@@ -74,6 +67,7 @@ interface FlashcardDecksProps {
   onStudyDeck: (deckId: string) => void;
   onEditDeck: (deckId: string, data: { name: string; description: string }) => void;
   onDeleteDeck: (deckId: string) => void;
+  onManageCards?: (deckId: string) => void;
   deckSummaries?: any[];
   onRefreshMetrics?: () => void;
 }
@@ -96,6 +90,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
   onStudyDeck, 
   onEditDeck, 
   onDeleteDeck,
+  onManageCards,
   deckSummaries = [],
   onRefreshMetrics
 }) => {
@@ -372,11 +367,11 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     
     return (
       <Card key={deck.id} className="flashcard-deck-card h-full flex flex-col overflow-hidden hover:shadow-lg transition-all">
-        <CardHeader className="pb-2 flex flex-row justify-between items-start">
-          <div className="flex flex-col gap-1">
-            <h3 className="font-semibold text-xl text-gray-900 dark:text-gray-100">{deck.name}</h3>
+        <CardHeader className="p-4 pb-2 flex flex-row justify-between items-start">
+          <div className="flex flex-col gap-2 max-w-[75%]">
+            <h3 className="font-bold text-xl leading-tight text-gray-900 dark:text-gray-50">{deck.name}</h3>
             {deck.description && (
-              <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 pr-4">
+              <p className="text-sm leading-snug text-gray-700 dark:text-gray-200 line-clamp-2">
                 {deck.description}
               </p>
             )}
@@ -420,107 +415,91 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           </div>
         </CardHeader>
         
-        <CardContent className="flex-grow px-4 pt-0 pb-3">
-          <div className="flex justify-between items-center mb-3">
-            <div className="flex items-center gap-2">
-              {statusBadge}
-              {nextReviewDate && (
-                <div className="flex items-center gap-1.5">
-                  <CalendarDays className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    Next Review: {nextReviewDate}
-                  </span>
-                </div>
-              )}
-            </div>
+        <CardContent className="flex-grow px-4 pt-1 pb-4">
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            {statusBadge && (
+              <div className="mr-1">{statusBadge}</div>
+            )}
+            {nextReviewDate && (
+              <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md">
+                <CalendarDays className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                <span className="text-xs font-medium text-gray-700 dark:text-gray-200">
+                  Next Review: {nextReviewDate}
+                </span>
+              </div>
+            )}
           </div>
           
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800">
-              <span className="text-lg font-semibold text-blue-700 dark:text-blue-300">{summary.total}</span>
-              <div className="flex items-center gap-1">
-                <CreditCard className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-                <span className="text-xs text-blue-600 dark:text-blue-400">Total Cards</span>
+          <div className="grid grid-cols-2 gap-4 mb-5">
+            <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 shadow-sm">
+              <span className="text-2xl font-bold text-blue-700 dark:text-blue-300">{summary.total}</span>
+              <div className="flex items-center gap-1.5 mt-1">
+                <CreditCard className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-xs font-medium text-blue-700 dark:text-blue-400">Total Cards</span>
               </div>
             </div>
             
-            <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800">
-              <span className="text-lg font-semibold text-amber-700 dark:text-amber-300">{summary.dueToday}</span>
-              <div className="flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-                <span className="text-xs text-amber-600 dark:text-amber-400">Cards Due Today</span>
+            <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-800 shadow-sm">
+              <span className="text-2xl font-bold text-amber-700 dark:text-amber-300">{summary.dueToday}</span>
+              <div className="flex items-center gap-1.5 mt-1">
+                <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <span className="text-xs font-medium text-amber-700 dark:text-amber-400">Cards Due Today</span>
               </div>
               {summary.dueToday > 0 && (
-                <div className="w-full mt-1 pt-1 border-t border-amber-200 dark:border-amber-800">
-                  <div className="flex justify-between items-center text-xxs text-amber-600 dark:text-amber-500">
+                <div className="w-full mt-2 pt-1.5 border-t border-amber-200 dark:border-amber-800">
+                  <div className="flex justify-between items-center text-xxs font-medium text-amber-700 dark:text-amber-400">
                     <span>{Math.round((summary.dueToday / summary.total) * 100)}% of deck</span>
                     {summary.due > summary.dueToday && (
-                      <span className="font-medium">+{summary.due - summary.dueToday} upcoming</span>
+                      <span className="font-semibold">+{summary.due - summary.dueToday} upcoming</span>
                     )}
                   </div>
                 </div>
               )}
             </div>
+            <div className="flex justify-between mt-1.5">
+              <span className="text-xs text-gray-600 dark:text-gray-400">{Math.round((summary.masteredCount / summary.total) * 100)}% mastered</span>
+              <span className="text-xs text-gray-600 dark:text-gray-400">{summary.total - summary.masteredCount} remaining</span>
+            </div>
           </div>
           
-          {summary.total > 0 && (
-            <div className="mt-auto">
-              <div className="flex justify-between text-xs mb-1.5">
-                <span className="font-medium text-gray-700 dark:text-gray-300">Mastery Progress</span>
-                <span className="font-medium text-emerald-600 dark:text-emerald-400">{masteredPercentage}%</span>
-              </div>
-              <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden dark:bg-gray-800 shadow-inner">
-                <div 
-                  className="h-full bg-gradient-to-r from-emerald-400 to-green-500 rounded-full shadow-sm" 
-                  style={{ width: `${masteredPercentage}%` }}
-                ></div>
-              </div>
-              <div className="flex justify-between mt-1.5 text-xxs text-gray-500 dark:text-gray-400">
-                <span>{summary.masteredCount} mastered</span>
-                <span>{summary.total - summary.masteredCount} to learn</span>
-              </div>
-            </div>
-          )}
-        </CardContent>
-        
-        <CardFooter className="pt-0 pb-4 px-4">
-          <div className="flex flex-col w-full space-y-2">
-            <div className="grid grid-cols-2 gap-2 mb-2">
-              <Button 
-                variant="outline" 
-                className="flex items-center justify-center gap-1.5 text-sm bg-yellow-400 hover:bg-yellow-500 text-gray-900 border-0 shadow-sm hover:shadow transition-all"
-                onClick={() => onSelectDeck && onSelectDeck(deck.id)}
-              >
-                <Library className="h-4 w-4" />
-                Manage Cards
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className={`flex items-center justify-center gap-1.5 text-sm bg-blue-500 hover:bg-blue-600 text-white border-0 shadow-sm hover:shadow transition-all ${summary.total === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                onClick={() => summary.total > 0 ? onStudyDeck(deck.id) : null}
-                disabled={summary.total === 0}
-              >
-                <Play className="h-4 w-4" />
-                Study
-              </Button>
-            </div>
+          <div className="flex justify-between items-center gap-3">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex-1 text-sm h-9 font-medium border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+              onClick={() => onManageCards?.(deck.id)}
+            >
+              <ListChecks className="h-4 w-4 mr-1.5" />
+              Manage Cards
+            </Button>
             
             <Button 
               variant="default" 
-              size="sm"
-              className="w-full flex items-center justify-center gap-1.5 text-sm bg-blue-500 hover:bg-blue-600 text-white shadow-sm hover:shadow transition-all"
-              onClick={() => {
-                // Open the add card dialog directly
-                setSelectedDeckForCard(deck.id);
-                setCardFormData({ front: '', back: '', tags: '' });
-                setIsAddingCard(true);
-              }}
+              size="sm" 
+              className="flex-1 text-sm h-9 font-medium bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+              onClick={() => onSelectDeck?.(deck.id)}
             >
-              <Plus className="h-5 w-5" />
-              Add New Card
+              <BookOpen className="h-4 w-4 mr-1.5" />
+              Study Now
             </Button>
           </div>
+        </CardContent>
+        
+        <CardFooter className="pt-0 pb-4 px-4">
+          <Button 
+            variant="default"
+            size="sm"
+            className="w-full flex items-center justify-center gap-1.5 text-sm bg-blue-500 hover:bg-blue-600 text-white shadow-sm hover:shadow transition-all"
+            onClick={() => {
+              // Open the add card dialog directly
+              setSelectedDeckForCard(deck.id);
+              setCardFormData({ front: '', back: '', tags: '' });
+              setIsAddingCard(true);
+            }}
+          >
+            <Plus className="h-5 w-5" />
+            Add New Card
+          </Button>
         </CardFooter>
       </Card>
     );
