@@ -431,23 +431,23 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           </div>
           
           <div className="grid grid-cols-2 gap-4 mb-5">
-            <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-blue-50 dark:bg-blue-800/50 border border-blue-100 dark:border-blue-700 shadow-sm">
-              <span className="text-2xl font-bold text-blue-700 dark:text-blue-200">{summary.total}</span>
+            <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-blue-50 dark:bg-blue-900 border border-blue-100 dark:border-blue-600 shadow-sm">
+              <span className="text-2xl font-bold text-blue-700 dark:text-blue-100">{summary.total}</span>
               <div className="flex items-center gap-1.5 mt-1">
-                <CreditCard className="h-4 w-4 text-blue-600 dark:text-blue-300" />
-                <span className="text-xs font-medium text-blue-700 dark:text-blue-300">Total Cards</span>
+                <CreditCard className="h-4 w-4 text-blue-600 dark:text-blue-200" />
+                <span className="text-xs font-medium text-blue-700 dark:text-blue-200">Total Cards</span>
               </div>
             </div>
             
-            <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-amber-50 dark:bg-amber-800/50 border border-amber-100 dark:border-amber-700 shadow-sm">
-              <span className="text-2xl font-bold text-amber-700 dark:text-amber-200">{summary.dueToday}</span>
+            <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-amber-50 dark:bg-amber-900 border border-amber-100 dark:border-amber-600 shadow-sm">
+              <span className="text-2xl font-bold text-amber-700 dark:text-amber-100">{summary.dueToday}</span>
               <div className="flex items-center gap-1.5 mt-1">
-                <Clock className="h-4 w-4 text-amber-600 dark:text-amber-300" />
-                <span className="text-xs font-medium text-amber-700 dark:text-amber-300">Cards Due Today</span>
+                <Clock className="h-4 w-4 text-amber-600 dark:text-amber-200" />
+                <span className="text-xs font-medium text-amber-700 dark:text-amber-200">Cards Due Today</span>
               </div>
               {summary.dueToday > 0 && (
-                <div className="w-full mt-2 pt-1.5 border-t border-amber-200 dark:border-amber-700">
-                  <div className="flex justify-between items-center text-xxs font-medium text-amber-700 dark:text-amber-300">
+                <div className="w-full mt-2 pt-1.5 border-t border-amber-200 dark:border-amber-600">
+                  <div className="flex justify-between items-center text-xxs font-medium text-amber-700 dark:text-amber-200">
                     <span>{Math.round((summary.dueToday / summary.total) * 100)}% of deck</span>
                     {summary.due > summary.dueToday && (
                       <span className="font-semibold">+{summary.due - summary.dueToday} upcoming</span>
@@ -459,22 +459,22 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           </div>
           
           {/* Mastery Progress Section */}
-          <div className="mb-4">
+          <div className="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">Mastery Progress</span>
-              <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+              <span className="text-sm font-medium text-gray-800 dark:text-gray-100">Mastery Progress</span>
+              <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-300">
                 {Math.round((summary.masteredCount / summary.total) * 100)}%
               </span>
             </div>
             <div className="h-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden shadow-inner">
               <div 
-                className="h-full bg-gradient-to-r from-emerald-400 to-green-500 dark:from-emerald-500 dark:to-green-400" 
+                className="h-full bg-gradient-to-r from-emerald-400 to-green-500 dark:from-emerald-400 dark:to-green-300" 
                 style={{ width: `${Math.round((summary.masteredCount / summary.total) * 100)}%` }}
               ></div>
             </div>
-            <div className="flex justify-between mt-1.5">
-              <span className="text-xs text-gray-600 dark:text-gray-400">{summary.masteredCount} mastered</span>
-              <span className="text-xs text-gray-600 dark:text-gray-400">{summary.total - summary.masteredCount} remaining</span>
+            <div className="flex justify-between mt-2">
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{summary.masteredCount} mastered</span>
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{summary.total - summary.masteredCount} remaining</span>
             </div>
           </div>
           
