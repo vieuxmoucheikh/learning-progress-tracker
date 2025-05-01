@@ -374,7 +374,12 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       <Card key={deck.id} className="flashcard-deck-card h-full flex flex-col overflow-hidden hover:shadow-lg transition-all">
         <CardHeader className="pb-2 flex flex-row justify-between items-start">
           <div className="flex flex-col gap-1">
-            {statusBadge}
+            <h3 className="font-semibold text-xl text-gray-900 dark:text-gray-100">{deck.name}</h3>
+            {deck.description && (
+              <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 pr-4">
+                {deck.description}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {deck.is_favorite && (
@@ -416,22 +421,19 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         </CardHeader>
         
         <CardContent className="flex-grow px-4 pt-0 pb-3">
-          {nextReviewDate && (
-            <div className="flex items-center gap-1.5 mb-2">
-              <CalendarDays className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                Next Review: {nextReviewDate}
-              </span>
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center gap-2">
+              {statusBadge}
+              {nextReviewDate && (
+                <div className="flex items-center gap-1.5">
+                  <CalendarDays className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Next Review: {nextReviewDate}
+                  </span>
+                </div>
+              )}
             </div>
-          )}
-          
-          <h3 className="font-semibold text-xl mb-1 text-gray-900 dark:text-gray-100">{deck.name}</h3>
-          
-          {deck.description && (
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
-              {deck.description}
-            </p>
-          )}
+          </div>
           
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800">
