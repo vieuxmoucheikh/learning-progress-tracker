@@ -26,6 +26,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -336,114 +342,98 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
     const summary = getDeckSummary(deck.id);
     const masteredPercentage = getMasteredPercentage(deck.id);
     
+    // Determine status badge
+    let statusBadge = null;
+    let nextReviewDate = null;
+    
+    if (summary.nextDue) {
+      nextReviewDate = formatDate(summary.nextDue);
+    }
+    
+    if (summary.reviewStatus === 'overdue') {
+      statusBadge = (
+        <Badge className="bg-red-500 text-white border-0 px-3 py-1 text-xs font-medium">
+          OVERDUE
+        </Badge>
+      );
+    } else if (summary.reviewStatus === 'due-soon') {
+      statusBadge = (
+        <Badge className="bg-yellow-400 text-gray-900 border-0 px-3 py-1 text-xs font-medium">
+          DUE SOON
+        </Badge>
+      );
+    } else if (summary.reviewStatus === 'up-to-date') {
+      statusBadge = (
+        <Badge className="bg-green-500 text-white border-0 px-3 py-1 text-xs font-medium">
+          UP TO DATE
+        </Badge>
+      );
+    }
+    
     return (
       <Card key={deck.id} className="flashcard-deck-card h-full flex flex-col overflow-hidden hover:shadow-lg transition-all">
-        <CardHeader className="pb-3 space-y-3">
-          <div className="flex justify-between items-start">
-            <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-50">{deck.name}</CardTitle>
-            <div className="flex space-x-1">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20">
-                    <Trash2 className="h-4 w-4 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="border border-gray-200 dark:border-gray-700 shadow-lg">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle className="text-gray-900 dark:text-gray-50">Delete Deck</AlertDialogTitle>
-                    <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
-                      Are you sure you want to delete this deck? This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">Cancel</AlertDialogCancel>
-                    <AlertDialogAction 
-                      onClick={() => handleDeleteDeck(deck)}
-                      className="bg-red-500 hover:bg-red-600 text-white dark:bg-red-600 dark:hover:bg-red-700"
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-              
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20" 
-                onClick={() => handleEditDeck(deck.id)}
-              >
-                <Edit className="h-4 w-4 text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400" />
-              </Button>
-            </div>
+        <CardHeader className="pb-2 flex flex-row justify-between items-start">
+          <div className="flex flex-col gap-1">
+            {statusBadge}
           </div>
-          
-          <div className="flex flex-wrap items-center gap-2">
-            {summary.reviewStatus && (
-              <div className={`status-badge ${
-                summary.reviewStatus === 'up-to-date' ? 'status-badge-up-to-date' : 
-                summary.reviewStatus === 'due-soon' ? 'status-badge-due-soon' : 
-                summary.reviewStatus === 'overdue' ? 'status-badge-overdue' : 
-                'status-badge-not-started'}`}
-              >
-                {formatReviewStatus(summary.reviewStatus)}
-              </div>
+          <div className="flex items-center gap-2">
+            {deck.is_favorite && (
+              <Star className="h-5 w-5 fill-amber-400 stroke-amber-500" />
             )}
-            
-            {summary.dueToday > 0 && (
-              <div className="status-badge status-badge-due-soon">
-                <Clock className="h-3.5 w-3.5" />
-                {summary.dueToday} due today
-              </div>
-            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleEditDeck(deck.id)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleDeleteDeck(deck)}>
+                  <Trash className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardHeader>
         
-        <CardContent className="flex-grow p-4 pt-0">
-          <div className="flex justify-between items-center mb-3">
-            <div className="flex items-center gap-1.5">
+        <CardContent className="flex-grow px-4 pt-0 pb-3">
+          {nextReviewDate && (
+            <div className="flex items-center gap-1.5 mb-2">
               <CalendarDays className="h-4 w-4 text-gray-500 dark:text-gray-400" />
               <span className="text-xs text-gray-500 dark:text-gray-400">
-                {formatDate(deck.created_at || new Date().toISOString())}
+                {nextReviewDate}
               </span>
             </div>
-            <div className="flex items-center gap-1.5">
-              {deck.is_public && (
-                <Badge variant="outline" className="text-xs py-0 h-5 border-green-200 text-green-700 bg-green-50 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
-                  <Globe className="h-3 w-3 mr-1" />
-                  Public
-                </Badge>
-              )}
-              {deck.is_favorite && (
-                <Badge variant="outline" className="text-xs py-0 h-5 border-amber-200 text-amber-700 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-400">
-                  <Star className="h-3 w-3 mr-1 fill-amber-500" />
-                  Favorite
-                </Badge>
-              )}
-            </div>
-          </div>
+          )}
           
-          <h3 className="font-semibold text-lg mb-2 line-clamp-1 text-gray-900 dark:text-gray-100">{deck.name}</h3>
+          <h3 className="font-semibold text-xl mb-1 text-gray-900 dark:text-gray-100">{deck.name}</h3>
           
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
-            {deck.description || "No description provided."}
-          </p>
+          {deck.description && (
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
+              {deck.description}
+            </p>
+          )}
           
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800">
-              <div className="flex items-center gap-1.5 mb-1">
-                <CreditCard className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">{summary.total}</span>
+              <span className="text-lg font-semibold text-blue-700 dark:text-blue-300">{summary.total}</span>
+              <div className="flex items-center gap-1">
+                <CreditCard className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                <span className="text-xs text-blue-600 dark:text-blue-400">Total Cards</span>
               </div>
-              <span className="text-xs text-blue-600 dark:text-blue-400">Total Cards</span>
             </div>
             
             <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800">
-              <div className="flex items-center gap-1.5 mb-1">
-                <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                <span className="text-sm font-medium text-amber-700 dark:text-amber-300">{summary.due}</span>
+              <span className="text-lg font-semibold text-amber-700 dark:text-amber-300">{summary.due}</span>
+              <div className="flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                <span className="text-xs text-amber-600 dark:text-amber-400">Cards Due</span>
               </div>
-              <span className="text-xs text-amber-600 dark:text-amber-400">Cards Due</span>
             </div>
           </div>
           
@@ -463,12 +453,12 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
           )}
         </CardContent>
         
-        <CardFooter className="pt-2">
+        <CardFooter className="pt-0 pb-4 px-4">
           <div className="flex flex-col w-full space-y-2">
             <div className="grid grid-cols-2 gap-2 mb-2">
               <Button 
                 variant="outline" 
-                className="flex items-center justify-center gap-1.5 text-sm border-gray-200 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:border-gray-600 dark:hover:bg-gray-800/50 transition-colors"
+                className="flex items-center justify-center gap-1.5 text-sm bg-yellow-400 hover:bg-yellow-500 text-gray-900 border-0 shadow-sm hover:shadow transition-all"
                 onClick={() => onSelectDeck && onSelectDeck(deck.id)}
               >
                 <Library className="h-4 w-4" />
@@ -477,7 +467,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
               
               <Button 
                 variant="outline" 
-                className={`flex items-center justify-center gap-1.5 text-sm border-blue-200 hover:border-blue-300 hover:bg-blue-50 dark:border-blue-800 dark:hover:border-blue-700 dark:hover:bg-blue-900/30 transition-colors ${summary.total === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`flex items-center justify-center gap-1.5 text-sm bg-blue-500 hover:bg-blue-600 text-white border-0 shadow-sm hover:shadow transition-all ${summary.total === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={() => summary.total > 0 ? onStudyDeck(deck.id) : null}
                 disabled={summary.total === 0}
               >
@@ -489,7 +479,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
             <Button 
               variant="default" 
               size="sm"
-              className="w-full flex items-center justify-center gap-1.5 text-sm bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 hover:from-blue-700 hover:via-indigo-600 hover:to-purple-700 text-white shadow-sm hover:shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] font-medium"
+              className="w-full flex items-center justify-center gap-1.5 text-sm bg-blue-500 hover:bg-blue-600 text-white shadow-sm hover:shadow transition-all"
               onClick={() => {
                 // Open the add card dialog directly
                 setSelectedDeckForCard(deck.id);
@@ -497,7 +487,7 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                 setIsAddingCard(true);
               }}
             >
-              <PlusCircle className="h-4 w-4 mr-1 animate-pulse" />
+              <Plus className="h-5 w-5" />
               Add New Card
             </Button>
           </div>
@@ -505,7 +495,6 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
       </Card>
     );
   };
-
   // Removed unused getTotalDueCards function
   
   const getTotalNonMasteredCards = () => {
