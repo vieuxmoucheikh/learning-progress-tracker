@@ -23,12 +23,33 @@
 
 /* Mobile specific fixes */
 @media (max-width: 768px) {
-  .dark .ql-toolbar.ql-snow {
-    background-color: #1e293b !important;
+  .ql-toolbar.ql-snow {
+    padding: 4px !important;
   }
   
-  .dark .ql-toolbar.ql-snow .ql-formats {
-    margin-right: 3px !important;
+  .ql-toolbar.ql-snow .ql-formats {
+    margin-right: 2px !important;
+  }
+  
+  .ql-toolbar.ql-snow button,
+  .ql-toolbar.ql-snow .ql-picker {
+    width: 20px !important;
+    height: 20px !important;
+    padding: 0 !important;
+  }
+  
+  .ql-toolbar.ql-snow button svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+  
+  .ql-toolbar.ql-snow .ql-picker-label {
+    padding: 0 2px !important;
+    font-size: 12px !important;
+  }
+  
+  .dark .ql-toolbar.ql-snow {
+    background-color: #1e293b !important;
   }
   
   .dark .ql-toolbar.ql-snow button {
@@ -37,12 +58,16 @@
 }
 
 /* Back to Decks button fix */
-.dark .back-to-decks-button {
+.dark .back-to-decks-button,
+.dark [data-theme="dark"] .back-to-decks-button,
+html[data-theme="dark"] .back-to-decks-button {
   background-color: #1e293b !important;
   border-color: #334155 !important;
   color: #e2e8f0 !important;
 }
 
-.dark .back-to-decks-button:hover {
+.dark .back-to-decks-button:hover,
+.dark [data-theme="dark"] .back-to-decks-button:hover,
+html[data-theme="dark"] .back-to-decks-button:hover {
   background-color: #334155 !important;
 }
