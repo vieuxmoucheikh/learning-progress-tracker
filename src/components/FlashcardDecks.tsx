@@ -433,14 +433,14 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
         
         <CardFooter className="pt-2">
           <div className="flex flex-col w-full space-y-2">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 mb-2">
               <Button 
                 variant="outline" 
                 className="flex items-center justify-center gap-1.5 text-sm border-gray-200 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:border-gray-600 dark:hover:bg-gray-800/50 transition-colors"
                 onClick={() => onSelectDeck && onSelectDeck(deck.id)}
               >
-                <PlusCircle className="h-4 w-4" />
-                Add Cards
+                <Library className="h-4 w-4" />
+                Manage Cards
               </Button>
               
               <Button 
@@ -453,6 +453,21 @@ const FlashcardDecks: React.FC<FlashcardDecksProps> = ({
                 Study
               </Button>
             </div>
+            
+            <Button 
+              variant="default" 
+              size="sm"
+              className="w-full flex items-center justify-center gap-1.5 text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm hover:shadow-md transition-all"
+              onClick={() => {
+                // Open the add card dialog directly
+                setSelectedDeckForCard(deck.id);
+                setCardFormData({ front: '', back: '', tags: '' });
+                setIsAddingCard(true);
+              }}
+            >
+              <PlusCircle className="h-4 w-4" />
+              Add Card
+            </Button>
           </div>
         </CardFooter>
       </Card>
