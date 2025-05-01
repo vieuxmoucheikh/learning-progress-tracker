@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
+import { ArrowLeft } from 'lucide-react';
 import FlashcardDecks from './FlashcardDecks';
 import { FlashcardManager } from './FlashcardManager';
 import { FlashcardStudy } from './FlashcardStudy';
+import '../styles/editor-dark-mode-fix.css';
 import { FlashcardDeck } from '@/types';
 import { useToast } from './ui/use-toast';
 import { getDecksSummary } from '@/lib/flashcards';
@@ -169,8 +171,9 @@ export const FlashcardsTab: React.FC<FlashcardsTabProps> = ({
               <Button
                 variant="outline"
                 onClick={handleBackToDecks}
-                className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300"
+                className="border-gray-200 back-to-decks-button"
               >
+                <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Decks
               </Button>
               <Button

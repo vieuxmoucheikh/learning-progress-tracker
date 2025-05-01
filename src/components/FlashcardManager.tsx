@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog';
+import { Badge } from './ui/badge';
 import ReactQuill from 'react-quill';
 import { useToast } from './ui/use-toast';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from './ui/alert-dialog';
@@ -9,8 +10,9 @@ import { Plus, Trash2, ArrowLeft, Search, Tag, Info, Calendar, Clock, CheckCircl
 import { createFlashcard } from '../lib/flashcards';
 import type { Flashcard } from '../types';
 import { supabase } from '../lib/supabase';
-import { Badge } from './ui/badge';
+import 'react-quill/dist/quill.snow.css';
 import './flashcard.css';
+import '../styles/editor-dark-mode-fix.css';
 
 interface FlashcardManagerProps {
   deckId: string;
@@ -590,26 +592,32 @@ export const FlashcardManager: React.FC<FlashcardManagerProps> = ({
                   </div>
                 </div>
                 <div className="border border-gray-200 dark:border-gray-700 rounded-md shadow-sm">
-                  <ReactQuill
-                    theme="snow"
-                    value={formData.front}
-                    onChange={(value) => setFormData({ ...formData, front: value })}
-                    placeholder="Enter the question or prompt"
-                    modules={{
-                      toolbar: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        ['blockquote', 'code-block'],
-                        ['link', 'image'],
-                        ['clean']
-                      ],
-                    }}
-                    className="min-h-[200px]"
-                  />
-                </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 italic">
-                  Good questions are clear, specific, and focus on a single concept.
+                  <div className="dark:bg-gray-800 dark:text-white">
+                    <ReactQuill
+                      theme="snow"
+                      value={formData.front}
+                      onChange={(value) => setFormData({ ...formData, front: value })}
+                      placeholder="Enter the question or prompt"
+                      modules={{
+                        toolbar: [
+                          [{ 'header': [1, 2, 3, false] }],
+                          ['bold', 'italic', 'underline', 'strike'],
+                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                          ['blockquote', 'code-block'],
+                          ['link', 'image'],
+                          ['clean']
+                        ],
+                      }}
+                      className="min-h-[200px] dark:text-white"
+                      style={{
+                        '--ql-toolbar-bg': 'var(--gray-800)',
+                        '--ql-toolbar-color': 'white',
+                      } as React.CSSProperties}
+                    />
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+                    Good questions are clear, specific, and focus on a single concept.
+                  </div>
                 </div>
               </div>
               

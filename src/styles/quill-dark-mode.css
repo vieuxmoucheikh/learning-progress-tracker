@@ -1,0 +1,84 @@
+/* ReactQuill dark mode fixes */
+.dark .ql-snow.ql-toolbar {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+.dark .ql-snow.ql-toolbar button,
+.dark .ql-snow.ql-toolbar .ql-picker-label,
+.dark .ql-snow.ql-toolbar .ql-picker-item {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
+.dark .ql-snow.ql-toolbar button svg {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
+.dark .ql-snow.ql-toolbar button.ql-active,
+.dark .ql-snow.ql-toolbar button:hover {
+  background-color: #374151 !important;
+}
+
+.dark .ql-snow.ql-toolbar .ql-picker-label {
+  color: #e5e7eb !important;
+}
+
+.dark .ql-snow.ql-toolbar .ql-picker-options {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+.dark .ql-snow.ql-toolbar .ql-picker-item {
+  color: #e5e7eb !important;
+}
+
+.dark .ql-snow.ql-container {
+  border-color: #374151 !important;
+}
+
+.dark .ql-snow .ql-editor {
+  background-color: #1f2937 !important;
+  color: #e5e7eb !important;
+}
+
+.dark .ql-snow .ql-editor.ql-blank::before {
+  color: #9ca3af !important;
+}
+
+/* Mobile specific fixes */
+@media (max-width: 768px) {
+  .dark .ql-snow.ql-toolbar {
+    padding: 4px !important;
+    background-color: #1f2937 !important;
+  }
+  
+  .dark .ql-snow.ql-toolbar button,
+  .dark .ql-snow.ql-toolbar .ql-picker {
+    height: 24px !important;
+    width: 24px !important;
+    padding: 2px !important;
+    filter: invert(1) hue-rotate(180deg) brightness(1.5) !important;
+  }
+  
+  .dark .ql-snow.ql-toolbar button svg,
+  .dark .ql-snow.ql-toolbar .ql-picker svg {
+    filter: invert(1) hue-rotate(180deg) brightness(1.5) !important;
+  }
+  
+  .dark .ql-snow.ql-toolbar .ql-formats {
+    margin-right: 4px !important;
+  }
+  
+  /* Force white icons on dark background */
+  .dark .ql-snow .ql-stroke {
+    stroke: #ffffff !important;
+  }
+  
+  .dark .ql-snow .ql-fill {
+    fill: #ffffff !important;
+  }
+  
+  .dark .ql-snow .ql-picker {
+    color: #ffffff !important;
+  }
+}

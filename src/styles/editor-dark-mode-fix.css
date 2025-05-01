@@ -1,0 +1,48 @@
+/* Direct fixes for ReactQuill editor in dark mode */
+.dark .ql-toolbar.ql-snow {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+.dark .ql-toolbar.ql-snow .ql-formats button svg {
+  filter: invert(1) !important;
+}
+
+.dark .ql-toolbar.ql-snow .ql-picker-label {
+  color: white !important;
+}
+
+.dark .ql-container.ql-snow {
+  border-color: #334155 !important;
+}
+
+.dark .ql-editor {
+  background-color: #1e293b !important;
+  color: white !important;
+}
+
+/* Mobile specific fixes */
+@media (max-width: 768px) {
+  .dark .ql-toolbar.ql-snow {
+    background-color: #1e293b !important;
+  }
+  
+  .dark .ql-toolbar.ql-snow .ql-formats {
+    margin-right: 3px !important;
+  }
+  
+  .dark .ql-toolbar.ql-snow button {
+    filter: invert(1) !important;
+  }
+}
+
+/* Back to Decks button fix */
+.dark .back-to-decks-button {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+.dark .back-to-decks-button:hover {
+  background-color: #334155 !important;
+}
