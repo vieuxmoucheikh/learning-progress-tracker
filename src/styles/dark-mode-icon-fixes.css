@@ -13,15 +13,37 @@
 }
 
 /* Fix for the Learning Goals icon in the green header */
+.dark .tab-navigation-item:nth-child(3) .nav-icon svg,
+.dark .tab-navigation-items button:nth-child(3) .nav-icon svg,
+.dark .tab-navigation-items button[aria-label*="Analytics"] .nav-icon svg,
+.dark .tab-navigation-items button[aria-label*="Stats"] .nav-icon svg {
+  color: white !important;
+  fill: none !important;
+  stroke: white !important;
+  stroke-width: 2.5px !important;
+  filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.5)) !important;
+  background-color: transparent !important;
+}
+
+/* Fix for the green background in the Learning Goals header */
+.dark [class*="bg-green-"],
+.dark [style*="background-color: rgb(22, 163, 74)"],
+.dark [style*="background: rgb(22, 163, 74)"],
+.dark [style*="background-color:#16a34a"],
+.dark [style*="background:#16a34a"] {
+  background-color: #16a34a !important;
+}
+
+/* Fix specifically for the icon in the green header */
 .dark [class*="bg-green-"] svg,
 .dark [style*="background-color: rgb(22, 163, 74)"] svg,
 .dark [style*="background: rgb(22, 163, 74)"] svg,
 .dark [style*="background-color:#16a34a"] svg,
 .dark [style*="background:#16a34a"] svg {
   color: white !important;
-  fill: white !important;
+  fill: none !important;
   stroke: white !important;
-  stroke-width: 2px !important;
+  stroke-width: 2.5px !important;
   filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.5)) !important;
 }
 
