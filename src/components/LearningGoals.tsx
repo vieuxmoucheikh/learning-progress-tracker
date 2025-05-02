@@ -4,17 +4,13 @@ import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
-import { useState, useEffect, useRef } from 'react';
-import { format, parseISO, isValid, isToday } from 'date-fns';
-import { CalendarIcon, Clock, Check, Target, X, Plus, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { format, addDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isSameMonth, isSameDay, subMonths, addMonths } from 'date-fns';
+import { CalendarIcon, Clock, Target, X, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { addGoal, deleteGoal, getGoals, updateGoal, addSession } from '@/lib/database';
+import { addGoal, deleteGoal, getGoals, updateGoal } from '@/lib/database';
 import { LearningItem } from '@/types';
-import '@/styles/goal-dialog-fixes.css';
-import '@/styles/calendar-fixes.css';
 import { clsx } from 'clsx';
-import { PomodoroTimer } from './pomodoro/PomodoroTimer';
-import type { Session } from '../types';
 import '../styles/analytics-card-fixes.css';
 import '../styles/dark-mode-icon-fixes.css';
 import '../styles/goal-dialog-fixes.css'; // Fix for select components in goal dialog
@@ -60,8 +56,7 @@ export default function LearningGoals({ items }: Props) {
   const { toast } = useToast();
   const [goals, setGoals] = useState<LearningGoal[]>([]);
   const [isAddingGoal, setIsAddingGoal] = useState(false);
-  const [activeSession, setActiveSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingGoals, setIsLoadingGoals] = useState(true);
   const [goalToDelete, setGoalToDelete] = useState<LearningGoal | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -86,7 +81,7 @@ export default function LearningGoals({ items }: Props) {
   // Fetch goals from Supabase
   const fetchGoals = async () => {
     try {
-      setIsLoading(true);
+      setIsLoadingGoals(true);
       const fetchedGoals = await getGoals();
       // Transform the fetched goals to match the LearningGoal interface
       const typedGoals: LearningGoal[] = fetchedGoals.map((goal: any) => ({
@@ -127,7 +122,7 @@ export default function LearningGoals({ items }: Props) {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsLoadingGoals(false);
     }
   };
 
@@ -247,60 +242,6 @@ export default function LearningGoals({ items }: Props) {
     }
   };
 
-  // Add session handling
-  const addSessionToGoal = async (goalId: string, date: string, duration: { hours: number; minutes: number }) => {
-    try {
-      console.log('Adding session:', { goalId, date, duration });
-      const session = await addSession(goalId, { date, duration });
-      console.log('Session added:', session);
-
-      // Update the local state
-      const updatedGoals = await getGoals();
-      console.log('Updated goals:', updatedGoals);
-      
-      // Transform the fetched goals to match the LearningGoal interface
-      const typedGoals: LearningGoal[] = updatedGoals.map((goal: any) => ({
-        id: goal.id,
-        userId: goal.userId,
-        title: goal.title,
-        category: goal.category,
-        targetHours: goal.targetHours,
-        targetDate: goal.targetDate,
-        priority: goal.priority as 'low' | 'medium' | 'high',
-        status: goal.status as GoalStatus,
-        createdAt: goal.createdAt,
-        progress: goal.progress ? {
-          sessions: Array.isArray(goal.progress.sessions) ? goal.progress.sessions.map((session: any) => ({
-            date: session.date,
-            duration: {
-              hours: session.duration?.hours || 0,
-              minutes: session.duration?.minutes || 0
-            }
-          })) : []
-        } : undefined,
-        // Handle sessions if they exist
-        sessions: goal.sessions && Array.isArray(goal.sessions) ? 
-          goal.sessions.map((session: any) => ({
-            date: session.date,
-            duration: {
-              hours: session.duration?.hours || 0,
-              minutes: session.duration?.minutes || 0
-            }
-          })) : undefined
-      }));
-      
-      setGoals(typedGoals);
-      
-      return session;
-    } catch (error) {
-      console.error('Error adding session:', error);
-      throw error;
-    }
-  };
-
-  // Calculate progress for a specific category
-
-
   const calculateProgress = (category: string) => {
     const categoryItems = items.filter(item => item.category === category);
     const totalMinutes = categoryItems.reduce((acc, item) => {
@@ -402,12 +343,6 @@ export default function LearningGoals({ items }: Props) {
     if (hoursPerDay <= 2) return 'text-green-600'; // Easy to achieve
     if (hoursPerDay <= 4) return 'text-amber-600'; // Moderate
     return 'text-red-600'; // Challenging
-  };
-
-  const getDailyHoursLabel = (hoursPerDay: number) => {
-    if (hoursPerDay <= 2) return 'achievable';
-    if (hoursPerDay <= 4) return 'moderate';
-    return 'challenging';
   };
 
   const calculateSuggestedAdjustment = (goal: LearningGoal): SuggestedAdjustment | null => {
@@ -513,12 +448,6 @@ export default function LearningGoals({ items }: Props) {
         <h2 className="text-3xl font-bold tracking-tight">Learning Goals</h2>
         <Button onClick={() => setIsAddingGoal(true)} className="bg-blue-500 hover:bg-blue-600 text-white">Add Goal</Button>
       </div>
-
-      {activeSession && (
-        <div className="mb-6">
-          <PomodoroTimer sessionId={activeSession.id} />
-        </div>
-      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {goals.map(goal => {
@@ -742,13 +671,13 @@ export default function LearningGoals({ items }: Props) {
                       classNames={{
                         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                         month: "space-y-4",
-                        caption: "flex justify-center pt-1 relative items-center h-10",
+                        caption: "flex justify-center pt-1 relative items-center",
                         caption_label: "text-sm font-medium",
                         nav: "space-x-1 flex items-center",
-                        nav_button: "h-8 w-8 bg-gray-100 hover:bg-gray-200 rounded-full p-0 opacity-90 hover:opacity-100 z-10",
-                        nav_button_previous: "absolute left-1",
-                        nav_button_next: "absolute right-1",
-                        table: "w-full border-collapse space-y-1 mt-3",
+                        nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+                        nav_button_previous: "absolute left-1", 
+                        nav_button_next: "absolute right-1", 
+                        table: "w-full border-collapse space-y-1",
                         head_row: "flex",
                         head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
                         row: "flex w-full mt-2",
@@ -856,8 +785,6 @@ export default function LearningGoals({ items }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-
     </div>
   );
 }
