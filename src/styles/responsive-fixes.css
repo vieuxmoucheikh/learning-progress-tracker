@@ -31,54 +31,16 @@
   }
 }
 
-/* Mobile calendar fixes */
-@media (max-width: 768px) {
-  /* Calendar activity indicators */
-  div[class*="grid-cols"] > div > div {
-    height: 20px !important;
-    min-width: 20px !important;
-    border-width: 2px !important;
-  }
-  
-  /* Green indicators */
-  div.bg-emerald-400, 
-  div.bg-emerald-500, 
-  div.bg-emerald-600 {
-    border-width: 2px !important;
-    border-color: #059669 !important;
-  }
-  
-  /* Any emerald class */
-  div[class*="bg-emerald"] {
-    height: 20px !important;
-    min-width: 20px !important;
-    border-width: 2px !important;
-    border-color: #059669 !important;
-    box-shadow: 0 0 0 1px rgba(5, 150, 105, 0.5) !important;
-  }
-}
-
-/* Tablet layout fixes */
+/* Tablet fixes */
 @media (min-width: 769px) and (max-width: 1024px) {
+  /* Adjust layout for tablets */
   .container {
     max-width: 95% !important;
   }
 }
 
-/* Tablet calendar fixes */
-@media (min-width: 769px) and (max-width: 1024px) {
-  div[class*="grid-cols"] > div > div {
-    height: 18px !important;
-    min-width: 18px !important;
-  }
-}
-
-/* Touch scrolling fix */
+/* Fix for any screen size */
 .overflow-x-auto {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Calendar grid spacing */
-div[class*="grid-cols"] {
-  gap: 2px !important;
-}

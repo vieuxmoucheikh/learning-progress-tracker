@@ -276,9 +276,10 @@ export function YearlyActivityHeatmap({
                                     : 'bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 opacity-50'
                                 )}
                                 style={{ 
-                                  height: '16px',
+                                  height: window.innerWidth < 768 ? '20px' : '16px',
                                   boxSizing: 'border-box',
-                                  minWidth: '16px'
+                                  minWidth: window.innerWidth < 768 ? '20px' : '16px',
+                                  borderWidth: window.innerWidth < 768 ? '2px' : undefined
                                 }}
                                 onTouchStart={() => handleTouchStart(day.date)}
                                 onTouchEnd={handleTouchEnd}
