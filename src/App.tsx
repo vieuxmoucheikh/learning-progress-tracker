@@ -31,6 +31,7 @@ import './styles/critical-icon-fixes.css'; // Ajout du nouveau fichier de correc
 import './styles/dark-mode-icon-fixes.css'; // Fix for icons in dark mode
 import './styles/icon-dark-mode-fixes.css'; // Critical fix for all icons in dark mode
 import './styles/analytics-enhancements.css'; // Enhanced design for analytics page
+import './styles/yearly-activity-enhancements.css'; // Enhanced design for yearly activity calendar
 import './components/LearningItemCard.css';
 import './components/Calendar.css';
 import './components/StatusBadge.css';
