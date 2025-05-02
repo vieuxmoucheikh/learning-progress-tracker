@@ -31,6 +31,31 @@
   }
 }
 
+/* Activity calendar fixes for mobile */
+@media (max-width: 768px) {
+  /* Make activity indicators larger and more visible */
+  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)] > div > div {
+    height: 20px !important;
+    min-width: 20px !important;
+    border-width: 2px !important;
+  }
+  
+  /* Increase visibility of green activity indicators */
+  .bg-emerald-400, .bg-emerald-500, .bg-emerald-600 {
+    border-width: 2px !important;
+    border-color: #059669 !important; /* emerald-600 */
+  }
+  
+  /* Make active indicators more prominent */
+  div[class*="bg-emerald"] {
+    height: 20px !important;
+    min-width: 20px !important;
+    border-width: 2px !important;
+    border-color: #059669 !important;
+    box-shadow: 0 0 0 1px rgba(5, 150, 105, 0.5) !important;
+  }
+}
+
 /* Tablet fixes */
 @media (min-width: 769px) and (max-width: 1024px) {
   /* Adjust layout for tablets */
@@ -39,7 +64,21 @@
   }
 }
 
+/* Activity calendar fixes for tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Make activity indicators slightly larger */
+  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)] > div > div {
+    height: 18px !important;
+    min-width: 18px !important;
+  }
+}
+
 /* Fix for any screen size */
 .overflow-x-auto {
   -webkit-overflow-scrolling: touch;
+}
+
+/* Global fixes for activity calendar */
+.grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)] {
+  gap: 2px !important;
 }
