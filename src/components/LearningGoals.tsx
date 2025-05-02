@@ -16,6 +16,7 @@ import type { Session } from '../types';
 import '../styles/analytics-card-fixes.css';
 import '../styles/dark-mode-icon-fixes.css';
 import '../styles/goal-dialog-fixes.css'; // Fix for select components in goal dialog
+import '../styles/calendar-fixes.css'; // Fix for calendar components
 
 type GoalStatus = 'active' | 'completed' | 'overdue';
 
@@ -721,7 +722,7 @@ export default function LearningGoals({ items }: Props) {
               </Button>
               {showCalendar && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-[1000]" onClick={() => setShowCalendar(false)}>
-                  <div className="relative bg-card p-4 rounded-lg shadow-lg border border-border" onClick={(e) => e.stopPropagation()}>
+                  <div className="relative bg-card p-4 rounded-lg shadow-lg border border-border calendar-container" onClick={(e) => e.stopPropagation()}>
                     <div className="flex justify-between items-center mb-2">
                       <h3 className="font-medium">Select Date</h3>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowCalendar(false)}>
@@ -740,12 +741,12 @@ export default function LearningGoals({ items }: Props) {
                       classNames={{
                         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                         month: "space-y-4",
-                        caption: "flex justify-center pt-1 relative items-center",
+                        caption: "flex justify-center pt-1 relative items-center calendar-caption",
                         caption_label: "text-sm font-medium",
                         nav: "space-x-1 flex items-center",
-                        nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 cursor-pointer z-10",
-                        nav_button_previous: "absolute left-1 p-2",
-                        nav_button_next: "absolute right-1 p-2",
+                        nav_button: "calendar-nav-button",
+                        nav_button_previous: "calendar-nav-button-previous",
+                        nav_button_next: "calendar-nav-button-next",
                         table: "w-full border-collapse space-y-1",
                         head_row: "flex",
                         head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
