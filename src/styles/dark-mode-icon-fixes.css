@@ -116,6 +116,21 @@ html[data-theme="dark"] button.bg-green-600,
 }
 
 /* Fix for yearly activity calendar indicators in dark mode on mobile */
+.dark [class*="bg-emerald"],
+html[data-theme="dark"] [class*="bg-emerald"] {
+  opacity: 1 !important;
+  border-width: 2px !important;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.4) !important;
+  background-color: #10b981 !important; /* emerald-500 - default fallback */
+}
+
+/* Direct targeting of calendar cells */
+.dark .grid .flex .flex-col > div,
+html[data-theme="dark"] .grid .flex .flex-col > div {
+  border: 2px solid transparent;
+}
+
+/* Force all emerald backgrounds to be visible */
 .dark .bg-emerald-400,
 .dark .bg-emerald-500,
 .dark .bg-emerald-600,
@@ -124,15 +139,14 @@ html[data-theme="dark"] .bg-emerald-400,
 html[data-theme="dark"] .bg-emerald-500,
 html[data-theme="dark"] .bg-emerald-600,
 html[data-theme="dark"] .bg-emerald-700 {
-  opacity: 1 !important;
-  border-width: 2px !important;
-  box-shadow: 0 0 3px rgba(255, 255, 255, 0.3) !important;
+  background-color: #10b981 !important; /* emerald-500 */
+  border-color: #059669 !important; /* emerald-600 */
 }
 
-/* Increase visibility for different activity levels */
+/* Increase visibility for different activity levels with brighter colors */
 .dark .bg-emerald-400,
 html[data-theme="dark"] .bg-emerald-400 {
-  background-color: #34d399 !important; /* emerald-400 */
+  background-color: #34d399 !important; /* emerald-400 - brighter */
   border-color: #10b981 !important; /* emerald-500 */
 }
 
@@ -173,6 +187,26 @@ html[data-theme="dark"] .hover\:bg-emerald-600:hover {
 .dark .hover\:bg-emerald-700:hover,
 html[data-theme="dark"] .hover\:bg-emerald-700:hover {
   background-color: #047857 !important; /* emerald-700 */
+}
+
+/* Ultra-specific targeting for the activity calendar cells */
+.dark .rounded-sm,
+html[data-theme="dark"] .rounded-sm {
+  border-radius: 0.125rem !important;
+}
+
+/* Target the specific calendar cells by their structure */
+.dark [class*="grid-cols"] .flex-col .rounded-sm,
+html[data-theme="dark"] [class*="grid-cols"] .flex-col .rounded-sm {
+  background-color: transparent;
+}
+
+/* Super-specific targeting for activity calendar cells */
+.dark [class*="grid-cols"] .flex-col [class*="bg-emerald"],
+html[data-theme="dark"] [class*="grid-cols"] .flex-col [class*="bg-emerald"] {
+  background-color: #10b981 !important;
+  border-color: #059669 !important;
+  box-shadow: 0 0 5px #10b981 !important;
 }
 
 /* CRITICAL: High-specificity fixes for Learning Goals and Learning Focus icons */
