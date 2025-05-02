@@ -65,39 +65,41 @@
 
   /* Fix for yearly activity heatmap squares */
   /* Target the specific classes used in YearlyActivityHeatmap.tsx */
-  .bg-emerald-400 {
-    background-color: #34d399 !important; /* emerald-400 */
-    border-color: #10b981 !important; /* emerald-500 */
-  }
-  
-  .bg-emerald-500 {
-    background-color: #10b981 !important; /* emerald-500 */
-    border-color: #059669 !important; /* emerald-600 */
-  }
-  
-  .bg-emerald-600 {
-    background-color: #059669 !important; /* emerald-600 */
-    border-color: #047857 !important; /* emerald-700 */
-  }
-  
-  .bg-emerald-700 {
-    background-color: #047857 !important; /* emerald-700 */
-    border-color: #065f46 !important; /* emerald-800 */
-  }
-  
-  /* Make sure the colors are visible in both light and dark mode */
-  .dark .bg-emerald-400 { background-color: #34d399 !important; }
-  .dark .bg-emerald-500 { background-color: #10b981 !important; }
-  .dark .bg-emerald-600 { background-color: #059669 !important; }
-  .dark .bg-emerald-700 { background-color: #047857 !important; }
-  
-  /* Ensure the color fills the entire square */
-  .rounded-sm[class*="bg-emerald"] {
+  /* Force solid fill for all activity squares */
+  .rounded-sm.bg-emerald-400,
+  .rounded-sm.bg-emerald-500,
+  .rounded-sm.bg-emerald-600,
+  .rounded-sm.bg-emerald-700 {
+    background: #34d399 !important; /* Use solid fill */
+    border: none !important; /* Remove borders */
+    box-shadow: 0 0 0 1px #10b981 !important; /* Add subtle outline */
     min-width: 16px !important;
     min-height: 16px !important;
-    box-sizing: border-box !important;
-    border-width: 2px !important;
-    border-style: solid !important;
+  }
+  
+  /* Different color levels */
+  .rounded-sm.bg-emerald-400 { background: #34d399 !important; }
+  .rounded-sm.bg-emerald-500 { background: #10b981 !important; }
+  .rounded-sm.bg-emerald-600 { background: #059669 !important; }
+  .rounded-sm.bg-emerald-700 { background: #047857 !important; }
+  
+  /* Make sure the colors are visible in both light and dark mode */
+  .dark .rounded-sm.bg-emerald-400 { background: #34d399 !important; }
+  .dark .rounded-sm.bg-emerald-500 { background: #10b981 !important; }
+  .dark .rounded-sm.bg-emerald-600 { background: #059669 !important; }
+  .dark .rounded-sm.bg-emerald-700 { background: #047857 !important; }
+  
+  /* Additional fix for any other emerald classes */
+  [class*="bg-emerald"].rounded-sm {
+    background-color: currentColor !important;
+    border: none !important;
+    min-width: 16px !important;
+    min-height: 16px !important;
+  }
+  
+  /* Override any hover effects that might be changing the background */
+  [class*="bg-emerald"].rounded-sm:hover {
+    opacity: 0.8 !important;
   }
 }
 
