@@ -3,6 +3,20 @@
  * This file fixes the background colors for icons and analytics page elements in dark mode
  */
 
+/* Global SVG icon fixes for dark mode - adapted from mobile styles */
+.dark svg, 
+.dark svg path, 
+.dark svg line, 
+.dark svg polyline, 
+.dark svg circle, 
+.dark svg rect {
+  stroke-width: inherit !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  fill: none !important; /* Prevent icon filling */
+  shape-rendering: geometricPrecision !important;
+}
+
 /* Fix for the Learning Goals navigation icon in TabNavigation */
 .dark .tab-navigation-item .nav-icon svg,
 .dark .mobile-logo .logo-icon {
@@ -217,13 +231,31 @@
   background-color: rgba(59, 130, 246, 0.3) !important;
 }
 
-/* Direct fix for Learning Focus and Learning Goals icons */
-.dark .flex.items-center.justify-between button.bg-green-500 svg,
-.dark .flex.items-center.justify-between button.bg-green-600 svg,
-.dark h2 + div button.bg-green-500 svg,
-.dark h2 + div button.bg-green-600 svg,
-.dark [class*="card-header"] button.bg-green-500 svg,
-.dark [class*="card-header"] button.bg-green-600 svg,
+/* Specific fixes for buttons with icons in card headers and flex containers */
+.dark .card-header button svg,
+.dark [class*="card-header"] button svg,
+.dark .flex.items-center.justify-between button svg,
+.dark h2 + div button svg,
+.dark h2 + button svg {
+  color: white !important;
+  fill: none !important;
+  stroke: white !important;
+  stroke-width: 2.5px !important;
+  filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.5)) !important;
+}
+
+/* Fix specifically for the icon in the green header */
+.dark [class*="bg-green-"] svg,
+.dark [style*="background-color: rgb(22, 163, 74)"] svg,
+.dark [style*="background: rgb(22, 163, 74)"] svg,
+.dark [style*="background-color:#16a34a"] svg,
+.dark [style*="background:#16a34a"] svg,
+.dark h2.text-3xl.font-bold.tracking-tight + button svg,
+.dark h2[class*="text-3xl"] + button svg,
+.dark h2 + button.bg-green-500 svg,
+.dark h2 + button.bg-green-600 svg,
+.dark button.bg-green-500 svg,
+.dark button.bg-green-600 svg,
 /* Universal fix for all green buttons with icons */
 .dark button.bg-green-500 svg,
 .dark button.bg-green-600 svg,
@@ -233,7 +265,11 @@
 .dark [style*="background: #16a34a"] svg,
 .dark [style*="background-color:rgb(22, 163, 74)"] svg,
 .dark [style*="background:rgb(22, 163, 74)"] svg,
-.dark [style*="background: rgb(22, 163, 74)"] svg {
+.dark [style*="background: rgb(22, 163, 74)"] svg,
+/* Specific fix for buttons in card headers */
+.dark .card-header button svg,
+.dark [class*="card-header"] button svg,
+.dark .flex.items-center.justify-between button svg {
   color: white !important;
   fill: none !important;
   stroke: white !important;
@@ -253,4 +289,29 @@
   background-color: rgba(30, 41, 59, 0.8) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   color: white !important;
+}
+
+/* Direct fix for Learning Focus and Learning Goals icons */
+.dark .flex.items-center.justify-between button.bg-green-500 svg,
+.dark .flex.items-center.justify-between button.bg-green-600 svg,
+.dark h2 + div button.bg-green-500 svg,
+.dark h2 + div button.bg-green-600 svg,
+.dark [class*="card-header"] button.bg-green-500 svg,
+.dark [class*="card-header"] button.bg-green-600 svg {
+  color: white !important;
+  fill: none !important;
+  stroke: white !important;
+  stroke-width: 2.5px !important;
+  filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.5)) !important;
+}
+
+/* Extra specific fix for Learning Focus icon */
+.dark h2:has(span:contains("Learning Focus")) ~ div button svg,
+.dark h2:has(span:contains("Learning Goals")) ~ div button svg,
+.dark h2[class*="text-3xl"] ~ div button svg {
+  color: white !important;
+  fill: none !important;
+  stroke: white !important;
+  stroke-width: 2.5px !important;
+  filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.5)) !important;
 }
