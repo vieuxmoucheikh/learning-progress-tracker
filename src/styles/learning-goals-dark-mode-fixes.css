@@ -1,0 +1,115 @@
+/* Learning Goals Dark Mode Fixes */
+
+/* Fix for goal card backgrounds and borders */
+.dark .goal-card {
+  background-color: hsl(222.2, 84%, 4.9%) !important;
+  border: 1px solid hsl(217.2, 32.6%, 17.5%) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Fix for goal card icon containers */
+.dark .goal-icon-container {
+  background-color: hsl(215, 28%, 17%) !important;
+  color: white !important;
+}
+
+/* Fix for goal status badges */
+.dark .goal-status-badge.active {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+  color: #60a5fa !important;
+}
+
+.dark .goal-status-badge.completed {
+  background-color: rgba(16, 185, 129, 0.2) !important;
+  color: #4ade80 !important;
+}
+
+.dark .goal-status-badge.overdue {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+}
+
+/* Fix for progress bars in dark mode */
+.dark .progress-bar-container {
+  background-color: hsl(215, 28%, 25%) !important;
+}
+
+.dark .progress-bar-fill {
+  background: linear-gradient(to right, #3b82f6, #60a5fa) !important;
+}
+
+/* Fix for goal metrics in dark mode */
+.dark .goal-metric {
+  background-color: hsl(215, 28%, 17%) !important;
+  border: 1px solid hsl(217.2, 32.6%, 20%) !important;
+}
+
+.dark .goal-metric svg {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Fix for specific goal metric icons */
+.dark .goal-metric.target svg {
+  color: #60a5fa !important;
+}
+
+.dark .goal-metric.spent svg {
+  color: #4ade80 !important;
+}
+
+.dark .goal-metric.deadline svg {
+  color: #f87171 !important;
+}
+
+.dark .goal-metric.daily svg {
+  color: #fcd34d !important;
+}
+
+/* Fix for priority indicators */
+.dark .priority-indicator.high {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+}
+
+.dark .priority-indicator.medium {
+  background-color: rgba(245, 158, 11, 0.2) !important;
+  color: #fbbf24 !important;
+}
+
+.dark .priority-indicator.low {
+  background-color: rgba(16, 185, 129, 0.2) !important;
+  color: #4ade80 !important;
+}
+
+/* Fix for add goal button */
+.dark .add-goal-button {
+  background: linear-gradient(to right, #1e40af, #3b82f6) !important;
+  color: white !important;
+  border: none !important;
+}
+
+/* Fix for dialog content in dark mode */
+.dark .goal-dialog-content {
+  background-color: hsl(222.2, 84%, 4.9%) !important;
+  border-color: hsl(217.2, 32.6%, 17.5%) !important;
+}
+
+/* Fix for select components in dark mode */
+.dark .goal-select-trigger {
+  background-color: hsl(215, 28%, 17%) !important;
+  border-color: hsl(217.2, 32.6%, 20%) !important;
+  color: white !important;
+}
+
+.dark .goal-select-content {
+  background-color: hsl(222.2, 84%, 4.9%) !important;
+  border-color: hsl(217.2, 32.6%, 17.5%) !important;
+}
+
+.dark .goal-select-item {
+  color: white !important;
+}
+
+.dark .goal-select-item:hover {
+  background-color: hsl(215, 28%, 17%) !important;
+}
