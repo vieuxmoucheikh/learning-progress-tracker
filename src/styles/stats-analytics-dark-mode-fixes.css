@@ -1,0 +1,197 @@
+/* Stats and Analytics Dark Mode Fixes */
+
+/* Fix for card backgrounds in dark mode */
+html.dark .bg-white,
+.dark .bg-white {
+  background-color: hsl(222.2, 84%, 4.9%) !important;
+}
+
+/* Fix for stats cards in dark mode */
+html.dark .stats-card,
+.dark .stats-card,
+html.dark [class*="rounded-xl"],
+.dark [class*="rounded-xl"] {
+  background-color: hsl(222.2, 84%, 4.9%) !important;
+  border-color: hsl(217.2, 32.6%, 17.5%) !important;
+}
+
+/* Fix for icon backgrounds in dark mode */
+html.dark .bg-blue-50,
+.dark .bg-blue-50,
+html.dark .bg-green-50,
+.dark .bg-green-50,
+html.dark .bg-orange-50,
+.dark .bg-orange-50,
+html.dark .bg-yellow-50,
+.dark .bg-yellow-50,
+html.dark .bg-red-50,
+.dark .bg-red-50,
+html.dark .bg-indigo-50,
+.dark .bg-indigo-50,
+html.dark .bg-amber-50,
+.dark .bg-amber-50 {
+  background-color: hsl(215, 28%, 17%) !important;
+}
+
+/* Fix for text colors in dark mode */
+html.dark .text-gray-800,
+.dark .text-gray-800,
+html.dark .text-gray-700,
+.dark .text-gray-700,
+html.dark .text-gray-600,
+.dark .text-gray-600 {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Fix for chart elements in dark mode */
+html.dark .recharts-cartesian-grid-horizontal line,
+.dark .recharts-cartesian-grid-horizontal line,
+html.dark .recharts-cartesian-grid-vertical line,
+.dark .recharts-cartesian-grid-vertical line {
+  stroke: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .recharts-cartesian-axis-line,
+.dark .recharts-cartesian-axis-line {
+  stroke: rgba(255, 255, 255, 0.2) !important;
+}
+
+html.dark .recharts-cartesian-axis-tick-line,
+.dark .recharts-cartesian-axis-tick-line {
+  stroke: rgba(255, 255, 255, 0.2) !important;
+}
+
+html.dark .recharts-cartesian-axis-tick-value tspan,
+.dark .recharts-cartesian-axis-tick-value tspan,
+html.dark .recharts-legend-item-text,
+.dark .recharts-legend-item-text {
+  fill: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Fix for tooltip in dark mode */
+html.dark .recharts-tooltip-wrapper .recharts-default-tooltip,
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: hsl(222.2, 47.4%, 11.2%) !important;
+  border-color: hsl(217.2, 32.6%, 17.5%) !important;
+}
+
+html.dark .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-label,
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-label,
+html.dark .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-item,
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-item {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Fix for yearly activity calendar in dark mode */
+html.dark .bg-white.dark\:bg-gray-800\/30,
+.dark .bg-white.dark\:bg-gray-800\/30 {
+  background-color: hsl(222.2, 84%, 4.9%) !important;
+}
+
+/* Fix for border hover colors in dark mode */
+html.dark .hover\:border-green-100:hover,
+.dark .hover\:border-green-100:hover,
+html.dark .hover\:border-blue-100:hover,
+.dark .hover\:border-blue-100:hover,
+html.dark .hover\:border-orange-100:hover,
+.dark .hover\:border-orange-100:hover,
+html.dark .hover\:border-yellow-100:hover,
+.dark .hover\:border-yellow-100:hover,
+html.dark .hover\:border-red-100:hover,
+.dark .hover\:border-red-100:hover {
+  border-color: hsl(217.2, 32.6%, 17.5%) !important;
+}
+
+/* Fix for specific icon colors in dark mode */
+html.dark .text-blue-500,
+.dark .text-blue-500 {
+  color: #60a5fa !important;
+}
+
+html.dark .text-green-500,
+.dark .text-green-500 {
+  color: #4ade80 !important;
+}
+
+html.dark .text-orange-500,
+.dark .text-orange-500 {
+  color: #fb923c !important;
+}
+
+html.dark .text-yellow-500,
+.dark .text-yellow-500 {
+  color: #fcd34d !important;
+}
+
+html.dark .text-red-500,
+.dark .text-red-500 {
+  color: #f87171 !important;
+}
+
+html.dark .text-indigo-500,
+.dark .text-indigo-500 {
+  color: #818cf8 !important;
+}
+
+html.dark .text-amber-500,
+.dark .text-amber-500 {
+  color: #fbbf24 !important;
+}
+
+/* Fix for status and priority indicators */
+html.dark .bg-green-500,
+.dark .bg-green-500 {
+  background-color: #4ade80 !important;
+}
+
+html.dark .bg-blue-500,
+.dark .bg-blue-500 {
+  background-color: #60a5fa !important;
+}
+
+html.dark .bg-gray-500,
+.dark .bg-gray-500 {
+  background-color: #9ca3af !important;
+}
+
+html.dark .bg-yellow-500,
+.dark .bg-yellow-500 {
+  background-color: #fcd34d !important;
+}
+
+html.dark .bg-red-500,
+.dark .bg-red-500 {
+  background-color: #f87171 !important;
+}
+
+/* Fix for value text colors */
+html.dark .text-green-600,
+.dark .text-green-600 {
+  color: #4ade80 !important;
+}
+
+html.dark .text-blue-600,
+.dark .text-blue-600 {
+  color: #60a5fa !important;
+}
+
+html.dark .text-orange-600,
+.dark .text-orange-600 {
+  color: #fb923c !important;
+}
+
+html.dark .text-yellow-600,
+.dark .text-yellow-600 {
+  color: #fcd34d !important;
+}
+
+html.dark .text-red-600,
+.dark .text-red-600 {
+  color: #f87171 !important;
+}
+
+/* Fix for border colors */
+html.dark .border-gray-100,
+.dark .border-gray-100 {
+  border-color: hsl(217.2, 32.6%, 17.5%) !important;
+}
