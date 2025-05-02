@@ -1,0 +1,48 @@
+/**
+ * Specific fix for the Learning Goals icon in the header
+ * This targets the icon in the green header specifically
+ */
+
+/* Force white color for all SVG elements in the green header */
+.dark svg {
+  color: white !important;
+}
+
+/* Target all SVG paths, circles, and rects to ensure they're white */
+.dark svg path,
+.dark svg circle,
+.dark svg rect,
+.dark svg line,
+.dark svg polyline,
+.dark svg polygon {
+  fill: white !important;
+  stroke: white !important;
+}
+
+/* Target the specific green header */
+.dark .bg-green-500,
+.dark .bg-green-600,
+.dark [class*="bg-green"] {
+  background-color: #16a34a !important;
+}
+
+/* Target the specific icon in the green header */
+.dark .bg-green-500 svg,
+.dark .bg-green-600 svg,
+.dark [class*="bg-green"] svg {
+  color: white !important;
+  fill: white !important;
+  stroke: white !important;
+}
+
+/* Ensure the brain icon is white */
+.dark .logo-icon {
+  color: white !important;
+}
+
+/* Target the Learning Goals text to ensure it's white */
+.dark .bg-green-500 span,
+.dark .bg-green-600 span,
+.dark [class*="bg-green"] span {
+  color: white !important;
+}

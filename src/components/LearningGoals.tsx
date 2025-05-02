@@ -16,6 +16,7 @@ import { PomodoroTimer } from './pomodoro/PomodoroTimer';
 import type { Session } from '../types';
 import '../styles/analytics-card-fixes.css';
 import '../styles/dark-mode-icon-fixes.css';
+import '../styles/learning-goals-icon-fix.css';
 
 type GoalStatus = 'active' | 'completed' | 'overdue';
 
