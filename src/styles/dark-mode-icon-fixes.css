@@ -1,9 +1,17 @@
 /**
  * Dark Mode Icon Background Fixes
  * This file fixes the background colors for icons and analytics page elements in dark mode
+ * Adapted from the working mobile styles
  */
 
-/* Global SVG icon fixes for dark mode - adapted from mobile styles */
+/* DIRECT COPY FROM MOBILE STYLES THAT WORK */
+/* Styles for all SVG icons in dark mode */
+html[data-theme="dark"] svg, 
+html[data-theme="dark"] svg path, 
+html[data-theme="dark"] svg line, 
+html[data-theme="dark"] svg polyline, 
+html[data-theme="dark"] svg circle, 
+html[data-theme="dark"] svg rect,
 .dark svg, 
 .dark svg path, 
 .dark svg line, 
@@ -13,20 +21,60 @@
   stroke-width: inherit !important;
   stroke-linecap: round !important;
   stroke-linejoin: round !important;
-  fill: none !important; /* Prevent icon filling */
+  fill: none !important;
   shape-rendering: geometricPrecision !important;
 }
 
-/* Fix for the Learning Goals navigation icon in TabNavigation */
-.dark .tab-navigation-item .nav-icon svg,
-.dark .mobile-logo .logo-icon {
-  color: white !important;
+/* Styles for icons in cards and buttons */
+html[data-theme="dark"] .card svg,
+html[data-theme="dark"] .learning-item-card svg,
+html[data-theme="dark"] .item-wrapper svg,
+.dark .card svg,
+.dark .learning-item-card svg,
+.dark .item-wrapper svg {
+  color: currentColor !important;
+  stroke: currentColor !important;
+  fill: none !important;
+  stroke-width: 2px !important;
+}
+
+/* Fix for buttons with icons */
+html[data-theme="dark"] .card button svg,
+html[data-theme="dark"] .learning-item-card button svg,
+html[data-theme="dark"] .item-wrapper button svg,
+.dark .card button svg,
+.dark .learning-item-card button svg,
+.dark .item-wrapper button svg {
   fill: none !important;
   stroke: currentColor !important;
   stroke-width: 2px !important;
 }
 
-/* Fix for the Learning Goals icon in the green header */
+/* Specific color fixes for buttons */
+html[data-theme="dark"] .card button.bg-green-500 svg,
+html[data-theme="dark"] .card button.bg-green-600 svg,
+html[data-theme="dark"] button.bg-green-500 svg,
+html[data-theme="dark"] button.bg-green-600 svg,
+.dark .card button.bg-green-500 svg,
+.dark .card button.bg-green-600 svg,
+.dark button.bg-green-500 svg,
+.dark button.bg-green-600 svg {
+  stroke: white !important;
+  fill: none !important;
+  color: white !important;
+  stroke-width: 2.5px !important;
+}
+
+/* Fix for the green background buttons */
+html[data-theme="dark"] button.bg-green-500,
+html[data-theme="dark"] button.bg-green-600,
+.dark button.bg-green-500,
+.dark button.bg-green-600 {
+  background-color: #16a34a !important;
+  color: white !important;
+}
+
+/* Fix for the Learning Goals tab specifically */
 .dark .tab-navigation-item:nth-child(3) .nav-icon svg,
 .dark .tab-navigation-items button:nth-child(3) .nav-icon svg,
 .dark .tab-navigation-items button[aria-label*="Analytics"] .nav-icon svg,
@@ -36,19 +84,9 @@
   stroke: white !important;
   stroke-width: 2.5px !important;
   filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.5)) !important;
-  background-color: transparent !important;
 }
 
-/* Fix for the green background in the Learning Goals header */
-.dark [class*="bg-green-"],
-.dark [style*="background-color: rgb(22, 163, 74)"],
-.dark [style*="background: rgb(22, 163, 74)"],
-.dark [style*="background-color:#16a34a"],
-.dark [style*="background:#16a34a"] {
-  background-color: #16a34a !important;
-}
-
-/* Fix specifically for the icon in the green header */
+/* Specific fixes for Learning Goals and Learning Focus icons */
 .dark [class*="bg-green-"] svg,
 .dark [style*="background-color: rgb(22, 163, 74)"] svg,
 .dark [style*="background: rgb(22, 163, 74)"] svg,
@@ -57,9 +95,24 @@
 .dark h2.text-3xl.font-bold.tracking-tight + button svg,
 .dark h2[class*="text-3xl"] + button svg,
 .dark h2 + button.bg-green-500 svg,
-.dark h2 + button.bg-green-600 svg,
-.dark button.bg-green-500 svg,
-.dark button.bg-green-600 svg {
+.dark h2 + button.bg-green-600 svg {
+  color: white !important;
+  fill: none !important;
+  stroke: white !important;
+  stroke-width: 2.5px !important;
+  filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.5)) !important;
+}
+
+/* Ultra-specific fix for Learning Focus */
+.dark h2:has(span:contains("Learning Focus")) ~ div button svg,
+.dark h2:has(span:contains("Learning Goals")) ~ div button svg,
+.dark h2[class*="text-3xl"] ~ div button svg,
+.dark .flex.items-center.justify-between button.bg-green-500 svg,
+.dark .flex.items-center.justify-between button.bg-green-600 svg,
+.dark h2 + div button.bg-green-500 svg,
+.dark h2 + div button.bg-green-600 svg,
+.dark [class*="card-header"] button.bg-green-500 svg,
+.dark [class*="card-header"] button.bg-green-600 svg {
   color: white !important;
   fill: none !important;
   stroke: white !important;
@@ -68,166 +121,121 @@
 }
 
 /* Fix for the active/completed states in learning goals */
-.dark .px-3.py-1.rounded-full.text-xs.font-semibold.shadow-sm {
+.dark .px-3.py-1.rounded-full.text-xs.font-semibold.shadow-sm,
+html[data-theme="dark"] .px-3.py-1.rounded-full.text-xs.font-semibold.shadow-sm {
   background-color: rgba(30, 41, 59, 0.8) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   color: white !important;
 }
 
 /* Specific status colors */
-.dark .bg-green-100.text-green-800 {
+.dark .bg-green-100.text-green-800,
+html[data-theme="dark"] .bg-green-100.text-green-800 {
   background-color: rgba(16, 185, 129, 0.2) !important;
   color: #4ade80 !important;
 }
 
-.dark .bg-blue-100.text-blue-800 {
+.dark .bg-blue-100.text-blue-800,
+html[data-theme="dark"] .bg-blue-100.text-blue-800 {
   background-color: rgba(59, 130, 246, 0.2) !important;
   color: #60a5fa !important;
 }
 
-.dark .bg-red-100.text-red-800 {
+.dark .bg-red-100.text-red-800,
+html[data-theme="dark"] .bg-red-100.text-red-800 {
   background-color: rgba(239, 68, 68, 0.2) !important;
   color: #f87171 !important;
 }
 
 /* Fix for the stats grid in learning goals cards */
 .dark .bg-muted\/30,
-.dark [class*="bg-muted"] {
+.dark [class*="bg-muted"],
+html[data-theme="dark"] .bg-muted\/30,
+html[data-theme="dark"] [class*="bg-muted"] {
   background-color: #1e293b !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Fix hover state for the stats grid items */
 .dark .bg-muted\/30:hover,
-.dark [class*="bg-muted"]:hover {
+.dark [class*="bg-muted"]:hover,
+html[data-theme="dark"] .bg-muted\/30:hover,
+html[data-theme="dark"] [class*="bg-muted"]:hover {
   background-color: #334155 !important;
 }
 
 /* Fix for the progress bar background */
-.dark .h-2\.5.w-full.bg-muted\/60 {
+.dark .h-2\.5.w-full.bg-muted\/60,
+html[data-theme="dark"] .h-2\.5.w-full.bg-muted\/60 {
   background-color: #1e293b !important;
 }
 
 /* Fix for progress bar fill colors */
-.dark .bg-gradient-to-r.from-blue-400.to-blue-600 {
+.dark .bg-gradient-to-r.from-blue-400.to-blue-600,
+html[data-theme="dark"] .bg-gradient-to-r.from-blue-400.to-blue-600 {
   background: linear-gradient(to right, #3b82f6, #2563eb) !important;
 }
 
-.dark .bg-gradient-to-r.from-green-400.to-green-600 {
+.dark .bg-gradient-to-r.from-green-400.to-green-600,
+html[data-theme="dark"] .bg-gradient-to-r.from-green-400.to-green-600 {
   background: linear-gradient(to right, #10b981, #059669) !important;
 }
 
-.dark .bg-gradient-to-r.from-red-400.to-red-600 {
+.dark .bg-gradient-to-r.from-red-400.to-red-600,
+html[data-theme="dark"] .bg-gradient-to-r.from-red-400.to-red-600 {
   background: linear-gradient(to right, #f87171, #dc2626) !important;
 }
 
 /* Fix for the card background */
-.dark .card {
+.dark .card,
+html[data-theme="dark"] .card {
   background-color: #0f172a !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Fix for the category indicator */
-.dark .inline-block.w-2\.5.h-2\.5.rounded-full.bg-primary\/70 {
+.dark .inline-block.w-2\.5.h-2\.5.rounded-full.bg-primary\/70,
+html[data-theme="dark"] .inline-block.w-2\.5.h-2\.5.rounded-full.bg-primary\/70 {
   background-color: #3b82f6 !important;
 }
 
-/* Direct fix for the category labels in the image */
-.dark .wbdbdb {
-  background-color: #1e40af !important;
+/* Direct fix for the Learning Focus icon */
+.dark h2:contains("Learning Focus") + button svg,
+.dark h2:contains("Learning Goals") + button svg,
+.dark h2 span:contains("Learning Focus") + button svg,
+.dark h2 span:contains("Learning Goals") + button svg,
+html[data-theme="dark"] h2:contains("Learning Focus") + button svg,
+html[data-theme="dark"] h2:contains("Learning Goals") + button svg,
+html[data-theme="dark"] h2 span:contains("Learning Focus") + button svg,
+html[data-theme="dark"] h2 span:contains("Learning Goals") + button svg {
   color: white !important;
-}
-
-.dark .ml {
-  background-color: #047857 !important;
-  color: white !important;
-}
-
-.dark .oll {
-  background-color: #7e22ce !important;
-  color: white !important;
-}
-
-/* Fix for the grid boxes in the learning goals */
-.dark .grid.grid-cols-2.gap-4 > div {
-  background-color: #1e293b !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-.dark .grid.grid-cols-2.gap-4 > div:hover {
-  background-color: #334155 !important;
-}
-
-/* Fix for the icon backgrounds */
-.dark .flex.items-center.gap-2.mb-1\.5 svg {
-  color: white !important;
-}
-
-/* Target specific icon background colors */
-.dark .flex.items-center.gap-2.mb-1\.5 .text-blue-500,
-.dark .flex.items-center.gap-2.mb-1\.5 .text-blue-600 {
-  background-color: #3b82f6 !important;
-  padding: 4px !important;
-  border-radius: 50% !important;
-  color: white !important;
-}
-
-.dark .flex.items-center.gap-2.mb-1\.5 .text-green-500,
-.dark .flex.items-center.gap-2.mb-1\.5 .text-green-600 {
-  background-color: #10b981 !important;
-  padding: 4px !important;
-  border-radius: 50% !important;
-  color: white !important;
-}
-
-.dark .flex.items-center.gap-2.mb-1\.5 .text-yellow-500,
-.dark .flex.items-center.gap-2.mb-1\.5 .text-yellow-600,
-.dark .flex.items-center.gap-2.mb-1\.5 .text-amber-500,
-.dark .flex.items-center.gap-2.mb-1\.5 .text-amber-600 {
-  background-color: #f59e0b !important;
-  padding: 4px !important;
-  border-radius: 50% !important;
-  color: white !important;
-}
-
-.dark .flex.items-center.gap-2.mb-1\.5 .text-red-500,
-.dark .flex.items-center.gap-2.mb-1\.5 .text-red-600 {
-  background-color: #ef4444 !important;
-  padding: 4px !important;
-  border-radius: 50% !important;
-  color: white !important;
-}
-
-.dark .flex.items-center.gap-2.mb-1\.5 .text-muted-foreground {
-  background-color: #475569 !important;
-  padding: 4px !important;
-  border-radius: 50% !important;
-  color: white !important;
-}
-
-/* Fix for the mobile logo background */
-.dark .mobile-logo {
-  background-color: rgba(30, 41, 59, 0.8) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  fill: none !important;
+  stroke: white !important;
+  stroke-width: 2.5px !important;
+  filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.5)) !important;
 }
 
 /* Fix for the navigation tab icons */
-.dark .tab-navigation-item {
+.dark .tab-navigation-item,
+html[data-theme="dark"] .tab-navigation-item {
   background-color: rgba(30, 41, 59, 0.6) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
-.dark .tab-navigation-item.active {
+.dark .tab-navigation-item.active,
+html[data-theme="dark"] .tab-navigation-item.active {
   background-color: rgba(59, 130, 246, 0.2) !important;
   border: 1px solid rgba(59, 130, 246, 0.3) !important;
 }
 
 /* Fix for the Learning Goals tab specifically */
-.dark .tab-navigation-item:nth-child(3) {
+.dark .tab-navigation-item:nth-child(3),
+html[data-theme="dark"] .tab-navigation-item:nth-child(3) {
   background-color: rgba(30, 41, 59, 0.8) !important;
 }
 
-.dark .tab-navigation-item:nth-child(3).active {
+.dark .tab-navigation-item:nth-child(3).active,
+html[data-theme="dark"] .tab-navigation-item:nth-child(3).active {
   background-color: rgba(59, 130, 246, 0.3) !important;
 }
 

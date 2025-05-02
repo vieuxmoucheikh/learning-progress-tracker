@@ -1,12 +1,7 @@
 import { useReducer, useEffect, useState, useMemo } from 'react';
 import { AddLearningItem } from './components/AddLearningItem';
-import { Stats } from './components/Stats';
-import { Insights } from './components/Insights';
-import { LearningInsights } from './components/LearningInsights';
-import { StreakDisplay } from './components/StreakDisplay';
 import { LearningItem, LearningItemFormData, FlashcardDeck } from '@/types';
 import { Plus, LayoutDashboard, BookOpen, BarChart3, Timer, Notebook, Library } from 'lucide-react';
-import { Calendar } from './components/Calendar';
 import { getLearningItems, addLearningItem, updateLearningItem, deleteLearningItem, trackLearningActivity } from './lib/database';
 import { useAuth } from './lib/auth';
 import { TabNavigation } from './components/TabNavigation';
@@ -68,14 +63,7 @@ const TAB_OPTIONS = {
   FLASHCARDS: 'flashcards'
 } as const;
 
-const tabs = [
-  { id: TAB_OPTIONS.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
-  { id: TAB_OPTIONS.ITEMS, label: 'Items', icon: BookOpen },
-  { id: TAB_OPTIONS.ANALYTICS, label: 'Analytics', icon: BarChart3 },
-  { id: TAB_OPTIONS.POMODORO, label: 'Pomodoro', icon: Timer },
-  { id: TAB_OPTIONS.LEARNING_CARDS, label: 'Learning Cards', icon: Notebook },
-  { id: TAB_OPTIONS.FLASHCARDS, label: 'Flashcards', icon: Library },
-];
+// Tab options are defined in TabNavigation component
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
