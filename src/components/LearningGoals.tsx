@@ -638,32 +638,30 @@ export default function LearningGoals({ items }: Props) {
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Target Date</label>
-              <div className="relative group">
-                <Button
-                  type="button"
-                  variant="outline"
+              <div className="relative">
+                {/* Visible button that matches app style */}
+                <div 
                   onClick={() => {
-                    // Find the date input and programmatically click it
-                    const dateInput = document.getElementById('target-date-input');
+                    const dateInput = document.getElementById('target-date-input') as HTMLInputElement;
                     if (dateInput) {
                       dateInput.click();
                       dateInput.focus();
                     }
                   }}
-                  className="w-full flex items-center justify-between pl-3 pr-3 py-2 bg-blue-50 border-blue-100 hover:bg-blue-100 text-left"
+                  className="w-full flex items-center justify-between px-4 py-2.5 rounded-md bg-blue-500 hover:bg-blue-600 text-white cursor-pointer transition-colors"
                 >
                   <div className="flex items-center">
-                    <CalendarIcon className="mr-2 h-4 w-4 text-blue-500" />
-                    <span className={newGoal.targetDate ? "text-gray-800" : "text-gray-400"}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <span>
                       {newGoal.targetDate 
                         ? format(newGoal.targetDate, "MMMM d, yyyy") 
                         : "Select a date"}
                     </span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-blue-400" />
-                </Button>
+                  <ChevronRight className="h-4 w-4" />
+                </div>
                 
-                {/* Hidden native date input for functionality */}
+                {/* Hidden date input */}
                 <input
                   id="target-date-input"
                   type="date"
@@ -673,7 +671,7 @@ export default function LearningGoals({ items }: Props) {
                     const date = e.target.value ? new Date(e.target.value) : undefined;
                     setNewGoal(prev => ({ ...prev, targetDate: date }));
                   }}
-                  className="sr-only" // Hidden visually but still functional
+                  className="opacity-0 absolute top-0 left-0 w-full h-full cursor-pointer z-[-1]" 
                 />
               </div>
               {newGoal.targetDate && 
