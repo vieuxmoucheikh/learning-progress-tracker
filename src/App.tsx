@@ -33,10 +33,7 @@ import './styles/critical-card-borders.css'; // Ajout du fichier de correctifs c
 import './styles/icon-fixes.css'; // Ajout du fichier de correctifs pour les icônes
 import './styles/icon-override.css';
 import './styles/critical-icon-fixes.css'; // Ajout du nouveau fichier de correctifs critiques
-import './styles/learning-goals-icon-fix.css'; // Fix for Learning Goals icons
-import './styles/header-icon-fix.css'; // Fix for header icons in dark mode
-import './styles/specific-header-icon-fix.css'; // Ultra-specific fix for Learning Goals and Learning Focus header icons
-import './styles/svg-icon-fix.css'; // Direct SVG element fixes for dark mode
+import './styles/dark-mode-icon-fixes.css'; // Fix for icons in dark mode
 import './components/LearningItemCard.css';
 import './components/Calendar.css';
 import './components/StatusBadge.css';
