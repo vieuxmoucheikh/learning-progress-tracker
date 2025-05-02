@@ -1,112 +1,114 @@
 /**
- * Critical Icon Fixes for Dark Mode
- * This file contains critical fixes for icons in dark mode
- * Specifically targeting the Learning Goals and Learning Focus sections
+ * Ultra-Targeted Icon Fixes for Dark Mode
+ * This file specifically targets the Target and Clock icons in the Learning Goals cards
  */
 
-/* Force all SVG icons to have white stroke in dark mode */
-html[data-theme="dark"] svg,
-.dark svg {
+/* Target and Clock icons in Learning Goals cards */
+.dark svg[data-lucide="Target"],
+.dark svg[data-lucide="Clock"],
+html[data-theme="dark"] svg[data-lucide="Target"],
+html[data-theme="dark"] svg[data-lucide="Clock"] {
   stroke: white !important;
   color: white !important;
   fill: none !important;
   stroke-width: 2px !important;
+  background-color: transparent !important;
 }
 
-/* Target all SVG paths, lines, etc. */
-html[data-theme="dark"] svg path,
-html[data-theme="dark"] svg line,
-html[data-theme="dark"] svg polyline,
-html[data-theme="dark"] svg circle,
-html[data-theme="dark"] svg rect,
-.dark svg path,
-.dark svg line,
-.dark svg polyline,
-.dark svg circle,
-.dark svg rect {
+/* Target all elements inside Target and Clock icons */
+.dark svg[data-lucide="Target"] *,
+.dark svg[data-lucide="Clock"] *,
+html[data-theme="dark"] svg[data-lucide="Target"] *,
+html[data-theme="dark"] svg[data-lucide="Clock"] * {
   stroke: white !important;
   color: white !important;
   fill: none !important;
   stroke-width: 2px !important;
+  background-color: transparent !important;
 }
 
-/* Target buttons with green background */
-html[data-theme="dark"] button.bg-green-500 svg,
-html[data-theme="dark"] button.bg-green-600 svg,
-.dark button.bg-green-500 svg,
-.dark button.bg-green-600 svg {
+/* Target the parent elements of these icons to ensure they don't have a background */
+.dark svg[data-lucide="Target"] ~ *,
+.dark svg[data-lucide="Target"] + *,
+.dark svg[data-lucide="Clock"] ~ *,
+.dark svg[data-lucide="Clock"] + *,
+.dark *:has(> svg[data-lucide="Target"]),
+.dark *:has(> svg[data-lucide="Clock"]),
+html[data-theme="dark"] svg[data-lucide="Target"] ~ *,
+html[data-theme="dark"] svg[data-lucide="Target"] + *,
+html[data-theme="dark"] svg[data-lucide="Clock"] ~ *,
+html[data-theme="dark"] svg[data-lucide="Clock"] + *,
+html[data-theme="dark"] *:has(> svg[data-lucide="Target"]),
+html[data-theme="dark"] *:has(> svg[data-lucide="Clock"]) {
+  background-color: transparent !important;
+}
+
+/* Target the specific elements by their class names in the card */
+.dark .flex div svg,
+.dark .flex div svg *,
+html[data-theme="dark"] .flex div svg,
+html[data-theme="dark"] .flex div svg * {
   stroke: white !important;
   color: white !important;
   fill: none !important;
-  stroke-width: 2.5px !important;
+  stroke-width: 2px !important;
+  background-color: transparent !important;
 }
 
-/* Target buttons with green background - all SVG elements */
-html[data-theme="dark"] button.bg-green-500 svg *,
-html[data-theme="dark"] button.bg-green-600 svg *,
-.dark button.bg-green-500 svg *,
-.dark button.bg-green-600 svg * {
+/* Target the parent elements of these icons */
+.dark .flex div:has(svg),
+html[data-theme="dark"] .flex div:has(svg) {
+  background-color: transparent !important;
+}
+
+/* Target all SVG icons in the Learning Goals section */
+.dark div:has(h2:contains("Learning Goals")) svg,
+.dark div:has(h2:contains("Learning Goals")) svg *,
+html[data-theme="dark"] div:has(h2:contains("Learning Goals")) svg,
+html[data-theme="dark"] div:has(h2:contains("Learning Goals")) svg * {
   stroke: white !important;
   color: white !important;
   fill: none !important;
-  stroke-width: 2.5px !important;
+  stroke-width: 2px !important;
+  background-color: transparent !important;
 }
 
-/* Target buttons next to headings */
-html[data-theme="dark"] h2 + button svg,
-html[data-theme="dark"] h2 ~ button svg,
-.dark h2 + button svg,
-.dark h2 ~ button svg {
+/* Target all SVG icons in the Learning Focus section */
+.dark div:has(h2:contains("Learning Focus")) svg,
+.dark div:has(h2:contains("Learning Focus")) svg *,
+html[data-theme="dark"] div:has(h2:contains("Learning Focus")) svg,
+html[data-theme="dark"] div:has(h2:contains("Learning Focus")) svg * {
   stroke: white !important;
   color: white !important;
   fill: none !important;
-  stroke-width: 2.5px !important;
+  stroke-width: 2px !important;
+  background-color: transparent !important;
 }
 
-/* Target buttons next to headings - all SVG elements */
-html[data-theme="dark"] h2 + button svg *,
-html[data-theme="dark"] h2 ~ button svg *,
-.dark h2 + button svg *,
-.dark h2 ~ button svg * {
+/* Target all elements that contain Target and Clock icons */
+.dark *:has(svg[data-lucide="Target"]),
+.dark *:has(svg[data-lucide="Clock"]),
+html[data-theme="dark"] *:has(svg[data-lucide="Target"]),
+html[data-theme="dark"] *:has(svg[data-lucide="Clock"]) {
+  background-color: transparent !important;
+}
+
+/* Extremely specific targeting for the card elements */
+.dark .flex button,
+.dark .flex button *,
+html[data-theme="dark"] .flex button,
+html[data-theme="dark"] .flex button * {
+  background-color: transparent !important;
+}
+
+/* Target all icons in cards */
+.dark .card svg,
+.dark .card svg *,
+html[data-theme="dark"] .card svg,
+html[data-theme="dark"] .card svg * {
   stroke: white !important;
   color: white !important;
   fill: none !important;
-  stroke-width: 2.5px !important;
-}
-
-/* Target buttons in flex containers */
-html[data-theme="dark"] .flex button svg,
-.dark .flex button svg {
-  stroke: white !important;
-  color: white !important;
-  fill: none !important;
-  stroke-width: 2.5px !important;
-}
-
-/* Target buttons in flex containers - all SVG elements */
-html[data-theme="dark"] .flex button svg *,
-.dark .flex button svg * {
-  stroke: white !important;
-  color: white !important;
-  fill: none !important;
-  stroke-width: 2.5px !important;
-}
-
-/* Target specific icon types */
-html[data-theme="dark"] svg[data-lucide="Plus"],
-html[data-theme="dark"] svg[data-lucide="Plus"] *,
-.dark svg[data-lucide="Plus"],
-.dark svg[data-lucide="Plus"] * {
-  stroke: white !important;
-  color: white !important;
-  fill: none !important;
-  stroke-width: 2.5px !important;
-}
-
-/* Extremely aggressive approach - target ALL SVGs */
-html[data-theme="dark"] *,
-.dark * {
-  --icon-color: white !important;
-  --icon-stroke: white !important;
-  --icon-fill: none !important;
+  stroke-width: 2px !important;
+  background-color: transparent !important;
 }
