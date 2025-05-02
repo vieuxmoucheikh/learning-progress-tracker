@@ -485,74 +485,25 @@ export default function LearningGoals({ items }: Props) {
     }
   };
 
-  const CategorySelect = () => {
-    // Get unique categories from items
-    const categories = Array.from(new Set(items.map(item => item.category || 'Uncategorized'))).filter(Boolean);
-
-    return (
-      <div>
-        <input
-          type="text"
-          list="categories-list"
-          value={newGoal.category}
-          placeholder="Select category"
-          onChange={(e) => setNewGoal(prev => ({ ...prev, category: e.target.value }))}
-          style={{
-            width: '100%',
-            padding: '0.5rem',
-            borderRadius: '0.375rem',
-            border: '1px solid #d1d5db',
-            backgroundColor: '#f0f9ff',
-            color: '#333',
-            fontSize: '0.875rem',
-            height: '40px',
-            boxSizing: 'border-box'
-          }}
-        />
-        <datalist id="categories-list">
-          {categories.map(category => (
-            <option key={category} value={category} />
-          ))}
-        </datalist>
-      </div>
-    );
+  // Direct category selection without custom components
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setNewGoal(prev => ({ ...prev, category: e.target.value }));
   };
+  
+  // Get unique categories from items
+  const categories = Array.from(new Set(items.map(item => item.category || 'Uncategorized'))).filter(Boolean);
 
-  const PrioritySelect = () => {
-    const priorities = [
-      { value: 'high', label: 'High' },
-      { value: 'medium', label: 'Medium' },
-      { value: 'low', label: 'Low' }
-    ];
-
-    return (
-      <div>
-        <input
-          type="text"
-          list="priorities-list"
-          value={newGoal.priority}
-          placeholder="Select priority"
-          onChange={(e) => setNewGoal(prev => ({ ...prev, priority: e.target.value as Priority }))}
-          style={{
-            width: '100%',
-            padding: '0.5rem',
-            borderRadius: '0.375rem',
-            border: '1px solid #d1d5db',
-            backgroundColor: '#f0f9ff',
-            color: '#333',
-            fontSize: '0.875rem',
-            height: '40px',
-            boxSizing: 'border-box'
-          }}
-        />
-        <datalist id="priorities-list">
-          {priorities.map(priority => (
-            <option key={priority.value} value={priority.value}>{priority.label}</option>
-          ))}
-        </datalist>
-      </div>
-    );
+  // Direct priority handling without custom components
+  const handlePriorityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setNewGoal(prev => ({ ...prev, priority: e.target.value as Priority }));
   };
+  
+  // Priority options
+  const priorities = [
+    { value: 'high', label: 'High' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'low', label: 'Low' }
+  ];
 
   return (
     <div className="space-y-6">
@@ -721,7 +672,25 @@ export default function LearningGoals({ items }: Props) {
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Category</label>
-              <CategorySelect />
+              <select
+                value={newGoal.category}
+                onChange={handleCategoryChange}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  borderRadius: '0.375rem',
+                  border: '1px solid #d1d5db',
+                  backgroundColor: '#f0f9ff',
+                  color: '#333',
+                  fontSize: '0.875rem',
+                  height: '40px'
+                }}
+              >
+                <option value="" disabled>Select category</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-2">
@@ -798,7 +767,25 @@ export default function LearningGoals({ items }: Props) {
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Priority</label>
-              <PrioritySelect />
+              <select
+                value={newGoal.priority}
+                onChange={handlePriorityChange}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  borderRadius: '0.375rem',
+                  border: '1px solid #d1d5db',
+                  backgroundColor: '#f0f9ff',
+                  color: '#333',
+                  fontSize: '0.875rem',
+                  height: '40px'
+                }}
+              >
+                <option value="" disabled>Select priority</option>
+                {priorities.map(priority => (
+                  <option key={priority.value} value={priority.value}>{priority.label}</option>
+                ))}
+              </select>
             </div>
           </div>
 
