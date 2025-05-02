@@ -63,43 +63,73 @@
     box-sizing: border-box !important;
   }
 
-  /* Fix for yearly activity heatmap squares */
-  /* Target the specific classes used in YearlyActivityHeatmap.tsx */
-  /* Force solid fill for all activity squares */
-  .rounded-sm.bg-emerald-400,
-  .rounded-sm.bg-emerald-500,
-  .rounded-sm.bg-emerald-600,
-  .rounded-sm.bg-emerald-700 {
-    background: #34d399 !important; /* Use solid fill */
-    border: none !important; /* Remove borders */
-    box-shadow: 0 0 0 1px #10b981 !important; /* Add subtle outline */
-    min-width: 16px !important;
-    min-height: 16px !important;
-  }
+  /* Ultra-aggressive fix for yearly activity heatmap squares */
+  /* This completely overrides the original styles to ensure squares are filled */
   
-  /* Different color levels */
-  .rounded-sm.bg-emerald-400 { background: #34d399 !important; }
-  .rounded-sm.bg-emerald-500 { background: #10b981 !important; }
-  .rounded-sm.bg-emerald-600 { background: #059669 !important; }
-  .rounded-sm.bg-emerald-700 { background: #047857 !important; }
-  
-  /* Make sure the colors are visible in both light and dark mode */
-  .dark .rounded-sm.bg-emerald-400 { background: #34d399 !important; }
-  .dark .rounded-sm.bg-emerald-500 { background: #10b981 !important; }
-  .dark .rounded-sm.bg-emerald-600 { background: #059669 !important; }
-  .dark .rounded-sm.bg-emerald-700 { background: #047857 !important; }
-  
-  /* Additional fix for any other emerald classes */
-  [class*="bg-emerald"].rounded-sm {
-    background-color: currentColor !important;
+  /* Target all activity squares directly */
+  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .rounded-sm {
+    width: 16px !important;
+    height: 16px !important;
     border: none !important;
-    min-width: 16px !important;
-    min-height: 16px !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
   }
   
-  /* Override any hover effects that might be changing the background */
-  [class*="bg-emerald"].rounded-sm:hover {
-    opacity: 0.8 !important;
+  /* Force solid background colors for each level */
+  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-400,
+  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-400:hover {
+    background-color: #34d399 !important;
+    background: #34d399 !important;
+  }
+  
+  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-500,
+  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-500:hover {
+    background-color: #10b981 !important;
+    background: #10b981 !important;
+  }
+  
+  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-600,
+  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-600:hover {
+    background-color: #059669 !important;
+    background: #059669 !important;
+  }
+  
+  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-700,
+  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-700:hover {
+    background-color: #047857 !important;
+    background: #047857 !important;
+  }
+  
+  /* Ensure even empty squares have proper styling */
+  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-gray-200 {
+    background-color: #e5e7eb !important;
+    background: #e5e7eb !important;
+    border: none !important;
+  }
+  
+  /* Force dark mode colors too */
+  .dark .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-400,
+  .dark .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-400:hover {
+    background-color: #34d399 !important;
+    background: #34d399 !important;
+  }
+  
+  .dark .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-500,
+  .dark .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-500:hover {
+    background-color: #10b981 !important;
+    background: #10b981 !important;
+  }
+  
+  .dark .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-600,
+  .dark .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-600:hover {
+    background-color: #059669 !important;
+    background: #059669 !important;
+  }
+  
+  .dark .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-700,
+  .dark .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-700:hover {
+    background-color: #047857 !important;
+    background: #047857 !important;
   }
 }
 
