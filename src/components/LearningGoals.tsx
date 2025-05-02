@@ -488,210 +488,67 @@ export default function LearningGoals({ items }: Props) {
   const CategorySelect = () => {
     // Get unique categories from items
     const categories = Array.from(new Set(items.map(item => item.category || 'Uncategorized'))).filter(Boolean);
-    const [isOpen, setIsOpen] = useState(false);
-
-    // Close dropdown when clicking outside
-    useEffect(() => {
-      if (!isOpen) return;
-      
-      const handleClickOutside = (e: MouseEvent) => {
-        setIsOpen(false);
-      };
-      
-      // Add with a slight delay to prevent immediate closing
-      const timer = setTimeout(() => {
-        document.addEventListener('click', handleClickOutside);
-      }, 100);
-      
-      return () => {
-        clearTimeout(timer);
-        document.removeEventListener('click', handleClickOutside);
-      };
-    }, [isOpen]);
 
     return (
-      <div className="relative" onClick={(e) => e.stopPropagation()}>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setIsOpen(!isOpen);
-          }}
-          style={{
-            backgroundColor: 'white',
-            color: '#333',
-            border: '1px solid #ccc',
-            borderRadius: '0.375rem',
-            padding: '0.5rem 1rem',
-            width: '100%',
-            textAlign: 'left',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            cursor: 'pointer'
-          }}
-        >
-          <span style={{ color: newGoal.category ? '#333' : '#888' }}>
-            {newGoal.category || "Select category"}
-          </span>
-          <ChevronDown style={{ width: '16px', height: '16px', opacity: 0.5 }} />
-        </button>
-
-        {isOpen && (
-          <div 
-            style={{
-              position: 'absolute',
-              zIndex: 9999,
-              top: '100%',
-              left: 0,
-              width: '100%',
-              backgroundColor: 'white',
-              border: '1px solid #ccc',
-              borderRadius: '0.375rem',
-              marginTop: '0.25rem',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-              maxHeight: '200px',
-              overflowY: 'auto'
-            }}
-          >
-            {categories.map(category => (
-              <div
-                key={category}
-                style={{
-                  padding: '0.5rem 1rem',
-                  cursor: 'pointer',
-                  color: '#333',
-                  backgroundColor: 'white',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f5f5f5';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = 'white';
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setNewGoal(prev => ({ ...prev, category }));
-                  setIsOpen(false);
-                }}
-              >
-                {category}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <select
+        value={newGoal.category}
+        onChange={(e) => setNewGoal(prev => ({ ...prev, category: e.target.value }))}
+        style={{
+          width: '100%',
+          padding: '0.5rem',
+          borderRadius: '0.375rem',
+          border: '1px solid #d1d5db',
+          backgroundColor: '#f0f9ff',
+          color: '#333',
+          fontSize: '0.875rem',
+          appearance: 'auto',
+          height: '40px'
+        }}
+      >
+        <option value="" disabled>
+          Select category
+        </option>
+        {categories.map(category => (
+          <option key={category} value={category}>
+            {category}
+          </option>
+        ))}
+      </select>
     );
   };
 
   const PrioritySelect = () => {
-    const [isOpen, setIsOpen] = useState(false);
     const priorities = [
       { value: 'high', label: 'High' },
       { value: 'medium', label: 'Medium' },
       { value: 'low', label: 'Low' }
     ];
-    
-    const getPriorityLabel = (value: string) => {
-      const priority = priorities.find(p => p.value === value);
-      return priority ? priority.label : 'Select priority';
-    };
-
-    // Close dropdown when clicking outside
-    useEffect(() => {
-      if (!isOpen) return;
-      
-      const handleClickOutside = (e: MouseEvent) => {
-        setIsOpen(false);
-      };
-      
-      // Add with a slight delay to prevent immediate closing
-      const timer = setTimeout(() => {
-        document.addEventListener('click', handleClickOutside);
-      }, 100);
-      
-      return () => {
-        clearTimeout(timer);
-        document.removeEventListener('click', handleClickOutside);
-      };
-    }, [isOpen]);
 
     return (
-      <div className="relative" onClick={(e) => e.stopPropagation()}>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setIsOpen(!isOpen);
-          }}
-          style={{
-            backgroundColor: 'white',
-            color: '#333',
-            border: '1px solid #ccc',
-            borderRadius: '0.375rem',
-            padding: '0.5rem 1rem',
-            width: '100%',
-            textAlign: 'left',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            cursor: 'pointer'
-          }}
-        >
-          <span style={{ color: newGoal.priority ? '#333' : '#888' }}>
-            {getPriorityLabel(newGoal.priority)}
-          </span>
-          <ChevronDown style={{ width: '16px', height: '16px', opacity: 0.5 }} />
-        </button>
-
-        {isOpen && (
-          <div 
-            style={{
-              position: 'absolute',
-              zIndex: 9999,
-              top: '100%',
-              left: 0,
-              width: '100%',
-              backgroundColor: 'white',
-              border: '1px solid #ccc',
-              borderRadius: '0.375rem',
-              marginTop: '0.25rem',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-              maxHeight: '200px',
-              overflowY: 'auto'
-            }}
-          >
-            {priorities.map(priority => (
-              <div
-                key={priority.value}
-                style={{
-                  padding: '0.5rem 1rem',
-                  cursor: 'pointer',
-                  color: '#333',
-                  backgroundColor: 'white',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f5f5f5';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = 'white';
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setNewGoal(prev => ({ ...prev, priority: priority.value as Priority }));
-                  setIsOpen(false);
-                }}
-              >
-                {priority.label}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <select
+        value={newGoal.priority}
+        onChange={(e) => setNewGoal(prev => ({ ...prev, priority: e.target.value as Priority }))}
+        style={{
+          width: '100%',
+          padding: '0.5rem',
+          borderRadius: '0.375rem',
+          border: '1px solid #d1d5db',
+          backgroundColor: '#f0f9ff',
+          color: '#333',
+          fontSize: '0.875rem',
+          appearance: 'auto',
+          height: '40px'
+        }}
+      >
+        <option value="" disabled>
+          Select priority
+        </option>
+        {priorities.map(priority => (
+          <option key={priority.value} value={priority.value}>
+            {priority.label}
+          </option>
+        ))}
+      </select>
     );
   };
 
