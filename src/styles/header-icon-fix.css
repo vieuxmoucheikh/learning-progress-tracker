@@ -1,0 +1,68 @@
+/**
+ * Direct fix for header icons in dark mode
+ * This file specifically targets the icons in headers like "Learning Goals" and "Learning Focus"
+ */
+
+/* Force all SVG elements to have white color in dark mode */
+.dark svg {
+  color: white !important;
+}
+
+/* Force all SVG paths to have white fill and stroke */
+.dark svg path,
+.dark svg circle,
+.dark svg rect,
+.dark svg line,
+.dark svg polyline,
+.dark svg polygon {
+  fill: white !important;
+  stroke: white !important;
+}
+
+/* Fix the Learning Goals header background */
+.dark .bg-green-500,
+.dark .bg-green-600,
+.dark [class*="bg-green"] {
+  background-color: #16a34a !important;
+}
+
+/* Fix the radar chart in Learning Focus */
+.dark .radar-chart line,
+.dark .radar-chart path,
+.dark .radar-chart polyline,
+.dark .radar-chart polygon {
+  stroke: white !important;
+  fill: none !important;
+}
+
+/* Fix the text in the radar chart */
+.dark .radar-chart text {
+  fill: white !important;
+  stroke: none !important;
+}
+
+/* Fix for any text in headers */
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6 {
+  color: white !important;
+}
+
+/* Fix for the specific icons in headers */
+.dark .header-icon,
+.dark .title-icon,
+.dark .section-icon {
+  color: white !important;
+  fill: white !important;
+  stroke: white !important;
+}
+
+/* Fix for the brain icon */
+.dark .logo-icon {
+  color: white !important;
+  fill: white !important;
+  stroke: white !important;
+}

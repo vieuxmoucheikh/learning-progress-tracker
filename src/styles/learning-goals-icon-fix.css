@@ -1,48 +1,50 @@
 /**
- * Specific fix for the Learning Goals icon in the header
- * This targets the icon in the green header specifically
+ * Direct fix for Learning Goals and Learning Focus icons
  */
 
-/* Force white color for all SVG elements in the green header */
+/* Fix for the Learning Goals header */
+.dark div:has(> :contains("Learning Goals")) {
+  background-color: #16a34a !important;
+  color: white !important;
+}
+
+/* Fix for the Learning Focus header */
+.dark div:has(> :contains("Learning Focus")) {
+  color: white !important;
+}
+
+/* Fix all SVG icons in headers */
 .dark svg {
   color: white !important;
 }
 
-/* Target all SVG paths, circles, and rects to ensure they're white */
-.dark svg path,
-.dark svg circle,
-.dark svg rect,
-.dark svg line,
-.dark svg polyline,
-.dark svg polygon {
+/* Force white fill and stroke for all SVG elements */
+.dark svg * {
   fill: white !important;
   stroke: white !important;
 }
 
-/* Target the specific green header */
+/* Specific fix for the green header */
 .dark .bg-green-500,
 .dark .bg-green-600,
 .dark [class*="bg-green"] {
   background-color: #16a34a !important;
 }
 
-/* Target the specific icon in the green header */
-.dark .bg-green-500 svg,
-.dark .bg-green-600 svg,
-.dark [class*="bg-green"] svg {
-  color: white !important;
-  fill: white !important;
+/* Specific fix for the Learning Focus chart */
+.dark [class*="focus-chart"] line,
+.dark [class*="radar-chart"] line,
+.dark [class*="spider-chart"] line,
+.dark [class*="web-chart"] line {
   stroke: white !important;
+  fill: none !important;
 }
 
-/* Ensure the brain icon is white */
-.dark .logo-icon {
-  color: white !important;
-}
-
-/* Target the Learning Goals text to ensure it's white */
-.dark .bg-green-500 span,
-.dark .bg-green-600 span,
-.dark [class*="bg-green"] span {
+/* Force white color for all text in headers */
+.dark h1,
+.dark h2,
+.dark h3,
+.dark .text-white,
+.dark [class*="header"] {
   color: white !important;
 }

@@ -1,0 +1,83 @@
+/**
+ * Ultra-specific fixes for the Learning Goals and Learning Focus header icons
+ * This is a targeted approach to ensure these specific icons display correctly in dark mode
+ */
+
+/* Target the Learning Goals header specifically */
+.dark [class*="learning-goals-header"] svg,
+.dark [class*="learning-goals-title"] svg,
+.dark [class*="learning-goals-section"] svg,
+.dark div:has(> h1:contains("Learning Goals")) svg,
+.dark div:has(> h2:contains("Learning Goals")) svg,
+.dark div:has(> h3:contains("Learning Goals")) svg,
+.dark div:has(> span:contains("Learning Goals")) svg {
+  color: white !important;
+  fill: white !important;
+  stroke: white !important;
+}
+
+/* Target the Learning Focus header specifically */
+.dark [class*="learning-focus-header"] svg,
+.dark [class*="learning-focus-title"] svg,
+.dark [class*="learning-focus-section"] svg,
+.dark div:has(> h1:contains("Learning Focus")) svg,
+.dark div:has(> h2:contains("Learning Focus")) svg,
+.dark div:has(> h3:contains("Learning Focus")) svg,
+.dark div:has(> span:contains("Learning Focus")) svg {
+  color: white !important;
+  fill: white !important;
+  stroke: white !important;
+}
+
+/* Target the SVG paths directly */
+.dark [class*="learning-goals"] svg path,
+.dark [class*="learning-goals"] svg circle,
+.dark [class*="learning-goals"] svg rect,
+.dark [class*="learning-focus"] svg path,
+.dark [class*="learning-focus"] svg circle,
+.dark [class*="learning-focus"] svg rect {
+  fill: white !important;
+  stroke: white !important;
+}
+
+/* Target the green background header */
+.dark .bg-green-500,
+.dark .bg-green-600,
+.dark [class*="bg-green"] {
+  background-color: #16a34a !important;
+}
+
+/* Target the header text to ensure it's white */
+.dark .bg-green-500 *,
+.dark .bg-green-600 *,
+.dark [class*="bg-green"] * {
+  color: white !important;
+}
+
+/* Fix for the brain icon in the navigation */
+.dark .logo-icon,
+.dark .brain-icon,
+.dark [class*="logo"] svg,
+.dark [class*="brain"] svg {
+  color: white !important;
+  fill: white !important;
+  stroke: white !important;
+}
+
+/* Fix for the specific analytics page icons */
+.dark [class*="analytics"] svg,
+.dark [class*="chart"] svg,
+.dark [class*="graph"] svg {
+  color: white !important;
+  fill: white !important;
+  stroke: white !important;
+}
+
+/* Override any inline styles that might be causing issues */
+.dark svg[style*="color"],
+.dark svg[style*="fill"],
+.dark svg[style*="stroke"] {
+  color: white !important;
+  fill: white !important;
+  stroke: white !important;
+}
