@@ -4,10 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
-import { Plus, Trash2, Target, Clock, LucideCalendar, X } from 'lucide-react';
+import { Plus, Trash2, Target, Clock, LucideCalendar, X, ChevronDown } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { addGoal, deleteGoal, getGoals, updateGoal, addSession } from '@/lib/database';
 import { LearningItem } from '@/types';
@@ -489,37 +488,90 @@ export default function LearningGoals({ items }: Props) {
   const CategorySelect = () => {
     // Get unique categories from items
     const categories = Array.from(new Set(items.map(item => item.category || 'Uncategorized'))).filter(Boolean);
+    const [isOpen, setIsOpen] = useState(false);
 
     return (
-      <Select
-        value={newGoal.category}
-        onValueChange={(value: string) => setNewGoal(prev => ({ ...prev, category: value }))}>
-        <SelectTrigger className="goal-input">
-          <SelectValue placeholder="Select category" />
-        </SelectTrigger>
-        <SelectContent className="bg-background border-input rounded-md shadow-md">
-          {categories.map(category => (
-            <SelectItem key={category} value={category} className="text-foreground">
-              {category}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        >
+          <span className={newGoal.category ? "text-foreground" : "text-muted-foreground"}>
+            {newGoal.category || "Select category"}
+          </span>
+          <ChevronDown className="h-4 w-4 opacity-50" />
+        </button>
+
+        {isOpen && (
+          <div className="absolute z-[9999] mt-1 w-full rounded-md border border-input bg-background shadow-lg">
+            <div className="max-h-60 overflow-auto py-1">
+              {categories.map(category => (
+                <div
+                  key={category}
+                  className="px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                  onClick={() => {
+                    setNewGoal(prev => ({ ...prev, category }));
+                    setIsOpen(false);
+                  }}
+                >
+                  {category}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     );
   };
 
-  const PrioritySelect = () => (
-    <Select value={newGoal.priority} onValueChange={(value: Priority) => setNewGoal({ ...newGoal, priority: value })}>
-      <SelectTrigger className="goal-input">
-        <SelectValue placeholder="Select priority" />
-      </SelectTrigger>
-      <SelectContent className="bg-background border-input rounded-md shadow-md">
-        <SelectItem value="high" className="text-foreground">High</SelectItem>
-        <SelectItem value="medium" className="text-foreground">Medium</SelectItem>
-        <SelectItem value="low" className="text-foreground">Low</SelectItem>
-      </SelectContent>
-    </Select>
-  );
+  const PrioritySelect = () => {
+    const [isOpen, setIsOpen] = useState(false);
+    const priorities = [
+      { value: 'high', label: 'High' },
+      { value: 'medium', label: 'Medium' },
+      { value: 'low', label: 'Low' }
+    ];
+    
+    const getPriorityLabel = (value: string) => {
+      const priority = priorities.find(p => p.value === value);
+      return priority ? priority.label : 'Select priority';
+    };
+
+    return (
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        >
+          <span className={newGoal.priority ? "text-foreground" : "text-muted-foreground"}>
+            {getPriorityLabel(newGoal.priority)}
+          </span>
+          <ChevronDown className="h-4 w-4 opacity-50" />
+        </button>
+
+        {isOpen && (
+          <div className="absolute z-[9999] mt-1 w-full rounded-md border border-input bg-background shadow-lg">
+            <div className="max-h-60 overflow-auto py-1">
+              {priorities.map(priority => (
+                <div
+                  key={priority.value}
+                  className="px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                  onClick={() => {
+                    setNewGoal(prev => ({ ...prev, priority: priority.value as Priority }));
+                    setIsOpen(false);
+                  }}
+                >
+                  {priority.label}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
