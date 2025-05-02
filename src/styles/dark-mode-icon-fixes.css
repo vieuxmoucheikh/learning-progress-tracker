@@ -12,6 +12,19 @@
   stroke-width: 2px !important;
 }
 
+/* Fix for the Learning Goals icon in the green header */
+.dark [class*="bg-green-"] svg,
+.dark [style*="background-color: rgb(22, 163, 74)"] svg,
+.dark [style*="background: rgb(22, 163, 74)"] svg,
+.dark [style*="background-color:#16a34a"] svg,
+.dark [style*="background:#16a34a"] svg {
+  color: white !important;
+  fill: white !important;
+  stroke: white !important;
+  stroke-width: 2px !important;
+  filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.5)) !important;
+}
+
 /* Fix for the active/completed states in learning goals */
 .dark .px-3.py-1.rounded-full.text-xs.font-semibold.shadow-sm {
   background-color: rgba(30, 41, 59, 0.8) !important;
