@@ -673,10 +673,10 @@ export default function LearningGoals({ items }: Props) {
                         month: "space-y-4",
                         caption: "flex justify-center pt-1 relative items-center",
                         caption_label: "text-sm font-medium",
-                        nav: "space-x-1 flex items-center",
-                        nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
-                        nav_button_previous: "absolute left-1", 
-                        nav_button_next: "absolute right-1", 
+                        nav: "space-x-1 flex items-center justify-between w-full relative z-10", // Added z-index and full width
+                        nav_button: "h-8 w-8 bg-transparent p-0 opacity-70 hover:opacity-100 cursor-pointer z-20", // Increased size, added cursor and z-index
+                        nav_button_previous: "absolute left-1 flex items-center justify-center", // Added flex centering
+                        nav_button_next: "absolute right-1 flex items-center justify-center", // Added flex centering
                         table: "w-full border-collapse space-y-1",
                         head_row: "flex",
                         head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
