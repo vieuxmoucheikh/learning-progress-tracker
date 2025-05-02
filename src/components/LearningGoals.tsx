@@ -490,35 +490,96 @@ export default function LearningGoals({ items }: Props) {
     const categories = Array.from(new Set(items.map(item => item.category || 'Uncategorized'))).filter(Boolean);
     const [isOpen, setIsOpen] = useState(false);
 
+    // Close dropdown when clicking outside
+    useEffect(() => {
+      if (!isOpen) return;
+      
+      const handleClickOutside = (e: MouseEvent) => {
+        setIsOpen(false);
+      };
+      
+      // Add with a slight delay to prevent immediate closing
+      const timer = setTimeout(() => {
+        document.addEventListener('click', handleClickOutside);
+      }, 100);
+      
+      return () => {
+        clearTimeout(timer);
+        document.removeEventListener('click', handleClickOutside);
+      };
+    }, [isOpen]);
+
     return (
-      <div className="relative">
+      <div className="relative" onClick={(e) => e.stopPropagation()}>
         <button
           type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsOpen(!isOpen);
+          }}
+          style={{
+            backgroundColor: 'white',
+            color: '#333',
+            border: '1px solid #ccc',
+            borderRadius: '0.375rem',
+            padding: '0.5rem 1rem',
+            width: '100%',
+            textAlign: 'left',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            cursor: 'pointer'
+          }}
         >
-          <span className={newGoal.category ? "text-foreground" : "text-muted-foreground"}>
+          <span style={{ color: newGoal.category ? '#333' : '#888' }}>
             {newGoal.category || "Select category"}
           </span>
-          <ChevronDown className="h-4 w-4 opacity-50" />
+          <ChevronDown style={{ width: '16px', height: '16px', opacity: 0.5 }} />
         </button>
 
         {isOpen && (
-          <div className="absolute z-[9999] mt-1 w-full rounded-md border border-input bg-background shadow-lg">
-            <div className="max-h-60 overflow-auto py-1">
-              {categories.map(category => (
-                <div
-                  key={category}
-                  className="px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                  onClick={() => {
-                    setNewGoal(prev => ({ ...prev, category }));
-                    setIsOpen(false);
-                  }}
-                >
-                  {category}
-                </div>
-              ))}
-            </div>
+          <div 
+            style={{
+              position: 'absolute',
+              zIndex: 9999,
+              top: '100%',
+              left: 0,
+              width: '100%',
+              backgroundColor: 'white',
+              border: '1px solid #ccc',
+              borderRadius: '0.375rem',
+              marginTop: '0.25rem',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              maxHeight: '200px',
+              overflowY: 'auto'
+            }}
+          >
+            {categories.map(category => (
+              <div
+                key={category}
+                style={{
+                  padding: '0.5rem 1rem',
+                  cursor: 'pointer',
+                  color: '#333',
+                  backgroundColor: 'white',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f5f5f5';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = 'white';
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setNewGoal(prev => ({ ...prev, category }));
+                  setIsOpen(false);
+                }}
+              >
+                {category}
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -538,35 +599,96 @@ export default function LearningGoals({ items }: Props) {
       return priority ? priority.label : 'Select priority';
     };
 
+    // Close dropdown when clicking outside
+    useEffect(() => {
+      if (!isOpen) return;
+      
+      const handleClickOutside = (e: MouseEvent) => {
+        setIsOpen(false);
+      };
+      
+      // Add with a slight delay to prevent immediate closing
+      const timer = setTimeout(() => {
+        document.addEventListener('click', handleClickOutside);
+      }, 100);
+      
+      return () => {
+        clearTimeout(timer);
+        document.removeEventListener('click', handleClickOutside);
+      };
+    }, [isOpen]);
+
     return (
-      <div className="relative">
+      <div className="relative" onClick={(e) => e.stopPropagation()}>
         <button
           type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsOpen(!isOpen);
+          }}
+          style={{
+            backgroundColor: 'white',
+            color: '#333',
+            border: '1px solid #ccc',
+            borderRadius: '0.375rem',
+            padding: '0.5rem 1rem',
+            width: '100%',
+            textAlign: 'left',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            cursor: 'pointer'
+          }}
         >
-          <span className={newGoal.priority ? "text-foreground" : "text-muted-foreground"}>
+          <span style={{ color: newGoal.priority ? '#333' : '#888' }}>
             {getPriorityLabel(newGoal.priority)}
           </span>
-          <ChevronDown className="h-4 w-4 opacity-50" />
+          <ChevronDown style={{ width: '16px', height: '16px', opacity: 0.5 }} />
         </button>
 
         {isOpen && (
-          <div className="absolute z-[9999] mt-1 w-full rounded-md border border-input bg-background shadow-lg">
-            <div className="max-h-60 overflow-auto py-1">
-              {priorities.map(priority => (
-                <div
-                  key={priority.value}
-                  className="px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                  onClick={() => {
-                    setNewGoal(prev => ({ ...prev, priority: priority.value as Priority }));
-                    setIsOpen(false);
-                  }}
-                >
-                  {priority.label}
-                </div>
-              ))}
-            </div>
+          <div 
+            style={{
+              position: 'absolute',
+              zIndex: 9999,
+              top: '100%',
+              left: 0,
+              width: '100%',
+              backgroundColor: 'white',
+              border: '1px solid #ccc',
+              borderRadius: '0.375rem',
+              marginTop: '0.25rem',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              maxHeight: '200px',
+              overflowY: 'auto'
+            }}
+          >
+            {priorities.map(priority => (
+              <div
+                key={priority.value}
+                style={{
+                  padding: '0.5rem 1rem',
+                  cursor: 'pointer',
+                  color: '#333',
+                  backgroundColor: 'white',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f5f5f5';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = 'white';
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setNewGoal(prev => ({ ...prev, priority: priority.value as Priority }));
+                  setIsOpen(false);
+                }}
+              >
+                {priority.label}
+              </div>
+            ))}
           </div>
         )}
       </div>
