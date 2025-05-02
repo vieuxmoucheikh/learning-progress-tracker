@@ -39,6 +39,32 @@
   }
 }
 
+/* Mobile fix for activity calendar indicators being clipped in light mode */
+@media (max-width: 768px) {
+  /* Adjust the calendar cell to ensure the green indicators are fully visible */
+  .activity-calendar-cell,
+  .calendar-activity-cell,
+  .yearly-activity-calendar-cell,
+  .react-calendar__tile, /* Common calendar cell class */
+  .calendar-heatmap-day {
+    padding: 2px !important;
+    box-sizing: content-box !important;
+    overflow: visible !important;
+  }
+
+  /* If indicators are SVG or divs inside the cell, ensure their size fits */
+  .activity-calendar-cell > *,
+  .calendar-activity-cell > *,
+  .yearly-activity-calendar-cell > *,
+  .react-calendar__tile > *,
+  .calendar-heatmap-day > * {
+    max-width: 100%;
+    max-height: 100%;
+    box-sizing: border-box !important;
+  }
+}
+
+
 /* Fix for any screen size */
 .overflow-x-auto {
   -webkit-overflow-scrolling: touch;
