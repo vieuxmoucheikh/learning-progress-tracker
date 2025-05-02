@@ -3,6 +3,38 @@
  * This file fixes the background colors for icons and analytics page elements in dark mode
  */
 
+/* Fix for the Learning Goals navigation icon in TabNavigation */
+.dark .tab-navigation-item .nav-icon svg,
+.dark .mobile-logo .logo-icon {
+  color: white !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+}
+
+/* Fix for the active/completed states in learning goals */
+.dark .px-3.py-1.rounded-full.text-xs.font-semibold.shadow-sm {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+
+/* Specific status colors */
+.dark .bg-green-100.text-green-800 {
+  background-color: rgba(16, 185, 129, 0.2) !important;
+  color: #4ade80 !important;
+}
+
+.dark .bg-blue-100.text-blue-800 {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+  color: #60a5fa !important;
+}
+
+.dark .bg-red-100.text-red-800 {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+}
+
 /* Fix for the stats grid in learning goals cards */
 .dark .bg-muted\/30,
 .dark [class*="bg-muted"] {
@@ -34,41 +66,6 @@
   background: linear-gradient(to right, #f87171, #dc2626) !important;
 }
 
-/* Fix for the icon colors */
-.dark .text-muted-foreground svg {
-  color: #94a3b8 !important;
-}
-
-/* Fix for the priority colors */
-.dark .text-red-500 {
-  color: #f87171 !important;
-}
-
-.dark .text-yellow-500,
-.dark .text-amber-500 {
-  color: #fbbf24 !important;
-}
-
-.dark .text-blue-500 {
-  color: #60a5fa !important;
-}
-
-/* Fix for the status badges */
-.dark .bg-green-100.text-green-800 {
-  background-color: rgba(16, 185, 129, 0.2) !important;
-  color: #4ade80 !important;
-}
-
-.dark .bg-blue-100.text-blue-800 {
-  background-color: rgba(59, 130, 246, 0.2) !important;
-  color: #60a5fa !important;
-}
-
-.dark .bg-red-100.text-red-800 {
-  background-color: rgba(239, 68, 68, 0.2) !important;
-  color: #f87171 !important;
-}
-
 /* Fix for the card background */
 .dark .card {
   background-color: #0f172a !important;
@@ -78,19 +75,6 @@
 /* Fix for the category indicator */
 .dark .inline-block.w-2\.5.h-2\.5.rounded-full.bg-primary\/70 {
   background-color: #3b82f6 !important;
-}
-
-/* Fix for the daily goal colors */
-.dark .text-green-500 {
-  color: #10b981 !important;
-}
-
-.dark .text-yellow-500 {
-  color: #f59e0b !important;
-}
-
-.dark .text-red-500 {
-  color: #ef4444 !important;
 }
 
 /* Direct fix for the category labels in the image */
@@ -107,17 +91,6 @@
 .dark .oll {
   background-color: #7e22ce !important;
   color: white !important;
-}
-
-/* Fix for the active/completed states */
-.dark [class*="active"] {
-  background-color: rgba(59, 130, 246, 0.3) !important;
-  color: #93c5fd !important;
-}
-
-.dark [class*="complete"] {
-  background-color: rgba(16, 185, 129, 0.3) !important;
-  color: #6ee7b7 !important;
 }
 
 /* Fix for the grid boxes in the learning goals */
@@ -174,5 +147,45 @@
   background-color: #475569 !important;
   padding: 4px !important;
   border-radius: 50% !important;
+  color: white !important;
+}
+
+/* Fix for the mobile logo background */
+.dark .mobile-logo {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Fix for the navigation tab icons */
+.dark .tab-navigation-item {
+  background-color: rgba(30, 41, 59, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .tab-navigation-item.active {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Fix for the Learning Goals tab specifically */
+.dark .tab-navigation-item:nth-child(3) {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+}
+
+.dark .tab-navigation-item:nth-child(3).active {
+  background-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Fix for the Learning Goals icon in the header */
+.dark h2.text-3xl.font-bold.tracking-tight + button.bg-blue-500 {
+  background-color: #3b82f6 !important;
+  border: none !important;
+  color: white !important;
+}
+
+/* Fix for the status badges in the learning goals */
+.dark [class*="getStatusColor"] {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   color: white !important;
 }
