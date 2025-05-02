@@ -10,6 +10,8 @@ import { CalendarIcon, Clock, Check, Target, X, Plus, Trash2 } from 'lucide-reac
 import { supabase } from '@/lib/supabase';
 import { addGoal, deleteGoal, getGoals, updateGoal, addSession } from '@/lib/database';
 import { LearningItem } from '@/types';
+import '@/styles/goal-dialog-fixes.css';
+import '@/styles/calendar-fixes.css';
 import { clsx } from 'clsx';
 import { PomodoroTimer } from './pomodoro/PomodoroTimer';
 import type { Session } from '../types';
