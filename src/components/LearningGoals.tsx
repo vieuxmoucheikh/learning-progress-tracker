@@ -16,6 +16,7 @@ import { PomodoroTimer } from './pomodoro/PomodoroTimer';
 import type { Session } from '../types';
 import '../styles/analytics-card-fixes.css';
 import '../styles/dark-mode-icon-fixes.css';
+import '../styles/goal-dialog-fixes.css'; // Fix for select components in goal dialog
 
 type GoalStatus = 'active' | 'completed' | 'overdue';
 
