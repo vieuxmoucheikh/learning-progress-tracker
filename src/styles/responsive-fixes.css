@@ -50,6 +50,9 @@
     padding: 2px !important;
     box-sizing: content-box !important;
     overflow: visible !important;
+    /* NEW: force color fill for activity squares */
+    background-color: currentColor !important;
+    border-width: 0 !important;
   }
 
   /* If indicators are SVG or divs inside the cell, ensure their size fits */
@@ -62,7 +65,18 @@
     max-height: 100%;
     box-sizing: border-box !important;
   }
+
+  /* NEW: If indicators are SVG rects, force fill */
+  .activity-calendar-cell rect,
+  .calendar-activity-cell rect,
+  .yearly-activity-calendar-cell rect,
+  .react-calendar__tile rect,
+  .calendar-heatmap-day rect {
+    fill: currentColor !important;
+    stroke: none !important;
+  }
 }
+
 
 
 /* Fix for any screen size */
