@@ -15,7 +15,6 @@ import { clsx } from 'clsx';
 import { PomodoroTimer } from './pomodoro/PomodoroTimer';
 import type { Session } from '../types';
 import '../styles/analytics-card-fixes.css';
-import '../styles/learning-goals-dark-mode-fixes.css';
 
 type GoalStatus = 'active' | 'completed' | 'overdue';
 

@@ -13,7 +13,6 @@ import { format } from "date-fns";
 import { clsx } from "clsx";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { LucideCalendar } from 'lucide-react';
-import '../styles/stats-analytics-dark-mode-fixes.css';
 
 interface Props {
   items: LearningItem[];
@@ -28,6 +27,7 @@ export function Stats({ items }: Props) {
     category: '',
     priority: 'medium' as const,
   });
+  const [isAddingGoal, setIsAddingGoal] = useState(false);
 
   const stats = useMemo(() => {
     // Calculate status distribution
@@ -111,8 +111,6 @@ export function Stats({ items }: Props) {
 
   const handleAddGoal = () => {
     // Implementation for adding a new goal
-    console.log('Adding goal:', newGoal);
-    setIsGoalPopoverOpen(false);
   };
 
   return (
@@ -160,7 +158,7 @@ export function Stats({ items }: Props) {
                     <Calendar
                       mode="single"
                       selected={newGoal.targetDate ? new Date(newGoal.targetDate) : undefined}
-                      onSelect={(date: Date | undefined) => {
+                      onSelect={(date) => {
                         if (date) {
                           const localDate = new Date(date);
                           const formattedDate = localDate.toISOString().split('T')[0];
@@ -171,7 +169,7 @@ export function Stats({ items }: Props) {
                           }));
                         }
                       }}
-                      disabled={(date: Date) => {
+                      disabled={(date) => {
                         const today = new Date();
                         today.setHours(0, 0, 0, 0);
                         return date < today;

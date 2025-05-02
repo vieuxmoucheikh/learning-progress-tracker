@@ -30,8 +30,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { subDays, subMonths, startOfYear, isAfter, format } from "date-fns";
-import '../styles/stats-analytics-dark-mode-fixes.css';
-import '../styles/charts-dark-mode-fixes.css';
 
 interface AnalyticsTabProps {
   items: LearningItem[];

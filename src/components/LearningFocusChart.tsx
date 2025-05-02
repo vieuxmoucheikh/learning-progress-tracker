@@ -1,4 +1,4 @@
-
+import React from 'react';
 import {
   Radar,
   RadarChart,
@@ -19,7 +19,7 @@ interface LearningFocusChartProps {
 
 export function LearningFocusChart({ data }: LearningFocusChartProps) {
   return (
-    <div className="w-full h-[300px] bg-white dark:bg-slate-900 rounded-lg p-4 shadow-sm">
+    <div className="w-full h-[300px] bg-white rounded-lg p-4 shadow-sm">
       <h3 className="text-lg font-semibold mb-4">Learning Focus</h3>
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
