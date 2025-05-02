@@ -639,8 +639,33 @@ export default function LearningGoals({ items }: Props) {
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Target Date</label>
               <div className="relative group">
-                <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500 group-hover:text-blue-600 transition-colors" />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    // Find the date input and programmatically click it
+                    const dateInput = document.getElementById('target-date-input');
+                    if (dateInput) {
+                      dateInput.click();
+                      dateInput.focus();
+                    }
+                  }}
+                  className="w-full flex items-center justify-between pl-3 pr-3 py-2 bg-blue-50 border-blue-100 hover:bg-blue-100 text-left"
+                >
+                  <div className="flex items-center">
+                    <CalendarIcon className="mr-2 h-4 w-4 text-blue-500" />
+                    <span className={newGoal.targetDate ? "text-gray-800" : "text-gray-400"}>
+                      {newGoal.targetDate 
+                        ? format(newGoal.targetDate, "MMMM d, yyyy") 
+                        : "Select a date"}
+                    </span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-blue-400" />
+                </Button>
+                
+                {/* Hidden native date input for functionality */}
                 <input
+                  id="target-date-input"
                   type="date"
                   value={newGoal.targetDate ? format(newGoal.targetDate, "yyyy-MM-dd") : ''}
                   min={format(new Date(), "yyyy-MM-dd")}
@@ -648,16 +673,8 @@ export default function LearningGoals({ items }: Props) {
                     const date = e.target.value ? new Date(e.target.value) : undefined;
                     setNewGoal(prev => ({ ...prev, targetDate: date }));
                   }}
-                  className="w-full pl-10 py-2.5 rounded-md border border-blue-100 bg-blue-50/70 text-gray-800 font-medium
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 shadow-sm
-                           hover:bg-blue-50 transition-colors cursor-pointer"
-                  placeholder="Select a date"
+                  className="sr-only" // Hidden visually but still functional
                 />
-                {!newGoal.targetDate && 
-                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-blue-400 pointer-events-none">
-                    Select date
-                  </span>
-                }
               </div>
               {newGoal.targetDate && 
                 <p className="text-xs text-blue-600 flex items-center gap-1 pl-1">
