@@ -1,53 +1,29 @@
 /**
  * Dark Mode Icon Background Fixes
- * This file fixes the background colors for icons and analytics page elements in dark mode
- * Adapted from the working mobile styles
+ * This file fixes the background colors for icons in dark mode
+ * Specifically targeting the Learning Goals and Learning Focus icons
  */
 
-/* DIRECT COPY FROM MOBILE STYLES THAT WORK */
-/* Styles for all SVG icons in dark mode */
-html[data-theme="dark"] svg, 
-html[data-theme="dark"] svg path, 
-html[data-theme="dark"] svg line, 
-html[data-theme="dark"] svg polyline, 
-html[data-theme="dark"] svg circle, 
-html[data-theme="dark"] svg rect,
-.dark svg, 
-.dark svg path, 
-.dark svg line, 
-.dark svg polyline, 
-.dark svg circle, 
-.dark svg rect {
-  stroke-width: inherit !important;
-  stroke-linecap: round !important;
-  stroke-linejoin: round !important;
+/* CRITICAL: Direct fix for green buttons with icons in dark mode */
+.dark button.bg-green-500 svg,
+.dark button.bg-green-600 svg,
+.dark button[class*="bg-green-"] svg,
+.dark [class*="bg-green-"] svg,
+.dark [style*="background-color: rgb(22, 163, 74)"] svg,
+.dark [style*="background: rgb(22, 163, 74)"] svg,
+.dark [style*="background-color:#16a34a"] svg,
+.dark [style*="background:#16a34a"] svg,
+.dark h2 + button svg,
+.dark h2 ~ button svg,
+.dark h2 + div button svg,
+.dark h2 ~ div button svg,
+.dark .flex.items-center.justify-between button svg,
+.dark [class*="card-header"] button svg {
+  color: white !important;
   fill: none !important;
-  shape-rendering: geometricPrecision !important;
-}
-
-/* Styles for icons in cards and buttons */
-html[data-theme="dark"] .card svg,
-html[data-theme="dark"] .learning-item-card svg,
-html[data-theme="dark"] .item-wrapper svg,
-.dark .card svg,
-.dark .learning-item-card svg,
-.dark .item-wrapper svg {
-  color: currentColor !important;
-  stroke: currentColor !important;
-  fill: none !important;
-  stroke-width: 2px !important;
-}
-
-/* Fix for buttons with icons */
-html[data-theme="dark"] .card button svg,
-html[data-theme="dark"] .learning-item-card button svg,
-html[data-theme="dark"] .item-wrapper button svg,
-.dark .card button svg,
-.dark .learning-item-card button svg,
-.dark .item-wrapper button svg {
-  fill: none !important;
-  stroke: currentColor !important;
-  stroke-width: 2px !important;
+  stroke: white !important;
+  stroke-width: 2.5px !important;
+  filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.5)) !important;
 }
 
 /* Specific color fixes for buttons */
@@ -86,16 +62,29 @@ html[data-theme="dark"] button.bg-green-600,
   filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.5)) !important;
 }
 
-/* Specific fixes for Learning Goals and Learning Focus icons */
-.dark [class*="bg-green-"] svg,
-.dark [style*="background-color: rgb(22, 163, 74)"] svg,
-.dark [style*="background: rgb(22, 163, 74)"] svg,
-.dark [style*="background-color:#16a34a"] svg,
-.dark [style*="background:#16a34a"] svg,
+/* CRITICAL: High-specificity fixes for Learning Goals and Learning Focus icons */
+.dark button.bg-green-500 svg,
+.dark button.bg-green-600 svg,
+.dark button[class*="bg-green-"] svg,
+.dark button[style*="background-color: rgb(22, 163, 74)"] svg,
+.dark button[style*="background: rgb(22, 163, 74)"] svg,
+.dark button[style*="background-color:#16a34a"] svg,
+.dark button[style*="background:#16a34a"] svg,
 .dark h2.text-3xl.font-bold.tracking-tight + button svg,
 .dark h2[class*="text-3xl"] + button svg,
 .dark h2 + button.bg-green-500 svg,
-.dark h2 + button.bg-green-600 svg {
+.dark h2 + button.bg-green-600 svg,
+html[data-theme="dark"] button.bg-green-500 svg,
+html[data-theme="dark"] button.bg-green-600 svg,
+html[data-theme="dark"] button[class*="bg-green-"] svg,
+html[data-theme="dark"] button[style*="background-color: rgb(22, 163, 74)"] svg,
+html[data-theme="dark"] button[style*="background: rgb(22, 163, 74)"] svg,
+html[data-theme="dark"] button[style*="background-color:#16a34a"] svg,
+html[data-theme="dark"] button[style*="background:#16a34a"] svg,
+html[data-theme="dark"] h2.text-3xl.font-bold.tracking-tight + button svg,
+html[data-theme="dark"] h2[class*="text-3xl"] + button svg,
+html[data-theme="dark"] h2 + button.bg-green-500 svg,
+html[data-theme="dark"] h2 + button.bg-green-600 svg {
   color: white !important;
   fill: none !important;
   stroke: white !important;
@@ -103,7 +92,7 @@ html[data-theme="dark"] button.bg-green-600,
   filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.5)) !important;
 }
 
-/* Ultra-specific fix for Learning Focus */
+/* ULTRA-SPECIFIC fix for Learning Focus and Learning Goals buttons */
 .dark h2:has(span:contains("Learning Focus")) ~ div button svg,
 .dark h2:has(span:contains("Learning Goals")) ~ div button svg,
 .dark h2[class*="text-3xl"] ~ div button svg,
@@ -112,7 +101,26 @@ html[data-theme="dark"] button.bg-green-600,
 .dark h2 + div button.bg-green-500 svg,
 .dark h2 + div button.bg-green-600 svg,
 .dark [class*="card-header"] button.bg-green-500 svg,
-.dark [class*="card-header"] button.bg-green-600 svg {
+.dark [class*="card-header"] button.bg-green-600 svg,
+.dark div:has(h2:contains("Learning Focus")) button svg,
+.dark div:has(h2:contains("Learning Goals")) button svg,
+.dark div:has(h2) button.bg-green-500 svg,
+.dark div:has(h2) button.bg-green-600 svg,
+.dark div:has(h2) button[class*="bg-green-"] svg,
+html[data-theme="dark"] h2:has(span:contains("Learning Focus")) ~ div button svg,
+html[data-theme="dark"] h2:has(span:contains("Learning Goals")) ~ div button svg,
+html[data-theme="dark"] h2[class*="text-3xl"] ~ div button svg,
+html[data-theme="dark"] .flex.items-center.justify-between button.bg-green-500 svg,
+html[data-theme="dark"] .flex.items-center.justify-between button.bg-green-600 svg,
+html[data-theme="dark"] h2 + div button.bg-green-500 svg,
+html[data-theme="dark"] h2 + div button.bg-green-600 svg,
+html[data-theme="dark"] [class*="card-header"] button.bg-green-500 svg,
+html[data-theme="dark"] [class*="card-header"] button.bg-green-600 svg,
+html[data-theme="dark"] div:has(h2:contains("Learning Focus")) button svg,
+html[data-theme="dark"] div:has(h2:contains("Learning Goals")) button svg,
+html[data-theme="dark"] div:has(h2) button.bg-green-500 svg,
+html[data-theme="dark"] div:has(h2) button.bg-green-600 svg,
+html[data-theme="dark"] div:has(h2) button[class*="bg-green-"] svg {
   color: white !important;
   fill: none !important;
   stroke: white !important;
