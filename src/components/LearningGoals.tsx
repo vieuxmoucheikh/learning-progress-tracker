@@ -639,40 +639,37 @@ export default function LearningGoals({ items }: Props) {
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Target Date</label>
               <div className="relative">
-                {/* Visible button that matches app style */}
-                <div 
-                  onClick={() => {
-                    const dateInput = document.getElementById('target-date-input') as HTMLInputElement;
-                    if (dateInput) {
-                      dateInput.click();
-                      dateInput.focus();
-                    }
-                  }}
-                  className="w-full flex items-center justify-between px-4 py-2.5 rounded-md bg-blue-500 hover:bg-blue-600 text-white cursor-pointer transition-colors"
-                >
-                  <div className="flex items-center">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    <span>
-                      {newGoal.targetDate 
-                        ? format(newGoal.targetDate, "MMMM d, yyyy") 
-                        : "Select a date"}
-                    </span>
+                <div className="flex">
+                  <input
+                    type="date"
+                    id="target-date-input"
+                    value={newGoal.targetDate ? format(newGoal.targetDate, "yyyy-MM-dd") : ''}
+                    min={format(new Date(), "yyyy-MM-dd")}
+                    onChange={(e) => {
+                      const date = e.target.value ? new Date(e.target.value) : undefined;
+                      setNewGoal(prev => ({ ...prev, targetDate: date }));
+                    }}
+                    className="w-full rounded-md bg-blue-500 text-white py-2.5 px-4 cursor-pointer"
+                    style={{
+                      colorScheme: 'dark',
+                    }}
+                  />
+                  <div 
+                    className="absolute inset-0 flex items-center pointer-events-none px-4"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center">
+                        <CalendarIcon className="mr-2 h-4 w-4 text-white" />
+                        <span className="text-white">
+                          {newGoal.targetDate 
+                            ? format(newGoal.targetDate, "MMMM d, yyyy") 
+                            : "Select a date"}
+                        </span>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-white" />
+                    </div>
                   </div>
-                  <ChevronRight className="h-4 w-4" />
                 </div>
-                
-                {/* Hidden date input */}
-                <input
-                  id="target-date-input"
-                  type="date"
-                  value={newGoal.targetDate ? format(newGoal.targetDate, "yyyy-MM-dd") : ''}
-                  min={format(new Date(), "yyyy-MM-dd")}
-                  onChange={(e) => {
-                    const date = e.target.value ? new Date(e.target.value) : undefined;
-                    setNewGoal(prev => ({ ...prev, targetDate: date }));
-                  }}
-                  className="opacity-0 absolute top-0 left-0 w-full h-full cursor-pointer z-[-1]" 
-                />
               </div>
               {newGoal.targetDate && 
                 <p className="text-xs text-blue-600 flex items-center gap-1 pl-1">
