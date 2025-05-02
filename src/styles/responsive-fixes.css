@@ -63,73 +63,43 @@
     box-sizing: border-box !important;
   }
 
-  /* Ultra-aggressive fix for yearly activity heatmap squares */
-  /* This completely overrides the original styles to ensure squares are filled */
+  /* Simple fix for yearly activity heatmap squares */
+  /* Target only the color classes to preserve the original structure */
   
-  /* Target all activity squares directly */
-  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .rounded-sm {
-    width: 16px !important;
-    height: 16px !important;
-    border: none !important;
-    box-shadow: none !important;
-    overflow: hidden !important;
-  }
-  
-  /* Force solid background colors for each level */
-  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-400,
-  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-400:hover {
+  /* Level 1 - Light green */
+  .bg-emerald-400 {
     background-color: #34d399 !important;
-    background: #34d399 !important;
   }
   
-  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-500,
-  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-500:hover {
+  /* Level 2 - Medium green */
+  .bg-emerald-500 {
     background-color: #10b981 !important;
-    background: #10b981 !important;
   }
   
-  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-600,
-  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-600:hover {
+  /* Level 3 - Dark green */
+  .bg-emerald-600 {
     background-color: #059669 !important;
-    background: #059669 !important;
   }
   
-  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-700,
-  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-700:hover {
+  /* Level 4 - Deepest green */
+  .bg-emerald-700 {
     background-color: #047857 !important;
-    background: #047857 !important;
   }
   
-  /* Ensure even empty squares have proper styling */
-  .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-gray-200 {
+  /* Empty squares */
+  .bg-gray-200 {
     background-color: #e5e7eb !important;
-    background: #e5e7eb !important;
-    border: none !important;
   }
   
-  /* Force dark mode colors too */
-  .dark .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-400,
-  .dark .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-400:hover {
-    background-color: #34d399 !important;
-    background: #34d399 !important;
-  }
+  /* Ensure the same colors in dark mode */
+  .dark .bg-emerald-400 { background-color: #34d399 !important; }
+  .dark .bg-emerald-500 { background-color: #10b981 !important; }
+  .dark .bg-emerald-600 { background-color: #059669 !important; }
+  .dark .bg-emerald-700 { background-color: #047857 !important; }
   
-  .dark .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-500,
-  .dark .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-500:hover {
-    background-color: #10b981 !important;
-    background: #10b981 !important;
-  }
-  
-  .dark .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-600,
-  .dark .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-600:hover {
-    background-color: #059669 !important;
-    background: #059669 !important;
-  }
-  
-  .dark .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-700,
-  .dark .grid-cols-\[repeat\(53\,minmax\(16px\,1fr\)\)\] .bg-emerald-700:hover {
-    background-color: #047857 !important;
-    background: #047857 !important;
+  /* Make sure hover doesn't change the color */
+  [class*="bg-emerald"]:hover {
+    opacity: 0.9 !important;
   }
 }
 
