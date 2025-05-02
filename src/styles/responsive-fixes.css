@@ -50,9 +50,6 @@
     padding: 2px !important;
     box-sizing: content-box !important;
     overflow: visible !important;
-    /* NEW: force color fill for activity squares */
-    background-color: currentColor !important;
-    border-width: 0 !important;
   }
 
   /* If indicators are SVG or divs inside the cell, ensure their size fits */
@@ -66,14 +63,31 @@
     box-sizing: border-box !important;
   }
 
-  /* NEW: If indicators are SVG rects, force fill */
-  .activity-calendar-cell rect,
-  .calendar-activity-cell rect,
-  .yearly-activity-calendar-cell rect,
-  .react-calendar__tile rect,
-  .calendar-heatmap-day rect {
-    fill: currentColor !important;
-    stroke: none !important;
+  /* Fix for yearly activity heatmap squares */
+  /* Target the specific classes used in YearlyActivityHeatmap.tsx */
+  .bg-emerald-400, .bg-emerald-500, .bg-emerald-600, .bg-emerald-700 {
+    border: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* Force solid background for activity squares in light mode */
+  [class*="bg-emerald"] {
+    border-width: 0 !important;
+    background-color: var(--tw-bg-opacity) !important;
+  }
+  
+  /* Specific fix for the yearly activity calendar squares with borders */
+  [class*="bg-emerald"][class*="border-"] {
+    border: none !important;
+    box-shadow: 0 0 0 1px currentColor !important;
+  }
+  
+  /* Ensure the color fills the entire square */
+  .rounded-sm[class*="bg-emerald"] {
+    min-width: 16px !important;
+    min-height: 16px !important;
+    box-sizing: border-box !important;
+    border: none !important;
   }
 }
 
