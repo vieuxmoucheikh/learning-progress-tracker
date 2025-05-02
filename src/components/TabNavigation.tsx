@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Brain, LayoutDashboard, Activity, FlaskConical, FlameKindling, Clock, List } from 'lucide-react';
 import './TabNavigation.css';
-import '../styles/learning-goals-icon-fix.css';
 
 export const TAB_OPTIONS = {
   DASHBOARD: 'dashboard',

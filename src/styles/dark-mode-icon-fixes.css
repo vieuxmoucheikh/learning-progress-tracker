@@ -12,53 +12,6 @@
   stroke-width: 2px !important;
 }
 
-/* Fix for the Learning Goals icon in the green header */
-.dark .mobile-logo-container,
-.dark [class*="learning-goals"] {
-  background-color: transparent !important;
-}
-
-/* Target the specific green header with Learning Goals text */
-.dark div[style*="background-color: rgb(34, 197, 94)"],
-.dark div[style*="background-color:#22c55e"],
-.dark div[style*="background: rgb(34, 197, 94)"],
-.dark div[style*="background:#22c55e"],
-.dark div[class*="bg-green"],
-.dark [class*="learning-goals-header"],
-.dark .bg-green-500 {
-  background-color: #16a34a !important;
-  color: white !important;
-}
-
-/* Target the specific icon in the green header */
-.dark div[style*="background-color: rgb(34, 197, 94)"] svg,
-.dark div[style*="background-color:#22c55e"] svg,
-.dark div[style*="background: rgb(34, 197, 94)"] svg,
-.dark div[style*="background:#22c55e"] svg,
-.dark div[class*="bg-green"] svg,
-.dark [class*="learning-goals-header"] svg,
-.dark .bg-green-500 svg {
-  color: white !important;
-  fill: white !important;
-  stroke: white !important;
-  stroke-width: 2px !important;
-}
-
-/* Extremely specific targeting for the Learning Goals header icon */
-.dark circle,
-.dark rect,
-.dark path {
-  fill: white !important;
-  stroke: white !important;
-}
-
-/* Target the specific brain icon */
-.dark .logo-icon {
-  color: white !important;
-  fill: white !important;
-  stroke: white !important;
-}
-
 /* Fix for the active/completed states in learning goals */
 .dark .px-3.py-1.rounded-full.text-xs.font-semibold.shadow-sm {
   background-color: rgba(30, 41, 59, 0.8) !important;
