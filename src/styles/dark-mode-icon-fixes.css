@@ -1,95 +1,76 @@
 /**
  * Dark Mode Icon Background Fixes
- * This file fixes the background colors for icons in dark mode
- * Specifically targeting the Learning Goals and Learning Focus icons
+ * Minimal solution specifically targeting the Learning Goals and Learning Focus buttons
  */
 
-/* Simple and direct approach to fix all button icons in dark mode */
-.dark button svg {
+/* Force white icons in dark mode for all buttons */
+.dark button svg,
+.dark button svg *,
+html[data-theme="dark"] button svg,
+html[data-theme="dark"] button svg * {
   stroke: white !important;
   fill: none !important;
   color: white !important;
   stroke-width: 2.5px !important;
 }
 
-/* Target all SVG elements inside buttons */
-.dark button svg path,
-.dark button svg line,
-.dark button svg circle,
-.dark button svg polyline,
-.dark button svg rect {
+/* Target the specific buttons in the Learning Goals section */
+.dark div:has(h2:contains("Learning Goals")) button svg,
+.dark div:has(h2:contains("Learning Goals")) button svg *,
+.dark div:has(h2.text-3xl) button svg,
+.dark div:has(h2.text-3xl) button svg * {
   stroke: white !important;
   fill: none !important;
   color: white !important;
   stroke-width: 2.5px !important;
 }
 
-/* Target green buttons specifically */
+/* Target the specific buttons in the Learning Focus section */
+.dark div:has(h2:contains("Learning Focus")) button svg,
+.dark div:has(h2:contains("Learning Focus")) button svg *,
+.dark div:has(h2.text-3xl) button svg,
+.dark div:has(h2.text-3xl) button svg * {
+  stroke: white !important;
+  fill: none !important;
+  color: white !important;
+  stroke-width: 2.5px !important;
+}
+
+/* Target all buttons with green background */
 .dark button.bg-green-500 svg,
-.dark button.bg-green-600 svg {
+.dark button.bg-green-600 svg,
+.dark button.bg-green-500 svg *,
+.dark button.bg-green-600 svg *,
+html[data-theme="dark"] button.bg-green-500 svg,
+html[data-theme="dark"] button.bg-green-600 svg,
+html[data-theme="dark"] button.bg-green-500 svg *,
+html[data-theme="dark"] button.bg-green-600 svg * {
   stroke: white !important;
   fill: none !important;
   color: white !important;
   stroke-width: 2.5px !important;
 }
 
-/* Target all SVG elements inside green buttons */
-.dark button.bg-green-500 svg path,
-.dark button.bg-green-500 svg line,
-.dark button.bg-green-500 svg circle,
-.dark button.bg-green-500 svg polyline,
-.dark button.bg-green-500 svg rect,
-.dark button.bg-green-600 svg path,
-.dark button.bg-green-600 svg line,
-.dark button.bg-green-600 svg circle,
-.dark button.bg-green-600 svg polyline,
-.dark button.bg-green-600 svg rect {
+/* Target all buttons in flex containers */
+.dark .flex button svg,
+.dark .flex button svg *,
+html[data-theme="dark"] .flex button svg,
+html[data-theme="dark"] .flex button svg * {
   stroke: white !important;
   fill: none !important;
   color: white !important;
   stroke-width: 2.5px !important;
 }
 
-/* Target buttons next to headings */
+/* Target all buttons next to headings */
 .dark h2 + button svg,
-.dark h2 ~ button svg {
-  stroke: white !important;
-  fill: none !important;
-  color: white !important;
-  stroke-width: 2.5px !important;
-}
-
-/* Target all SVG elements inside buttons next to headings */
-.dark h2 + button svg path,
-.dark h2 + button svg line,
-.dark h2 + button svg circle,
-.dark h2 + button svg polyline,
-.dark h2 + button svg rect,
-.dark h2 ~ button svg path,
-.dark h2 ~ button svg line,
-.dark h2 ~ button svg circle,
-.dark h2 ~ button svg polyline,
-.dark h2 ~ button svg rect {
-  stroke: white !important;
-  fill: none !important;
-  color: white !important;
-  stroke-width: 2.5px !important;
-}
-
-/* Target buttons in flex containers */
-.dark .flex button svg {
-  stroke: white !important;
-  fill: none !important;
-  color: white !important;
-  stroke-width: 2.5px !important;
-}
-
-/* Target all SVG elements inside buttons in flex containers */
-.dark .flex button svg path,
-.dark .flex button svg line,
-.dark .flex button svg circle,
-.dark .flex button svg polyline,
-.dark .flex button svg rect {
+.dark h2 + button svg *,
+.dark h2 ~ button svg,
+.dark h2 ~ button svg *,
+html[data-theme="dark"] h2 + button svg,
+html[data-theme="dark"] h2 + button svg *,
+html[data-theme="dark"] h2 ~ button svg,
+html[data-theme="dark"] h2 ~ button svg * {
   stroke: white !important;
   fill: none !important;
   color: white !important;
