@@ -1,6 +1,7 @@
 /**
  * Dark Mode Icon Background Fixes
  * Minimal solution specifically targeting the Learning Goals and Learning Focus buttons
+ * and fixing yearly activity calendar indicators in dark mode on mobile
  */
 
 /* Force white icons in dark mode for all buttons */
@@ -12,6 +13,7 @@ html[data-theme="dark"] button svg * {
   fill: none !important;
   color: white !important;
   stroke-width: 2.5px !important;
+  filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.5)) !important;
 }
 
 /* Target the specific buttons in the Learning Goals section */
@@ -111,6 +113,66 @@ html[data-theme="dark"] button.bg-green-600,
   stroke: white !important;
   stroke-width: 2.5px !important;
   filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.5)) !important;
+}
+
+/* Fix for yearly activity calendar indicators in dark mode on mobile */
+.dark .bg-emerald-400,
+.dark .bg-emerald-500,
+.dark .bg-emerald-600,
+.dark .bg-emerald-700,
+html[data-theme="dark"] .bg-emerald-400,
+html[data-theme="dark"] .bg-emerald-500,
+html[data-theme="dark"] .bg-emerald-600,
+html[data-theme="dark"] .bg-emerald-700 {
+  opacity: 1 !important;
+  border-width: 2px !important;
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Increase visibility for different activity levels */
+.dark .bg-emerald-400,
+html[data-theme="dark"] .bg-emerald-400 {
+  background-color: #34d399 !important; /* emerald-400 */
+  border-color: #10b981 !important; /* emerald-500 */
+}
+
+.dark .bg-emerald-500,
+html[data-theme="dark"] .bg-emerald-500 {
+  background-color: #10b981 !important; /* emerald-500 */
+  border-color: #059669 !important; /* emerald-600 */
+}
+
+.dark .bg-emerald-600,
+html[data-theme="dark"] .bg-emerald-600 {
+  background-color: #059669 !important; /* emerald-600 */
+  border-color: #047857 !important; /* emerald-700 */
+}
+
+.dark .bg-emerald-700,
+html[data-theme="dark"] .bg-emerald-700 {
+  background-color: #047857 !important; /* emerald-700 */
+  border-color: #065f46 !important; /* emerald-800 */
+}
+
+/* Ensure hover states maintain visibility */
+.dark .hover\:bg-emerald-400:hover,
+html[data-theme="dark"] .hover\:bg-emerald-400:hover {
+  background-color: #34d399 !important; /* emerald-400 */
+}
+
+.dark .hover\:bg-emerald-500:hover,
+html[data-theme="dark"] .hover\:bg-emerald-500:hover {
+  background-color: #10b981 !important; /* emerald-500 */
+}
+
+.dark .hover\:bg-emerald-600:hover,
+html[data-theme="dark"] .hover\:bg-emerald-600:hover {
+  background-color: #059669 !important; /* emerald-600 */
+}
+
+.dark .hover\:bg-emerald-700:hover,
+html[data-theme="dark"] .hover\:bg-emerald-700:hover {
+  background-color: #047857 !important; /* emerald-700 */
 }
 
 /* CRITICAL: High-specificity fixes for Learning Goals and Learning Focus icons */
