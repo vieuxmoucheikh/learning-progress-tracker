@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useToast } from '@/components/ui/use-toast';
 import { useState, useEffect } from 'react';
 import { format, addDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isSameMonth, isSameDay, subMonths, addMonths } from 'date-fns';
-import { CalendarIcon, Clock, Target, X, Plus, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarIcon, Clock, Target, Plus, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { addGoal, deleteGoal, getGoals, updateGoal } from '@/lib/database';
 import { LearningItem } from '@/types';
@@ -449,14 +449,23 @@ export default function LearningGoals({ items }: Props) {
         <Button onClick={() => setIsAddingGoal(true)} className="bg-blue-500 hover:bg-blue-600 text-white">Add Goal</Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {isLoadingGoals ? (
+        <div className="flex justify-center items-center py-10">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      ) : goals.length === 0 ? (
+        <div className="text-center py-10">
+          <p className="text-lg text-muted-foreground">No learning goals yet. Add your first goal to get started!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6 max-w-6xl mx-auto">
         {goals.map(goal => {
           const progress = calculateProgress(goal.category);
           const progressPercentage = Math.min(100, (progress / goal.targetHours) * 100);
           const currentStatus = getGoalStatus(goal);
 
           return (
-            <Card key={goal.id} className="relative group overflow-hidden border border-border/40 hover:border-primary/40 transition-all duration-300 hover:shadow-lg">
+            <Card key={goal.id} className="relative group overflow-hidden border border-border/40 hover:border-primary/40 transition-all duration-300 hover:shadow-lg min-h-[420px] flex flex-col">
               {/* Status indicator stripe at the top */}
               <div className={clsx(
                 'absolute top-0 left-0 w-full h-1.5',
@@ -479,7 +488,7 @@ export default function LearningGoals({ items }: Props) {
                 </Button>
               </div>
               
-              <div className="p-6 pt-7">
+              <div className="p-5 pt-7 flex-1 flex flex-col">
                 {/* Header with title and status */}
                 <div className="flex justify-between items-start mb-5">
                   <div className="space-y-1.5">
@@ -520,24 +529,24 @@ export default function LearningGoals({ items }: Props) {
                 </div>
 
                 {/* Stats grid */}
-                <div className="grid grid-cols-2 gap-4 mb-5">
-                  <div className="bg-muted/30 hover:bg-muted/40 transition-colors duration-200 rounded-xl p-3.5 border border-border/20">
+                <div className="grid grid-cols-2 gap-3 mb-5 mt-auto">
+                  <div className="bg-muted/30 hover:bg-muted/40 transition-colors duration-200 rounded-xl p-3 border border-border/20">
                     <div className="flex items-center gap-2 mb-1.5">
                       <Target className={clsx('h-4 w-4', getPriorityColor(goal.priority))} />
                       <span className="text-xs font-medium text-muted-foreground">Target</span>
                     </div>
-                    <p className="text-lg font-semibold">{goal.targetHours}h</p>
+                    <p className="text-base font-semibold">{goal.targetHours}h</p>
                   </div>
                   
-                  <div className="bg-muted/30 hover:bg-muted/40 transition-colors duration-200 rounded-xl p-3.5 border border-border/20">
+                  <div className="bg-muted/30 hover:bg-muted/40 transition-colors duration-200 rounded-xl p-3 border border-border/20">
                     <div className="flex items-center gap-2 mb-1.5">
                       <Clock className="h-4 w-4 text-muted-foreground" />
                       <span className="text-xs font-medium text-muted-foreground">Spent</span>
                     </div>
-                    <p className="text-lg font-semibold">{progress}h</p>
+                    <p className="text-base font-semibold">{progress}h</p>
                   </div>
                   
-                  <div className="bg-muted/30 hover:bg-muted/40 transition-colors duration-200 rounded-xl p-3.5 border border-border/20">
+                  <div className="bg-muted/30 hover:bg-muted/40 transition-colors duration-200 rounded-xl p-3 border border-border/20">
                     <div className="flex items-center gap-2 mb-1.5">
                       <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                       <span className="text-xs font-medium text-muted-foreground">Deadline</span>
@@ -545,13 +554,13 @@ export default function LearningGoals({ items }: Props) {
                     <p className="text-sm font-semibold">{getRemainingTime(goal.targetDate)}</p>
                   </div>
                   
-                  <div className="bg-muted/30 hover:bg-muted/40 transition-colors duration-200 rounded-xl p-3.5 border border-border/20">
+                  <div className="bg-muted/30 hover:bg-muted/40 transition-colors duration-200 rounded-xl p-3 border border-border/20">
                     <div className="flex items-center gap-2 mb-1.5">
                       <Clock className={clsx('h-4 w-4', getDailyHoursColor(calculateMinHoursPerDay(goal)))} />
                       <span className="text-xs font-medium text-muted-foreground">Daily Goal</span>
                     </div>
                     <p className={clsx('text-sm font-semibold', getDailyHoursColor(calculateMinHoursPerDay(goal)))}>
-                      {formatDailyGoal(calculateMinHoursPerDay(goal))}
+                      {calculateMinHoursPerDay(goal) > 0 ? `${calculateMinHoursPerDay(goal).toFixed(1)}h/day` : 'Done!'}
                     </p>
                   </div>
                 </div>
@@ -578,6 +587,7 @@ export default function LearningGoals({ items }: Props) {
           );
         })}
       </div>
+      )}
       {/* Add Goal Dialog */}
       <Dialog open={isAddingGoal} onOpenChange={setIsAddingGoal}>
         <DialogContent className="sm:max-w-[500px] goal-dialog-content p-0 sm:p-6 sm:pt-4">
@@ -638,38 +648,26 @@ export default function LearningGoals({ items }: Props) {
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Target Date</label>
-              <div className="relative">
-                <div className="flex">
-                  <input
-                    type="date"
-                    id="target-date-input"
-                    value={newGoal.targetDate ? format(newGoal.targetDate, "yyyy-MM-dd") : ''}
-                    min={format(new Date(), "yyyy-MM-dd")}
-                    onChange={(e) => {
-                      const date = e.target.value ? new Date(e.target.value) : undefined;
-                      setNewGoal(prev => ({ ...prev, targetDate: date }));
-                    }}
-                    className="w-full rounded-md bg-blue-500 text-white py-2.5 px-4 cursor-pointer"
-                    style={{
-                      colorScheme: 'dark',
-                    }}
-                  />
-                  <div 
-                    className="absolute inset-0 flex items-center pointer-events-none px-4"
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center">
-                        <CalendarIcon className="mr-2 h-4 w-4 text-white" />
-                        <span className="text-white">
-                          {newGoal.targetDate 
-                            ? format(newGoal.targetDate, "MMMM d, yyyy") 
-                            : "Select a date"}
-                        </span>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-white" />
-                    </div>
-                  </div>
-                </div>
+              <div className="relative group">
+                <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500 group-hover:text-blue-600 transition-colors" />
+                <input
+                  type="date"
+                  value={newGoal.targetDate ? format(newGoal.targetDate, "yyyy-MM-dd") : ''}
+                  min={format(new Date(), "yyyy-MM-dd")}
+                  onChange={(e) => {
+                    const date = e.target.value ? new Date(e.target.value) : undefined;
+                    setNewGoal(prev => ({ ...prev, targetDate: date }));
+                  }}
+                  className="w-full pl-10 py-2.5 rounded-md border border-blue-100 bg-blue-50/70 text-gray-800 font-medium
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 shadow-sm
+                           hover:bg-blue-50 transition-colors cursor-pointer"
+                  placeholder="Select a date"
+                />
+                {!newGoal.targetDate && 
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-blue-400 pointer-events-none">
+                    Select date
+                  </span>
+                }
               </div>
               {newGoal.targetDate && 
                 <p className="text-xs text-blue-600 flex items-center gap-1 pl-1">
