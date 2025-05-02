@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
-import { format } from 'date-fns';
-import { Plus, Trash2, Target, Clock, LucideCalendar, X, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { format, parseISO, isValid, isToday } from 'date-fns';
+import { CalendarIcon, Clock, Check, Target, X, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { addGoal, deleteGoal, getGoals, updateGoal, addSession } from '@/lib/database';
 import { LearningItem } from '@/types';
@@ -490,30 +490,31 @@ export default function LearningGoals({ items }: Props) {
     const categories = Array.from(new Set(items.map(item => item.category || 'Uncategorized'))).filter(Boolean);
 
     return (
-      <select
-        value={newGoal.category}
-        onChange={(e) => setNewGoal(prev => ({ ...prev, category: e.target.value }))}
-        style={{
-          width: '100%',
-          padding: '0.5rem',
-          borderRadius: '0.375rem',
-          border: '1px solid #d1d5db',
-          backgroundColor: '#f0f9ff',
-          color: '#333',
-          fontSize: '0.875rem',
-          appearance: 'auto',
-          height: '40px'
-        }}
-      >
-        <option value="" disabled>
-          Select category
-        </option>
-        {categories.map(category => (
-          <option key={category} value={category}>
-            {category}
-          </option>
-        ))}
-      </select>
+      <div>
+        <input
+          type="text"
+          list="categories-list"
+          value={newGoal.category}
+          placeholder="Select category"
+          onChange={(e) => setNewGoal(prev => ({ ...prev, category: e.target.value }))}
+          style={{
+            width: '100%',
+            padding: '0.5rem',
+            borderRadius: '0.375rem',
+            border: '1px solid #d1d5db',
+            backgroundColor: '#f0f9ff',
+            color: '#333',
+            fontSize: '0.875rem',
+            height: '40px',
+            boxSizing: 'border-box'
+          }}
+        />
+        <datalist id="categories-list">
+          {categories.map(category => (
+            <option key={category} value={category} />
+          ))}
+        </datalist>
+      </div>
     );
   };
 
@@ -525,30 +526,31 @@ export default function LearningGoals({ items }: Props) {
     ];
 
     return (
-      <select
-        value={newGoal.priority}
-        onChange={(e) => setNewGoal(prev => ({ ...prev, priority: e.target.value as Priority }))}
-        style={{
-          width: '100%',
-          padding: '0.5rem',
-          borderRadius: '0.375rem',
-          border: '1px solid #d1d5db',
-          backgroundColor: '#f0f9ff',
-          color: '#333',
-          fontSize: '0.875rem',
-          appearance: 'auto',
-          height: '40px'
-        }}
-      >
-        <option value="" disabled>
-          Select priority
-        </option>
-        {priorities.map(priority => (
-          <option key={priority.value} value={priority.value}>
-            {priority.label}
-          </option>
-        ))}
-      </select>
+      <div>
+        <input
+          type="text"
+          list="priorities-list"
+          value={newGoal.priority}
+          placeholder="Select priority"
+          onChange={(e) => setNewGoal(prev => ({ ...prev, priority: e.target.value as Priority }))}
+          style={{
+            width: '100%',
+            padding: '0.5rem',
+            borderRadius: '0.375rem',
+            border: '1px solid #d1d5db',
+            backgroundColor: '#f0f9ff',
+            color: '#333',
+            fontSize: '0.875rem',
+            height: '40px',
+            boxSizing: 'border-box'
+          }}
+        />
+        <datalist id="priorities-list">
+          {priorities.map(priority => (
+            <option key={priority.value} value={priority.value}>{priority.label}</option>
+          ))}
+        </datalist>
+      </div>
     );
   };
 
@@ -655,7 +657,7 @@ export default function LearningGoals({ items }: Props) {
                   
                   <div className="bg-muted/30 hover:bg-muted/40 transition-colors duration-200 rounded-xl p-3.5 border border-border/20">
                     <div className="flex items-center gap-2 mb-1.5">
-                      <LucideCalendar className="h-4 w-4 text-muted-foreground" />
+                      <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                       <span className="text-xs font-medium text-muted-foreground">Deadline</span>
                     </div>
                     <p className="text-sm font-semibold">{getRemainingTime(goal.targetDate)}</p>
@@ -745,7 +747,7 @@ export default function LearningGoals({ items }: Props) {
                   !newGoal.targetDate && "text-muted-foreground"
                 )}
               >
-                <LucideCalendar className="mr-2 h-4 w-4" />
+                <CalendarIcon className="mr-2 h-4 w-4" />
                 {newGoal.targetDate ? format(newGoal.targetDate, "PPP") : <span>Pick a date</span>}
               </Button>
               {showCalendar && (
