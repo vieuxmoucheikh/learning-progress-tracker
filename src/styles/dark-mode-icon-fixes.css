@@ -1,0 +1,111 @@
+/**
+ * Dark Mode Icon Background Fixes
+ * This file fixes the background colors for icons and analytics page elements in dark mode
+ */
+
+/* Fix icon backgrounds in learning goals cards */
+html.dark .learning-goals-container .icon-container,
+html[data-theme="dark"] .learning-goals-container .icon-container,
+html.dark [class*="goal-card"] [class*="icon-container"],
+html[data-theme="dark"] [class*="goal-card"] [class*="icon-container"] {
+  background-color: rgba(15, 23, 42, 0.6) !important; /* darker background */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Specific icon background colors for different categories */
+html.dark .learning-goals-container .wbdbdb,
+html[data-theme="dark"] .learning-goals-container .wbdbdb,
+html.dark [class*="goal-card"] .wbdbdb {
+  background-color: #1e3a8a !important; /* deep blue */
+  color: white !important;
+}
+
+html.dark .learning-goals-container .ml,
+html[data-theme="dark"] .learning-goals-container .ml,
+html.dark [class*="goal-card"] .ml {
+  background-color: #065f46 !important; /* deep green */
+  color: white !important;
+}
+
+html.dark .learning-goals-container .oll,
+html[data-theme="dark"] .learning-goals-container .oll,
+html.dark [class*="goal-card"] .oll {
+  background-color: #7e22ce !important; /* deep purple */
+  color: white !important;
+}
+
+/* Fix for active/complete state backgrounds */
+html.dark .learning-goals-container .active,
+html[data-theme="dark"] .learning-goals-container .active,
+html.dark [class*="goal-card"] .active {
+  background-color: rgba(59, 130, 246, 0.3) !important; /* blue with transparency */
+  color: #93c5fd !important;
+}
+
+html.dark .learning-goals-container .complete,
+html[data-theme="dark"] .learning-goals-container .complete,
+html.dark [class*="goal-card"] .complete {
+  background-color: rgba(16, 185, 129, 0.3) !important; /* green with transparency */
+  color: #6ee7b7 !important;
+}
+
+/* Fix for progress bars in dark mode */
+html.dark .learning-goals-container .progress-bar,
+html[data-theme="dark"] .learning-goals-container .progress-bar,
+html.dark [class*="goal-card"] .progress-bar {
+  background-color: #1e293b !important;
+}
+
+html.dark .learning-goals-container .progress-fill,
+html[data-theme="dark"] .learning-goals-container .progress-fill,
+html.dark [class*="goal-card"] .progress-fill {
+  background: linear-gradient(to right, #3b82f6, #10b981) !important;
+}
+
+/* Fix for target/spent time containers */
+html.dark .learning-goals-container .time-container,
+html[data-theme="dark"] .learning-goals-container .time-container,
+html.dark [class*="goal-card"] .time-container {
+  background-color: #1e293b !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Fix for deadline and daily goal containers */
+html.dark .learning-goals-container .deadline-container,
+html[data-theme="dark"] .learning-goals-container .deadline-container,
+html.dark [class*="goal-card"] .deadline-container,
+html.dark .learning-goals-container .daily-goal-container,
+html[data-theme="dark"] .learning-goals-container .daily-goal-container,
+html.dark [class*="goal-card"] .daily-goal-container {
+  background-color: #1e293b !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Fix for priority badges */
+html.dark .learning-goals-container .priority-badge,
+html[data-theme="dark"] .learning-goals-container .priority-badge,
+html.dark [class*="goal-card"] .priority-badge {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* High priority */
+html.dark .learning-goals-container .priority-high,
+html[data-theme="dark"] .learning-goals-container .priority-high,
+html.dark [class*="goal-card"] .priority-high {
+  color: #f87171 !important; /* red-400 */
+}
+
+/* Medium priority */
+html.dark .learning-goals-container .priority-medium,
+html[data-theme="dark"] .learning-goals-container .priority-medium,
+html.dark [class*="goal-card"] .priority-medium {
+  color: #fbbf24 !important; /* amber-400 */
+}
+
+/* Low priority */
+html.dark .learning-goals-container .priority-low,
+html[data-theme="dark"] .learning-goals-container .priority-low,
+html.dark [class*="goal-card"] .priority-low {
+  color: #60a5fa !important; /* blue-400 */
+}
