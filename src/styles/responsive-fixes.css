@@ -63,43 +63,43 @@
     box-sizing: border-box !important;
   }
 
-  /* Simple fix for yearly activity heatmap squares */
-  /* Target only the color classes to preserve the original structure */
-  
-  /* Level 1 - Light green */
-  .bg-emerald-400 {
-    background-color: #34d399 !important;
+  /* Fix for yearly activity heatmap squares */
+  /* Target the specific classes used in YearlyActivityHeatmap.tsx */
+  /* Force solid fill for all activity squares */
+  .rounded-sm.bg-emerald-400,
+  .rounded-sm.bg-emerald-500,
+  .rounded-sm.bg-emerald-600,
+  .rounded-sm.bg-emerald-700 {
+    background: #34d399 !important; /* Use solid fill */
+    border: none !important; /* Remove borders */
+    box-shadow: 0 0 0 1px #10b981 !important; /* Add subtle outline */
+    min-width: 16px !important;
+    min-height: 16px !important;
   }
   
-  /* Level 2 - Medium green */
-  .bg-emerald-500 {
-    background-color: #10b981 !important;
+  /* Different color levels */
+  .rounded-sm.bg-emerald-400 { background: #34d399 !important; }
+  .rounded-sm.bg-emerald-500 { background: #10b981 !important; }
+  .rounded-sm.bg-emerald-600 { background: #059669 !important; }
+  .rounded-sm.bg-emerald-700 { background: #047857 !important; }
+  
+  /* Make sure the colors are visible in both light and dark mode */
+  .dark .rounded-sm.bg-emerald-400 { background: #34d399 !important; }
+  .dark .rounded-sm.bg-emerald-500 { background: #10b981 !important; }
+  .dark .rounded-sm.bg-emerald-600 { background: #059669 !important; }
+  .dark .rounded-sm.bg-emerald-700 { background: #047857 !important; }
+  
+  /* Additional fix for any other emerald classes */
+  [class*="bg-emerald"].rounded-sm {
+    background-color: currentColor !important;
+    border: none !important;
+    min-width: 16px !important;
+    min-height: 16px !important;
   }
   
-  /* Level 3 - Dark green */
-  .bg-emerald-600 {
-    background-color: #059669 !important;
-  }
-  
-  /* Level 4 - Deepest green */
-  .bg-emerald-700 {
-    background-color: #047857 !important;
-  }
-  
-  /* Empty squares */
-  .bg-gray-200 {
-    background-color: #e5e7eb !important;
-  }
-  
-  /* Ensure the same colors in dark mode */
-  .dark .bg-emerald-400 { background-color: #34d399 !important; }
-  .dark .bg-emerald-500 { background-color: #10b981 !important; }
-  .dark .bg-emerald-600 { background-color: #059669 !important; }
-  .dark .bg-emerald-700 { background-color: #047857 !important; }
-  
-  /* Make sure hover doesn't change the color */
-  [class*="bg-emerald"]:hover {
-    opacity: 0.9 !important;
+  /* Override any hover effects that might be changing the background */
+  [class*="bg-emerald"].rounded-sm:hover {
+    opacity: 0.8 !important;
   }
 }
 
