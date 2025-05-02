@@ -1,0 +1,375 @@
+/**
+ * Analytics Page Design Enhancements
+ * This file contains targeted improvements for the analytics page UI
+ */
+
+/* Card consistency and spacing */
+.dark .card,
+html[data-theme="dark"] .card {
+  background-color: rgba(17, 24, 39, 0.7) !important;
+  border: 1px solid rgba(75, 85, 99, 0.3) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 0.75rem !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card {
+  padding: 1.25rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  transform: translateY(-2px);
+}
+
+/* Typography hierarchy */
+.card h2, 
+.card h3 {
+  font-weight: 700 !important;
+  margin-bottom: 0.75rem !important;
+  color: var(--heading-color, #1f2937) !important;
+}
+
+.dark .card h2, 
+.dark .card h3,
+html[data-theme="dark"] .card h2,
+html[data-theme="dark"] .card h3 {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Primary metrics styling */
+.card .primary-metric {
+  font-size: 2rem !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  color: var(--primary-metric-color, #2563eb) !important;
+}
+
+.dark .card .primary-metric,
+html[data-theme="dark"] .card .primary-metric {
+  color: rgba(255, 255, 255, 0.95) !important;
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.5) !important;
+}
+
+/* Secondary metrics styling */
+.card .secondary-metric {
+  font-size: 0.875rem !important;
+  color: var(--secondary-metric-color, #6b7280) !important;
+  margin-top: 0.25rem !important;
+}
+
+.dark .card .secondary-metric,
+html[data-theme="dark"] .card .secondary-metric {
+  color: rgba(209, 213, 219, 0.8) !important;
+}
+
+/* Progress bar enhancements */
+.card progress,
+.card .progress {
+  height: 0.5rem !important;
+  border-radius: 9999px !important;
+  overflow: hidden !important;
+  background-color: rgba(243, 244, 246, 0.7) !important;
+}
+
+.dark .card progress,
+.dark .card .progress,
+html[data-theme="dark"] .card progress,
+html[data-theme="dark"] .card .progress {
+  background-color: rgba(55, 65, 81, 0.5) !important;
+}
+
+.card progress::-webkit-progress-value,
+.card .progress-value {
+  background-image: linear-gradient(to right, var(--progress-color-start, #3b82f6), var(--progress-color-end, #2563eb)) !important;
+  border-radius: 9999px !important;
+  transition: width 0.5s ease !important;
+}
+
+.dark .card progress::-webkit-progress-value,
+.dark .card .progress-value,
+html[data-theme="dark"] .card progress::-webkit-progress-value,
+html[data-theme="dark"] .card .progress-value {
+  background-image: linear-gradient(to right, var(--progress-color-start-dark, #60a5fa), var(--progress-color-end-dark, #3b82f6)) !important;
+}
+
+/* Learning Goals section enhancements */
+div:has(h2:contains("Learning Goals")) .card {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  justify-content: space-between !important;
+}
+
+/* Target and Clock icons in Learning Goals cards */
+div:has(h2:contains("Learning Goals")) svg[data-lucide="Target"],
+div:has(h2:contains("Learning Goals")) svg[data-lucide="Clock"] {
+  stroke: white !important;
+  color: white !important;
+  fill: none !important;
+  stroke-width: 2px !important;
+  background-color: transparent !important;
+}
+
+/* Chart enhancements */
+.chart-container {
+  position: relative !important;
+  padding: 1rem !important;
+  height: 100% !important;
+}
+
+/* Radar chart enhancements */
+div:has(h2:contains("Learning Focus")) .chart-container {
+  min-height: 250px !important;
+}
+
+div:has(h2:contains("Learning Focus")) svg text {
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  fill: var(--chart-text-color, #4b5563) !important;
+}
+
+.dark div:has(h2:contains("Learning Focus")) svg text,
+html[data-theme="dark"] div:has(h2:contains("Learning Focus")) svg text {
+  fill: rgba(209, 213, 219, 0.9) !important;
+}
+
+div:has(h2:contains("Learning Focus")) svg line {
+  stroke: var(--chart-grid-color, #e5e7eb) !important;
+  stroke-width: 0.5 !important;
+}
+
+.dark div:has(h2:contains("Learning Focus")) svg line,
+html[data-theme="dark"] div:has(h2:contains("Learning Focus")) svg line {
+  stroke: rgba(75, 85, 99, 0.5) !important;
+}
+
+/* Pie chart enhancements */
+div:has(h2:contains("Time Spent by Category")) .chart-container {
+  min-height: 200px !important;
+}
+
+div:has(h2:contains("Time Spent by Category")) svg path {
+  transition: opacity 0.2s ease, transform 0.2s ease !important;
+}
+
+div:has(h2:contains("Time Spent by Category")) svg path:hover {
+  opacity: 0.85 !important;
+  transform: scale(1.02) translateX(2px) !important;
+}
+
+/* Category breakdown enhancements */
+.category-breakdown {
+  margin-top: 1rem !important;
+  padding-top: 1rem !important;
+  border-top: 1px solid var(--divider-color, #e5e7eb) !important;
+}
+
+.dark .category-breakdown,
+html[data-theme="dark"] .category-breakdown {
+  border-top-color: rgba(75, 85, 99, 0.3) !important;
+}
+
+.category-item {
+  display: flex !important;
+  align-items: center !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.category-color {
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 50% !important;
+  margin-right: 0.5rem !important;
+}
+
+.category-name {
+  font-weight: 500 !important;
+  flex: 1 !important;
+}
+
+.category-value {
+  font-weight: 600 !important;
+  color: var(--category-value-color, #1f2937) !important;
+}
+
+.dark .category-value,
+html[data-theme="dark"] .category-value {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Daily activity chart enhancements */
+div:has(h2:contains("Daily Activity")) .chart-container {
+  min-height: 200px !important;
+}
+
+div:has(h2:contains("Daily Activity")) svg rect {
+  transition: opacity 0.2s ease !important;
+}
+
+div:has(h2:contains("Daily Activity")) svg rect:hover {
+  opacity: 0.8 !important;
+}
+
+/* Progress by difficulty chart enhancements */
+div:has(h2:contains("Progress by Difficulty")) .chart-container {
+  min-height: 200px !important;
+}
+
+/* Yearly activity calendar enhancements */
+div:has(h2:contains("Yearly Activity Calendar")) .chart-container {
+  padding: 1rem 0 !important;
+}
+
+/* Learning activity stats cards */
+.analytics-stat-card {
+  border-radius: 0.75rem !important;
+  padding: 1rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.dark .analytics-stat-card,
+html[data-theme="dark"] .analytics-stat-card {
+  background-color: rgba(17, 24, 39, 0.7) !important;
+  border: 1px solid rgba(75, 85, 99, 0.3) !important;
+}
+
+.analytics-stat-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.analytics-stat-card .stat-value {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.analytics-stat-card .stat-label {
+  font-size: 0.875rem !important;
+  color: var(--stat-label-color, #6b7280) !important;
+}
+
+.dark .analytics-stat-card .stat-label,
+html[data-theme="dark"] .analytics-stat-card .stat-label {
+  color: rgba(209, 213, 219, 0.8) !important;
+}
+
+/* Blue card */
+.analytics-stat-card.blue-card {
+  background-color: var(--blue-bg, #dbeafe) !important;
+}
+
+.dark .analytics-stat-card.blue-card,
+html[data-theme="dark"] .analytics-stat-card.blue-card {
+  background-color: rgba(30, 58, 138, 0.2) !important;
+}
+
+.analytics-stat-card.blue-card .stat-value {
+  color: var(--blue-text, #1e40af) !important;
+}
+
+.dark .analytics-stat-card.blue-card .stat-value,
+html[data-theme="dark"] .analytics-stat-card.blue-card .stat-value {
+  color: rgba(96, 165, 250, 0.9) !important;
+}
+
+/* Emerald card */
+.analytics-stat-card.emerald-card {
+  background-color: var(--emerald-bg, #d1fae5) !important;
+}
+
+.dark .analytics-stat-card.emerald-card,
+html[data-theme="dark"] .analytics-stat-card.emerald-card {
+  background-color: rgba(6, 78, 59, 0.2) !important;
+}
+
+.analytics-stat-card.emerald-card .stat-value {
+  color: var(--emerald-text, #065f46) !important;
+}
+
+.dark .analytics-stat-card.emerald-card .stat-value,
+html[data-theme="dark"] .analytics-stat-card.emerald-card .stat-value {
+  color: rgba(52, 211, 153, 0.9) !important;
+}
+
+/* Purple card */
+.analytics-stat-card.purple-card {
+  background-color: var(--purple-bg, #f5f3ff) !important;
+}
+
+.dark .analytics-stat-card.purple-card,
+html[data-theme="dark"] .analytics-stat-card.purple-card {
+  background-color: rgba(76, 29, 149, 0.2) !important;
+}
+
+.analytics-stat-card.purple-card .stat-value {
+  color: var(--purple-text, #6d28d9) !important;
+}
+
+.dark .analytics-stat-card.purple-card .stat-value,
+html[data-theme="dark"] .analytics-stat-card.purple-card .stat-value {
+  color: rgba(167, 139, 250, 0.9) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .card {
+    padding: 1rem !important;
+  }
+  
+  .card .primary-metric {
+    font-size: 1.5rem !important;
+  }
+  
+  .analytics-stat-card {
+    padding: 0.75rem !important;
+  }
+  
+  .analytics-stat-card .stat-value {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* Add specific class names to elements */
+.total-learning-time,
+.completion-rate,
+.active-days,
+.categories-count {
+  font-size: 2rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.dark .total-learning-time,
+.dark .completion-rate,
+.dark .active-days,
+.dark .categories-count,
+html[data-theme="dark"] .total-learning-time,
+html[data-theme="dark"] .completion-rate,
+html[data-theme="dark"] .active-days,
+html[data-theme="dark"] .categories-count {
+  color: rgba(255, 255, 255, 0.95) !important;
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Add hover effects to interactive elements */
+button, 
+.interactive {
+  transition: all 0.2s ease !important;
+}
+
+button:hover, 
+.interactive:hover {
+  transform: translateY(-1px) !important;
+}
+
+button:active, 
+.interactive:active {
+  transform: translateY(0) !important;
+}
