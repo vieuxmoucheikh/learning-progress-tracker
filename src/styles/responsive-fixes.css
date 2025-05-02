@@ -65,29 +65,39 @@
 
   /* Fix for yearly activity heatmap squares */
   /* Target the specific classes used in YearlyActivityHeatmap.tsx */
-  .bg-emerald-400, .bg-emerald-500, .bg-emerald-600, .bg-emerald-700 {
-    border: none !important;
-    box-shadow: none !important;
+  .bg-emerald-400 {
+    background-color: #34d399 !important; /* emerald-400 */
+    border-color: #10b981 !important; /* emerald-500 */
   }
   
-  /* Force solid background for activity squares in light mode */
-  [class*="bg-emerald"] {
-    border-width: 0 !important;
-    background-color: var(--tw-bg-opacity) !important;
+  .bg-emerald-500 {
+    background-color: #10b981 !important; /* emerald-500 */
+    border-color: #059669 !important; /* emerald-600 */
   }
   
-  /* Specific fix for the yearly activity calendar squares with borders */
-  [class*="bg-emerald"][class*="border-"] {
-    border: none !important;
-    box-shadow: 0 0 0 1px currentColor !important;
+  .bg-emerald-600 {
+    background-color: #059669 !important; /* emerald-600 */
+    border-color: #047857 !important; /* emerald-700 */
   }
+  
+  .bg-emerald-700 {
+    background-color: #047857 !important; /* emerald-700 */
+    border-color: #065f46 !important; /* emerald-800 */
+  }
+  
+  /* Make sure the colors are visible in both light and dark mode */
+  .dark .bg-emerald-400 { background-color: #34d399 !important; }
+  .dark .bg-emerald-500 { background-color: #10b981 !important; }
+  .dark .bg-emerald-600 { background-color: #059669 !important; }
+  .dark .bg-emerald-700 { background-color: #047857 !important; }
   
   /* Ensure the color fills the entire square */
   .rounded-sm[class*="bg-emerald"] {
     min-width: 16px !important;
     min-height: 16px !important;
     box-sizing: border-box !important;
-    border: none !important;
+    border-width: 2px !important;
+    border-style: solid !important;
   }
 }
 
