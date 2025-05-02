@@ -158,11 +158,29 @@ export function YearlyActivityHeatmap({
   }, [weeks, selectedYear]);
 
   // Améliorer la fonction getColorForCount pour des couleurs plus visibles en mode sombre
+  // Enhanced getColorForCount function with more visible colors for mobile
   const getColorForCount = (count: number) => {
-    if (count === 0) return 'bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600';
-    if (count === 1) return 'bg-emerald-400 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 border-2 border-emerald-500 dark:border-emerald-600';
-    if (count <= 3) return 'bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-500 border-2 border-emerald-600 dark:border-emerald-700';
-    return 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 border-2 border-emerald-700 dark:border-emerald-800';
+    const isMobile = window.innerWidth < 768;
+    
+    if (count === 0) {
+      return 'bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600';
+    }
+    
+    if (count === 1) {
+      return isMobile
+        ? 'bg-green-500 hover:bg-green-600 dark:bg-emerald-500 dark:hover:bg-emerald-400 border-2 border-green-600 dark:border-emerald-600'
+        : 'bg-emerald-400 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 border-2 border-emerald-500 dark:border-emerald-600';
+    }
+    
+    if (count <= 3) {
+      return isMobile
+        ? 'bg-green-600 hover:bg-green-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 border-2 border-green-700 dark:border-emerald-700'
+        : 'bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-500 border-2 border-emerald-600 dark:border-emerald-700';
+    }
+    
+    return isMobile
+      ? 'bg-green-700 hover:bg-green-800 dark:bg-emerald-700 dark:hover:bg-emerald-600 border-2 border-green-800 dark:border-emerald-800'
+      : 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 border-2 border-emerald-700 dark:border-emerald-800';
   };
 
   // State pour gérer le tooltip mobile
