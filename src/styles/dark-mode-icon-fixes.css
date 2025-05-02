@@ -3,109 +3,176 @@
  * This file fixes the background colors for icons and analytics page elements in dark mode
  */
 
-/* Fix icon backgrounds in learning goals cards */
-html.dark .learning-goals-container .icon-container,
-html[data-theme="dark"] .learning-goals-container .icon-container,
-html.dark [class*="goal-card"] [class*="icon-container"],
-html[data-theme="dark"] [class*="goal-card"] [class*="icon-container"] {
-  background-color: rgba(15, 23, 42, 0.6) !important; /* darker background */
+/* Fix for the stats grid in learning goals cards */
+.dark .bg-muted\/30,
+.dark [class*="bg-muted"] {
+  background-color: #1e293b !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Specific icon background colors for different categories */
-html.dark .learning-goals-container .wbdbdb,
-html[data-theme="dark"] .learning-goals-container .wbdbdb,
-html.dark [class*="goal-card"] .wbdbdb {
-  background-color: #1e3a8a !important; /* deep blue */
+/* Fix hover state for the stats grid items */
+.dark .bg-muted\/30:hover,
+.dark [class*="bg-muted"]:hover {
+  background-color: #334155 !important;
+}
+
+/* Fix for the progress bar background */
+.dark .h-2\.5.w-full.bg-muted\/60 {
+  background-color: #1e293b !important;
+}
+
+/* Fix for progress bar fill colors */
+.dark .bg-gradient-to-r.from-blue-400.to-blue-600 {
+  background: linear-gradient(to right, #3b82f6, #2563eb) !important;
+}
+
+.dark .bg-gradient-to-r.from-green-400.to-green-600 {
+  background: linear-gradient(to right, #10b981, #059669) !important;
+}
+
+.dark .bg-gradient-to-r.from-red-400.to-red-600 {
+  background: linear-gradient(to right, #f87171, #dc2626) !important;
+}
+
+/* Fix for the icon colors */
+.dark .text-muted-foreground svg {
+  color: #94a3b8 !important;
+}
+
+/* Fix for the priority colors */
+.dark .text-red-500 {
+  color: #f87171 !important;
+}
+
+.dark .text-yellow-500,
+.dark .text-amber-500 {
+  color: #fbbf24 !important;
+}
+
+.dark .text-blue-500 {
+  color: #60a5fa !important;
+}
+
+/* Fix for the status badges */
+.dark .bg-green-100.text-green-800 {
+  background-color: rgba(16, 185, 129, 0.2) !important;
+  color: #4ade80 !important;
+}
+
+.dark .bg-blue-100.text-blue-800 {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+  color: #60a5fa !important;
+}
+
+.dark .bg-red-100.text-red-800 {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+}
+
+/* Fix for the card background */
+.dark .card {
+  background-color: #0f172a !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Fix for the category indicator */
+.dark .inline-block.w-2\.5.h-2\.5.rounded-full.bg-primary\/70 {
+  background-color: #3b82f6 !important;
+}
+
+/* Fix for the daily goal colors */
+.dark .text-green-500 {
+  color: #10b981 !important;
+}
+
+.dark .text-yellow-500 {
+  color: #f59e0b !important;
+}
+
+.dark .text-red-500 {
+  color: #ef4444 !important;
+}
+
+/* Direct fix for the category labels in the image */
+.dark .wbdbdb {
+  background-color: #1e40af !important;
   color: white !important;
 }
 
-html.dark .learning-goals-container .ml,
-html[data-theme="dark"] .learning-goals-container .ml,
-html.dark [class*="goal-card"] .ml {
-  background-color: #065f46 !important; /* deep green */
+.dark .ml {
+  background-color: #047857 !important;
   color: white !important;
 }
 
-html.dark .learning-goals-container .oll,
-html[data-theme="dark"] .learning-goals-container .oll,
-html.dark [class*="goal-card"] .oll {
-  background-color: #7e22ce !important; /* deep purple */
+.dark .oll {
+  background-color: #7e22ce !important;
   color: white !important;
 }
 
-/* Fix for active/complete state backgrounds */
-html.dark .learning-goals-container .active,
-html[data-theme="dark"] .learning-goals-container .active,
-html.dark [class*="goal-card"] .active {
-  background-color: rgba(59, 130, 246, 0.3) !important; /* blue with transparency */
+/* Fix for the active/completed states */
+.dark [class*="active"] {
+  background-color: rgba(59, 130, 246, 0.3) !important;
   color: #93c5fd !important;
 }
 
-html.dark .learning-goals-container .complete,
-html[data-theme="dark"] .learning-goals-container .complete,
-html.dark [class*="goal-card"] .complete {
-  background-color: rgba(16, 185, 129, 0.3) !important; /* green with transparency */
+.dark [class*="complete"] {
+  background-color: rgba(16, 185, 129, 0.3) !important;
   color: #6ee7b7 !important;
 }
 
-/* Fix for progress bars in dark mode */
-html.dark .learning-goals-container .progress-bar,
-html[data-theme="dark"] .learning-goals-container .progress-bar,
-html.dark [class*="goal-card"] .progress-bar {
-  background-color: #1e293b !important;
-}
-
-html.dark .learning-goals-container .progress-fill,
-html[data-theme="dark"] .learning-goals-container .progress-fill,
-html.dark [class*="goal-card"] .progress-fill {
-  background: linear-gradient(to right, #3b82f6, #10b981) !important;
-}
-
-/* Fix for target/spent time containers */
-html.dark .learning-goals-container .time-container,
-html[data-theme="dark"] .learning-goals-container .time-container,
-html.dark [class*="goal-card"] .time-container {
+/* Fix for the grid boxes in the learning goals */
+.dark .grid.grid-cols-2.gap-4 > div {
   background-color: #1e293b !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Fix for deadline and daily goal containers */
-html.dark .learning-goals-container .deadline-container,
-html[data-theme="dark"] .learning-goals-container .deadline-container,
-html.dark [class*="goal-card"] .deadline-container,
-html.dark .learning-goals-container .daily-goal-container,
-html[data-theme="dark"] .learning-goals-container .daily-goal-container,
-html.dark [class*="goal-card"] .daily-goal-container {
-  background-color: #1e293b !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+.dark .grid.grid-cols-2.gap-4 > div:hover {
+  background-color: #334155 !important;
 }
 
-/* Fix for priority badges */
-html.dark .learning-goals-container .priority-badge,
-html[data-theme="dark"] .learning-goals-container .priority-badge,
-html.dark [class*="goal-card"] .priority-badge {
-  background-color: rgba(30, 41, 59, 0.8) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+/* Fix for the icon backgrounds */
+.dark .flex.items-center.gap-2.mb-1\.5 svg {
+  color: white !important;
 }
 
-/* High priority */
-html.dark .learning-goals-container .priority-high,
-html[data-theme="dark"] .learning-goals-container .priority-high,
-html.dark [class*="goal-card"] .priority-high {
-  color: #f87171 !important; /* red-400 */
+/* Target specific icon background colors */
+.dark .flex.items-center.gap-2.mb-1\.5 .text-blue-500,
+.dark .flex.items-center.gap-2.mb-1\.5 .text-blue-600 {
+  background-color: #3b82f6 !important;
+  padding: 4px !important;
+  border-radius: 50% !important;
+  color: white !important;
 }
 
-/* Medium priority */
-html.dark .learning-goals-container .priority-medium,
-html[data-theme="dark"] .learning-goals-container .priority-medium,
-html.dark [class*="goal-card"] .priority-medium {
-  color: #fbbf24 !important; /* amber-400 */
+.dark .flex.items-center.gap-2.mb-1\.5 .text-green-500,
+.dark .flex.items-center.gap-2.mb-1\.5 .text-green-600 {
+  background-color: #10b981 !important;
+  padding: 4px !important;
+  border-radius: 50% !important;
+  color: white !important;
 }
 
-/* Low priority */
-html.dark .learning-goals-container .priority-low,
-html[data-theme="dark"] .learning-goals-container .priority-low,
-html.dark [class*="goal-card"] .priority-low {
-  color: #60a5fa !important; /* blue-400 */
+.dark .flex.items-center.gap-2.mb-1\.5 .text-yellow-500,
+.dark .flex.items-center.gap-2.mb-1\.5 .text-yellow-600,
+.dark .flex.items-center.gap-2.mb-1\.5 .text-amber-500,
+.dark .flex.items-center.gap-2.mb-1\.5 .text-amber-600 {
+  background-color: #f59e0b !important;
+  padding: 4px !important;
+  border-radius: 50% !important;
+  color: white !important;
+}
+
+.dark .flex.items-center.gap-2.mb-1\.5 .text-red-500,
+.dark .flex.items-center.gap-2.mb-1\.5 .text-red-600 {
+  background-color: #ef4444 !important;
+  padding: 4px !important;
+  border-radius: 50% !important;
+  color: white !important;
+}
+
+.dark .flex.items-center.gap-2.mb-1\.5 .text-muted-foreground {
+  background-color: #475569 !important;
+  padding: 4px !important;
+  border-radius: 50% !important;
+  color: white !important;
 }
