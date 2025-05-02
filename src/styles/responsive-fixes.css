@@ -29,6 +29,19 @@
   textarea {
     font-size: 16px !important; /* Prevents iOS zoom on focus */
   }
+  
+  /* Critical fix for yearly activity calendar green cells */
+  .bg-emerald-400, .bg-emerald-500, .bg-emerald-600 {
+    background-color: #059669 !important; /* emerald-600 */
+    border-color: #047857 !important; /* emerald-700 */
+    border-width: 2px !important;
+  }
+  
+  /* Make all calendar cells larger on mobile */
+  [class*="grid-cols"] > div > div {
+    height: 20px !important;
+    min-width: 20px !important;
+  }
 }
 
 /* Tablet fixes */
