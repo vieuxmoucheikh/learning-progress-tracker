@@ -74,6 +74,7 @@ export default function LearningGoals({ items }: Props) {
     priority: 'medium',
   });
   const [showCalendar, setShowCalendar] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [showAdjustmentDialog, setShowAdjustmentDialog] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<LearningGoal | null>(null);
   const [suggestedAdjustment, setSuggestedAdjustment] = useState<SuggestedAdjustment | null>(null);
@@ -667,9 +668,11 @@ export default function LearningGoals({ items }: Props) {
                           className="bg-blue-100 hover:bg-blue-200 rounded-full p-1 flex items-center justify-center"
                           onClick={() => {
                             const date = newGoal.targetDate ? new Date(newGoal.targetDate) : new Date();
+                            const newDate = subMonths(date, 1);
+                            setCurrentMonth(newDate);
                             setNewGoal(prev => ({ 
                               ...prev, 
-                              targetDate: subMonths(date, 1)
+                              targetDate: newDate
                             }));
                           }}
                         >
@@ -683,9 +686,11 @@ export default function LearningGoals({ items }: Props) {
                           className="bg-blue-100 hover:bg-blue-200 rounded-full p-1 flex items-center justify-center"
                           onClick={() => {
                             const date = newGoal.targetDate ? new Date(newGoal.targetDate) : new Date();
+                            const newDate = addMonths(date, 1);
+                            setCurrentMonth(newDate);
                             setNewGoal(prev => ({ 
                               ...prev, 
-                              targetDate: addMonths(date, 1)
+                              targetDate: newDate
                             }));
                           }}
                         >
@@ -697,7 +702,13 @@ export default function LearningGoals({ items }: Props) {
                       <Calendar
                         mode="single"
                         selected={newGoal.targetDate}
-                        onSelect={(date) => setNewGoal(prev => ({ ...prev, targetDate: date }))}
+                        defaultMonth={currentMonth}
+                        month={currentMonth}
+                        onMonthChange={setCurrentMonth}
+                        onSelect={(date) => {
+                          setNewGoal(prev => ({ ...prev, targetDate: date }));
+                          if (date) setCurrentMonth(date);
+                        }}
                         className="custom-calendar"
                         classNames={{
                           months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
