@@ -29,6 +29,7 @@ import './styles/icon-fixes.css'; // Ajout du fichier de correctifs pour les ic√
 import './styles/icon-override.css';
 import './styles/critical-icon-fixes.css'; // Ajout du nouveau fichier de correctifs critiques
 import './styles/dark-mode-icon-fixes.css'; // Fix for icons in dark mode
+import './styles/icon-dark-mode-fixes.css'; // Critical fix for all icons in dark mode
 import './components/LearningItemCard.css';
 import './components/Calendar.css';
 import './components/StatusBadge.css';
