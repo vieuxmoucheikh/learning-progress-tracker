@@ -1045,7 +1045,7 @@ export default function App() {
             onTabChange={setSelectedTab} 
           />
         </div>
-        <div className="flex-1 p-4 md:p-6 overflow-y-auto bg-white dark:bg-gray-900">
+        <div className="flex-1 p-4 md:p-6 bg-white dark:bg-gray-900" style={{ overflow: 'auto', height: '100vh' }}>
           <div className="container mx-auto py-4 h-full flex flex-col">
             <header className="mb-6">
               <div className="flex justify-end items-center gap-3">

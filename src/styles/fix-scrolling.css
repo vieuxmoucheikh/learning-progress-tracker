@@ -1,65 +1,115 @@
 /* Critical fix for scrolling issues on both mobile and desktop */
 
+/* Force scrolling on body and html */
+html, body {
+  height: 100% !important;
+  width: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  position: relative !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
 /* Fix for the main container */
-.min-h-screen {
-  min-height: 100vh;
+#root, [id="root"] {
   height: auto !important;
+  min-height: 100% !important;
+  width: 100% !important;
+  overflow: visible !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Fix for the main app container */
+.min-h-screen {
+  height: auto !important;
+  min-height: 100vh !important;
+  overflow: visible !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+@media (min-width: 768px) {
+  .min-h-screen {
+    flex-direction: row !important;
+  }
 }
 
 /* Fix for the main content area */
-.flex-1.p-4.md\:p-6 {
-  overflow-y: auto !important;
+.flex-1.p-4, .flex-1.p-6, .flex-1.md\:p-6, .flex-1.p-4.md\:p-6 {
+  overflow: auto !important;
   height: auto !important;
   max-height: none !important;
-  display: flex;
-  flex-direction: column;
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 /* Fix for the main container inside the content area */
-.container.mx-auto.py-4.h-full.flex.flex-col {
+.container, .container.mx-auto, .container.mx-auto.py-4, .container.mx-auto.py-4.h-full, .container.mx-auto.py-4.h-full.flex, .container.mx-auto.py-4.h-full.flex.flex-col {
   height: auto !important;
   min-height: 0 !important;
-  flex: 1;
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 /* Fix for the main content area */
-main.flex-1.overflow-auto {
-  overflow-y: auto !important;
+main, main.flex-1, main.flex-1.overflow-auto, main.flex-1.overflow-auto.bg-white, main.flex-1.overflow-auto.bg-white.dark\:bg-gray-800 {
+  overflow: auto !important;
   height: auto !important;
   min-height: 0 !important;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 /* Fix for the LearningGoals component */
-.space-y-6 {
+.space-y-6, div.space-y-6, div.space-y-6.pb-24, div.space-y-6.pb-24.relative {
   height: auto !important;
   min-height: 0 !important;
-  overflow-y: visible !important;
+  overflow: visible !important;
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 /* Fix for the grid container */
-.grid {
+.grid, div.grid, div.grid.grid-cols-1, div.mobile-cards-container {
   height: auto !important;
   min-height: 0 !important;
   overflow: visible !important;
   padding-bottom: 80px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+@media (min-width: 768px) {
+  .grid, div.grid, div.grid.grid-cols-1, div.mobile-cards-container {
+    display: grid !important;
+  }
 }
 
 /* Fix for cards */
 .card {
   height: auto !important;
   min-height: 0 !important;
-}
-
-/* Global fix for body and html */
-html, body {
-  height: 100%;
-  overflow-y: auto;
+  width: 100% !important;
+  margin-bottom: 16px !important;
 }
 
 /* Fix for iOS momentum scrolling */
 * {
-  -webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Fix for any fixed position elements that might interfere with scrolling */
+.sticky {
+  position: sticky !important;
+}
+
+/* Only keep the floating action button fixed */
+.fixed.bottom-6.right-6.z-50 {
+  position: fixed !important;
+  z-index: 9999 !important;
 }
