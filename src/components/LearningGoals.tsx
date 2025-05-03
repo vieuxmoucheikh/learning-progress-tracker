@@ -14,6 +14,7 @@ import { clsx } from 'clsx';
 import '../styles/analytics-card-fixes.css';
 import '../styles/dark-mode-icon-fixes.css';
 import '../styles/goal-dialog-fixes.css'; // Fix for select components in goal dialog
+import '../styles/scroll-container-fixes.css'; // Fix for scrolling with many cards
 
 type GoalStatus = 'active' | 'completed' | 'overdue';
 
@@ -443,7 +444,7 @@ export default function LearningGoals({ items }: Props) {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 scroll-container">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold tracking-tight">Learning Goals</h2>
         <Button onClick={() => setIsAddingGoal(true)} className="bg-blue-500 hover:bg-blue-600 text-white">Add Goal</Button>
@@ -458,14 +459,14 @@ export default function LearningGoals({ items }: Props) {
           <p className="text-lg text-muted-foreground">No learning goals yet. Add your first goal to get started!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6 max-w-6xl mx-auto">
+        <div className="card-grid max-w-6xl mx-auto">
         {goals.map(goal => {
           const progress = calculateProgress(goal.category);
           const progressPercentage = Math.min(100, (progress / goal.targetHours) * 100);
           const currentStatus = getGoalStatus(goal);
 
           return (
-            <Card key={goal.id} className="relative group overflow-hidden border border-border/40 hover:border-primary/40 transition-all duration-300 hover:shadow-lg min-h-[420px] flex flex-col">
+            <Card key={goal.id} className="relative group overflow-hidden border border-border/40 hover:border-primary/40 transition-all duration-300 hover:shadow-lg min-h-[420px] flex flex-col goal-card">
               {/* Status indicator stripe at the top */}
               <div className={clsx(
                 'absolute top-0 left-0 w-full h-1.5',

@@ -1,0 +1,56 @@
+/* Scroll container fixes for components with many items */
+
+/* Main container scrolling */
+.scroll-container {
+  height: calc(100vh - 180px);
+  overflow-y: auto;
+  padding-right: 6px;
+  margin-right: -6px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+/* Custom scrollbar styling */
+.scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+}
+
+/* Dark mode scrollbar adjustments */
+.dark .scroll-container::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Ensure content has padding at the bottom for better scrolling experience */
+.scroll-container > div:last-child {
+  padding-bottom: 20px;
+}
+
+/* Card grid container */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Ensure cards have consistent height */
+.goal-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
