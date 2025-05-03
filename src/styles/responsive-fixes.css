@@ -29,31 +29,6 @@
   textarea {
     font-size: 16px !important; /* Prevents iOS zoom on focus */
   }
-  
-  /* Fix mobile scrolling issues */
-  html, body {
-    height: 100%;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Ensure content is scrollable on mobile */
-  #root, main, [class*="layout"], [class*="container"] {
-    min-height: 100%;
-    height: auto;
-    overflow-y: visible;
-  }
-  
-  /* Fix for iOS momentum scrolling */
-  .overflow-y-auto,
-  .overflow-auto {
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Ensure cards don't get cut off at the bottom */
-  .grid {
-    padding-bottom: 80px;
-  }
 }
 
 /* Tablet fixes */

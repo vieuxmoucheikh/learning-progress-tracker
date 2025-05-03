@@ -443,19 +443,10 @@ export default function LearningGoals({ items }: Props) {
   ];
 
   return (
-    <div className="space-y-6 pb-24 relative" style={{ overflowY: 'auto', height: 'auto', minHeight: '100vh' }}>
-      {/* Floating Add Button for Mobile */}
-      <div className="md:hidden fixed bottom-6 right-6 z-50">
-        <Button 
-          onClick={() => setIsAddingGoal(true)} 
-          className="bg-blue-500 hover:bg-blue-600 text-white rounded-full h-14 w-14 shadow-lg flex items-center justify-center"
-        >
-          <Plus className="h-6 w-6" />
-        </Button>
-      </div>
-      <div className="flex justify-between items-center sticky top-0 z-10 bg-background py-3 mb-4 px-2">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold tracking-tight">Learning Goals</h2>
-        <Button onClick={() => setIsAddingGoal(true)} className="hidden md:flex bg-blue-500 hover:bg-blue-600 text-white whitespace-nowrap">Add Goal</Button>
+        <Button onClick={() => setIsAddingGoal(true)} className="bg-blue-500 hover:bg-blue-600 text-white">Add Goal</Button>
       </div>
 
       {isLoadingGoals ? (
@@ -467,7 +458,7 @@ export default function LearningGoals({ items }: Props) {
           <p className="text-lg text-muted-foreground">No learning goals yet. Add your first goal to get started!</p>
         </div>
       ) : (
-        <div className="mobile-cards-container flex flex-col md:grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 max-w-6xl mx-auto px-2">
+        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6 max-w-6xl mx-auto">
         {goals.map(goal => {
           const progress = calculateProgress(goal.category);
           const progressPercentage = Math.min(100, (progress / goal.targetHours) * 100);
