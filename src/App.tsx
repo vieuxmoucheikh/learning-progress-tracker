@@ -32,6 +32,7 @@ import './styles/dark-mode-icon-fixes.css'; // Fix for icons in dark mode
 import './styles/icon-dark-mode-fixes.css'; // Critical fix for all icons in dark mode
 import './styles/mobile-scroll-fix.css'; // Fix for mobile scrolling issues
 import './styles/mobile-layout-fix.css'; // Fix for mobile layout and display issues
+import './styles/fix-scrolling.css'; // Critical fix for scrolling issues on all devices
 import './components/LearningItemCard.css';
 import './components/Calendar.css';
 import './components/StatusBadge.css';
