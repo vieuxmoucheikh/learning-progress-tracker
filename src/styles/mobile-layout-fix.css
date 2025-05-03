@@ -1,0 +1,85 @@
+/* Mobile layout fix - ensures proper display and scrolling on mobile devices */
+
+/* Basic mobile layout fixes */
+@media (max-width: 768px) {
+  /* Fix the overall page structure */
+  body {
+    overflow-y: scroll !important;
+    position: relative !important;
+    height: 100% !important;
+    width: 100% !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Fix the root container */
+  #root {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow: visible !important;
+    position: relative !important;
+  }
+  
+  /* Fix the main content area */
+  main, [role="main"] {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow: visible !important;
+    position: relative !important;
+  }
+  
+  /* Fix the Learning Goals container */
+  .space-y-6 {
+    height: auto !important;
+    overflow: visible !important;
+    position: relative !important;
+    padding-bottom: 100px !important;
+  }
+  
+  /* Fix the grid layout */
+  .grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    padding-bottom: 80px !important;
+  }
+  
+  /* Fix for mobile cards container */
+  .mobile-cards-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    padding-bottom: 80px !important;
+    width: 100% !important;
+    overflow-y: visible !important;
+  }
+  
+  /* Fix cards to display properly */
+  .card {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin-bottom: 16px !important;
+  }
+  
+  /* Ensure the floating button stays visible */
+  .fixed.bottom-6.right-6.z-50 {
+    position: fixed !important;
+    bottom: 16px !important;
+    right: 16px !important;
+    z-index: 9999 !important;
+  }
+  
+  /* Fix the header */
+  .sticky.top-0 {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+    background-color: var(--background) !important;
+    padding: 8px !important;
+  }
+  
+  /* Fix for iOS momentum scrolling */
+  * {
+    -webkit-overflow-scrolling: touch !important;
+  }
+}

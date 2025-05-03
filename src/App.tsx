@@ -31,6 +31,7 @@ import './styles/critical-icon-fixes.css'; // Ajout du nouveau fichier de correc
 import './styles/dark-mode-icon-fixes.css'; // Fix for icons in dark mode
 import './styles/icon-dark-mode-fixes.css'; // Critical fix for all icons in dark mode
 import './styles/mobile-scroll-fix.css'; // Fix for mobile scrolling issues
+import './styles/mobile-layout-fix.css'; // Fix for mobile layout and display issues
 import './components/LearningItemCard.css';
 import './components/Calendar.css';
 import './components/StatusBadge.css';

@@ -443,7 +443,7 @@ export default function LearningGoals({ items }: Props) {
   ];
 
   return (
-    <div className="space-y-6 pb-24 relative mobile-scroll-container">
+    <div className="space-y-6 pb-24 relative" style={{ overflowY: 'auto', height: 'auto', minHeight: '100vh' }}>
       {/* Floating Add Button for Mobile */}
       <div className="md:hidden fixed bottom-6 right-6 z-50">
         <Button 
@@ -467,7 +467,7 @@ export default function LearningGoals({ items }: Props) {
           <p className="text-lg text-muted-foreground">No learning goals yet. Add your first goal to get started!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 max-w-6xl mx-auto px-2">
+        <div className="mobile-cards-container flex flex-col md:grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 max-w-6xl mx-auto px-2">
         {goals.map(goal => {
           const progress = calculateProgress(goal.category);
           const progressPercentage = Math.min(100, (progress / goal.targetHours) * 100);
