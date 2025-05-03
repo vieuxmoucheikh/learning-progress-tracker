@@ -443,7 +443,7 @@ export default function LearningGoals({ items }: Props) {
   ];
 
   return (
-    <div className="space-y-6 pb-20 relative">
+    <div className="space-y-6 pb-24 relative overflow-y-auto max-h-full">
       {/* Floating Add Button for Mobile */}
       <div className="md:hidden fixed bottom-6 right-6 z-50">
         <Button 
@@ -453,7 +453,7 @@ export default function LearningGoals({ items }: Props) {
           <Plus className="h-6 w-6" />
         </Button>
       </div>
-      <div className="flex justify-between items-center sticky top-0 z-10 bg-background py-3 mb-4">
+      <div className="flex justify-between items-center sticky top-0 z-10 bg-background py-3 mb-4 px-2">
         <h2 className="text-3xl font-bold tracking-tight">Learning Goals</h2>
         <Button onClick={() => setIsAddingGoal(true)} className="hidden md:flex bg-blue-500 hover:bg-blue-600 text-white whitespace-nowrap">Add Goal</Button>
       </div>
@@ -467,7 +467,7 @@ export default function LearningGoals({ items }: Props) {
           <p className="text-lg text-muted-foreground">No learning goals yet. Add your first goal to get started!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 max-w-6xl mx-auto px-2">
         {goals.map(goal => {
           const progress = calculateProgress(goal.category);
           const progressPercentage = Math.min(100, (progress / goal.targetHours) * 100);
