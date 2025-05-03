@@ -443,7 +443,7 @@ export default function LearningGoals({ items }: Props) {
   ];
 
   return (
-    <div className="space-y-6 pb-24 relative overflow-y-auto max-h-full">
+    <div className="space-y-6 pb-24 relative mobile-scroll-container">
       {/* Floating Add Button for Mobile */}
       <div className="md:hidden fixed bottom-6 right-6 z-50">
         <Button 
