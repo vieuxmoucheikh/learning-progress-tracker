@@ -299,7 +299,7 @@ const LearningItemCard = ({
     onUpdate(item.id, {
       progress: {
         ...item.progress,
-        sessions: [newSession, ...(item.progress.sessions || [])]
+        sessions: [newSession, ...(item.progress?.sessions || [])]
       }
     });
     
@@ -1474,12 +1474,6 @@ const LearningItemCard = ({
                   <p>
                     Record your thoughts, progress, or any important points about this learning session.
                   </p>
-                  <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-800/30 text-amber-800 dark:text-amber-300 rounded-lg border border-amber-200 dark:border-amber-800/50">
-                    <AlertCircle className="h-5 w-5 text-amber-500 dark:text-amber-400 flex-shrink-0" />
-                    <p className="text-sm">
-                      This action cannot be undone. All sessions and progress will be permanently deleted.
-                    </p>
-                  </div>
                 </div>
               </DialogDescription>
             </DialogHeader>
